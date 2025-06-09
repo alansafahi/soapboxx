@@ -31,8 +31,13 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     let url = queryKey[0] as string;
     
+    // Handle conversation messages URLs: ["/api/conversations", conversationId, "messages"]
+    if (queryKey.length === 3 && queryKey[2] === "messages") {
+      const conversationId = queryKey[1];
+      url = `/api/conversations/${conversationId}/messages`;
+    }
     // Handle search queries with parameters
-    if (queryKey.length > 1 && url.includes('/search')) {
+    else if (queryKey.length > 1 && url.includes('/search')) {
       const searchTerm = queryKey[1] as string;
       url += `?q=${encodeURIComponent(searchTerm)}`;
     }

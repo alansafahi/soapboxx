@@ -64,11 +64,8 @@ export default function Chat() {
     refetchInterval: 2000, // Refetch every 2 seconds for real-time updates
   });
 
-  // Debug logging and scroll to bottom when messages change
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    console.log('Selected conversation:', selectedConversation);
-    console.log('Messages data:', messages);
-    console.log('Messages array length:', Array.isArray(messages) ? messages.length : 'not array');
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -344,7 +341,11 @@ export default function Chat() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => sendFriendRequestMutation.mutate({ addresseeId: foundUser.id })}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                sendFriendRequestMutation.mutate({ addresseeId: foundUser.id });
+                              }}
                               disabled={sendFriendRequestMutation.isPending}
                             >
                               <UserPlus className="h-4 w-4" />
@@ -410,7 +411,11 @@ export default function Chat() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => sendFriendRequestMutation.mutate({ addresseeId: foundUser.id })}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              sendFriendRequestMutation.mutate({ addresseeId: foundUser.id });
+                            }}
                             disabled={sendFriendRequestMutation.isPending}
                           >
                             <UserPlus className="h-4 w-4" />
