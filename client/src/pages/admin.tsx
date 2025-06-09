@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, BookOpen, Video, Music } from "lucide-react";
+import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, BookOpen, Video, Music, FileText, Edit, Trash2, Eye } from "lucide-react";
 import { insertChurchSchema, insertEventSchema, insertDevotionalSchema, insertWeeklySeriesSchema, insertSermonMediaSchema } from "@shared/schema";
 import { ChurchProfileManager } from "@/components/church-profile-manager";
 
@@ -46,6 +46,262 @@ type EventFormData = z.infer<typeof eventFormSchema>;
 type DevotionalFormData = z.infer<typeof devotionalFormSchema>;
 type WeeklySeriesFormData = z.infer<typeof weeklySeriesFormSchema>;
 type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
+
+// Draft management components
+function DraftDevotionalsList({ churchId }: { churchId: number }) {
+  const { data: drafts, isLoading } = useQuery({
+    queryKey: ['/api/drafts/devotionals', churchId],
+    queryFn: () => apiRequest(`/api/drafts/devotionals?churchId=${churchId}`),
+  });
+
+  const publishMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/drafts/devotionals/${id}/publish`, {
+        method: 'PATCH',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts/devotionals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/devotionals'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/drafts/devotionals/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts/devotionals'] });
+    },
+  });
+
+  if (isLoading) return <div className="text-center py-4">Loading drafts...</div>;
+
+  const draftList = Array.isArray(drafts) ? drafts : [];
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {draftList.length} devotional drafts saved
+      </p>
+      {draftList.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No devotional drafts found
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {draftList.map((draft: any) => (
+            <Card key={draft.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{draft.title}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Category: {draft.category} • Created: {new Date(draft.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {draft.content}
+                  </p>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => publishMutation.mutate(draft.id)}
+                    disabled={publishMutation.isPending}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Publish
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteMutation.mutate(draft.id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DraftSeriesList({ churchId }: { churchId: number }) {
+  const { data: drafts, isLoading } = useQuery({
+    queryKey: ['/api/drafts/weekly-series', churchId],
+    queryFn: () => apiRequest(`/api/drafts/weekly-series?churchId=${churchId}`),
+  });
+
+  const publishMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/drafts/weekly-series/${id}/publish`, {
+        method: 'PATCH',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts/weekly-series'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/weekly-series'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/drafts/weekly-series/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts/weekly-series'] });
+    },
+  });
+
+  if (isLoading) return <div className="text-center py-4">Loading drafts...</div>;
+
+  const draftList = Array.isArray(drafts) ? drafts : [];
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {draftList.length} series drafts saved
+      </p>
+      {draftList.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No series drafts found
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {draftList.map((draft: any) => (
+            <Card key={draft.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{draft.title}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Duration: {draft.duration} weeks • Created: {new Date(draft.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {draft.description}
+                  </p>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => publishMutation.mutate(draft.id)}
+                    disabled={publishMutation.isPending}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Activate
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteMutation.mutate(draft.id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DraftMediaList({ churchId }: { churchId: number }) {
+  const { data: drafts, isLoading } = useQuery({
+    queryKey: ['/api/drafts/sermon-media', churchId],
+    queryFn: () => apiRequest(`/api/drafts/sermon-media?churchId=${churchId}`),
+  });
+
+  const publishMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/drafts/sermon-media/${id}/publish`, {
+        method: 'PATCH',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts/sermon-media'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sermon-media'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/drafts/sermon-media/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts/sermon-media'] });
+    },
+  });
+
+  if (isLoading) return <div className="text-center py-4">Loading drafts...</div>;
+
+  const draftList = Array.isArray(drafts) ? drafts : [];
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {draftList.length} media drafts saved
+      </p>
+      {draftList.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No media drafts found
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {draftList.map((draft: any) => (
+            <Card key={draft.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{draft.title}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Type: {draft.mediaType} • Created: {new Date(draft.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {draft.description}
+                  </p>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => publishMutation.mutate(draft.id)}
+                    disabled={publishMutation.isPending}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Publish
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteMutation.mutate(draft.id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminPortal() {
   const { user } = useAuth();

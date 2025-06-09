@@ -1610,6 +1610,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Draft content endpoints
+  app.get('/api/drafts/devotionals', isAuthenticated, async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      const drafts = await db.select()
+        .from(devotionals)
+        .where(and(
+          eq(devotionals.isPublished, false),
+          churchId ? eq(devotionals.churchId, Number(churchId)) : undefined
+        ))
+        .orderBy(desc(devotionals.createdAt));
+      res.json(drafts);
+    } catch (error) {
+      console.error("Error fetching devotional drafts:", error);
+      res.status(500).json({ message: "Failed to fetch devotional drafts" });
+    }
+  });
+
+  app.get('/api/drafts/weekly-series', isAuthenticated, async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      const drafts = await db.select()
+        .from(weeklySeries)
+        .where(and(
+          eq(weeklySeries.isActive, false),
+          churchId ? eq(weeklySeries.churchId, Number(churchId)) : undefined
+        ))
+        .orderBy(desc(weeklySeries.createdAt));
+      res.json(drafts);
+    } catch (error) {
+      console.error("Error fetching weekly series drafts:", error);
+      res.status(500).json({ message: "Failed to fetch weekly series drafts" });
+    }
+  });
+
+  app.get('/api/drafts/sermon-media', isAuthenticated, async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      const drafts = await db.select()
+        .from(sermonMedia)
+        .where(and(
+          eq(sermonMedia.isPublished, false),
+          churchId ? eq(sermonMedia.churchId, Number(churchId)) : undefined
+        ))
+        .orderBy(desc(sermonMedia.createdAt));
+      res.json(drafts);
+    } catch (error) {
+      console.error("Error fetching sermon media drafts:", error);
+      res.status(500).json({ message: "Failed to fetch sermon media drafts" });
+    }
+  });
+
+  // Publish draft endpoints
+  app.patch('/api/drafts/devotionals/:id/publish', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updated = await db.update(devotionals)
+        .set({ isPublished: true, publishedAt: new Date() })
+        .where(eq(devotionals.id, Number(id)))
+        .returning();
+      res.json(updated[0]);
+    } catch (error) {
+      console.error("Error publishing devotional:", error);
+      res.status(500).json({ message: "Failed to publish devotional" });
+    }
+  });
+
+  app.patch('/api/drafts/weekly-series/:id/publish', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updated = await db.update(weeklySeries)
+        .set({ isActive: true })
+        .where(eq(weeklySeries.id, Number(id)))
+        .returning();
+      res.json(updated[0]);
+    } catch (error) {
+      console.error("Error publishing weekly series:", error);
+      res.status(500).json({ message: "Failed to publish weekly series" });
+    }
+  });
+
+  app.patch('/api/drafts/sermon-media/:id/publish', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updated = await db.update(sermonMedia)
+        .set({ isPublished: true, publishedAt: new Date() })
+        .where(eq(sermonMedia.id, Number(id)))
+        .returning();
+      res.json(updated[0]);
+    } catch (error) {
+      console.error("Error publishing sermon media:", error);
+      res.status(500).json({ message: "Failed to publish sermon media" });
+    }
+  });
+
+  // Delete draft endpoints
+  app.delete('/api/drafts/devotionals/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(devotionals).where(eq(devotionals.id, Number(id)));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting devotional draft:", error);
+      res.status(500).json({ message: "Failed to delete devotional draft" });
+    }
+  });
+
+  app.delete('/api/drafts/weekly-series/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(weeklySeries).where(eq(weeklySeries.id, Number(id)));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting weekly series draft:", error);
+      res.status(500).json({ message: "Failed to delete weekly series draft" });
+    }
+  });
+
+  app.delete('/api/drafts/sermon-media/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(sermonMedia).where(eq(sermonMedia.id, Number(id)));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting sermon media draft:", error);
+      res.status(500).json({ message: "Failed to delete sermon media draft" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Setup WebSocket server for real-time chat
