@@ -152,6 +152,21 @@ export interface IStorage {
   unbookmarkInspiration(userId: string, inspirationId: number): Promise<void>;
   bookmarkEvent(userId: string, eventId: number): Promise<void>;
   unbookmarkEvent(userId: string, eventId: number): Promise<void>;
+  
+  // Leaderboard operations
+  getUserScore(userId: string): Promise<UserScore | undefined>;
+  updateUserScore(userId: string, updates: Partial<InsertUserScore>): Promise<UserScore>;
+  addPointTransaction(transaction: InsertPointTransaction): Promise<PointTransaction>;
+  getLeaderboard(type: string, category: string, churchId?: number): Promise<LeaderboardEntry[]>;
+  createLeaderboard(leaderboard: InsertLeaderboard): Promise<Leaderboard>;
+  updateLeaderboardEntries(leaderboardId: number): Promise<void>;
+  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  awardAchievement(userId: string, achievementId: number): Promise<UserAchievement>;
+  getUserStreaks(userId: string): Promise<Streak[]>;
+  updateStreak(userId: string, type: string): Promise<Streak>;
+  getChallenges(churchId?: number): Promise<Challenge[]>;
+  joinChallenge(userId: string, challengeId: number): Promise<ChallengeParticipant>;
+  updateChallengeProgress(userId: string, challengeId: number, progress: number): Promise<ChallengeParticipant>;
 }
 
 export class DatabaseStorage implements IStorage {

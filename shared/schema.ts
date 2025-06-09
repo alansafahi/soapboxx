@@ -316,6 +316,123 @@ export const messages = pgTable("messages", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Leaderboard and gamification tables
+export const userScores = pgTable("user_scores", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  totalPoints: integer("total_points").default(0),
+  weeklyPoints: integer("weekly_points").default(0),
+  monthlyPoints: integer("monthly_points").default(0),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastActivityDate: timestamp("last_activity_date"),
+  weekStartDate: timestamp("week_start_date").defaultNow(),
+  monthStartDate: timestamp("month_start_date").defaultNow(),
+  faithfulnessScore: integer("faithfulness_score").default(0),
+  prayerChampionPoints: integer("prayer_champion_points").default(0),
+  serviceHours: integer("service_hours").default(0),
+  isAnonymous: boolean("is_anonymous").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userScoreUnique: unique().on(table.userId),
+}));
+
+export const pointTransactions = pgTable("point_transactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  points: integer("points").notNull(),
+  activityType: varchar("activity_type", { length: 50 }).notNull(),
+  entityId: integer("entity_id"),
+  description: text("description"),
+  multiplier: integer("multiplier").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  badgeIcon: varchar("badge_icon", { length: 50 }),
+  pointsRequired: integer("points_required").default(0),
+  category: varchar("category", { length: 50 }).notNull(),
+  type: varchar("type", { length: 30 }).notNull(),
+  criteria: text("criteria"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const leaderboards = pgTable("leaderboards", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  type: varchar("type", { length: 30 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(),
+  churchId: integer("church_id").references(() => churches.id),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: boolean("is_active").default(true),
+  settings: text("settings"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const leaderboardEntries = pgTable("leaderboard_entries", {
+  id: serial("id").primaryKey(),
+  leaderboardId: integer("leaderboard_id").notNull().references(() => leaderboards.id),
+  userId: varchar("user_id").references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  rank: integer("rank").notNull(),
+  score: integer("score").notNull(),
+  entityName: varchar("entity_name", { length: 100 }),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+}, (table) => ({
+  leaderboardUserUnique: unique().on(table.leaderboardId, table.userId),
+  leaderboardChurchUnique: unique().on(table.leaderboardId, table.churchId),
+}));
+
+export const streaks = pgTable("streaks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: varchar("type", { length: 50 }).notNull(),
+  currentCount: integer("current_count").default(0),
+  longestCount: integer("longest_count").default(0),
+  lastActivityDate: timestamp("last_activity_date"),
+  startDate: timestamp("start_date").defaultNow(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userStreakUnique: unique().on(table.userId, table.type),
+}));
+
+export const challenges = pgTable("challenges", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  type: varchar("type", { length: 30 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  targetPoints: integer("target_points").default(0),
+  targetActivity: varchar("target_activity", { length: 50 }),
+  targetCount: integer("target_count").default(0),
+  rewardPoints: integer("reward_points").default(0),
+  churchId: integer("church_id").references(() => churches.id),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const challengeParticipants = pgTable("challenge_participants", {
+  id: serial("id").primaryKey(),
+  challengeId: integer("challenge_id").notNull().references(() => challenges.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  currentProgress: integer("current_progress").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  joinedAt: timestamp("joined_at").defaultNow(),
+}, (table) => ({
+  challengeUserUnique: unique().on(table.challengeId, table.userId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userChurches: many(userChurches),
@@ -614,3 +731,31 @@ export const insertEventRsvpSchema = createInsertSchema(eventRsvps).omit({
   id: true,
   createdAt: true,
 });
+
+// Leaderboard type definitions
+export type UserScore = typeof userScores.$inferSelect;
+export type InsertUserScore = typeof userScores.$inferInsert;
+
+export type PointTransaction = typeof pointTransactions.$inferSelect;
+export type InsertPointTransaction = typeof pointTransactions.$inferInsert;
+
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = typeof achievements.$inferInsert;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
+
+export type Leaderboard = typeof leaderboards.$inferSelect;
+export type InsertLeaderboard = typeof leaderboards.$inferInsert;
+
+export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
+export type InsertLeaderboardEntry = typeof leaderboardEntries.$inferInsert;
+
+export type Streak = typeof streaks.$inferSelect;
+export type InsertStreak = typeof streaks.$inferInsert;
+
+export type Challenge = typeof challenges.$inferSelect;
+export type InsertChallenge = typeof challenges.$inferInsert;
+
+export type ChallengeParticipant = typeof challengeParticipants.$inferSelect;
+export type InsertChallengeParticipant = typeof challengeParticipants.$inferInsert;
