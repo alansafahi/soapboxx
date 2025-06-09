@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
-import { userInspirationHistory } from "@shared/schema";
+import { userInspirationHistory, prayerResponses } from "@shared/schema";
 import { and, eq } from "drizzle-orm";
 import { 
   insertChurchSchema,
@@ -381,6 +381,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error creating prayer request:", error);
       res.status(500).json({ message: "Failed to create prayer request" });
+    }
+  });
+
+  app.post('/api/prayers/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const prayerResponse = await storage.getUserPrayerResponse(prayerRequestId, userId);
+      
+      if (prayerResponse) {
+        // Remove the prayer response to "unlike"
+        await db.delete(prayerResponses).where(and(
+          eq(prayerResponses.prayerRequestId, prayerRequestId),
+          eq(prayerResponses.userId, userId)
+        ));
+        res.json({ liked: false });
+      } else {
+        // Add prayer response to "like"
+        await storage.prayForRequest({
+          prayerRequestId,
+          userId,
+        });
+        res.json({ liked: true });
+      }
+    } catch (error) {
+      console.error("Error toggling prayer like:", error);
+      res.status(500).json({ message: "Failed to toggle like" });
     }
   });
 
