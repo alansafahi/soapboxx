@@ -75,8 +75,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#663535]">{userStats?.inspirationsRead || 0}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Daily Inspirations Read</div>
+                      <div className="text-xl font-bold text-white">{userStats?.inspirationsRead || 0}</div>
+                      <div className="text-xs text-blue-100 font-bold">Daily Inspirations Read</div>
                     </div>
                   </div>
                 </div>
@@ -90,8 +90,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#866eb5]">{userStats?.prayersOffered || 0}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Prayers Offered</div>
+                      <div className="text-xl font-bold text-white">{userStats?.prayersOffered || 0}</div>
+                      <div className="text-xs text-blue-100 font-bold">Prayers Offered</div>
                     </div>
                   </div>
                 </div>
@@ -105,8 +105,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#850000]">{userStats?.discussionCount || 0}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Discussion Posts</div>
+                      <div className="text-xl font-bold text-white">{userStats?.discussionCount || 0}</div>
+                      <div className="text-xs text-blue-100 font-bold">Discussion Posts</div>
                     </div>
                   </div>
                 </div>
@@ -120,8 +120,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#663535]">Level {userStats?.level || 1}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Achievement Level</div>
+                      <div className="text-xl font-bold text-white">Level {userStats?.level || 1}</div>
+                      <div className="text-xs text-blue-100 font-bold">Achievement Level</div>
                     </div>
                   </div>
                 </div>
@@ -135,8 +135,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#850000]">{userStats?.totalPoints || 0}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Points Earned</div>
+                      <div className="text-xl font-bold text-white">{userStats?.totalPoints || 0}</div>
+                      <div className="text-xs text-blue-100 font-bold">Points Earned</div>
                     </div>
                   </div>
                 </div>
@@ -150,8 +150,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#663535]">{userStats?.attendanceCount || 0}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Events Attended</div>
+                      <div className="text-xl font-bold text-white">{userStats?.attendanceCount || 0}</div>
+                      <div className="text-xs text-blue-100 font-bold">Events Attended</div>
                     </div>
                   </div>
                 </div>
@@ -165,8 +165,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#866eb5]">{userStats?.prayerCount || 0}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Prayer Requests</div>
+                      <div className="text-xl font-bold text-white">{userStats?.prayerCount || 0}</div>
+                      <div className="text-xs text-blue-100 font-bold">Prayer Requests</div>
                     </div>
                   </div>
                 </div>
