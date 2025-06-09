@@ -23,6 +23,8 @@ import {
   type UpsertUser,
   type Church,
   type InsertChurch,
+  type UserChurch,
+  type InsertUserChurch,
   type Event,
   type InsertEvent,
   type Discussion,
@@ -334,6 +336,18 @@ export class DatabaseStorage implements IStorage {
           lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
           bio: users.bio,
+          mobileNumber: users.mobileNumber,
+          address: users.address,
+          city: users.city,
+          state: users.state,
+          zipCode: users.zipCode,
+          country: users.country,
+          denomination: users.denomination,
+          interests: users.interests,
+          hasCompletedOnboarding: users.hasCompletedOnboarding,
+          onboardingData: users.onboardingData,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
         }
       })
       .from(userChurches)

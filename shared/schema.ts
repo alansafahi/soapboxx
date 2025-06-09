@@ -321,7 +321,7 @@ export const messages = pgTable("messages", {
   senderId: varchar("sender_id").notNull().references(() => users.id),
   content: text("content").notNull(),
   messageType: varchar("message_type", { length: 20 }).default("text"), // text, image, file, system
-  replyToId: integer("reply_to_id").references(() => messages.id),
+  replyToId: integer("reply_to_id").references((): any => messages.id),
   isEdited: boolean("is_edited").default(false),
   editedAt: timestamp("edited_at"),
   isDeleted: boolean("is_deleted").default(false),

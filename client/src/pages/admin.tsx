@@ -274,9 +274,9 @@ export default function AdminPortal() {
           <p className="text-gray-600 dark:text-gray-400">Manage your church community and events</p>
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -766,6 +766,7 @@ export default function AdminPortal() {
               </CardContent>
             </Card>
           )}
+        </div>
         </div>
       </div>
     </div>
