@@ -374,6 +374,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Daily inspiration endpoints
+  app.get('/api/inspiration/daily', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const inspiration = await storage.getDailyInspiration(userId);
+      
+      if (!inspiration) {
+        return res.status(404).json({ message: "No inspiration available" });
+      }
+      
+      res.json(inspiration);
+    } catch (error) {
+      console.error("Error fetching daily inspiration:", error);
+      res.status(500).json({ message: "Failed to fetch inspiration" });
+    }
+  });
+
+  app.get('/api/inspiration/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const preferences = await storage.getUserInspirationPreferences(userId);
+      res.json(preferences || { preferredCategories: ['faith', 'hope', 'love'], deliveryTime: '08:00', isEnabled: true });
+    } catch (error) {
+      console.error("Error fetching inspiration preferences:", error);
+      res.status(500).json({ message: "Failed to fetch preferences" });
+    }
+  });
+
+  app.post('/api/inspiration/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const preferences = await storage.updateInspirationPreferences(userId, req.body);
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error updating inspiration preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  app.post('/api/inspiration/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const inspirationId = parseInt(req.params.id);
+      await storage.markInspirationAsRead(userId, inspirationId);
+      res.json({ message: "Marked as read" });
+    } catch (error) {
+      console.error("Error marking inspiration as read:", error);
+      res.status(500).json({ message: "Failed to mark as read" });
+    }
+  });
+
+  app.post('/api/inspiration/:id/favorite', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const inspirationId = parseInt(req.params.id);
+      await storage.favoriteInspiration(userId, inspirationId);
+      res.json({ message: "Added to favorites" });
+    } catch (error) {
+      console.error("Error favoriting inspiration:", error);
+      res.status(500).json({ message: "Failed to favorite" });
+    }
+  });
+
+  app.delete('/api/inspiration/:id/favorite', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const inspirationId = parseInt(req.params.id);
+      await storage.unfavoriteInspiration(userId, inspirationId);
+      res.json({ message: "Removed from favorites" });
+    } catch (error) {
+      console.error("Error unfavoriting inspiration:", error);
+      res.status(500).json({ message: "Failed to unfavorite" });
+    }
+  });
+
+  app.post('/api/inspiration/:id/share', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const inspirationId = parseInt(req.params.id);
+      await storage.shareInspiration(userId, inspirationId);
+      res.json({ message: "Shared successfully" });
+    } catch (error) {
+      console.error("Error sharing inspiration:", error);
+      res.status(500).json({ message: "Failed to share" });
+    }
+  });
+
   app.get('/api/users/churches', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

@@ -7,6 +7,7 @@ import EventsList from "@/components/events-list";
 import PrayerRequests from "@/components/prayer-requests";
 import ProgressTracker from "@/components/progress-tracker";
 import ChurchDiscovery from "@/components/church-discovery";
+import DailyInspiration from "@/components/daily-inspiration";
 import MobileNav from "@/components/mobile-nav";
 import { useQuery } from "@tanstack/react-query";
 
@@ -129,6 +130,9 @@ export default function Home() {
           
           {/* Right Sidebar */}
           <div className="space-y-6">
+            <div id="daily-inspiration">
+              <DailyInspiration />
+            </div>
             <div id="prayer-requests">
               <PrayerRequests />
             </div>
