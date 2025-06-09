@@ -120,15 +120,23 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Community Feed */}
           <div className="lg:col-span-2 space-y-6">
-            <CommunityFeed />
-            <EventsList />
+            <div id="community-feed">
+              <CommunityFeed />
+            </div>
+            <div id="events-list">
+              <EventsList />
+            </div>
           </div>
           
           {/* Right Sidebar */}
           <div className="space-y-6">
-            <PrayerRequests />
+            <div id="prayer-requests">
+              <PrayerRequests />
+            </div>
             <AchievementTracker />
-            <ChurchDiscovery />
+            <div id="church-discovery">
+              <ChurchDiscovery />
+            </div>
           </div>
         </div>
       </main>

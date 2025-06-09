@@ -21,6 +21,8 @@ const discussionSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title too long"),
   content: z.string().min(1, "Content is required"),
   category: z.string().optional(),
+  churchId: z.number().optional(),
+  isPublic: z.boolean().default(true),
 });
 
 type DiscussionFormData = z.infer<typeof discussionSchema>;
@@ -36,6 +38,8 @@ export default function CommunityFeed() {
       title: "",
       content: "",
       category: "general",
+      churchId: undefined,
+      isPublic: true,
     },
   });
 
@@ -179,7 +183,7 @@ export default function CommunityFeed() {
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="font-medium text-gray-900">Community Member</span>
                       <span className="text-gray-400 text-sm">
-                        {formatTimeAgo(discussion.createdAt!)}
+                        {formatTimeAgo(discussion.createdAt?.toString() || new Date().toISOString())}
                       </span>
                     </div>
                     <h3 className="font-medium text-gray-900 mb-2">{discussion.title}</h3>

@@ -26,16 +26,36 @@ export default function Navigation() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <button className="text-gray-700 hover:text-faith-blue transition-colors font-medium">
+            <button 
+              onClick={() => {
+                document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+            >
               Community
             </button>
-            <button className="text-gray-700 hover:text-faith-blue transition-colors font-medium">
+            <button 
+              onClick={() => {
+                document.getElementById('church-discovery')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+            >
               Churches
             </button>
-            <button className="text-gray-700 hover:text-faith-blue transition-colors font-medium">
+            <button 
+              onClick={() => {
+                document.getElementById('events-list')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+            >
               Events
             </button>
-            <button className="text-gray-700 hover:text-faith-blue transition-colors font-medium">
+            <button 
+              onClick={() => {
+                document.getElementById('prayer-requests')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+            >
               Prayer
             </button>
           </nav>

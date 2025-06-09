@@ -23,6 +23,8 @@ const prayerRequestSchema = z.object({
   content: z.string().min(1, "Prayer request content is required"),
   isAnonymous: z.boolean().default(false),
   category: z.string().optional(),
+  churchId: z.number().optional(),
+  isPublic: z.boolean().default(true),
 });
 
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
@@ -39,6 +41,8 @@ export default function PrayerRequests() {
       content: "",
       isAnonymous: false,
       category: "general",
+      churchId: undefined,
+      isPublic: true,
     },
   });
 
@@ -263,7 +267,7 @@ export default function PrayerRequests() {
                   {prayer.isAnonymous ? "Anonymous" : "Community Member"}
                 </span>
                 <span className="text-xs text-gray-500">
-                  {formatTimeAgo(prayer.createdAt!)}
+                  {formatTimeAgo(prayer.createdAt?.toString() || new Date().toISOString())}
                 </span>
                 {prayer.isAnswered && (
                   <Badge className="bg-green-100 text-green-800">
