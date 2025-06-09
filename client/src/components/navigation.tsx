@@ -58,6 +58,12 @@ export default function Navigation() {
             >
               Prayer
             </button>
+            <button 
+              onClick={() => window.location.href = '/admin'}
+              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+            >
+              Admin Portal
+            </button>
           </nav>
           
           {/* User Actions */}
@@ -79,7 +85,9 @@ export default function Navigation() {
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+                  Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
                   Sign Out
