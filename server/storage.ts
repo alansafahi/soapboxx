@@ -1216,6 +1216,16 @@ export class DatabaseStorage implements IStorage {
           ? `${d.authorFirstName} ${d.authorLastName}`
           : d.authorEmail || 'Unknown User';
 
+        // Check if user bookmarked this discussion
+        const [bookmark] = await db
+          .select()
+          .from(discussionBookmarks)
+          .where(and(
+            eq(discussionBookmarks.userId, userId),
+            eq(discussionBookmarks.discussionId, d.id)
+          ))
+          .limit(1);
+
         feedPosts.push({
           id: d.id,
           type: 'discussion',
@@ -1231,7 +1241,8 @@ export class DatabaseStorage implements IStorage {
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
-          isLiked: false
+          isLiked: false,
+          isBookmarked: !!bookmark
         });
       }
 
@@ -1262,6 +1273,16 @@ export class DatabaseStorage implements IStorage {
           ? `${p.authorFirstName} ${p.authorLastName}`
           : p.authorEmail || 'Unknown User';
 
+        // Check if user bookmarked this prayer
+        const [prayerBookmark] = await db
+          .select()
+          .from(prayerBookmarks)
+          .where(and(
+            eq(prayerBookmarks.userId, userId),
+            eq(prayerBookmarks.prayerId, p.id)
+          ))
+          .limit(1);
+
         feedPosts.push({
           id: p.id,
           type: 'prayer',
@@ -1278,6 +1299,7 @@ export class DatabaseStorage implements IStorage {
           commentCount: 0,
           shareCount: 0,
           isLiked: false,
+          isBookmarked: !!prayerBookmark,
           tags: ['prayer', 'faith']
         });
       }
@@ -1299,6 +1321,16 @@ export class DatabaseStorage implements IStorage {
 
       // Transform inspirations for feed
       for (const i of inspirationsData) {
+        // Check if user bookmarked this inspiration
+        const [inspirationBookmark] = await db
+          .select()
+          .from(inspirationBookmarks)
+          .where(and(
+            eq(inspirationBookmarks.userId, userId),
+            eq(inspirationBookmarks.inspirationId, i.id)
+          ))
+          .limit(1);
+
         feedPosts.push({
           id: i.id,
           type: 'inspiration',
@@ -1315,6 +1347,7 @@ export class DatabaseStorage implements IStorage {
           commentCount: 0,
           shareCount: 0,
           isLiked: false,
+          isBookmarked: !!inspirationBookmark,
           tags: ['inspiration', i.category]
         });
       }
