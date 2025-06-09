@@ -74,7 +74,7 @@ export default function Home() {
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-[#663535]">{userStats?.attendanceCount || 0}</div>
-                      <div className="text-blue-100 text-sm">Events Attended</div>
+                      <div className="text-sm text-[#1433ff] font-bold">Events Attended</div>
                     </div>
                   </div>
                 </div>
