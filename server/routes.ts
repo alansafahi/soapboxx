@@ -485,6 +485,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const friendship = await storage.sendFriendRequest(requesterId, addresseeId);
+      
+      // Create a conversation immediately when friend request is sent
+      try {
+        const conversation = await storage.createConversation({
+          title: null,
+          type: 'direct',
+          isActive: true
+        });
+        
+        // Add both users as participants
+        await storage.addConversationParticipant({
+          conversationId: conversation.id,
+          userId: requesterId,
+          isActive: true
+        });
+        
+        await storage.addConversationParticipant({
+          conversationId: conversation.id,
+          userId: addresseeId,
+          isActive: true
+        });
+      } catch (convError) {
+        console.error("Error creating conversation:", convError);
+        // Don't fail the friend request if conversation creation fails
+      }
+      
       res.status(201).json(friendship);
     } catch (error) {
       console.error("Error sending friend request:", error);
