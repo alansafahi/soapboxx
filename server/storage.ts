@@ -637,27 +637,45 @@ export class DatabaseStorage implements IStorage {
       const level = Math.floor(achievement.progress / achievement.maxProgress) + 1;
       const isUnlocked = achievement.progress >= achievement.maxProgress;
       
-      await db
-        .insert(userAchievements)
-        .values({
-          userId,
-          achievementType: achievement.type,
-          achievementLevel: level,
-          progress: achievement.progress,
-          maxProgress: achievement.maxProgress,
-          isUnlocked,
-          unlockedAt: isUnlocked ? new Date() : null,
-        })
-        .onConflictDoUpdate({
-          target: [userAchievements.userId, userAchievements.achievementType],
-          set: {
+      // Check if achievement already exists
+      const existingAchievement = await db
+        .select()
+        .from(userAchievements)
+        .where(and(
+          eq(userAchievements.userId, userId),
+          eq(userAchievements.achievementType, achievement.type)
+        ))
+        .limit(1);
+
+      if (existingAchievement.length > 0) {
+        // Update existing achievement
+        await db
+          .update(userAchievements)
+          .set({
             progress: achievement.progress,
             achievementLevel: level,
             isUnlocked,
-            unlockedAt: isUnlocked ? sql`COALESCE(${userAchievements.unlockedAt}, NOW())` : null,
+            unlockedAt: isUnlocked && !existingAchievement[0].isUnlocked ? new Date() : existingAchievement[0].unlockedAt,
             updatedAt: new Date(),
-          },
-        });
+          })
+          .where(and(
+            eq(userAchievements.userId, userId),
+            eq(userAchievements.achievementType, achievement.type)
+          ));
+      } else {
+        // Insert new achievement
+        await db
+          .insert(userAchievements)
+          .values({
+            userId,
+            achievementType: achievement.type,
+            achievementLevel: level,
+            progress: achievement.progress,
+            maxProgress: achievement.maxProgress,
+            isUnlocked,
+            unlockedAt: isUnlocked ? new Date() : null,
+          });
+      }
     }
   }
 

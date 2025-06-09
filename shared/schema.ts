@@ -9,6 +9,7 @@ import {
   integer,
   boolean,
   real,
+  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -170,7 +171,9 @@ export const userAchievements = pgTable("user_achievements", {
   unlockedAt: timestamp("unlocked_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  userAchievementUnique: unique().on(table.userId, table.achievementType),
+}));
 
 // User activity tracking
 export const userActivities = pgTable("user_activities", {
