@@ -16,8 +16,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings } from "lucide-react";
-import { insertChurchSchema, insertEventSchema } from "@shared/schema";
+import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, BookOpen, Video, Music } from "lucide-react";
+import { insertChurchSchema, insertEventSchema, insertDevotionalSchema, insertWeeklySeriesSchema, insertSermonMediaSchema } from "@shared/schema";
 import { ChurchProfileManager } from "@/components/church-profile-manager";
 
 const churchFormSchema = insertChurchSchema.extend({
@@ -29,8 +29,23 @@ const eventFormSchema = insertEventSchema.extend({
   churchId: z.coerce.number(),
 });
 
+const devotionalFormSchema = insertDevotionalSchema.extend({
+  churchId: z.coerce.number().optional(),
+});
+
+const weeklySeriesFormSchema = insertWeeklySeriesSchema.extend({
+  churchId: z.coerce.number().optional(),
+});
+
+const sermonMediaFormSchema = insertSermonMediaSchema.extend({
+  churchId: z.coerce.number().optional(),
+});
+
 type ChurchFormData = z.infer<typeof churchFormSchema>;
 type EventFormData = z.infer<typeof eventFormSchema>;
+type DevotionalFormData = z.infer<typeof devotionalFormSchema>;
+type WeeklySeriesFormData = z.infer<typeof weeklySeriesFormSchema>;
+type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 
 export default function AdminPortal() {
   const { user } = useAuth();
@@ -469,10 +484,11 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
+                <TabsTrigger value="content">Content</TabsTrigger>
                 <TabsTrigger value="discussions">Discussions</TabsTrigger>
                 <TabsTrigger value="prayers">Prayers</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
@@ -666,6 +682,280 @@ export default function AdminPortal() {
                     </Card>
                   )}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="content" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Devotionals Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="h-5 w-5" />
+                        Devotionals
+                      </CardTitle>
+                      <CardDescription>
+                        Publish daily devotionals and spiritual reflections
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="w-full">
+                            <Plus className="h-4 w-4 mr-2" />
+                            New Devotional
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Create Devotional</DialogTitle>
+                            <DialogDescription>
+                              Share a spiritual reflection with your community
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="devotional-title">Title</Label>
+                              <Input id="devotional-title" placeholder="Finding Peace in Difficult Times" />
+                            </div>
+                            <div>
+                              <Label htmlFor="devotional-category">Category</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="hope">Hope</SelectItem>
+                                  <SelectItem value="faith">Faith</SelectItem>
+                                  <SelectItem value="love">Love</SelectItem>
+                                  <SelectItem value="strength">Strength</SelectItem>
+                                  <SelectItem value="forgiveness">Forgiveness</SelectItem>
+                                  <SelectItem value="gratitude">Gratitude</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="devotional-verse">Scripture Reference</Label>
+                              <Input id="devotional-verse" placeholder="John 14:27" />
+                            </div>
+                            <div>
+                              <Label htmlFor="devotional-content">Content</Label>
+                              <Textarea 
+                                id="devotional-content" 
+                                placeholder="Write your devotional content here..."
+                                className="min-h-32"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" className="flex-1">
+                                Save as Draft
+                              </Button>
+                              <Button className="flex-1">
+                                Publish Now
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Published: 12 devotionals this month
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Weekly Series Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        Weekly Series
+                      </CardTitle>
+                      <CardDescription>
+                        Set up weekly series like "Lenten Journey" or "Advent Countdown"
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="w-full">
+                            <Plus className="h-4 w-4 mr-2" />
+                            New Series
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Create Weekly Series</DialogTitle>
+                            <DialogDescription>
+                              Plan a series of devotionals or studies
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="series-title">Series Title</Label>
+                              <Input id="series-title" placeholder="Advent Countdown" />
+                            </div>
+                            <div>
+                              <Label htmlFor="series-description">Description</Label>
+                              <Textarea 
+                                id="series-description" 
+                                placeholder="A 4-week journey preparing our hearts for Christmas..."
+                                className="min-h-20"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="series-start">Start Date</Label>
+                                <Input id="series-start" type="date" />
+                              </div>
+                              <div>
+                                <Label htmlFor="series-end">End Date</Label>
+                                <Input id="series-end" type="date" />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="series-frequency">Frequency</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="How often?" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="daily">Daily</SelectItem>
+                                  <SelectItem value="weekly">Weekly</SelectItem>
+                                  <SelectItem value="custom">Custom</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Button className="w-full">
+                              Create Series
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Active: 2 series running
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Sermon Media Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Video className="h-5 w-5" />
+                        Sermon Media
+                      </CardTitle>
+                      <CardDescription>
+                        Upload sermon audio, video, and documents
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="w-full">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Upload Media
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Upload Sermon Media</DialogTitle>
+                            <DialogDescription>
+                              Share sermons with your congregation
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="media-title">Title</Label>
+                              <Input id="media-title" placeholder="Sunday Service - Finding Hope" />
+                            </div>
+                            <div>
+                              <Label htmlFor="media-speaker">Speaker</Label>
+                              <Input id="media-speaker" placeholder="Pastor John Smith" />
+                            </div>
+                            <div>
+                              <Label htmlFor="media-type">Media Type</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="audio">Audio</SelectItem>
+                                  <SelectItem value="video">Video</SelectItem>
+                                  <SelectItem value="document">Document</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="media-date">Date</Label>
+                              <Input id="media-date" type="date" />
+                            </div>
+                            <div>
+                              <Label htmlFor="media-file">File Upload</Label>
+                              <Input id="media-file" type="file" accept="audio/*,video/*,.pdf,.doc,.docx" />
+                            </div>
+                            <div>
+                              <Label htmlFor="media-description">Description</Label>
+                              <Textarea 
+                                id="media-description" 
+                                placeholder="Brief description of the sermon..."
+                                className="min-h-20"
+                              />
+                            </div>
+                            <Button className="w-full">
+                              Upload Media
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Library: 24 audio, 8 video files
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Recent Content Overview */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Content</CardTitle>
+                    <CardDescription>
+                      Overview of your latest published content
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <BookOpen className="h-5 w-5 text-blue-600" />
+                          <div>
+                            <h4 className="font-medium">Walking in Faith</h4>
+                            <p className="text-sm text-gray-600">Devotional • Published 2 days ago</p>
+                          </div>
+                        </div>
+                        <Badge variant="secondary">Hope</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Music className="h-5 w-5 text-green-600" />
+                          <div>
+                            <h4 className="font-medium">Sunday Service Audio</h4>
+                            <p className="text-sm text-gray-600">Audio • Uploaded 5 days ago</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline">45 min</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Calendar className="h-5 w-5 text-purple-600" />
+                          <div>
+                            <h4 className="font-medium">Advent Countdown</h4>
+                            <p className="text-sm text-gray-600">Series • 3 of 4 weeks completed</p>
+                          </div>
+                        </div>
+                        <Badge variant="default">Active</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="discussions" className="space-y-6">
