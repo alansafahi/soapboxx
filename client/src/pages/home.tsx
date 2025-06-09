@@ -65,7 +65,7 @@ export default function Home() {
               </p>
               
               {/* Quick Stats with Gamification */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Daily Inspirations Read */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="flex flex-col items-center text-center space-y-2">
@@ -127,7 +127,7 @@ export default function Home() {
                 </div>
 
                 {/* Points Earned */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 col-span-2 md:col-span-1">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="flex flex-col items-center text-center space-y-2">
                     <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -137,6 +137,51 @@ export default function Home() {
                     <div>
                       <div className="text-xl font-bold text-[#850000]">{userStats?.totalPoints || 0}</div>
                       <div className="text-xs text-[#1433ff] font-bold">Points Earned</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Events Attended */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-[#663535]">{userStats?.attendanceCount || 0}</div>
+                      <div className="text-xs text-[#1433ff] font-bold">Events Attended</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Prayer Requests */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 8V4l8 8-8 8v-4H4v-8h8z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-[#866eb5]">{userStats?.prayerCount || 0}</div>
+                      <div className="text-xs text-[#1433ff] font-bold">Prayer Requests</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Connections */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <div className="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-[#850000]">{userStats?.connectionCount || 0}</div>
+                      <div className="text-xs text-[#1433ff] font-bold">Connections</div>
                     </div>
                   </div>
                 </div>
