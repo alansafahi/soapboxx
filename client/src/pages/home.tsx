@@ -73,7 +73,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold">{userStats?.attendanceCount || 0}</div>
+                      <div className="text-2xl font-bold text-[#663535]">{userStats?.attendanceCount || 0}</div>
                       <div className="text-blue-100 text-sm">Events Attended</div>
                     </div>
                   </div>
