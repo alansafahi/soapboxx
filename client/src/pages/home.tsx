@@ -2,10 +2,9 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
-import CommunityFeed from "@/components/community-feed";
+import SocialFeed from "@/components/social-feed";
 import EventsList from "@/components/events-list";
 import PrayerRequests from "@/components/prayer-requests";
-
 import ChurchDiscovery from "@/components/church-discovery";
 import DailyInspiration from "@/components/daily-inspiration";
 import MobileNav from "@/components/mobile-nav";
@@ -115,8 +114,8 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Community Feed */}
           <div className="lg:col-span-2 space-y-6">
-            <div id="community-feed">
-              <CommunityFeed />
+            <div id="social-feed">
+              <SocialFeed />
             </div>
             <div id="events-list">
               <EventsList />

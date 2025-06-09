@@ -1176,7 +1176,7 @@ export class DatabaseStorage implements IStorage {
       const feedPosts: any[] = [];
 
       // Get discussions with author info and like status
-      const discussions = await db
+      const discussionsQuery = await db
         .select({
           id: discussions.id,
           type: sql<string>`'discussion'`,

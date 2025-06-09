@@ -62,10 +62,15 @@ export default function SocialFeed() {
   // Create new post mutation
   const createPostMutation = useMutation({
     mutationFn: async (postData: any) => {
-      return await apiRequest('/api/feed/posts', {
+      const response = await fetch('/api/feed/posts', {
         method: 'POST',
-        body: postData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
       });
+      if (!response.ok) throw new Error('Failed to create post');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -87,9 +92,14 @@ export default function SocialFeed() {
   // Like post mutation
   const likePostMutation = useMutation({
     mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
-      return await apiRequest(`/api/${postType}s/${postId}/like`, {
+      const response = await fetch(`/api/${postType}s/${postId}/like`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
+      if (!response.ok) throw new Error('Failed to like post');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });

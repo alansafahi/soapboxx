@@ -27,6 +27,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Feed routes
+  app.get("/api/feed", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const feedPosts = await storage.getFeedPosts(userId);
+      res.json(feedPosts);
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+      res.status(500).json({ message: "Failed to fetch feed" });
+    }
+  });
+
+  app.post("/api/feed/posts", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { type, content, title } = req.body;
+      
+      let post;
+      if (type === 'discussion') {
+        post = await storage.createDiscussion({
+          title: title || 'Community Discussion',
+          content,
+          authorId: userId,
+          churchId: null
+        });
+      } else if (type === 'prayer') {
+        post = await storage.createPrayerRequest({
+          title: title || 'Prayer Request',
+          content,
+          authorId: userId,
+          churchId: null,
+          isAnonymous: false
+        });
+      }
+      
+      res.json(post);
+    } catch (error) {
+      console.error("Error creating feed post:", error);
+      res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+
   app.post('/api/auth/complete-onboarding', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
