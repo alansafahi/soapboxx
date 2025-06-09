@@ -1614,16 +1614,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/drafts/devotionals', isAuthenticated, async (req, res) => {
     try {
       const { churchId } = req.query;
-      let query = db.select().from(devotionals).where(eq(devotionals.isPublished, false));
+      let whereConditions = [eq(devotionals.isPublished, false)];
       
       if (churchId) {
-        query = query.where(and(
-          eq(devotionals.isPublished, false),
-          eq(devotionals.churchId, Number(churchId))
-        ));
+        whereConditions.push(eq(devotionals.churchId, Number(churchId)));
       }
       
-      const drafts = await query.orderBy(desc(devotionals.createdAt));
+      const drafts = await db.select()
+        .from(devotionals)
+        .where(and(...whereConditions))
+        .orderBy(desc(devotionals.createdAt));
+        
       res.json(drafts);
     } catch (error) {
       console.error("Error fetching devotional drafts:", error);
@@ -1634,13 +1635,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/drafts/weekly-series', isAuthenticated, async (req, res) => {
     try {
       const { churchId } = req.query;
+      let whereConditions = [eq(weeklySeries.isActive, false)];
+      
+      if (churchId) {
+        whereConditions.push(eq(weeklySeries.churchId, Number(churchId)));
+      }
+      
       const drafts = await db.select()
         .from(weeklySeries)
-        .where(and(
-          eq(weeklySeries.isActive, false),
-          churchId ? eq(weeklySeries.churchId, Number(churchId)) : undefined
-        ))
+        .where(and(...whereConditions))
         .orderBy(desc(weeklySeries.createdAt));
+        
       res.json(drafts);
     } catch (error) {
       console.error("Error fetching weekly series drafts:", error);
@@ -1651,13 +1656,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/drafts/sermon-media', isAuthenticated, async (req, res) => {
     try {
       const { churchId } = req.query;
+      let whereConditions = [eq(sermonMedia.isPublished, false)];
+      
+      if (churchId) {
+        whereConditions.push(eq(sermonMedia.churchId, Number(churchId)));
+      }
+      
       const drafts = await db.select()
         .from(sermonMedia)
-        .where(and(
-          eq(sermonMedia.isPublished, false),
-          churchId ? eq(sermonMedia.churchId, Number(churchId)) : undefined
-        ))
+        .where(and(...whereConditions))
         .orderBy(desc(sermonMedia.createdAt));
+        
       res.json(drafts);
     } catch (error) {
       console.error("Error fetching sermon media drafts:", error);
