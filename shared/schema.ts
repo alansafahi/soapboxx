@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   bio: text("bio"),
+  hasCompletedOnboarding: boolean("has_completed_onboarding").default(false),
+  onboardingData: jsonb("onboarding_data"), // Store wizard responses
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

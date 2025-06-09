@@ -493,9 +493,9 @@ export default function Chat() {
             <CardContent>
               <ScrollArea className="h-64">
                 <div className="space-y-2">
-                  {friends.map((friend: any) => (
+                  {friends.map((friend: any, index: number) => (
                     <div
-                      key={`friends-sidebar-${friend.id}`}
+                      key={`friends-list-${friend.id}-${index}`}
                       className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                       onClick={() => startConversationWithFriend(friend.id, friend.firstName || friend.email)}
                     >

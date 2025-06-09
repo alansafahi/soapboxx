@@ -27,6 +27,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/auth/complete-onboarding', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const onboardingData = req.body;
+      
+      await storage.completeOnboarding(userId, onboardingData);
+      
+      res.json({ message: "Onboarding completed successfully" });
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ message: "Failed to complete onboarding" });
+    }
+  });
+
   // Church routes
   app.get('/api/churches', async (req, res) => {
     try {
