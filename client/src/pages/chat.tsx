@@ -592,7 +592,7 @@ export default function Chat() {
                         </div>
                       </div>
                     ))}
-                    {messages.length === 0 && (
+                    {(!Array.isArray(messages) || messages.length === 0) && (
                       <div className="text-center py-8">
                         <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                         <p className="text-gray-500">No messages yet. Start the conversation!</p>
