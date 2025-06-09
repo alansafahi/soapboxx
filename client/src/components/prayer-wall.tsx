@@ -223,6 +223,8 @@ export default function PrayerWall() {
         newMap.set(prayerRequestId, '');
         return newMap;
       });
+      // Refresh support messages for this prayer
+      fetchSupportMessages(prayerRequestId);
       toast({
         title: "Support sent",
         description: "Your encouraging message has been shared.",
