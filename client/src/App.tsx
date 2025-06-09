@@ -15,6 +15,7 @@ import Churches from "@/pages/churches";
 import Events from "@/pages/events";
 import Prayer from "@/pages/prayer";
 import Messages from "@/pages/messages";
+import Leaderboard from "@/pages/leaderboard";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { useState } from "react";
 
@@ -39,6 +40,7 @@ function Router() {
             <Route path="/prayer" component={Prayer} />
             <Route path="/messages" component={Messages} />
             <Route path="/chat" component={Chat} />
+            <Route path="/leaderboard" component={Leaderboard} />
             <Route path="/admin" component={AdminPortal} />
             <Route path="/profile" component={Profile} />
           </>

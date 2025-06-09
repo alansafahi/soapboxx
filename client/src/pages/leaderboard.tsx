@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Trophy, Flame, Heart, Hands, Crown, Church, Medal, Target } from "lucide-react";
+import { Trophy, Flame, Heart, Crown, Church, Medal, Target, Users } from "lucide-react";
 
 interface LeaderboardEntry {
   id: number;
@@ -72,7 +72,7 @@ export default function LeaderboardPage() {
       case "weekly-faithfulness": return <Trophy className="h-4 w-4" />;
       case "streaks": return <Flame className="h-4 w-4" />;
       case "prayer-champions": return <Heart className="h-4 w-4" />;
-      case "service": return <Hands className="h-4 w-4" />;
+      case "service": return <Users className="h-4 w-4" />;
       case "church-vs-church": return <Church className="h-4 w-4" />;
       case "seasonal": return <Target className="h-4 w-4" />;
       default: return <Trophy className="h-4 w-4" />;

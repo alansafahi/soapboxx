@@ -376,6 +376,15 @@ export default function Navigation() {
               </button>
               <button 
                 onClick={() => {
+                  window.location.href = '/leaderboard';
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
+              >
+                Leaderboard
+              </button>
+              <button 
+                onClick={() => {
                   window.location.href = '/admin';
                   setMobileMenuOpen(false);
                 }}
