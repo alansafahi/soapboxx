@@ -11,7 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Users, UserPlus, Check, X, ArrowLeft } from "lucide-react";
+import { MessageCircle, Send, Users, UserPlus, Check, X, ArrowLeft, Search } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Chat() {

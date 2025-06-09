@@ -50,6 +50,7 @@ export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  searchUsers(query: string): Promise<User[]>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -135,6 +136,20 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    const foundUsers = await db
+      .select()
+      .from(users)
+      .where(
+        sql`LOWER(${users.firstName}) LIKE ${searchTerm} OR 
+            LOWER(${users.lastName}) LIKE ${searchTerm} OR 
+            LOWER(${users.email}) LIKE ${searchTerm}`
+      )
+      .limit(10);
+    return foundUsers;
   }
 
   // Church operations
