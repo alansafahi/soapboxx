@@ -360,6 +360,7 @@ export default function PrayerRequests() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
+                    onClick={() => handlePrayForRequest(prayer.id)}
                     className="text-gray-500 hover:text-pink-500 hover:bg-pink-50 transition-all duration-300"
                   >
                     <motion.div

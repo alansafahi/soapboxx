@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share, Plus } from "lucide-react";
+import { Heart, MessageCircle, Share, Plus, Upload, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +34,8 @@ export default function CommunityFeed() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [likedDiscussions, setLikedDiscussions] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
+  const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const form = useForm<DiscussionFormData>({
     resolver: zodResolver(discussionSchema),
@@ -263,6 +265,7 @@ export default function CommunityFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
+                          onClick={() => setCommentDialogOpen(discussion.id)}
                           className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
                         >
                           <motion.div
@@ -283,6 +286,7 @@ export default function CommunityFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
+                          onClick={() => setUploadDialogOpen(true)}
                           className="text-gray-500 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
                         >
                           <motion.div
@@ -303,6 +307,81 @@ export default function CommunityFeed() {
             ))}
           </div>
         )}
+        
+        {/* Comment Dialog */}
+        <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Comment</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea 
+                placeholder="Share your thoughts..."
+                className="min-h-[100px]"
+              />
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCommentDialogOpen(null)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    toast({
+                      title: "Comment Posted",
+                      description: "Your comment has been added to the discussion.",
+                    });
+                    setCommentDialogOpen(null);
+                  }}
+                  className="bg-faith-blue hover:bg-blue-600"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Post Comment
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Dialog */}
+        <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Share Content</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600 mb-2">Share photos, videos, or documents</p>
+                <Button variant="outline">
+                  Choose Files
+                </Button>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setUploadDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    toast({
+                      title: "Content Shared",
+                      description: "Your content has been shared with the community.",
+                    });
+                    setUploadDialogOpen(false);
+                  }}
+                  className="bg-faith-blue hover:bg-blue-600"
+                >
+                  <Share className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
         
         <div className="border-t border-gray-100 pt-6">
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
