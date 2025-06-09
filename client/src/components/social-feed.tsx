@@ -92,22 +92,7 @@ export default function SocialFeed() {
     },
   });
 
-  // Like post mutation
-  const likePostMutation = useMutation({
-    mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
-      const response = await fetch(`/api/${postType}s/${postId}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) throw new Error('Failed to like post');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    },
-  });
+
 
   // Bookmark post mutation
   const bookmarkPostMutation = useMutation({
@@ -127,6 +112,55 @@ export default function SocialFeed() {
       toast({
         title: variables.isBookmarked ? "Bookmark removed" : "Bookmarked",
         description: variables.isBookmarked ? "Post removed from bookmarks" : "Post saved to bookmarks",
+      });
+    },
+  });
+
+  // Share post mutation
+  const sharePostMutation = useMutation({
+    mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
+      const response = await fetch(`/api/${postType}s/${postId}/share`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to share post');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      toast({
+        title: "Post shared",
+        description: "Post has been shared to your feed",
+      });
+    },
+  });
+
+
+
+  // Comment mutation
+  const commentMutation = useMutation({
+    mutationFn: async ({ postId, postType, content }: { postId: number; postType: string; content: string }) => {
+      if (postType !== 'discussion') {
+        throw new Error('Comments are only supported for discussions');
+      }
+      
+      const response = await fetch(`/api/discussions/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content }),
+      });
+      if (!response.ok) throw new Error('Failed to add comment');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      toast({
+        title: "Comment added",
+        description: "Your comment has been posted",
       });
     },
   });

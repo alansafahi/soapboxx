@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { db } from "./db";
+import { userInspirationHistory } from "@shared/schema";
+import { and, eq } from "drizzle-orm";
 import { 
   insertChurchSchema,
   insertEventSchema,
@@ -865,6 +868,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error marking messages as read:", error);
       res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
+  // Like routes for different post types
+  app.post("/api/discussions/:id/like", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      const isLiked = await storage.getUserDiscussionLike(discussionId, userId);
+      if (isLiked) {
+        await storage.unlikeDiscussion(discussionId, userId);
+        res.json({ message: "Discussion unliked", isLiked: false });
+      } else {
+        await storage.likeDiscussion(discussionId, userId);
+        res.json({ message: "Discussion liked", isLiked: true });
+      }
+    } catch (error) {
+      console.error("Error toggling discussion like:", error);
+      res.status(500).json({ message: "Failed to toggle like" });
+    }
+  });
+
+  app.post("/api/prayers/:id/like", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const prayerId = parseInt(req.params.id);
+      
+      // For prayers, we'll track "prayers offered" as likes
+      const existingResponse = await storage.getUserPrayerResponse(prayerId, userId);
+      if (existingResponse) {
+        res.json({ message: "Already prayed for this request", isLiked: true });
+      } else {
+        await storage.prayForRequest({
+          prayerRequestId: prayerId,
+          userId: userId
+        });
+        res.json({ message: "Prayer offered", isLiked: true });
+      }
+    } catch (error) {
+      console.error("Error offering prayer:", error);
+      res.status(500).json({ message: "Failed to offer prayer" });
+    }
+  });
+
+  app.post("/api/inspirations/:id/like", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const inspirationId = parseInt(req.params.id);
+      
+      // Check if already favorited
+      const [existing] = await db
+        .select()
+        .from(userInspirationHistory)
+        .where(and(
+          eq(userInspirationHistory.userId, userId),
+          eq(userInspirationHistory.inspirationId, inspirationId)
+        ));
+
+      if (existing?.wasFavorited) {
+        await storage.unfavoriteInspiration(userId, inspirationId);
+        res.json({ message: "Inspiration unfavorited", isLiked: false });
+      } else {
+        await storage.favoriteInspiration(userId, inspirationId);
+        res.json({ message: "Inspiration favorited", isLiked: true });
+      }
+    } catch (error) {
+      console.error("Error toggling inspiration favorite:", error);
+      res.status(500).json({ message: "Failed to toggle favorite" });
+    }
+  });
+
+  // Comment routes
+  app.get("/api/discussions/:id/comments", async (req, res) => {
+    try {
+      const discussionId = parseInt(req.params.id);
+      const comments = await storage.getDiscussionComments(discussionId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+
+  app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      const { content } = req.body;
+      
+      const comment = await storage.createDiscussionComment({
+        discussionId,
+        authorId: userId,
+        content,
+        parentId: null
+      });
+      
+      res.json(comment);
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      res.status(500).json({ message: "Failed to create comment" });
+    }
+  });
+
+  // Share routes
+  app.post("/api/discussions/:id/share", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      // Get the discussion details
+      const discussion = await storage.getDiscussion(discussionId);
+      if (!discussion) {
+        return res.status(404).json({ message: "Discussion not found" });
+      }
+      
+      // Get author info for the discussion
+      const author = await storage.getUser(discussion.authorId);
+      const authorName = author ? (author.firstName && author.lastName ? `${author.firstName} ${author.lastName}` : author.email || 'Unknown User') : 'Unknown User';
+      
+      // Create a new discussion post sharing the original
+      const shareContent = `📢 **Shared Discussion: ${discussion.title}**\n\n${discussion.content}\n\n*Originally shared by ${authorName}*`;
+      
+      await storage.createDiscussion({
+        authorId: userId,
+        title: `Shared: ${discussion.title}`,
+        content: shareContent,
+        category: 'shared',
+        churchId: null,
+      });
+      
+      res.json({ message: "Discussion shared" });
+    } catch (error) {
+      console.error("Error sharing discussion:", error);
+      res.status(500).json({ message: "Failed to share discussion" });
+    }
+  });
+
+  app.post("/api/prayers/:id/share", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const prayerId = parseInt(req.params.id);
+      
+      // Get the prayer details
+      const prayer = await storage.getPrayerRequest(prayerId);
+      if (!prayer) {
+        return res.status(404).json({ message: "Prayer request not found" });
+      }
+      
+      // Create a new discussion post sharing the prayer
+      const shareContent = `🙏 **Shared Prayer Request: ${prayer.title}**\n\n${prayer.content}\n\n*Please join me in praying for this request*`;
+      
+      await storage.createDiscussion({
+        authorId: userId,
+        title: `Prayer Request: ${prayer.title}`,
+        content: shareContent,
+        category: 'prayer',
+        churchId: null,
+      });
+      
+      res.json({ message: "Prayer request shared" });
+    } catch (error) {
+      console.error("Error sharing prayer:", error);
+      res.status(500).json({ message: "Failed to share prayer" });
+    }
+  });
+
+  app.post("/api/inspirations/:id/share", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const inspirationId = parseInt(req.params.id);
+      
+      await storage.shareInspiration(userId, inspirationId);
+      res.json({ message: "Inspiration shared" });
+    } catch (error) {
+      console.error("Error sharing inspiration:", error);
+      res.status(500).json({ message: "Failed to share inspiration" });
     }
   });
 
