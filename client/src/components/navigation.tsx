@@ -1,7 +1,7 @@
 import { Bell, Heart, Menu, MessageCircle, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,36 +17,59 @@ export default function Navigation() {
   const { toast } = useToast();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // State for notifications with read/unread tracking
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "New Prayer Request",
-      message: "Sarah requested prayers for her family",
-      time: "2 minutes ago",
-      unread: true,
-      type: "prayer",
-      targetId: "2" // Prayer request ID
-    },
-    {
-      id: 2,
-      title: "Event Reminder",
-      message: "Sunday service starts in 1 hour",
-      time: "45 minutes ago",
-      unread: true,
-      type: "event",
-      targetId: "1" // Event ID
-    },
-    {
-      id: 3,
-      title: "New Message",
-      message: "Pastor John sent you a message",
-      time: "1 hour ago",
-      unread: true,
-      type: "message",
-      targetId: "chat" // Chat page
+  // Initialize notifications from localStorage or use defaults
+  const getInitialNotifications = () => {
+    try {
+      const stored = localStorage.getItem('soapbox-notifications');
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications from localStorage:', error);
     }
-  ]);
+    
+    // Default notifications
+    return [
+      {
+        id: 1,
+        title: "New Prayer Request",
+        message: "Sarah requested prayers for her family",
+        time: "2 minutes ago",
+        unread: true,
+        type: "prayer",
+        targetId: "2"
+      },
+      {
+        id: 2,
+        title: "Event Reminder",
+        message: "Sunday service starts in 1 hour",
+        time: "45 minutes ago",
+        unread: true,
+        type: "event",
+        targetId: "1"
+      },
+      {
+        id: 3,
+        title: "New Message",
+        message: "Pastor John sent you a message",
+        time: "1 hour ago",
+        unread: true,
+        type: "message",
+        targetId: "chat"
+      }
+    ];
+  };
+
+  const [notifications, setNotifications] = useState(getInitialNotifications);
+
+  // Persist notifications to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('soapbox-notifications', JSON.stringify(notifications));
+    } catch (error) {
+      console.error('Failed to save notifications to localStorage:', error);
+    }
+  }, [notifications]);
 
   const handleNotificationClick = (notification: any) => {
     console.log('Notification clicked:', notification);

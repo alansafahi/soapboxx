@@ -673,8 +673,10 @@ export default function DailyInspiration() {
                 <div className="space-y-2">
                   <p className="text-xs text-gray-500 dark:text-gray-400">Search Results</p>
                   <div className="max-h-32 overflow-y-auto space-y-2">
-                    {searchResults.slice(0, 10).map((user: any) => (
-                      <div key={user.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                    {searchResults.slice(0, 10).filter((user: any) => 
+                      !friends?.some((friend: any) => friend.id === user.id)
+                    ).map((user: any) => (
+                      <div key={`search-${user.id}`} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                         <Checkbox
                           checked={selectedUsers.includes(user.id)}
                           onCheckedChange={() => toggleUserSelection(user.id)}
