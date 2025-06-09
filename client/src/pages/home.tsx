@@ -101,7 +101,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold">{userStats?.connectionCount || 0}</div>
+                      <div className="text-2xl font-bold text-[#850000]">{userStats?.connectionCount || 0}</div>
                       <div className="text-blue-100 text-sm">Connections</div>
                     </div>
                   </div>
