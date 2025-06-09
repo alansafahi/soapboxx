@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share, Plus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,6 +32,8 @@ export default function CommunityFeed() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [likedDiscussions, setLikedDiscussions] = useState<Set<number>>(new Set());
+  const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
 
   const form = useForm<DiscussionFormData>({
     resolver: zodResolver(discussionSchema),
@@ -115,6 +118,30 @@ export default function CommunityFeed() {
   };
 
   const handleLikeDiscussion = (discussionId: number) => {
+    // Add animation state
+    setAnimatingButtons(prev => new Set([...Array.from(prev), discussionId]));
+    
+    // Toggle like state optimistically
+    const isCurrentlyLiked = likedDiscussions.has(discussionId);
+    setLikedDiscussions(prev => {
+      const newSet = new Set(prev);
+      if (isCurrentlyLiked) {
+        newSet.delete(discussionId);
+      } else {
+        newSet.add(discussionId);
+      }
+      return newSet;
+    });
+
+    // Remove animation state after animation completes
+    setTimeout(() => {
+      setAnimatingButtons(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(discussionId);
+        return newSet;
+      });
+    }, 300);
+
     likeDiscussionMutation.mutate(discussionId);
   };
 
@@ -189,22 +216,86 @@ export default function CommunityFeed() {
                     <h3 className="font-medium text-gray-900 mb-2">{discussion.title}</h3>
                     <p className="text-gray-600 text-sm line-clamp-2 mb-3">{discussion.content}</p>
                     <div className="flex items-center space-x-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleLikeDiscussion(discussion.id)}
-                        className="text-gray-500 hover:text-faith-blue"
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
-                        <Heart className="w-4 h-4 mr-1" />
-                        {discussion.likeCount || 0}
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-gray-500 hover:text-faith-blue">
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        {discussion.commentCount || 0}
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-gray-500 hover:text-faith-blue">
-                        <Share className="w-4 h-4" />
-                      </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleLikeDiscussion(discussion.id)}
+                          className={`transition-all duration-300 ${
+                            likedDiscussions.has(discussion.id)
+                              ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100'
+                              : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
+                          }`}
+                        >
+                          <motion.div
+                            animate={animatingButtons.has(discussion.id) ? {
+                              scale: [1, 1.3, 1],
+                              rotate: [0, 15, -15, 0]
+                            } : {}}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <Heart 
+                              className={`w-4 h-4 mr-1 transition-all duration-200 ${
+                                likedDiscussions.has(discussion.id) ? 'fill-current' : ''
+                              }`} 
+                            />
+                          </motion.div>
+                          <motion.span
+                            animate={animatingButtons.has(discussion.id) ? {
+                              scale: [1, 1.1, 1]
+                            } : {}}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {(discussion.likeCount || 0) + (likedDiscussions.has(discussion.id) ? 1 : 0)}
+                          </motion.span>
+                        </Button>
+                      </motion.div>
+                      
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
+                        >
+                          <motion.div
+                            whileHover={{ rotate: [0, -10, 10, 0] }}
+                            transition={{ duration: 0.5 }}
+                          >
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                          </motion.div>
+                          {discussion.commentCount || 0}
+                        </Button>
+                      </motion.div>
+                      
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-gray-500 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
+                        >
+                          <motion.div
+                            whileHover={{ 
+                              rotate: [0, 15, -15, 0],
+                              scale: [1, 1.1, 1]
+                            }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <Share className="w-4 h-4" />
+                          </motion.div>
+                        </Button>
+                      </motion.div>
                     </div>
                   </div>
                 </div>
