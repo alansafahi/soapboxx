@@ -39,22 +39,16 @@ export default function DailyInspiration() {
 
   const markAsReadMutation = useMutation({
     mutationFn: async (inspirationId: number) => {
-      await apiRequest(`/api/inspiration/${inspirationId}/read`, {
-        method: 'POST',
-      });
+      await apiRequest('POST', `/api/inspiration/${inspirationId}/read`);
     },
   });
 
   const favoriteMutation = useMutation({
     mutationFn: async ({ inspirationId, action }: { inspirationId: number; action: 'add' | 'remove' }) => {
       if (action === 'add') {
-        await apiRequest(`/api/inspiration/${inspirationId}/favorite`, {
-          method: 'POST',
-        });
+        await apiRequest('POST', `/api/inspiration/${inspirationId}/favorite`);
       } else {
-        await apiRequest(`/api/inspiration/${inspirationId}/favorite`, {
-          method: 'DELETE',
-        });
+        await apiRequest('DELETE', `/api/inspiration/${inspirationId}/favorite`);
       }
     },
     onSuccess: (_, variables) => {
@@ -68,9 +62,7 @@ export default function DailyInspiration() {
 
   const shareMutation = useMutation({
     mutationFn: async (inspirationId: number) => {
-      await apiRequest(`/api/inspiration/${inspirationId}/share`, {
-        method: 'POST',
-      });
+      await apiRequest('POST', `/api/inspiration/${inspirationId}/share`);
     },
     onSuccess: () => {
       setIsShared(true);
