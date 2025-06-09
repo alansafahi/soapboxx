@@ -130,6 +130,7 @@ export default function CommunityFeed() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions", viewCommentsDialogOpen, "comments"] });
       setCommentText("");
       setCommentDialogOpen(null);
       toast({
@@ -307,7 +308,7 @@ export default function CommunityFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => setCommentDialogOpen(discussion.id)}
+                          onClick={() => setViewCommentsDialogOpen(discussion.id)}
                           className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
                         >
                           <motion.div
@@ -388,6 +389,82 @@ export default function CommunityFeed() {
                   <Send className="w-4 h-4 mr-2" />
                   {createCommentMutation.isPending ? "Posting..." : "Post Comment"}
                 </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Comments Dialog */}
+        <Dialog open={viewCommentsDialogOpen !== null} onOpenChange={() => setViewCommentsDialogOpen(null)}>
+          <DialogContent className="sm:max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Discussion Comments</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[50vh] overflow-y-auto">
+              {comments.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {comments.map((comment: any) => (
+                    <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="bg-blue-100 text-blue-600">
+                          {comment.authorId[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="font-medium text-sm">Community Member</span>
+                          <span className="text-xs text-gray-500">
+                            {formatTimeAgo(comment.createdAt?.toString() || new Date().toISOString())}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 text-sm">{comment.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Add Comment Form */}
+            <div className="border-t pt-4">
+              <div className="space-y-3">
+                <Textarea 
+                  placeholder="Add your comment..."
+                  className="min-h-[80px]"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setCommentText("");
+                      setViewCommentsDialogOpen(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      if (viewCommentsDialogOpen && commentText.trim()) {
+                        createCommentMutation.mutate({
+                          discussionId: viewCommentsDialogOpen,
+                          content: commentText.trim()
+                        });
+                      }
+                    }}
+                    disabled={!commentText.trim() || createCommentMutation.isPending}
+                    className="bg-faith-blue hover:bg-blue-600"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {createCommentMutation.isPending ? "Posting..." : "Post Comment"}
+                  </Button>
+                </div>
               </div>
             </div>
           </DialogContent>
