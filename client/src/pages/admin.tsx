@@ -217,11 +217,62 @@ export default function AdminPortal() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Church Admin Portal</h1>
-        <p className="text-gray-600 dark:text-gray-400">Manage your church community and events</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Top Navigation */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-8">
+              <div className="flex items-center space-x-2">
+                <Church className="h-8 w-8 text-blue-600" />
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Admin Portal</h1>
+              </div>
+              <nav className="hidden md:flex space-x-6">
+                <Button variant="ghost" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                  <Building className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+                <Button variant="ghost" onClick={() => window.location.href = '/churches'} className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                  <Church className="h-4 w-4 mr-2" />
+                  Churches
+                </Button>
+                <Button variant="ghost" onClick={() => window.location.href = '/events'} className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Events
+                </Button>
+                <Button variant="ghost" onClick={() => window.location.href = '/community'} className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                  <Users className="h-4 w-4 mr-2" />
+                  Community
+                </Button>
+                <Button variant="ghost" onClick={() => window.location.href = '/leaderboard'} className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Leaderboard
+                </Button>
+              </nav>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                <Settings className="h-3 w-3 mr-1" />
+                Admin
+              </Badge>
+              <Button variant="outline" size="sm" onClick={() => window.location.href = '/profile'}>
+                <Users className="h-4 w-4 mr-2" />
+                My Profile
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => window.location.href = '/'}>
+                <Globe className="h-4 w-4 mr-2" />
+                Main Site
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Church Administration</h2>
+          <p className="text-gray-600 dark:text-gray-400">Manage your church community and events</p>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
