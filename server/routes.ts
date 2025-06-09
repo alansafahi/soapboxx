@@ -1614,13 +1614,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/drafts/devotionals', isAuthenticated, async (req, res) => {
     try {
       const { churchId } = req.query;
-      const drafts = await db.select()
-        .from(devotionals)
-        .where(and(
+      let query = db.select().from(devotionals).where(eq(devotionals.isPublished, false));
+      
+      if (churchId) {
+        query = query.where(and(
           eq(devotionals.isPublished, false),
-          churchId ? eq(devotionals.churchId, Number(churchId)) : undefined
-        ))
-        .orderBy(desc(devotionals.createdAt));
+          eq(devotionals.churchId, Number(churchId))
+        ));
+      }
+      
+      const drafts = await query.orderBy(desc(devotionals.createdAt));
       res.json(drafts);
     } catch (error) {
       console.error("Error fetching devotional drafts:", error);
