@@ -132,13 +132,13 @@ export const discussions = pgTable("discussions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Discussion comments
+// Discussion comments  
 export const discussionComments = pgTable("discussion_comments", {
   id: serial("id").primaryKey(),
   discussionId: integer("discussion_id").notNull().references(() => discussions.id),
   authorId: varchar("author_id").notNull().references(() => users.id),
   content: text("content").notNull(),
-  parentId: integer("parent_id").references(() => discussionComments.id),
+  parentId: integer("parent_id").references((): any => discussionComments.id),
   likeCount: integer("like_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
