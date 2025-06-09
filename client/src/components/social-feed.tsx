@@ -160,6 +160,28 @@ export default function SocialFeed() {
     },
   });
 
+  // Prayer-specific like mutation
+  const prayerLikeMutation = useMutation({
+    mutationFn: async (prayerId: number) => {
+      console.log('Making prayer like request to:', `/api/prayers/${prayerId}/like`);
+      const response = await fetch(`/api/prayers/${prayerId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to toggle prayer like');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      toast({
+        title: data.liked ? "Liked" : "Unliked",
+        description: data.liked ? "Prayer request liked" : "Prayer request unliked",
+      });
+    },
+  });
+
   // Comment mutation
   const commentMutation = useMutation({
     mutationFn: async ({ postId, postType, content }: { postId: number; postType: string; content: string }) => {
@@ -200,10 +222,15 @@ export default function SocialFeed() {
 
   const handleLikePost = (post: FeedPost) => {
     console.log('handleLikePost called with:', { postId: post.id, postType: post.type });
-    likePostMutation.mutate({ 
-      postId: post.id, 
-      postType: post.type 
-    });
+    if (post.type === 'prayer') {
+      // Use direct prayer like mutation for prayer posts
+      prayerLikeMutation.mutate(post.id);
+    } else {
+      likePostMutation.mutate({ 
+        postId: post.id, 
+        postType: post.type 
+      });
+    }
   };
 
   const handleCommentPost = (post: FeedPost) => {
@@ -432,7 +459,11 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleLikePost(post)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleLikePost(post);
+                    }}
                     className={`${post.isLiked ? 'text-red-600 hover:text-red-700' : 'text-gray-500 hover:text-red-600'} transition-colors`}
                   >
                     <Heart className={`w-4 h-4 mr-2 ${post.isLiked ? 'fill-current' : ''}`} />
