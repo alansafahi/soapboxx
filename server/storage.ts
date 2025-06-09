@@ -136,6 +136,16 @@ export interface IStorage {
   
   // Feed operations
   getFeedPosts(userId: string): Promise<any[]>;
+  
+  // Bookmark operations
+  bookmarkDiscussion(userId: string, discussionId: number): Promise<void>;
+  unbookmarkDiscussion(userId: string, discussionId: number): Promise<void>;
+  bookmarkPrayer(userId: string, prayerId: number): Promise<void>;
+  unbookmarkPrayer(userId: string, prayerId: number): Promise<void>;
+  bookmarkInspiration(userId: string, inspirationId: number): Promise<void>;
+  unbookmarkInspiration(userId: string, inspirationId: number): Promise<void>;
+  bookmarkEvent(userId: string, eventId: number): Promise<void>;
+  unbookmarkEvent(userId: string, eventId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

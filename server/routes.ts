@@ -868,6 +868,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bookmark routes for different post types
+  app.post("/api/discussions/:id/bookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      await storage.bookmarkDiscussion(userId, discussionId);
+      res.json({ message: "Discussion bookmarked" });
+    } catch (error) {
+      console.error("Error bookmarking discussion:", error);
+      res.status(500).json({ message: "Failed to bookmark discussion" });
+    }
+  });
+
+  app.post("/api/discussions/:id/unbookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      await storage.unbookmarkDiscussion(userId, discussionId);
+      res.json({ message: "Discussion unbookmarked" });
+    } catch (error) {
+      console.error("Error unbookmarking discussion:", error);
+      res.status(500).json({ message: "Failed to unbookmark discussion" });
+    }
+  });
+
+  app.post("/api/prayers/:id/bookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const prayerId = parseInt(req.params.id);
+      
+      await storage.bookmarkPrayer(userId, prayerId);
+      res.json({ message: "Prayer request bookmarked" });
+    } catch (error) {
+      console.error("Error bookmarking prayer:", error);
+      res.status(500).json({ message: "Failed to bookmark prayer" });
+    }
+  });
+
+  app.post("/api/prayers/:id/unbookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const prayerId = parseInt(req.params.id);
+      
+      await storage.unbookmarkPrayer(userId, prayerId);
+      res.json({ message: "Prayer request unbookmarked" });
+    } catch (error) {
+      console.error("Error unbookmarking prayer:", error);
+      res.status(500).json({ message: "Failed to unbookmark prayer" });
+    }
+  });
+
+  app.post("/api/inspirations/:id/bookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const inspirationId = parseInt(req.params.id);
+      
+      await storage.bookmarkInspiration(userId, inspirationId);
+      res.json({ message: "Inspiration bookmarked" });
+    } catch (error) {
+      console.error("Error bookmarking inspiration:", error);
+      res.status(500).json({ message: "Failed to bookmark inspiration" });
+    }
+  });
+
+  app.post("/api/inspirations/:id/unbookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const inspirationId = parseInt(req.params.id);
+      
+      await storage.unbookmarkInspiration(userId, inspirationId);
+      res.json({ message: "Inspiration unbookmarked" });
+    } catch (error) {
+      console.error("Error unbookmarking inspiration:", error);
+      res.status(500).json({ message: "Failed to unbookmark inspiration" });
+    }
+  });
+
+  app.post("/api/events/:id/bookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const eventId = parseInt(req.params.id);
+      
+      await storage.bookmarkEvent(userId, eventId);
+      res.json({ message: "Event bookmarked" });
+    } catch (error) {
+      console.error("Error bookmarking event:", error);
+      res.status(500).json({ message: "Failed to bookmark event" });
+    }
+  });
+
+  app.post("/api/events/:id/unbookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const eventId = parseInt(req.params.id);
+      
+      await storage.unbookmarkEvent(userId, eventId);
+      res.json({ message: "Event unbookmarked" });
+    } catch (error) {
+      console.error("Error unbookmarking event:", error);
+      res.status(500).json({ message: "Failed to unbookmark event" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

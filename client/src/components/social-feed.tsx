@@ -18,6 +18,8 @@ import {
   Church,
   BookOpen,
   PlusCircle,
+  Bookmark,
+  BookmarkCheck,
   Send
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -41,6 +43,7 @@ interface FeedPost {
   commentCount: number;
   shareCount: number;
   isLiked: boolean;
+  isBookmarked?: boolean;
   tags?: string[];
   eventDate?: Date;
   location?: string;
@@ -103,6 +106,28 @@ export default function SocialFeed() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    },
+  });
+
+  // Bookmark post mutation
+  const bookmarkPostMutation = useMutation({
+    mutationFn: async ({ postId, postType, isBookmarked }: { postId: number; postType: string; isBookmarked: boolean }) => {
+      const endpoint = isBookmarked ? 'unbookmark' : 'bookmark';
+      const response = await fetch(`/api/${postType}s/${postId}/${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error(`Failed to ${endpoint} post`);
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      toast({
+        title: variables.isBookmarked ? "Bookmark removed" : "Bookmarked",
+        description: variables.isBookmarked ? "Post removed from bookmarks" : "Post saved to bookmarks",
+      });
     },
   });
 
@@ -347,6 +372,23 @@ export default function SocialFeed() {
                   >
                     <Share2 className="w-4 h-4 mr-2" />
                     <span>{post.shareCount}</span>
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => bookmarkPostMutation.mutate({ 
+                      postId: post.id, 
+                      postType: post.type, 
+                      isBookmarked: post.isBookmarked || false 
+                    })}
+                    className={`${post.isBookmarked ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-500 hover:text-yellow-600'} transition-colors`}
+                    disabled={bookmarkPostMutation.isPending}
+                  >
+                    {post.isBookmarked ? 
+                      <BookmarkCheck className="w-4 h-4" /> : 
+                      <Bookmark className="w-4 h-4" />
+                    }
                   </Button>
                 </div>
               </div>
