@@ -12,6 +12,9 @@ import {
   insertDiscussionSchema,
   insertPrayerRequestSchema,
   insertEventRsvpSchema,
+  insertDevotionalSchema,
+  insertWeeklySeriesSchema,
+  insertSermonMediaSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";

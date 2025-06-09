@@ -19,6 +19,9 @@ import {
   messages,
   eventBookmarks,
   inspirationBookmarks,
+  devotionals,
+  weeklySeries,
+  sermonMedia,
   type User,
   type UpsertUser,
   type Church,
@@ -48,6 +51,12 @@ import {
   type InsertConversationParticipant,
   type Message,
   type InsertMessage,
+  type Devotional,
+  type InsertDevotional,
+  type WeeklySeries,
+  type InsertWeeklySeries,
+  type SermonMedia,
+  type InsertSermonMedia,
   dailyInspirations,
   userInspirationPreferences,
   userInspirationHistory,
@@ -206,6 +215,14 @@ export interface IStorage {
   getChallenges(churchId?: number): Promise<Challenge[]>;
   joinChallenge(userId: string, challengeId: number): Promise<ChallengeParticipant>;
   updateChallengeProgress(userId: string, challengeId: number, progress: number): Promise<ChallengeParticipant>;
+  
+  // Content management operations
+  createDevotional(devotional: InsertDevotional): Promise<Devotional>;
+  getDevotionals(churchId?: number): Promise<Devotional[]>;
+  createWeeklySeries(series: InsertWeeklySeries): Promise<WeeklySeries>;
+  getWeeklySeries(churchId?: number): Promise<WeeklySeries[]>;
+  createSermonMedia(media: InsertSermonMedia): Promise<SermonMedia>;
+  getSermonMedia(churchId?: number): Promise<SermonMedia[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1848,6 +1865,61 @@ export class DatabaseStorage implements IStorage {
       ))
       .returning();
     return participant;
+  }
+
+  // Content management operations
+  async createDevotional(devotional: InsertDevotional): Promise<Devotional> {
+    const [newDevotional] = await db
+      .insert(devotionals)
+      .values(devotional)
+      .returning();
+    return newDevotional;
+  }
+
+  async getDevotionals(churchId?: number): Promise<Devotional[]> {
+    let query = db.select().from(devotionals);
+    
+    if (churchId) {
+      query = query.where(eq(devotionals.churchId, churchId));
+    }
+    
+    return query.orderBy(desc(devotionals.createdAt));
+  }
+
+  async createWeeklySeries(series: InsertWeeklySeries): Promise<WeeklySeries> {
+    const [newSeries] = await db
+      .insert(weeklySeries)
+      .values(series)
+      .returning();
+    return newSeries;
+  }
+
+  async getWeeklySeries(churchId?: number): Promise<WeeklySeries[]> {
+    let query = db.select().from(weeklySeries);
+    
+    if (churchId) {
+      query = query.where(eq(weeklySeries.churchId, churchId));
+    }
+    
+    return query.orderBy(desc(weeklySeries.createdAt));
+  }
+
+  async createSermonMedia(media: InsertSermonMedia): Promise<SermonMedia> {
+    const [newMedia] = await db
+      .insert(sermonMedia)
+      .values(media)
+      .returning();
+    return newMedia;
+  }
+
+  async getSermonMedia(churchId?: number): Promise<SermonMedia[]> {
+    let query = db.select().from(sermonMedia);
+    
+    if (churchId) {
+      query = query.where(eq(sermonMedia.churchId, churchId));
+    }
+    
+    return query.orderBy(desc(sermonMedia.createdAt));
   }
 }
 
