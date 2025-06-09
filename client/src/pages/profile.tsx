@@ -1,317 +1,657 @@
-import { useEffect } from "react";
+import { useState, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
-import { LogOut, Mail, Calendar, Users, Heart } from "lucide-react";
-import MobileNav from "@/components/mobile-nav";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Church, 
+  Heart, 
+  Camera, 
+  Save,
+  Calendar,
+  Trophy,
+  Flame,
+  Book,
+  Users,
+  MessageSquare,
+  Target,
+  Edit2
+} from "lucide-react";
+import { format } from "date-fns";
+
+interface UserProfile {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl: string | null;
+  bio: string | null;
+  mobileNumber: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  country: string | null;
+  denomination: string | null;
+  interests: string[] | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
+
+interface UserStats {
+  prayerCount: number;
+  discussionCount: number;
+  attendanceCount: number;
+  connectionCount: number;
+  inspirationsRead: number;
+  prayersOffered: number;
+}
+
+const DENOMINATIONS = [
+  "Catholic",
+  "Protestant",
+  "Baptist",
+  "Methodist",
+  "Presbyterian",
+  "Lutheran",
+  "Pentecostal",
+  "Episcopalian",
+  "Orthodox",
+  "Non-denominational",
+  "Other"
+];
+
+const SPIRITUAL_INTERESTS = [
+  "Bible Study",
+  "Prayer",
+  "Worship",
+  "Community Service",
+  "Youth Ministry",
+  "Missions",
+  "Music Ministry",
+  "Teaching",
+  "Counseling",
+  "Evangelism",
+  "Social Justice",
+  "Meditation",
+  "Discipleship",
+  "Leadership"
+];
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState<Partial<UserProfile>>({});
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
-  const { data: userStats } = useQuery({
-    queryKey: ['/api/users/stats'],
-    enabled: !!user,
+  // Fetch user profile data
+  const { data: profile, isLoading: profileLoading } = useQuery<UserProfile>({
+    queryKey: ["/api/auth/user"],
   });
 
+  // Fetch user stats
+  const { data: stats } = useQuery<UserStats>({
+    queryKey: ["/api/users/stats"],
+  });
+
+  // Fetch user achievements
   const { data: achievements } = useQuery({
-    queryKey: ['/api/users/achievements'],
-    enabled: !!user,
+    queryKey: ["/api/users/achievements"],
   });
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+  // Profile update mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: Partial<UserProfile>) => {
+      return await apiRequest("/api/users/profile", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
+    },
+  });
 
-  if (isLoading) {
+  // Image upload handler
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // For now, we'll use a simple base64 conversion
+    // In production, you'd upload to a proper file storage service
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageUrl = e.target?.result as string;
+      setProfileData(prev => ({ ...prev, profileImageUrl: imageUrl }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveProfile = () => {
+    const updatedData = {
+      ...profileData,
+      interests: selectedInterests,
+    };
+    updateProfileMutation.mutate(updatedData);
+  };
+
+  const handleEditToggle = () => {
+    if (!isEditing) {
+      // Initialize form data when entering edit mode
+      setProfileData({
+        firstName: profile?.firstName || "",
+        lastName: profile?.lastName || "",
+        email: profile?.email || "",
+        bio: profile?.bio || "",
+        mobileNumber: profile?.mobileNumber || "",
+        address: profile?.address || "",
+        city: profile?.city || "",
+        state: profile?.state || "",
+        zipCode: profile?.zipCode || "",
+        country: profile?.country || "United States",
+        denomination: profile?.denomination || "",
+        profileImageUrl: profile?.profileImageUrl || "",
+      });
+      setSelectedInterests(profile?.interests || []);
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev => 
+      prev.includes(interest) 
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
+  };
+
+  if (profileLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-faith-blue mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated || !user) {
-    return null;
-  }
+  const displayName = profile?.firstName && profile?.lastName 
+    ? `${profile.firstName} ${profile.lastName}`
+    : profile?.firstName || profile?.email || "Anonymous User";
 
-  const getUserDisplayName = () => {
-    if (user.firstName && user.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    if (user.firstName) {
-      return user.firstName;
-    }
-    if (user.email) {
-      return user.email.split('@')[0];
-    }
-    return 'User';
-  };
+  const userInitials = profile?.firstName && profile?.lastName
+    ? `${profile.firstName[0]}${profile.lastName[0]}`
+    : profile?.firstName?.[0] || profile?.email?.[0] || "A";
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-          <p className="text-gray-600 mt-1">Manage your account and view your activity</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile</h1>
+          <Button
+            onClick={handleEditToggle}
+            variant={isEditing ? "outline" : "default"}
+            className="flex items-center gap-2"
+          >
+            {isEditing ? (
+              <>
+                <Save className="h-4 w-4" />
+                Cancel
+              </>
+            ) : (
+              <>
+                <Edit2 className="h-4 w-4" />
+                Edit Profile
+              </>
+            )}
+          </Button>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Profile Header */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-6">
-              <Avatar className="w-20 h-20">
-                <AvatarImage src={user.profileImageUrl} />
-                <AvatarFallback className="text-2xl">
-                  {getUserDisplayName().charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900">{getUserDisplayName()}</h2>
-                {user.email && (
-                  <p className="text-gray-600 flex items-center space-x-2 mt-1">
-                    <Mail className="w-4 h-4" />
-                    <span>{user.email}</span>
-                  </p>
-                )}
-                <p className="text-sm text-gray-500 flex items-center space-x-2 mt-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
-                </p>
-              </div>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = '/api/logout'}
-                className="flex items-center space-x-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="stats">Statistics</TabsTrigger>
+            <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          </TabsList>
 
-        {/* Your Activity - Comprehensive Badge System */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <span>Your Activity</span>
-              <div className="text-sm font-normal text-gray-500">Track your spiritual journey</div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            
-            {/* Your Spiritual Journey */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center text-purple-700">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 3l1.09 3.26L16 6.11l-3.26 1.09L12 10l-1.09-3.26L8 6.11l3.26-1.09L12 3zm2.54 5L13 10.54l3.26 1.09L17 15l1.09-3.26L21.5 11l-3.26-1.09L17 7l-1.09 3.26L14.5 11l1.09-3.26z"/>
-                </svg>
-                Your Spiritual Journey
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                  <div className="text-2xl mb-2">📖</div>
-                  <div className="text-lg font-bold text-purple-700">
-                    {userStats?.inspirationsRead || 0}
+          <TabsContent value="profile" className="space-y-6">
+            {/* Profile Header Card */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                  {/* Profile Picture */}
+                  <div className="relative">
+                    <Avatar className="h-32 w-32">
+                      <AvatarImage 
+                        src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl) : profile?.profileImageUrl} 
+                        alt={displayName} 
+                      />
+                      <AvatarFallback className="text-2xl">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isEditing && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="absolute bottom-0 right-0 rounded-full p-2"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Camera className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
                   </div>
-                  <div className="text-xs text-purple-600">Daily Inspirations</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                  <div className="text-2xl mb-2">🙏</div>
-                  <div className="text-lg font-bold text-blue-700">
-                    {userStats?.prayersOffered || 0}
-                  </div>
-                  <div className="text-xs text-blue-600">Prayers Offered</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                  <div className="text-2xl mb-2">🔥</div>
-                  <div className="text-lg font-bold text-green-700">0</div>
-                  <div className="text-xs text-green-600">Devotional Streak</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
-                  <div className="text-2xl mb-2">✝️</div>
-                  <div className="text-lg font-bold text-yellow-700">0</div>
-                  <div className="text-xs text-yellow-600">Scripture Shared</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg border border-pink-200">
-                  <div className="text-2xl mb-2">✍️</div>
-                  <div className="text-lg font-bold text-pink-700">0</div>
-                  <div className="text-xs text-pink-600">Reflections</div>
-                </div>
-              </div>
-            </div>
 
-            {/* Community Engagement */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center text-blue-700">
-                <Users className="w-5 h-5 mr-2" />
-                Community Engagement
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                  <div className="text-2xl mb-2">💬</div>
-                  <div className="text-lg font-bold text-blue-700">
-                    {userStats?.discussionCount || 0}
+                  {/* Basic Info */}
+                  <div className="flex-1 space-y-4">
+                    {isEditing ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="firstName">First Name</Label>
+                          <Input
+                            id="firstName"
+                            value={profileData.firstName || ""}
+                            onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
+                            placeholder="Enter your first name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="lastName">Last Name</Label>
+                          <Input
+                            id="lastName"
+                            value={profileData.lastName || ""}
+                            onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
+                            placeholder="Enter your last name"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <Label htmlFor="bio">Bio</Label>
+                          <Textarea
+                            id="bio"
+                            value={profileData.bio || ""}
+                            onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                            placeholder="Tell us about yourself and your faith journey..."
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
+                          <p className="text-muted-foreground flex items-center gap-2 mt-1">
+                            <Mail className="h-4 w-4" />
+                            {profile?.email || "No email provided"}
+                          </p>
+                        </div>
+                        {profile?.bio && (
+                          <p className="text-gray-600 dark:text-gray-300">{profile.bio}</p>
+                        )}
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          Member since {profile?.createdAt ? format(new Date(profile.createdAt), "MMMM yyyy") : "Unknown"}
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <div className="text-xs text-blue-600">Discussion Posts</div>
                 </div>
-                <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                  <div className="text-2xl mb-2">📅</div>
-                  <div className="text-lg font-bold text-green-700">
-                    {userStats?.attendanceCount || 0}
-                  </div>
-                  <div className="text-xs text-green-600">Events Attended</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                  <div className="text-2xl mb-2">🤝</div>
-                  <div className="text-lg font-bold text-purple-700">
-                    {userStats?.connectionCount || 0}
-                  </div>
-                  <div className="text-xs text-purple-600">Connections</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                  <div className="text-2xl mb-2">👋</div>
-                  <div className="text-lg font-bold text-orange-700">0</div>
-                  <div className="text-xs text-orange-600">Welcome Ambassador</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200">
-                  <div className="text-2xl mb-2">🎯</div>
-                  <div className="text-lg font-bold text-red-700">0</div>
-                  <div className="text-xs text-red-600">Event Organizer</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg border border-teal-200">
-                  <div className="text-2xl mb-2">🌟</div>
-                  <div className="text-lg font-bold text-teal-700">0</div>
-                  <div className="text-xs text-teal-600">Mentor</div>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Achievement Progress */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center text-green-700">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/>
-                </svg>
-                Achievement Progress
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                <div className="text-center p-3 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
-                  <div className="text-2xl mb-2">🏆</div>
-                  <div className="text-lg font-bold text-yellow-700">1</div>
-                  <div className="text-xs text-yellow-600">Level</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                  <div className="text-2xl mb-2">⭐</div>
-                  <div className="text-lg font-bold text-blue-700">0</div>
-                  <div className="text-xs text-blue-600">Total Points</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                  <div className="text-2xl mb-2">📈</div>
-                  <div className="text-lg font-bold text-green-700">0</div>
-                  <div className="text-xs text-green-600">Consistency</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                  <div className="text-2xl mb-2">🎓</div>
-                  <div className="text-lg font-bold text-purple-700">0</div>
-                  <div className="text-xs text-purple-600">Learning Journey</div>
-                </div>
-                <div className="text-center p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200">
-                  <div className="text-2xl mb-2">💝</div>
-                  <div className="text-lg font-bold text-red-700">0</div>
-                  <div className="text-xs text-red-600">Generosity Heart</div>
-                </div>
-              </div>
-              
-              {/* View Leaderboard Button */}
-              <div className="mt-6 pt-4 border-t">
-                <button
-                  onClick={() => window.location.href = '/leaderboard'}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
-                  </svg>
-                  View Community Leaderboard
-                </button>
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  See how you rank among your faith community
-                </p>
-              </div>
-            </div>
-
-          </CardContent>
-        </Card>
-
-        {/* Achievements */}
-        {achievements && achievements.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Achievements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {achievements.map((achievement) => (
-                  <div key={achievement.id} className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
-                    <div className="text-2xl">🏆</div>
+            {/* Contact Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
+                  Contact Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isEditing ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-semibold text-gray-900">{achievement.achievementType}</h4>
-                      <p className="text-sm text-gray-600">
-                        Earned {new Date(achievement.earnedAt).toLocaleDateString()}
-                      </p>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={profileData.email || ""}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="mobileNumber">Mobile Number</Label>
+                      <Input
+                        id="mobileNumber"
+                        type="tel"
+                        value={profileData.mobileNumber || ""}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, mobileNumber: e.target.value }))}
+                        placeholder="(555) 123-4567"
+                      />
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span>{profile?.email || "Not provided"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span>{profile?.mobileNumber || "Not provided"}</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Address Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Address
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isEditing ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="address">Street Address</Label>
+                      <Input
+                        id="address"
+                        value={profileData.address || ""}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
+                        placeholder="123 Main Street"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="city">City</Label>
+                        <Input
+                          id="city"
+                          value={profileData.city || ""}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, city: e.target.value }))}
+                          placeholder="Your City"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="state">State</Label>
+                        <Input
+                          id="state"
+                          value={profileData.state || ""}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, state: e.target.value }))}
+                          placeholder="CA"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="zipCode">ZIP Code</Label>
+                        <Input
+                          id="zipCode"
+                          value={profileData.zipCode || ""}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, zipCode: e.target.value }))}
+                          placeholder="12345"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {profile?.address || profile?.city ? (
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {profile?.address && `${profile.address}, `}
+                        {profile?.city && `${profile.city}, `}
+                        {profile?.state && `${profile.state} `}
+                        {profile?.zipCode}
+                      </p>
+                    ) : (
+                      <p className="text-muted-foreground">No address provided</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Faith Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Church className="h-5 w-5" />
+                  Faith & Interests
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="denomination">Denomination</Label>
+                      <Select 
+                        value={profileData.denomination || ""} 
+                        onValueChange={(value) => setProfileData(prev => ({ ...prev, denomination: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your denomination" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DENOMINATIONS.map((denom) => (
+                            <SelectItem key={denom} value={denom}>{denom}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Spiritual Interests</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {SPIRITUAL_INTERESTS.map((interest) => (
+                          <Badge
+                            key={interest}
+                            variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                            className="cursor-pointer"
+                            onClick={() => toggleInterest(interest)}
+                          >
+                            {interest}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Denomination</p>
+                      <p className="text-gray-900 dark:text-white">
+                        {profile?.denomination || "Not specified"}
+                      </p>
+                    </div>
+                    {profile?.interests && profile.interests.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground mb-2">Spiritual Interests</p>
+                        <div className="flex flex-wrap gap-2">
+                          {profile.interests.map((interest) => (
+                            <Badge key={interest} variant="secondary">
+                              {interest}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {isEditing && (
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveProfile}
+                  disabled={updateProfileMutation.isPending}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </TabsContent>
 
-        {/* Account Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Your account is managed through Replit authentication. To update your profile information, 
-              please visit your Replit account settings.
-            </p>
-            <div className="pt-4 border-t">
-              <Button 
-                variant="destructive" 
-                onClick={() => window.location.href = '/api/logout'}
-                className="w-full flex items-center justify-center space-x-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out of SoapBox</span>
-              </Button>
+          <TabsContent value="stats" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-2">
+                    <Heart className="h-8 w-8 text-red-500" />
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.prayersOffered || 0}</p>
+                      <p className="text-sm text-muted-foreground">Prayers Offered</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-2">
+                    <MessageSquare className="h-8 w-8 text-blue-500" />
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.discussionCount || 0}</p>
+                      <p className="text-sm text-muted-foreground">Discussions</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-8 w-8 text-green-500" />
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.attendanceCount || 0}</p>
+                      <p className="text-sm text-muted-foreground">Events Attended</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-8 w-8 text-purple-500" />
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.connectionCount || 0}</p>
+                      <p className="text-sm text-muted-foreground">Connections</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-2">
+                    <Book className="h-8 w-8 text-orange-500" />
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.inspirationsRead || 0}</p>
+                      <p className="text-sm text-muted-foreground">Inspirations Read</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-2">
+                    <Target className="h-8 w-8 text-indigo-500" />
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.prayerCount || 0}</p>
+                      <p className="text-sm text-muted-foreground">Prayer Requests</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </TabsContent>
 
-      <MobileNav />
+          <TabsContent value="achievements" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  Achievements
+                </CardTitle>
+                <CardDescription>
+                  Your spiritual journey milestones and community contributions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {achievements && Array.isArray(achievements) && achievements.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {achievements.map((achievement: any) => (
+                      <div
+                        key={achievement.id}
+                        className="flex items-center space-x-3 p-4 rounded-lg border bg-card"
+                      >
+                        <Trophy className="h-8 w-8 text-yellow-500" />
+                        <div>
+                          <p className="font-medium">{achievement.achievementType}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Level {achievement.achievementLevel}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No achievements yet</p>
+                    <p className="text-sm">Start engaging with the community to earn achievements!</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
