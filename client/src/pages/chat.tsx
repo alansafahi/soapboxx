@@ -297,7 +297,7 @@ export default function Chat() {
                       <div className="text-sm text-gray-500 p-2">Searching...</div>
                     ) : searchResults.length > 0 ? (
                       searchResults.map((foundUser: any) => (
-                        <div key={foundUser.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div key={`mobile-${foundUser.id}`} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
                               <AvatarImage src={foundUser.profileImageUrl} />
@@ -363,7 +363,7 @@ export default function Chat() {
                     <div className="text-sm text-gray-500 p-2">Searching...</div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map((foundUser: any) => (
-                      <div key={foundUser.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div key={`desktop-${foundUser.id}`} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={foundUser.profileImageUrl} />
@@ -462,7 +462,7 @@ export default function Chat() {
                 <div className="space-y-2">
                   {friends.map((friend: any) => (
                     <div
-                      key={friend.id}
+                      key={`friend-${friend.id}`}
                       className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                       onClick={() => startConversationWithFriend(friend.id, friend.firstName || friend.email)}
                     >

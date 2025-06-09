@@ -489,9 +489,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create a conversation immediately when friend request is sent
       try {
         const conversation = await storage.createConversation({
-          title: null,
+          name: null,
           type: 'direct',
-          isActive: true
+          isActive: true,
+          createdBy: requesterId
         });
         
         // Add both users as participants
