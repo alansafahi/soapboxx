@@ -34,6 +34,8 @@ export default function PrayerRequests() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [prayedRequests, setPrayedRequests] = useState<Set<number>>(new Set());
+  const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),
@@ -123,6 +125,30 @@ export default function PrayerRequests() {
   };
 
   const handlePrayForRequest = (prayerRequestId: number) => {
+    // Add animation state
+    setAnimatingButtons(prev => new Set([...Array.from(prev), prayerRequestId]));
+    
+    // Toggle prayed state optimistically
+    const isCurrentlyPrayed = prayedRequests.has(prayerRequestId);
+    setPrayedRequests(prev => {
+      const newSet = new Set(prev);
+      if (isCurrentlyPrayed) {
+        newSet.delete(prayerRequestId);
+      } else {
+        newSet.add(prayerRequestId);
+      }
+      return newSet;
+    });
+
+    // Remove animation state after animation completes
+    setTimeout(() => {
+      setAnimatingButtons(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(prayerRequestId);
+        return newSet;
+      });
+    }, 400);
+
     prayForRequestMutation.mutate(prayerRequestId);
   };
 
@@ -285,26 +311,68 @@ export default function PrayerRequests() {
               <p className="text-sm text-gray-600 mb-2 line-clamp-3">{prayer.content}</p>
               
               <div className="flex items-center space-x-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handlePrayForRequest(prayer.id)}
-                  disabled={prayForRequestMutation.isPending}
-                  className={`text-sm ${
-                    prayer.isAnswered 
-                      ? 'text-green-500 hover:text-green-600' 
-                      : 'text-faith-blue hover:text-blue-600'
-                  }`}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Hand className="w-4 h-4 mr-1" />
-                  {prayer.isAnswered 
-                    ? `${prayer.prayerCount || 0} prayed` 
-                    : `${prayer.prayerCount || 0} praying`
-                  }
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
-                  <Heart className="w-4 h-4" />
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handlePrayForRequest(prayer.id)}
+                    disabled={prayForRequestMutation.isPending}
+                    className={`text-sm transition-all duration-300 ${
+                      prayedRequests.has(prayer.id)
+                        ? 'text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100'
+                        : prayer.isAnswered 
+                          ? 'text-green-500 hover:text-green-600 hover:bg-green-50' 
+                          : 'text-faith-blue hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                  >
+                    <motion.div
+                      animate={animatingButtons.has(prayer.id) ? {
+                        scale: [1, 1.4, 1],
+                        rotate: [0, 10, -10, 0]
+                      } : {}}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <Hand className="w-4 h-4 mr-1" />
+                    </motion.div>
+                    <motion.span
+                      animate={animatingButtons.has(prayer.id) ? {
+                        scale: [1, 1.1, 1]
+                      } : {}}
+                      transition={{ duration: 0.4 }}
+                    >
+                      {prayer.isAnswered 
+                        ? `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} prayed` 
+                        : `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} praying`
+                      }
+                    </motion.span>
+                  </Button>
+                </motion.div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-500 hover:text-pink-500 hover:bg-pink-50 transition-all duration-300"
+                  >
+                    <motion.div
+                      whileHover={{ 
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Heart className="w-4 h-4" />
+                    </motion.div>
+                  </Button>
+                </motion.div>
               </div>
             </div>
           ))
