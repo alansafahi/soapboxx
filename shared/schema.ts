@@ -217,6 +217,64 @@ export const dailyInspirations = pgTable("daily_inspirations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Devotionals table
+export const devotionals = pgTable("devotionals", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 200 }).notNull(),
+  content: text("content").notNull(),
+  verse: varchar("verse", { length: 500 }),
+  verseReference: varchar("verse_reference", { length: 100 }),
+  category: varchar("category", { length: 50 }).notNull(),
+  tags: text("tags").array(),
+  seriesId: integer("series_id").references(() => weeklySeries.id),
+  scheduledDate: timestamp("scheduled_date"),
+  isPublished: boolean("is_published").default(false),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Weekly series table
+export const weeklySeries = pgTable("weekly_series", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  imageUrl: varchar("image_url"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  frequency: varchar("frequency", { length: 20 }).default("weekly"), // weekly, daily, custom
+  isActive: boolean("is_active").default(true),
+  totalDevotionals: integer("total_devotionals").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Sermon media table
+export const sermonMedia = pgTable("sermon_media", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  mediaType: varchar("media_type", { length: 20 }).notNull(), // audio, video, document
+  mediaUrl: varchar("media_url"),
+  fileSize: integer("file_size"), // in bytes
+  duration: integer("duration"), // in seconds for audio/video
+  thumbnailUrl: varchar("thumbnail_url"),
+  speaker: varchar("speaker", { length: 100 }),
+  date: timestamp("date").notNull(),
+  series: varchar("series", { length: 100 }),
+  tags: text("tags").array(),
+  isPublic: boolean("is_public").default(true),
+  downloadCount: integer("download_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // User inspiration preferences
 export const userInspirationPreferences = pgTable("user_inspiration_preferences", {
   id: serial("id").primaryKey(),
@@ -805,3 +863,33 @@ export type InsertChallenge = typeof challenges.$inferInsert;
 
 export type ChallengeParticipant = typeof challengeParticipants.$inferSelect;
 export type InsertChallengeParticipant = typeof challengeParticipants.$inferInsert;
+
+export type Devotional = typeof devotionals.$inferSelect;
+export type InsertDevotional = typeof devotionals.$inferInsert;
+
+export type WeeklySeries = typeof weeklySeries.$inferSelect;
+export type InsertWeeklySeries = typeof weeklySeries.$inferInsert;
+
+export type SermonMedia = typeof sermonMedia.$inferSelect;
+export type InsertSermonMedia = typeof sermonMedia.$inferInsert;
+
+export const insertDevotionalSchema = createInsertSchema(devotionals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  publishedAt: true,
+});
+
+export const insertWeeklySeriesSchema = createInsertSchema(weeklySeries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalDevotionals: true,
+});
+
+export const insertSermonMediaSchema = createInsertSchema(sermonMedia).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  downloadCount: true,
+});
