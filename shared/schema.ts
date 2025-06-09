@@ -54,6 +54,7 @@ export const churches = pgTable("churches", {
   name: varchar("name", { length: 255 }).notNull(),
   denomination: varchar("denomination", { length: 100 }),
   description: text("description"),
+  bio: text("bio"), // Extended biography/about section
   address: text("address"),
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 50 }),
@@ -61,7 +62,9 @@ export const churches = pgTable("churches", {
   phone: varchar("phone", { length: 20 }),
   email: varchar("email", { length: 255 }),
   website: varchar("website", { length: 255 }),
-  imageUrl: varchar("image_url"),
+  logoUrl: varchar("logo_url"), // Changed from imageUrl for clarity
+  socialLinks: jsonb("social_links"), // Facebook, Instagram, Twitter, YouTube, etc.
+  communityTags: text("community_tags").array(), // Custom tags for community categorization
   latitude: real("latitude"),
   longitude: real("longitude"),
   rating: real("rating").default(0),
@@ -76,7 +79,10 @@ export const userChurches = pgTable("user_churches", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   churchId: integer("church_id").notNull().references(() => churches.id),
-  role: varchar("role", { length: 50 }).default("member"), // member, admin, pastor
+  role: varchar("role", { length: 50 }).default("member"), // member, moderator, content_creator, admin, pastor
+  permissions: text("permissions").array(), // Custom permissions array
+  title: varchar("title", { length: 100 }), // Custom title like "Youth Leader", "Worship Director"
+  bio: text("bio"), // Role-specific bio
   joinedAt: timestamp("joined_at").defaultNow(),
   isActive: boolean("is_active").default(true),
 }, (table) => ({
@@ -441,6 +447,33 @@ export const challengeParticipants = pgTable("challenge_participants", {
   challengeUserUnique: unique().on(table.challengeId, table.userId),
 }));
 
+// Community Groups table
+export const communityGroups = pgTable("community_groups", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }), // youth, adults, seniors, ministry, etc.
+  tags: text("tags").array(),
+  leaderId: varchar("leader_id").references(() => users.id),
+  maxMembers: integer("max_members"),
+  isPrivate: boolean("is_private").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const communityGroupMembers = pgTable("community_group_members", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull().references(() => communityGroups.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: varchar("role", { length: 50 }).default("member"), // member, moderator, leader
+  joinedAt: timestamp("joined_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+}, (table) => ({
+  groupUserUnique: unique().on(table.groupId, table.userId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userChurches: many(userChurches),
@@ -701,6 +734,12 @@ export type UserInspirationPreference = typeof userInspirationPreferences.$infer
 
 export type InsertUserInspirationHistory = typeof userInspirationHistory.$inferInsert;
 export type UserInspirationHistory = typeof userInspirationHistory.$inferSelect;
+
+export type InsertCommunityGroup = typeof communityGroups.$inferInsert;
+export type CommunityGroup = typeof communityGroups.$inferSelect;
+
+export type InsertCommunityGroupMember = typeof communityGroupMembers.$inferInsert;
+export type CommunityGroupMember = typeof communityGroupMembers.$inferSelect;
 
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({

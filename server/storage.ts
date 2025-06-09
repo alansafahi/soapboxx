@@ -95,6 +95,12 @@ export interface IStorage {
   getNearbyChurches(lat?: number, lng?: number, limit?: number): Promise<Church[]>;
   getChurch(id: number): Promise<Church | undefined>;
   createChurch(church: InsertChurch): Promise<Church>;
+  updateChurch(id: number, updates: Partial<Church>): Promise<Church>;
+  
+  // Church team management
+  getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]>;
+  updateMemberRole(churchId: number, userId: string, role: string, permissions?: string[], title?: string, bio?: string): Promise<UserChurch>;
+  removeMember(churchId: number, userId: string): Promise<void>;
   
   // Event operations
   getEvents(churchId?: number): Promise<Event[]>;
@@ -860,7 +866,10 @@ export class DatabaseStorage implements IStorage {
         phone: churches.phone,
         email: churches.email,
         website: churches.website,
-        imageUrl: churches.imageUrl,
+        logoUrl: churches.logoUrl,
+        bio: churches.bio,
+        socialLinks: churches.socialLinks,
+        communityTags: churches.communityTags,
         latitude: churches.latitude,
         longitude: churches.longitude,
         rating: churches.rating,
