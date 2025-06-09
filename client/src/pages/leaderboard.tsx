@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Trophy, Flame, Heart, Crown, Church, Medal, Target, Users } from "lucide-react";
+import { Trophy, Flame, Heart, Crown, Church, Medal, Target, Users, HandHeart } from "lucide-react";
 
 interface LeaderboardEntry {
   id: number;
@@ -213,7 +213,7 @@ export default function LeaderboardPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Hands className="h-5 w-5 text-blue-500" />
+                <HandHeart className="h-5 w-5 text-blue-500" />
                 Service & Volunteering
               </CardTitle>
               <CardDescription>
