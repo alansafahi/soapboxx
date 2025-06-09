@@ -72,6 +72,10 @@
 }
 
 @layer utilities {
+  .no-text-shadow {
+    text-shadow: none !important;
+  }
+  
   .faith-blue {
     color: var(--faith-blue);
   }

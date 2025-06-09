@@ -140,7 +140,7 @@ export default function Navigation() {
               alt="SoapBox Super App" 
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl object-cover flex-shrink-0"
             />
-            <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap">SoapBox Super App</span>
+            <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap no-text-shadow">SoapBox Super App</span>
           </div>
           
           {/* Desktop Navigation */}
