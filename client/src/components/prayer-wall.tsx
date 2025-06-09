@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +31,12 @@ const prayerRequestSchema = z.object({
   isPublic: z.boolean().default(true),
 });
 
+const commentSchema = z.object({
+  content: z.string().min(1, "Comment cannot be empty"),
+});
+
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
+type CommentFormData = z.infer<typeof commentSchema>;
 
 export default function PrayerWall() {
   const { user } = useAuth();
@@ -39,6 +45,8 @@ export default function PrayerWall() {
   const [prayedRequests, setPrayedRequests] = useState<Set<number>>(new Set());
   const [likedRequests, setLikedRequests] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+  const [commentForms, setCommentForms] = useState<Map<number, any>>(new Map());
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),
@@ -56,6 +64,19 @@ export default function PrayerWall() {
   const { data: prayerRequests = [], isLoading } = useQuery<PrayerRequest[]>({
     queryKey: ["/api/prayers"],
   });
+
+  // Comment handling functions
+  const toggleComments = (prayerId: number) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(prayerId)) {
+        newSet.delete(prayerId);
+      } else {
+        newSet.add(prayerId);
+      }
+      return newSet;
+    });
+  };
 
   // Pray for request mutation (prayer counter)
   const prayForRequestMutation = useMutation({
@@ -459,17 +480,114 @@ export default function PrayerWall() {
                           </Button>
                         </motion.div>
 
-                        {/* Comments Button (Placeholder) */}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-gray-500 hover:text-blue-500 transition-colors"
+                        {/* Comments Button */}
+                        <Collapsible 
+                          open={expandedComments.has(prayer.id)}
+                          onOpenChange={() => toggleComments(prayer.id)}
                         >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          <span className="text-sm">Support</span>
-                        </Button>
+                          <CollapsibleTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-gray-500 hover:text-blue-500 transition-colors"
+                            >
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              <span className="text-sm">Support</span>
+                              {expandedComments.has(prayer.id) ? (
+                                <ChevronUp className="w-3 h-3 ml-1" />
+                              ) : (
+                                <ChevronDown className="w-3 h-3 ml-1" />
+                              )}
+                            </Button>
+                          </CollapsibleTrigger>
+                        </Collapsible>
                       </div>
                     </div>
+
+                    {/* Collapsible Comments Section */}
+                    <Collapsible 
+                      open={expandedComments.has(prayer.id)}
+                      onOpenChange={() => toggleComments(prayer.id)}
+                    >
+                      <CollapsibleContent className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <div className="space-y-4">
+                          {/* Support Messages */}
+                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                            <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Community Support
+                            </h4>
+                            <div className="space-y-3 text-sm">
+                              {/* Sample support messages */}
+                              <div className="flex items-start space-x-3">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">U</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <p className="text-blue-800 dark:text-blue-200">
+                                    "Praying for strength and healing for you during this time. God is with you. 🙏"
+                                  </p>
+                                  <span className="text-blue-600 dark:text-blue-400 text-xs">Community Member • 2h ago</span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-start space-x-3">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">F</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <p className="text-blue-800 dark:text-blue-200">
+                                    "Sending love and prayers your way. You are not alone in this journey."
+                                  </p>
+                                  <span className="text-blue-600 dark:text-blue-400 text-xs">Friend in Faith • 5h ago</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Add Support Comment Form */}
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                            <h5 className="font-medium text-gray-900 dark:text-white mb-3">Share Words of Encouragement</h5>
+                            <div className="flex space-x-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src="/placeholder-avatar.png" />
+                                <AvatarFallback className="bg-purple-100 text-purple-600">
+                                  {user?.firstName?.[0] || "U"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <Textarea 
+                                  placeholder="Share an encouraging message or Bible verse..."
+                                  className="min-h-[80px] resize-none border-gray-200 dark:border-gray-700"
+                                />
+                                <div className="flex justify-between items-center mt-3">
+                                  <span className="text-xs text-gray-500">Your words can bring hope and comfort</span>
+                                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                                    <Send className="w-3 h-3 mr-1" />
+                                    Send Support
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Prayer Updates Section */}
+                          {prayer.isAnswered && (
+                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                              <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center">
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Prayer Update
+                              </h4>
+                              <p className="text-green-800 dark:text-green-200 text-sm">
+                                "Thank you all for your prayers! God has answered in such a beautiful way. 
+                                Feeling grateful for this amazing community. 🌟"
+                              </p>
+                              <span className="text-green-600 dark:text-green-400 text-xs">Prayer Author • 1 day ago</span>
+                            </div>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </CardContent>
               </Card>
