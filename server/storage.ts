@@ -6,8 +6,10 @@ import {
   discussions,
   discussionComments,
   discussionLikes,
+  discussionBookmarks,
   prayerRequests,
   prayerResponses,
+  prayerBookmarks,
   userAchievements,
   userActivities,
   userChurches,
@@ -15,6 +17,8 @@ import {
   conversations,
   conversationParticipants,
   messages,
+  eventBookmarks,
+  inspirationBookmarks,
   type User,
   type UpsertUser,
   type Church,
@@ -1322,6 +1326,67 @@ export class DatabaseStorage implements IStorage {
       console.error('Error fetching feed posts:', error);
       return [];
     }
+  }
+
+  // Bookmark operations
+  async bookmarkDiscussion(userId: string, discussionId: number): Promise<void> {
+    await db.insert(discussionBookmarks).values({
+      userId,
+      discussionId,
+    }).onConflictDoNothing();
+  }
+
+  async unbookmarkDiscussion(userId: string, discussionId: number): Promise<void> {
+    await db.delete(discussionBookmarks)
+      .where(and(
+        eq(discussionBookmarks.userId, userId),
+        eq(discussionBookmarks.discussionId, discussionId)
+      ));
+  }
+
+  async bookmarkPrayer(userId: string, prayerId: number): Promise<void> {
+    await db.insert(prayerBookmarks).values({
+      userId,
+      prayerId,
+    }).onConflictDoNothing();
+  }
+
+  async unbookmarkPrayer(userId: string, prayerId: number): Promise<void> {
+    await db.delete(prayerBookmarks)
+      .where(and(
+        eq(prayerBookmarks.userId, userId),
+        eq(prayerBookmarks.prayerId, prayerId)
+      ));
+  }
+
+  async bookmarkInspiration(userId: string, inspirationId: number): Promise<void> {
+    await db.insert(inspirationBookmarks).values({
+      userId,
+      inspirationId,
+    }).onConflictDoNothing();
+  }
+
+  async unbookmarkInspiration(userId: string, inspirationId: number): Promise<void> {
+    await db.delete(inspirationBookmarks)
+      .where(and(
+        eq(inspirationBookmarks.userId, userId),
+        eq(inspirationBookmarks.inspirationId, inspirationId)
+      ));
+  }
+
+  async bookmarkEvent(userId: string, eventId: number): Promise<void> {
+    await db.insert(eventBookmarks).values({
+      userId,
+      eventId,
+    }).onConflictDoNothing();
+  }
+
+  async unbookmarkEvent(userId: string, eventId: number): Promise<void> {
+    await db.delete(eventBookmarks)
+      .where(and(
+        eq(eventBookmarks.userId, userId),
+        eq(eventBookmarks.eventId, eventId)
+      ));
   }
 }
 

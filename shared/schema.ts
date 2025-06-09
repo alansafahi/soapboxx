@@ -228,6 +228,43 @@ export const userInspirationHistory = pgTable("user_inspiration_history", {
   userInspirationUnique: unique().on(table.userId, table.inspirationId),
 }));
 
+// Bookmark tables
+export const discussionBookmarks = pgTable("discussion_bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  discussionId: integer("discussion_id").notNull().references(() => discussions.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userDiscussionUnique: unique().on(table.userId, table.discussionId),
+}));
+
+export const prayerBookmarks = pgTable("prayer_bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  prayerId: integer("prayer_id").notNull().references(() => prayerRequests.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userPrayerUnique: unique().on(table.userId, table.prayerId),
+}));
+
+export const eventBookmarks = pgTable("event_bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userEventUnique: unique().on(table.userId, table.eventId),
+}));
+
+export const inspirationBookmarks = pgTable("inspiration_bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  inspirationId: integer("inspiration_id").notNull().references(() => dailyInspirations.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userInspirationBookmarkUnique: unique().on(table.userId, table.inspirationId),
+}));
+
 // Friend relationships
 export const friendships = pgTable("friendships", {
   id: serial("id").primaryKey(),
