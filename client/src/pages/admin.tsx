@@ -407,7 +407,7 @@ export default function AdminPortal() {
                   onClick={() => setSelectedChurch(church.id)}
                 >
                   <Church className="h-4 w-4 mr-2" />
-                  {church.name}
+                  {church.name || `Church ${church.id}`}
                 </Button>
               ))}
             </CardContent>
