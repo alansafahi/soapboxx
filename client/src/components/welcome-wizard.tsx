@@ -197,7 +197,6 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   });
 
   const nextStep = () => {
-    console.log('nextStep called, currentStep:', currentStep, 'canProceed:', canProceed());
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
