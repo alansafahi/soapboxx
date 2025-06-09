@@ -540,6 +540,79 @@ export default function AdminPortal() {
     },
   });
 
+  // Draft saving mutations
+  const saveDevotionalDraftMutation = useMutation({
+    mutationFn: async (data: DevotionalFormData) => {
+      return await apiRequest("POST", "/api/devotionals", {
+        ...data,
+        isPublished: false
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Devotional draft saved successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/devotionals"] });
+      setDevotionalForm({ title: '', category: '', verseReference: '', content: '', churchId: selectedChurch });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to save devotional draft. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveWeeklySeriesDraftMutation = useMutation({
+    mutationFn: async (data: WeeklySeriesFormData) => {
+      return await apiRequest("POST", "/api/weekly-series", {
+        ...data,
+        isActive: false
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Weekly series draft saved successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/weekly-series"] });
+      setWeeklySeriesForm({ title: '', description: '', startDate: '', endDate: '', frequency: '', churchId: selectedChurch });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to save weekly series draft. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const saveSermonMediaDraftMutation = useMutation({
+    mutationFn: async (data: SermonMediaFormData) => {
+      return await apiRequest("POST", "/api/sermon-media", {
+        ...data,
+        isPublished: false
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Sermon media draft saved successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/sermon-media"] });
+      setSermonMediaForm({ title: '', speaker: '', mediaType: '', date: '', description: '', churchId: selectedChurch });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to save sermon media draft. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Form handlers for content
   const [devotionalForm, setDevotionalForm] = useState({
     title: '',
@@ -583,6 +656,22 @@ export default function AdminPortal() {
     });
   };
 
+  const handleSaveDevotionalDraft = () => {
+    if (!devotionalForm.title || !devotionalForm.content) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveDevotionalDraftMutation.mutate({
+      ...devotionalForm,
+      churchId: selectedChurch,
+    });
+  };
+
   const handleCreateWeeklySeries = () => {
     if (!weeklySeriesForm.title || !weeklySeriesForm.description) {
       toast({
@@ -599,6 +688,22 @@ export default function AdminPortal() {
     });
   };
 
+  const handleSaveWeeklySeriesDraft = () => {
+    if (!weeklySeriesForm.title || !weeklySeriesForm.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveWeeklySeriesDraftMutation.mutate({
+      ...weeklySeriesForm,
+      churchId: selectedChurch,
+    });
+  };
+
   const handleUploadSermonMedia = () => {
     if (!sermonMediaForm.title || !sermonMediaForm.speaker) {
       toast({
@@ -610,6 +715,22 @@ export default function AdminPortal() {
     }
 
     createSermonMediaMutation.mutate({
+      ...sermonMediaForm,
+      churchId: selectedChurch,
+    });
+  };
+
+  const handleSaveSermonMediaDraft = () => {
+    if (!sermonMediaForm.title || !sermonMediaForm.speaker) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveSermonMediaDraftMutation.mutate({
       ...sermonMediaForm,
       churchId: selectedChurch,
     });
@@ -710,54 +831,7 @@ export default function AdminPortal() {
     },
   });
 
-  // Draft handlers
-  const handleSaveDevotionalDraft = () => {
-    if (!devotionalForm.title || !devotionalForm.content) {
-      toast({
-        title: "Error",
-        description: "Please fill in at least title and content to save as draft",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    saveDraftMutation.mutate({
-      ...devotionalForm,
-      churchId: selectedChurch,
-    });
-  };
-
-  const handleSaveSeriesDraft = () => {
-    if (!weeklySeriesForm.title || !weeklySeriesForm.description) {
-      toast({
-        title: "Error",
-        description: "Please fill in at least title and description to save as draft",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    saveSeriesDraftMutation.mutate({
-      ...weeklySeriesForm,
-      churchId: selectedChurch,
-    });
-  };
-
-  const handleSaveMediaDraft = () => {
-    if (!sermonMediaForm.title || !sermonMediaForm.speaker) {
-      toast({
-        title: "Error",
-        description: "Please fill in at least title and speaker to save as draft",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    saveMediaDraftMutation.mutate({
-      ...sermonMediaForm,
-      churchId: selectedChurch,
-    });
-  };
 
 
 
@@ -1413,7 +1487,7 @@ export default function AdminPortal() {
                               <Button 
                                 variant="outline"
                                 className="flex-1"
-                                onClick={handleSaveSeriesDraft}
+                                onClick={handleSaveWeeklySeriesDraft}
                               >
                                 Save as Draft
                               </Button>
@@ -1522,7 +1596,7 @@ export default function AdminPortal() {
                               <Button 
                                 variant="outline"
                                 className="flex-1"
-                                onClick={handleSaveMediaDraft}
+                                onClick={handleSaveSermonMediaDraft}
                               >
                                 Save as Draft
                               </Button>
