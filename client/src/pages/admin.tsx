@@ -82,9 +82,40 @@ export default function AdminPortal() {
     },
   });
 
+  const uploadImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      return response.json();
+    },
+  });
+
   const createChurchMutation = useMutation({
     mutationFn: async (data: ChurchFormData) => {
-      return await apiRequest("POST", "/api/churches", data);
+      let churchData = { ...data };
+      
+      // Upload logo if present
+      if (logoFile) {
+        try {
+          const uploadResult = await uploadImageMutation.mutateAsync(logoFile);
+          churchData.logoUrl = uploadResult.imageUrl;
+        } catch (error) {
+          throw new Error('Failed to upload logo');
+        }
+      }
+      
+      return await apiRequest("POST", "/api/churches", churchData);
     },
     onSuccess: () => {
       toast({
@@ -92,6 +123,8 @@ export default function AdminPortal() {
         description: "Church created successfully!",
       });
       churchForm.reset();
+      setLogoFile(null);
+      setLogoPreview(null);
       queryClient.invalidateQueries({ queryKey: ["/api/churches"] });
     },
     onError: (error) => {
@@ -123,6 +156,45 @@ export default function AdminPortal() {
       });
     },
   });
+
+  const handleLogoFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLogoFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
 
   const handleCreateChurch = (data: ChurchFormData) => {
     createChurchMutation.mutate(data);
@@ -274,12 +346,51 @@ export default function AdminPortal() {
                           )}
                         />
                       </div>
+                      
+                      {/* Logo Upload Section */}
+                      <div className="space-y-4">
+                        <Label>Church Logo</Label>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-1">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoFileChange}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                          </div>
+                          {logoPreview && (
+                            <div className="relative">
+                              <img
+                                src={logoPreview}
+                                alt="Logo preview"
+                                className="h-16 w-16 object-cover rounded-lg border-2 border-gray-200"
+                              />
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                onClick={removeLogo}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                        {logoFile && (
+                          <p className="text-sm text-gray-600">
+                            Selected: {logoFile.name} ({(logoFile.size / 1024 / 1024).toFixed(2)} MB)
+                          </p>
+                        )}
+                      </div>
+
                       <Button 
                         type="submit" 
                         className="w-full"
-                        disabled={createChurchMutation.isPending}
+                        disabled={createChurchMutation.isPending || uploadImageMutation.isPending}
                       >
-                        {createChurchMutation.isPending ? "Creating..." : "Create Church"}
+                        {createChurchMutation.isPending || uploadImageMutation.isPending ? "Creating..." : "Create Church"}
                       </Button>
                     </form>
                   </Form>
