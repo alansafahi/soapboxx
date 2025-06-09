@@ -118,10 +118,17 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
-      return await apiRequest("/api/users/profile", {
+      const response = await fetch("/api/users/profile", {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -254,7 +261,7 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Avatar className="h-32 w-32">
                       <AvatarImage 
-                        src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl) : profile?.profileImageUrl} 
+                        src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || undefined) : (profile?.profileImageUrl || undefined)} 
                         alt={displayName} 
                       />
                       <AvatarFallback className="text-2xl">
