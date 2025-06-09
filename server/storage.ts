@@ -943,41 +943,14 @@ export class DatabaseStorage implements IStorage {
 
   // Daily inspiration operations
   async getDailyInspiration(userId: string): Promise<DailyInspiration | undefined> {
-    // Get user preferences to personalize inspiration
-    const preferences = await this.getUserInspirationPreferences(userId);
-    const preferredCategories = preferences?.preferredCategories || ['faith', 'hope', 'love'];
-    
-    // Get inspirations the user hasn't seen recently (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const recentHistory = await db
-      .select({ inspirationId: userInspirationHistory.inspirationId })
-      .from(userInspirationHistory)
-      .where(
-        and(
-          eq(userInspirationHistory.userId, userId),
-          sql`${userInspirationHistory.createdAt} > ${thirtyDaysAgo}`
-        )
-      );
-    
-    const seenIds = recentHistory.map(h => h.inspirationId);
-    
-    // Find a personalized inspiration
-    const query = db
+    // Simple approach - get a random active inspiration
+    const [inspiration] = await db
       .select()
       .from(dailyInspirations)
-      .where(
-        and(
-          eq(dailyInspirations.isActive, true),
-          sql`${dailyInspirations.category} = ANY(${preferredCategories})`,
-          seenIds.length > 0 ? sql`${dailyInspirations.id} NOT IN (${seenIds.join(',')})` : sql`1=1`
-        )
-      )
+      .where(eq(dailyInspirations.isActive, true))
       .orderBy(sql`RANDOM()`)
       .limit(1);
     
-    const [inspiration] = await query;
     return inspiration;
   }
 

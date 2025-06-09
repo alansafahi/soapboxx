@@ -224,7 +224,9 @@ export const userInspirationHistory = pgTable("user_inspiration_history", {
   wasShared: boolean("was_shared").default(false),
   viewedAt: timestamp("viewed_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  userInspirationUnique: unique().on(table.userId, table.inspirationId),
+}));
 
 // Friend relationships
 export const friendships = pgTable("friendships", {
