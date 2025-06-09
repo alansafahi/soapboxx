@@ -48,6 +48,7 @@ export default function Chat() {
   const { data: friends = [], isLoading: friendsLoading } = useQuery({
     queryKey: ["/api/friends"],
     enabled: isAuthenticated,
+    select: (data) => data || [], // Ensure consistent array format
   });
 
   // Fetch friend requests
@@ -494,7 +495,7 @@ export default function Chat() {
                 <div className="space-y-2">
                   {friends.map((friend: any) => (
                     <div
-                      key={`friendlist-${friend.id}`}
+                      key={`friends-sidebar-${friend.id}`}
                       className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                       onClick={() => startConversationWithFriend(friend.id, friend.firstName || friend.email)}
                     >

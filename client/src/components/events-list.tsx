@@ -8,11 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Video, Users } from "lucide-react";
+import { motion } from "framer-motion";
 import type { Event } from "@shared/schema";
 
 export default function EventsList() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [rsvpStatus, setRsvpStatus] = useState<Map<number, string>>(new Map());
+  const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery<Event[]>({
