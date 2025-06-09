@@ -5,7 +5,7 @@ import Navigation from "@/components/navigation";
 import CommunityFeed from "@/components/community-feed";
 import EventsList from "@/components/events-list";
 import PrayerRequests from "@/components/prayer-requests";
-import ProgressTracker from "@/components/progress-tracker";
+
 import ChurchDiscovery from "@/components/church-discovery";
 import DailyInspiration from "@/components/daily-inspiration";
 import MobileNav from "@/components/mobile-nav";
@@ -214,7 +214,6 @@ export default function Home() {
             <div id="prayer-requests">
               <PrayerRequests />
             </div>
-            <ProgressTracker />
             <div id="church-discovery">
               <ChurchDiscovery />
             </div>
