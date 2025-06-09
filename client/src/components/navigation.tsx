@@ -1,6 +1,7 @@
 import { Bell, Heart, Menu, MessageCircle, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -15,41 +16,85 @@ export default function Navigation() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Mock notifications for demonstration
-  const notifications = [
+  // State for notifications with read/unread tracking
+  const [notifications, setNotifications] = useState([
     {
       id: 1,
       title: "New Prayer Request",
       message: "Sarah requested prayers for her family",
       time: "2 minutes ago",
-      unread: true
+      unread: true,
+      type: "prayer",
+      targetId: "2" // Prayer request ID
     },
     {
       id: 2,
       title: "Event Reminder",
       message: "Sunday service starts in 1 hour",
       time: "45 minutes ago",
-      unread: true
+      unread: true,
+      type: "event",
+      targetId: "1" // Event ID
     },
     {
       id: 3,
       title: "New Message",
       message: "Pastor John sent you a message",
       time: "1 hour ago",
-      unread: true
+      unread: true,
+      type: "message",
+      targetId: "chat" // Chat page
     }
-  ];
+  ]);
 
   const handleNotificationClick = (notification: any) => {
     console.log('Notification clicked:', notification);
+    
+    // Mark notification as read
+    setNotifications(prev => 
+      prev.map(n => n.id === notification.id ? {...n, unread: false} : n)
+    );
+
+    // Navigate based on notification type
+    switch (notification.type) {
+      case "prayer":
+        // Scroll to prayer requests section
+        setTimeout(() => {
+          const prayerSection = document.getElementById('prayer-requests');
+          if (prayerSection) {
+            prayerSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+        break;
+      case "event":
+        // Scroll to events section
+        setTimeout(() => {
+          const eventsSection = document.getElementById('events-list');
+          if (eventsSection) {
+            eventsSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+        break;
+      case "message":
+        // Navigate to messages page
+        window.location.href = '/chat';
+        break;
+      default:
+        // Default behavior
+        break;
+    }
+
     toast({
       title: `📢 ${notification.title}`,
-      description: notification.message,
-      duration: 5000,
+      description: "Navigating to content...",
+      duration: 3000,
     });
   };
 
   const markAllAsRead = () => {
+    setNotifications(prev => 
+      prev.map(n => ({...n, unread: false}))
+    );
     toast({
       title: "Notifications",
       description: "All notifications marked as read",
