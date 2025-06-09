@@ -46,7 +46,7 @@ export default function PrayerWall() {
   const [likedRequests, setLikedRequests] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
-  const [commentForms, setCommentForms] = useState<Map<number, any>>(new Map());
+  const [supportComments, setSupportComments] = useState<Map<number, string>>(new Map());
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),
@@ -187,6 +187,43 @@ export default function PrayerWall() {
       toast({
         title: "Error",
         description: "Failed to submit prayer request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Support comment mutation
+  const supportCommentMutation = useMutation({
+    mutationFn: async ({ prayerRequestId, content }: { prayerRequestId: number; content: string }) => {
+      await apiRequest("POST", `/api/prayers/${prayerRequestId}/support`, { content });
+    },
+    onSuccess: (_, { prayerRequestId }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      setSupportComments(prev => {
+        const newMap = new Map(prev);
+        newMap.set(prayerRequestId, '');
+        return newMap;
+      });
+      toast({
+        title: "Support sent",
+        description: "Your encouraging message has been shared.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to send support message. Please try again.",
         variant: "destructive",
       });
     },

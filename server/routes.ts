@@ -448,6 +448,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/prayers/:id/support', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const { content } = req.body;
+      
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: "Support message cannot be empty" });
+      }
+      
+      const supportResponse = await storage.prayForRequest({
+        prayerRequestId,
+        userId,
+      });
+      
+      // Track user activity for providing support
+      await storage.trackUserActivity({
+        userId,
+        activityType: 'prayer_support_given',
+        entityId: prayerRequestId,
+        points: 10,
+      });
+      
+      res.status(201).json(supportResponse);
+    } catch (error) {
+      console.error("Error adding support message:", error);
+      res.status(500).json({ message: "Failed to add support message" });
+    }
+  });
+
   // User stats and achievements
   app.get('/api/users/stats', isAuthenticated, async (req: any, res) => {
     try {
