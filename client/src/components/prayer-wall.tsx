@@ -596,12 +596,31 @@ export default function PrayerWall() {
                                 <Textarea 
                                   placeholder="Share an encouraging message or Bible verse..."
                                   className="min-h-[80px] resize-none border-gray-200 dark:border-gray-700"
+                                  value={supportComments.get(prayer.id) || ''}
+                                  onChange={(e) => {
+                                    const newMap = new Map(supportComments);
+                                    newMap.set(prayer.id, e.target.value);
+                                    setSupportComments(newMap);
+                                  }}
                                 />
                                 <div className="flex justify-between items-center mt-3">
                                   <span className="text-xs text-gray-500">Your words can bring hope and comfort</span>
-                                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                    onClick={() => {
+                                      const content = supportComments.get(prayer.id)?.trim();
+                                      if (content) {
+                                        supportCommentMutation.mutate({ 
+                                          prayerRequestId: prayer.id, 
+                                          content 
+                                        });
+                                      }
+                                    }}
+                                    disabled={supportCommentMutation.isPending || !supportComments.get(prayer.id)?.trim()}
+                                  >
                                     <Send className="w-3 h-3 mr-1" />
-                                    Send Support
+                                    {supportCommentMutation.isPending ? 'Sending...' : 'Send Support'}
                                   </Button>
                                 </div>
                               </div>
