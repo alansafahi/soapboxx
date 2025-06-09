@@ -197,6 +197,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   });
 
   const nextStep = () => {
+    console.log('nextStep called, currentStep:', currentStep, 'canProceed:', canProceed());
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -246,13 +247,13 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-2xl"
+        className="w-full max-w-2xl my-8"
       >
-        <Card className="border-0 shadow-2xl">
+        <Card className="border-0 shadow-2xl max-h-[90vh] flex flex-col">
           <CardHeader className="text-center pb-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 flex-1 justify-center">
@@ -286,7 +287,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
             </div>
           </CardHeader>
 
-          <CardContent className="px-8 pb-8">
+          <CardContent className="px-8 pb-8 flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -294,7 +295,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="min-h-[400px] flex flex-col"
+                className="flex flex-col h-full"
               >
                 {currentStep === 0 && (
                   <div className="text-center space-y-6">
@@ -517,8 +518,10 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                 )}
               </motion.div>
             </AnimatePresence>
-
-            <div className="flex justify-between mt-8">
+          </CardContent>
+          
+          <div className="px-8 pb-6 border-t bg-gray-50/50">
+            <div className="flex justify-between pt-4">
               <Button
                 variant="outline"
                 onClick={prevStep}
@@ -553,7 +556,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                 </Button>
               )}
             </div>
-          </CardContent>
+          </div>
         </Card>
       </motion.div>
     </div>
