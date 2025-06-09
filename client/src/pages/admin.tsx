@@ -390,26 +390,9 @@ export default function AdminPortal() {
     },
   });
 
-  // Draft handlers
-  const handleSaveDevotionalDraft = () => {
-    if (!devotionalForm.title || !devotionalForm.content) {
-      toast({
-        title: "Error",
-        description: "Please fill in at least title and content to save as draft",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    saveDraftMutation.mutate({
-      ...devotionalForm,
-      churchId: selectedChurch,
-    });
-  };
-
-  // Draft mutation for weekly series
+  // Draft mutations for weekly series
   const saveSeriesDraftMutation = useMutation({
-    mutationFn: async (data: WeeklySeriesFormData) => {
+    mutationFn: async (data: any) => {
       return await apiRequest("POST", "/api/weekly-series", {
         ...data,
         isActive: false, // Save as draft
@@ -439,25 +422,9 @@ export default function AdminPortal() {
     },
   });
 
-  const handleSaveSeriesDraft = () => {
-    if (!weeklySeriesForm.title || !weeklySeriesForm.startDate) {
-      toast({
-        title: "Error",
-        description: "Please fill in at least title and start date to save as draft",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    saveSeriesDraftMutation.mutate({
-      ...weeklySeriesForm,
-      churchId: selectedChurch,
-    });
-  };
-
-  // Draft mutation for sermon media
+  // Draft mutations for sermon media
   const saveMediaDraftMutation = useMutation({
-    mutationFn: async (data: SermonMediaFormData) => {
+    mutationFn: async (data: any) => {
       return await apiRequest("POST", "/api/sermon-media", {
         ...data,
         isPublished: false, // Save as draft
@@ -487,11 +454,44 @@ export default function AdminPortal() {
     },
   });
 
-  const handleSaveMediaDraft = () => {
-    if (!sermonMediaForm.title || !sermonMediaForm.mediaType) {
+  // Draft handlers
+  const handleSaveDevotionalDraft = () => {
+    if (!devotionalForm.title || !devotionalForm.content) {
       toast({
         title: "Error",
-        description: "Please fill in at least title and media type to save as draft",
+        description: "Please fill in at least title and content to save as draft",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveDraftMutation.mutate({
+      ...devotionalForm,
+      churchId: selectedChurch,
+    });
+  };
+
+  const handleSaveSeriesDraft = () => {
+    if (!weeklySeriesForm.title || !weeklySeriesForm.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in at least title and description to save as draft",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveSeriesDraftMutation.mutate({
+      ...weeklySeriesForm,
+      churchId: selectedChurch,
+    });
+  };
+
+  const handleSaveMediaDraft = () => {
+    if (!sermonMediaForm.title || !sermonMediaForm.speaker) {
+      toast({
+        title: "Error",
+        description: "Please fill in at least title and speaker to save as draft",
         variant: "destructive",
       });
       return;
@@ -502,6 +502,12 @@ export default function AdminPortal() {
       churchId: selectedChurch,
     });
   };
+
+
+
+
+
+
 
   if (churchesLoading) {
     return (
