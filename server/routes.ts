@@ -200,12 +200,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/discussions', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Discussion request body:", req.body);
       const discussionData = insertDiscussionSchema.parse(req.body);
       discussionData.authorId = req.user.claims.sub;
       const discussion = await storage.createDiscussion(discussionData);
       res.status(201).json(discussion);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log("Discussion validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid discussion data", errors: error.errors });
       }
       console.error("Error creating discussion:", error);
@@ -260,12 +262,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Prayer request body:", req.body);
       const prayerData = insertPrayerRequestSchema.parse(req.body);
       prayerData.authorId = req.user.claims.sub;
       const prayer = await storage.createPrayerRequest(prayerData);
       res.status(201).json(prayer);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log("Prayer validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid prayer request data", errors: error.errors });
       }
       console.error("Error creating prayer request:", error);
