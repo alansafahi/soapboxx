@@ -49,10 +49,13 @@ type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 
 // Draft management components
 function DraftDevotionalsList({ churchId }: { churchId: number }) {
-  const { data: drafts, isLoading } = useQuery({
+  const { data: drafts, isLoading, error } = useQuery({
     queryKey: ['/api/drafts/devotionals', churchId],
     queryFn: () => apiRequest(`/api/drafts/devotionals?churchId=${churchId}`),
+    enabled: !!churchId,
   });
+
+  console.log('Draft query result:', { drafts, isLoading, error, churchId });
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
