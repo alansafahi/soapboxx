@@ -137,7 +137,26 @@ export default function SocialFeed() {
     },
   });
 
-
+  // Like post mutation
+  const likePostMutation = useMutation({
+    mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
+      const response = await fetch(`/api/${postType}s/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to toggle like');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      toast({
+        title: data.isLiked !== false ? "Liked" : "Unliked",
+        description: data.message,
+      });
+    },
+  });
 
   // Comment mutation
   const commentMutation = useMutation({
@@ -181,6 +200,33 @@ export default function SocialFeed() {
     likePostMutation.mutate({ 
       postId: post.id, 
       postType: post.type 
+    });
+  };
+
+  const handleCommentPost = (post: FeedPost) => {
+    if (post.type !== 'discussion') {
+      toast({
+        title: "Comments not available",
+        description: "Comments are only available for discussions",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const content = prompt("Enter your comment:");
+    if (content && content.trim()) {
+      commentMutation.mutate({
+        postId: post.id,
+        postType: post.type,
+        content: content.trim()
+      });
+    }
+  };
+
+  const handleSharePost = (post: FeedPost) => {
+    sharePostMutation.mutate({
+      postId: post.id,
+      postType: post.type
     });
   };
 
