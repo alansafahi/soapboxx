@@ -1147,13 +1147,22 @@ export default function AdminPortal() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <Button 
-                              className="w-full"
-                              onClick={handleCreateWeeklySeries}
-                              disabled={createWeeklySeriesMutation.isPending}
-                            >
-                              {createWeeklySeriesMutation.isPending ? "Creating..." : "Create Series"}
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline"
+                                className="flex-1"
+                                onClick={handleSaveSeriesDraft}
+                              >
+                                Save as Draft
+                              </Button>
+                              <Button 
+                                className="flex-1"
+                                onClick={handleCreateWeeklySeries}
+                                disabled={createWeeklySeriesMutation.isPending}
+                              >
+                                {createWeeklySeriesMutation.isPending ? "Creating..." : "Create Series"}
+                              </Button>
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -1247,13 +1256,22 @@ export default function AdminPortal() {
                                 onChange={(e) => setSermonMediaForm({...sermonMediaForm, description: e.target.value})}
                               />
                             </div>
-                            <Button 
-                              className="w-full"
-                              onClick={handleUploadSermonMedia}
-                              disabled={createSermonMediaMutation.isPending}
-                            >
-                              {createSermonMediaMutation.isPending ? "Uploading..." : "Upload Media"}
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline"
+                                className="flex-1"
+                                onClick={handleSaveMediaDraft}
+                              >
+                                Save as Draft
+                              </Button>
+                              <Button 
+                                className="flex-1"
+                                onClick={handleUploadSermonMedia}
+                                disabled={createSermonMediaMutation.isPending}
+                              >
+                                {createSermonMediaMutation.isPending ? "Uploading..." : "Upload Media"}
+                              </Button>
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>

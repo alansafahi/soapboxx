@@ -1588,7 +1588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const mediaData = insertSermonMediaSchema.parse({
         ...req.body,
-        uploadedBy: userId,
+        authorId: userId,
       });
       
       const media = await storage.createSermonMedia(mediaData);
