@@ -885,6 +885,9 @@ export const insertWeeklySeriesSchema = createInsertSchema(weeklySeries).omit({
   createdAt: true,
   updatedAt: true,
   totalDevotionals: true,
+}).extend({
+  startDate: z.string().transform((str) => new Date(str)),
+  endDate: z.string().transform((str) => new Date(str)),
 });
 
 export const insertSermonMediaSchema = createInsertSchema(sermonMedia).omit({
@@ -892,4 +895,6 @@ export const insertSermonMediaSchema = createInsertSchema(sermonMedia).omit({
   createdAt: true,
   updatedAt: true,
   downloadCount: true,
+}).extend({
+  date: z.string().transform((str) => new Date(str)),
 });

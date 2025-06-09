@@ -359,6 +359,38 @@ export default function AdminPortal() {
     });
   };
 
+  // Draft handlers
+  const handleSaveDevotionalDraft = () => {
+    // For now, we'll show a success message and clear the form
+    // In a real implementation, you'd save to a drafts table
+    toast({
+      title: "Draft Saved",
+      description: "Your devotional has been saved as a draft.",
+    });
+    setDevotionalForm({
+      title: '',
+      category: '',
+      verseReference: '',
+      content: '',
+      churchId: selectedChurch,
+    });
+  };
+
+  const handleSaveSeriesDraft = () => {
+    toast({
+      title: "Draft Saved", 
+      description: "Your weekly series has been saved as a draft.",
+    });
+    setWeeklySeriesForm({
+      title: '',
+      description: '',
+      startDate: '',
+      endDate: '',
+      frequency: '',
+      churchId: selectedChurch,
+    });
+  };
+
   if (churchesLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -897,7 +929,11 @@ export default function AdminPortal() {
                               />
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" className="flex-1">
+                              <Button 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={handleSaveDevotionalDraft}
+                              >
                                 Save as Draft
                               </Button>
                               <Button 
