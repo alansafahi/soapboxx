@@ -242,6 +242,22 @@ export default function ProfilePage() {
                   <div className="text-xs text-red-600">Generosity Heart</div>
                 </div>
               </div>
+              
+              {/* View Leaderboard Button */}
+              <div className="mt-6 pt-4 border-t">
+                <button
+                  onClick={() => window.location.href = '/leaderboard'}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                  </svg>
+                  View Community Leaderboard
+                </button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  See how you rank among your faith community
+                </p>
+              </div>
             </div>
 
           </CardContent>
