@@ -355,7 +355,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(userChurches.churchId, churchId),
         eq(userChurches.isActive, true)
-      ));
+      )) as any;
   }
 
   async updateMemberRole(
@@ -821,7 +821,7 @@ export class DatabaseStorage implements IStorage {
     const sortedDays = Array.from(uniqueDays).sort((a, b) => new Date(b as string).getTime() - new Date(a as string).getTime());
     
     for (let i = 0; i < sortedDays.length; i++) {
-      const dayDate = new Date(sortedDays[i]);
+      const dayDate = new Date(sortedDays[i] as string);
       const expectedDate = new Date(today);
       expectedDate.setDate(today.getDate() - i);
       
@@ -1003,16 +1003,7 @@ export class DatabaseStorage implements IStorage {
   // Friend operations
   async getFriends(userId: string): Promise<User[]> {
     const friendsList = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        profileImageUrl: users.profileImageUrl,
-        bio: users.bio,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      })
+      .select()
       .from(friendships)
       .innerJoin(
         users,
@@ -1025,7 +1016,7 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    return friendsList;
+    return friendsList as any;
   }
 
   async getFriendRequests(userId: string): Promise<Friendship[]> {
