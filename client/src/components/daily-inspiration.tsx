@@ -67,8 +67,8 @@ export default function DailyInspiration() {
     onSuccess: () => {
       setIsShared(true);
       toast({
-        title: "Shared successfully",
-        description: "Your inspiration has been shared with the community.",
+        title: "Shared to Community",
+        description: "This inspiration has been posted to the community discussions where others can see and engage with it.",
       });
     },
   });

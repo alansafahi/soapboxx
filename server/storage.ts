@@ -1029,6 +1029,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async shareInspiration(userId: string, inspirationId: number): Promise<void> {
+    // Mark as shared in user history
     await db
       .insert(userInspirationHistory)
       .values({
@@ -1042,6 +1043,25 @@ export class DatabaseStorage implements IStorage {
           wasShared: true,
         },
       });
+
+    // Get the inspiration details
+    const [inspiration] = await db
+      .select()
+      .from(dailyInspirations)
+      .where(eq(dailyInspirations.id, inspirationId));
+
+    if (inspiration) {
+      // Create a discussion post sharing the inspiration
+      const content = `🌟 **Shared Daily Inspiration: ${inspiration.title}**\n\n${inspiration.content}${inspiration.verse ? `\n\n*"${inspiration.verse}"* - ${inspiration.verseReference}` : ''}`;
+      
+      await db.insert(discussions).values({
+        authorId: userId,
+        title: `Daily Inspiration: ${inspiration.title}`,
+        content: content,
+        category: 'inspiration',
+        churchId: null, // Share to general community
+      });
+    }
   }
 }
 
