@@ -97,6 +97,7 @@ export interface IStorage {
   createPrayerRequest(prayer: InsertPrayerRequest): Promise<PrayerRequest>;
   prayForRequest(response: InsertPrayerResponse): Promise<PrayerResponse>;
   getUserPrayerResponse(prayerRequestId: number, userId: string): Promise<PrayerResponse | undefined>;
+  getPrayerSupportMessages(prayerRequestId: number): Promise<any[]>;
   markPrayerAnswered(id: number): Promise<void>;
   
   // User stats and achievements
@@ -537,7 +538,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(prayerResponses.prayerRequestId, prayerRequestId),
         eq(prayerResponses.responseType, 'support'),
-        isNotNull(prayerResponses.content)
+        sql`${prayerResponses.content} IS NOT NULL`
       ))
       .orderBy(desc(prayerResponses.createdAt));
     

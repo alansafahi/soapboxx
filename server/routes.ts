@@ -480,6 +480,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/prayers/:id/support', async (req, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const supportMessages = await storage.getPrayerSupportMessages(prayerRequestId);
+      res.json(supportMessages);
+    } catch (error) {
+      console.error("Error fetching support messages:", error);
+      res.status(500).json({ message: "Failed to fetch support messages" });
+    }
+  });
+
   // User stats and achievements
   app.get('/api/users/stats', isAuthenticated, async (req: any, res) => {
     try {

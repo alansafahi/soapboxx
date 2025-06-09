@@ -47,6 +47,7 @@ export default function PrayerWall() {
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
   const [supportComments, setSupportComments] = useState<Map<number, string>>(new Map());
+  const [supportMessages, setSupportMessages] = useState<Map<number, any[]>>(new Map());
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),
@@ -66,16 +67,34 @@ export default function PrayerWall() {
   });
 
   // Comment handling functions
-  const toggleComments = (prayerId: number) => {
+  const toggleComments = async (prayerId: number) => {
     setExpandedComments(prev => {
       const newSet = new Set(prev);
       if (newSet.has(prayerId)) {
         newSet.delete(prayerId);
       } else {
         newSet.add(prayerId);
+        // Fetch support messages when expanding comments
+        fetchSupportMessages(prayerId);
       }
       return newSet;
     });
+  };
+
+  const fetchSupportMessages = async (prayerId: number) => {
+    try {
+      const response = await fetch(`/api/prayers/${prayerId}/support`);
+      if (response.ok) {
+        const messages = await response.json();
+        setSupportMessages(prev => {
+          const newMap = new Map(prev);
+          newMap.set(prayerId, messages);
+          return newMap;
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching support messages:", error);
+    }
   };
 
   // Pray for request mutation (prayer counter)
@@ -555,30 +574,28 @@ export default function PrayerWall() {
                               Community Support
                             </h4>
                             <div className="space-y-3 text-sm">
-                              {/* Sample support messages */}
-                              <div className="flex items-start space-x-3">
-                                <Avatar className="w-6 h-6">
-                                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">U</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <p className="text-blue-800 dark:text-blue-200">
-                                    "Praying for strength and healing for you during this time. God is with you. 🙏"
-                                  </p>
-                                  <span className="text-blue-600 dark:text-blue-400 text-xs">Community Member • 2h ago</span>
+                              {supportMessages.get(prayer.id)?.map((message: any) => (
+                                <div key={message.id} className="flex items-start space-x-3">
+                                  <Avatar className="w-6 h-6">
+                                    <AvatarImage src={message.user?.profileImageUrl} />
+                                    <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+                                      {message.user?.firstName?.[0] || message.user?.email?.[0]?.toUpperCase() || "U"}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1">
+                                    <p className="text-blue-800 dark:text-blue-200">
+                                      {message.content}
+                                    </p>
+                                    <span className="text-blue-600 dark:text-blue-400 text-xs">
+                                      {message.user?.firstName || message.user?.email || "Community Member"} • {new Date(message.createdAt).toLocaleDateString()}
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                              
-                              <div className="flex items-start space-x-3">
-                                <Avatar className="w-6 h-6">
-                                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">F</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <p className="text-blue-800 dark:text-blue-200">
-                                    "Sending love and prayers your way. You are not alone in this journey."
-                                  </p>
-                                  <span className="text-blue-600 dark:text-blue-400 text-xs">Friend in Faith • 5h ago</span>
-                                </div>
-                              </div>
+                              )) || (
+                                <p className="text-blue-700 dark:text-blue-300 text-sm italic">
+                                  No support messages yet. Be the first to share encouragement!
+                                </p>
+                              )}
                             </div>
                           </div>
 
