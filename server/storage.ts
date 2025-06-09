@@ -487,6 +487,11 @@ export class DatabaseStorage implements IStorage {
     prayerCount: number;
     connectionCount: number;
     discussionCount: number;
+    totalPoints: number;
+    currentStreak: number;
+    level: number;
+    experiencePoints: number;
+    nextLevelXP: number;
   }> {
     // Get attendance count (events RSVP'd)
     const [attendanceResult] = await db
@@ -497,11 +502,11 @@ export class DatabaseStorage implements IStorage {
         eq(eventRsvps.status, 'attending')
       ));
 
-    // Get prayer requests count
+    // Get prayer count (prayers offered by user)
     const [prayerResult] = await db
       .select({ count: count() })
-      .from(prayerRequests)
-      .where(eq(prayerRequests.authorId, userId));
+      .from(prayerResponses)
+      .where(eq(prayerResponses.userId, userId));
 
     // Get connections count (unique churches user is part of)
     const [connectionResult] = await db
@@ -518,11 +523,70 @@ export class DatabaseStorage implements IStorage {
       .from(discussions)
       .where(eq(discussions.authorId, userId));
 
+    // Calculate total points from user activities
+    const [pointsResult] = await db
+      .select({ 
+        totalPoints: sql<number>`COALESCE(SUM(${userActivities.points}), 0)`.as('totalPoints')
+      })
+      .from(userActivities)
+      .where(eq(userActivities.userId, userId));
+
+    const totalPoints = pointsResult.totalPoints || 0;
+
+    // Calculate current streak (consecutive days with activity)
+    const recentActivities = await db
+      .select({ 
+        createdAt: userActivities.createdAt 
+      })
+      .from(userActivities)
+      .where(eq(userActivities.userId, userId))
+      .orderBy(desc(userActivities.createdAt))
+      .limit(30); // Check last 30 days
+
+    let currentStreak = 0;
+    const today = new Date();
+    const uniqueDays = new Set();
+    
+    // Group activities by day and calculate streak
+    for (const activity of recentActivities) {
+      if (activity.createdAt) {
+        const activityDate = new Date(activity.createdAt.toString());
+        const dayKey = activityDate.toDateString();
+        uniqueDays.add(dayKey);
+      }
+    }
+
+    const sortedDays = Array.from(uniqueDays).sort((a, b) => new Date(b as string).getTime() - new Date(a as string).getTime());
+    
+    for (let i = 0; i < sortedDays.length; i++) {
+      const dayDate = new Date(sortedDays[i]);
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - i);
+      
+      if (dayDate.toDateString() === expectedDate.toDateString()) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    // Calculate level and experience
+    const level = Math.floor(Math.sqrt(totalPoints / 100)) + 1;
+    const currentLevelThreshold = Math.pow(level - 1, 2) * 100;
+    const nextLevelThreshold = Math.pow(level, 2) * 100;
+    const experiencePoints = totalPoints - currentLevelThreshold;
+    const nextLevelXP = nextLevelThreshold - currentLevelThreshold;
+
     return {
       attendanceCount: attendanceResult.count,
       prayerCount: prayerResult.count,
       connectionCount: connectionResult.count,
       discussionCount: discussionResult.count,
+      totalPoints,
+      currentStreak,
+      level,
+      experiencePoints,
+      nextLevelXP,
     };
   }
 
@@ -536,6 +600,65 @@ export class DatabaseStorage implements IStorage {
 
   async trackUserActivity(activity: InsertUserActivity): Promise<void> {
     await db.insert(userActivities).values(activity);
+    
+    // Update achievements based on activity
+    if (activity.userId) {
+      await this.updateUserAchievements(activity.userId);
+    }
+  }
+
+  async updateUserAchievements(userId: string): Promise<void> {
+    const stats = await this.getUserStats(userId);
+    
+    const achievementUpdates = [
+      {
+        type: 'prayer_warrior',
+        progress: stats.prayerCount,
+        maxProgress: 50,
+      },
+      {
+        type: 'community_builder',
+        progress: stats.discussionCount,
+        maxProgress: 25,
+      },
+      {
+        type: 'faithful_attendee',
+        progress: stats.attendanceCount,
+        maxProgress: 20,
+      },
+      {
+        type: 'social_butterfly',
+        progress: stats.connectionCount,
+        maxProgress: 30,
+      },
+    ];
+
+    for (const achievement of achievementUpdates) {
+      const level = Math.floor(achievement.progress / achievement.maxProgress) + 1;
+      const isUnlocked = achievement.progress >= achievement.maxProgress;
+      
+      await db
+        .insert(userAchievements)
+        .values({
+          userId,
+          achievementType: achievement.type,
+          achievementLevel: level,
+          progress: achievement.progress,
+          maxProgress: achievement.maxProgress,
+          isUnlocked,
+          unlockedAt: isUnlocked ? new Date() : null,
+        })
+        .onConflictDoUpdate({
+          target: [userAchievements.userId, userAchievements.achievementType],
+          set: {
+            progress: achievement.progress,
+            achievementLevel: level,
+            isUnlocked,
+            unlockedAt: isUnlocked ? sql`COALESCE(${userAchievements.unlockedAt}, NOW())` : null,
+            updatedAt: new Date(),
+          },
+        });
+    }
   }
 
   // User church connections
