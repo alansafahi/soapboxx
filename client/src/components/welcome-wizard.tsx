@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +24,8 @@ import {
   ChevronRight,
   ChevronLeft,
   Sparkles,
-  Target
+  Target,
+  X
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -230,6 +231,18 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     }
   };
 
+  // Add escape key handler
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onComplete();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onComplete]);
+
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
@@ -241,11 +254,21 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       >
         <Card className="border-0 shadow-2xl">
           <CardHeader className="text-center pb-6">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Church className="h-8 w-8 text-primary" />
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                Welcome to Soapbox
-              </CardTitle>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 flex-1 justify-center">
+                <Church className="h-8 w-8 text-primary" />
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                  Welcome to Soapbox
+                </CardTitle>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onComplete}
+                className="absolute top-4 right-4 h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             <div className="space-y-2">
               <div className="flex justify-center gap-2">
