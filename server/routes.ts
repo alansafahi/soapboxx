@@ -4,8 +4,8 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
-import { userInspirationHistory, prayerResponses, conversationParticipants } from "@shared/schema";
-import { and, eq } from "drizzle-orm";
+import { userInspirationHistory, prayerResponses, conversationParticipants, devotionals, weeklySeries, sermonMedia } from "@shared/schema";
+import { and, eq, desc } from "drizzle-orm";
 import { 
   insertChurchSchema,
   insertEventSchema,

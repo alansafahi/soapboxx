@@ -1544,6 +1544,40 @@ export default function AdminPortal() {
                   </Card>
                 </div>
 
+                {/* Drafts Management Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Draft Content Management
+                    </CardTitle>
+                    <CardDescription>
+                      View, edit, publish, or delete all saved drafts
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs defaultValue="devotional-drafts" className="w-full">
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="devotional-drafts">Devotional Drafts</TabsTrigger>
+                        <TabsTrigger value="series-drafts">Series Drafts</TabsTrigger>
+                        <TabsTrigger value="media-drafts">Media Drafts</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="devotional-drafts" className="space-y-4">
+                        <DraftDevotionalsList churchId={selectedChurch} />
+                      </TabsContent>
+                      
+                      <TabsContent value="series-drafts" className="space-y-4">
+                        <DraftSeriesList churchId={selectedChurch} />
+                      </TabsContent>
+                      
+                      <TabsContent value="media-drafts" className="space-y-4">
+                        <DraftMediaList churchId={selectedChurch} />
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+
                 {/* Recent Content Overview */}
                 <Card>
                   <CardHeader>
