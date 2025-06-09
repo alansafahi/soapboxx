@@ -182,6 +182,55 @@ export const userActivities = pgTable("user_activities", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Friend relationships
+export const friendships = pgTable("friendships", {
+  id: serial("id").primaryKey(),
+  requesterId: varchar("requester_id").notNull().references(() => users.id),
+  addresseeId: varchar("addressee_id").notNull().references(() => users.id),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, accepted, rejected, blocked
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chat conversations
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  type: varchar("type", { length: 20 }).notNull().default("direct"), // direct, group
+  name: varchar("name", { length: 255 }), // for group chats
+  description: text("description"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Conversation participants
+export const conversationParticipants = pgTable("conversation_participants", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: varchar("role", { length: 20 }).default("member"), // member, admin, clergy
+  joinedAt: timestamp("joined_at").defaultNow(),
+  lastReadAt: timestamp("last_read_at"),
+  isActive: boolean("is_active").default(true),
+});
+
+// Chat messages
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  messageType: varchar("message_type", { length: 20 }).default("text"), // text, image, file, system
+  replyToId: integer("reply_to_id").references(() => messages.id),
+  isEdited: boolean("is_edited").default(false),
+  editedAt: timestamp("edited_at"),
+  isDeleted: boolean("is_deleted").default(false),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userChurches: many(userChurches),
@@ -194,6 +243,59 @@ export const usersRelations = relations(users, ({ many }) => ({
   prayerResponses: many(prayerResponses),
   userAchievements: many(userAchievements),
   userActivities: many(userActivities),
+  requestedFriendships: many(friendships, { relationName: "requester" }),
+  receivedFriendships: many(friendships, { relationName: "addressee" }),
+  conversations: many(conversations),
+  conversationParticipants: many(conversationParticipants),
+  messages: many(messages),
+}));
+
+export const friendshipsRelations = relations(friendships, ({ one }) => ({
+  requester: one(users, {
+    fields: [friendships.requesterId],
+    references: [users.id],
+    relationName: "requester",
+  }),
+  addressee: one(users, {
+    fields: [friendships.addresseeId],
+    references: [users.id],
+    relationName: "addressee",
+  }),
+}));
+
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [conversations.createdBy],
+    references: [users.id],
+  }),
+  participants: many(conversationParticipants),
+  messages: many(messages),
+}));
+
+export const conversationParticipantsRelations = relations(conversationParticipants, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [conversationParticipants.conversationId],
+    references: [conversations.id],
+  }),
+  user: one(users, {
+    fields: [conversationParticipants.userId],
+    references: [users.id],
+  }),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+  }),
+  replyTo: one(messages, {
+    fields: [messages.replyToId],
+    references: [messages.id],
+  }),
 }));
 
 export const churchesRelations = relations(churches, ({ many }) => ({
@@ -347,6 +449,18 @@ export type UserActivity = typeof userActivities.$inferSelect;
 
 export type InsertUserChurch = typeof userChurches.$inferInsert;
 export type UserChurch = typeof userChurches.$inferSelect;
+
+export type InsertFriendship = typeof friendships.$inferInsert;
+export type Friendship = typeof friendships.$inferSelect;
+
+export type InsertConversation = typeof conversations.$inferInsert;
+export type Conversation = typeof conversations.$inferSelect;
+
+export type InsertConversationParticipant = typeof conversationParticipants.$inferInsert;
+export type ConversationParticipant = typeof conversationParticipants.$inferSelect;
+
+export type InsertMessage = typeof messages.$inferInsert;
+export type Message = typeof messages.$inferSelect;
 
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({

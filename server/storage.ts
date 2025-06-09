@@ -11,6 +11,10 @@ import {
   userAchievements,
   userActivities,
   userChurches,
+  friendships,
+  conversations,
+  conversationParticipants,
+  messages,
   type User,
   type UpsertUser,
   type Church,
@@ -30,6 +34,14 @@ import {
   type InsertPrayerResponse,
   type DiscussionComment,
   type InsertDiscussionComment,
+  type Friendship,
+  type InsertFriendship,
+  type Conversation,
+  type InsertConversation,
+  type ConversationParticipant,
+  type InsertConversationParticipant,
+  type Message,
+  type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc } from "drizzle-orm";
@@ -86,6 +98,21 @@ export interface IStorage {
   // User church connections
   getUserChurches(userId: string): Promise<Church[]>;
   joinChurch(userId: string, churchId: number): Promise<void>;
+  
+  // Friend operations
+  getFriends(userId: string): Promise<User[]>;
+  getFriendRequests(userId: string): Promise<Friendship[]>;
+  sendFriendRequest(requesterId: string, addresseeId: string): Promise<Friendship>;
+  respondToFriendRequest(friendshipId: number, status: 'accepted' | 'rejected'): Promise<Friendship>;
+  
+  // Chat operations
+  getConversations(userId: string): Promise<Conversation[]>;
+  getConversation(conversationId: number, userId: string): Promise<Conversation | undefined>;
+  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  addConversationParticipant(participant: InsertConversationParticipant): Promise<ConversationParticipant>;
+  getConversationMessages(conversationId: number, userId: string, limit?: number): Promise<Message[]>;
+  sendMessage(message: InsertMessage): Promise<Message>;
+  markMessagesAsRead(conversationId: number, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -546,6 +573,185 @@ export class DatabaseStorage implements IStorage {
       entityId: churchId,
       points: 20,
     });
+  }
+
+  // Friend operations
+  async getFriends(userId: string): Promise<User[]> {
+    const friendsList = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        bio: users.bio,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(friendships)
+      .innerJoin(
+        users,
+        sql`(${friendships.requesterId} = ${users.id} AND ${friendships.addresseeId} = ${userId}) OR (${friendships.addresseeId} = ${users.id} AND ${friendships.requesterId} = ${userId})`
+      )
+      .where(
+        and(
+          eq(friendships.status, 'accepted'),
+          sql`${users.id} != ${userId}`
+        )
+      );
+
+    return friendsList;
+  }
+
+  async getFriendRequests(userId: string): Promise<Friendship[]> {
+    return await db
+      .select()
+      .from(friendships)
+      .where(
+        and(
+          eq(friendships.addresseeId, userId),
+          eq(friendships.status, 'pending')
+        )
+      );
+  }
+
+  async sendFriendRequest(requesterId: string, addresseeId: string): Promise<Friendship> {
+    const [friendship] = await db
+      .insert(friendships)
+      .values({
+        requesterId,
+        addresseeId,
+        status: 'pending',
+      })
+      .returning();
+
+    return friendship;
+  }
+
+  async respondToFriendRequest(friendshipId: number, status: 'accepted' | 'rejected'): Promise<Friendship> {
+    const [friendship] = await db
+      .update(friendships)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(friendships.id, friendshipId))
+      .returning();
+
+    return friendship;
+  }
+
+  // Chat operations
+  async getConversations(userId: string): Promise<Conversation[]> {
+    return await db
+      .select({
+        id: conversations.id,
+        type: conversations.type,
+        name: conversations.name,
+        description: conversations.description,
+        createdBy: conversations.createdBy,
+        isActive: conversations.isActive,
+        createdAt: conversations.createdAt,
+        updatedAt: conversations.updatedAt,
+      })
+      .from(conversations)
+      .innerJoin(conversationParticipants, eq(conversations.id, conversationParticipants.conversationId))
+      .where(
+        and(
+          eq(conversationParticipants.userId, userId),
+          eq(conversationParticipants.isActive, true),
+          eq(conversations.isActive, true)
+        )
+      )
+      .orderBy(desc(conversations.updatedAt));
+  }
+
+  async getConversation(conversationId: number, userId: string): Promise<Conversation | undefined> {
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .innerJoin(conversationParticipants, eq(conversations.id, conversationParticipants.conversationId))
+      .where(
+        and(
+          eq(conversations.id, conversationId),
+          eq(conversationParticipants.userId, userId),
+          eq(conversationParticipants.isActive, true)
+        )
+      );
+
+    return conversation?.conversations;
+  }
+
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    const [newConversation] = await db
+      .insert(conversations)
+      .values(conversation)
+      .returning();
+
+    return newConversation;
+  }
+
+  async addConversationParticipant(participant: InsertConversationParticipant): Promise<ConversationParticipant> {
+    const [newParticipant] = await db
+      .insert(conversationParticipants)
+      .values(participant)
+      .returning();
+
+    return newParticipant;
+  }
+
+  async getConversationMessages(conversationId: number, userId: string, limit: number = 50): Promise<Message[]> {
+    // First verify user is participant
+    const isParticipant = await db
+      .select({ id: conversationParticipants.id })
+      .from(conversationParticipants)
+      .where(
+        and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.userId, userId),
+          eq(conversationParticipants.isActive, true)
+        )
+      );
+
+    if (isParticipant.length === 0) {
+      return [];
+    }
+
+    return await db
+      .select()
+      .from(messages)
+      .where(
+        and(
+          eq(messages.conversationId, conversationId),
+          eq(messages.isDeleted, false)
+        )
+      )
+      .orderBy(desc(messages.createdAt))
+      .limit(limit);
+  }
+
+  async sendMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
+
+    // Update conversation's updatedAt
+    await db
+      .update(conversations)
+      .set({ updatedAt: new Date() })
+      .where(eq(conversations.id, message.conversationId));
+
+    return newMessage;
+  }
+
+  async markMessagesAsRead(conversationId: number, userId: string): Promise<void> {
+    await db
+      .update(conversationParticipants)
+      .set({ lastReadAt: new Date() })
+      .where(
+        and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.userId, userId)
+        )
+      );
   }
 }
 
