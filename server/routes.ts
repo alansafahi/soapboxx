@@ -1,9 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
-import { userInspirationHistory, prayerResponses } from "@shared/schema";
+import { userInspirationHistory, prayerResponses, conversationParticipants } from "@shared/schema";
 import { and, eq } from "drizzle-orm";
 import { 
   insertChurchSchema,
@@ -1415,5 +1416,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Setup WebSocket server for real-time chat
+  const wss = new WebSocketServer({ 
+    server: httpServer,
+    path: '/ws'
+  });
+
+  // Store active connections
+  const connections = new Map<string, any>();
+
+  wss.on('connection', (ws, req) => {
+    let userId: string | null = null;
+
+    ws.on('message', async (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        switch (data.type) {
+          case 'auth':
+            userId = data.userId;
+            if (userId) {
+              connections.set(userId, ws);
+              ws.send(JSON.stringify({ type: 'auth_success' }));
+            }
+            break;
+            
+          case 'join_conversation':
+            // Store conversation ID for this connection
+            (ws as any).conversationId = data.conversationId;
+            break;
+            
+          case 'send_message':
+            if (userId && data.conversationId && data.content) {
+              try {
+                // Save message to database
+                const message = await storage.sendMessage({
+                  conversationId: data.conversationId,
+                  senderId: userId,
+                  content: data.content,
+                  messageType: data.messageType || 'text',
+                  replyToId: data.replyToId || null,
+                });
+                
+                // Broadcast to sender immediately
+                ws.send(JSON.stringify({
+                  type: 'new_message',
+                  message
+                }));
+                
+                // Broadcast to other participants
+                connections.forEach((connection, connUserId) => {
+                  if (connUserId !== userId && connection.readyState === 1) {
+                    connection.send(JSON.stringify({
+                      type: 'new_message',
+                      message
+                    }));
+                  }
+                });
+              } catch (msgError) {
+                console.error('Error saving message:', msgError);
+                ws.send(JSON.stringify({ type: 'error', message: 'Failed to send message' }));
+              }
+            }
+            break;
+        }
+      } catch (error) {
+        console.error('WebSocket error:', error);
+        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
+      }
+    });
+
+    ws.on('close', () => {
+      if (userId) {
+        connections.delete(userId);
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket connection error:', error);
+      if (userId) {
+        connections.delete(userId);
+      }
+    });
+  });
+
   return httpServer;
 }
