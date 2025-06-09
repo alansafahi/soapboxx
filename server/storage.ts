@@ -44,7 +44,7 @@ import {
   type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, count, asc } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -144,9 +144,11 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(
-        sql`LOWER(${users.firstName}) LIKE ${searchTerm} OR 
-            LOWER(${users.lastName}) LIKE ${searchTerm} OR 
-            LOWER(${users.email}) LIKE ${searchTerm}`
+        or(
+          ilike(users.firstName, searchTerm),
+          ilike(users.lastName, searchTerm),
+          ilike(users.email, searchTerm)
+        )
       )
       .limit(10);
     return foundUsers;
