@@ -757,6 +757,7 @@ export default function AdminPortal() {
         churchId: selectedChurch,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/devotionals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/devotionals"] });
     },
     onError: (error) => {
       toast({
@@ -789,6 +790,7 @@ export default function AdminPortal() {
         churchId: selectedChurch,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/weekly-series"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/weekly-series"] });
     },
     onError: (error) => {
       toast({
@@ -821,6 +823,7 @@ export default function AdminPortal() {
         churchId: selectedChurch,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/sermon-media"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/sermon-media"] });
     },
     onError: (error) => {
       toast({
