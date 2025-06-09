@@ -124,7 +124,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const generateRecommendations = useMutation({
     mutationFn: async (data: WizardData) => {
       // Simulate AI-powered matching based on preferences
-      const churchList = churches || [];
+      const churchList = Array.isArray(churches) ? churches : [];
       const scored = churchList.map((church: any) => {
         let score = 0;
         
@@ -173,16 +173,32 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     }
   });
 
-  const joinChurch = useMutation({
-    mutationFn: async (churchId: number) => {
-      return await apiRequest(`/api/churches/${churchId}/join`, { method: "POST" });
+  const completeOnboarding = useMutation({
+    mutationFn: async (data: WizardData) => {
+      return await apiRequest("/api/auth/complete-onboarding", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
     },
     onSuccess: () => {
       toast({
-        title: "Success!",
-        description: "You've joined the church community. Welcome!",
+        title: "Welcome to Soapbox!",
+        description: "Your preferences have been saved. Start exploring!",
       });
       onComplete();
+    }
+  });
+
+  const joinChurch = useMutation({
+    mutationFn: async (churchId: number) => {
+      return await apiRequest(`/api/churches/${churchId}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+    onSuccess: () => {
+      completeOnboarding.mutate(wizardData);
     }
   });
 

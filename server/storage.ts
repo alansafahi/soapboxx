@@ -51,6 +51,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   searchUsers(query: string): Promise<User[]>;
+  completeOnboarding(userId: string, onboardingData: any): Promise<void>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -152,6 +153,17 @@ export class DatabaseStorage implements IStorage {
       )
       .limit(10);
     return foundUsers;
+  }
+
+  async completeOnboarding(userId: string, onboardingData: any): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        hasCompletedOnboarding: true,
+        onboardingData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 
   // Church operations
