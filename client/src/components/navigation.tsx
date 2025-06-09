@@ -18,6 +18,7 @@ export default function Navigation() {
   const { toast } = useToast();
   const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Initialize notifications from localStorage or use defaults
   const getInitialNotifications = () => {
@@ -144,12 +145,12 @@ export default function Navigation() {
           </div>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             <button 
               onClick={() => {
                 document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Community
             </button>
@@ -157,7 +158,7 @@ export default function Navigation() {
               onClick={() => {
                 document.getElementById('church-discovery')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Churches
             </button>
@@ -165,7 +166,7 @@ export default function Navigation() {
               onClick={() => {
                 document.getElementById('events-list')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Events
             </button>
@@ -173,21 +174,47 @@ export default function Navigation() {
               onClick={() => {
                 document.getElementById('prayer-requests')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Prayer
             </button>
             <button 
               onClick={() => window.location.href = '/chat'}
-              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Messages
             </button>
             <button 
               onClick={() => window.location.href = '/admin'}
-              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Admin Portal
+            </button>
+          </nav>
+          
+          {/* Medium Screen Navigation - Compact */}
+          <nav className="hidden md:flex lg:hidden items-center space-x-4">
+            <button 
+              onClick={() => {
+                document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue transition-colors font-medium text-sm px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Community
+            </button>
+            <button 
+              onClick={() => {
+                document.getElementById('prayer-requests')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue transition-colors font-medium text-sm px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Prayer
+            </button>
+            <button 
+              onClick={() => window.location.href = '/chat'}
+              className="text-gray-900 dark:text-gray-100 hover:text-faith-blue transition-colors font-medium text-sm px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Messages
             </button>
           </nav>
           
@@ -287,11 +314,78 @@ export default function Navigation() {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="w-5 h-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <Menu className="w-5 h-5 text-gray-900 dark:text-white" />
             </Button>
           </div>
         </div>
+        
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div className="px-4 py-2 space-y-2">
+              <button 
+                onClick={() => {
+                  document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
+              >
+                Community
+              </button>
+              <button 
+                onClick={() => {
+                  document.getElementById('church-discovery')?.scrollIntoView({ behavior: 'smooth' });
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
+              >
+                Churches
+              </button>
+              <button 
+                onClick={() => {
+                  document.getElementById('events-list')?.scrollIntoView({ behavior: 'smooth' });
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
+              >
+                Events
+              </button>
+              <button 
+                onClick={() => {
+                  document.getElementById('prayer-requests')?.scrollIntoView({ behavior: 'smooth' });
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
+              >
+                Prayer
+              </button>
+              <button 
+                onClick={() => {
+                  window.location.href = '/chat';
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
+              >
+                Messages
+              </button>
+              <button 
+                onClick={() => {
+                  window.location.href = '/admin';
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
+              >
+                Admin Portal
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
