@@ -189,6 +189,43 @@ export const userActivities = pgTable("user_activities", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Daily inspirations table
+export const dailyInspirations = pgTable("daily_inspirations", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  content: text("content").notNull(),
+  verse: varchar("verse", { length: 200 }),
+  verseReference: varchar("verse_reference", { length: 100 }),
+  category: varchar("category", { length: 50 }).notNull(), // hope, faith, love, strength, etc.
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User inspiration preferences
+export const userInspirationPreferences = pgTable("user_inspiration_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  preferredCategories: text("preferred_categories").array(), // Array of categories user prefers
+  deliveryTime: varchar("delivery_time", { length: 10 }).default("08:00"), // Preferred time for daily inspiration
+  isEnabled: boolean("is_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userInspirationUnique: unique().on(table.userId),
+}));
+
+// User inspiration history
+export const userInspirationHistory = pgTable("user_inspiration_history", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  inspirationId: integer("inspiration_id").notNull().references(() => dailyInspirations.id),
+  wasRead: boolean("was_read").default(false),
+  wasFavorited: boolean("was_favorited").default(false),
+  wasShared: boolean("was_shared").default(false),
+  viewedAt: timestamp("viewed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Friend relationships
 export const friendships = pgTable("friendships", {
   id: serial("id").primaryKey(),
@@ -423,6 +460,28 @@ export const userActivitiesRelations = relations(userActivities, ({ one }) => ({
   }),
 }));
 
+export const dailyInspirationsRelations = relations(dailyInspirations, ({ many }) => ({
+  userHistory: many(userInspirationHistory),
+}));
+
+export const userInspirationPreferencesRelations = relations(userInspirationPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userInspirationPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userInspirationHistoryRelations = relations(userInspirationHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [userInspirationHistory.userId],
+    references: [users.id],
+  }),
+  inspiration: one(dailyInspirations, {
+    fields: [userInspirationHistory.inspirationId],
+    references: [dailyInspirations.id],
+  }),
+}));
+
 // Export types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -468,6 +527,15 @@ export type ConversationParticipant = typeof conversationParticipants.$inferSele
 
 export type InsertMessage = typeof messages.$inferInsert;
 export type Message = typeof messages.$inferSelect;
+
+export type InsertDailyInspiration = typeof dailyInspirations.$inferInsert;
+export type DailyInspiration = typeof dailyInspirations.$inferSelect;
+
+export type InsertUserInspirationPreference = typeof userInspirationPreferences.$inferInsert;
+export type UserInspirationPreference = typeof userInspirationPreferences.$inferSelect;
+
+export type InsertUserInspirationHistory = typeof userInspirationHistory.$inferInsert;
+export type UserInspirationHistory = typeof userInspirationHistory.$inferSelect;
 
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({

@@ -42,6 +42,14 @@ import {
   type InsertConversationParticipant,
   type Message,
   type InsertMessage,
+  dailyInspirations,
+  userInspirationPreferences,
+  userInspirationHistory,
+  type DailyInspiration,
+  type UserInspirationPreference,
+  type InsertUserInspirationPreference,
+  type UserInspirationHistory,
+  type InsertUserInspirationHistory,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike } from "drizzle-orm";
@@ -115,6 +123,15 @@ export interface IStorage {
   getConversationMessages(conversationId: number, userId: string, limit?: number): Promise<Message[]>;
   sendMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(conversationId: number, userId: string): Promise<void>;
+  
+  // Daily inspiration operations
+  getDailyInspiration(userId: string): Promise<DailyInspiration | undefined>;
+  getUserInspirationPreferences(userId: string): Promise<UserInspirationPreference | undefined>;
+  updateInspirationPreferences(userId: string, preferences: Partial<InsertUserInspirationPreference>): Promise<UserInspirationPreference>;
+  markInspirationAsRead(userId: string, inspirationId: number): Promise<void>;
+  favoriteInspiration(userId: string, inspirationId: number): Promise<void>;
+  unfavoriteInspiration(userId: string, inspirationId: number): Promise<void>;
+  shareInspiration(userId: string, inspirationId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -922,6 +939,136 @@ export class DatabaseStorage implements IStorage {
           eq(conversationParticipants.userId, userId)
         )
       );
+  }
+
+  // Daily inspiration operations
+  async getDailyInspiration(userId: string): Promise<DailyInspiration | undefined> {
+    // Get user preferences to personalize inspiration
+    const preferences = await this.getUserInspirationPreferences(userId);
+    const preferredCategories = preferences?.preferredCategories || ['faith', 'hope', 'love'];
+    
+    // Get inspirations the user hasn't seen recently (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentHistory = await db
+      .select({ inspirationId: userInspirationHistory.inspirationId })
+      .from(userInspirationHistory)
+      .where(
+        and(
+          eq(userInspirationHistory.userId, userId),
+          sql`${userInspirationHistory.createdAt} > ${thirtyDaysAgo}`
+        )
+      );
+    
+    const seenIds = recentHistory.map(h => h.inspirationId);
+    
+    // Find a personalized inspiration
+    const query = db
+      .select()
+      .from(dailyInspirations)
+      .where(
+        and(
+          eq(dailyInspirations.isActive, true),
+          sql`${dailyInspirations.category} = ANY(${preferredCategories})`,
+          seenIds.length > 0 ? sql`${dailyInspirations.id} NOT IN (${seenIds.join(',')})` : sql`1=1`
+        )
+      )
+      .orderBy(sql`RANDOM()`)
+      .limit(1);
+    
+    const [inspiration] = await query;
+    return inspiration;
+  }
+
+  async getUserInspirationPreferences(userId: string): Promise<UserInspirationPreference | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(userInspirationPreferences)
+      .where(eq(userInspirationPreferences.userId, userId));
+    return preferences;
+  }
+
+  async updateInspirationPreferences(
+    userId: string, 
+    preferences: Partial<InsertUserInspirationPreference>
+  ): Promise<UserInspirationPreference> {
+    const [updated] = await db
+      .insert(userInspirationPreferences)
+      .values({
+        userId,
+        ...preferences,
+      })
+      .onConflictDoUpdate({
+        target: [userInspirationPreferences.userId],
+        set: {
+          ...preferences,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return updated;
+  }
+
+  async markInspirationAsRead(userId: string, inspirationId: number): Promise<void> {
+    await db
+      .insert(userInspirationHistory)
+      .values({
+        userId,
+        inspirationId,
+        wasRead: true,
+      })
+      .onConflictDoUpdate({
+        target: [userInspirationHistory.userId, userInspirationHistory.inspirationId],
+        set: {
+          wasRead: true,
+          viewedAt: new Date(),
+        },
+      });
+  }
+
+  async favoriteInspiration(userId: string, inspirationId: number): Promise<void> {
+    await db
+      .insert(userInspirationHistory)
+      .values({
+        userId,
+        inspirationId,
+        wasFavorited: true,
+      })
+      .onConflictDoUpdate({
+        target: [userInspirationHistory.userId, userInspirationHistory.inspirationId],
+        set: {
+          wasFavorited: true,
+        },
+      });
+  }
+
+  async unfavoriteInspiration(userId: string, inspirationId: number): Promise<void> {
+    await db
+      .update(userInspirationHistory)
+      .set({ wasFavorited: false })
+      .where(
+        and(
+          eq(userInspirationHistory.userId, userId),
+          eq(userInspirationHistory.inspirationId, inspirationId)
+        )
+      );
+  }
+
+  async shareInspiration(userId: string, inspirationId: number): Promise<void> {
+    await db
+      .insert(userInspirationHistory)
+      .values({
+        userId,
+        inspirationId,
+        wasShared: true,
+      })
+      .onConflictDoUpdate({
+        target: [userInspirationHistory.userId, userInspirationHistory.inspirationId],
+        set: {
+          wasShared: true,
+        },
+      });
   }
 }
 
