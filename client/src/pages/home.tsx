@@ -87,7 +87,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold">{userStats?.prayerCount || 0}</div>
+                      <div className="text-2xl font-bold text-[#866eb5]">{userStats?.prayerCount || 0}</div>
                       <div className="text-blue-100 text-sm">Prayer Requests</div>
                     </div>
                   </div>
