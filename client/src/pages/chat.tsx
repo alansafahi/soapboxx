@@ -60,7 +60,19 @@ export default function Chat() {
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ["/api/conversations", selectedConversation, "messages"],
     enabled: isAuthenticated && selectedConversation !== null,
+    staleTime: 0,
+    refetchInterval: 2000, // Refetch every 2 seconds for real-time updates
   });
+
+  // Debug logging and scroll to bottom when messages change
+  useEffect(() => {
+    console.log('Selected conversation:', selectedConversation);
+    console.log('Messages data:', messages);
+    console.log('Messages array length:', Array.isArray(messages) ? messages.length : 'not array');
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   // Search users query
   const { data: searchResults = [], isLoading: searchLoading } = useQuery({
@@ -559,7 +571,7 @@ export default function Chat() {
                 {/* Messages */}
                 <ScrollArea className="flex-1 p-4">
                   <div className="space-y-4">
-                    {messages.map((message: any) => (
+                    {Array.isArray(messages) && messages.map((message: any) => (
                       <div
                         key={message.id}
                         className={`flex ${message.senderId === user?.id ? 'justify-end' : 'justify-start'}`}

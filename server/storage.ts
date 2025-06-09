@@ -740,7 +740,7 @@ export class DatabaseStorage implements IStorage {
           eq(messages.isDeleted, false)
         )
       )
-      .orderBy(desc(messages.createdAt))
+      .orderBy(messages.createdAt)
       .limit(limit);
   }
 
