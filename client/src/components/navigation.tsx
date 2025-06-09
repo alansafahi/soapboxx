@@ -59,24 +59,29 @@ export default function Navigation() {
     switch (notification.type) {
       case "prayer":
         // Scroll to prayer requests section
+        console.log('Attempting to scroll to prayer-requests');
         setTimeout(() => {
           const prayerSection = document.getElementById('prayer-requests');
+          console.log('Prayer section found:', prayerSection);
           if (prayerSection) {
-            prayerSection.scrollIntoView({ behavior: 'smooth' });
+            prayerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-        }, 100);
+        }, 500);
         break;
       case "event":
         // Scroll to events section
+        console.log('Attempting to scroll to events-list');
         setTimeout(() => {
           const eventsSection = document.getElementById('events-list');
+          console.log('Events section found:', eventsSection);
           if (eventsSection) {
-            eventsSection.scrollIntoView({ behavior: 'smooth' });
+            eventsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-        }, 100);
+        }, 500);
         break;
       case "message":
         // Navigate to messages page
+        console.log('Navigating to chat page');
         window.location.href = '/chat';
         break;
       default:
