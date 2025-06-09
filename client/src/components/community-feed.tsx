@@ -36,6 +36,8 @@ export default function CommunityFeed() {
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [viewCommentsDialogOpen, setViewCommentsDialogOpen] = useState<number | null>(null);
 
   const form = useForm<DiscussionFormData>({
     resolver: zodResolver(discussionSchema),
@@ -51,6 +53,12 @@ export default function CommunityFeed() {
   // Fetch discussions
   const { data: discussions = [], isLoading } = useQuery<Discussion[]>({
     queryKey: ["/api/discussions"],
+  });
+
+  // Fetch comments for viewing dialog
+  const { data: comments = [] } = useQuery({
+    queryKey: ["/api/discussions", viewCommentsDialogOpen, "comments"],
+    enabled: !!viewCommentsDialogOpen,
   });
 
   // Create discussion mutation
@@ -110,6 +118,40 @@ export default function CommunityFeed() {
       toast({
         title: "Error",
         description: "Failed to like discussion.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create comment mutation
+  const createCommentMutation = useMutation({
+    mutationFn: async ({ discussionId, content }: { discussionId: number; content: string }) => {
+      await apiRequest("POST", `/api/discussions/${discussionId}/comments`, { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      setCommentText("");
+      setCommentDialogOpen(null);
+      toast({
+        title: "Comment Posted",
+        description: "Your comment has been added to the discussion.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to post comment.",
         variant: "destructive",
       });
     },
@@ -318,26 +360,33 @@ export default function CommunityFeed() {
               <Textarea 
                 placeholder="Share your thoughts..."
                 className="min-h-[100px]"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
               />
               <div className="flex justify-end space-x-2">
                 <Button 
                   variant="outline" 
-                  onClick={() => setCommentDialogOpen(null)}
+                  onClick={() => {
+                    setCommentText("");
+                    setCommentDialogOpen(null);
+                  }}
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={() => {
-                    toast({
-                      title: "Comment Posted",
-                      description: "Your comment has been added to the discussion.",
-                    });
-                    setCommentDialogOpen(null);
+                    if (commentDialogOpen && commentText.trim()) {
+                      createCommentMutation.mutate({
+                        discussionId: commentDialogOpen,
+                        content: commentText.trim()
+                      });
+                    }
                   }}
+                  disabled={!commentText.trim() || createCommentMutation.isPending}
                   className="bg-faith-blue hover:bg-blue-600"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Post Comment
+                  {createCommentMutation.isPending ? "Posting..." : "Post Comment"}
                 </Button>
               </div>
             </div>

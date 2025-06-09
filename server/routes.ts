@@ -272,6 +272,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/discussions/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const discussionId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const { content } = req.body;
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: "Comment content is required" });
+      }
+      
+      const commentData = {
+        discussionId,
+        authorId: userId,
+        content: content.trim(),
+      };
+      
+      const comment = await storage.createDiscussionComment(commentData);
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      res.status(500).json({ message: "Failed to create comment" });
+    }
+  });
+
   // Prayer request routes
   app.get('/api/prayers', async (req, res) => {
     try {
