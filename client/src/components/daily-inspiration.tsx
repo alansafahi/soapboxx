@@ -24,9 +24,15 @@ import {
   Lightbulb,
   Waves,
   Smile,
-  Gift
+  Gift,
+  Search,
+  Users,
+  UserPlus
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FaFacebook, FaTwitter, FaInstagram, FaWhatsapp, FaTelegram, FaWeixin, FaSignal } from "react-icons/fa";
 
 interface DailyInspiration {
@@ -44,12 +50,26 @@ export default function DailyInspiration() {
   const [isShared, setIsShared] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: inspiration, isLoading, refetch } = useQuery({
     queryKey: ['/api/inspiration/daily'],
     retry: false,
+  });
+
+  // Get friends and search users
+  const { data: friends } = useQuery({
+    queryKey: ['/api/friends'],
+    retry: false,
+  });
+
+  const { data: searchResults } = useQuery({
+    queryKey: ['/api/users/search', searchQuery],
+    retry: false,
+    enabled: searchQuery.length > 0,
   });
 
   const markAsReadMutation = useMutation({
@@ -84,6 +104,28 @@ export default function DailyInspiration() {
       toast({
         title: "Shared to Community",
         description: "This inspiration has been posted to the community discussions where others can see and engage with it.",
+      });
+    },
+  });
+
+  const shareWithUsersMutation = useMutation({
+    mutationFn: async ({ inspirationId, userIds }: { inspirationId: number; userIds: string[] }) => {
+      await apiRequest('POST', `/api/inspiration/${inspirationId}/share-with-users`, { userIds });
+    },
+    onSuccess: () => {
+      setSelectedUsers([]);
+      setSearchQuery('');
+      setShowShareModal(false);
+      toast({
+        title: "Shared successfully",
+        description: `Inspiration shared with ${selectedUsers.length} ${selectedUsers.length === 1 ? 'person' : 'people'}`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Share failed",
+        description: "Please try again",
+        variant: "destructive",
       });
     },
   });
@@ -179,6 +221,31 @@ export default function DailyInspiration() {
     
     // Also track the share in our database
     shareMutation.mutate(inspiration.id);
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const shareWithSelectedUsers = () => {
+    if (!inspiration || selectedUsers.length === 0) return;
+    shareWithUsersMutation.mutate({ 
+      inspirationId: inspiration.id, 
+      userIds: selectedUsers 
+    });
+  };
+
+  const getUserDisplayName = (user: any) => {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user.firstName) return user.firstName;
+    if (user.email) return user.email;
+    return 'Unknown User';
   };
 
   const handleRefresh = () => {
@@ -552,23 +619,118 @@ export default function DailyInspiration() {
               </p>
             </div>
 
-            {/* Share to Community */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Share to Community</h4>
-              <Button
-                onClick={() => {
-                  if (inspiration) {
-                    shareMutation.mutate(inspiration.id);
-                    setShowShareModal(false);
-                  }
-                }}
-                disabled={shareMutation.isPending}
-                className="w-full"
-                variant="outline"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                {shareMutation.isPending ? 'Sharing...' : 'Post to Community Discussions'}
-              </Button>
+            {/* Share with Friends & Community */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center space-x-2">
+                <Users className="w-4 h-4" />
+                <span>Share with Friends & Community</span>
+              </h4>
+              
+              {/* Search Users */}
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="Search friends or community members..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Friends List */}
+              {friends && friends.length > 0 && searchQuery.length === 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
+                    <UserPlus className="w-3 h-3" />
+                    <span>Your Friends</span>
+                  </p>
+                  <div className="max-h-32 overflow-y-auto space-y-2">
+                    {friends.slice(0, 5).map((friend: any) => (
+                      <div key={friend.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <Checkbox
+                          checked={selectedUsers.includes(friend.id)}
+                          onCheckedChange={() => toggleUserSelection(friend.id)}
+                        />
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={friend.profileImageUrl} />
+                          <AvatarFallback>
+                            {getUserDisplayName(friend).charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {getUserDisplayName(friend)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Search Results */}
+              {searchResults && searchResults.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Search Results</p>
+                  <div className="max-h-32 overflow-y-auto space-y-2">
+                    {searchResults.slice(0, 10).map((user: any) => (
+                      <div key={user.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <Checkbox
+                          checked={selectedUsers.includes(user.id)}
+                          onCheckedChange={() => toggleUserSelection(user.id)}
+                        />
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={user.profileImageUrl} />
+                          <AvatarFallback>
+                            {getUserDisplayName(user).charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {getUserDisplayName(user)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Selected Users Count */}
+              {selectedUsers.length > 0 && (
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">
+                    {selectedUsers.length} {selectedUsers.length === 1 ? 'person' : 'people'} selected
+                  </span>
+                  <Button
+                    onClick={shareWithSelectedUsers}
+                    disabled={shareWithUsersMutation.isPending}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {shareWithUsersMutation.isPending ? 'Sharing...' : 'Share'}
+                  </Button>
+                </div>
+              )}
+
+              {/* Community Discussion Share */}
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                <Button
+                  onClick={() => {
+                    if (inspiration) {
+                      shareMutation.mutate(inspiration.id);
+                      setShowShareModal(false);
+                    }
+                  }}
+                  disabled={shareMutation.isPending}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {shareMutation.isPending ? 'Sharing...' : 'Post to Community Discussions'}
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
