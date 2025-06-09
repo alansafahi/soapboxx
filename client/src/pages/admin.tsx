@@ -666,7 +666,7 @@ export default function AdminPortal() {
       return;
     }
 
-    saveDevotionalDraftMutation.mutate({
+    saveDraftMutation.mutate({
       ...devotionalForm,
       churchId: selectedChurch,
     });
@@ -833,6 +833,8 @@ export default function AdminPortal() {
       });
     },
   });
+
+
 
 
 
