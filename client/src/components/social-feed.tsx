@@ -197,6 +197,7 @@ export default function SocialFeed() {
   };
 
   const handleLikePost = (post: FeedPost) => {
+    console.log('handleLikePost called with:', { postId: post.id, postType: post.type });
     likePostMutation.mutate({ 
       postId: post.id, 
       postType: post.type 
