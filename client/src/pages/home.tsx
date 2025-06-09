@@ -180,8 +180,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#850000]">{userStats?.connectionCount || 0}</div>
-                      <div className="text-xs text-[#1433ff] font-bold">Connections</div>
+                      <div className="text-xl font-bold text-white">{userStats?.connectionCount || 0}</div>
+                      <div className="text-xs text-blue-100 font-bold">Connections</div>
                     </div>
                   </div>
                 </div>
