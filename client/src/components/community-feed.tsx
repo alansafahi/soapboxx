@@ -1,0 +1,280 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Heart, MessageCircle, Share, Plus } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import type { Discussion } from "@shared/schema";
+
+const discussionSchema = z.object({
+  title: z.string().min(1, "Title is required").max(255, "Title too long"),
+  content: z.string().min(1, "Content is required"),
+  category: z.string().optional(),
+});
+
+type DiscussionFormData = z.infer<typeof discussionSchema>;
+
+export default function CommunityFeed() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  const form = useForm<DiscussionFormData>({
+    resolver: zodResolver(discussionSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      category: "general",
+    },
+  });
+
+  // Fetch discussions
+  const { data: discussions = [], isLoading } = useQuery<Discussion[]>({
+    queryKey: ["/api/discussions"],
+  });
+
+  // Create discussion mutation
+  const createDiscussionMutation = useMutation({
+    mutationFn: async (data: DiscussionFormData) => {
+      await apiRequest("POST", "/api/discussions", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      setIsCreateDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Discussion Created",
+        description: "Your discussion has been posted successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to create discussion. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Like discussion mutation
+  const likeDiscussionMutation = useMutation({
+    mutationFn: async (discussionId: number) => {
+      await apiRequest("POST", `/api/discussions/${discussionId}/like`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to like discussion.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateDiscussion = (data: DiscussionFormData) => {
+    createDiscussionMutation.mutate(data);
+  };
+
+  const handleLikeDiscussion = (discussionId: number) => {
+    likeDiscussionMutation.mutate(discussionId);
+  };
+
+  const formatTimeAgo = (date: string) => {
+    const now = new Date();
+    const past = new Date(date);
+    const diffInHours = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return `${Math.floor(diffInHours / 24)}d ago`;
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-16 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Community Discussions</CardTitle>
+          <Button variant="ghost" size="sm">
+            View All
+          </Button>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-6">
+        {discussions.length === 0 ? (
+          <div className="text-center py-8">
+            <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No discussions yet</h3>
+            <p className="text-gray-600 mb-4">Be the first to start a conversation in your community!</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {discussions.map((discussion) => (
+              <div key={discussion.id} className="py-6 first:pt-0 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-4 -mx-4">
+                <div className="flex items-start space-x-4">
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback>
+                      {discussion.authorId[0]?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="font-medium text-gray-900">Community Member</span>
+                      <span className="text-gray-400 text-sm">
+                        {formatTimeAgo(discussion.createdAt!)}
+                      </span>
+                    </div>
+                    <h3 className="font-medium text-gray-900 mb-2">{discussion.title}</h3>
+                    <p className="text-gray-600 text-sm line-clamp-2 mb-3">{discussion.content}</p>
+                    <div className="flex items-center space-x-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleLikeDiscussion(discussion.id)}
+                        className="text-gray-500 hover:text-faith-blue"
+                      >
+                        <Heart className="w-4 h-4 mr-1" />
+                        {discussion.likeCount || 0}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-gray-500 hover:text-faith-blue">
+                        <MessageCircle className="w-4 h-4 mr-1" />
+                        {discussion.commentCount || 0}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-gray-500 hover:text-faith-blue">
+                        <Share className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <div className="border-t border-gray-100 pt-6">
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full bg-faith-blue hover:bg-blue-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Start a Discussion
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create New Discussion</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleCreateDiscussion)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="What would you like to discuss?" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Content</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Share your thoughts..." 
+                            className="min-h-[100px]"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsCreateDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={createDiscussionMutation.isPending}
+                      className="bg-faith-blue hover:bg-blue-600"
+                    >
+                      {createDiscussionMutation.isPending ? "Posting..." : "Post Discussion"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
