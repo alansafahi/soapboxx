@@ -69,9 +69,11 @@ export default function Home() {
             <div id="daily-inspiration">
               <DailyInspiration />
             </div>
+            {/* Temporarily disabled to prevent event conflicts with social feed
             <div id="prayer-requests">
               <PrayerRequests />
             </div>
+            */}
             <div id="church-discovery">
               <ChurchDiscovery />
             </div>
