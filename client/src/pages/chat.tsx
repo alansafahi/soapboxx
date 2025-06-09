@@ -257,7 +257,84 @@ export default function Chat() {
         </div>
       </div>
 
-      <div className="container mx-auto p-6 h-[calc(100vh-120px)] flex flex-col">
+      <div className="container mx-auto p-6 h-[calc(100vh-120px)] flex flex-col md:pb-6 pb-20">
+        {/* Mobile Search Toggle */}
+        <div className="md:hidden mb-4">
+          <Button
+            variant="outline"
+            onClick={() => setShowUserSearch(!showUserSearch)}
+            className="w-full justify-start gap-2"
+          >
+            <Search className="h-4 w-4" />
+            Find Friends
+          </Button>
+        </div>
+
+        {/* Mobile Search Panel */}
+        {showUserSearch && (
+          <div className="md:hidden mb-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Find Friends
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="relative">
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pr-10"
+                  />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+                
+                {searchQuery.length >= 2 && (
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {searchLoading ? (
+                      <div className="text-sm text-gray-500 p-2">Searching...</div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map((foundUser: any) => (
+                        <div key={foundUser.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={foundUser.profileImageUrl} />
+                              <AvatarFallback>
+                                {foundUser.firstName?.[0] || foundUser.email?.[0] || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="text-sm">
+                              <div className="font-medium">
+                                {foundUser.firstName && foundUser.lastName 
+                                  ? `${foundUser.firstName} ${foundUser.lastName}`
+                                  : foundUser.email}
+                              </div>
+                            </div>
+                          </div>
+                          {foundUser.id !== user?.id && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => sendFriendRequestMutation.mutate({ addresseeId: foundUser.id })}
+                              disabled={sendFriendRequestMutation.isPending}
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-gray-500 p-2">No users found</div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <div className="flex gap-6 flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="w-80 hidden md:flex flex-col gap-4">
@@ -533,6 +610,29 @@ export default function Chat() {
             </Card>
           )}
         </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50">
+        <div className="flex justify-around items-center py-2 px-2">
+          <Link href="/">
+            <button className="flex flex-col items-center gap-1 p-2 rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <ArrowLeft className="h-5 w-5" />
+              <span className="text-xs font-medium">Back</span>
+            </button>
+          </Link>
+          <button 
+            onClick={() => setShowUserSearch(!showUserSearch)}
+            className="flex flex-col items-center gap-1 p-2 rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Search className="h-5 w-5" />
+            <span className="text-xs font-medium">Search</span>
+          </button>
+          <button className="flex flex-col items-center gap-1 p-2 rounded-lg transition-colors bg-blue-600 text-white">
+            <MessageCircle className="h-5 w-5" />
+            <span className="text-xs font-medium">Chat</span>
+          </button>
         </div>
       </div>
     </div>
