@@ -43,8 +43,9 @@ export default function Navigation() {
   const handleNotificationClick = (notification: any) => {
     console.log('Notification clicked:', notification);
     toast({
-      title: notification.title,
-      description: `Opened: ${notification.message}`,
+      title: `📢 ${notification.title}`,
+      description: notification.message,
+      duration: 5000,
     });
   };
 
