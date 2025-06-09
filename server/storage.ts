@@ -56,7 +56,7 @@ import {
   type InsertUserInspirationHistory,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -516,6 +516,32 @@ export class DatabaseStorage implements IStorage {
         eq(prayerResponses.userId, userId)
       ));
     return response;
+  }
+
+  async getPrayerSupportMessages(prayerRequestId: number): Promise<any[]> {
+    const responses = await db
+      .select({
+        id: prayerResponses.id,
+        content: prayerResponses.content,
+        createdAt: prayerResponses.createdAt,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(prayerResponses)
+      .innerJoin(users, eq(prayerResponses.userId, users.id))
+      .where(and(
+        eq(prayerResponses.prayerRequestId, prayerRequestId),
+        eq(prayerResponses.responseType, 'support'),
+        isNotNull(prayerResponses.content)
+      ))
+      .orderBy(desc(prayerResponses.createdAt));
+    
+    return responses;
   }
 
   async markPrayerAnswered(id: number): Promise<void> {

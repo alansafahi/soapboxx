@@ -160,6 +160,8 @@ export const prayerResponses = pgTable("prayer_responses", {
   id: serial("id").primaryKey(),
   prayerRequestId: integer("prayer_request_id").notNull().references(() => prayerRequests.id),
   userId: varchar("user_id").notNull().references(() => users.id),
+  responseType: varchar("response_type", { length: 20 }).default("prayed"), // "prayed" or "support"
+  content: text("content"), // Support message content (null for simple "prayed" responses)
   createdAt: timestamp("created_at").defaultNow(),
 });
 

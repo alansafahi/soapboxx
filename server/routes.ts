@@ -461,6 +461,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const supportResponse = await storage.prayForRequest({
         prayerRequestId,
         userId,
+        responseType: 'support',
+        content: content.trim(),
       });
       
       // Track user activity for providing support
