@@ -34,7 +34,6 @@ function Router() {
           <Route path="/chat" component={Chat} />
           <Route path="/admin" component={AdminPortal} />
           <Route path="/profile" component={Profile} />
-          <Route component={NotFound} />
         </>
       )}
     </Switch>
