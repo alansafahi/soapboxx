@@ -436,11 +436,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/search', isAuthenticated, async (req: any, res) => {
     try {
       const { q } = req.query;
+      console.log("Search query received:", q, typeof q, q?.length);
+      
       if (!q || typeof q !== 'string' || q.trim().length < 2) {
+        console.log("Query too short or invalid, returning empty array");
         return res.json([]);
       }
       
+      console.log("Searching for users with query:", q.trim());
       const users = await storage.searchUsers(q.trim());
+      console.log("Search results:", users);
       res.json(users);
     } catch (error) {
       console.error("Error searching users:", error);
