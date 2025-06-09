@@ -54,8 +54,23 @@ export default function EventsList() {
     },
   });
 
-  const handleRSVP = (eventId: number) => {
-    rsvpMutation.mutate({ eventId, status: "attending" });
+  const handleRSVP = (eventId: number, status: string) => {
+    // Add animation state
+    setAnimatingButtons(prev => new Set([...Array.from(prev), eventId]));
+    
+    // Update RSVP status optimistically
+    setRsvpStatus(prev => new Map(prev).set(eventId, status));
+
+    // Remove animation state after animation completes
+    setTimeout(() => {
+      setAnimatingButtons(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(eventId);
+        return newSet;
+      });
+    }, 400);
+
+    rsvpMutation.mutate({ eventId, status });
   };
 
   const formatEventDate = (date: string) => {
@@ -206,14 +221,32 @@ export default function EventsList() {
                           <Users className="w-4 h-4 mr-1" />
                           {event.maxAttendees ? `${Math.floor(Math.random() * event.maxAttendees)} / ${event.maxAttendees}` : `${Math.floor(Math.random() * 50)} attending`}
                         </span>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleRSVP(event.id)}
-                          disabled={rsvpMutation.isPending}
-                          className="bg-faith-blue hover:bg-blue-600 text-white"
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
                         >
-                          {rsvpMutation.isPending ? "RSVPing..." : "RSVP"}
-                        </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleRSVP(event.id, "attending")}
+                            disabled={rsvpMutation.isPending}
+                            className={`transition-all duration-300 ${
+                              rsvpStatus.get(event.id) === "attending"
+                                ? 'bg-green-500 hover:bg-green-600 text-white'
+                                : 'bg-faith-blue hover:bg-blue-600 text-white'
+                            }`}
+                          >
+                            <motion.span
+                              animate={animatingButtons.has(event.id) ? {
+                                scale: [1, 1.1, 1]
+                              } : {}}
+                              transition={{ duration: 0.4 }}
+                            >
+                              {rsvpMutation.isPending ? "RSVPing..." : 
+                               rsvpStatus.get(event.id) === "attending" ? "Attending ✓" : "RSVP"}
+                            </motion.span>
+                          </Button>
+                        </motion.div>
                       </div>
                     </div>
                   </div>

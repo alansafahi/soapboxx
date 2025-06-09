@@ -8,11 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Phone, Globe, Users } from "lucide-react";
+import { motion } from "framer-motion";
 import type { Church } from "@shared/schema";
 
 export default function ChurchDiscovery() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [joinedChurches, setJoinedChurches] = useState<Set<number>>(new Set());
+  const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
 
   // Fetch nearby churches
   const { data: churches = [], isLoading } = useQuery<Church[]>({
@@ -53,6 +56,21 @@ export default function ChurchDiscovery() {
   });
 
   const handleJoinChurch = (churchId: number) => {
+    // Add animation state
+    setAnimatingButtons(prev => new Set([...Array.from(prev), churchId]));
+    
+    // Update joined status optimistically
+    setJoinedChurches(prev => new Set([...Array.from(prev), churchId]));
+
+    // Remove animation state after animation completes
+    setTimeout(() => {
+      setAnimatingButtons(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(churchId);
+        return newSet;
+      });
+    }, 400);
+
     joinChurchMutation.mutate(churchId);
   };
 
@@ -220,15 +238,33 @@ export default function ChurchDiscovery() {
                       )}
                     </div>
                     
-                    <Button 
-                      size="sm"
-                      onClick={() => handleJoinChurch(church.id)}
-                      disabled={joinChurchMutation.isPending}
-                      className="text-faith-blue hover:text-blue-600 hover:bg-light-blue text-xs font-medium h-7 px-3"
-                      variant="ghost"
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      {joinChurchMutation.isPending ? "Connecting..." : "Connect"}
-                    </Button>
+                      <Button 
+                        size="sm"
+                        onClick={() => handleJoinChurch(church.id)}
+                        disabled={joinChurchMutation.isPending}
+                        className={`text-xs font-medium h-7 px-3 transition-all duration-300 ${
+                          joinedChurches.has(church.id)
+                            ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
+                            : 'text-faith-blue hover:text-blue-600 hover:bg-blue-50'
+                        }`}
+                        variant="ghost"
+                      >
+                        <motion.span
+                          animate={animatingButtons.has(church.id) ? {
+                            scale: [1, 1.1, 1]
+                          } : {}}
+                          transition={{ duration: 0.4 }}
+                        >
+                          {joinChurchMutation.isPending ? "Connecting..." : 
+                           joinedChurches.has(church.id) ? "Connected ✓" : "Connect"}
+                        </motion.span>
+                      </Button>
+                    </motion.div>
                   </div>
                   
                   {/* Contact Information */}
