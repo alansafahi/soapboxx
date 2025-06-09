@@ -1,5 +1,6 @@
-import { Bell, Heart, Menu, MessageCircle } from "lucide-react";
+import { Bell, Heart, Menu, MessageCircle, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -7,10 +8,51 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 export default function Navigation() {
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  // Mock notifications for demonstration
+  const notifications = [
+    {
+      id: 1,
+      title: "New Prayer Request",
+      message: "Sarah requested prayers for her family",
+      time: "2 minutes ago",
+      unread: true
+    },
+    {
+      id: 2,
+      title: "Event Reminder",
+      message: "Sunday service starts in 1 hour",
+      time: "45 minutes ago",
+      unread: true
+    },
+    {
+      id: 3,
+      title: "New Message",
+      message: "Pastor John sent you a message",
+      time: "1 hour ago",
+      unread: true
+    }
+  ];
+
+  const handleNotificationClick = (notification: any) => {
+    toast({
+      title: notification.title,
+      description: `Opened: ${notification.message}`,
+    });
+  };
+
+  const markAllAsRead = () => {
+    toast({
+      title: "Notifications",
+      description: "All notifications marked as read",
+    });
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -74,12 +116,54 @@ export default function Navigation() {
           
           {/* User Actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            {/* Notifications Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {notifications.filter(n => n.unread).length}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="flex items-center justify-between p-3 border-b">
+                  <h3 className="font-semibold text-sm">Notifications</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={markAllAsRead}
+                    className="text-xs h-6 px-2"
+                  >
+                    <Check className="w-3 h-3 mr-1" />
+                    Mark all read
+                  </Button>
+                </div>
+                {notifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    onClick={() => handleNotificationClick(notification)}
+                    className="p-3 flex flex-col items-start space-y-1 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-medium text-sm">{notification.title}</span>
+                      {notification.unread && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
+                    </div>
+                    <span className="text-sm text-gray-600 text-left">{notification.message}</span>
+                    <span className="text-xs text-gray-400">{notification.time}</span>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => window.location.href = '/messages'}
+                  className="p-3 text-center text-sm text-blue-600 hover:text-blue-700"
+                >
+                  View all messages
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <DropdownMenu>
               <DropdownMenuTrigger>
