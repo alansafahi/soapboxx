@@ -189,26 +189,30 @@ export default function Navigation() {
                     Mark all read
                   </Button>
                 </div>
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleNotificationClick(notification);
-                    }}
-                    className="p-3 flex flex-col items-start space-y-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="font-medium text-sm">{notification.title}</span>
-                      {notification.unread && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      )}
-                    </div>
-                    <span className="text-sm text-gray-600 dark:text-gray-300 text-left">{notification.message}</span>
-                    <span className="text-xs text-gray-400">{notification.time}</span>
+                {notifications.filter(n => n.unread).length === 0 ? (
+                  <div className="p-4 text-center text-gray-500 text-sm">
+                    No new notifications
                   </div>
-                ))}
+                ) : (
+                  notifications.filter(n => n.unread).map((notification) => (
+                    <div
+                      key={notification.id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleNotificationClick(notification);
+                      }}
+                      className="p-3 flex flex-col items-start space-y-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium text-sm">{notification.title}</span>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                      <span className="text-sm text-gray-600 dark:text-gray-300 text-left">{notification.message}</span>
+                      <span className="text-xs text-gray-400">{notification.time}</span>
+                    </div>
+                  ))
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   onClick={() => window.location.href = '/messages'}
