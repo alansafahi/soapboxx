@@ -363,6 +363,7 @@ export const insertEventSchema = createInsertSchema(events).omit({
 
 export const insertDiscussionSchema = createInsertSchema(discussions).omit({
   id: true,
+  authorId: true,
   createdAt: true,
   updatedAt: true,
   likeCount: true,
@@ -371,6 +372,7 @@ export const insertDiscussionSchema = createInsertSchema(discussions).omit({
 
 export const insertPrayerRequestSchema = createInsertSchema(prayerRequests).omit({
   id: true,
+  authorId: true,
   createdAt: true,
   updatedAt: true,
   prayerCount: true,

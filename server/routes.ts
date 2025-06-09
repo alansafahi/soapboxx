@@ -202,8 +202,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Discussion request body:", req.body);
       const discussionData = insertDiscussionSchema.parse(req.body);
-      discussionData.authorId = req.user.claims.sub;
-      const discussion = await storage.createDiscussion(discussionData);
+      const fullDiscussionData = {
+        ...discussionData,
+        authorId: req.user.claims.sub,
+      };
+      const discussion = await storage.createDiscussion(fullDiscussionData);
       res.status(201).json(discussion);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -264,8 +267,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Prayer request body:", req.body);
       const prayerData = insertPrayerRequestSchema.parse(req.body);
-      prayerData.authorId = req.user.claims.sub;
-      const prayer = await storage.createPrayerRequest(prayerData);
+      const fullPrayerData = {
+        ...prayerData,
+        authorId: req.user.claims.sub,
+      };
+      const prayer = await storage.createPrayerRequest(fullPrayerData);
       res.status(201).json(prayer);
     } catch (error) {
       if (error instanceof z.ZodError) {
