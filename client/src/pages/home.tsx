@@ -51,7 +51,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-warm-white">
       <Navigation />
-      
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <section className="mb-8">
@@ -60,7 +59,7 @@ export default function Home() {
               <h1 className="text-3xl font-bold mb-2">
                 Welcome back, {user?.firstName || 'Friend'}!
               </h1>
-              <p className="text-blue-100 text-lg mb-6">
+              <p className="text-lg mb-6 text-[#ff00f1]">
                 Continue your spiritual journey with your faith community
               </p>
               
@@ -140,7 +139,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      
       <MobileNav />
     </div>
   );
