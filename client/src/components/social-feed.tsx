@@ -140,7 +140,9 @@ export default function SocialFeed() {
   // Like post mutation
   const likePostMutation = useMutation({
     mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
-      const response = await fetch(`/api/${postType}s/${postId}/like`, {
+      const url = `/api/${postType}s/${postId}/like`;
+      console.log('Making like request to:', url);
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
