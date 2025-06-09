@@ -20,6 +20,8 @@ export default function Chat() {
   const queryClient = useQueryClient();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [messageContent, setMessageContent] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showUserSearch, setShowUserSearch] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,6 +60,12 @@ export default function Chat() {
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ["/api/conversations", selectedConversation, "messages"],
     enabled: isAuthenticated && selectedConversation !== null,
+  });
+
+  // Search users query
+  const { data: searchResults = [], isLoading: searchLoading } = useQuery({
+    queryKey: ['/api/users/search', searchQuery],
+    enabled: isAuthenticated && searchQuery.length >= 2,
   });
 
   // Send message mutation
@@ -119,6 +127,40 @@ export default function Chat() {
       toast({
         title: "Error",
         description: "Failed to start conversation",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Send friend request mutation
+  const sendFriendRequestMutation = useMutation({
+    mutationFn: async (data: { addresseeId: string }) => {
+      return await apiRequest("POST", "/api/friend-requests", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+      toast({
+        title: "Friend request sent",
+        description: "Your friend request has been sent successfully.",
+      });
+      setSearchQuery("");
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to send friend request. Please try again.",
         variant: "destructive",
       });
     },
@@ -218,7 +260,68 @@ export default function Chat() {
       <div className="container mx-auto p-6 h-[calc(100vh-120px)] flex flex-col">
         <div className="flex gap-6 flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-80 flex flex-col gap-4">
+        <div className="w-80 hidden md:flex flex-col gap-4">
+          {/* Friend Search */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Find Friends
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="relative">
+                <Input
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-10"
+                />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              </div>
+              
+              {searchQuery.length >= 2 && (
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {searchLoading ? (
+                    <div className="text-sm text-gray-500 p-2">Searching...</div>
+                  ) : searchResults.length > 0 ? (
+                    searchResults.map((foundUser: any) => (
+                      <div key={foundUser.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={foundUser.profileImageUrl} />
+                            <AvatarFallback>
+                              {foundUser.firstName?.[0] || foundUser.email?.[0] || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="text-sm">
+                            <div className="font-medium">
+                              {foundUser.firstName && foundUser.lastName 
+                                ? `${foundUser.firstName} ${foundUser.lastName}`
+                                : foundUser.email}
+                            </div>
+                          </div>
+                        </div>
+                        {foundUser.id !== user?.id && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => sendFriendRequestMutation.mutate({ addresseeId: foundUser.id })}
+                            disabled={sendFriendRequestMutation.isPending}
+                          >
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-gray-500 p-2">No users found</div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Friend Requests */}
           {friendRequests.length > 0 && (
             <Card>
