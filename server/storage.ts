@@ -133,6 +133,9 @@ export interface IStorage {
   unfavoriteInspiration(userId: string, inspirationId: number): Promise<void>;
   shareInspiration(userId: string, inspirationId: number): Promise<void>;
   shareInspirationWithUsers(senderId: string, inspirationId: number, userIds: string[]): Promise<void>;
+  
+  // Feed operations
+  getFeedPosts(userId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1166,6 +1169,198 @@ export class DatabaseStorage implements IStorage {
           wasShared: true,
         },
       });
+  }
+
+  async getFeedPosts(userId: string): Promise<any[]> {
+    try {
+      const feedPosts: any[] = [];
+
+      // Get discussions with author info and like status
+      const discussions = await db
+        .select({
+          id: discussions.id,
+          type: sql<string>`'discussion'`,
+          title: discussions.title,
+          content: discussions.content,
+          authorId: discussions.authorId,
+          authorName: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.email})`,
+          authorProfileImage: users.profileImageUrl,
+          churchId: discussions.churchId,
+          churchName: churches.name,
+          createdAt: discussions.createdAt,
+          likeCount: sql<number>`COALESCE(COUNT(${discussionLikes.id}), 0)`,
+          commentCount: sql<number>`0`,
+          shareCount: sql<number>`0`,
+          isLiked: sql<boolean>`EXISTS(
+            SELECT 1 FROM ${discussionLikes} 
+            WHERE ${discussionLikes.discussionId} = ${discussions.id} 
+            AND ${discussionLikes.userId} = ${userId}
+          )`
+        })
+        .from(discussions)
+        .leftJoin(users, eq(discussions.authorId, users.id))
+        .leftJoin(churches, eq(discussions.churchId, churches.id))
+        .leftJoin(discussionLikes, eq(discussionLikes.discussionId, discussions.id))
+        .groupBy(discussions.id, users.id, churches.id)
+        .orderBy(desc(discussions.createdAt))
+        .limit(10);
+
+      feedPosts.push(...discussions.map(d => ({
+        id: d.id,
+        type: 'discussion',
+        title: d.title,
+        content: d.content,
+        author: {
+          id: d.authorId,
+          name: d.authorName,
+          profileImage: d.authorProfileImage
+        },
+        church: d.churchId ? { id: d.churchId, name: d.churchName } : null,
+        createdAt: d.createdAt,
+        likeCount: d.likeCount,
+        commentCount: d.commentCount,
+        shareCount: d.shareCount,
+        isLiked: d.isLiked
+      })));
+
+      // Get prayer requests with author info
+      const prayers = await db
+        .select({
+          id: prayerRequests.id,
+          type: sql<string>`'prayer'`,
+          title: prayerRequests.title,
+          content: prayerRequests.content,
+          authorId: prayerRequests.authorId,
+          authorName: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.email})`,
+          authorProfileImage: users.profileImageUrl,
+          churchId: prayerRequests.churchId,
+          churchName: churches.name,
+          createdAt: prayerRequests.createdAt,
+          likeCount: sql<number>`0`,
+          commentCount: sql<number>`COALESCE(COUNT(${prayerResponses.id}), 0)`,
+          shareCount: sql<number>`0`,
+          isLiked: sql<boolean>`false`
+        })
+        .from(prayerRequests)
+        .leftJoin(users, eq(prayerRequests.authorId, users.id))
+        .leftJoin(churches, eq(prayerRequests.churchId, churches.id))
+        .leftJoin(prayerResponses, eq(prayerResponses.prayerRequestId, prayerRequests.id))
+        .groupBy(prayerRequests.id, users.id, churches.id)
+        .orderBy(desc(prayerRequests.createdAt))
+        .limit(10);
+
+      feedPosts.push(...prayers.map(p => ({
+        id: p.id,
+        type: 'prayer',
+        title: p.title,
+        content: p.content,
+        author: {
+          id: p.authorId,
+          name: p.authorName,
+          profileImage: p.authorProfileImage
+        },
+        church: p.churchId ? { id: p.churchId, name: p.churchName } : null,
+        createdAt: p.createdAt,
+        likeCount: p.likeCount,
+        commentCount: p.commentCount,
+        shareCount: p.shareCount,
+        isLiked: p.isLiked,
+        tags: ['prayer', 'faith']
+      })));
+
+      // Get events with author info
+      const eventsList = await db
+        .select({
+          id: events.id,
+          type: sql<string>`'event'`,
+          title: events.title,
+          content: events.description,
+          authorId: events.organizerId,
+          authorName: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.email})`,
+          authorProfileImage: users.profileImageUrl,
+          churchId: events.churchId,
+          churchName: churches.name,
+          createdAt: events.createdAt,
+          eventDate: events.date,
+          location: events.location,
+          likeCount: sql<number>`0`,
+          commentCount: sql<number>`0`,
+          shareCount: sql<number>`0`,
+          isLiked: sql<boolean>`false`
+        })
+        .from(events)
+        .leftJoin(users, eq(events.organizerId, users.id))
+        .leftJoin(churches, eq(events.churchId, churches.id))
+        .orderBy(desc(events.createdAt))
+        .limit(10);
+
+      feedPosts.push(...eventsList.map(e => ({
+        id: e.id,
+        type: 'event',
+        title: e.title,
+        content: e.content,
+        author: {
+          id: e.authorId,
+          name: e.authorName,
+          profileImage: e.authorProfileImage
+        },
+        church: e.churchId ? { id: e.churchId, name: e.churchName } : null,
+        createdAt: e.createdAt,
+        eventDate: e.eventDate,
+        location: e.location,
+        likeCount: e.likeCount,
+        commentCount: e.commentCount,
+        shareCount: e.shareCount,
+        isLiked: e.isLiked,
+        tags: ['event', 'community']
+      })));
+
+      // Get daily inspirations
+      const inspirations = await db
+        .select({
+          id: dailyInspirations.id,
+          type: sql<string>`'inspiration'`,
+          title: dailyInspirations.title,
+          content: dailyInspirations.content,
+          verse: dailyInspirations.verse,
+          verseReference: dailyInspirations.verseReference,
+          category: dailyInspirations.category,
+          createdAt: dailyInspirations.createdAt,
+          likeCount: sql<number>`0`,
+          commentCount: sql<number>`0`,
+          shareCount: sql<number>`0`,
+          isLiked: sql<boolean>`false`
+        })
+        .from(dailyInspirations)
+        .orderBy(desc(dailyInspirations.createdAt))
+        .limit(5);
+
+      feedPosts.push(...inspirations.map(i => ({
+        id: i.id,
+        type: 'inspiration',
+        title: i.title,
+        content: `${i.content}\n\n"${i.verse}"\n- ${i.verseReference}`,
+        author: {
+          id: 'system',
+          name: 'Daily Inspiration',
+          profileImage: null
+        },
+        church: null,
+        createdAt: i.createdAt,
+        likeCount: i.likeCount,
+        commentCount: i.commentCount,
+        shareCount: i.shareCount,
+        isLiked: i.isLiked,
+        tags: ['inspiration', i.category]
+      })));
+
+      // Sort all posts by creation date and return
+      return feedPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    } catch (error) {
+      console.error('Error fetching feed posts:', error);
+      return [];
+    }
   }
 }
 
