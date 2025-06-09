@@ -213,6 +213,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/churches/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const updatedChurch = await storage.updateChurch(churchId, updates);
+      res.json(updatedChurch);
+    } catch (error) {
+      console.error("Error updating church:", error);
+      res.status(500).json({ message: "Failed to update church" });
+    }
+  });
+
+  app.get('/api/churches/:id/members', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = parseInt(req.params.id);
+      const members = await storage.getChurchMembers(churchId);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching church members:", error);
+      res.status(500).json({ message: "Failed to fetch church members" });
+    }
+  });
+
+  app.put('/api/churches/:churchId/members/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const userId = req.params.userId;
+      const { role, permissions, title, bio } = req.body;
+      
+      const updatedMember = await storage.updateMemberRole(churchId, userId, role, permissions, title, bio);
+      res.json(updatedMember);
+    } catch (error) {
+      console.error("Error updating member role:", error);
+      res.status(500).json({ message: "Failed to update member role" });
+    }
+  });
+
+  app.delete('/api/churches/:churchId/members/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const userId = req.params.userId;
+      
+      await storage.removeMember(churchId, userId);
+      res.json({ message: "Member removed successfully" });
+    } catch (error) {
+      console.error("Error removing member:", error);
+      res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
   app.post('/api/churches/:id/join', isAuthenticated, async (req: any, res) => {
     try {
       const churchId = parseInt(req.params.id);
