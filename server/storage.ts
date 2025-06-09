@@ -97,6 +97,7 @@ export interface IStorage {
   createPrayerRequest(prayer: InsertPrayerRequest): Promise<PrayerRequest>;
   prayForRequest(response: InsertPrayerResponse): Promise<PrayerResponse>;
   getUserPrayerResponse(prayerRequestId: number, userId: string): Promise<PrayerResponse | undefined>;
+  removePrayerResponse(prayerRequestId: number, userId: string): Promise<void>;
   getPrayerSupportMessages(prayerRequestId: number): Promise<any[]>;
   markPrayerAnswered(id: number): Promise<void>;
   
@@ -514,9 +515,32 @@ export class DatabaseStorage implements IStorage {
       .from(prayerResponses)
       .where(and(
         eq(prayerResponses.prayerRequestId, prayerRequestId),
-        eq(prayerResponses.userId, userId)
+        eq(prayerResponses.userId, userId),
+        eq(prayerResponses.responseType, 'prayer')
       ));
     return response;
+  }
+
+  async removePrayerResponse(prayerRequestId: number, userId: string): Promise<void> {
+    // Delete the prayer response
+    const deletedResponse = await db
+      .delete(prayerResponses)
+      .where(and(
+        eq(prayerResponses.prayerRequestId, prayerRequestId),
+        eq(prayerResponses.userId, userId),
+        eq(prayerResponses.responseType, 'prayer')
+      ))
+      .returning();
+    
+    if (deletedResponse.length > 0) {
+      // Decrease prayer count
+      await db
+        .update(prayerRequests)
+        .set({ 
+          prayerCount: sql`GREATEST(${prayerRequests.prayerCount} - 1, 0)`
+        })
+        .where(eq(prayerRequests.id, prayerRequestId));
+    }
   }
 
   async getPrayerSupportMessages(prayerRequestId: number): Promise<any[]> {

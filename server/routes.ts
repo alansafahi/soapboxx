@@ -393,16 +393,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (prayerResponse) {
         // Remove the prayer response to "unlike"
-        await db.delete(prayerResponses).where(and(
-          eq(prayerResponses.prayerRequestId, prayerRequestId),
-          eq(prayerResponses.userId, userId)
-        ));
+        await storage.removePrayerResponse(prayerRequestId, userId);
         res.json({ liked: false });
       } else {
         // Add prayer response to "like"
         await storage.prayForRequest({
           prayerRequestId,
           userId,
+          responseType: 'prayer',
         });
         res.json({ liked: true });
       }
