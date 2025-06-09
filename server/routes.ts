@@ -1528,6 +1528,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Content Management API Routes
+  app.post('/api/devotionals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const devotionalData = insertDevotionalSchema.parse({
+        ...req.body,
+        authorId: userId,
+      });
+      
+      const devotional = await storage.createDevotional(devotionalData);
+      res.json(devotional);
+    } catch (error) {
+      console.error("Error creating devotional:", error);
+      res.status(500).json({ message: "Failed to create devotional" });
+    }
+  });
+
+  app.get('/api/devotionals', async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      const devotionals = await storage.getDevotionals(churchId ? parseInt(churchId.toString()) : undefined);
+      res.json(devotionals);
+    } catch (error) {
+      console.error("Error fetching devotionals:", error);
+      res.status(500).json({ message: "Failed to fetch devotionals" });
+    }
+  });
+
+  app.post('/api/weekly-series', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const seriesData = insertWeeklySeriesSchema.parse({
+        ...req.body,
+        authorId: userId,
+      });
+      
+      const series = await storage.createWeeklySeries(seriesData);
+      res.json(series);
+    } catch (error) {
+      console.error("Error creating weekly series:", error);
+      res.status(500).json({ message: "Failed to create weekly series" });
+    }
+  });
+
+  app.get('/api/weekly-series', async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      const series = await storage.getWeeklySeries(churchId ? parseInt(churchId.toString()) : undefined);
+      res.json(series);
+    } catch (error) {
+      console.error("Error fetching weekly series:", error);
+      res.status(500).json({ message: "Failed to fetch weekly series" });
+    }
+  });
+
+  app.post('/api/sermon-media', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const mediaData = insertSermonMediaSchema.parse({
+        ...req.body,
+        uploadedBy: userId,
+      });
+      
+      const media = await storage.createSermonMedia(mediaData);
+      res.json(media);
+    } catch (error) {
+      console.error("Error creating sermon media:", error);
+      res.status(500).json({ message: "Failed to create sermon media" });
+    }
+  });
+
+  app.get('/api/sermon-media', async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      const media = await storage.getSermonMedia(churchId ? parseInt(churchId.toString()) : undefined);
+      res.json(media);
+    } catch (error) {
+      console.error("Error fetching sermon media:", error);
+      res.status(500).json({ message: "Failed to fetch sermon media" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Setup WebSocket server for real-time chat
