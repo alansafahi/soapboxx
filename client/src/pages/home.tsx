@@ -88,7 +88,7 @@ export default function Home() {
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-[#866eb5]">{userStats?.prayerCount || 0}</div>
-                      <div className="text-sm text-[#1433ff]">Prayer Requests</div>
+                      <div className="text-sm text-[#1433ff] font-bold">Prayer Requests</div>
                     </div>
                   </div>
                 </div>
