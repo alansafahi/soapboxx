@@ -1,4 +1,4 @@
-import { Bell, Heart, Menu } from "lucide-react";
+import { Bell, Heart, Menu, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -57,6 +57,12 @@ export default function Navigation() {
               className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
             >
               Prayer
+            </button>
+            <button 
+              onClick={() => window.location.href = '/chat'}
+              className="text-gray-700 hover:text-faith-blue transition-colors font-medium"
+            >
+              Messages
             </button>
             <button 
               onClick={() => window.location.href = '/admin'}

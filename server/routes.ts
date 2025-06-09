@@ -431,6 +431,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Friends routes
+  app.get('/api/friends', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const friends = await storage.getFriends(userId);
+      res.json(friends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+      res.status(500).json({ message: "Failed to fetch friends" });
+    }
+  });
+
+  app.get('/api/friend-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const requests = await storage.getFriendRequests(userId);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+      res.status(500).json({ message: "Failed to fetch friend requests" });
+    }
+  });
+
+  app.post('/api/friend-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const requesterId = req.user.claims.sub;
+      const { addresseeId } = req.body;
+      
+      if (requesterId === addresseeId) {
+        return res.status(400).json({ message: "Cannot send friend request to yourself" });
+      }
+      
+      const friendship = await storage.sendFriendRequest(requesterId, addresseeId);
+      res.status(201).json(friendship);
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      res.status(500).json({ message: "Failed to send friend request" });
+    }
+  });
+
+  app.patch('/api/friend-requests/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const friendshipId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!['accepted', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const friendship = await storage.respondToFriendRequest(friendshipId, status);
+      res.json(friendship);
+    } catch (error) {
+      console.error("Error responding to friend request:", error);
+      res.status(500).json({ message: "Failed to respond to friend request" });
+    }
+  });
+
+  // Chat routes
+  app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const conversations = await storage.getConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.post('/api/conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const createdBy = req.user.claims.sub;
+      const { type, name, description, participantIds } = req.body;
+      
+      // Create conversation
+      const conversation = await storage.createConversation({
+        type: type || 'direct',
+        name,
+        description,
+        createdBy,
+      });
+      
+      // Add creator as participant
+      await storage.addConversationParticipant({
+        conversationId: conversation.id,
+        userId: createdBy,
+        role: 'admin',
+      });
+      
+      // Add other participants
+      if (participantIds && Array.isArray(participantIds)) {
+        for (const participantId of participantIds) {
+          if (participantId !== createdBy) {
+            await storage.addConversationParticipant({
+              conversationId: conversation.id,
+              userId: participantId,
+              role: 'member',
+            });
+          }
+        }
+      }
+      
+      res.status(201).json(conversation);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  app.get('/api/conversations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const conversation = await storage.getConversation(conversationId, userId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      res.json(conversation);
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      res.status(500).json({ message: "Failed to fetch conversation" });
+    }
+  });
+
+  app.get('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      const messages = await storage.getConversationMessages(conversationId, userId, limit);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const senderId = req.user.claims.sub;
+      const { content, messageType, replyToId } = req.body;
+      
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: "Message content is required" });
+      }
+      
+      const message = await storage.sendMessage({
+        conversationId,
+        senderId,
+        content: content.trim(),
+        messageType: messageType || 'text',
+        replyToId: replyToId || null,
+      });
+      
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.patch('/api/conversations/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.markMessagesAsRead(conversationId, userId);
+      res.json({ message: "Messages marked as read" });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
