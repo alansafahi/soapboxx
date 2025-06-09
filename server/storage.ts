@@ -78,6 +78,12 @@ import {
   type InsertChallenge,
   type ChallengeParticipant,
   type InsertChallengeParticipant,
+  communityGroups,
+  communityGroupMembers,
+  type CommunityGroup,
+  type InsertCommunityGroup,
+  type CommunityGroupMember,
+  type InsertCommunityGroupMember,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull } from "drizzle-orm";
@@ -298,6 +304,78 @@ export class DatabaseStorage implements IStorage {
   async createChurch(church: InsertChurch): Promise<Church> {
     const [newChurch] = await db.insert(churches).values(church).returning();
     return newChurch;
+  }
+
+  async updateChurch(id: number, updates: Partial<Church>): Promise<Church> {
+    const [updatedChurch] = await db
+      .update(churches)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(churches.id, id))
+      .returning();
+    return updatedChurch;
+  }
+
+  async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
+    return await db
+      .select({
+        id: userChurches.id,
+        userId: userChurches.userId,
+        churchId: userChurches.churchId,
+        role: userChurches.role,
+        permissions: userChurches.permissions,
+        title: userChurches.title,
+        bio: userChurches.bio,
+        joinedAt: userChurches.joinedAt,
+        isActive: userChurches.isActive,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          bio: users.bio,
+        }
+      })
+      .from(userChurches)
+      .innerJoin(users, eq(userChurches.userId, users.id))
+      .where(and(
+        eq(userChurches.churchId, churchId),
+        eq(userChurches.isActive, true)
+      ));
+  }
+
+  async updateMemberRole(
+    churchId: number, 
+    userId: string, 
+    role: string, 
+    permissions?: string[], 
+    title?: string, 
+    bio?: string
+  ): Promise<UserChurch> {
+    const [updatedMember] = await db
+      .update(userChurches)
+      .set({ 
+        role, 
+        permissions: permissions || [],
+        title,
+        bio 
+      })
+      .where(and(
+        eq(userChurches.churchId, churchId),
+        eq(userChurches.userId, userId)
+      ))
+      .returning();
+    return updatedMember;
+  }
+
+  async removeMember(churchId: number, userId: string): Promise<void> {
+    await db
+      .update(userChurches)
+      .set({ isActive: false })
+      .where(and(
+        eq(userChurches.churchId, churchId),
+        eq(userChurches.userId, userId)
+      ));
   }
 
   // Event operations
