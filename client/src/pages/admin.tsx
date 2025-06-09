@@ -476,6 +476,10 @@ export default function AdminPortal() {
                 </div>
               </TabsContent>
 
+              <TabsContent value="profile" className="space-y-6">
+                <ChurchProfileManager churchId={selectedChurch} />
+              </TabsContent>
+
               <TabsContent value="events" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">Church Events</h3>
