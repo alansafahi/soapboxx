@@ -58,6 +58,7 @@ export default function CommunityFeed() {
   // Fetch comments for viewing dialog
   const { data: comments = [] } = useQuery({
     queryKey: ["/api/discussions", viewCommentsDialogOpen, "comments"],
+    queryFn: () => apiRequest("GET", `/api/discussions/${viewCommentsDialogOpen}/comments`),
     enabled: !!viewCommentsDialogOpen,
   });
 
