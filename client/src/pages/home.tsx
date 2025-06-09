@@ -58,10 +58,10 @@ export default function Home() {
           <div className="bg-gradient-to-r from-faith-blue to-blue-600 rounded-2xl p-8 text-white relative overflow-hidden">
             <div className="relative z-10">
               <h1 className="text-3xl mb-2 text-[#9d00ff] text-left font-extrabold">
-                Welcome back, {user?.firstName || 'Friend'}!
+                Welcome to SoapBox Super App, {user?.firstName || 'Friend'}!
               </h1>
               <p className="text-lg mb-6 text-[#ff00f1]">
-                Continue your spiritual journey with your faith community
+                Your complete faith community platform - connect, grow, and thrive together
               </p>
               
               {/* Quick Stats with Gamification */}

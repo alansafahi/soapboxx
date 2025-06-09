@@ -133,10 +133,12 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-faith-blue rounded-xl flex items-center justify-center">
-              <Heart className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">Soapbox</span>
+            <img 
+              src="/src/assets/SoapBx logo_1749447146620.jpeg" 
+              alt="SoapBox Super App" 
+              className="w-10 h-10 rounded-xl object-cover"
+            />
+            <span className="text-2xl font-bold text-gray-900">SoapBox Super App</span>
           </div>
           
           {/* Desktop Navigation */}
