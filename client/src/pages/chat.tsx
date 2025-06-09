@@ -11,7 +11,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Users, UserPlus, Check, X } from "lucide-react";
+import { MessageCircle, Send, Users, UserPlus, Check, X, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Chat() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -192,16 +193,30 @@ export default function Chat() {
   }
 
   return (
-    <div className="container mx-auto p-6 h-screen flex flex-col">
-      <div className="flex items-center gap-4 mb-6">
-        <MessageCircle className="h-8 w-8 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Messages</h1>
-          <p className="text-gray-600 dark:text-gray-300">Connect with friends and clergy</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Navigation Header */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
+            <div className="flex items-center gap-3">
+              <MessageCircle className="h-8 w-8 text-blue-600" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Connect with friends and clergy</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex gap-6 flex-1 overflow-hidden">
+      <div className="container mx-auto p-6 h-[calc(100vh-120px)] flex flex-col">
+        <div className="flex gap-6 flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="w-80 flex flex-col gap-4">
           {/* Friend Requests */}
@@ -414,6 +429,7 @@ export default function Chat() {
               </div>
             </Card>
           )}
+        </div>
         </div>
       </div>
     </div>
