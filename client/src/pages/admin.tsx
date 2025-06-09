@@ -82,7 +82,7 @@ export default function AdminPortal() {
 
   const createChurchMutation = useMutation({
     mutationFn: async (data: ChurchFormData) => {
-      return await apiRequest("/api/churches", "POST", data);
+      return await apiRequest("POST", "/api/churches", data);
     },
     onSuccess: () => {
       toast({
@@ -103,7 +103,7 @@ export default function AdminPortal() {
 
   const createEventMutation = useMutation({
     mutationFn: async (data: EventFormData) => {
-      return await apiRequest("/api/events", "POST", data);
+      return await apiRequest("POST", "/api/events", data);
     },
     onSuccess: () => {
       toast({
