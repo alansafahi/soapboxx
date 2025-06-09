@@ -223,6 +223,142 @@ export default function AdminPortal() {
     });
   };
 
+  // Content management mutations
+  const createDevotionalMutation = useMutation({
+    mutationFn: async (data: DevotionalFormData) => {
+      return await apiRequest("POST", "/api/devotionals", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Devotional published successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/devotionals"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to publish devotional. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createWeeklySeriesMutation = useMutation({
+    mutationFn: async (data: WeeklySeriesFormData) => {
+      return await apiRequest("POST", "/api/weekly-series", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Weekly series created successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/weekly-series"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create weekly series. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createSermonMediaMutation = useMutation({
+    mutationFn: async (data: SermonMediaFormData) => {
+      return await apiRequest("POST", "/api/sermon-media", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Sermon media uploaded successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/sermon-media"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to upload sermon media. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Form handlers for content
+  const [devotionalForm, setDevotionalForm] = useState({
+    title: '',
+    category: '',
+    verseReference: '',
+    content: '',
+    churchId: selectedChurch,
+  });
+
+  const [weeklySeriesForm, setWeeklySeriesForm] = useState({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    frequency: '',
+    churchId: selectedChurch,
+  });
+
+  const [sermonMediaForm, setSermonMediaForm] = useState({
+    title: '',
+    speaker: '',
+    mediaType: '',
+    date: '',
+    description: '',
+    churchId: selectedChurch,
+  });
+
+  const handlePublishDevotional = () => {
+    if (!devotionalForm.title || !devotionalForm.content) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createDevotionalMutation.mutate({
+      ...devotionalForm,
+      churchId: selectedChurch,
+    });
+  };
+
+  const handleCreateWeeklySeries = () => {
+    if (!weeklySeriesForm.title || !weeklySeriesForm.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createWeeklySeriesMutation.mutate({
+      ...weeklySeriesForm,
+      churchId: selectedChurch,
+    });
+  };
+
+  const handleUploadSermonMedia = () => {
+    if (!sermonMediaForm.title || !sermonMediaForm.speaker) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createSermonMediaMutation.mutate({
+      ...sermonMediaForm,
+      churchId: selectedChurch,
+    });
+  };
+
   if (churchesLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -715,11 +851,19 @@ export default function AdminPortal() {
                           <div className="space-y-4">
                             <div>
                               <Label htmlFor="devotional-title">Title</Label>
-                              <Input id="devotional-title" placeholder="Finding Peace in Difficult Times" />
+                              <Input 
+                                id="devotional-title" 
+                                placeholder="Finding Peace in Difficult Times"
+                                value={devotionalForm.title}
+                                onChange={(e) => setDevotionalForm({...devotionalForm, title: e.target.value})}
+                              />
                             </div>
                             <div>
                               <Label htmlFor="devotional-category">Category</Label>
-                              <Select>
+                              <Select 
+                                value={devotionalForm.category}
+                                onValueChange={(value) => setDevotionalForm({...devotionalForm, category: value})}
+                              >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
@@ -735,7 +879,12 @@ export default function AdminPortal() {
                             </div>
                             <div>
                               <Label htmlFor="devotional-verse">Scripture Reference</Label>
-                              <Input id="devotional-verse" placeholder="John 14:27" />
+                              <Input 
+                                id="devotional-verse" 
+                                placeholder="John 14:27"
+                                value={devotionalForm.verseReference}
+                                onChange={(e) => setDevotionalForm({...devotionalForm, verseReference: e.target.value})}
+                              />
                             </div>
                             <div>
                               <Label htmlFor="devotional-content">Content</Label>
@@ -743,14 +892,20 @@ export default function AdminPortal() {
                                 id="devotional-content" 
                                 placeholder="Write your devotional content here..."
                                 className="min-h-32"
+                                value={devotionalForm.content}
+                                onChange={(e) => setDevotionalForm({...devotionalForm, content: e.target.value})}
                               />
                             </div>
                             <div className="flex gap-2">
                               <Button variant="outline" className="flex-1">
                                 Save as Draft
                               </Button>
-                              <Button className="flex-1">
-                                Publish Now
+                              <Button 
+                                className="flex-1"
+                                onClick={handlePublishDevotional}
+                                disabled={createDevotionalMutation.isPending}
+                              >
+                                {createDevotionalMutation.isPending ? "Publishing..." : "Publish Now"}
                               </Button>
                             </div>
                           </div>
@@ -791,7 +946,12 @@ export default function AdminPortal() {
                           <div className="space-y-4">
                             <div>
                               <Label htmlFor="series-title">Series Title</Label>
-                              <Input id="series-title" placeholder="Advent Countdown" />
+                              <Input 
+                                id="series-title" 
+                                placeholder="Advent Countdown"
+                                value={weeklySeriesForm.title}
+                                onChange={(e) => setWeeklySeriesForm({...weeklySeriesForm, title: e.target.value})}
+                              />
                             </div>
                             <div>
                               <Label htmlFor="series-description">Description</Label>
@@ -799,21 +959,36 @@ export default function AdminPortal() {
                                 id="series-description" 
                                 placeholder="A 4-week journey preparing our hearts for Christmas..."
                                 className="min-h-20"
+                                value={weeklySeriesForm.description}
+                                onChange={(e) => setWeeklySeriesForm({...weeklySeriesForm, description: e.target.value})}
                               />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <Label htmlFor="series-start">Start Date</Label>
-                                <Input id="series-start" type="date" />
+                                <Input 
+                                  id="series-start" 
+                                  type="date"
+                                  value={weeklySeriesForm.startDate}
+                                  onChange={(e) => setWeeklySeriesForm({...weeklySeriesForm, startDate: e.target.value})}
+                                />
                               </div>
                               <div>
                                 <Label htmlFor="series-end">End Date</Label>
-                                <Input id="series-end" type="date" />
+                                <Input 
+                                  id="series-end" 
+                                  type="date"
+                                  value={weeklySeriesForm.endDate}
+                                  onChange={(e) => setWeeklySeriesForm({...weeklySeriesForm, endDate: e.target.value})}
+                                />
                               </div>
                             </div>
                             <div>
                               <Label htmlFor="series-frequency">Frequency</Label>
-                              <Select>
+                              <Select
+                                value={weeklySeriesForm.frequency}
+                                onValueChange={(value) => setWeeklySeriesForm({...weeklySeriesForm, frequency: value})}
+                              >
                                 <SelectTrigger>
                                   <SelectValue placeholder="How often?" />
                                 </SelectTrigger>
@@ -824,8 +999,12 @@ export default function AdminPortal() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <Button className="w-full">
-                              Create Series
+                            <Button 
+                              className="w-full"
+                              onClick={handleCreateWeeklySeries}
+                              disabled={createWeeklySeriesMutation.isPending}
+                            >
+                              {createWeeklySeriesMutation.isPending ? "Creating..." : "Create Series"}
                             </Button>
                           </div>
                         </DialogContent>
@@ -865,15 +1044,28 @@ export default function AdminPortal() {
                           <div className="space-y-4">
                             <div>
                               <Label htmlFor="media-title">Title</Label>
-                              <Input id="media-title" placeholder="Sunday Service - Finding Hope" />
+                              <Input 
+                                id="media-title" 
+                                placeholder="Sunday Service - Finding Hope"
+                                value={sermonMediaForm.title}
+                                onChange={(e) => setSermonMediaForm({...sermonMediaForm, title: e.target.value})}
+                              />
                             </div>
                             <div>
                               <Label htmlFor="media-speaker">Speaker</Label>
-                              <Input id="media-speaker" placeholder="Pastor John Smith" />
+                              <Input 
+                                id="media-speaker" 
+                                placeholder="Pastor John Smith"
+                                value={sermonMediaForm.speaker}
+                                onChange={(e) => setSermonMediaForm({...sermonMediaForm, speaker: e.target.value})}
+                              />
                             </div>
                             <div>
                               <Label htmlFor="media-type">Media Type</Label>
-                              <Select>
+                              <Select
+                                value={sermonMediaForm.mediaType}
+                                onValueChange={(value) => setSermonMediaForm({...sermonMediaForm, mediaType: value})}
+                              >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
@@ -886,7 +1078,12 @@ export default function AdminPortal() {
                             </div>
                             <div>
                               <Label htmlFor="media-date">Date</Label>
-                              <Input id="media-date" type="date" />
+                              <Input 
+                                id="media-date" 
+                                type="date"
+                                value={sermonMediaForm.date}
+                                onChange={(e) => setSermonMediaForm({...sermonMediaForm, date: e.target.value})}
+                              />
                             </div>
                             <div>
                               <Label htmlFor="media-file">File Upload</Label>
@@ -898,10 +1095,16 @@ export default function AdminPortal() {
                                 id="media-description" 
                                 placeholder="Brief description of the sermon..."
                                 className="min-h-20"
+                                value={sermonMediaForm.description}
+                                onChange={(e) => setSermonMediaForm({...sermonMediaForm, description: e.target.value})}
                               />
                             </div>
-                            <Button className="w-full">
-                              Upload Media
+                            <Button 
+                              className="w-full"
+                              onClick={handleUploadSermonMedia}
+                              disabled={createSermonMediaMutation.isPending}
+                            >
+                              {createSermonMediaMutation.isPending ? "Uploading..." : "Upload Media"}
                             </Button>
                           </div>
                         </DialogContent>
