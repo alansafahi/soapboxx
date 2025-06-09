@@ -48,11 +48,13 @@ type WeeklySeriesFormData = z.infer<typeof weeklySeriesFormSchema>;
 type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 
 // Draft management components
-function DraftDevotionalsList({ churchId }: { churchId: number }) {
+function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
   const { data: drafts, isLoading, error } = useQuery({
     queryKey: ['/api/drafts/devotionals', churchId],
-    queryFn: () => apiRequest(`/api/drafts/devotionals?churchId=${churchId}`),
-    enabled: !!churchId,
+    queryFn: () => {
+      const url = churchId ? `/api/drafts/devotionals?churchId=${churchId}` : '/api/drafts/devotionals';
+      return apiRequest(url);
+    },
   });
 
   console.log('Draft query result:', { drafts, isLoading, error, churchId });
@@ -136,10 +138,13 @@ function DraftDevotionalsList({ churchId }: { churchId: number }) {
   );
 }
 
-function DraftSeriesList({ churchId }: { churchId: number }) {
+function DraftSeriesList({ churchId }: { churchId: number | null }) {
   const { data: drafts, isLoading } = useQuery({
     queryKey: ['/api/drafts/weekly-series', churchId],
-    queryFn: () => apiRequest(`/api/drafts/weekly-series?churchId=${churchId}`),
+    queryFn: () => {
+      const url = churchId ? `/api/drafts/weekly-series?churchId=${churchId}` : '/api/drafts/weekly-series';
+      return apiRequest(url);
+    },
   });
 
   const publishMutation = useMutation({
@@ -221,10 +226,13 @@ function DraftSeriesList({ churchId }: { churchId: number }) {
   );
 }
 
-function DraftMediaList({ churchId }: { churchId: number }) {
+function DraftMediaList({ churchId }: { churchId: number | null }) {
   const { data: drafts, isLoading } = useQuery({
     queryKey: ['/api/drafts/sermon-media', churchId],
-    queryFn: () => apiRequest(`/api/drafts/sermon-media?churchId=${churchId}`),
+    queryFn: () => {
+      const url = churchId ? `/api/drafts/sermon-media?churchId=${churchId}` : '/api/drafts/sermon-media';
+      return apiRequest(url);
+    },
   });
 
   const publishMutation = useMutation({
