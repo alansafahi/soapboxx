@@ -148,7 +148,7 @@ export default function Navigation() {
           <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             <button 
               onClick={() => {
-                document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('social-feed')?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
@@ -172,7 +172,7 @@ export default function Navigation() {
             </button>
             <button 
               onClick={() => {
-                document.getElementById('prayer-requests')?.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('prayer-wall')?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
