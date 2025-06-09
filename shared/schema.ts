@@ -665,8 +665,7 @@ export type PrayerRequest = typeof prayerRequests.$inferSelect;
 export type InsertPrayerResponse = typeof prayerResponses.$inferInsert;
 export type PrayerResponse = typeof prayerResponses.$inferSelect;
 
-export type InsertUserAchievement = typeof userAchievements.$inferInsert;
-export type UserAchievement = typeof userAchievements.$inferSelect;
+
 
 export type InsertUserActivity = typeof userActivities.$inferInsert;
 export type UserActivity = typeof userActivities.$inferSelect;

@@ -54,6 +54,32 @@ import {
   type InsertUserInspirationPreference,
   type UserInspirationHistory,
   type InsertUserInspirationHistory,
+  userScores,
+  pointTransactions,
+  achievements,
+  userAchievements,
+  leaderboards,
+  leaderboardEntries,
+  streaks,
+  challenges,
+  challengeParticipants,
+  type UserScore,
+  type InsertUserScore,
+  type PointTransaction,
+  type InsertPointTransaction,
+  type Achievement,
+  type UserAchievement,
+  type InsertUserAchievement,
+  type Leaderboard,
+  type InsertLeaderboard,
+  type LeaderboardEntry,
+  type InsertLeaderboardEntry,
+  type Streak,
+  type InsertStreak,
+  type Challenge,
+  type InsertChallenge,
+  type ChallengeParticipant,
+  type InsertChallengeParticipant,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull } from "drizzle-orm";
@@ -1504,6 +1530,222 @@ export class DatabaseStorage implements IStorage {
         eq(eventBookmarks.userId, userId),
         eq(eventBookmarks.eventId, eventId)
       ));
+  }
+
+  // Leaderboard operations
+  async getUserScore(userId: string): Promise<UserScore | undefined> {
+    const [userScore] = await db.select().from(userScores).where(eq(userScores.userId, userId));
+    return userScore;
+  }
+
+  async updateUserScore(userId: string, updates: Partial<InsertUserScore>): Promise<UserScore> {
+    const [userScore] = await db
+      .insert(userScores)
+      .values({
+        userId,
+        ...updates,
+      })
+      .onConflictDoUpdate({
+        target: userScores.userId,
+        set: {
+          ...updates,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return userScore;
+  }
+
+  async addPointTransaction(transaction: InsertPointTransaction): Promise<PointTransaction> {
+    const [pointTransaction] = await db
+      .insert(pointTransactions)
+      .values(transaction)
+      .returning();
+
+    // Update user score
+    await this.updateUserScore(transaction.userId, {
+      totalPoints: sql`${userScores.totalPoints} + ${transaction.points}`,
+      weeklyPoints: sql`${userScores.weeklyPoints} + ${transaction.points}`,
+      monthlyPoints: sql`${userScores.monthlyPoints} + ${transaction.points}`,
+    });
+
+    return pointTransaction;
+  }
+
+  async getLeaderboard(type: string, category: string, churchId?: number): Promise<LeaderboardEntry[]> {
+    let query = db
+      .select({
+        id: leaderboardEntries.id,
+        leaderboardId: leaderboardEntries.leaderboardId,
+        userId: leaderboardEntries.userId,
+        churchId: leaderboardEntries.churchId,
+        rank: leaderboardEntries.rank,
+        score: leaderboardEntries.score,
+        entityName: leaderboardEntries.entityName,
+        lastUpdated: leaderboardEntries.lastUpdated,
+      })
+      .from(leaderboardEntries)
+      .innerJoin(leaderboards, eq(leaderboardEntries.leaderboardId, leaderboards.id))
+      .where(
+        and(
+          eq(leaderboards.type, type),
+          eq(leaderboards.category, category),
+          eq(leaderboards.isActive, true)
+        )
+      );
+
+    if (churchId) {
+      query = query.where(eq(leaderboards.churchId, churchId));
+    }
+
+    return query.orderBy(asc(leaderboardEntries.rank));
+  }
+
+  async createLeaderboard(leaderboard: InsertLeaderboard): Promise<Leaderboard> {
+    const [newLeaderboard] = await db
+      .insert(leaderboards)
+      .values(leaderboard)
+      .returning();
+    return newLeaderboard;
+  }
+
+  async updateLeaderboardEntries(leaderboardId: number): Promise<void> {
+    const [leaderboard] = await db
+      .select()
+      .from(leaderboards)
+      .where(eq(leaderboards.id, leaderboardId));
+
+    if (!leaderboard) return;
+
+    // Clear existing entries
+    await db.delete(leaderboardEntries).where(eq(leaderboardEntries.leaderboardId, leaderboardId));
+
+    // Generate new entries based on leaderboard type and category
+    if (leaderboard.type === 'weekly' && leaderboard.category === 'overall') {
+      const topUsers = await db
+        .select({
+          userId: userScores.userId,
+          score: userScores.weeklyPoints,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+        })
+        .from(userScores)
+        .innerJoin(users, eq(userScores.userId, users.id))
+        .where(eq(userScores.isAnonymous, false))
+        .orderBy(desc(userScores.weeklyPoints))
+        .limit(100);
+
+      const entries = topUsers.map((user, index) => ({
+        leaderboardId,
+        userId: user.userId,
+        rank: index + 1,
+        score: user.score || 0,
+        entityName: user.firstName && user.lastName 
+          ? `${user.firstName} ${user.lastName}`
+          : user.email || 'Anonymous',
+      }));
+
+      if (entries.length > 0) {
+        await db.insert(leaderboardEntries).values(entries);
+      }
+    }
+    // Add more leaderboard types as needed
+  }
+
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    return db
+      .select()
+      .from(userAchievements)
+      .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+      .where(eq(userAchievements.userId, userId))
+      .orderBy(desc(userAchievements.earnedAt));
+  }
+
+  async awardAchievement(userId: string, achievementId: number): Promise<UserAchievement> {
+    const [userAchievement] = await db
+      .insert(userAchievements)
+      .values({
+        userId,
+        achievementId,
+      })
+      .onConflictDoNothing()
+      .returning();
+    return userAchievement;
+  }
+
+  async getUserStreaks(userId: string): Promise<Streak[]> {
+    return db
+      .select()
+      .from(streaks)
+      .where(and(
+        eq(streaks.userId, userId),
+        eq(streaks.isActive, true)
+      ));
+  }
+
+  async updateStreak(userId: string, type: string): Promise<Streak> {
+    const [streak] = await db
+      .insert(streaks)
+      .values({
+        userId,
+        type,
+        currentCount: 1,
+        longestCount: 1,
+        lastActivityDate: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [streaks.userId, streaks.type],
+        set: {
+          currentCount: sql`${streaks.currentCount} + 1`,
+          longestCount: sql`GREATEST(${streaks.longestCount}, ${streaks.currentCount} + 1)`,
+          lastActivityDate: new Date(),
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return streak;
+  }
+
+  async getChallenges(churchId?: number): Promise<Challenge[]> {
+    let query = db
+      .select()
+      .from(challenges)
+      .where(eq(challenges.isActive, true));
+
+    if (churchId) {
+      query = query.where(eq(challenges.churchId, churchId));
+    }
+
+    return query.orderBy(desc(challenges.startDate));
+  }
+
+  async joinChallenge(userId: string, challengeId: number): Promise<ChallengeParticipant> {
+    const [participant] = await db
+      .insert(challengeParticipants)
+      .values({
+        userId,
+        challengeId,
+      })
+      .onConflictDoNothing()
+      .returning();
+    return participant;
+  }
+
+  async updateChallengeProgress(userId: string, challengeId: number, progress: number): Promise<ChallengeParticipant> {
+    const [participant] = await db
+      .update(challengeParticipants)
+      .set({
+        currentProgress: progress,
+        isCompleted: sql`${challengeParticipants.currentProgress} >= (SELECT target_count FROM challenges WHERE id = ${challengeId})`,
+        completedAt: sql`CASE WHEN ${challengeParticipants.currentProgress} >= (SELECT target_count FROM challenges WHERE id = ${challengeId}) THEN NOW() ELSE NULL END`,
+      })
+      .where(and(
+        eq(challengeParticipants.userId, userId),
+        eq(challengeParticipants.challengeId, challengeId)
+      ))
+      .returning();
+    return participant;
   }
 }
 

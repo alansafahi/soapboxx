@@ -1222,6 +1222,185 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive Leaderboard API Endpoints
+  // 1. Weekly Faithfulness Score
+  app.get('/api/leaderboard/weekly-faithfulness', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.query;
+      const leaderboard = await storage.getLeaderboard('weekly', 'faithfulness', churchId ? parseInt(churchId) : undefined);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching weekly faithfulness leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // 2. Streak-Based Rankings
+  app.get('/api/leaderboard/streaks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const streaks = await storage.getUserStreaks(userId);
+      res.json(streaks);
+    } catch (error) {
+      console.error("Error fetching user streaks:", error);
+      res.status(500).json({ message: "Failed to fetch streaks" });
+    }
+  });
+
+  // 3. Prayer Champions
+  app.get('/api/leaderboard/prayer-champions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.query;
+      const leaderboard = await storage.getLeaderboard('monthly', 'prayer', churchId ? parseInt(churchId) : undefined);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching prayer champions leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // 4. Service & Volunteering Points
+  app.get('/api/leaderboard/service', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.query;
+      const leaderboard = await storage.getLeaderboard('monthly', 'service', churchId ? parseInt(churchId) : undefined);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching service leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // 5. User Score Management
+  app.get('/api/users/score', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userScore = await storage.getUserScore(userId);
+      res.json(userScore || { 
+        totalPoints: 0, 
+        weeklyPoints: 0, 
+        monthlyPoints: 0, 
+        currentStreak: 0, 
+        faithfulnessScore: 0,
+        prayerChampionPoints: 0,
+        serviceHours: 0,
+        isAnonymous: false
+      });
+    } catch (error) {
+      console.error("Error fetching user score:", error);
+      res.status(500).json({ message: "Failed to fetch user score" });
+    }
+  });
+
+  app.post('/api/users/score/anonymous', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { isAnonymous } = req.body;
+      const userScore = await storage.updateUserScore(userId, { isAnonymous });
+      res.json(userScore);
+    } catch (error) {
+      console.error("Error updating anonymous mode:", error);
+      res.status(500).json({ message: "Failed to update anonymous mode" });
+    }
+  });
+
+  // 6. Church vs Church Leaderboards
+  app.get('/api/leaderboard/church-vs-church', isAuthenticated, async (req: any, res) => {
+    try {
+      const leaderboard = await storage.getLeaderboard('monthly', 'church_comparison', undefined);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching church vs church leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // 7. Seasonal Leaderboards
+  app.get('/api/leaderboard/seasonal', isAuthenticated, async (req: any, res) => {
+    try {
+      const { season } = req.query;
+      const leaderboard = await storage.getLeaderboard('seasonal', season || 'current', undefined);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching seasonal leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // 8. Role-Based Filters
+  app.get('/api/leaderboard/by-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const { role, churchId } = req.query;
+      const leaderboard = await storage.getLeaderboard('monthly', `role_${role}`, churchId ? parseInt(churchId) : undefined);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching role-based leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // 9. Achievement System
+  app.get('/api/achievements', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const achievements = await storage.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  // 10. Challenge System
+  app.get('/api/challenges', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.query;
+      const challenges = await storage.getChallenges(churchId ? parseInt(churchId) : undefined);
+      res.json(challenges);
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+      res.status(500).json({ message: "Failed to fetch challenges" });
+    }
+  });
+
+  app.post('/api/challenges/:id/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const challengeId = parseInt(req.params.id);
+      const participant = await storage.joinChallenge(userId, challengeId);
+      res.json(participant);
+    } catch (error) {
+      console.error("Error joining challenge:", error);
+      res.status(500).json({ message: "Failed to join challenge" });
+    }
+  });
+
+  // Point Transaction System
+  app.post('/api/points/add', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { points, activityType, entityId, description } = req.body;
+      
+      const transaction = await storage.addPointTransaction({
+        userId,
+        points,
+        activityType,
+        entityId,
+        description,
+      });
+
+      // Update streaks based on activity
+      if (activityType === 'daily_prayer' || activityType === 'daily_devotional') {
+        await storage.updateStreak(userId, activityType);
+      }
+
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error adding points:", error);
+      res.status(500).json({ message: "Failed to add points" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
