@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus } from "lucide-react";
+import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X } from "lucide-react";
 import { insertChurchSchema, insertEventSchema } from "@shared/schema";
 
 const churchFormSchema = insertChurchSchema.extend({
@@ -35,6 +35,8 @@ export default function AdminPortal() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedChurch, setSelectedChurch] = useState<number | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const { data: churches = [], isLoading: churchesLoading } = useQuery({
     queryKey: ["/api/churches"],
