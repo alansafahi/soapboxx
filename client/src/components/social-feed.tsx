@@ -233,7 +233,7 @@ export default function SocialFeed() {
 
       {/* Feed Posts */}
       <div className="space-y-6">
-        {feedPosts.map((post: FeedPost) => (
+        {Array.isArray(feedPosts) && feedPosts.length > 0 ? feedPosts.map((post: FeedPost) => (
           <Card key={`${post.type}-${post.id}`} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between">
@@ -352,7 +352,12 @@ export default function SocialFeed() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        )) : (
+          <div className="text-center py-12">
+            <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">No posts yet. Be the first to share something!</p>
+          </div>
+        )}
       </div>
 
       {/* Load More Button */}
