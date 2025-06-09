@@ -64,160 +64,44 @@ export default function Home() {
                 Your complete faith community platform - connect, grow, and thrive together
               </p>
               
-              {/* Organized Metrics Dashboard */}
-              <div className="space-y-8">
-                {/* Your Spiritual Journey */}
-                <div>
-                  <h3 className="text-white text-lg font-semibold mb-4 flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 3l1.09 3.26L16 6.11l-3.26 1.09L12 10l-1.09-3.26L8 6.11l3.26-1.09L12 3zm2.54 5L13 10.54l3.26 1.09L17 15l1.09-3.26L21.5 11l-3.26-1.09L17 7l-1.09 3.26L14.5 11l1.09-3.26z"/>
-                    </svg>
-                    Your Spiritual Journey
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {/* Daily Inspirations Read */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 3l1.09 3.26L16 6.11l-3.26 1.09L12 10l-1.09-3.26L8 6.11l3.26-1.09L12 3zm2.54 5L13 10.54l3.26 1.09L17 15l1.09-3.26L21.5 11l-3.26-1.09L17 7l-1.09 3.26L14.5 11l1.09-3.26z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">{userStats?.inspirationsRead || 0}</div>
-                          <div className="text-xs text-blue-100 font-bold">Daily Inspirations</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Prayers Offered */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 8c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1s-1 .45-1 1v4c0 .55.45 1 1 1zm4.24-2.93l1.41-1.41c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0zM21 11h-4c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1s-.45-1-1-1zM7.76 5.07L6.35 3.66c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41zM8 13H4c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1s-.45-1-1-1zm4.3 7.3l-1.41-1.41c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">{userStats?.prayersOffered || 0}</div>
-                          <div className="text-xs text-blue-100 font-bold">Prayers Offered</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Prayer Requests */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 8V4l8 8-8 8v-4H4v-8h8z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">{userStats?.prayerCount || 0}</div>
-                          <div className="text-xs text-blue-100 font-bold">Prayer Requests</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Community Engagement */}
-                <div>
-                  <h3 className="text-white text-lg font-semibold mb-4 flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                    Community Engagement
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {/* Discussion Posts */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">{userStats?.discussionCount || 0}</div>
-                          <div className="text-xs text-blue-100 font-bold">Discussion Posts</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Events Attended */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">{userStats?.attendanceCount || 0}</div>
-                          <div className="text-xs text-blue-100 font-bold">Events Attended</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Connections */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">{userStats?.connectionCount || 0}</div>
-                          <div className="text-xs text-blue-100 font-bold">Connections</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Achievement Progress */}
-                <div>
-                  <h3 className="text-white text-lg font-semibold mb-4 flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    Achievement Progress
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Achievement Level */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-yellow-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">Level {userStats?.level || 1}</div>
-                          <div className="text-xs text-blue-100 font-bold">Current Level</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Points Earned */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">{userStats?.totalPoints || 0}</div>
-                          <div className="text-xs text-blue-100 font-bold">Total Points</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+                <button 
+                  onClick={() => {
+                    document.getElementById('daily-inspiration')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center border border-white/30 hover:bg-white/30 transition-all duration-200 group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📖</div>
+                  <div className="text-sm font-medium text-white">Daily Inspiration</div>
+                </button>
+                <button 
+                  onClick={() => {
+                    document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center border border-white/30 hover:bg-white/30 transition-all duration-200 group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">💬</div>
+                  <div className="text-sm font-medium text-white">Community</div>
+                </button>
+                <button 
+                  onClick={() => {
+                    document.getElementById('prayer-requests')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center border border-white/30 hover:bg-white/30 transition-all duration-200 group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🙏</div>
+                  <div className="text-sm font-medium text-white">Prayer</div>
+                </button>
+                <button 
+                  onClick={() => {
+                    document.getElementById('church-discovery')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center border border-white/30 hover:bg-white/30 transition-all duration-200 group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">⛪</div>
+                  <div className="text-sm font-medium text-white">Churches</div>
+                </button>
               </div>
             </div>
             
