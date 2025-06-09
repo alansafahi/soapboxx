@@ -517,6 +517,8 @@ export class DatabaseStorage implements IStorage {
     prayerCount: number;
     connectionCount: number;
     discussionCount: number;
+    inspirationsRead: number;
+    prayersOffered: number;
     totalPoints: number;
     currentStreak: number;
     level: number;
@@ -552,6 +554,18 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(discussions)
       .where(eq(discussions.authorId, userId));
+
+    // Get inspirations read count
+    const [inspirationsResult] = await db
+      .select({ count: count() })
+      .from(userInspirationHistory)
+      .where(and(
+        eq(userInspirationHistory.userId, userId),
+        eq(userInspirationHistory.wasRead, true)
+      ));
+
+    // Get prayers offered count (same as prayer count but more descriptive)
+    const prayersOffered = prayerResult.count;
 
     // Calculate total points from user activities
     const [pointsResult] = await db
@@ -612,6 +626,8 @@ export class DatabaseStorage implements IStorage {
       prayerCount: prayerResult.count,
       connectionCount: connectionResult.count,
       discussionCount: discussionResult.count,
+      inspirationsRead: inspirationsResult.count,
+      prayersOffered,
       totalPoints,
       currentStreak,
       level,
