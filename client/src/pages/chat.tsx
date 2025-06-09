@@ -212,6 +212,21 @@ export default function Chat() {
   };
 
   const startConversationWithFriend = (friendId: string, friendName: string) => {
+    // Look for existing conversation that matches this friend
+    const existingConversation = (conversations as any[]).find((conv: any) => 
+      conv.type === 'direct' && conv.name && conv.name.includes(friendName)
+    );
+    
+    if (existingConversation) {
+      setSelectedConversation(existingConversation.id);
+      toast({
+        title: "Conversation selected",
+        description: `Now chatting with ${friendName}`,
+      });
+      return;
+    }
+    
+    // Create new conversation if none exists
     startConversationMutation.mutate({
       participantIds: [friendId],
       type: "direct",
@@ -462,7 +477,7 @@ export default function Chat() {
                 <div className="space-y-2">
                   {friends.map((friend: any) => (
                     <div
-                      key={`friend-${friend.id}`}
+                      key={`friendlist-${friend.id}`}
                       className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
                       onClick={() => startConversationWithFriend(friend.id, friend.firstName || friend.email)}
                     >
