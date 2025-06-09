@@ -71,7 +71,9 @@ export const userChurches = pgTable("user_churches", {
   role: varchar("role", { length: 50 }).default("member"), // member, admin, pastor
   joinedAt: timestamp("joined_at").defaultNow(),
   isActive: boolean("is_active").default(true),
-});
+}, (table) => ({
+  userChurchUnique: unique().on(table.userId, table.churchId),
+}));
 
 // Events table
 export const events = pgTable("events", {
