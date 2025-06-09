@@ -13,8 +13,21 @@ import {
   Sparkles, 
   BookOpen,
   Sun,
-  Star
+  Star,
+  Copy,
+  Check,
+  X,
+  Mail,
+  MessageCircle,
+  Send,
+  Shield,
+  Lightbulb,
+  Waves,
+  Smile,
+  Gift
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FaFacebook, FaTwitter, FaInstagram, FaWhatsapp, FaTelegram, FaWeixin, FaSignal } from "react-icons/fa";
 
 interface DailyInspiration {
   id: number;
@@ -29,6 +42,8 @@ interface DailyInspiration {
 export default function DailyInspiration() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isShared, setIsShared] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -94,7 +109,75 @@ export default function DailyInspiration() {
 
   const handleShare = () => {
     if (!inspiration) return;
+    setShowShareModal(true);
+  };
+
+  const getShareUrl = () => {
+    if (!inspiration) return '';
+    return `${window.location.origin}/inspiration/${inspiration.id}`;
+  };
+
+  const getShareText = () => {
+    if (!inspiration) return '';
+    return `${inspiration.title}\n\n${inspiration.content}${inspiration.verse ? `\n\n"${inspiration.verse}" - ${inspiration.verseReference}` : ''}\n\nShared from Soapbox`;
+  };
+
+  const copyToClipboard = async () => {
+    const shareText = getShareText();
+    const shareUrl = getShareUrl();
+    const fullText = `${shareText}\n\n${shareUrl}`;
     
+    try {
+      await navigator.clipboard.writeText(fullText);
+      setCopied(true);
+      toast({
+        title: "Copied to clipboard",
+        description: "Share text and link copied successfully",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Copy failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const shareToSocial = (platform: string) => {
+    if (!inspiration) return;
+    
+    const text = encodeURIComponent(getShareText());
+    const url = encodeURIComponent(getShareUrl());
+    
+    let shareUrl = '';
+    
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${text}%20${url}`;
+        break;
+      case 'telegram':
+        shareUrl = `https://t.me/share/url?url=${url}&text=${text}`;
+        break;
+      case 'email':
+        shareUrl = `mailto:?subject=${encodeURIComponent(inspiration.title)}&body=${text}%20${url}`;
+        break;
+      case 'sms':
+        shareUrl = `sms:?body=${text}%20${url}`;
+        break;
+      default:
+        return;
+    }
+    
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    
+    // Also track the share in our database
     shareMutation.mutate(inspiration.id);
   };
 
@@ -345,6 +428,151 @@ export default function DailyInspiration() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Social Media Sharing Modal */}
+      <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Share2 className="w-5 h-5" />
+              <span>Share Daily Inspiration</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Copy Link Section */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Copy Link</h4>
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-300 break-all">
+                  {getShareUrl()}
+                </div>
+                <Button
+                  onClick={copyToClipboard}
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Social Media Platforms */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Share to Social Media</h4>
+              <div className="grid grid-cols-4 gap-3">
+                <Button
+                  onClick={() => shareToSocial('facebook')}
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                >
+                  <FaFacebook className="w-5 h-5 text-blue-600" />
+                  <span className="text-xs">Facebook</span>
+                </Button>
+                
+                <Button
+                  onClick={() => shareToSocial('twitter')}
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                >
+                  <FaTwitter className="w-5 h-5 text-blue-400" />
+                  <span className="text-xs">X (Twitter)</span>
+                </Button>
+                
+                <Button
+                  onClick={() => shareToSocial('whatsapp')}
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                >
+                  <FaWhatsapp className="w-5 h-5 text-green-500" />
+                  <span className="text-xs">WhatsApp</span>
+                </Button>
+                
+                <Button
+                  onClick={() => shareToSocial('telegram')}
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                >
+                  <FaTelegram className="w-5 h-5 text-blue-500" />
+                  <span className="text-xs">Telegram</span>
+                </Button>
+                
+                <Button
+                  onClick={() => shareToSocial('email')}
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                >
+                  <Mail className="w-5 h-5 text-gray-600" />
+                  <span className="text-xs">Email</span>
+                </Button>
+                
+                <Button
+                  onClick={() => shareToSocial('sms')}
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                >
+                  <MessageCircle className="w-5 h-5 text-green-600" />
+                  <span className="text-xs">SMS</span>
+                </Button>
+                
+                <Button
+                  onClick={() => shareToSocial('instagram')}
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                  disabled
+                >
+                  <FaInstagram className="w-5 h-5 text-pink-500 opacity-50" />
+                  <span className="text-xs opacity-50">Instagram</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-col items-center space-y-1 h-auto p-3"
+                  disabled
+                >
+                  <FaWeixin className="w-5 h-5 text-green-600 opacity-50" />
+                  <span className="text-xs opacity-50">WeChat</span>
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Some platforms require their native apps to be installed for direct sharing.
+              </p>
+            </div>
+
+            {/* Share to Community */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Share to Community</h4>
+              <Button
+                onClick={() => {
+                  if (inspiration) {
+                    shareMutation.mutate(inspiration.id);
+                    setShowShareModal(false);
+                  }
+                }}
+                disabled={shareMutation.isPending}
+                className="w-full"
+                variant="outline"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {shareMutation.isPending ? 'Sharing...' : 'Post to Community Discussions'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AnimatePresence>
   );
 }
