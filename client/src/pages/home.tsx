@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
 import SocialFeed from "@/components/social-feed";
 import EventsList from "@/components/events-list";
-import PrayerRequests from "@/components/prayer-requests";
+import PrayerWall from "@/components/prayer-wall";
 import ChurchDiscovery from "@/components/church-discovery";
 import DailyInspiration from "@/components/daily-inspiration";
 import MobileNav from "@/components/mobile-nav";
@@ -69,11 +69,9 @@ export default function Home() {
             <div id="daily-inspiration">
               <DailyInspiration />
             </div>
-            {/* Temporarily disabled to prevent event conflicts with social feed
-            <div id="prayer-requests">
-              <PrayerRequests />
+            <div id="prayer-wall">
+              <PrayerWall />
             </div>
-            */}
             <div id="church-discovery">
               <ChurchDiscovery />
             </div>
