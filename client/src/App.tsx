@@ -15,28 +15,46 @@ import Churches from "@/pages/churches";
 import Events from "@/pages/events";
 import Prayer from "@/pages/prayer";
 import Messages from "@/pages/messages";
+import WelcomeWizard from "@/components/welcome-wizard";
+import { useState } from "react";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [showWelcomeWizard, setShowWelcomeWizard] = useState(false);
+
+  // Check if user needs onboarding
+  const needsOnboarding = isAuthenticated && user && !(user as any).hasCompletedOnboarding && !showWelcomeWizard;
 
   return (
-    <Switch>
-      {isLoading || !isAuthenticated ? (
-        <Route path="*" component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/community" component={Community} />
-          <Route path="/churches" component={Churches} />
-          <Route path="/events" component={Events} />
-          <Route path="/prayer" component={Prayer} />
-          <Route path="/messages" component={Messages} />
-          <Route path="/chat" component={Chat} />
-          <Route path="/admin" component={AdminPortal} />
-          <Route path="/profile" component={Profile} />
-        </>
+    <>
+      <Switch>
+        {isLoading || !isAuthenticated ? (
+          <Route path="*" component={Landing} />
+        ) : (
+          <>
+            <Route path="/" component={Home} />
+            <Route path="/community" component={Community} />
+            <Route path="/churches" component={Churches} />
+            <Route path="/events" component={Events} />
+            <Route path="/prayer" component={Prayer} />
+            <Route path="/messages" component={Messages} />
+            <Route path="/chat" component={Chat} />
+            <Route path="/admin" component={AdminPortal} />
+            <Route path="/profile" component={Profile} />
+          </>
+        )}
+      </Switch>
+      
+      {needsOnboarding && (
+        <WelcomeWizard 
+          onComplete={() => {
+            setShowWelcomeWizard(true);
+            // Refresh user data
+            queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+          }} 
+        />
       )}
-    </Switch>
+    </>
   );
 }
 

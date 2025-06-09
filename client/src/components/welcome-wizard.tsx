@@ -175,11 +175,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
 
   const completeOnboarding = useMutation({
     mutationFn: async (data: WizardData) => {
-      return await apiRequest("/api/auth/complete-onboarding", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("POST", "/api/auth/complete-onboarding", data);
     },
     onSuccess: () => {
       toast({
@@ -192,10 +188,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
 
   const joinChurch = useMutation({
     mutationFn: async (churchId: number) => {
-      return await apiRequest(`/api/churches/${churchId}/join`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("POST", `/api/churches/${churchId}/join`);
     },
     onSuccess: () => {
       completeOnboarding.mutate(wizardData);
