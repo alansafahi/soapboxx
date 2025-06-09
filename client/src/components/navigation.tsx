@@ -15,6 +15,7 @@ import {
 export default function Navigation() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // State for notifications with read/unread tracking
   const [notifications, setNotifications] = useState([
@@ -50,6 +51,9 @@ export default function Navigation() {
   const handleNotificationClick = (notification: any) => {
     console.log('Notification clicked:', notification);
     
+    // Close dropdown immediately
+    setDropdownOpen(false);
+    
     // Mark notification as read
     setNotifications(prev => 
       prev.map(n => n.id === notification.id ? {...n, unread: false} : n)
@@ -59,33 +63,27 @@ export default function Navigation() {
     switch (notification.type) {
       case "prayer":
         // Scroll to prayer requests section
-        console.log('Attempting to scroll to prayer-requests');
         setTimeout(() => {
           const prayerSection = document.getElementById('prayer-requests');
-          console.log('Prayer section found:', prayerSection);
           if (prayerSection) {
             prayerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-        }, 500);
+        }, 300);
         break;
       case "event":
         // Scroll to events section
-        console.log('Attempting to scroll to events-list');
         setTimeout(() => {
           const eventsSection = document.getElementById('events-list');
-          console.log('Events section found:', eventsSection);
           if (eventsSection) {
             eventsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-        }, 500);
+        }, 300);
         break;
       case "message":
         // Navigate to messages page
-        console.log('Navigating to chat page');
         window.location.href = '/chat';
         break;
       default:
-        // Default behavior
         break;
     }
 
@@ -169,7 +167,7 @@ export default function Navigation() {
           {/* User Actions */}
           <div className="flex items-center space-x-4">
             {/* Notifications Dropdown */}
-            <DropdownMenu>
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="w-5 h-5" />
