@@ -5,7 +5,7 @@ import Navigation from "@/components/navigation";
 import CommunityFeed from "@/components/community-feed";
 import EventsList from "@/components/events-list";
 import PrayerRequests from "@/components/prayer-requests";
-import AchievementTracker from "@/components/achievement-tracker";
+import ProgressTracker from "@/components/progress-tracker";
 import ChurchDiscovery from "@/components/church-discovery";
 import MobileNav from "@/components/mobile-nav";
 import { useQuery } from "@tanstack/react-query";
@@ -132,7 +132,7 @@ export default function Home() {
             <div id="prayer-requests">
               <PrayerRequests />
             </div>
-            <AchievementTracker />
+            <ProgressTracker />
             <div id="church-discovery">
               <ChurchDiscovery />
             </div>

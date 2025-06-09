@@ -207,6 +207,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authorId: req.user.claims.sub,
       };
       const discussion = await storage.createDiscussion(fullDiscussionData);
+      
+      // Track user activity for creating discussion
+      await storage.trackUserActivity({
+        userId: req.user.claims.sub,
+        activityType: 'discussion_created',
+        entityId: discussion.id,
+        points: 15,
+      });
+      
       res.status(201).json(discussion);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -272,6 +281,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authorId: req.user.claims.sub,
       };
       const prayer = await storage.createPrayerRequest(fullPrayerData);
+      
+      // Track user activity for creating prayer request
+      await storage.trackUserActivity({
+        userId: req.user.claims.sub,
+        activityType: 'prayer_request_created',
+        entityId: prayer.id,
+        points: 10,
+      });
+      
       res.status(201).json(prayer);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -291,6 +309,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await storage.prayForRequest({
         prayerRequestId,
         userId,
+      });
+      
+      // Track user activity for praying for someone
+      await storage.trackUserActivity({
+        userId,
+        activityType: 'prayer_offered',
+        entityId: prayerRequestId,
+        points: 5,
       });
       
       res.json(response);
