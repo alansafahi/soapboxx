@@ -56,11 +56,12 @@ export default function CommunityFeed() {
   });
 
   // Fetch comments for viewing dialog
-  const { data: comments = [] } = useQuery({
-    queryKey: ["/api/discussions", viewCommentsDialogOpen, "comments"],
-    queryFn: () => apiRequest("GET", `/api/discussions/${viewCommentsDialogOpen}/comments`),
+  const { data: commentsData } = useQuery({
+    queryKey: [`/api/discussions/${viewCommentsDialogOpen}/comments`],
     enabled: !!viewCommentsDialogOpen,
   });
+  
+  const comments = Array.isArray(commentsData) ? commentsData : [];
 
   // Create discussion mutation
   const createDiscussionMutation = useMutation({
@@ -131,9 +132,10 @@ export default function CommunityFeed() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/discussions", viewCommentsDialogOpen, "comments"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/discussions/${viewCommentsDialogOpen}/comments`] });
       setCommentText("");
       setCommentDialogOpen(null);
+      setViewCommentsDialogOpen(null);
       toast({
         title: "Comment Posted",
         description: "Your comment has been added to the discussion.",
