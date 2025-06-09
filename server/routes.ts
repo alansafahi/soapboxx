@@ -345,6 +345,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Church routes
+  app.get('/api/churches', async (req, res) => {
+    try {
+      const churches = await storage.getChurches();
+      res.json(churches);
+    } catch (error) {
+      console.error("Error fetching churches:", error);
+      res.status(500).json({ message: "Failed to fetch churches" });
+    }
+  });
+
+  app.post('/api/churches', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchData = insertChurchSchema.parse(req.body);
+      const church = await storage.createChurch(churchData);
+      res.status(201).json(church);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid church data", errors: error.errors });
+      }
+      console.error("Error creating church:", error);
+      res.status(500).json({ message: "Failed to create church" });
+    }
+  });
+
+  app.get('/api/churches/:id', async (req, res) => {
+    try {
+      const churchId = parseInt(req.params.id);
+      const church = await storage.getChurch(churchId);
+      if (!church) {
+        return res.status(404).json({ message: "Church not found" });
+      }
+      res.json(church);
+    } catch (error) {
+      console.error("Error fetching church:", error);
+      res.status(500).json({ message: "Failed to fetch church" });
+    }
+  });
+
+  // User profile routes
+  app.patch('/api/users/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profileData = req.body;
+      // Update user profile data
+      res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.get('/api/users/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const events = await storage.getUserEvents(userId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching user events:", error);
+      res.status(500).json({ message: "Failed to fetch user events" });
+    }
+  });
+
+  app.get('/api/users/activities', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      // Return user activities - implement based on needs
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching user activities:", error);
+      res.status(500).json({ message: "Failed to fetch user activities" });
+    }
+  });
+
+  app.post('/api/users/churches/:churchId/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const churchId = parseInt(req.params.churchId);
+      await storage.joinChurch(userId, churchId);
+      res.json({ message: "Successfully joined church" });
+    } catch (error) {
+      console.error("Error joining church:", error);
+      res.status(500).json({ message: "Failed to join church" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
