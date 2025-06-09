@@ -270,6 +270,8 @@ export const sermonMedia = pgTable("sermon_media", {
   series: varchar("series", { length: 100 }),
   tags: text("tags").array(),
   isPublic: boolean("is_public").default(true),
+  isPublished: boolean("is_published").default(false),
+  publishedAt: timestamp("published_at"),
   downloadCount: integer("download_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

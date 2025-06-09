@@ -359,34 +359,146 @@ export default function AdminPortal() {
     });
   };
 
+  // Draft mutation for devotionals
+  const saveDraftMutation = useMutation({
+    mutationFn: async (data: DevotionalFormData) => {
+      return await apiRequest("POST", "/api/devotionals", {
+        ...data,
+        isPublished: false, // Save as draft
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Draft Saved",
+        description: "Your devotional has been saved as a draft.",
+      });
+      setDevotionalForm({
+        title: '',
+        category: '',
+        verseReference: '',
+        content: '',
+        churchId: selectedChurch,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/devotionals"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to save draft. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Draft handlers
   const handleSaveDevotionalDraft = () => {
-    // For now, we'll show a success message and clear the form
-    // In a real implementation, you'd save to a drafts table
-    toast({
-      title: "Draft Saved",
-      description: "Your devotional has been saved as a draft.",
-    });
-    setDevotionalForm({
-      title: '',
-      category: '',
-      verseReference: '',
-      content: '',
+    if (!devotionalForm.title || !devotionalForm.content) {
+      toast({
+        title: "Error",
+        description: "Please fill in at least title and content to save as draft",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveDraftMutation.mutate({
+      ...devotionalForm,
       churchId: selectedChurch,
     });
   };
 
+  // Draft mutation for weekly series
+  const saveSeriesDraftMutation = useMutation({
+    mutationFn: async (data: WeeklySeriesFormData) => {
+      return await apiRequest("POST", "/api/weekly-series", {
+        ...data,
+        isActive: false, // Save as draft
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Draft Saved",
+        description: "Your weekly series has been saved as a draft.",
+      });
+      setWeeklySeriesForm({
+        title: '',
+        description: '',
+        startDate: '',
+        endDate: '',
+        frequency: '',
+        churchId: selectedChurch,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/weekly-series"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to save draft. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSaveSeriesDraft = () => {
-    toast({
-      title: "Draft Saved", 
-      description: "Your weekly series has been saved as a draft.",
+    if (!weeklySeriesForm.title || !weeklySeriesForm.startDate) {
+      toast({
+        title: "Error",
+        description: "Please fill in at least title and start date to save as draft",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveSeriesDraftMutation.mutate({
+      ...weeklySeriesForm,
+      churchId: selectedChurch,
     });
-    setWeeklySeriesForm({
-      title: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      frequency: '',
+  };
+
+  // Draft mutation for sermon media
+  const saveMediaDraftMutation = useMutation({
+    mutationFn: async (data: SermonMediaFormData) => {
+      return await apiRequest("POST", "/api/sermon-media", {
+        ...data,
+        isPublished: false, // Save as draft
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Draft Saved",
+        description: "Your sermon media has been saved as a draft.",
+      });
+      setSermonMediaForm({
+        title: '',
+        speaker: '',
+        mediaType: '',
+        date: '',
+        description: '',
+        churchId: selectedChurch,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/sermon-media"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to save draft. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveMediaDraft = () => {
+    if (!sermonMediaForm.title || !sermonMediaForm.mediaType) {
+      toast({
+        title: "Error",
+        description: "Please fill in at least title and media type to save as draft",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveMediaDraftMutation.mutate({
+      ...sermonMediaForm,
       churchId: selectedChurch,
     });
   };
