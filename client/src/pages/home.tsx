@@ -102,7 +102,7 @@ export default function Home() {
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-[#850000]">{userStats?.connectionCount || 0}</div>
-                      <div className="text-blue-100 text-sm">Connections</div>
+                      <div className="text-sm text-[#1433ff] font-bold">Connections</div>
                     </div>
                   </div>
                 </div>
