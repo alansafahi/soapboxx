@@ -1226,6 +1226,9 @@ export class DatabaseStorage implements IStorage {
           ))
           .limit(1);
 
+        // Check if user liked this discussion
+        const isLiked = await this.getUserDiscussionLike(d.id, userId);
+
         feedPosts.push({
           id: d.id,
           type: 'discussion',
@@ -1241,7 +1244,7 @@ export class DatabaseStorage implements IStorage {
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
-          isLiked: false,
+          isLiked: isLiked,
           isBookmarked: !!bookmark
         });
       }
@@ -1283,6 +1286,10 @@ export class DatabaseStorage implements IStorage {
           ))
           .limit(1);
 
+        // Check if user has prayed for this request (equivalent to liking)
+        const prayerResponse = await this.getUserPrayerResponse(p.id, userId);
+        const isLiked = !!prayerResponse;
+
         feedPosts.push({
           id: p.id,
           type: 'prayer',
@@ -1298,7 +1305,7 @@ export class DatabaseStorage implements IStorage {
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
-          isLiked: false,
+          isLiked: isLiked,
           isBookmarked: !!prayerBookmark,
           tags: ['prayer', 'faith']
         });
@@ -1331,6 +1338,17 @@ export class DatabaseStorage implements IStorage {
           ))
           .limit(1);
 
+        // Check if user favorited this inspiration (equivalent to liking)
+        const [inspirationFavorite] = await db
+          .select()
+          .from(userInspirationHistory)
+          .where(and(
+            eq(userInspirationHistory.userId, userId),
+            eq(userInspirationHistory.inspirationId, i.id),
+            eq(userInspirationHistory.wasFavorited, true)
+          ))
+          .limit(1);
+
         feedPosts.push({
           id: i.id,
           type: 'inspiration',
@@ -1346,7 +1364,7 @@ export class DatabaseStorage implements IStorage {
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
-          isLiked: false,
+          isLiked: !!inspirationFavorite,
           isBookmarked: !!inspirationBookmark,
           tags: ['inspiration', i.category]
         });

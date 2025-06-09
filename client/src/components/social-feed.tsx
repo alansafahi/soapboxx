@@ -152,8 +152,8 @@ export default function SocialFeed() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
-        title: data.isLiked !== false ? "Liked" : "Unliked",
-        description: data.message,
+        title: data.liked ? "Liked" : "Unliked", 
+        description: data.liked ? "Post liked successfully" : "Post unliked successfully",
       });
     },
   });
