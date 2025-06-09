@@ -132,6 +132,7 @@ export interface IStorage {
   favoriteInspiration(userId: string, inspirationId: number): Promise<void>;
   unfavoriteInspiration(userId: string, inspirationId: number): Promise<void>;
   shareInspiration(userId: string, inspirationId: number): Promise<void>;
+  shareInspirationWithUsers(senderId: string, inspirationId: number, userIds: string[]): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1062,6 +1063,93 @@ export class DatabaseStorage implements IStorage {
         churchId: null, // Share to general community
       });
     }
+  }
+
+  async shareInspirationWithUsers(senderId: string, inspirationId: number, userIds: string[]): Promise<void> {
+    // Get the inspiration details
+    const [inspiration] = await db
+      .select()
+      .from(dailyInspirations)
+      .where(eq(dailyInspirations.id, inspirationId));
+
+    if (!inspiration) {
+      throw new Error('Inspiration not found');
+    }
+    
+    // Create conversations or send messages to each user
+    for (const userId of userIds) {
+      // Check if a conversation already exists between sender and recipient
+      const existingConversation = await db
+        .select({ id: conversations.id })
+        .from(conversations)
+        .innerJoin(conversationParticipants, eq(conversations.id, conversationParticipants.conversationId))
+        .where(
+          and(
+            eq(conversations.type, 'direct'),
+            eq(conversationParticipants.userId, senderId)
+          )
+        )
+        .intersect(
+          db.select({ id: conversations.id })
+            .from(conversations)
+            .innerJoin(conversationParticipants, eq(conversations.id, conversationParticipants.conversationId))
+            .where(
+              and(
+                eq(conversations.type, 'direct'),
+                eq(conversationParticipants.userId, userId)
+              )
+            )
+        )
+        .limit(1);
+
+      let conversationId: number;
+
+      if (!existingConversation.length) {
+        // Create new conversation
+        const [newConversation] = await db.insert(conversations)
+          .values({
+            name: 'Shared Inspiration',
+            type: 'direct',
+            createdBy: senderId,
+          })
+          .returning();
+        
+        conversationId = newConversation.id;
+
+        // Add participants
+        await db.insert(conversationParticipants).values([
+          { conversationId, userId: senderId },
+          { conversationId, userId: userId }
+        ]);
+      } else {
+        conversationId = existingConversation[0].id;
+      }
+
+      // Send the inspiration as a message
+      const shareText = `🌟 **Shared Daily Inspiration: ${inspiration.title}**\n\n${inspiration.content}${inspiration.verse ? `\n\n*"${inspiration.verse}"* - ${inspiration.verseReference}` : ''}`;
+      
+      await db.insert(messages).values({
+        conversationId,
+        senderId,
+        content: shareText,
+        messageType: 'inspiration_share',
+      });
+    }
+
+    // Mark as shared in user history
+    await db
+      .insert(userInspirationHistory)
+      .values({
+        userId: senderId,
+        inspirationId,
+        wasShared: true,
+      })
+      .onConflictDoUpdate({
+        target: [userInspirationHistory.userId, userInspirationHistory.inspirationId],
+        set: {
+          wasShared: true,
+        },
+      });
   }
 }
 

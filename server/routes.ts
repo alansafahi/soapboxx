@@ -461,6 +461,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/inspiration/:id/share-with-users', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const inspirationId = parseInt(req.params.id);
+      const { userIds } = req.body;
+      
+      if (!Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ message: "userIds array is required" });
+      }
+      
+      await storage.shareInspirationWithUsers(userId, inspirationId, userIds);
+      res.json({ message: "Shared with users successfully" });
+    } catch (error) {
+      console.error("Error sharing inspiration with users:", error);
+      res.status(500).json({ message: "Failed to share with users" });
+    }
+  });
+
   app.get('/api/users/churches', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
