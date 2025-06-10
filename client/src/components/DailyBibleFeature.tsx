@@ -693,6 +693,79 @@ export function DailyBibleFeature() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Journal Note Dialog */}
+      <Dialog open={showJournalNote} onOpenChange={setShowJournalNote}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Journal Note</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Write your personal reflection about today's verse:
+            </p>
+            <Textarea
+              value={journalNote}
+              onChange={(e) => setJournalNote(e.target.value)}
+              placeholder="What does this verse mean to you today? How might you apply it in your life?"
+              className="min-h-32"
+            />
+            <div className="flex space-x-2">
+              <Button onClick={handleSaveJournalNote} className="flex-1">
+                <PenTool className="h-4 w-4 mr-2" />
+                Save Note
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowJournalNote(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ETHOS Dialog */}
+      <Dialog open={showETHOSDialog} onOpenChange={setShowETHOSDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ask ETHOS about this verse</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <p className="text-sm text-purple-800 font-medium mb-2">
+                Current verse: {dailyVerse?.verseReference}
+              </p>
+              <p className="text-sm text-purple-700 italic">
+                "{getVerseText()}"
+              </p>
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600">What would you like to know?</p>
+              <div className="grid gap-2">
+                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                  <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>What is the historical context of this verse?</span>
+                </Button>
+                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                  <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>How can I apply this verse to my daily life?</span>
+                </Button>
+                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                  <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>What other verses relate to this theme?</span>
+                </Button>
+                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                  <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>Ask a custom question...</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
