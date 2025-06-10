@@ -896,6 +896,16 @@ export const insertEventRsvpSchema = createInsertSchema(eventRsvps).omit({
   createdAt: true,
 });
 
+// Prayer management type definitions
+export type PrayerFollowUp = typeof prayerFollowUps.$inferSelect;
+export type InsertPrayerFollowUp = typeof prayerFollowUps.$inferInsert;
+
+export type PrayerUpdate = typeof prayerUpdates.$inferSelect;
+export type InsertPrayerUpdate = typeof prayerUpdates.$inferInsert;
+
+export type PrayerAssignment = typeof prayerAssignments.$inferSelect;
+export type InsertPrayerAssignment = typeof prayerAssignments.$inferInsert;
+
 // Leaderboard type definitions
 export type UserScore = typeof userScores.$inferSelect;
 export type InsertUserScore = typeof userScores.$inferInsert;

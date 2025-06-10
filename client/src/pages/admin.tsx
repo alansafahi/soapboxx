@@ -3217,45 +3217,7 @@ export default function AdminPortal() {
               </TabsContent>
 
               <TabsContent value="prayers" className="space-y-6">
-                <h3 className="text-lg font-semibold">Prayer Requests</h3>
-                <div className="grid gap-4">
-                  {prayers.map((prayer: any) => (
-                    <Card key={prayer.id}>
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            {prayer.title && <h4 className="font-semibold">{prayer.title}</h4>}
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              {prayer.content}
-                            </p>
-                            <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                              <span className="flex items-center gap-1">
-                                <Heart className="h-3 w-3" />
-                                {prayer.prayerCount || 0} prayers
-                              </span>
-                              <Badge variant="secondary">{prayer.category}</Badge>
-                              {prayer.isAnswered && (
-                                <Badge variant="default" className="bg-green-100 text-green-800">
-                                  Answered
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          {prayer.isAnonymous && (
-                            <Badge variant="outline">Anonymous</Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {prayers.length === 0 && (
-                    <Card>
-                      <CardContent className="p-6 text-center text-gray-500">
-                        No prayer requests yet.
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                <PrayerManagementSystem />
               </TabsContent>
 
               <TabsContent value="members" className="space-y-6">

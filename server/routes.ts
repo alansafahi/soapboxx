@@ -11,6 +11,8 @@ import {
   insertEventSchema,
   insertDiscussionSchema,
   insertPrayerRequestSchema,
+  insertPrayerAssignmentSchema,
+  insertPrayerFollowUpSchema,
   insertEventRsvpSchema,
   insertDevotionalSchema,
   insertWeeklySeriesSchema,
@@ -508,6 +510,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error creating prayer request:", error);
       res.status(500).json({ message: "Failed to create prayer request" });
+    }
+  });
+
+  // Prayer status update route
+  app.patch('/api/prayers/:id/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerId = parseInt(req.params.id);
+      const { status, moderationNotes } = req.body;
+      
+      const updatedPrayer = await storage.updatePrayerStatus(prayerId, status, moderationNotes);
+      res.json(updatedPrayer);
+    } catch (error) {
+      console.error("Error updating prayer status:", error);
+      res.status(500).json({ message: "Failed to update prayer status" });
+    }
+  });
+
+  // Prayer assignment routes
+  app.post('/api/prayer-assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const assignmentData = insertPrayerAssignmentSchema.parse(req.body);
+      const fullAssignmentData = {
+        ...assignmentData,
+        assignedBy: req.user.claims.sub,
+      };
+      const assignment = await storage.createPrayerAssignment(fullAssignmentData);
+      res.status(201).json(assignment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid assignment data", errors: error.errors });
+      }
+      console.error("Error creating prayer assignment:", error);
+      res.status(500).json({ message: "Failed to create prayer assignment" });
+    }
+  });
+
+  // Prayer follow-up routes
+  app.post('/api/prayer-follow-ups', isAuthenticated, async (req: any, res) => {
+    try {
+      const followUpData = insertPrayerFollowUpSchema.parse(req.body);
+      const followUp = await storage.createPrayerFollowUp(followUpData);
+      res.status(201).json(followUp);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid follow-up data", errors: error.errors });
+      }
+      console.error("Error creating prayer follow-up:", error);
+      res.status(500).json({ message: "Failed to create prayer follow-up" });
+    }
+  });
+
+  // Get users for assignment dropdowns
+  app.get('/api/users', isAuthenticated, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
     }
   });
 
