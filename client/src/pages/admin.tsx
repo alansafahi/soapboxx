@@ -2491,7 +2491,7 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs defaultValue="dashboard" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="dashboard">
                   <Building className="h-4 w-4 mr-2" />
                   Dashboard
@@ -2503,10 +2503,6 @@ export default function AdminPortal() {
                 <TabsTrigger value="ministry">
                   <Heart className="h-4 w-4 mr-2" />
                   Ministry
-                </TabsTrigger>
-                <TabsTrigger value="volunteers">
-                  <HeartHandshake className="h-4 w-4 mr-2" />
-                  Volunteers
                 </TabsTrigger>
                 <TabsTrigger value="media">
                   <Video className="h-4 w-4 mr-2" />
@@ -2568,7 +2564,26 @@ export default function AdminPortal() {
               </TabsContent>
 
               <TabsContent value="people" className="space-y-6">
-                <MemberManagementSystem selectedChurch={selectedChurch} />
+                <Tabs defaultValue="members" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="members">
+                      <Users className="h-4 w-4 mr-2" />
+                      Members
+                    </TabsTrigger>
+                    <TabsTrigger value="volunteers">
+                      <HeartHandshake className="h-4 w-4 mr-2" />
+                      Volunteers
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="members" className="space-y-6">
+                    <MemberManagementSystem selectedChurch={selectedChurch} />
+                  </TabsContent>
+
+                  <TabsContent value="volunteers" className="space-y-6">
+                    <VolunteerManagementSystem />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
               <TabsContent value="ministry" className="space-y-6">
@@ -3110,10 +3125,6 @@ export default function AdminPortal() {
                     <PrayerManagementSystem />
                   </TabsContent>
                 </Tabs>
-              </TabsContent>
-
-              <TabsContent value="volunteers" className="space-y-6">
-                <VolunteerManagementSystem />
               </TabsContent>
 
               <TabsContent value="media" className="space-y-6">
