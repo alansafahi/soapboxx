@@ -3637,7 +3637,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .select({ count: count() })
       .from(userBibleReadings)
-      .where(gte(userBibleReadings.readDate, date));
+      .where(gte(userBibleReadings.readAt, date));
     return result[0]?.count || 0;
   }
 

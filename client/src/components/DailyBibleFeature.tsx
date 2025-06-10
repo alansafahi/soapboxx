@@ -34,8 +34,22 @@ import {
   Brain,
   Rocket,
   Bell,
-  Square
+  Square,
+  Mail,
+  Copy,
+  Link,
+  Smartphone
 } from "lucide-react";
+import { 
+  FaFacebook, 
+  FaTwitter, 
+  FaInstagram, 
+  FaLinkedin, 
+  FaWhatsapp, 
+  FaTelegram, 
+  FaReddit, 
+  FaPinterest 
+} from "react-icons/fa";
 import { BibleInADayFeature } from "./BibleInADayFeature";
 import { NotificationScheduler } from "./NotificationScheduler";
 import { format } from "date-fns";
@@ -293,16 +307,14 @@ export function DailyBibleFeature() {
     const shareUrl = window.location.origin + '/bible';
     
     // Handle external sharing platforms directly
-    if (platform === 'facebook' || platform === 'twitter') {
+    if (platform !== 'soapbox') {
       let url = '';
       switch (platform) {
         case 'twitter':
           url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(finalShareText)}&url=${encodeURIComponent(shareUrl)}`;
           break;
         case 'facebook':
-          // Use modern Facebook sharing - only URL is supported, text must be added manually
           url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-          // Copy text to clipboard for user to paste
           navigator.clipboard.writeText(finalShareText).then(() => {
             toast({ 
               title: "Text copied to clipboard", 
@@ -310,14 +322,62 @@ export function DailyBibleFeature() {
             });
           });
           break;
+        case 'instagram':
+          // Instagram doesn't support direct URL sharing, copy text for manual posting
+          navigator.clipboard.writeText(finalShareText).then(() => {
+            toast({ 
+              title: "Text copied to clipboard", 
+              description: "Open Instagram and paste the text into your story or post" 
+            });
+          });
+          break;
+        case 'linkedin':
+          url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent('Daily Bible Verse')}&summary=${encodeURIComponent(finalShareText)}`;
+          break;
+        case 'whatsapp':
+          url = `https://wa.me/?text=${encodeURIComponent(finalShareText + ' ' + shareUrl)}`;
+          break;
+        case 'telegram':
+          url = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(finalShareText)}`;
+          break;
+        case 'reddit':
+          url = `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(finalShareText)}`;
+          break;
+        case 'pinterest':
+          url = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(shareUrl)}&description=${encodeURIComponent(finalShareText)}`;
+          break;
+        case 'email':
+          const subject = encodeURIComponent('Daily Bible Verse - ' + dailyVerse.verseReference);
+          const body = encodeURIComponent(`${finalShareText}\n\nRead more daily verses at: ${shareUrl}`);
+          url = `mailto:?subject=${subject}&body=${body}`;
+          break;
+        case 'sms':
+          const smsText = encodeURIComponent(finalShareText + ' ' + shareUrl);
+          url = `sms:?body=${smsText}`;
+          break;
+        case 'copy':
+          navigator.clipboard.writeText(finalShareText + ' ' + shareUrl).then(() => {
+            toast({ 
+              title: "Link copied to clipboard", 
+              description: "You can now paste it anywhere you'd like to share" 
+            });
+          });
+          setShowShareDialog(false);
+          return;
       }
+      
       if (url) {
-        window.open(url, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+        if (platform === 'email' || platform === 'sms') {
+          window.location.href = url;
+        } else {
+          window.open(url, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+        }
       }
+      
       setShowShareDialog(false);
       toast({
         title: "Verse Shared",
-        description: "Your verse is ready to share on " + platform.charAt(0).toUpperCase() + platform.slice(1),
+        description: `Your verse is ready to share${platform !== 'instagram' && platform !== 'copy' ? ' on ' + platform.charAt(0).toUpperCase() + platform.slice(1) : ''}`,
       });
       return;
     }
@@ -875,25 +935,150 @@ export function DailyBibleFeature() {
                       Share
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>Share This Verse</DialogTitle>
+                      <DialogDescription>
+                        Share "{dailyVerse?.verseReference}" with your community
+                      </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       <Textarea
                         value={shareText}
                         onChange={(e) => setShareText(e.target.value)}
                         placeholder="Add your thoughts..."
                         className="min-h-20"
                       />
-                      <div className="flex space-x-2">
-                        <Button onClick={() => handleShare("soapbox")} className="flex-1">
+                      
+                      {/* SoapBox Community */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium text-gray-900">Share to Community</h4>
+                        <Button onClick={() => handleShare("soapbox")} className="w-full">
                           <Users className="h-4 w-4 mr-2" />
-                          SoapBox
+                          Share to SoapBox Community
                         </Button>
-                        <Button onClick={() => handleShare("facebook")} variant="outline" className="flex-1">
-                          Share External
-                        </Button>
+                      </div>
+
+                      {/* Social Media Platforms */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium text-gray-900">Share to Social Media</h4>
+                        <div className="grid grid-cols-4 gap-3">
+                          <Button
+                            onClick={() => handleShare('facebook')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaFacebook className="w-5 h-5 text-blue-600" />
+                            <span className="text-xs">Facebook</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('twitter')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaTwitter className="w-5 h-5 text-blue-400" />
+                            <span className="text-xs">Twitter</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('instagram')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaInstagram className="w-5 h-5 text-pink-500" />
+                            <span className="text-xs">Instagram</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('linkedin')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaLinkedin className="w-5 h-5 text-blue-700" />
+                            <span className="text-xs">LinkedIn</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('whatsapp')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaWhatsapp className="w-5 h-5 text-green-500" />
+                            <span className="text-xs">WhatsApp</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('telegram')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaTelegram className="w-5 h-5 text-blue-500" />
+                            <span className="text-xs">Telegram</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('reddit')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaReddit className="w-5 h-5 text-orange-500" />
+                            <span className="text-xs">Reddit</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('pinterest')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <FaPinterest className="w-5 h-5 text-red-600" />
+                            <span className="text-xs">Pinterest</span>
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Direct Communication */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium text-gray-900">Direct Sharing</h4>
+                        <div className="grid grid-cols-3 gap-3">
+                          <Button
+                            onClick={() => handleShare('email')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <Mail className="w-5 h-5 text-gray-600" />
+                            <span className="text-xs">Email</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('sms')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <Smartphone className="w-5 h-5 text-green-600" />
+                            <span className="text-xs">SMS</span>
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleShare('copy')}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center space-y-1 h-auto p-3"
+                          >
+                            <Copy className="w-5 h-5 text-gray-600" />
+                            <span className="text-xs">Copy Link</span>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </DialogContent>
