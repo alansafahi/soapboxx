@@ -103,6 +103,8 @@ export function DailyBibleFeature() {
   const [showETHOSDialog, setShowETHOSDialog] = useState(false);
   const [ethosResponse, setEthosResponse] = useState<string>('');
   const [showEthosResponse, setShowEthosResponse] = useState(false);
+  const [customQuestion, setCustomQuestion] = useState('');
+  const [savedInsights, setSavedInsights] = useState<string[]>([]);
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
   const [currentJourneyType, setCurrentJourneyType] = useState("reading");
@@ -378,7 +380,8 @@ export function DailyBibleFeature() {
     } else if (question.includes("other verses")) {
       response = `Related verses to ${verseRef}: See Mark 4:3-20 (parallel account), Luke 8:4-15 (another parallel), Isaiah 55:10-11 (God's word accomplishing its purpose), and 1 Peter 1:23 (being born again through God's word). These passages explore similar themes of God's word taking root and bearing fruit.`;
     } else {
-      response = `Thank you for your question about ${verseRef}. This parable teaches us about the importance of having a receptive heart to God's word. Consider how you can cultivate good spiritual soil in your life through prayer, study, and removing distractions that might hinder spiritual growth.`;
+      // Handle custom questions
+      response = `Thank you for your question "${question}" about ${verseRef}. This verse teaches us about the importance of having a receptive heart to God's word. Consider how you can apply this spiritual truth to your specific question and cultivate good spiritual soil in your life through prayer, study, and removing distractions that might hinder spiritual growth.`;
     }
     
     // Show response in dedicated panel
@@ -391,6 +394,24 @@ export function DailyBibleFeature() {
       description: "Scroll down to see the detailed spiritual insight.",
       duration: 3000,
     });
+  };
+
+  const handleSaveInsight = () => {
+    if (ethosResponse && !savedInsights.includes(ethosResponse)) {
+      setSavedInsights([...savedInsights, ethosResponse]);
+      toast({
+        title: "Insight Saved",
+        description: "This spiritual insight has been saved to your collection.",
+        duration: 2000,
+      });
+    }
+  };
+
+  const handleCustomQuestion = () => {
+    if (customQuestion.trim()) {
+      handleETHOSQuestion(customQuestion);
+      setCustomQuestion('');
+    }
   };
 
   const handleJourneySwitch = async (journeyType: string) => {
@@ -959,10 +980,15 @@ export function DailyBibleFeature() {
                     <p className="text-gray-800 leading-relaxed">{ethosResponse}</p>
                   </div>
                   <div className="flex justify-between items-center mt-4">
-                    <div className="flex items-center space-x-2 text-sm text-purple-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleSaveInsight}
+                      className="flex items-center space-x-2 text-sm text-purple-600 hover:text-purple-800 hover:bg-purple-100"
+                    >
                       <Bookmark className="h-4 w-4" />
                       <span>Save this insight</span>
-                    </div>
+                    </Button>
                     <div className="flex space-x-2">
                       <Button variant="outline" size="sm" onClick={() => setShowETHOSDialog(true)}>
                         Ask Another Question
@@ -1208,14 +1234,29 @@ export function DailyBibleFeature() {
                   <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>What other verses relate to this theme?</span>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="justify-start text-left p-3 h-auto"
-                  onClick={() => handleETHOSQuestion("Ask a custom question")}
-                >
-                  <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span>Ask a custom question...</span>
-                </Button>
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Brain className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm font-medium">Ask your own question:</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Input
+                      value={customQuestion}
+                      onChange={(e) => setCustomQuestion(e.target.value)}
+                      placeholder="Type your question about this verse..."
+                      className="flex-1"
+                      onKeyPress={(e) => e.key === 'Enter' && handleCustomQuestion()}
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={handleCustomQuestion}
+                      disabled={!customQuestion.trim()}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      Ask
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
