@@ -2631,23 +2631,23 @@ export default function AdminPortal() {
                   </TabsList>
 
                   <TabsContent value="events" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Church Events</h3>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Event
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Create New Event</DialogTitle>
-                        <DialogDescription>
-                          Schedule a new event for your church
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Form {...eventForm}>
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold">Church Events</h3>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create Event
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Create New Event</DialogTitle>
+                            <DialogDescription>
+                              Schedule a new event for your church
+                            </DialogDescription>
+                          </DialogHeader>
+                          <Form {...eventForm}>
                         <form onSubmit={eventForm.handleSubmit(handleCreateEvent)} className="space-y-4">
                           <FormField
                             control={eventForm.control}
