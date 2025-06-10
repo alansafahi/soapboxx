@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +86,7 @@ interface BibleBadge {
 export function DailyBibleFeature() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [selectedVersion, setSelectedVersion] = useState<string>("niv");
   const [reflection, setReflection] = useState("");
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -103,18 +105,21 @@ export function DailyBibleFeature() {
   const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
 
   // Fetch daily verse
-  const { data: dailyVerse, isLoading: verseLoading } = useQuery<DailyVerse>({
+  const { data: dailyVerse, isLoading: verseLoading, error: verseError } = useQuery<DailyVerse>({
     queryKey: ["/api/bible/daily-verse"],
+    enabled: isAuthenticated,
   });
 
   // Fetch user streak
-  const { data: streak, isLoading: streakLoading } = useQuery<UserBibleStreak>({
+  const { data: streak, isLoading: streakLoading, error: streakError } = useQuery<UserBibleStreak>({
     queryKey: ["/api/bible/streak"],
+    enabled: isAuthenticated,
   });
 
   // Fetch user badges
-  const { data: badges } = useQuery<BibleBadge[]>({
+  const { data: badges, error: badgesError } = useQuery<BibleBadge[]>({
     queryKey: ["/api/bible/badges"],
+    enabled: isAuthenticated,
   });
 
   // Record bible reading mutation
@@ -378,6 +383,59 @@ export function DailyBibleFeature() {
       </div>
     </motion.div>
   );
+
+  // Handle authentication loading
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Handle authentication errors
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-6 text-center">
+            <div className="text-red-600 mb-4">
+              <BookOpen className="h-12 w-12 mx-auto mb-2" />
+              <h2 className="text-lg font-semibold">Authentication Required</h2>
+            </div>
+            <p className="text-red-700 mb-4">
+              Please log in to access your Daily Bible reading experience.
+            </p>
+            <Button onClick={() => window.location.href = '/api/login'} className="bg-red-600 hover:bg-red-700">
+              Log In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Handle API errors
+  if (verseError || streakError || badgesError) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-6 text-center">
+            <div className="text-red-600 mb-4">
+              <BookOpen className="h-12 w-12 mx-auto mb-2" />
+              <h2 className="text-lg font-semibold">Unable to Load Daily Bible</h2>
+            </div>
+            <p className="text-red-700 mb-4">
+              There was an error connecting to the Bible service. Please try refreshing the page.
+            </p>
+            <Button onClick={() => window.location.reload()} variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
+              Refresh Page
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (verseLoading || streakLoading) {
     return (
