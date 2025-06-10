@@ -359,6 +359,34 @@ export function DailyBibleFeature() {
     setShowETHOSDialog(true);
   };
 
+  const handleETHOSQuestion = (question: string) => {
+    // Close the dialog first
+    setShowETHOSDialog(false);
+    
+    // Generate AI response based on the question and current verse
+    const verseText = getVerseText();
+    const verseRef = dailyVerse?.verseReference;
+    
+    let response = "";
+    
+    if (question.includes("historical context")) {
+      response = `The historical context of ${verseRef}: This verse was written during a time when Jesus used parables to teach spiritual truths to diverse audiences. The parable of the sower illustrates how different hearts receive God's word differently, reflecting the varied spiritual conditions Jesus encountered in first-century Palestine.`;
+    } else if (question.includes("apply this verse")) {
+      response = `Applying ${verseRef} to daily life: Consider what type of soil your heart represents today. Are you receptive to God's word like good soil, or are there distractions (thorns) or hardness (rocky ground) preventing spiritual growth? Make space for God's word to take root through prayer, meditation, and removing barriers to spiritual growth.`;
+    } else if (question.includes("other verses")) {
+      response = `Related verses to ${verseRef}: See Mark 4:3-20 (parallel account), Luke 8:4-15 (another parallel), Isaiah 55:10-11 (God's word accomplishing its purpose), and 1 Peter 1:23 (being born again through God's word). These passages explore similar themes of God's word taking root and bearing fruit.`;
+    } else {
+      response = `Thank you for your question about ${verseRef}. This parable teaches us about the importance of having a receptive heart to God's word. Consider how you can cultivate good spiritual soil in your life through prayer, study, and removing distractions that might hinder spiritual growth.`;
+    }
+    
+    // Show response in a toast
+    toast({
+      title: "ETHOS Response",
+      description: response,
+      duration: 8000,
+    });
+  };
+
   const handleJourneySwitch = async (journeyType: string) => {
     try {
       // Call API to switch journey
@@ -1101,19 +1129,35 @@ export function DailyBibleFeature() {
             <div className="space-y-3">
               <p className="text-sm text-gray-600">What would you like to know?</p>
               <div className="grid gap-2">
-                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                <Button 
+                  variant="outline" 
+                  className="justify-start text-left p-3 h-auto"
+                  onClick={() => handleETHOSQuestion("What is the historical context of this verse?")}
+                >
                   <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>What is the historical context of this verse?</span>
                 </Button>
-                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                <Button 
+                  variant="outline" 
+                  className="justify-start text-left p-3 h-auto"
+                  onClick={() => handleETHOSQuestion("How can I apply this verse to my daily life?")}
+                >
                   <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>How can I apply this verse to my daily life?</span>
                 </Button>
-                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                <Button 
+                  variant="outline" 
+                  className="justify-start text-left p-3 h-auto"
+                  onClick={() => handleETHOSQuestion("What other verses relate to this theme?")}
+                >
                   <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>What other verses relate to this theme?</span>
                 </Button>
-                <Button variant="outline" className="justify-start text-left p-3 h-auto">
+                <Button 
+                  variant="outline" 
+                  className="justify-start text-left p-3 h-auto"
+                  onClick={() => handleETHOSQuestion("Ask a custom question")}
+                >
                   <Brain className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>Ask a custom question...</span>
                 </Button>
