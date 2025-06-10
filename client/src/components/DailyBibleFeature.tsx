@@ -1135,7 +1135,7 @@ export function DailyBibleFeature() {
         <Card className="bg-gradient-to-r from-green-50 to-blue-50">
           <CardContent className="p-6">
             {/* Show community stats if there's activity, otherwise show invite */}
-            {communityStatsData && (communityStatsData.todayReads > 0 || communityStatsData.weekReads > 0) ? (
+{communityStatsData && (communityStatsData.todayReads > 0 || communityStatsData.weekReads > 0) ? (
               <div className="text-center">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   You're not alone in this journey
@@ -1203,7 +1203,6 @@ export function DailyBibleFeature() {
                       <p>• They start with 250 bonus points to kickstart their journey</p>
                       <p className="italic font-medium mt-2">Faith grows stronger when shared.</p>
                     </div>
-                  </div>
                   </div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
