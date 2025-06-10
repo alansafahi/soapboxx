@@ -62,6 +62,8 @@ import {
   CloudRain,
   Snowflake,
   Send,
+  Link,
+  Mail,
 } from "lucide-react";
 
 interface Event {
@@ -291,21 +293,62 @@ export default function EventsList() {
   };
 
   const shareEvent = async (event: Event) => {
+    // Create proper event URL
+    const eventUrl = `${window.location.origin}/events?event=${event.id}`;
+    const shareText = `${event.title}\n\n${event.description || "Join us for this event!"}\n\nDate: ${format(new Date(event.eventDate), "PPP")}\n${event.location ? `Location: ${event.location}\n` : ""}${eventUrl}`;
+    
     if (navigator.share) {
       try {
         await navigator.share({
           title: event.title,
           text: event.description || "Join us for this event!",
-          url: window.location.href,
+          url: eventUrl,
         });
       } catch (error) {
         // Fallback to clipboard
-        navigator.clipboard.writeText(`${event.title} - ${window.location.href}`);
-        toast({ title: "Event link copied to clipboard" });
+        await navigator.clipboard.writeText(shareText);
+        toast({ title: "Event details copied to clipboard" });
       }
     } else {
-      navigator.clipboard.writeText(`${event.title} - ${window.location.href}`);
+      await navigator.clipboard.writeText(shareText);
+      toast({ title: "Event details copied to clipboard" });
+    }
+  };
+
+  const copyEventLink = async (event: Event) => {
+    const eventUrl = `${window.location.origin}/events?event=${event.id}`;
+    try {
+      await navigator.clipboard.writeText(eventUrl);
       toast({ title: "Event link copied to clipboard" });
+    } catch (error) {
+      toast({ title: "Failed to copy link", variant: "destructive" });
+    }
+  };
+
+  const shareToSocial = (event: Event, platform: string) => {
+    const eventUrl = `${window.location.origin}/events?event=${event.id}`;
+    const shareText = `Check out this event: ${event.title}`;
+    
+    let shareUrl = "";
+    switch (platform) {
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}`;
+        break;
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(eventUrl)}`;
+        break;
+      case "whatsapp":
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${eventUrl}`)}`;
+        break;
+      case "email":
+        const subject = `Event: ${event.title}`;
+        const body = `I wanted to share this event with you:\n\n${event.title}\n\n${event.description || ""}\n\nDate: ${format(new Date(event.eventDate), "PPP")}\n${event.location ? `Location: ${event.location}\n` : ""}\nMore details: ${eventUrl}`;
+        shareUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        break;
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, '_blank');
     }
   };
 
@@ -735,15 +778,82 @@ export default function EventsList() {
                                 </DialogContent>
                               </Dialog>
 
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => shareEvent(event)}
-                                className="flex items-center gap-1"
-                              >
-                                <Share2 className="w-4 h-4" />
-                                Share
-                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Share2 className="w-4 h-4" />
+                                    Share
+                                    <ChevronDown className="w-3 h-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem
+                                    onClick={() => copyEventLink(event)}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Link className="w-4 h-4" />
+                                      Copy Event Link
+                                    </div>
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem
+                                    onClick={() => shareEvent(event)}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Share2 className="w-4 h-4" />
+                                      Native Share
+                                    </div>
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuSeparator />
+                                  
+                                  <DropdownMenuItem
+                                    onClick={() => shareToSocial(event, 'facebook')}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
+                                      Facebook
+                                    </div>
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem
+                                    onClick={() => shareToSocial(event, 'twitter')}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-4 h-4 bg-sky-500 rounded-sm"></div>
+                                      Twitter
+                                    </div>
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem
+                                    onClick={() => shareToSocial(event, 'whatsapp')}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
+                                      WhatsApp
+                                    </div>
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem
+                                    onClick={() => shareToSocial(event, 'email')}
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Mail className="w-4 h-4" />
+                                      Email
+                                    </div>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
