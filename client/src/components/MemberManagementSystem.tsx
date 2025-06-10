@@ -41,13 +41,15 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
   });
 
   const { data: members = [], isLoading, error } = useQuery({
-    queryKey: ["/api/members", effectiveSelectedChurch],
+    queryKey: ["/api/members", "church", effectiveSelectedChurch],
     queryFn: () => {
       const url = effectiveSelectedChurch === "all" 
         ? "/api/members" 
         : `/api/members?churchId=${effectiveSelectedChurch}`;
       return fetch(url).then(res => res.json());
     },
+    staleTime: 0, // Always refetch to avoid cache issues
+    cacheTime: 30000, // Keep cache for 30 seconds only
   });
 
 
