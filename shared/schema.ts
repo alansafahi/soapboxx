@@ -948,6 +948,139 @@ export const memberCommunications = pgTable("member_communications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Confession & Counseling Scheduling
+export const counselingSessions = pgTable("counseling_sessions", {
+  id: serial("id").primaryKey(),
+  memberId: varchar("member_id").notNull().references(() => users.id),
+  counselorId: varchar("counselor_id").notNull().references(() => users.id),
+  sessionType: varchar("session_type", { length: 30 }).notNull(), // confession, counseling, crisis_prayer, spiritual_guidance
+  scheduledTime: timestamp("scheduled_time").notNull(),
+  duration: integer("duration").default(60), // minutes
+  location: varchar("location", { length: 255 }),
+  isVirtual: boolean("is_virtual").default(false),
+  meetingLink: varchar("meeting_link", { length: 500 }),
+  status: varchar("status", { length: 20 }).default("scheduled"), // scheduled, confirmed, completed, cancelled, no_show
+  notes: text("notes"),
+  followUpNeeded: boolean("follow_up_needed").default(false),
+  confidential: boolean("confidential").default(true),
+  churchId: integer("church_id").references(() => churches.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Volunteer & Event Sign-Ups
+export const volunteerOpportunities = pgTable("volunteer_opportunities", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => events.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  requiredSkills: text("required_skills").array(),
+  maxVolunteers: integer("max_volunteers"),
+  currentSignUps: integer("current_sign_ups").default(0),
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
+  location: varchar("location", { length: 255 }),
+  contactPersonId: varchar("contact_person_id").references(() => users.id),
+  isActive: boolean("is_active").default(true),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const volunteerSignUps = pgTable("volunteer_sign_ups", {
+  id: serial("id").primaryKey(),
+  opportunityId: integer("opportunity_id").notNull().references(() => volunteerOpportunities.id),
+  volunteerId: varchar("volunteer_id").notNull().references(() => users.id),
+  signUpDate: timestamp("sign_up_date").defaultNow(),
+  status: varchar("status", { length: 20 }).default("signed_up"), // signed_up, confirmed, completed, cancelled
+  notes: text("notes"),
+  hoursServed: real("hours_served"),
+  feedback: text("feedback"),
+  churchId: integer("church_id").references(() => churches.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const eventSignUps = pgTable("event_sign_ups", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  memberId: varchar("member_id").notNull().references(() => users.id),
+  signUpType: varchar("sign_up_type", { length: 30 }).notNull(), // greeter, usher, setup, cleanup, food_service, childcare
+  role: varchar("role", { length: 100 }),
+  requirements: text("requirements"),
+  signUpDate: timestamp("sign_up_date").defaultNow(),
+  status: varchar("status", { length: 20 }).default("confirmed"), // confirmed, completed, cancelled
+  notes: text("notes"),
+  churchId: integer("church_id").references(() => churches.id),
+});
+
+// Livestream & Sermon Archive
+export const livestreams = pgTable("livestreams", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  streamKey: varchar("stream_key", { length: 255 }),
+  streamUrl: varchar("stream_url", { length: 500 }),
+  embedCode: text("embed_code"),
+  scheduledStart: timestamp("scheduled_start"),
+  actualStart: timestamp("actual_start"),
+  actualEnd: timestamp("actual_end"),
+  status: varchar("status", { length: 20 }).default("scheduled"), // scheduled, live, ended, archived
+  viewerCount: integer("viewer_count").default(0),
+  maxViewers: integer("max_viewers").default(0),
+  chatEnabled: boolean("chat_enabled").default(true),
+  recordingEnabled: boolean("recording_enabled").default(true),
+  recordingUrl: varchar("recording_url", { length: 500 }),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  tags: text("tags").array(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const sermonArchive = pgTable("sermon_archive", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  speaker: varchar("speaker", { length: 255 }).notNull(),
+  sermonDate: timestamp("sermon_date").notNull(),
+  series: varchar("series", { length: 255 }),
+  scripture: varchar("scripture", { length: 255 }),
+  description: text("description"),
+  videoUrl: varchar("video_url", { length: 500 }),
+  audioUrl: varchar("audio_url", { length: 500 }),
+  transcriptUrl: varchar("transcript_url", { length: 500 }),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  duration: integer("duration"), // seconds
+  viewCount: integer("view_count").default(0),
+  downloadCount: integer("download_count").default(0),
+  tags: text("tags").array(),
+  category: varchar("category", { length: 50 }).default("sermon"), // sermon, teaching, testimony, special
+  isPublic: boolean("is_public").default(true),
+  featured: boolean("featured").default(false),
+  churchId: integer("church_id").references(() => churches.id),
+  uploadedBy: varchar("uploaded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const devotionalMedia = pgTable("devotional_media", {
+  id: serial("id").primaryKey(),
+  devotionalId: integer("devotional_id").references(() => devotionals.id),
+  mediaType: varchar("media_type", { length: 20 }).notNull(), // video, audio, image, document
+  mediaUrl: varchar("media_url", { length: 500 }).notNull(),
+  title: varchar("title", { length: 255 }),
+  description: text("description"),
+  duration: integer("duration"), // seconds for audio/video
+  fileSize: integer("file_size"), // bytes
+  mimeType: varchar("mime_type", { length: 100 }),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  isEmbedded: boolean("is_embedded").default(false),
+  embedCode: text("embed_code"),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userChurches: many(userChurches),
