@@ -154,6 +154,187 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Community Feed API
+  app.get('/api/community/enhanced-feed', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const {
+        type = 'all',
+        category = 'all',
+        timeRange = 'all',
+        visibility = 'all',
+        hasReactions = 'false',
+        sortBy = 'recent',
+        search = ''
+      } = req.query;
+
+      const filters = {
+        type: type as string,
+        category: category as string,
+        timeRange: timeRange as string,
+        visibility: visibility as string,
+        hasReactions: hasReactions === 'true',
+        sortBy: sortBy as string,
+        search: search as string
+      };
+
+      const posts = await storage.getEnhancedCommunityFeed(userId, filters);
+      res.json(posts);
+    } catch (error) {
+      console.error('Enhanced feed error:', error);
+      res.status(500).json({ message: 'Failed to fetch enhanced community feed' });
+    }
+  });
+
+  // Reactions API
+  app.post('/api/community/reactions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reactionData = {
+        ...req.body,
+        userId
+      };
+
+      const reaction = await storage.addReaction(reactionData);
+      res.status(201).json(reaction);
+    } catch (error) {
+      console.error('Add reaction error:', error);
+      res.status(400).json({ message: 'Failed to add reaction' });
+    }
+  });
+
+  app.delete('/api/community/reactions/:targetId/:reactionType', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { targetId, reactionType } = req.params;
+      await storage.removeReaction(userId, parseInt(targetId), reactionType);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Remove reaction error:', error);
+      res.status(400).json({ message: 'Failed to remove reaction' });
+    }
+  });
+
+  // Community Groups API
+  app.get('/api/community/groups', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const groups = await storage.getCommunityGroups(userId);
+      res.json(groups);
+    } catch (error) {
+      console.error('Get groups error:', error);
+      res.status(500).json({ message: 'Failed to fetch community groups' });
+    }
+  });
+
+  app.post('/api/community/groups', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const groupData = {
+        ...req.body,
+        createdBy: userId
+      };
+
+      const group = await storage.createCommunityGroup(groupData);
+      res.status(201).json(group);
+    } catch (error) {
+      console.error('Create group error:', error);
+      res.status(400).json({ message: 'Failed to create community group' });
+    }
+  });
+
+  app.post('/api/community/groups/:groupId/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { groupId } = req.params;
+      const memberData = {
+        groupId: parseInt(groupId),
+        userId,
+        role: 'member'
+      };
+
+      await storage.joinCommunityGroup(memberData);
+      res.status(201).json({ message: 'Successfully joined group' });
+    } catch (error) {
+      console.error('Join group error:', error);
+      res.status(400).json({ message: 'Failed to join group' });
+    }
+  });
+
+  // Friendships API
+  app.get('/api/community/friends', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const friends = await storage.getUserFriends(userId);
+      res.json(friends);
+    } catch (error) {
+      console.error('Get friends error:', error);
+      res.status(500).json({ message: 'Failed to fetch friends' });
+    }
+  });
+
+  app.post('/api/community/friends/request', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { addresseeId } = req.body;
+      const friendshipData = {
+        requesterId: userId,
+        addresseeId,
+        status: 'pending'
+      };
+
+      const friendship = await storage.sendFriendRequest(friendshipData);
+      res.status(201).json(friendship);
+    } catch (error) {
+      console.error('Send friend request error:', error);
+      res.status(400).json({ message: 'Failed to send friend request' });
+    }
+  });
+
+  app.put('/api/community/friends/:friendshipId/respond', isAuthenticated, async (req: any, res) => {
+    try {
+      const { friendshipId } = req.params;
+      const { status } = req.body;
+
+      const friendship = await storage.respondToFriendRequest(parseInt(friendshipId), status);
+      res.json(friendship);
+    } catch (error) {
+      console.error('Respond to friend request error:', error);
+      res.status(400).json({ message: 'Failed to respond to friend request' });
+    }
+  });
+
+  // Community Reflections API
+  app.post('/api/community/reflections', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reflectionData = {
+        ...req.body,
+        userId
+      };
+
+      const reflection = await storage.createCommunityReflection(reflectionData);
+      res.status(201).json(reflection);
+    } catch (error) {
+      console.error('Create reflection error:', error);
+      res.status(400).json({ message: 'Failed to create reflection' });
+    }
+  });
+
+  app.get('/api/community/reflections', isAuthenticated, async (req: any, res) => {
+    try {
+      const { verseId, groupId } = req.query;
+      const reflections = await storage.getCommunityReflections({
+        verseId: verseId ? parseInt(verseId as string) : undefined,
+        groupId: groupId ? parseInt(groupId as string) : undefined
+      });
+      res.json(reflections);
+    } catch (error) {
+      console.error('Get reflections error:', error);
+      res.status(500).json({ message: 'Failed to fetch reflections' });
+    }
+  });
+
   app.post('/api/auth/complete-onboarding', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

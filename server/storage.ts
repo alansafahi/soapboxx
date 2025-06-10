@@ -476,6 +476,20 @@ export interface IStorage {
   
   // Community statistics
   getBibleReadingCountSince(date: Date): Promise<number>;
+  
+  // Enhanced Social & Community Features
+  getEnhancedCommunityFeed(userId: string, filters: any): Promise<any[]>;
+  addReaction(reactionData: any): Promise<any>;
+  removeReaction(userId: string, targetId: number, reactionType: string): Promise<void>;
+  getCommunityGroups(userId: string): Promise<any[]>;
+  createCommunityGroup(groupData: any): Promise<any>;
+  joinCommunityGroup(memberData: any): Promise<void>;
+  leaveCommunityGroup(userId: string, groupId: number): Promise<void>;
+  getUserFriends(userId: string): Promise<any[]>;
+  sendFriendRequest(friendshipData: any): Promise<any>;
+  respondToFriendRequest(friendshipId: number, status: string): Promise<any>;
+  createCommunityReflection(reflectionData: any): Promise<any>;
+  getCommunityReflections(filters: any): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
