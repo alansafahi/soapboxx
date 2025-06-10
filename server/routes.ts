@@ -3917,6 +3917,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   wss.on('connection', (ws, req) => {
     let userId: string | null = null;
+    
+    // Send connection acknowledgment
+    ws.send(JSON.stringify({ type: 'connection_established' }));
 
     ws.on('message', async (message) => {
       try {
@@ -3927,7 +3930,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId = data.userId;
             if (userId) {
               connections.set(userId, ws);
-              ws.send(JSON.stringify({ type: 'auth_success' }));
+              ws.send(JSON.stringify({ type: 'auth_success', userId }));
+            } else {
+              ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid user ID' }));
             }
             break;
             
@@ -3986,6 +3991,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('WebSocket connection error:', error);
       if (userId) {
         connections.delete(userId);
+      }
+      // Send error response if connection is still open
+      if (ws.readyState === 1) {
+        ws.send(JSON.stringify({ 
+          type: 'connection_error', 
+          message: 'Connection error occurred' 
+        }));
       }
     });
   });

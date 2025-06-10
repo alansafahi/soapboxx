@@ -16,7 +16,7 @@ import {
   Settings, 
   Bell, 
   Download, 
-  Sync, 
+  RefreshCw, 
   Brain, 
   Globe, 
   Users,
@@ -633,7 +633,7 @@ export default function UserPreferences() {
                     
                     <div className="p-4 bg-blue-50 rounded-lg">
                       <div className="flex items-center space-x-2 text-blue-800">
-                        <Sync className="h-4 w-4" />
+                        <RefreshCw className="h-4 w-4" />
                         <span className="font-medium">Last synced: Just now</span>
                       </div>
                       <p className="text-sm text-blue-600 mt-1">All your devices are up to date</p>
