@@ -2536,18 +2536,27 @@ export default function AdminPortal() {
         {/* Main Content */}
         <div className="lg:col-span-3">
           {selectedChurch ? (
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-7">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="management">Management</TabsTrigger>
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="events">Events</TabsTrigger>
-                <TabsTrigger value="content">Content</TabsTrigger>
-                <TabsTrigger value="discussions">Discussions</TabsTrigger>
-                <TabsTrigger value="prayers">Prayers</TabsTrigger>
+            <Tabs defaultValue="dashboard" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="dashboard">
+                  <Building className="h-4 w-4 mr-2" />
+                  Dashboard
+                </TabsTrigger>
+                <TabsTrigger value="people">
+                  <Users className="h-4 w-4 mr-2" />
+                  People
+                </TabsTrigger>
+                <TabsTrigger value="ministry">
+                  <Heart className="h-4 w-4 mr-2" />
+                  Ministry
+                </TabsTrigger>
+                <TabsTrigger value="settings">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="overview" className="space-y-6">
+              <TabsContent value="dashboard" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Card>
                     <CardContent className="p-6">
@@ -2596,11 +2605,32 @@ export default function AdminPortal() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="profile" className="space-y-6">
-                <ChurchProfileManager churchId={selectedChurch} />
+              <TabsContent value="people" className="space-y-6">
+                <MemberManagementSystem selectedChurch={selectedChurch} />
               </TabsContent>
 
-              <TabsContent value="events" className="space-y-6">
+              <TabsContent value="ministry" className="space-y-6">
+                <Tabs defaultValue="events" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="events">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Events
+                    </TabsTrigger>
+                    <TabsTrigger value="content">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Content
+                    </TabsTrigger>
+                    <TabsTrigger value="discussions">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Discussions
+                    </TabsTrigger>
+                    <TabsTrigger value="prayers">
+                      <Heart className="h-4 w-4 mr-2" />
+                      Prayers
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="events" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">Church Events</h3>
                   <Dialog>
@@ -3247,32 +3277,14 @@ export default function AdminPortal() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="prayers" className="space-y-6">
-                <PrayerManagementSystem />
+                  <TabsContent value="prayers" className="space-y-6">
+                    <PrayerManagementSystem />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
-
-
-              <TabsContent value="notifications" className="space-y-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Notification Management</h3>
-                    <Badge variant="outline">Coming Soon</Badge>
-                  </div>
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <Settings className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h4 className="text-lg font-medium mb-2">Advanced Notifications</h4>
-                      <p className="text-muted-foreground">
-                        Push notification system with scheduling and targeting capabilities will be available soon.
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="management" className="space-y-6">
-                <MemberManagementSystem selectedChurch={selectedChurch} />
+              <TabsContent value="settings" className="space-y-6">
+                <ChurchProfileManager churchId={selectedChurch} />
               </TabsContent>
 
 
