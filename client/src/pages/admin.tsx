@@ -96,13 +96,15 @@ function PublishedDevotionals() {
 
   // Get available years and months for filters
   const yearsList = publishedDevotionals.map(d => new Date(d.publishedAt).getFullYear());
-  const availableYears = Array.from(new Set(yearsList)).sort((a, b) => b - a);
+  const uniqueYears = new Set(yearsList);
+  const availableYears = Array.from(uniqueYears).sort((a, b) => b - a);
   
   const monthsList = selectedYear ? 
     publishedDevotionals
       .filter(d => new Date(d.publishedAt).getFullYear() === selectedYear)
       .map(d => new Date(d.publishedAt).getMonth()) : [];
-  const availableMonths = Array.from(new Set(monthsList)).sort((a, b) => a - b);
+  const uniqueMonths = new Set(monthsList);
+  const availableMonths = Array.from(uniqueMonths).sort((a, b) => a - b);
 
   // Group filtered devotionals by month and year
   const groupedByMonth = filteredDevotionals.reduce((acc: any, devotional: any) => {
@@ -125,7 +127,7 @@ function PublishedDevotionals() {
     month.devotionals.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
   });
 
-  const months = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
+  const monthEntries = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
   
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -136,16 +138,55 @@ function PublishedDevotionals() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Published Devotionals</h3>
-        <Badge variant="outline">{publishedDevotionals.length} total</Badge>
+        <Badge variant="outline">{filteredDevotionals.length} devotionals</Badge>
       </div>
       
-      {months.length === 0 ? (
+      {/* Year and Month Filters */}
+      <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Year:</label>
+          <Select value={selectedYear.toString()} onValueChange={(value) => {
+            setSelectedYear(parseInt(value));
+            setSelectedMonth('all'); // Reset month when year changes
+          }}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Month:</label>
+          <Select value={selectedMonth.toString()} onValueChange={(value) => {
+            setSelectedMonth(value === 'all' ? 'all' : parseInt(value));
+          }}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Months</SelectItem>
+              {availableMonths.map(monthIndex => (
+                <SelectItem key={monthIndex} value={monthIndex.toString()}>
+                  {monthNames[monthIndex]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      {monthEntries.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           No published devotionals found
         </div>
       ) : (
         <div className="space-y-6">
-          {months.map(([monthKey, { monthName, devotionals }]) => (
+          {monthEntries.map(([monthKey, { monthName, devotionals }]: [string, any]) => (
             <div key={monthKey} className="space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
