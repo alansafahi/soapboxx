@@ -437,9 +437,9 @@ export function EventManagement() {
                     name="eventDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Start Date & Time</FormLabel>
+                        <FormLabel>Start Date & Time *</FormLabel>
                         <FormControl>
-                          <Input type="datetime-local" {...field} />
+                          <Input type="datetime-local" required {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -450,9 +450,9 @@ export function EventManagement() {
                     name="endDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>End Date & Time</FormLabel>
+                        <FormLabel>End Date & Time *</FormLabel>
                         <FormControl>
-                          <Input type="datetime-local" {...field} />
+                          <Input type="datetime-local" required {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
