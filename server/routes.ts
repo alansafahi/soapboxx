@@ -1417,22 +1417,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           id: "1",
           fullName: "John Smith",
-          email: "john@example.com",
+          email: "john.smith@email.com",
           phoneNumber: "+1 555-0123",
-          address: "123 Main St, Anytown, USA",
+          address: "123 Main St, Springfield, IL 62701",
           membershipStatus: "active",
           joinedDate: "2023-01-15",
-          notes: "Active volunteer and regular attendee"
+          notes: "Active volunteer, leads youth ministry, regular attendee"
         },
         {
           id: "2", 
           fullName: "Mary Johnson",
-          email: "mary@example.com",
+          email: "mary.johnson@email.com",
           phoneNumber: "+1 555-0456",
-          address: "456 Oak Ave, Anytown, USA",
+          address: "456 Oak Ave, Springfield, IL 62702",
           membershipStatus: "new_member",
           joinedDate: "2024-11-01",
-          notes: "Recently joined, interested in choir"
+          notes: "Recently joined, interested in choir ministry"
+        },
+        {
+          id: "3",
+          fullName: "David Wilson",
+          email: "david.wilson@email.com",
+          phoneNumber: "+1 555-0789",
+          address: "789 Pine Rd, Springfield, IL 62703",
+          membershipStatus: "active",
+          joinedDate: "2022-03-20",
+          notes: "Sunday school teacher, active in men's ministry"
+        },
+        {
+          id: "4",
+          fullName: "Sarah Davis",
+          email: "sarah.davis@email.com",
+          phoneNumber: "+1 555-0234",
+          address: "234 Elm St, Springfield, IL 62704",
+          membershipStatus: "active",
+          joinedDate: "2021-08-12",
+          notes: "Worship team member, children's ministry coordinator"
+        },
+        {
+          id: "5",
+          fullName: "Michael Brown",
+          email: "michael.brown@email.com",
+          phoneNumber: "+1 555-0567",
+          address: "567 Maple Dr, Springfield, IL 62705",
+          membershipStatus: "visitor",
+          joinedDate: "2024-12-01",
+          notes: "First-time visitor, interested in small groups"
+        },
+        {
+          id: "6",
+          fullName: "Jennifer Martinez",
+          email: "jennifer.martinez@email.com",
+          phoneNumber: "+1 555-0890",
+          address: "890 Cedar Ln, Springfield, IL 62706",
+          membershipStatus: "active",
+          joinedDate: "2020-06-14",
+          notes: "Women's ministry leader, prayer team coordinator"
+        },
+        {
+          id: "7",
+          fullName: "Robert Taylor",
+          email: "robert.taylor@email.com",
+          phoneNumber: "+1 555-0345",
+          address: "345 Birch Ave, Springfield, IL 62707",
+          membershipStatus: "active",
+          joinedDate: "2019-11-30",
+          notes: "Deacon, financial ministry, building maintenance team"
+        },
+        {
+          id: "8",
+          fullName: "Lisa Anderson",
+          email: "lisa.anderson@email.com",
+          phoneNumber: "+1 555-0678",
+          address: "678 Walnut St, Springfield, IL 62708",
+          membershipStatus: "new_member",
+          joinedDate: "2024-10-15",
+          notes: "New member class graduate, seeking ministry involvement"
+        },
+        {
+          id: "9",
+          fullName: "James Thompson",
+          email: "james.thompson@email.com",
+          phoneNumber: "+1 555-0912",
+          address: "912 Hickory Ct, Springfield, IL 62709",
+          membershipStatus: "inactive",
+          joinedDate: "2018-04-22",
+          notes: "Former active member, moved but still on roster"
+        },
+        {
+          id: "10",
+          fullName: "Amanda White",
+          email: "amanda.white@email.com",
+          phoneNumber: "+1 555-0456",
+          address: "456 Spruce Way, Springfield, IL 62710",
+          membershipStatus: "visitor",
+          joinedDate: "2024-12-08",
+          notes: "Visiting family, considering membership"
         }
       ];
       res.json(members);
