@@ -25,6 +25,8 @@ import { CounselingManagement } from "@/components/CounselingManagement";
 import { EventManagement } from "@/components/EventManagement";
 import MediaManagementSystem from "@/components/MediaManagementSystem";
 import VolunteerManagementSystem from "@/components/VolunteerManagementSystem";
+import ChurchAdminDashboard from "@/components/ChurchAdminDashboard";
+import ContentManagementSystem from "@/components/ContentManagementSystem";
 
 const churchFormSchema = insertChurchSchema.extend({
   latitude: z.coerce.number().optional(),
@@ -2492,10 +2494,18 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="dashboard">
                   <Building className="h-4 w-4 mr-2" />
                   Dashboard
+                </TabsTrigger>
+                <TabsTrigger value="analytics">
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Analytics
+                </TabsTrigger>
+                <TabsTrigger value="content">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Content
                 </TabsTrigger>
                 <TabsTrigger value="people">
                   <Users className="h-4 w-4 mr-2" />
@@ -2562,6 +2572,14 @@ export default function AdminPortal() {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="analytics" className="space-y-6">
+                <ChurchAdminDashboard selectedChurch={selectedChurch} />
+              </TabsContent>
+
+              <TabsContent value="content" className="space-y-6">
+                <ContentManagementSystem />
               </TabsContent>
 
               <TabsContent value="people" className="space-y-6">

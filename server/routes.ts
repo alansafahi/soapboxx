@@ -4009,6 +4009,401 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create spiritual growth tracking" });
     }
   });
+
+  // Content Management System API Routes
+
+  // Media Library Management
+  app.get("/api/content/media", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0) {
+        return res.status(403).json({ message: "Church membership required" });
+      }
+
+      const { type, category, search, page = 1, limit = 20 } = req.query;
+      const mediaItems = await storage.getMediaLibrary(userChurch[0].churchId, {
+        type: type as string,
+        category: category as string,
+        search: search as string,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      
+      res.json(mediaItems);
+    } catch (error) {
+      console.error("Error fetching media library:", error);
+      res.status(500).json({ message: "Failed to fetch media library" });
+    }
+  });
+
+  app.post("/api/content/media/upload", upload.single('file'), isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0) {
+        return res.status(403).json({ message: "Church membership required" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const { title, description, category, tags, isPublic } = req.body;
+      
+      // Determine file type based on MIME type
+      const fileType = req.file.mimetype.startsWith('video/') ? 'video' :
+                      req.file.mimetype.startsWith('audio/') ? 'audio' :
+                      req.file.mimetype.startsWith('image/') ? 'image' : 'document';
+
+      const mediaData = {
+        title: title || req.file.originalname,
+        description,
+        type: fileType,
+        url: `/uploads/${req.file.filename}`,
+        fileSize: req.file.size,
+        category: category || 'general',
+        tags: typeof tags === 'string' ? tags.split(',') : (tags || []),
+        isPublic: isPublic === 'true',
+        uploadedBy: userId,
+        churchId: userChurch[0].churchId,
+        status: 'processing' // Will be updated to 'ready' after processing
+      };
+
+      const mediaItem = await storage.createMediaItem(mediaData);
+      
+      // Simulate processing completion for demo
+      setTimeout(async () => {
+        await storage.updateMediaItemStatus(mediaItem.id, 'ready');
+      }, 2000);
+
+      res.json(mediaItem);
+    } catch (error) {
+      console.error("Error uploading media:", error);
+      res.status(500).json({ message: "Failed to upload media" });
+    }
+  });
+
+  app.patch("/api/content/media/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const updatedMedia = await storage.updateMediaItem(parseInt(id), req.body);
+      res.json(updatedMedia);
+    } catch (error) {
+      console.error("Error updating media:", error);
+      res.status(500).json({ message: "Failed to update media" });
+    }
+  });
+
+  app.delete("/api/content/media/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      await storage.deleteMediaItem(parseInt(id));
+      res.json({ message: "Media deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting media:", error);
+      res.status(500).json({ message: "Failed to delete media" });
+    }
+  });
+
+  // Sermon Management
+  app.get("/api/content/sermons", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0) {
+        return res.status(403).json({ message: "Church membership required" });
+      }
+
+      const { series, preacher, year, page = 1, limit = 20 } = req.query;
+      const sermons = await storage.getSermons(userChurch[0].churchId, {
+        seriesId: series ? parseInt(series as string) : undefined,
+        preacher: preacher as string,
+        year: year ? parseInt(year as string) : undefined,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      
+      res.json(sermons);
+    } catch (error) {
+      console.error("Error fetching sermons:", error);
+      res.status(500).json({ message: "Failed to fetch sermons" });
+    }
+  });
+
+  app.post("/api/content/sermons", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator', 'content_creator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Content creation access required" });
+      }
+
+      const sermonData = {
+        ...req.body,
+        churchId: userChurch[0].churchId,
+        createdBy: userId
+      };
+
+      const sermon = await storage.createSermon(sermonData);
+      res.json(sermon);
+    } catch (error) {
+      console.error("Error creating sermon:", error);
+      res.status(500).json({ message: "Failed to create sermon" });
+    }
+  });
+
+  app.patch("/api/content/sermons/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator', 'content_creator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Content editing access required" });
+      }
+
+      const updatedSermon = await storage.updateSermon(parseInt(id), req.body);
+      res.json(updatedSermon);
+    } catch (error) {
+      console.error("Error updating sermon:", error);
+      res.status(500).json({ message: "Failed to update sermon" });
+    }
+  });
+
+  // Devotional Management
+  app.get("/api/content/devotionals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0) {
+        return res.status(403).json({ message: "Church membership required" });
+      }
+
+      const { category, author, published, page = 1, limit = 20 } = req.query;
+      const devotionals = await storage.getDevotionals(userChurch[0].churchId, {
+        category: category as string,
+        author: author as string,
+        published: published === 'true',
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      
+      res.json(devotionals);
+    } catch (error) {
+      console.error("Error fetching devotionals:", error);
+      res.status(500).json({ message: "Failed to fetch devotionals" });
+    }
+  });
+
+  app.post("/api/content/devotionals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator', 'content_creator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Content creation access required" });
+      }
+
+      const devotionalData = {
+        ...req.body,
+        churchId: userChurch[0].churchId,
+        author: userId
+      };
+
+      const devotional = await storage.createDevotional(devotionalData);
+      res.json(devotional);
+    } catch (error) {
+      console.error("Error creating devotional:", error);
+      res.status(500).json({ message: "Failed to create devotional" });
+    }
+  });
+
+  // Weekly Series Management
+  app.get("/api/content/weekly-series", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0) {
+        return res.status(403).json({ message: "Church membership required" });
+      }
+
+      const { status, year, page = 1, limit = 20 } = req.query;
+      const series = await storage.getWeeklySeries(userChurch[0].churchId, {
+        status: status as string,
+        year: year ? parseInt(year as string) : undefined,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      
+      res.json(series);
+    } catch (error) {
+      console.error("Error fetching weekly series:", error);
+      res.status(500).json({ message: "Failed to fetch weekly series" });
+    }
+  });
+
+  app.post("/api/content/weekly-series", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Series creation access required" });
+      }
+
+      const seriesData = {
+        ...req.body,
+        churchId: userChurch[0].churchId,
+        createdBy: userId
+      };
+
+      const series = await storage.createWeeklySeries(seriesData);
+      res.json(series);
+    } catch (error) {
+      console.error("Error creating weekly series:", error);
+      res.status(500).json({ message: "Failed to create weekly series" });
+    }
+  });
+
+  // Content Moderation
+  app.get("/api/content/moderation", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Moderation access required" });
+      }
+
+      const { status, type, priority, page = 1, limit = 50 } = req.query;
+      const moderationQueue = await storage.getModerationQueue(userChurch[0].churchId, {
+        status: status as string,
+        type: type as string,
+        priority: priority as string,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string)
+      });
+      
+      res.json(moderationQueue);
+    } catch (error) {
+      console.error("Error fetching moderation queue:", error);
+      res.status(500).json({ message: "Failed to fetch moderation queue" });
+    }
+  });
+
+  app.patch("/api/content/moderation/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { action, notes } = req.body;
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Moderation access required" });
+      }
+
+      const moderationData = {
+        status: action, // 'approve' or 'reject'
+        moderatorNotes: notes,
+        moderatedBy: userId,
+        moderatedAt: new Date()
+      };
+
+      const updatedItem = await storage.updateModerationItem(parseInt(id), moderationData);
+      res.json(updatedItem);
+    } catch (error) {
+      console.error("Error moderating content:", error);
+      res.status(500).json({ message: "Failed to moderate content" });
+    }
+  });
+
+  // Media Analytics
+  app.get("/api/content/analytics", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Analytics access required" });
+      }
+
+      const { period = 'monthly', type, startDate, endDate } = req.query;
+      const analytics = await storage.getContentAnalytics(userChurch[0].churchId, {
+        period: period as string,
+        type: type as string,
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching content analytics:", error);
+      res.status(500).json({ message: "Failed to fetch content analytics" });
+    }
+  });
+
+  // Content Categories Management
+  app.get("/api/content/categories", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0) {
+        return res.status(403).json({ message: "Church membership required" });
+      }
+
+      const { type } = req.query; // 'media', 'sermon', 'devotional'
+      const categories = await storage.getContentCategories(userChurch[0].churchId, type as string);
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching content categories:", error);
+      res.status(500).json({ message: "Failed to fetch content categories" });
+    }
+  });
+
+  app.post("/api/content/categories", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurches(userId);
+      
+      if (!userChurch || userChurch.length === 0 || !['admin', 'pastor', 'moderator'].includes(userChurch[0].role)) {
+        return res.status(403).json({ message: "Category management access required" });
+      }
+
+      const categoryData = {
+        ...req.body,
+        churchId: userChurch[0].churchId,
+        createdBy: userId
+      };
+
+      const category = await storage.createContentCategory(categoryData);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating content category:", error);
+      res.status(500).json({ message: "Failed to create content category" });
+    }
+  });
     }
   });
 
