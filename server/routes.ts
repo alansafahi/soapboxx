@@ -17,6 +17,8 @@ import {
   insertDevotionalSchema,
   insertWeeklySeriesSchema,
   insertSermonMediaSchema,
+  insertCheckInSchema,
+  insertQrCodeSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -2787,6 +2789,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting scheduled notification:", error);
       res.status(500).json({ message: "Failed to delete scheduled notification" });
+    }
+  });
+
+  // Check-in system routes
+  app.post("/api/checkins", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const checkInData = insertCheckInSchema.parse({
+        ...req.body,
+        userId,
+      });
+      
+      const checkIn = await storage.createCheckIn(checkInData);
+      res.json(checkIn);
+    } catch (error) {
+      console.error("Error creating check-in:", error);
+      res.status(500).json({ message: "Failed to create check-in" });
+    }
+  });
+
+  app.get("/api/checkins/today", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const checkIn = await storage.getUserDailyCheckIn(userId, new Date());
+      res.json(checkIn || null);
+    } catch (error) {
+      console.error("Error fetching today's check-in:", error);
+      res.status(500).json({ message: "Failed to fetch today's check-in" });
+    }
+  });
+
+  app.get("/api/checkins/streak", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const streak = await storage.getUserCheckInStreak(userId);
+      res.json({ streak });
+    } catch (error) {
+      console.error("Error fetching check-in streak:", error);
+      res.status(500).json({ message: "Failed to fetch check-in streak" });
+    }
+  });
+
+  app.get("/api/checkins/recent", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const checkIns = await storage.getUserCheckIns(userId, limit);
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error fetching recent check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch recent check-ins" });
+    }
+  });
+
+  app.get("/api/events/today", isAuthenticated, async (req: any, res) => {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const events = await storage.getEvents();
+      const todayEvents = events.filter(event => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate >= startOfDay && eventDate <= endOfDay;
+      });
+
+      res.json(todayEvents);
+    } catch (error) {
+      console.error("Error fetching today's events:", error);
+      res.status(500).json({ message: "Failed to fetch today's events" });
+    }
+  });
+
+  // QR code routes
+  app.post("/api/qr-codes", isAuthenticated, async (req: any, res) => {
+    try {
+      const createdBy = req.user.claims.sub;
+      const qrCodeData = insertQrCodeSchema.parse({
+        ...req.body,
+        createdBy,
+      });
+      
+      const qrCode = await storage.createQrCode(qrCodeData);
+      res.json(qrCode);
+    } catch (error) {
+      console.error("Error creating QR code:", error);
+      res.status(500).json({ message: "Failed to create QR code" });
+    }
+  });
+
+  app.get("/api/qr-codes/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const qrCode = await storage.getQrCode(id);
+      if (!qrCode) {
+        return res.status(404).json({ message: "QR code not found" });
+      }
+      res.json(qrCode);
+    } catch (error) {
+      console.error("Error fetching QR code:", error);
+      res.status(500).json({ message: "Failed to fetch QR code" });
+    }
+  });
+
+  app.post("/api/qr-codes/:id/validate", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const validation = await storage.validateQrCode(id);
+      res.json(validation);
+    } catch (error) {
+      console.error("Error validating QR code:", error);
+      res.status(500).json({ message: "Failed to validate QR code" });
+    }
+  });
+
+  app.get("/api/churches/:churchId/qr-codes", isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.params;
+      const qrCodes = await storage.getChurchQrCodes(parseInt(churchId));
+      res.json(qrCodes);
+    } catch (error) {
+      console.error("Error fetching church QR codes:", error);
+      res.status(500).json({ message: "Failed to fetch church QR codes" });
+    }
+  });
+
+  app.get("/api/churches/:churchId/checkins", isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.params;
+      const date = req.query.date ? new Date(req.query.date as string) : new Date();
+      const checkIns = await storage.getChurchCheckIns(parseInt(churchId), date);
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error fetching church check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch church check-ins" });
     }
   });
 

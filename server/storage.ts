@@ -2474,6 +2474,209 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return delivery;
   }
+
+  // Check-in system operations
+  async createCheckIn(checkInData: InsertCheckIn): Promise<CheckIn> {
+    // Calculate streak count for this user
+    const streak = await this.getUserCheckInStreak(checkInData.userId);
+    const newStreak = streak + 1;
+    
+    // Calculate points based on streak and check-in type
+    let pointsEarned = 10; // Base points
+    if (checkInData.checkInType === "Sunday Service") pointsEarned = 25;
+    else if (checkInData.checkInType === "Prayer Time") pointsEarned = 15;
+    else if (checkInData.isPhysicalAttendance) pointsEarned = 30;
+    
+    // Streak bonus
+    if (newStreak >= 7) pointsEarned += 10;
+    if (newStreak >= 30) pointsEarned += 20;
+
+    const [checkIn] = await db
+      .insert(checkIns)
+      .values({
+        ...checkInData,
+        streakCount: newStreak,
+        pointsEarned,
+      })
+      .returning();
+
+    // Update user score
+    await this.updateUserScore(checkInData.userId, pointsEarned, "check_in", checkIn.id);
+
+    return checkIn;
+  }
+
+  async getUserCheckIns(userId: string, limit = 20): Promise<CheckIn[]> {
+    return await db
+      .select()
+      .from(checkIns)
+      .where(eq(checkIns.userId, userId))
+      .orderBy(desc(checkIns.createdAt))
+      .limit(limit);
+  }
+
+  async getUserDailyCheckIn(userId: string, date = new Date()): Promise<CheckIn | undefined> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const [checkIn] = await db
+      .select()
+      .from(checkIns)
+      .where(
+        and(
+          eq(checkIns.userId, userId),
+          gte(checkIns.createdAt, startOfDay),
+          lte(checkIns.createdAt, endOfDay)
+        )
+      )
+      .orderBy(desc(checkIns.createdAt))
+      .limit(1);
+    
+    return checkIn;
+  }
+
+  async getUserCheckInStreak(userId: string): Promise<number> {
+    const checkIns = await db
+      .select()
+      .from(checkIns)
+      .where(eq(checkIns.userId, userId))
+      .orderBy(desc(checkIns.createdAt))
+      .limit(365); // Look back up to a year
+
+    if (checkIns.length === 0) return 0;
+
+    let streak = 0;
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    for (const checkIn of checkIns) {
+      const checkInDate = new Date(checkIn.createdAt);
+      checkInDate.setHours(0, 0, 0, 0);
+      
+      const diffTime = currentDate.getTime() - checkInDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0 || diffDays === 1) {
+        if (diffDays === 1 || streak === 0) {
+          streak++;
+          currentDate = checkInDate;
+        }
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  async getChurchCheckIns(churchId: number, date = new Date()): Promise<(CheckIn & { user: User })[]> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await db
+      .select({
+        id: checkIns.id,
+        userId: checkIns.userId,
+        churchId: checkIns.churchId,
+        eventId: checkIns.eventId,
+        checkInType: checkIns.checkInType,
+        mood: checkIns.mood,
+        moodEmoji: checkIns.moodEmoji,
+        notes: checkIns.notes,
+        prayerIntent: checkIns.prayerIntent,
+        isPhysicalAttendance: checkIns.isPhysicalAttendance,
+        qrCodeId: checkIns.qrCodeId,
+        location: checkIns.location,
+        streakCount: checkIns.streakCount,
+        pointsEarned: checkIns.pointsEarned,
+        createdAt: checkIns.createdAt,
+        updatedAt: checkIns.updatedAt,
+        user: users,
+      })
+      .from(checkIns)
+      .innerJoin(users, eq(checkIns.userId, users.id))
+      .where(
+        and(
+          eq(checkIns.churchId, churchId),
+          gte(checkIns.createdAt, startOfDay),
+          lte(checkIns.createdAt, endOfDay)
+        )
+      )
+      .orderBy(desc(checkIns.createdAt));
+  }
+
+  // QR code operations
+  async createQrCode(qrCodeData: InsertQrCode): Promise<QrCode> {
+    const [qrCode] = await db
+      .insert(qrCodes)
+      .values(qrCodeData)
+      .returning();
+    return qrCode;
+  }
+
+  async getQrCode(id: string): Promise<QrCode | undefined> {
+    const [qrCode] = await db
+      .select()
+      .from(qrCodes)
+      .where(eq(qrCodes.id, id));
+    return qrCode;
+  }
+
+  async getChurchQrCodes(churchId: number): Promise<QrCode[]> {
+    return await db
+      .select()
+      .from(qrCodes)
+      .where(eq(qrCodes.churchId, churchId))
+      .orderBy(desc(qrCodes.createdAt));
+  }
+
+  async updateQrCode(id: string, updates: Partial<QrCode>): Promise<QrCode> {
+    const [qrCode] = await db
+      .update(qrCodes)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(qrCodes.id, id))
+      .returning();
+    return qrCode;
+  }
+
+  async deleteQrCode(id: string): Promise<void> {
+    await db
+      .delete(qrCodes)
+      .where(eq(qrCodes.id, id));
+  }
+
+  async validateQrCode(id: string): Promise<{ valid: boolean; qrCode?: QrCode }> {
+    const qrCode = await this.getQrCode(id);
+    
+    if (!qrCode) {
+      return { valid: false };
+    }
+
+    const now = new Date();
+    const isActive = qrCode.isActive;
+    const notExpired = !qrCode.expiresAt || qrCode.expiresAt > now;
+    const withinUsageLimit = !qrCode.maxUses || qrCode.usageCount < qrCode.maxUses;
+
+    const valid = isActive && notExpired && withinUsageLimit;
+
+    if (valid) {
+      // Increment usage count
+      await this.updateQrCode(id, {
+        usageCount: qrCode.usageCount + 1,
+      });
+    }
+
+    return { valid, qrCode };
+  }
 }
 
 export const storage = new DatabaseStorage();
