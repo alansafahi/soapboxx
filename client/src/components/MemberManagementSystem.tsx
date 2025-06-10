@@ -26,23 +26,26 @@ import {
 } from "lucide-react";
 
 // Member Directory Component
-function MemberDirectory() {
+function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurch?: number | null }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [selectedChurch, setSelectedChurch] = useState("all");
   const { toast } = useToast();
 
+  // Use the prop selectedChurch if provided, otherwise fall back to internal state
+  const effectiveSelectedChurch = propSelectedChurch ? propSelectedChurch.toString() : selectedChurch;
+
   const { data: churches = [] } = useQuery({
     queryKey: ["/api/churches"],
   });
 
   const { data: members = [], isLoading, error } = useQuery({
-    queryKey: ["/api/members", selectedChurch],
+    queryKey: ["/api/members", effectiveSelectedChurch],
     queryFn: () => {
-      const url = selectedChurch === "all" 
+      const url = effectiveSelectedChurch === "all" 
         ? "/api/members" 
-        : `/api/members?churchId=${selectedChurch}`;
+        : `/api/members?churchId=${effectiveSelectedChurch}`;
       return fetch(url).then(res => res.json());
     },
   });
@@ -1357,7 +1360,7 @@ function MediaLivestream() {
 }
 
 // Main Component
-export function MemberManagementSystem() {
+export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: number | null }) {
   const [activeTab, setActiveTab] = useState("members");
 
   return (
@@ -1387,7 +1390,7 @@ export function MemberManagementSystem() {
         </TabsList>
 
         <TabsContent value="members">
-          <MemberDirectory />
+          <MemberDirectory selectedChurch={selectedChurch} />
         </TabsContent>
 
         <TabsContent value="counseling">
