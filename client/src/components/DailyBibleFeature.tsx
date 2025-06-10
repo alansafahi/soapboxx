@@ -294,17 +294,12 @@ export function DailyBibleFeature() {
   const handleMarkAsRead = async () => {
     if (!dailyVerse || hasReadToday) return;
     
-    try {
-      await recordReadingMutation.mutateAsync({
-        dailyVerseId: dailyVerse.id,
-        reflectionText: reflection,
-        emotionalReaction: emotionalReaction,
-        audioListened: isAudioPlaying,
-      });
-      setHasReadToday(true);
-    } catch (error) {
-      console.error('Error recording reading:', error);
-    }
+    recordReadingMutation.mutate({
+      dailyVerseId: dailyVerse.id,
+      reflectionText: reflection,
+      emotionalReaction: emotionalReaction,
+      audioListened: isAudioPlaying,
+    });
   };
 
   const handleEmotionalReaction = (reaction: string) => {
@@ -828,22 +823,6 @@ export function DailyBibleFeature() {
           
           <TabsContent value="bible-in-a-day" className="space-y-4">
             <BibleInADayFeature />
-            
-            {/* Progress Indicator */}
-            <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Bible in a Day Progress</span>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                    Not Started
-                  </Badge>
-                </div>
-                <Progress value={0} className="h-2 bg-purple-100" />
-                <p className="text-xs text-gray-600 mt-2">
-                  Ready to embark on your accelerated Bible reading journey
-                </p>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </motion.div>

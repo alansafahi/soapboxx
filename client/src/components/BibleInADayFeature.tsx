@@ -170,10 +170,20 @@ export function BibleInADayFeature() {
   const completedSections = sessionProgress?.filter((p: any) => p.isCompleted) || [];
   const totalProgress = (completedSections.length / BIBLE_SECTIONS.length) * 100;
   
-  // Find the current section - either the first incomplete one or the last section if all complete
+  // Find the current section - either the first incomplete one or the next unstarted section
   const currentSectionFromProgress = sessionProgress?.find((p: any) => !p.isCompleted);
-  const currentSectionKey = currentSectionFromProgress?.sectionKey || BIBLE_SECTIONS[0].id;
-  const currentSection = BIBLE_SECTIONS.find(s => s.id === currentSectionKey) || BIBLE_SECTIONS[currentSectionIndex];
+  const nextUnstartedSection = BIBLE_SECTIONS.find(section => 
+    !sessionProgress?.some((p: any) => p.sectionKey === section.id)
+  );
+  
+  const currentSectionKey = currentSectionFromProgress?.sectionKey || 
+                           nextUnstartedSection?.id || 
+                           BIBLE_SECTIONS[0].id;
+  const currentSection = BIBLE_SECTIONS.find(s => s.id === currentSectionKey) || BIBLE_SECTIONS[0];
+  
+  // Check if current section is in progress
+  const currentSectionProgress = sessionProgress?.find((p: any) => p.sectionKey === currentSection.id);
+  const shouldShowReadingState = currentSectionProgress && !currentSectionProgress.isCompleted;
 
   const handleStartSession = () => {
     startSessionMutation.mutate(selectedSessionType);
@@ -511,7 +521,7 @@ export function BibleInADayFeature() {
         </CardHeader>
         
         <CardContent>
-          {!isReading ? (
+          {!shouldShowReadingState ? (
             <div className="text-center py-8">
               <Button onClick={handleStartSection} size="lg" className="mb-4">
                 <Play className="h-4 w-4 mr-2" />
@@ -567,24 +577,22 @@ export function BibleInADayFeature() {
       {sessionProgress && sessionProgress.length > 0 && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Your Progress</CardTitle>
+            <CardTitle>Section Progress Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {sessionProgress.map((progress: any, index: number) => (
-                <div key={progress.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                  <div className="flex items-center space-x-3">
-                    {progress.isCompleted ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <div className="h-5 w-5 rounded-full border-2 border-gray-300"></div>
-                    )}
-                    <span className={progress.isCompleted ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}>
-                      {progress.sectionName}
-                    </span>
-                  </div>
+                <div key={progress.id} className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  {progress.isCompleted ? (
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  ) : (
+                    <div className="h-4 w-4 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
+                  )}
+                  <span className={`text-sm ${progress.isCompleted ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
+                    {progress.sectionName}
+                  </span>
                   {progress.isCompleted && (
-                    <Badge variant="secondary">Complete</Badge>
+                    <Badge variant="secondary" className="ml-auto text-xs">✓</Badge>
                   )}
                 </div>
               ))}
