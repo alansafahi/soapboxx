@@ -27,81 +27,63 @@ interface BibleSection {
 const BIBLE_SECTIONS: BibleSection[] = [
   {
     id: 'creation',
-    title: 'Creation & The Fall',
-    description: 'The beginning of everything and humanity\'s first choices',
+    title: 'Creation',
+    description: 'In the beginning, God created everything perfect and good',
+    estimatedMinutes: 30,
+    keyVerses: ['Genesis 1:1', 'Genesis 1:27', 'Genesis 2:7', 'Genesis 3:15'],
+    reflectionQuestion: 'What does it mean to you that you are created in God\'s image?',
+    content: 'In the beginning God created the heavens and the earth... So God created mankind in his own image, in the image of God he created them; male and female he created them. Then the Lord God formed a man from the dust of the ground and breathed into his nostrils the breath of life, and the man became a living being.'
+  },
+  {
+    id: 'fall_promise',
+    title: 'Fall & Promise',
+    description: 'Humanity\'s rebellion and God\'s promise of redemption through Abraham',
     estimatedMinutes: 45,
-    keyVerses: ['Genesis 1:1', 'Genesis 1:27', 'Genesis 3:15'],
-    reflectionQuestion: 'How does understanding God as Creator change your perspective on your daily life?',
-    content: 'In the beginning God created the heavens and the earth. The earth was without form and void, and darkness was over the face of the deep. And the Spirit of God was hovering over the face of the waters. And God said, "Let there be light," and there was light...'
+    keyVerses: ['Genesis 12:1-3', 'Exodus 20:1-17', 'Isaiah 53:4-6'],
+    reflectionQuestion: 'How do you see God\'s faithfulness despite human failure in your own life?',
+    content: 'Now the Lord had said to Abram: "Get out of your country, from your family and from your father\'s house, to a land that I will show you. I will make you a great nation; I will bless you and make your name great; and you shall be a blessing."'
   },
   {
-    id: 'covenant',
-    title: 'God\'s Covenant People',
-    description: 'Abraham, Isaac, Jacob, and the formation of God\'s chosen people',
-    estimatedMinutes: 60,
-    keyVerses: ['Genesis 12:1-3', 'Genesis 17:7', 'Genesis 22:18'],
-    reflectionQuestion: 'What does God\'s faithfulness to His promises with Abraham teach you about trusting God today?',
-    content: 'Now the Lord said to Abram, "Go from your country and your kindred and your father\'s house to the land that I will show you. And I will make of you a great nation, and I will bless you and make your name great, so that you will be a blessing..."'
+    id: 'kings_prophets',
+    title: 'Kings & Prophets',
+    description: 'God\'s chosen leaders and messengers prepare the way',
+    estimatedMinutes: 50,
+    keyVerses: ['1 Samuel 16:7', 'Psalm 23:1', 'Isaiah 9:6'],
+    reflectionQuestion: 'What does it mean that God looks at the heart rather than outward appearance?',
+    content: 'But the Lord said to Samuel, "Do not look at his appearance or at his physical stature, because I have refused him. For the Lord does not see as man sees; for man looks at the outward appearance, but the Lord looks at the heart."'
   },
   {
-    id: 'exodus',
-    title: 'Deliverance & The Law',
-    description: 'God\'s rescue of Israel and establishment of His law',
-    estimatedMinutes: 75,
-    keyVerses: ['Exodus 3:14', 'Exodus 20:1-17', 'Exodus 34:6-7'],
-    reflectionQuestion: 'How do you see God\'s character of both justice and mercy revealed in the Exodus story?',
-    content: 'God said to Moses, "I AM WHO I AM." And he said, "Say this to the people of Israel: \'I AM has sent me to you.\'" God also said to Moses, "Say this to the people of Israel: \'The Lord, the God of your fathers, the God of Abraham, the God of Isaac, and the God of Jacob, has sent me to you...\'\"'
-  },
-  {
-    id: 'kingdom',
-    title: 'The Kingdom Era',
-    description: 'From judges to kings - David, Solomon, and the divided kingdom',
+    id: 'christ_messiah',
+    title: 'Christ the Messiah',
+    description: 'Jesus - the promised Savior arrives, lives, dies, and rises again',
     estimatedMinutes: 90,
-    keyVerses: ['1 Samuel 16:7', '2 Samuel 7:16', '1 Kings 8:27'],
-    reflectionQuestion: 'What can we learn from the successes and failures of Israel\'s kings about leadership and following God?',
-    content: 'But the Lord said to Samuel, "Do not look on his appearance or on the height of his stature, because I have rejected him. For the Lord sees not as man sees: man looks on the outward appearance, but the Lord looks on the heart."'
+    keyVerses: ['Luke 2:10-11', 'Matthew 5:3-4', 'John 1:14', 'John 19:30'],
+    reflectionQuestion: 'How does knowing Jesus personally change how you live each day?',
+    content: 'Then the angel said to them, "Do not be afraid, for behold, I bring you good tidings of great joy which will be to all people. For there is born to you this day in the city of David a Savior, who is Christ the Lord."'
   },
   {
-    id: 'prophets',
-    title: 'Prophets & Exile',
-    description: 'God\'s warnings, judgment, and promises of restoration',
+    id: 'church_born',
+    title: 'Church Born',
+    description: 'The Holy Spirit empowers believers to spread the Gospel worldwide',
     estimatedMinutes: 60,
-    keyVerses: ['Isaiah 53:4-6', 'Jeremiah 29:11', 'Ezekiel 36:26'],
-    reflectionQuestion: 'How do the prophets\' messages of both judgment and hope speak to our world today?',
-    content: 'Surely he has borne our griefs and carried our sorrows; yet we esteemed him stricken, smitten by God, and afflicted. But he was pierced for our transgressions; he was crushed for our iniquities; upon him was the chastisement that brought us peace, and with his wounds we are healed.'
+    keyVerses: ['Acts 2:1-4', 'Romans 8:28', 'Ephesians 2:8-9'],
+    reflectionQuestion: 'What role do you feel called to play in God\'s mission in the world?',
+    content: 'When the Day of Pentecost had fully come, they were all with one accord in one place. And suddenly there came a sound from heaven, as of a rushing mighty wind, and it filled the whole house where they were sitting.'
   },
   {
-    id: 'jesus',
-    title: 'The Life of Jesus',
-    description: 'The promised Messiah - His birth, ministry, death, and resurrection',
-    estimatedMinutes: 120,
-    keyVerses: ['John 1:14', 'John 3:16', 'John 14:6', 'Matthew 28:18-20'],
-    reflectionQuestion: 'How does Jesus\' life, death, and resurrection change everything about how you understand God and life?',
-    content: 'And the Word became flesh and dwelt among us, and we have seen his glory, glory as of the only Son from the Father, full of grace and truth... For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'
-  },
-  {
-    id: 'church',
-    title: 'The Early Church',
-    description: 'Pentecost, Paul\'s missions, and the spread of the Gospel',
-    estimatedMinutes: 75,
-    keyVerses: ['Acts 2:38', 'Romans 8:28', '1 Corinthians 13:13', 'Ephesians 2:8-9'],
-    reflectionQuestion: 'What does the early church\'s unity and mission teach us about Christian community today?',
-    content: 'And Peter said to them, "Repent and be baptized every one of you in the name of Jesus Christ for the forgiveness of your sins, and you will receive the gift of the Holy Spirit. For the promise is for you and for your children and for all who are far off, everyone whom the Lord our God calls to himself."'
-  },
-  {
-    id: 'revelation',
-    title: 'The New Heaven & Earth',
-    description: 'God\'s ultimate victory and the restoration of all things',
-    estimatedMinutes: 45,
+    id: 'future_hope',
+    title: 'Future Hope',
+    description: 'God\'s ultimate victory and the promise of new heaven and new earth',
+    estimatedMinutes: 30,
     keyVerses: ['Revelation 21:1-4', 'Revelation 22:20'],
-    reflectionQuestion: 'How does the promise of God\'s ultimate victory and new creation give you hope for today?',
-    content: 'Then I saw a new heaven and a new earth, for the first heaven and the first earth had passed away, and the sea was no more. And I saw the holy city, new Jerusalem, coming down out of heaven from God, prepared as a bride adorned for her husband...'
+    reflectionQuestion: 'How does the promise of God\'s perfect future give you hope today?',
+    content: 'Now I saw a new heaven and a new earth, for the first heaven and the first earth had passed away. Also there was no more sea. Then I, John, saw the holy city, New Jerusalem, coming down out of heaven from God, prepared as a bride adorned for her husband.'
   }
 ];
 
 export function BibleInADayFeature() {
   const { toast } = useToast();
-  const [selectedSessionType, setSelectedSessionType] = useState<'fast_track' | 'full_immersion'>('fast_track');
+  const [selectedSessionType, setSelectedSessionType] = useState<'fast_track' | 'deep_dive' | 'audio_only'>('fast_track');
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [isReading, setIsReading] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
@@ -129,10 +111,11 @@ export function BibleInADayFeature() {
 
   // Start new session mutation
   const startSessionMutation = useMutation({
-    mutationFn: async (sessionType: 'fast_track' | 'full_immersion') => {
+    mutationFn: async (sessionType: 'fast_track' | 'deep_dive' | 'audio_only') => {
+      const targetDuration = sessionType === 'fast_track' ? 60 : sessionType === 'deep_dive' ? 300 : 45;
       return await apiRequest('/api/bible-in-a-day/sessions', {
         method: 'POST',
-        body: { sessionType, targetDuration: sessionType === 'fast_track' ? 360 : 600 },
+        body: { sessionType, targetDuration },
       });
     },
     onSuccess: () => {
@@ -249,9 +232,7 @@ export function BibleInADayFeature() {
   };
 
   const isSessionComplete = completedSections.length === BIBLE_SECTIONS.length;
-  const filteredSections = selectedSessionType === 'fast_track' 
-    ? BIBLE_SECTIONS.filter((_, index) => [0, 2, 5, 7].includes(index))
-    : BIBLE_SECTIONS;
+  const filteredSections = BIBLE_SECTIONS; // All sections included for simplified implementation
 
   if (!activeSession) {
     return (
