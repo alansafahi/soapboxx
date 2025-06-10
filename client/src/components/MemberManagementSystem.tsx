@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
@@ -20,7 +21,8 @@ import {
   Heart, Building, Clock, Plus, Edit, Trash2, Search, 
   Filter, UserPlus, HeartHandshake, ClipboardList, 
   Archive, PlayCircle, Video, Headphones, User,
-  Home, Star, UserCog, BookOpen, Radio
+  Home, Star, UserCog, BookOpen, Radio, CheckCircle,
+  Clock3, AlertCircle
 } from "lucide-react";
 
 // Member Directory Component
@@ -363,6 +365,10 @@ function MemberDetailDialog({ member, onClose, onUpdate }: any) {
 // Counseling Scheduling Component
 function CounselingScheduling() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const { data: sessions = [], isLoading } = useQuery({
@@ -376,10 +382,56 @@ function CounselingScheduling() {
   });
 
   const createSessionMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/counseling-sessions", { method: "POST", body: data }),
+    mutationFn: async (sessionData: any) => {
+      const response = await apiRequest("POST", "/api/counseling-sessions", sessionData);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/counseling-sessions"] });
-      toast({ title: "Counseling session scheduled successfully" });
+      toast({ title: "Session created successfully" });
+      setIsCreating(false);
+    },
+  });
+
+  const updateSessionMutation = useMutation({
+    mutationFn: async (data: { id: string; updates: any }) => {
+      const response = await apiRequest("PUT", `/api/counseling-sessions/${data.id}`, data.updates);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/counseling-sessions"] });
+      toast({ title: "Session updated successfully" });
+      setSelectedSession(null);
+      setIsEditing(false);
+    },
+  });
+
+  const deleteSessionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest("DELETE", `/api/counseling-sessions/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/counseling-sessions"] });
+      toast({ title: "Session deleted successfully" });
+      setDeleteConfirmId(null);
+    },
+  });
+
+  const confirmSessionMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await apiRequest("PATCH", `/api/counseling-sessions/${sessionId}/confirm`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/counseling-sessions"] });
+      toast({ title: "Session confirmed successfully" });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to confirm session",
+        variant: "destructive",
+      });
     },
   });
 
@@ -395,9 +447,56 @@ function CounselingScheduling() {
     },
   });
 
+  const editForm = useForm({
+    defaultValues: {
+      memberId: "",
+      sessionType: "",
+      scheduledTime: "",
+      duration: 60,
+      location: "",
+      isVirtual: false,
+      notes: "",
+    },
+  });
+
   const handleCreateSession = (data: any) => {
     createSessionMutation.mutate(data);
     sessionForm.reset();
+  };
+
+  const handleEditSession = (data: any) => {
+    if (selectedSession) {
+      updateSessionMutation.mutate({
+        id: selectedSession.id,
+        updates: data
+      });
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Confirmed</Badge>;
+      case "pending":
+        return <Badge variant="outline" className="border-yellow-300 text-yellow-800"><Clock3 className="h-3 w-3 mr-1" />Pending</Badge>;
+      case "cancelled":
+        return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" />Cancelled</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const getSessionTypeLabel = (type: string) => {
+    switch (type) {
+      case "counseling":
+        return "Counseling";
+      case "pastoral_care":
+        return "Pastoral Care";
+      case "prayer":
+        return "Prayer Session";
+      default:
+        return type;
+    }
   };
 
   return (
@@ -530,43 +629,303 @@ function CounselingScheduling() {
         </Dialog>
       </div>
 
-      {/* Sessions List */}
-      <div className="grid gap-4">
-        {sessions.map((session: any) => (
-          <Card key={session.id}>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <HeartHandshake className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">{session.sessionType.replace('_', ' ')}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(session.scheduledTime).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-                <Badge variant={session.status === 'confirmed' ? 'default' : 'secondary'}>
-                  {session.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {session.duration} minutes
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  {session.location || "TBD"}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Sessions Overview Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{sessions.length}</div>
+            <p className="text-xs text-muted-foreground">
+              All scheduled sessions
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {sessions.filter((s: any) => s.status === "confirmed").length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Ready to proceed
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <Clock3 className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">
+              {sessions.filter((s: any) => s.status === "pending").length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Awaiting confirmation
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Sessions Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Scheduled Sessions</CardTitle>
+          <CardDescription>
+            View and manage all counseling and pastoral care sessions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Date & Time</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sessions.map((session: any) => (
+                <TableRow key={session.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <div className="font-medium">{session.memberName || "Unknown Member"}</div>
+                        <div className="text-sm text-muted-foreground">{session.memberEmail || ""}</div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {getSessionTypeLabel(session.sessionType)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <div>{new Date(session.scheduledTime).toLocaleDateString()}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {new Date(session.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({session.duration}min)
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      {session.location}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(session.status)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {session.status === "pending" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => confirmSessionMutation.mutate(session.id)}
+                          disabled={confirmSessionMutation.isPending}
+                        >
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedSession(session);
+                          editForm.reset({
+                            memberId: session.memberId,
+                            sessionType: session.sessionType,
+                            scheduledTime: session.scheduledTime,
+                            duration: session.duration,
+                            location: session.location,
+                            isVirtual: session.isVirtual || false,
+                            notes: session.notes || "",
+                          });
+                          setIsEditing(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeleteConfirmId(session.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Edit Session Dialog */}
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Session</DialogTitle>
+            <DialogDescription>
+              Update session details and preferences
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(handleEditSession)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="memberId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Member</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select member" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {members.map((member: any) => (
+                          <SelectItem key={member.id} value={member.id}>
+                            {member.fullName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="sessionType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Session Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="confession">Confession</SelectItem>
+                        <SelectItem value="counseling">Counseling</SelectItem>
+                        <SelectItem value="crisis_prayer">Crisis Prayer</SelectItem>
+                        <SelectItem value="spiritual_guidance">Spiritual Guidance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="scheduledTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date & Time</FormLabel>
+                      <FormControl>
+                        <Input type="datetime-local" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration (minutes)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={editForm.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Meeting room, online link..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Session notes or special requirements..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={updateSessionMutation.isPending}>
+                  {updateSessionMutation.isPending ? "Updating..." : "Update Session"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Session</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this session? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteConfirmId && deleteSessionMutation.mutate(deleteConfirmId)}
+              disabled={deleteSessionMutation.isPending}
+            >
+              {deleteSessionMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
