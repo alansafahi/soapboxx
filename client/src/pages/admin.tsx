@@ -126,33 +126,33 @@ function PublishedSeries() {
   if (isLoading) return <div className="text-center py-4">Loading published series...</div>;
 
   const seriesList = Array.isArray(series) ? series : [];
-  const publishedSeries = seriesList.filter(s => s.isPublished && s.publishedAt);
+  const publishedSeries = seriesList.filter(s => s.isActive && s.createdAt);
 
   // Filter by selected year and month
   const filteredSeries = publishedSeries.filter(s => {
-    const publishedDate = new Date(s.publishedAt);
-    const matchesYear = publishedDate.getFullYear() === selectedYear;
-    const matchesMonth = selectedMonth === 'all' || publishedDate.getMonth() === selectedMonth;
+    const createdDate = new Date(s.createdAt);
+    const matchesYear = createdDate.getFullYear() === selectedYear;
+    const matchesMonth = selectedMonth === 'all' || createdDate.getMonth() === selectedMonth;
     return matchesYear && matchesMonth;
   });
 
   // Get available years and months for filters
-  const yearsList = publishedSeries.map(s => new Date(s.publishedAt).getFullYear());
+  const yearsList = publishedSeries.map(s => new Date(s.createdAt).getFullYear());
   const uniqueYears = new Set(yearsList);
   const availableYears = Array.from(uniqueYears).sort((a, b) => b - a);
   
   const monthsList = selectedYear ? 
     publishedSeries
-      .filter(s => new Date(s.publishedAt).getFullYear() === selectedYear)
-      .map(s => new Date(s.publishedAt).getMonth()) : [];
+      .filter(s => new Date(s.createdAt).getFullYear() === selectedYear)
+      .map(s => new Date(s.createdAt).getMonth()) : [];
   const uniqueMonths = new Set(monthsList);
   const availableMonths = Array.from(uniqueMonths).sort((a, b) => a - b);
 
   // Group filtered series by month and year
   const groupedByMonth = filteredSeries.reduce((acc: any, seriesItem: any) => {
-    const publishedDate = new Date(seriesItem.publishedAt);
-    const monthKey = `${publishedDate.getFullYear()}-${publishedDate.getMonth()}`;
-    const monthName = publishedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const createdDate = new Date(seriesItem.createdAt);
+    const monthKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}`;
+    const monthName = createdDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     
     if (!acc[monthKey]) {
       acc[monthKey] = {
@@ -166,7 +166,7 @@ function PublishedSeries() {
 
   // Sort each month's series by date (newest first)
   Object.values(groupedByMonth).forEach((month: any) => {
-    month.series.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    month.series.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   });
 
   const monthEntries = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
@@ -254,11 +254,11 @@ function PublishedSeries() {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {new Date(seriesItem.publishedAt).toLocaleDateString()}
+                            {new Date(seriesItem.createdAt).toLocaleDateString()}
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {seriesItem.duration} weeks
+                            {seriesItem.frequency}
                           </span>
                         </div>
                       </div>
@@ -1075,7 +1075,10 @@ export default function AdminPortal() {
 
   const createWeeklySeriesMutation = useMutation({
     mutationFn: async (data: WeeklySeriesFormData) => {
-      return await apiRequest("POST", "/api/weekly-series", data);
+      return await apiRequest("POST", "/api/weekly-series", {
+        ...data,
+        isPublished: true
+      });
     },
     onSuccess: () => {
       toast({
@@ -1285,10 +1288,10 @@ export default function AdminPortal() {
   };
 
   const handleUploadSermonMedia = () => {
-    if (!sermonMediaForm.title || !sermonMediaForm.speaker) {
+    if (!sermonMediaForm.title || !sermonMediaForm.speaker || !sermonMediaForm.date) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including date",
         variant: "destructive",
       });
       return;
@@ -1297,6 +1300,7 @@ export default function AdminPortal() {
     createSermonMediaMutation.mutate({
       ...sermonMediaForm,
       churchId: selectedChurch,
+      date: new Date(sermonMediaForm.date).toISOString(),
     });
   };
 
