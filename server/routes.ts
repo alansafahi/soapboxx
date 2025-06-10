@@ -3698,6 +3698,317 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error getting notification deliveries:", error);
       res.status(500).json({ message: "Failed to get notification deliveries" });
+
+  // Church Admin Dashboard API Routes
+
+  // Member Analytics
+  app.get("/api/admin/analytics", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Calculate comprehensive member analytics
+      const totalMembers = await storage.getChurchMemberCount(userChurch.churchId);
+      const activeMembers = await storage.getActiveChurchMembers(userChurch.churchId);
+      const newMembersThisMonth = await storage.getNewMembersThisMonth(userChurch.churchId);
+      const engagementMetrics = await storage.getMemberEngagementMetrics(userChurch.churchId);
+      
+      const analytics = {
+        totalMembers,
+        activeMembers,
+        newMembersThisMonth,
+        averageEngagement: engagementMetrics.averageEngagement || 0,
+        attendanceRate: engagementMetrics.attendanceRate || 0,
+        volunteerParticipation: engagementMetrics.volunteerParticipation || 0,
+        donationParticipation: engagementMetrics.donationParticipation || 0,
+        eventParticipation: engagementMetrics.eventParticipation || 0
+      };
+
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching admin analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Communication Campaigns
+  app.get("/api/admin/campaigns", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const campaigns = await storage.getCommunicationCampaigns(userChurch.churchId);
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
+  app.post("/api/admin/campaigns", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const campaignData = {
+        ...req.body,
+        churchId: userChurch.churchId,
+        createdBy: userId
+      };
+
+      const campaign = await storage.createCommunicationCampaign(campaignData);
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      res.status(500).json({ message: "Failed to create campaign" });
+    }
+  });
+
+  // Volunteer Role Management
+  app.get("/api/admin/volunteer-roles", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const roles = await storage.getEnhancedVolunteerRoles(userChurch.churchId);
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching volunteer roles:", error);
+      res.status(500).json({ message: "Failed to fetch volunteer roles" });
+    }
+  });
+
+  app.post("/api/admin/volunteer-roles", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const roleData = {
+        ...req.body,
+        churchId: userChurch.churchId,
+        createdBy: userId
+      };
+
+      const role = await storage.createEnhancedVolunteerRole(roleData);
+      res.json(role);
+    } catch (error) {
+      console.error("Error creating volunteer role:", error);
+      res.status(500).json({ message: "Failed to create volunteer role" });
+    }
+  });
+
+  // Donation Management
+  app.get("/api/admin/donations/summary", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const summary = await storage.getDonationSummary(userChurch.churchId);
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching donation summary:", error);
+      res.status(500).json({ message: "Failed to fetch donation summary" });
+    }
+  });
+
+  app.get("/api/admin/donations", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { page = 1, limit = 50, startDate, endDate, categoryId } = req.query;
+      const donations = await storage.getDonations(userChurch.churchId, {
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        startDate: startDate as string,
+        endDate: endDate as string,
+        categoryId: categoryId ? parseInt(categoryId as string) : undefined
+      });
+      
+      res.json(donations);
+    } catch (error) {
+      console.error("Error fetching donations:", error);
+      res.status(500).json({ message: "Failed to fetch donations" });
+    }
+  });
+
+  app.get("/api/admin/donation-categories", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const categories = await storage.getDonationCategories(userChurch.churchId);
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching donation categories:", error);
+      res.status(500).json({ message: "Failed to fetch donation categories" });
+    }
+  });
+
+  app.post("/api/admin/donation-categories", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const categoryData = {
+        ...req.body,
+        churchId: userChurch.churchId
+      };
+
+      const category = await storage.createDonationCategory(categoryData);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating donation category:", error);
+      res.status(500).json({ message: "Failed to create donation category" });
+    }
+  });
+
+  // Campus Management
+  app.get("/api/admin/campuses", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const campuses = await storage.getCampuses(userChurch.churchId);
+      res.json(campuses);
+    } catch (error) {
+      console.error("Error fetching campuses:", error);
+      res.status(500).json({ message: "Failed to fetch campuses" });
+    }
+  });
+
+  app.post("/api/admin/campuses", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const campusData = {
+        ...req.body,
+        churchId: userChurch.churchId
+      };
+
+      const campus = await storage.createCampus(campusData);
+      res.json(campus);
+    } catch (error) {
+      console.error("Error creating campus:", error);
+      res.status(500).json({ message: "Failed to create campus" });
+    }
+  });
+
+  // Member Engagement Metrics
+  app.get("/api/admin/member-engagement", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { period = 'monthly', startDate, endDate } = req.query;
+      const metrics = await storage.getMemberEngagementMetrics(userChurch.churchId, {
+        period: period as string,
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+      
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching member engagement metrics:", error);
+      res.status(500).json({ message: "Failed to fetch engagement metrics" });
+    }
+  });
+
+  // Spiritual Growth Tracking
+  app.get("/api/admin/spiritual-growth", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { category, startDate, endDate } = req.query;
+      const tracking = await storage.getSpiritualGrowthTracking(userChurch.churchId, {
+        category: category as string,
+        startDate: startDate as string,
+        endDate: endDate as string
+      });
+      
+      res.json(tracking);
+    } catch (error) {
+      console.error("Error fetching spiritual growth tracking:", error);
+      res.status(500).json({ message: "Failed to fetch spiritual growth tracking" });
+    }
+  });
+
+  app.post("/api/admin/spiritual-growth", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch || !['admin', 'pastor', 'moderator'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const trackingData = {
+        ...req.body,
+        churchId: userChurch.churchId,
+        verifiedBy: userId
+      };
+
+      const tracking = await storage.createSpiritualGrowthTracking(trackingData);
+      res.json(tracking);
+    } catch (error) {
+      console.error("Error creating spiritual growth tracking:", error);
+      res.status(500).json({ message: "Failed to create spiritual growth tracking" });
+    }
+  });
     }
   });
 

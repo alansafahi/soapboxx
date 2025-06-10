@@ -2248,6 +2248,358 @@ export type InsertEngagementSession = typeof engagementSessions.$inferInsert;
 export type ActivityFeed = typeof activityFeed.$inferSelect;
 export type InsertActivityFeed = typeof activityFeed.$inferInsert;
 
+// Advanced Church Management Tables
+
+// Member Analytics and Engagement Tracking
+export const memberEngagementMetrics = pgTable("member_engagement_metrics", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  metricType: varchar("metric_type", { length: 50 }).notNull(), // attendance, prayer, reading, giving, volunteering, events
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(),
+  unit: varchar("unit", { length: 20 }), // hours, count, dollars, percentage
+  period: varchar("period", { length: 20 }).notNull(), // daily, weekly, monthly, yearly
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  metadata: jsonb("metadata"), // Additional metric details
+  recordedBy: varchar("recorded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const spiritualGrowthTracking = pgTable("spiritual_growth_tracking", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  growthCategory: varchar("growth_category", { length: 50 }).notNull(), // baptism, discipleship, leadership, service, faith_milestone
+  milestone: varchar("milestone", { length: 100 }).notNull(),
+  description: text("description"),
+  achievedDate: timestamp("achieved_date").notNull(),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  notes: text("notes"),
+  attachments: text("attachments").array(), // Photos, certificates, documents
+  isPublic: boolean("is_public").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Bulk Communication System
+export const communicationCampaigns = pgTable("communication_campaigns", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 50 }).notNull(), // email, sms, push, announcement, newsletter
+  status: varchar("status", { length: 20 }).default("draft"), // draft, scheduled, sending, sent, cancelled
+  targetAudience: jsonb("target_audience"), // Complex targeting rules
+  subject: varchar("subject", { length: 255 }),
+  content: text("content").notNull(),
+  templateId: integer("template_id"),
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  totalRecipients: integer("total_recipients").default(0),
+  deliveredCount: integer("delivered_count").default(0),
+  openedCount: integer("opened_count").default(0),
+  clickCount: integer("click_count").default(0),
+  responseCount: integer("response_count").default(0),
+  bounceCount: integer("bounce_count").default(0),
+  unsubscribeCount: integer("unsubscribe_count").default(0),
+  attachments: text("attachments").array(),
+  trackingEnabled: boolean("tracking_enabled").default(true),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: jsonb("recurring_pattern"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const communicationTemplates = pgTable("communication_templates", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 50 }).notNull(), // email, sms, push, announcement
+  category: varchar("category", { length: 50 }), // welcome, event, prayer, announcement, newsletter
+  subject: varchar("subject", { length: 255 }),
+  content: text("content").notNull(),
+  variables: text("variables").array(), // {{first_name}}, {{church_name}}, etc.
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  lastUsed: timestamp("last_used"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Enhanced Event Management
+export const eventCapacityManagement = pgTable("event_capacity_management", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  totalCapacity: integer("total_capacity"),
+  currentAttendees: integer("current_attendees").default(0),
+  waitlistEnabled: boolean("waitlist_enabled").default(false),
+  waitlistCount: integer("waitlist_count").default(0),
+  overBookingAllowed: boolean("over_booking_allowed").default(false),
+  overBookingPercentage: integer("over_booking_percentage").default(0),
+  ageGroupCapacities: jsonb("age_group_capacities"), // {adults: 100, children: 50, infants: 20}
+  accessibilityCapacity: integer("accessibility_capacity"),
+  currentAccessibilityCount: integer("current_accessibility_count").default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const recurringEventSeries = pgTable("recurring_event_series", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  seriesName: varchar("series_name", { length: 255 }).notNull(),
+  description: text("description"),
+  eventTemplate: jsonb("event_template").notNull(), // Base event data
+  recurrencePattern: jsonb("recurrence_pattern").notNull(), // {type: 'weekly', days: ['sunday'], interval: 1}
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  maxOccurrences: integer("max_occurrences"),
+  currentOccurrences: integer("current_occurrences").default(0),
+  isActive: boolean("is_active").default(true),
+  autoPublish: boolean("auto_publish").default(true),
+  advanceNotice: integer("advance_notice").default(14), // Days in advance to create events
+  lastGenerated: timestamp("last_generated"),
+  nextGeneration: timestamp("next_generation"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Enhanced Volunteer Management System
+export const enhancedVolunteerRoles = pgTable("enhanced_volunteer_roles", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  department: varchar("department", { length: 50 }), // worship, children, youth, hospitality, tech, admin
+  requirements: text("requirements").array(), // Skills, training, background check
+  timeCommitment: varchar("time_commitment", { length: 50 }), // weekly, monthly, event-based
+  hoursPerWeek: integer("hours_per_week"),
+  isLeadershipRole: boolean("is_leadership_role").default(false),
+  requiredTraining: text("required_training").array(),
+  backgroundCheckRequired: boolean("background_check_required").default(false),
+  minimumAge: integer("minimum_age").default(16),
+  maximumVolunteers: integer("maximum_volunteers"),
+  currentVolunteers: integer("current_volunteers").default(0),
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const enhancedVolunteerAssignments = pgTable("enhanced_volunteer_assignments", {
+  id: serial("id").primaryKey(),
+  volunteerRoleId: integer("volunteer_role_id").notNull().references(() => enhancedVolunteerRoles.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  assignedBy: varchar("assigned_by").notNull().references(() => users.id),
+  status: varchar("status", { length: 20 }).default("active"), // active, inactive, pending, completed
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  notes: text("notes"),
+  trainingCompleted: boolean("training_completed").default(false),
+  backgroundCheckCompleted: boolean("background_check_completed").default(false),
+  performanceRating: integer("performance_rating"), // 1-5 scale
+  feedbackNotes: text("feedback_notes"),
+  totalHours: decimal("total_hours", { precision: 8, scale: 2 }).default("0"),
+  lastActiveDate: timestamp("last_active_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  volunteerUserUnique: unique().on(table.volunteerRoleId, table.userId),
+}));
+
+export const enhancedVolunteerSchedules = pgTable("enhanced_volunteer_schedules", {
+  id: serial("id").primaryKey(),
+  volunteerAssignmentId: integer("volunteer_assignment_id").notNull().references(() => enhancedVolunteerAssignments.id),
+  eventId: integer("event_id").references(() => events.id),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  location: varchar("location", { length: 255 }),
+  specialInstructions: text("special_instructions"),
+  status: varchar("status", { length: 20 }).default("scheduled"), // scheduled, confirmed, completed, cancelled, no_show
+  checkInTime: timestamp("check_in_time"),
+  checkOutTime: timestamp("check_out_time"),
+  actualHours: decimal("actual_hours", { precision: 8, scale: 2 }),
+  supervisorNotes: text("supervisor_notes"),
+  volunteerFeedback: text("volunteer_feedback"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Donation and Financial Tracking
+export const donationCategories = pgTable("donation_categories", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  code: varchar("code", { length: 20 }), // For accounting integration
+  taxDeductible: boolean("tax_deductible").default(true),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  goalAmount: decimal("goal_amount", { precision: 12, scale: 2 }),
+  currentAmount: decimal("current_amount", { precision: 12, scale: 2 }).default("0"),
+  fiscalYearStart: timestamp("fiscal_year_start"),
+  fiscalYearEnd: timestamp("fiscal_year_end"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const donations = pgTable("donations", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  donorId: varchar("donor_id").references(() => users.id), // Can be null for anonymous donations
+  categoryId: integer("category_id").notNull().references(() => donationCategories.id),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("USD"),
+  method: varchar("method", { length: 20 }).notNull(), // cash, check, card, bank_transfer, online
+  frequency: varchar("frequency", { length: 20 }).default("one_time"), // one_time, weekly, monthly, yearly
+  isRecurring: boolean("is_recurring").default(false),
+  recurringScheduleId: integer("recurring_schedule_id"),
+  transactionId: varchar("transaction_id", { length: 255 }), // External payment processor ID
+  checkNumber: varchar("check_number", { length: 50 }),
+  donorName: varchar("donor_name", { length: 255 }), // For anonymous or guest donations
+  donorEmail: varchar("donor_email", { length: 255 }),
+  donorPhone: varchar("donor_phone", { length: 20 }),
+  donorAddress: text("donor_address"),
+  isAnonymous: boolean("is_anonymous").default(false),
+  notes: text("notes"),
+  receiptSent: boolean("receipt_sent").default(false),
+  receiptSentAt: timestamp("receipt_sent_at"),
+  taxReceiptNumber: varchar("tax_receipt_number", { length: 50 }),
+  fiscalYear: integer("fiscal_year"),
+  donationDate: timestamp("donation_date").notNull(),
+  processedBy: varchar("processed_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const donationReports = pgTable("donation_reports", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  generatedBy: varchar("generated_by").notNull().references(() => users.id),
+  reportType: varchar("report_type", { length: 50 }).notNull(), // annual_statement, monthly_summary, category_breakdown, donor_history
+  reportPeriod: varchar("report_period", { length: 50 }).notNull(), // 2024, 2024-01, Q1-2024, etc.
+  parameters: jsonb("parameters"), // Filters and options used to generate report
+  totalAmount: decimal("total_amount", { precision: 12, scale: 2 }),
+  totalDonations: integer("total_donations"),
+  uniqueDonors: integer("unique_donors"),
+  reportData: jsonb("report_data"), // Full report data in JSON format
+  fileUrl: varchar("file_url", { length: 500 }), // Link to generated PDF/Excel file
+  generatedAt: timestamp("generated_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+// Multi-Campus Support
+export const campuses = pgTable("campuses", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  address: text("address"),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 50 }),
+  zipCode: varchar("zip_code", { length: 10 }),
+  phone: varchar("phone", { length: 20 }),
+  email: varchar("email", { length: 255 }),
+  campusCode: varchar("campus_code", { length: 20 }).notNull(), // MAIN, EAST, WEST, ONLINE, etc.
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  capacity: integer("capacity"),
+  facilities: text("facilities").array(), // sanctuary, classrooms, gym, kitchen, parking
+  servicesOffered: text("services_offered").array(), // worship, childcare, counseling, food_bank
+  staffCount: integer("staff_count").default(0),
+  memberCount: integer("member_count").default(0),
+  isActive: boolean("is_active").default(true),
+  isPrimary: boolean("is_primary").default(false),
+  openingDate: timestamp("opening_date"),
+  campusLeaderId: varchar("campus_leader_id").references(() => users.id),
+  operatingHours: jsonb("operating_hours"), // {monday: {open: '09:00', close: '17:00'}}
+  specialFeatures: text("special_features").array(), // wheelchair_accessible, live_streaming, translation
+  budgetAllocation: decimal("budget_allocation", { precision: 12, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  churchCampusCodeUnique: unique().on(table.churchId, table.campusCode),
+}));
+
+export const campusAssignments = pgTable("campus_assignments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  campusId: integer("campus_id").notNull().references(() => campuses.id),
+  role: varchar("role", { length: 50 }).default("member"), // member, volunteer, staff, leader, pastor
+  assignedBy: varchar("assigned_by").references(() => users.id),
+  isPrimary: boolean("is_primary").default(true), // Primary campus assignment
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userCampusUnique: unique().on(table.userId, table.campusId),
+}));
+
+// TypeScript types for church management tables
+export type MemberEngagementMetric = typeof memberEngagementMetrics.$inferSelect;
+export type InsertMemberEngagementMetric = typeof memberEngagementMetrics.$inferInsert;
+
+export type SpiritualGrowthTracking = typeof spiritualGrowthTracking.$inferSelect;
+export type InsertSpiritualGrowthTracking = typeof spiritualGrowthTracking.$inferInsert;
+
+export type CommunicationCampaign = typeof communicationCampaigns.$inferSelect;
+export type InsertCommunicationCampaign = typeof communicationCampaigns.$inferInsert;
+
+export type CommunicationTemplate = typeof communicationTemplates.$inferSelect;
+export type InsertCommunicationTemplate = typeof communicationTemplates.$inferInsert;
+
+export type EventCapacityManagement = typeof eventCapacityManagement.$inferSelect;
+export type InsertEventCapacityManagement = typeof eventCapacityManagement.$inferInsert;
+
+export type RecurringEventSeries = typeof recurringEventSeries.$inferSelect;
+export type InsertRecurringEventSeries = typeof recurringEventSeries.$inferInsert;
+
+export type EnhancedVolunteerRole = typeof enhancedVolunteerRoles.$inferSelect;
+export type InsertEnhancedVolunteerRole = typeof enhancedVolunteerRoles.$inferInsert;
+
+export type EnhancedVolunteerAssignment = typeof enhancedVolunteerAssignments.$inferSelect;
+export type InsertEnhancedVolunteerAssignment = typeof enhancedVolunteerAssignments.$inferInsert;
+
+export type EnhancedVolunteerSchedule = typeof enhancedVolunteerSchedules.$inferSelect;
+export type InsertEnhancedVolunteerSchedule = typeof enhancedVolunteerSchedules.$inferInsert;
+
+export type DonationCategory = typeof donationCategories.$inferSelect;
+export type InsertDonationCategory = typeof donationCategories.$inferInsert;
+
+export type Donation = typeof donations.$inferSelect;
+export type InsertDonation = typeof donations.$inferInsert;
+
+export type DonationReport = typeof donationReports.$inferSelect;
+export type InsertDonationReport = typeof donationReports.$inferInsert;
+
+export type Campus = typeof campuses.$inferSelect;
+export type InsertCampus = typeof campuses.$inferInsert;
+
+export type CampusAssignment = typeof campusAssignments.$inferSelect;
+export type InsertCampusAssignment = typeof campusAssignments.$inferInsert;
+
+// Zod schemas for validation
+export const insertMemberEngagementMetricSchema = createInsertSchema(memberEngagementMetrics).omit({ id: true, createdAt: true });
+export const insertSpiritualGrowthTrackingSchema = createInsertSchema(spiritualGrowthTracking).omit({ id: true, createdAt: true });
+export const insertCommunicationCampaignSchema = createInsertSchema(communicationCampaigns).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCommunicationTemplateSchema = createInsertSchema(communicationTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEventCapacityManagementSchema = createInsertSchema(eventCapacityManagement).omit({ id: true, updatedAt: true });
+export const insertRecurringEventSeriesSchema = createInsertSchema(recurringEventSeries).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEnhancedVolunteerRoleSchema = createInsertSchema(enhancedVolunteerRoles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEnhancedVolunteerAssignmentSchema = createInsertSchema(enhancedVolunteerAssignments).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEnhancedVolunteerScheduleSchema = createInsertSchema(enhancedVolunteerSchedules).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertDonationCategorySchema = createInsertSchema(donationCategories).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertDonationSchema = createInsertSchema(donations).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertDonationReportSchema = createInsertSchema(donationReports).omit({ id: true, generatedAt: true });
+export const insertCampusSchema = createInsertSchema(campuses).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCampusAssignmentSchema = createInsertSchema(campusAssignments).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({
   id: true,
