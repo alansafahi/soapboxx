@@ -3611,6 +3611,15 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return certification;
   }
+
+  // Community statistics
+  async getBibleReadingCountSince(date: Date): Promise<number> {
+    const readings = await db
+      .select()
+      .from(userBibleReadings)
+      .where(gte(userBibleReadings.readDate, date));
+    return readings.length;
+  }
 }
 
 export const storage = new DatabaseStorage();
