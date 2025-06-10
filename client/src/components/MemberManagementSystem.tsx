@@ -1404,50 +1404,9 @@ function MediaLivestream() {
 
 // Main Component
 export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: number | null }) {
-  const [activeTab, setActiveTab] = useState("members");
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Church Management</h2>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="members">
-            <Users className="h-4 w-4 mr-2" />
-            Members
-          </TabsTrigger>
-          <TabsTrigger value="counseling">
-            <HeartHandshake className="h-4 w-4 mr-2" />
-            Counseling
-          </TabsTrigger>
-          <TabsTrigger value="sessions">
-            <Calendar className="h-4 w-4 mr-2" />
-            Sessions
-          </TabsTrigger>
-          <TabsTrigger value="volunteers">
-            <ClipboardList className="h-4 w-4 mr-2" />
-            Volunteers
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="members">
-          <MemberDirectory selectedChurch={selectedChurch} />
-        </TabsContent>
-
-        <TabsContent value="counseling">
-          <CounselingScheduling selectedChurch={selectedChurch} />
-        </TabsContent>
-
-        <TabsContent value="sessions">
-          <SessionsManagement selectedChurch={selectedChurch} />
-        </TabsContent>
-
-        <TabsContent value="volunteers">
-          <VolunteerManagement />
-        </TabsContent>
-      </Tabs>
+      <MemberDirectory selectedChurch={selectedChurch} />
     </div>
   );
 }
