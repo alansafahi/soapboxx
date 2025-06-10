@@ -41,11 +41,19 @@ const sermonMediaFormSchema = insertSermonMediaSchema.extend({
   churchId: z.coerce.number().optional(),
 });
 
+const prayerFollowUpFormSchema = insertPrayerFollowUpSchema.extend({
+  nextFollowUpDate: z.string().optional(),
+});
+
+const prayerAssignmentFormSchema = insertPrayerAssignmentSchema.extend({});
+
 type ChurchFormData = z.infer<typeof churchFormSchema>;
 type EventFormData = z.infer<typeof eventFormSchema>;
 type DevotionalFormData = z.infer<typeof devotionalFormSchema>;
 type WeeklySeriesFormData = z.infer<typeof weeklySeriesFormSchema>;
 type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
+type PrayerFollowUpFormData = z.infer<typeof prayerFollowUpFormSchema>;
+type PrayerAssignmentFormData = z.infer<typeof prayerAssignmentFormSchema>;
 
 // File type validation function
 function validateFileType(file: File, mediaType: string): boolean {
@@ -520,6 +528,668 @@ function PublishedSermonMedia() {
 }
 
 // Published devotionals viewer
+// Comprehensive Prayer Management System
+function PrayerManagementSystem() {
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedPrayer, setSelectedPrayer] = useState<any>(null);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
+
+  const { data: prayers, isLoading } = useQuery({
+    queryKey: ['/api/prayers'],
+    staleTime: 30 * 1000, // 30 seconds for real-time updates
+  });
+
+  const { data: users } = useQuery({
+    queryKey: ['/api/users'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { toast } = useToast();
+
+  // Prayer status update mutation
+  const updatePrayerStatusMutation = useMutation({
+    mutationFn: async ({ id, status, moderationNotes }: { id: number; status: string; moderationNotes?: string }) => {
+      return await apiRequest("PATCH", `/api/prayers/${id}/status`, { status, moderationNotes });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Prayer status updated successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update prayer status.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Prayer assignment mutation
+  const assignPrayerMutation = useMutation({
+    mutationFn: async (data: PrayerAssignmentFormData) => {
+      return await apiRequest("POST", "/api/prayer-assignments", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Prayer assigned successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      setShowAssignDialog(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to assign prayer.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Follow-up creation mutation
+  const createFollowUpMutation = useMutation({
+    mutationFn: async (data: PrayerFollowUpFormData) => {
+      return await apiRequest("POST", "/api/prayer-follow-ups", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Follow-up scheduled successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      setShowFollowUpDialog(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to schedule follow-up.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (isLoading) return <div className="text-center py-4">Loading prayers...</div>;
+
+  const prayerList = Array.isArray(prayers) ? prayers : [];
+  const userList = Array.isArray(users) ? users : [];
+
+  // Filter prayers based on criteria
+  const filteredPrayers = prayerList.filter(prayer => {
+    const matchesStatus = filterStatus === 'all' || prayer.status === filterStatus;
+    const matchesCategory = filterCategory === 'all' || prayer.category === filterCategory;
+    const matchesPriority = filterPriority === 'all' || prayer.priority === filterPriority;
+    const matchesSearch = searchQuery === '' || 
+      prayer.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prayer.content?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesStatus && matchesCategory && matchesPriority && matchesSearch;
+  });
+
+  // Get prayer statistics
+  const stats = {
+    total: prayerList.length,
+    pending: prayerList.filter(p => p.status === 'pending').length,
+    approved: prayerList.filter(p => p.status === 'approved').length,
+    flagged: prayerList.filter(p => p.status === 'flagged').length,
+    urgent: prayerList.filter(p => p.isUrgent).length,
+    needsFollowUp: prayerList.filter(p => p.followUpDate && new Date(p.followUpDate) <= new Date()).length,
+  };
+
+  const handleStatusUpdate = (prayer: any, status: string) => {
+    const moderationNotes = status === 'flagged' ? 
+      prompt('Please provide moderation notes:') : undefined;
+    
+    if (status === 'flagged' && !moderationNotes) return;
+    
+    updatePrayerStatusMutation.mutate({ 
+      id: prayer.id, 
+      status, 
+      moderationNotes 
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      approved: 'bg-green-100 text-green-800',
+      flagged: 'bg-red-100 text-red-800',
+      archived: 'bg-gray-100 text-gray-800'
+    };
+    return variants[status as keyof typeof variants] || variants.pending;
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const variants = {
+      urgent: 'bg-red-100 text-red-800',
+      high: 'bg-orange-100 text-orange-800',
+      normal: 'bg-blue-100 text-blue-800',
+      low: 'bg-gray-100 text-gray-800'
+    };
+    return variants[priority as keyof typeof variants] || variants.normal;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Prayer Management Stats */}
+      <div className="grid gap-4 md:grid-cols-6">
+        <Card className="p-4">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-blue-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Total Prayers</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-yellow-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Pending</p>
+              <p className="text-2xl font-bold">{stats.pending}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Approved</p>
+              <p className="text-2xl font-bold">{stats.approved}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2">
+            <Flag className="h-4 w-4 text-red-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Flagged</p>
+              <p className="text-2xl font-bold">{stats.flagged}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Urgent</p>
+              <p className="text-2xl font-bold">{stats.urgent}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4 text-purple-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Follow-ups Due</p>
+              <p className="text-2xl font-bold">{stats.needsFollowUp}</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Filters and Search */}
+      <Card className="p-4">
+        <div className="grid gap-4 md:grid-cols-5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search prayers..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="flagged">Flagged</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="health">Health</SelectItem>
+              <SelectItem value="family">Family</SelectItem>
+              <SelectItem value="guidance">Guidance</SelectItem>
+              <SelectItem value="gratitude">Gratitude</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterPriority} onValueChange={setFilterPriority}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priorities</SelectItem>
+              <SelectItem value="urgent">Urgent</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            onClick={() => {
+              setFilterStatus('all');
+              setFilterCategory('all');
+              setFilterPriority('all');
+              setSearchQuery('');
+            }}
+            variant="outline"
+          >
+            Clear Filters
+          </Button>
+        </div>
+      </Card>
+
+      {/* Prayer List */}
+      {filteredPrayers.length === 0 ? (
+        <Card className="p-8 text-center">
+          <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">No prayers found</h3>
+          <p className="text-muted-foreground">Try adjusting your filters or search criteria.</p>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {filteredPrayers.map((prayer: any) => (
+            <Card key={prayer.id} className="p-6">
+              <div className="space-y-4">
+                {/* Prayer Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      {prayer.isUrgent && (
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                      )}
+                      <h4 className="font-medium">{prayer.title || 'Prayer Request'}</h4>
+                      <Badge className={getStatusBadge(prayer.status)}>
+                        {prayer.status}
+                      </Badge>
+                      <Badge className={getPriorityBadge(prayer.priority)}>
+                        {prayer.priority}
+                      </Badge>
+                      {prayer.category && (
+                        <Badge variant="outline" className="text-xs">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {prayer.category}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
+                      {prayer.content}
+                    </p>
+                    
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {prayer.prayerCount || 0} prayers
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {new Date(prayer.createdAt).toLocaleDateString()}
+                      </span>
+                      {prayer.assignedTo && (
+                        <span className="flex items-center gap-1">
+                          <UserCheck className="h-3 w-3" />
+                          Assigned
+                        </span>
+                      )}
+                      {prayer.followUpDate && (
+                        <span className="flex items-center gap-1">
+                          <CalendarIcon className="h-3 w-3" />
+                          Follow-up: {new Date(prayer.followUpDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2">
+                    {prayer.status === 'pending' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusUpdate(prayer, 'approved')}
+                          disabled={updatePrayerStatusMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleStatusUpdate(prayer, 'flagged')}
+                          disabled={updatePrayerStatusMutation.isPending}
+                        >
+                          <Flag className="h-4 w-4 mr-1" />
+                          Flag
+                        </Button>
+                      </>
+                    )}
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedPrayer(prayer);
+                        setShowAssignDialog(true);
+                      }}
+                    >
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      Assign
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedPrayer(prayer);
+                        setShowFollowUpDialog(true);
+                      }}
+                    >
+                      <CalendarIcon className="h-4 w-4 mr-1" />
+                      Follow-up
+                    </Button>
+                    
+                    {prayer.status !== 'archived' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleStatusUpdate(prayer, 'archived')}
+                        disabled={updatePrayerStatusMutation.isPending}
+                      >
+                        Archive
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Moderation Notes */}
+                {prayer.moderationNotes && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm font-medium text-yellow-800 mb-1">Moderation Notes:</p>
+                    <p className="text-sm text-yellow-700">{prayer.moderationNotes}</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Assignment Dialog */}
+      <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Prayer Request</DialogTitle>
+            <DialogDescription>
+              Assign "{selectedPrayer?.title || 'Prayer Request'}" to a team member for pastoral care.
+            </DialogDescription>
+          </DialogHeader>
+          <AssignmentForm
+            prayer={selectedPrayer}
+            users={userList}
+            onSubmit={(data) => assignPrayerMutation.mutate(data)}
+            isLoading={assignPrayerMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Follow-up Dialog */}
+      <Dialog open={showFollowUpDialog} onOpenChange={setShowFollowUpDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Schedule Follow-up</DialogTitle>
+            <DialogDescription>
+              Create a follow-up reminder for "{selectedPrayer?.title || 'Prayer Request'}".
+            </DialogDescription>
+          </DialogHeader>
+          <FollowUpForm
+            prayer={selectedPrayer}
+            onSubmit={(data) => createFollowUpMutation.mutate(data)}
+            isLoading={createFollowUpMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// Assignment Form Component
+function AssignmentForm({ prayer, users, onSubmit, isLoading }: {
+  prayer: any;
+  users: any[];
+  onSubmit: (data: PrayerAssignmentFormData) => void;
+  isLoading: boolean;
+}) {
+  const form = useForm<PrayerAssignmentFormData>({
+    resolver: zodResolver(prayerAssignmentFormSchema),
+    defaultValues: {
+      prayerRequestId: prayer?.id,
+      assignedBy: '', // Will be set by backend to current user
+      assignedTo: '',
+      role: 'pastor',
+      notes: '',
+    },
+  });
+
+  const handleSubmit = (data: PrayerAssignmentFormData) => {
+    onSubmit({
+      ...data,
+      prayerRequestId: prayer.id,
+    });
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="assignedTo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assign To *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {users.map((user: any) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.firstName} {user.lastName} ({user.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Role *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="pastor">Pastor</SelectItem>
+                  <SelectItem value="prayer_team">Prayer Team</SelectItem>
+                  <SelectItem value="counselor">Counselor</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assignment Notes</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Special instructions or context for the assignee..."
+                  {...field}
+                  className="min-h-[80px]"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-2">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoading ? "Assigning..." : "Assign Prayer"}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
+// Follow-up Form Component
+function FollowUpForm({ prayer, onSubmit, isLoading }: {
+  prayer: any;
+  onSubmit: (data: PrayerFollowUpFormData) => void;
+  isLoading: boolean;
+}) {
+  const { user } = useAuth();
+  const form = useForm<PrayerFollowUpFormData>({
+    resolver: zodResolver(prayerFollowUpFormSchema),
+    defaultValues: {
+      prayerRequestId: prayer?.id,
+      adminId: user?.id || '',
+      followUpType: 'check_in',
+      notes: '',
+      nextFollowUpDate: '',
+    },
+  });
+
+  const handleSubmit = (data: PrayerFollowUpFormData) => {
+    const submitData = {
+      ...data,
+      prayerRequestId: prayer.id,
+      adminId: user?.id || '',
+      nextFollowUpDate: data.nextFollowUpDate ? new Date(data.nextFollowUpDate).toISOString() : undefined,
+    };
+    onSubmit(submitData);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="followUpType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Follow-up Type *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select follow-up type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="check_in">Check-in</SelectItem>
+                  <SelectItem value="update">Update Request</SelectItem>
+                  <SelectItem value="encouragement">Encouragement</SelectItem>
+                  <SelectItem value="resolved">Mark Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Follow-up Notes *</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Notes about this follow-up and what needs to be done..."
+                  {...field}
+                  className="min-h-[80px]"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="nextFollowUpDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Next Follow-up Date</FormLabel>
+              <FormControl>
+                <Input
+                  type="datetime-local"
+                  {...field}
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-2">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            {isLoading ? "Scheduling..." : "Schedule Follow-up"}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 function PublishedDevotionals() {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
