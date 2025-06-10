@@ -155,9 +155,7 @@ export default function Navigation() {
               Churches
             </button>
             <button 
-              onClick={() => {
-                document.getElementById('events-list')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={() => window.location.href = '/events'}
               className="text-gray-900 dark:text-gray-100 hover:text-faith-blue dark:hover:text-blue-400 transition-colors font-medium text-sm xl:text-base px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Events
@@ -333,7 +331,7 @@ export default function Navigation() {
               </button>
               <button 
                 onClick={() => {
-                  document.getElementById('events-list')?.scrollIntoView({ behavior: 'smooth' });
+                  window.location.href = '/events';
                   setMobileMenuOpen(false);
                 }}
                 className="block w-full text-left px-3 py-2 text-gray-900 dark:text-gray-100 hover:text-faith-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md font-medium"
