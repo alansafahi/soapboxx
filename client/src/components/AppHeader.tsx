@@ -39,9 +39,11 @@ export default function AppHeader() {
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SB</span>
-              </div>
+              <img 
+                src="/attached_assets/SoapBx logo_1749447146620.jpeg" 
+                alt="SoapBox Logo" 
+                className="w-8 h-8 rounded-lg object-cover"
+              />
               <span className="font-semibold text-gray-900">SoapBox Super App</span>
             </div>
           </Link>
@@ -113,10 +115,6 @@ export default function AppHeader() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button variant="ghost" size="sm">
-              <span className="text-sm">A</span>
-            </Button>
           </div>
         </div>
       </div>
