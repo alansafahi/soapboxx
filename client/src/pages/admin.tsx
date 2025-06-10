@@ -47,6 +47,23 @@ type DevotionalFormData = z.infer<typeof devotionalFormSchema>;
 type WeeklySeriesFormData = z.infer<typeof weeklySeriesFormSchema>;
 type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 
+// File type validation function
+function validateFileType(file: File, mediaType: string): boolean {
+  const fileName = file.name.toLowerCase();
+  const fileExtension = fileName.split('.').pop() || '';
+  
+  switch (mediaType) {
+    case 'audio':
+      return ['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg'].includes(fileExtension);
+    case 'video':
+      return ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv'].includes(fileExtension);
+    case 'document':
+      return ['pdf', 'doc', 'docx', 'txt'].includes(fileExtension);
+    default:
+      return false;
+  }
+}
+
 // Stats component
 function DevotionalStats() {
   const { data: devotionals } = useQuery({
@@ -2130,7 +2147,34 @@ export default function AdminPortal() {
                             </div>
                             <div>
                               <Label htmlFor="media-file">File Upload</Label>
-                              <Input id="media-file" type="file" accept="audio/*,video/*,.pdf,.doc,.docx" />
+                              <Input 
+                                id="media-file" 
+                                type="file" 
+                                accept={
+                                  sermonMediaForm.mediaType === 'audio' ? 'audio/*' :
+                                  sermonMediaForm.mediaType === 'video' ? 'video/*' :
+                                  sermonMediaForm.mediaType === 'document' ? '.pdf,.doc,.docx,.txt' :
+                                  'audio/*,video/*,.pdf,.doc,.docx,.txt'
+                                }
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file && sermonMediaForm.mediaType) {
+                                    const isValidFileType = validateFileType(file, sermonMediaForm.mediaType);
+                                    if (!isValidFileType) {
+                                      alert(`Invalid file type for ${sermonMediaForm.mediaType}. Please select an appropriate file.`);
+                                      e.target.value = '';
+                                      return;
+                                    }
+                                  }
+                                }}
+                              />
+                              {sermonMediaForm.mediaType && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {sermonMediaForm.mediaType === 'audio' && 'Accepted: MP3, WAV, M4A, AAC'}
+                                  {sermonMediaForm.mediaType === 'video' && 'Accepted: MP4, MOV, AVI, MKV'}
+                                  {sermonMediaForm.mediaType === 'document' && 'Accepted: PDF, DOC, DOCX, TXT'}
+                                </div>
+                              )}
                             </div>
                             <div>
                               <Label htmlFor="media-description">Description</Label>
