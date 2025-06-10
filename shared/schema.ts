@@ -502,6 +502,45 @@ export const eventBookmarks = pgTable("event_bookmarks", {
   userEventUnique: unique().on(table.userId, table.eventId),
 }));
 
+// Check-ins table for spiritual and event attendance tracking
+export const checkIns = pgTable("check_ins", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  eventId: integer("event_id").references(() => events.id), // null for general spiritual check-ins
+  checkInType: varchar("check_in_type", { length: 50 }).notNull(), // "Sunday Service", "Daily Devotional", "Prayer Time", "Spiritual Check-In", "Custom"
+  mood: varchar("mood", { length: 20 }), // "joyful", "peaceful", "grateful", "struggling", "hopeful", etc.
+  moodEmoji: varchar("mood_emoji", { length: 10 }), // emoji representation
+  notes: text("notes"), // personal reflection or prayer intent
+  prayerIntent: text("prayer_intent"), // specific prayer request/intent
+  isPhysicalAttendance: boolean("is_physical_attendance").default(false), // true if QR code check-in
+  qrCodeId: varchar("qr_code_id"), // reference to QR code used for physical check-in
+  location: varchar("location"), // for physical check-ins
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  streakCount: integer("streak_count").default(1), // daily streak counter
+  pointsEarned: integer("points_earned").default(5), // gamification points
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// QR codes for physical check-in locations
+export const qrCodes = pgTable("qr_codes", {
+  id: varchar("id").primaryKey(), // unique QR code identifier
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  eventId: integer("event_id").references(() => events.id), // null for general church location
+  name: varchar("name", { length: 100 }).notNull(), // "Main Sanctuary", "Youth Room", etc.
+  description: text("description"),
+  location: varchar("location").notNull(),
+  isActive: boolean("is_active").default(true),
+  maxUsesPerDay: integer("max_uses_per_day"), // optional limit
+  validFrom: timestamp("valid_from"),
+  validUntil: timestamp("valid_until"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const inspirationBookmarks = pgTable("inspiration_bookmarks", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -1478,7 +1517,25 @@ export type PrayerRequest = typeof prayerRequests.$inferSelect;
 export type InsertPrayerResponse = typeof prayerResponses.$inferInsert;
 export type PrayerResponse = typeof prayerResponses.$inferSelect;
 
+// Check-in system types
+export type CheckIn = typeof checkIns.$inferSelect;
+export type InsertCheckIn = typeof checkIns.$inferInsert;
+export type QrCode = typeof qrCodes.$inferSelect;
+export type InsertQrCode = typeof qrCodes.$inferInsert;
 
+// Check-in form schemas
+export const insertCheckInSchema = createInsertSchema(checkIns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCheckInForm = z.infer<typeof insertCheckInSchema>;
+
+export const insertQrCodeSchema = createInsertSchema(qrCodes).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertQrCodeForm = z.infer<typeof insertQrCodeSchema>;
 
 export type InsertUserActivity = typeof userActivities.$inferInsert;
 export type UserActivity = typeof userActivities.$inferSelect;
