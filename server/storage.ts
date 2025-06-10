@@ -419,6 +419,7 @@ export interface IStorage {
 
   // Daily Bible Feature
   getDailyVerse(date?: Date): Promise<DailyVerse | undefined>;
+  getUserDailyVerse(userId: string, date?: Date): Promise<DailyVerse | undefined>;
   createDailyVerse(verse: InsertDailyVerse): Promise<DailyVerse>;
   getUserBibleStreak(userId: string): Promise<UserBibleStreak | undefined>;
   updateUserBibleStreak(userId: string, updates: Partial<InsertUserBibleStreak>): Promise<UserBibleStreak>;
@@ -429,6 +430,13 @@ export interface IStorage {
   awardBibleBadge(userId: string, badgeId: number): Promise<UserBibleBadge>;
   shareBibleVerse(share: InsertBibleVerseShare): Promise<BibleVerseShare>;
   getBibleVerseShares(dailyVerseId: number): Promise<BibleVerseShare[]>;
+  
+  // Journey Management
+  getUserJourneyPreferences(userId: string): Promise<UserJourneyPreferences | undefined>;
+  updateUserJourneyPreferences(userId: string, preferences: Partial<InsertUserJourneyPreferences>): Promise<UserJourneyPreferences>;
+  getAvailableJourneyTypes(): Promise<{type: string, name: string, description: string}[]>;
+  getSeriesByType(journeyType: string): Promise<{name: string, description: string, totalVerses: number}[]>;
+  switchUserJourney(userId: string, journeyType: string, seriesName?: string): Promise<UserJourneyPreferences>;
   
   // Bible in a Day operations
   createBibleInADaySession(session: InsertBibleInADaySession): Promise<BibleInADaySession>;
@@ -2939,6 +2947,52 @@ export class DatabaseStorage implements IStorage {
       .from(dailyVerses)
       .where(eq(dailyVerses.date, targetDate))
       .limit(1);
+    return verse;
+  }
+
+  async getUserDailyVerse(userId: string, date?: Date): Promise<DailyVerse | undefined> {
+    const targetDate = date || new Date();
+    targetDate.setHours(0, 0, 0, 0);
+    
+    // Get user's journey preferences
+    const preferences = await this.getUserJourneyPreferences(userId);
+    
+    if (!preferences) {
+      // Return default verse if no preferences set
+      return this.getDailyVerse(targetDate);
+    }
+    
+    // Find verse based on user's current journey and series progress
+    const [verse] = await db
+      .select()
+      .from(dailyVerses)
+      .where(
+        and(
+          eq(dailyVerses.journeyType, preferences.currentJourneyType),
+          eq(dailyVerses.seriesName, preferences.currentSeries || ""),
+          eq(dailyVerses.seriesOrder, preferences.seriesProgress + 1)
+        )
+      )
+      .limit(1);
+    
+    if (!verse) {
+      // If no verse found for current progress, check if series is complete
+      const seriesVerses = await db
+        .select()
+        .from(dailyVerses)
+        .where(
+          and(
+            eq(dailyVerses.journeyType, preferences.currentJourneyType),
+            eq(dailyVerses.seriesName, preferences.currentSeries || "")
+          )
+        );
+      
+      if (seriesVerses.length > 0 && preferences.seriesProgress >= seriesVerses.length) {
+        // Series complete, suggest new journey
+        return null;
+      }
+    }
+    
     return verse;
   }
 

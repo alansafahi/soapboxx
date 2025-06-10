@@ -1261,6 +1261,27 @@ export const dailyVerses = pgTable("daily_verses", {
   guidedPrayer: text("guided_prayer"),
   backgroundImageUrl: varchar("background_image_url"),
   audioUrl: varchar("audio_url"),
+  journeyType: varchar("journey_type", { length: 50 }).default("reading"), // reading, audio, meditation, study
+  seriesName: varchar("series_name", { length: 200 }), // e.g., "Psalms of Peace", "Parables of Jesus"
+  seriesOrder: integer("series_order").default(1), // Position within series
+  difficulty: varchar("difficulty", { length: 20 }).default("beginner"), // beginner, intermediate, advanced
+  estimatedMinutes: integer("estimated_minutes").default(5),
+  tags: text("tags").array(), // ["hope", "faith", "courage"]
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User journey preferences and progress
+export const userJourneyPreferences = pgTable("user_journey_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  currentJourneyType: varchar("current_journey_type", { length: 50 }).default("reading"), // reading, audio, meditation, study
+  preferredTime: varchar("preferred_time", { length: 20 }), // morning, afternoon, evening
+  currentSeries: varchar("current_series", { length: 200 }), // Which series they're following
+  seriesProgress: integer("series_progress").default(0), // How far in the series
+  lastCompletedDate: timestamp("last_completed_date"),
+  autoAdvanceSeries: boolean("auto_advance_series").default(true),
+  notificationEnabled: boolean("notification_enabled").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1568,6 +1589,8 @@ export const bibleInADayBadges = pgTable("bible_in_a_day_badges", {
 // Daily Bible Feature Types
 export type DailyVerse = typeof dailyVerses.$inferSelect;
 export type InsertDailyVerse = typeof dailyVerses.$inferInsert;
+export type UserJourneyPreferences = typeof userJourneyPreferences.$inferSelect;
+export type InsertUserJourneyPreferences = typeof userJourneyPreferences.$inferInsert;
 
 // Bible in a Day Types
 export type BibleInADaySession = typeof bibleInADaySessions.$inferSelect;

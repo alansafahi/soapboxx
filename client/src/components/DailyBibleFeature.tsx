@@ -103,6 +103,14 @@ export function DailyBibleFeature() {
   const [showETHOSDialog, setShowETHOSDialog] = useState(false);
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
+  const [currentJourneyType, setCurrentJourneyType] = useState("reading");
+  const [showJourneySelector, setShowJourneySelector] = useState(false);
+  const [availableJourneys] = useState([
+    { type: "reading", name: "Scripture Reading", description: "Daily verses with reflection questions", icon: "📖" },
+    { type: "audio", name: "Audio Journey", description: "Listen to narrated Bible passages", icon: "🎧" },
+    { type: "meditation", name: "Meditative Study", description: "Guided meditation on God's Word", icon: "🧘" },
+    { type: "study", name: "Deep Study", description: "In-depth Bible study with commentary", icon: "📚" }
+  ]);
 
   // Fetch daily verse
   const { data: dailyVerse, isLoading: verseLoading, error: verseError } = useQuery<DailyVerse>({
@@ -348,6 +356,48 @@ export function DailyBibleFeature() {
 
   const handleAskETHOS = () => {
     setShowETHOSDialog(true);
+  };
+
+  const handleJourneySwitch = (journeyType: string) => {
+    setCurrentJourneyType(journeyType);
+    setShowJourneySelector(false);
+    toast({
+      title: "Journey Changed",
+      description: `Switched to ${availableJourneys.find(j => j.type === journeyType)?.name}`,
+    });
+  };
+
+  const getJourneyContent = () => {
+    switch (currentJourneyType) {
+      case "audio":
+        return {
+          title: "Today's Audio Journey",
+          description: "Listen to God's Word with guided narration",
+          actionText: "Play Audio",
+          icon: "🎧"
+        };
+      case "meditation":
+        return {
+          title: "Meditative Study",
+          description: "Quiet reflection on Scripture",
+          actionText: "Begin Meditation",
+          icon: "🧘"
+        };
+      case "study":
+        return {
+          title: "Deep Bible Study",
+          description: "Explore Scripture with commentary",
+          actionText: "Start Study",
+          icon: "📚"
+        };
+      default:
+        return {
+          title: "Daily Bible Reading",
+          description: "Today's verse for reflection",
+          actionText: "Read & Reflect",
+          icon: "📖"
+        };
+    }
   };
 
   const handleSaveJournalNote = () => {
