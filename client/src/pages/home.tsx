@@ -8,6 +8,7 @@ import PrayerWall from "@/components/prayer-wall";
 import ChurchDiscovery from "@/components/church-discovery";
 import LeaderboardWidget from "@/components/leaderboard-widget";
 import MobileNav from "@/components/mobile-nav";
+import CheckInSystem from "@/components/CheckInSystem";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
@@ -66,6 +67,9 @@ export default function Home() {
           
           {/* Right Sidebar */}
           <div className="space-y-6">
+            <div id="check-in-system">
+              <CheckInSystem />
+            </div>
             <div id="leaderboard-widget">
               <LeaderboardWidget />
             </div>

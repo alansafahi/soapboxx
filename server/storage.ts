@@ -327,6 +327,21 @@ export interface IStorage {
   getNotificationDeliveries(notificationId?: number, userId?: string): Promise<NotificationDelivery[]>;
   createNotificationDelivery(data: InsertNotificationDelivery): Promise<NotificationDelivery>;
   updateNotificationDelivery(id: number, data: Partial<InsertNotificationDelivery>): Promise<NotificationDelivery>;
+
+  // Check-in system operations
+  createCheckIn(checkIn: InsertCheckIn): Promise<CheckIn>;
+  getUserCheckIns(userId: string, limit?: number): Promise<CheckIn[]>;
+  getUserDailyCheckIn(userId: string, date?: Date): Promise<CheckIn | undefined>;
+  getUserCheckInStreak(userId: string): Promise<number>;
+  getChurchCheckIns(churchId: number, date?: Date): Promise<(CheckIn & { user: User })[]>;
+  
+  // QR code operations
+  createQrCode(qrCode: InsertQrCode): Promise<QrCode>;
+  getQrCode(id: string): Promise<QrCode | undefined>;
+  getChurchQrCodes(churchId: number): Promise<QrCode[]>;
+  updateQrCode(id: string, updates: Partial<QrCode>): Promise<QrCode>;
+  deleteQrCode(id: string): Promise<void>;
+  validateQrCode(id: string): Promise<{ valid: boolean; qrCode?: QrCode }>;
 }
 
 export class DatabaseStorage implements IStorage {
