@@ -495,6 +495,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Specific routes must come before parameterized routes
+  app.get("/api/events/today", async (req, res) => {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const events = await storage.getEvents();
+      const todayEvents = events.filter(event => {
+        const eventDate = new Date(event.eventDate);
+        return eventDate >= startOfDay && eventDate <= endOfDay;
+      });
+
+      res.json(todayEvents);
+    } catch (error) {
+      console.error("Error fetching today's events:", error);
+      res.status(500).json({ message: "Failed to fetch today's events" });
+    }
+  });
+
   app.get('/api/events/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -3551,28 +3574,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching recent check-ins:", error);
       res.status(500).json({ message: "Failed to fetch recent check-ins" });
-    }
-  });
-
-  app.get("/api/events/today", async (req, res) => {
-    try {
-      const today = new Date();
-      const startOfDay = new Date(today);
-      startOfDay.setHours(0, 0, 0, 0);
-      
-      const endOfDay = new Date(today);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const events = await storage.getEvents();
-      const todayEvents = events.filter(event => {
-        const eventDate = new Date(event.eventDate);
-        return eventDate >= startOfDay && eventDate <= endOfDay;
-      });
-
-      res.json(todayEvents);
-    } catch (error) {
-      console.error("Error fetching today's events:", error);
-      res.status(500).json({ message: "Failed to fetch today's events" });
     }
   });
 
