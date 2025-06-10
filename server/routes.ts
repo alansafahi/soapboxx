@@ -2815,36 +2815,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Daily Bible Feature API Routes
   app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
     try {
-      const { date } = req.query;
+      const { date, journeyType } = req.query;
+      const userId = req.user.claims.sub;
       const targetDate = date ? new Date(date) : new Date();
-      const verse = await storage.getDailyVerse(targetDate);
+      
+      // Import journey system for verse selection
+      const { getDailyVerseForUser } = await import('./journeySystem');
+      
+      // Get user's current journey preferences (simplified for now)
+      const currentJourneyType = journeyType || "reading";
+      const currentProgress = 0; // This would come from user preferences in full implementation
+      
+      // Get verse based on journey type and progress
+      const verse = getDailyVerseForUser(currentJourneyType, currentProgress);
       
       if (!verse) {
-        // Return a default verse if no verse is set for today
-        const defaultVerse = {
-          id: 0,
-          date: targetDate,
-          verseReference: "John 3:16",
-          verseText: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
-          verseTextNiv: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
-          verseTextKjv: "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
-          verseTextEsv: "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
-          verseTextNlt: "For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
-          theme: "God's Love",
-          reflectionPrompt: "How does knowing God's immense love for you change the way you see yourself and others today?",
-          guidedPrayer: "Heavenly Father, thank you for your incredible love demonstrated through Jesus. Help me to receive your love fully and share it with others today. Amen.",
-          backgroundImageUrl: null,
-          audioUrl: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        return res.json(defaultVerse);
+        return res.status(404).json({ message: "No verse available for this journey type" });
       }
+      
+      // Update verse date to today
+      verse.date = targetDate;
       
       res.json(verse);
     } catch (error) {
       console.error("Error fetching daily verse:", error);
       res.status(500).json({ message: "Failed to fetch daily verse" });
+    }
+  });
+
+  // Journey types endpoint
+  app.get('/api/bible/journey-types', isAuthenticated, async (req: any, res) => {
+    try {
+      const { journeyTypes } = await import('./journeySystem');
+      const availableJourneys = journeyTypes.map(journey => ({
+        type: journey.type,
+        name: journey.name,
+        description: journey.description,
+        seriesCount: journey.series.length
+      }));
+      res.json(availableJourneys);
+    } catch (error) {
+      console.error("Error fetching journey types:", error);
+      res.status(500).json({ message: "Failed to fetch journey types" });
+    }
+  });
+
+  // Switch journey type endpoint
+  app.post('/api/bible/switch-journey', isAuthenticated, async (req: any, res) => {
+    try {
+      const { journeyType } = req.body;
+      const userId = req.user.claims.sub;
+      
+      if (!journeyType) {
+        return res.status(400).json({ message: "Journey type is required" });
+      }
+      
+      // In a full implementation, this would update user preferences in the database
+      // For now, return success
+      res.json({ 
+        message: "Journey switched successfully",
+        journeyType,
+        userId
+      });
+    } catch (error) {
+      console.error("Error switching journey:", error);
+      res.status(500).json({ message: "Failed to switch journey" });
     }
   });
 

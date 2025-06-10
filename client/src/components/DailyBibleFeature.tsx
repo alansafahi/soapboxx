@@ -112,9 +112,10 @@ export function DailyBibleFeature() {
     { type: "study", name: "Deep Study", description: "In-depth Bible study with commentary", icon: "📚" }
   ]);
 
-  // Fetch daily verse
-  const { data: dailyVerse, isLoading: verseLoading, error: verseError } = useQuery<DailyVerse>({
-    queryKey: ["/api/bible/daily-verse"],
+  // Fetch daily verse based on current journey type
+  const { data: dailyVerse, isLoading: verseLoading, error: verseError, refetch: refetchVerse } = useQuery<DailyVerse>({
+    queryKey: ["/api/bible/daily-verse", currentJourneyType],
+    queryFn: () => fetch(`/api/bible/daily-verse?journeyType=${currentJourneyType}`).then(res => res.json()),
     enabled: isAuthenticated,
   });
 
@@ -358,13 +359,36 @@ export function DailyBibleFeature() {
     setShowETHOSDialog(true);
   };
 
-  const handleJourneySwitch = (journeyType: string) => {
-    setCurrentJourneyType(journeyType);
-    setShowJourneySelector(false);
-    toast({
-      title: "Journey Changed",
-      description: `Switched to ${availableJourneys.find(j => j.type === journeyType)?.name}`,
-    });
+  const handleJourneySwitch = async (journeyType: string) => {
+    try {
+      // Call API to switch journey
+      const response = await fetch('/api/bible/switch-journey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ journeyType })
+      });
+      
+      if (response.ok) {
+        setCurrentJourneyType(journeyType);
+        setShowJourneySelector(false);
+        
+        // Refetch verse with new journey type
+        refetchVerse();
+        
+        toast({
+          title: "Journey Changed",
+          description: `Switched to ${availableJourneys.find(j => j.type === journeyType)?.name}`,
+        });
+      } else {
+        throw new Error('Failed to switch journey');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to switch journey. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getJourneyContent = () => {
@@ -528,13 +552,25 @@ export function DailyBibleFeature() {
         {showMeditativeMode && <MeditativeMode />}
       </AnimatePresence>
 
-      {/* Header with Streak Info */}
+      {/* Header with Journey Selection */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Daily Bible</h1>
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <span className="text-3xl">{getJourneyContent().icon}</span>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{getJourneyContent().title}</h1>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowJourneySelector(true)}
+            className="ml-2"
+          >
+            Switch Journey
+          </Button>
+        </div>
+        <p className="text-gray-600 dark:text-gray-300 mb-2">{getJourneyContent().description}</p>
         <p className="text-gray-600">{format(new Date(), "EEEE, MMMM d, yyyy")}</p>
         
         {streak && (
@@ -1083,6 +1119,47 @@ export function DailyBibleFeature() {
                 </Button>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Journey Selector Dialog */}
+      <Dialog open={showJourneySelector} onOpenChange={setShowJourneySelector}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Choose Your Bible Journey</DialogTitle>
+            <DialogDescription>
+              Select how you'd like to experience God's Word today
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+            {availableJourneys.map((journey) => (
+              <Card 
+                key={journey.type}
+                className={`cursor-pointer transition-all hover:shadow-lg ${
+                  currentJourneyType === journey.type ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                }`}
+                onClick={() => handleJourneySwitch(journey.type)}
+              >
+                <CardContent className="p-6 text-center">
+                  <div className="text-4xl mb-3">{journey.icon}</div>
+                  <h3 className="font-semibold text-lg mb-2">{journey.name}</h3>
+                  <p className="text-sm text-gray-600">{journey.description}</p>
+                  {currentJourneyType === journey.type && (
+                    <Badge className="mt-3 bg-blue-600">Currently Active</Badge>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg mx-4 mb-4">
+            <h4 className="font-medium mb-2">Journey Features:</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Daily verse progression through themed series</li>
+              <li>• Adaptive content based on your reading history</li>
+              <li>• Streak tracking and achievement badges</li>
+              <li>• Switch between journeys anytime</li>
+            </ul>
           </div>
         </DialogContent>
       </Dialog>
