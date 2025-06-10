@@ -24,6 +24,7 @@ import { SessionsManagement } from "@/components/SessionsManagement";
 import { CounselingManagement } from "@/components/CounselingManagement";
 import { EventManagement } from "@/components/EventManagement";
 import MediaManagementSystem from "@/components/MediaManagementSystem";
+import VolunteerManagementSystem from "@/components/VolunteerManagementSystem";
 
 const churchFormSchema = insertChurchSchema.extend({
   latitude: z.coerce.number().optional(),
