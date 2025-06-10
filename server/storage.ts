@@ -157,6 +157,10 @@ export interface IStorage {
   removePrayerResponse(prayerRequestId: number, userId: string): Promise<void>;
   getPrayerSupportMessages(prayerRequestId: number): Promise<any[]>;
   markPrayerAnswered(id: number): Promise<void>;
+  updatePrayerStatus(prayerId: number, status: string, moderationNotes?: string): Promise<PrayerRequest>;
+  createPrayerAssignment(assignment: InsertPrayerAssignment): Promise<PrayerAssignment>;
+  createPrayerFollowUp(followUp: InsertPrayerFollowUp): Promise<PrayerFollowUp>;
+  getAllUsers(): Promise<User[]>;
   
   // User stats and achievements
   getUserStats(userId: string): Promise<{
@@ -753,6 +757,42 @@ export class DatabaseStorage implements IStorage {
         answeredAt: new Date(),
       })
       .where(eq(prayerRequests.id, id));
+  }
+
+  async updatePrayerStatus(prayerId: number, status: string, moderationNotes?: string): Promise<PrayerRequest> {
+    const [updatedPrayer] = await db
+      .update(prayerRequests)
+      .set({
+        status,
+        moderationNotes,
+        updatedAt: new Date(),
+      })
+      .where(eq(prayerRequests.id, prayerId))
+      .returning();
+    return updatedPrayer;
+  }
+
+  async createPrayerAssignment(assignment: InsertPrayerAssignment): Promise<PrayerAssignment> {
+    const [newAssignment] = await db
+      .insert(prayerAssignments)
+      .values(assignment)
+      .returning();
+    return newAssignment;
+  }
+
+  async createPrayerFollowUp(followUp: InsertPrayerFollowUp): Promise<PrayerFollowUp> {
+    const [newFollowUp] = await db
+      .insert(prayerFollowUps)
+      .values(followUp)
+      .returning();
+    return newFollowUp;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(asc(users.name));
   }
 
   // User stats and achievements
