@@ -22,8 +22,8 @@ const eventFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   churchId: z.number().min(1, "Church is required"),
-  eventDate: z.string().min(1, "Event date is required"),
-  endDate: z.string().optional(),
+  eventDate: z.string().min(1, "Start date and time is required"),
+  endDate: z.string().min(1, "End date and time is required"),
   location: z.string().optional(),
   address: z.string().optional(),
   category: z.string().min(1, "Category is required"),
@@ -43,6 +43,16 @@ const eventFormSchema = z.object({
   isRecurring: z.boolean().default(false),
   notes: z.string().optional(),
   publicNotes: z.string().optional(),
+}).refine((data) => {
+  if (data.eventDate && data.endDate) {
+    const startDate = new Date(data.eventDate);
+    const endDate = new Date(data.endDate);
+    return endDate > startDate;
+  }
+  return true;
+}, {
+  message: "End date must be after start date",
+  path: ["endDate"],
 });
 
 type EventForm = z.infer<typeof eventFormSchema>;
@@ -135,16 +145,27 @@ export function EventManagement() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to create event");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create event");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setIsCreateDialogOpen(false);
-      toast({ title: "Event created successfully" });
+      form.reset();
+      toast({ 
+        title: "Success", 
+        description: "Event created successfully!" 
+      });
     },
     onError: (error: any) => {
-      toast({ title: "Failed to create event", description: error.message, variant: "destructive" });
+      toast({ 
+        title: "Failed to create event", 
+        description: error.message, 
+        variant: "destructive" 
+      });
     },
   });
 
@@ -243,7 +264,7 @@ export function EventManagement() {
     const formattedData = {
       ...data,
       eventDate: new Date(data.eventDate).toISOString(),
-      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+      endDate: new Date(data.endDate).toISOString(),
     };
     createEventMutation.mutate(formattedData);
   };

@@ -319,9 +319,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         organizerId: req.user.claims.sub,
         // Ensure numeric values are properly typed
         churchId: parseInt(req.body.churchId),
-        cost: parseFloat(req.body.cost || 0),
+        cost: req.body.cost ? req.body.cost.toString() : "0.00",
         maxAttendees: req.body.maxAttendees ? parseInt(req.body.maxAttendees) : null,
         minAttendees: req.body.minAttendees ? parseInt(req.body.minAttendees) : null,
+        // Convert string dates to Date objects before validation
+        eventDate: req.body.eventDate ? new Date(req.body.eventDate) : undefined,
+        endDate: req.body.endDate ? new Date(req.body.endDate) : null,
         // Ensure arrays are properly formatted
         tags: Array.isArray(req.body.tags) ? req.body.tags : [],
         ageGroups: Array.isArray(req.body.ageGroups) ? req.body.ageGroups : [],
@@ -336,14 +339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const eventData = insertEventSchema.parse(preprocessedData);
       
-      // Convert string dates to Date objects for storage
-      const processedEventData = {
-        ...eventData,
-        eventDate: new Date(eventData.eventDate),
-        endDate: eventData.endDate ? new Date(eventData.endDate) : null,
-      };
-      
-      const event = await storage.createEvent(processedEventData);
+      const event = await storage.createEvent(eventData);
       res.status(201).json(event);
     } catch (error) {
       if (error instanceof z.ZodError) {
