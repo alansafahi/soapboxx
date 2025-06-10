@@ -1547,7 +1547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "456 Spruce Way, Springfield, IL 62710",
           membershipStatus: "visitor",
           joinedDate: "2024-12-08",
-          churchId: "3",
+          churchId: "1",
           churchAffiliation: "La Mesa",
           denomination: "Baptist",
           interests: "Family ministry, outreach, Bible study",
