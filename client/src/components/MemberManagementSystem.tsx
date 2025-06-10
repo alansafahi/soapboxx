@@ -368,7 +368,7 @@ function MemberDetailDialog({ member, onClose, onUpdate }: any) {
 }
 
 // Counseling Scheduling Component
-function CounselingScheduling() {
+function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | null }) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -377,13 +377,23 @@ function CounselingScheduling() {
   const { toast } = useToast();
 
   const { data: sessions = [], isLoading } = useQuery({
-    queryKey: ["/api/counseling-sessions"],
-    queryFn: () => apiRequest("/api/counseling-sessions"),
+    queryKey: ["/api/counseling-sessions", selectedChurch],
+    queryFn: () => {
+      const url = selectedChurch 
+        ? `/api/counseling-sessions?churchId=${selectedChurch}`
+        : "/api/counseling-sessions";
+      return apiRequest(url);
+    },
   });
 
   const { data: members = [] } = useQuery({
-    queryKey: ["/api/members"],
-    queryFn: () => apiRequest("/api/members"),
+    queryKey: ["/api/members", selectedChurch],
+    queryFn: () => {
+      const url = selectedChurch 
+        ? `/api/members?churchId=${selectedChurch}`
+        : "/api/members";
+      return apiRequest(url);
+    },
   });
 
   const createSessionMutation = useMutation({
@@ -1396,7 +1406,7 @@ export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: nu
         </TabsContent>
 
         <TabsContent value="counseling">
-          <CounselingScheduling />
+          <CounselingScheduling selectedChurch={selectedChurch} />
         </TabsContent>
 
         <TabsContent value="volunteers">
