@@ -215,12 +215,23 @@ export function EventManagement() {
   });
 
   const onCreateSubmit = (data: EventForm) => {
-    createEventMutation.mutate(data);
+    // Convert datetime-local strings to ISO strings
+    const formattedData = {
+      ...data,
+      eventDate: new Date(data.eventDate).toISOString(),
+      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+    };
+    createEventMutation.mutate(formattedData);
   };
 
   const onEditSubmit = (data: EventForm) => {
     if (selectedEvent) {
-      updateEventMutation.mutate({ id: selectedEvent.id, data });
+      const formattedData = {
+        ...data,
+        eventDate: new Date(data.eventDate).toISOString(),
+        endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+      };
+      updateEventMutation.mutate({ id: selectedEvent.id, data: formattedData });
     }
   };
 

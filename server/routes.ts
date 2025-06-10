@@ -312,8 +312,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/events', isAuthenticated, async (req: any, res) => {
     try {
       const eventData = insertEventSchema.parse(req.body);
-      eventData.organizerId = req.user.claims.sub;
-      const event = await storage.createEvent(eventData);
+      
+      // Convert string dates to Date objects for storage
+      const processedEventData = {
+        ...eventData,
+        organizerId: req.user.claims.sub,
+        eventDate: new Date(eventData.eventDate),
+        endDate: eventData.endDate ? new Date(eventData.endDate) : undefined,
+      };
+      
+      const event = await storage.createEvent(processedEventData);
       res.status(201).json(event);
     } catch (error) {
       if (error instanceof z.ZodError) {
