@@ -2517,7 +2517,7 @@ export default function AdminPortal() {
 
               <TabsContent value="dashboard" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab("ministry")}>
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/events'}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -2528,7 +2528,7 @@ export default function AdminPortal() {
                       </div>
                     </CardContent>
                   </Card>
-                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab("ministry")}>
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/discussions'}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -2539,7 +2539,7 @@ export default function AdminPortal() {
                       </div>
                     </CardContent>
                   </Card>
-                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab("ministry")}>
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/prayer'}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
