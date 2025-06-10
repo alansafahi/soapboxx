@@ -1642,6 +1642,15 @@ export default function AdminPortal() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/20 rounded border">
+                      <h3 className="font-semibold text-red-800 dark:text-red-200">Debug Test</h3>
+                      <p className="text-red-700 dark:text-red-300">
+                        This should always be visible. Selected church: {JSON.stringify(selectedChurch)}
+                      </p>
+                      <p className="text-red-700 dark:text-red-300">
+                        Timestamp: {new Date().toLocaleTimeString()}
+                      </p>
+                    </div>
                     <Tabs defaultValue="devotional-drafts" className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="devotional-drafts">Devotional Drafts</TabsTrigger>
