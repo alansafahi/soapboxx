@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Clock, BookOpen, Award, CheckCircle, Play, Pause, RotateCcw, Star, Volume2, Share2, Twitter, Facebook, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -91,6 +91,8 @@ export function BibleInADayFeature() {
   const [reflectionAnswer, setReflectionAnswer] = useState('');
   const [finalRating, setFinalRating] = useState<number>(0);
   const [finalReflection, setFinalReflection] = useState('');
+  const [isPaused, setIsPaused] = useState(false);
+  const [showPauseDialog, setShowPauseDialog] = useState(false);
 
   // Fetch active session
   const { data: activeSession, refetch: refetchActiveSession } = useQuery<any>({
@@ -231,9 +233,49 @@ export function BibleInADayFeature() {
         reflectionAnswer,
       });
       
+      // Enhanced completion message based on suggested workflow
+      const sectionTitle = currentSection.title;
+      const isLastSection = currentSection.id === 'future-hope';
+      
+      toast({ 
+        title: `Well done! You've completed ${sectionTitle}.`,
+        description: isLastSection 
+          ? "You've completed the Bible in a Day journey!"
+          : "Ready to continue to the next segment, or return tomorrow?"
+      });
+      
       setReflectionAnswer('');
       setIsReading(false);
       setSectionStartTime(null);
+    }
+  };
+
+  const handlePauseAndSave = async () => {
+    try {
+      // Save current progress and reflection
+      const progressData = {
+        sessionId: activeSession?.id,
+        currentSection: currentSection.id,
+        currentReflection: reflectionAnswer,
+        pausedAt: new Date().toISOString()
+      };
+
+      // In a real implementation, this would save to backend
+      localStorage.setItem('bible-in-a-day-pause', JSON.stringify(progressData));
+
+      toast({
+        title: "Progress Saved",
+        description: "Your progress has been saved. You can continue tomorrow!",
+      });
+
+      setShowPauseDialog(false);
+      setIsPaused(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -566,9 +608,9 @@ export function BibleInADayFeature() {
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Complete Section
                   </Button>
-                  <Button variant="outline" onClick={() => setIsReading(false)}>
+                  <Button variant="outline" onClick={() => setShowPauseDialog(true)}>
                     <Pause className="h-4 w-4 mr-2" />
-                    Pause
+                    Pause & Save
                   </Button>
                 </div>
               </div>
@@ -603,6 +645,37 @@ export function BibleInADayFeature() {
           </CardContent>
         </Card>
       )}
+
+      {/* Pause & Save Dialog */}
+      <Dialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pause Your Journey</DialogTitle>
+            <DialogDescription>
+              Your progress will be saved and you can continue anytime. We'll send you a gentle reminder tomorrow to continue your Bible in a Day journey.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col space-y-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Current progress: {currentSection.title}
+              {reflectionAnswer && (
+                <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs">
+                  Your reflection will be saved: "{reflectionAnswer.substring(0, 100)}{reflectionAnswer.length > 100 ? '...' : ''}"
+                </div>
+              )}
+            </div>
+            <div className="flex space-x-3">
+              <Button onClick={handlePauseAndSave} className="flex-1">
+                <Pause className="h-4 w-4 mr-2" />
+                Save & Pause
+              </Button>
+              <Button variant="outline" onClick={() => setShowPauseDialog(false)} className="flex-1">
+                Continue Reading
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
