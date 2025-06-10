@@ -1547,7 +1547,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/members", async (req, res) => {
     try {
-      res.json(membersData);
+      const { churchId } = req.query;
+      
+      let filteredMembers = membersData;
+      
+      // Filter by church if churchId is provided
+      if (churchId) {
+        filteredMembers = membersData.filter(member => 
+          member.churchAffiliation && 
+          member.churchAffiliation.toLowerCase().includes(churchId.toString().toLowerCase())
+        );
+      }
+      
+      res.json(filteredMembers);
     } catch (error) {
       console.error("Error fetching members:", error);
       res.status(500).json({ error: "Failed to fetch members" });
@@ -1574,19 +1586,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // In-memory storage for sessions
+  let sessionsData = [
+    {
+      id: "1",
+      sessionType: "counseling",
+      memberName: "John Smith",
+      memberEmail: "john.smith@email.com",
+      scheduledTime: "2024-06-15T14:00:00Z",
+      duration: 60,
+      location: "Pastor's Office",
+      status: "confirmed",
+      notes: "Marriage counseling session",
+      createdAt: "2024-06-10T10:00:00Z"
+    },
+    {
+      id: "2",
+      sessionType: "pastoral_care",
+      memberName: "Mary Johnson",
+      memberEmail: "mary.johnson@email.com",
+      scheduledTime: "2024-06-16T16:00:00Z",
+      duration: 45,
+      location: "Church Library",
+      status: "pending",
+      notes: "Spiritual guidance discussion",
+      createdAt: "2024-06-11T09:30:00Z"
+    },
+    {
+      id: "3",
+      sessionType: "prayer",
+      memberName: "David Wilson",
+      memberEmail: "david.wilson@email.com",
+      scheduledTime: "2024-06-17T18:00:00Z",
+      duration: 30,
+      location: "Prayer Room",
+      status: "confirmed",
+      notes: "Personal prayer and support",
+      createdAt: "2024-06-12T14:15:00Z"
+    }
+  ];
+
   app.get("/api/counseling-sessions", async (req, res) => {
     try {
-      const sessions = [
-        {
-          id: "1",
-          sessionType: "counseling",
-          scheduledTime: "2024-06-15T14:00:00Z",
-          duration: 60,
-          location: "Pastor's Office",
-          status: "confirmed"
-        }
-      ];
-      res.json(sessions);
+      res.json(sessionsData);
     } catch (error) {
       console.error("Error fetching counseling sessions:", error);
       res.status(500).json({ error: "Failed to fetch counseling sessions" });
@@ -1598,12 +1640,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newSession = {
         id: Date.now().toString(),
         ...req.body,
-        status: "pending"
+        status: "pending",
+        createdAt: new Date().toISOString()
       };
+      sessionsData.push(newSession);
       res.json(newSession);
     } catch (error) {
       console.error("Error creating counseling session:", error);
       res.status(400).json({ error: "Failed to create counseling session" });
+    }
+  });
+
+  // Update session endpoint
+  app.put("/api/counseling-sessions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const sessionIndex = sessionsData.findIndex(session => session.id === id);
+      if (sessionIndex !== -1) {
+        sessionsData[sessionIndex] = { ...sessionsData[sessionIndex], ...updates };
+        res.json(sessionsData[sessionIndex]);
+      } else {
+        res.status(404).json({ error: "Session not found" });
+      }
+    } catch (error) {
+      console.error("Error updating session:", error);
+      res.status(500).json({ error: "Failed to update session" });
+    }
+  });
+
+  // Delete session endpoint
+  app.delete("/api/counseling-sessions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const sessionIndex = sessionsData.findIndex(session => session.id === id);
+      if (sessionIndex !== -1) {
+        sessionsData.splice(sessionIndex, 1);
+        res.json({ message: "Session deleted successfully" });
+      } else {
+        res.status(404).json({ error: "Session not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      res.status(500).json({ error: "Failed to delete session" });
     }
   });
 

@@ -28,10 +28,21 @@ function MemberDirectory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [selectedChurch, setSelectedChurch] = useState("all");
   const { toast } = useToast();
 
+  const { data: churches = [] } = useQuery({
+    queryKey: ["/api/churches"],
+  });
+
   const { data: members = [], isLoading, error } = useQuery({
-    queryKey: ["/api/members"],
+    queryKey: ["/api/members", selectedChurch],
+    queryFn: () => {
+      const url = selectedChurch === "all" 
+        ? "/api/members" 
+        : `/api/members?churchId=${encodeURIComponent(selectedChurch)}`;
+      return fetch(url).then(res => res.json());
+    },
   });
 
 
@@ -77,6 +88,19 @@ function MemberDirectory() {
             className="pl-10"
           />
         </div>
+        <Select value={selectedChurch} onValueChange={setSelectedChurch}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Filter by church" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Churches</SelectItem>
+            {churches.map((church: any) => (
+              <SelectItem key={church.id} value={church.name}>
+                {church.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="Filter by status" />
