@@ -93,19 +93,19 @@ export function BibleInADayFeature() {
   const [finalReflection, setFinalReflection] = useState('');
 
   // Fetch active session
-  const { data: activeSession, refetch: refetchActiveSession } = useQuery({
+  const { data: activeSession, refetch: refetchActiveSession } = useQuery<any>({
     queryKey: ['/api/bible-in-a-day/sessions/active'],
     enabled: true,
   });
 
   // Fetch session progress
-  const { data: sessionProgress } = useQuery({
+  const { data: sessionProgress } = useQuery<any[]>({
     queryKey: ['/api/bible-in-a-day/sessions', activeSession?.id, 'progress'],
     enabled: !!activeSession?.id,
   });
 
   // Fetch user badges
-  const { data: badges } = useQuery({
+  const { data: badges } = useQuery<any[]>({
     queryKey: ['/api/bible-in-a-day/badges'],
   });
 
