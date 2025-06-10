@@ -3272,7 +3272,7 @@ export default function AdminPortal() {
               </TabsContent>
 
               <TabsContent value="management" className="space-y-6">
-                <MemberManagementSystem />
+                <MemberManagementSystem selectedChurch={selectedChurch} />
               </TabsContent>
 
               <TabsContent value="sessions" className="space-y-6">

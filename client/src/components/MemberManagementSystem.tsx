@@ -42,7 +42,7 @@ function MemberDirectory() {
     queryFn: () => {
       const url = selectedChurch === "all" 
         ? "/api/members" 
-        : `/api/members?churchId=${encodeURIComponent(selectedChurch)}`;
+        : `/api/members?churchId=${selectedChurch}`;
       return fetch(url).then(res => res.json());
     },
   });
@@ -97,7 +97,7 @@ function MemberDirectory() {
           <SelectContent>
             <SelectItem value="all">All Churches</SelectItem>
             {churches.map((church: any) => (
-              <SelectItem key={church.id} value={church.name}>
+              <SelectItem key={church.id} value={church.id.toString()}>
                 {church.name}
               </SelectItem>
             ))}
