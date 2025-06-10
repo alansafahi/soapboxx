@@ -11,9 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, MapPin, Video, Users, Search, Filter, Share2, CalendarPlus, Heart, MessageCircle, Star } from "lucide-react";
+import { Calendar, Clock, MapPin, Video, Users, Search, Filter, Share2, CalendarPlus, Heart, MessageCircle, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { format, isToday, isTomorrow, isThisWeek, addDays } from "date-fns";
+import { format, isToday, isTomorrow, isThisWeek, addDays, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, getDay } from "date-fns";
 import type { Event } from "@shared/schema";
 
 export default function EventsList() {
@@ -27,6 +27,7 @@ export default function EventsList() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery<Event[]>({
@@ -222,6 +223,172 @@ export default function EventsList() {
     }
   };
 
+  // Calendar helper functions
+  const nextMonth = () => {
+    setCurrentMonth(prev => addDays(prev, 32));
+  };
+
+  const prevMonth = () => {
+    setCurrentMonth(prev => addDays(prev, -32));
+  };
+
+  const getEventsForDay = (day: Date) => {
+    return filteredEvents.filter(event => 
+      isSameDay(new Date(event.eventDate), day)
+    );
+  };
+
+  const renderCalendarView = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const calendarStart = startOfWeek(monthStart);
+    const calendarEnd = endOfWeek(monthEnd);
+    const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">
+              {format(currentMonth, "MMMM yyyy")}
+            </h2>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={prevMonth}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentMonth(new Date())}
+              >
+                Today
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={nextMonth}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-7 gap-1 mb-4">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
+              <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
+                {day}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {calendarDays.map((day, index) => {
+              const dayEvents = getEventsForDay(day);
+              const isCurrentMonth = isSameMonth(day, currentMonth);
+              const isToday = isSameDay(day, new Date());
+              
+              return (
+                <div
+                  key={index}
+                  className={`
+                    min-h-[100px] p-2 border border-gray-100 rounded-lg relative
+                    ${!isCurrentMonth ? "bg-gray-50 text-gray-400" : "bg-white"}
+                    ${isToday ? "bg-blue-50 border-blue-200" : ""}
+                    hover:bg-gray-50 transition-colors
+                  `}
+                >
+                  <div className={`
+                    text-sm font-medium mb-1
+                    ${isToday ? "text-blue-600" : ""}
+                  `}>
+                    {format(day, "d")}
+                  </div>
+                  
+                  <div className="space-y-1">
+                    {dayEvents.slice(0, 3).map(event => (
+                      <Dialog key={event.id}>
+                        <DialogTrigger asChild>
+                          <div
+                            className={`
+                              text-xs p-1 rounded cursor-pointer truncate
+                              ${getCategoryColor(event.category || 'other')}
+                              hover:opacity-80 transition-opacity
+                            `}
+                            title={event.title}
+                          >
+                            {event.title}
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <Calendar className="w-5 h-5" />
+                              {event.title}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <strong>Date:</strong> {format(new Date(event.eventDate), "PPP")}
+                              </div>
+                              <div>
+                                <strong>Time:</strong> {formatDateRange(event.eventDate, event.endDate || undefined)}
+                              </div>
+                              {event.location && (
+                                <div className="col-span-2">
+                                  <strong>Location:</strong> {event.location}
+                                </div>
+                              )}
+                            </div>
+                            {event.description && (
+                              <div>
+                                <strong>Description:</strong>
+                                <p className="mt-2 text-gray-700">{event.description}</p>
+                              </div>
+                            )}
+                            <div className="flex gap-2">
+                              <Button 
+                                onClick={() => handleRSVP(event.id, rsvpStatus.get(event.id) === "attending" ? "not_attending" : "attending")}
+                                variant={rsvpStatus.get(event.id) === "attending" ? "default" : "outline"}
+                                size="sm"
+                                disabled={rsvpMutation.isPending}
+                              >
+                                {rsvpMutation.isPending ? "Processing..." : 
+                                 rsvpStatus.get(event.id) === "attending" ? "✓ Attending" : "RSVP"}
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => shareEvent(event)}
+                              >
+                                <Share2 className="w-4 h-4 mr-1" />
+                                Share
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ))}
+                    
+                    {dayEvents.length > 3 && (
+                      <div className="text-xs text-gray-500 text-center">
+                        +{dayEvents.length - 3} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -343,9 +510,12 @@ export default function EventsList() {
       </Card>
 
       {/* Events Display */}
-      <Card>
-        <CardContent className="p-0">
-          {filteredEvents.length === 0 ? (
+      {viewMode === "calendar" ? (
+        renderCalendarView()
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            {filteredEvents.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-900 mb-2">
@@ -586,8 +756,9 @@ END:VCALENDAR`;
               </AnimatePresence>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
