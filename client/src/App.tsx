@@ -29,12 +29,21 @@ function Router() {
   // Check if user needs onboarding
   const needsOnboarding = isAuthenticated && user && !(user as any).hasCompletedOnboarding && !showWelcomeWizard;
 
+  // Show loading spinner during initial auth check
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <>
       {isAuthenticated && <AppHeader />}
       <main className="min-h-screen bg-gray-50">
         <Switch>
-          {isLoading || !isAuthenticated ? (
+          {!isAuthenticated ? (
             <Route path="*" component={Landing} />
           ) : (
             <>
