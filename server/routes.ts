@@ -311,20 +311,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/events', isAuthenticated, async (req: any, res) => {
     try {
-      const eventData = insertEventSchema.parse(req.body);
+      console.log("Received event data:", req.body);
+      
+      // Pre-process the data to match schema expectations
+      const preprocessedData = {
+        ...req.body,
+        organizerId: req.user.claims.sub,
+        // Ensure numeric values are properly typed
+        churchId: parseInt(req.body.churchId),
+        cost: parseFloat(req.body.cost || 0),
+        maxAttendees: req.body.maxAttendees ? parseInt(req.body.maxAttendees) : null,
+        minAttendees: req.body.minAttendees ? parseInt(req.body.minAttendees) : null,
+        // Ensure arrays are properly formatted
+        tags: Array.isArray(req.body.tags) ? req.body.tags : [],
+        ageGroups: Array.isArray(req.body.ageGroups) ? req.body.ageGroups : [],
+        // Handle optional strings
+        subcategory: req.body.subcategory || null,
+        location: req.body.location || null,
+        address: req.body.address || null,
+        onlineLink: req.body.onlineLink || null,
+        notes: req.body.notes || null,
+        publicNotes: req.body.publicNotes || null,
+      };
+      
+      const eventData = insertEventSchema.parse(preprocessedData);
       
       // Convert string dates to Date objects for storage
       const processedEventData = {
         ...eventData,
-        organizerId: req.user.claims.sub,
         eventDate: new Date(eventData.eventDate),
-        endDate: eventData.endDate ? new Date(eventData.endDate) : undefined,
+        endDate: eventData.endDate ? new Date(eventData.endDate) : null,
       };
       
       const event = await storage.createEvent(processedEventData);
       res.status(201).json(event);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid event data", errors: error.errors });
       }
       console.error("Error creating event:", error);
