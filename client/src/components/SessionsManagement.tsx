@@ -126,6 +126,23 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
     },
   });
 
+  const confirmSessionMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await apiRequest("PATCH", `/api/counseling-sessions/${sessionId}/confirm`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/counseling-sessions"] });
+      toast({ title: "Session confirmed successfully" });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to confirm session",
+        variant: "destructive",
+      });
+    },
+  });
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -275,6 +292,16 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      {session.status === "pending" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => confirmSessionMutation.mutate(session.id)}
+                          disabled={confirmSessionMutation.isPending}
+                        >
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"

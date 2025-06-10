@@ -1748,6 +1748,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Confirm session endpoint
+  app.patch("/api/counseling-sessions/:id/confirm", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const sessionIndex = sessionsData.findIndex(session => session.id === id);
+      if (sessionIndex !== -1) {
+        sessionsData[sessionIndex] = { 
+          ...sessionsData[sessionIndex], 
+          status: "confirmed",
+          updatedAt: new Date().toISOString()
+        };
+        res.json(sessionsData[sessionIndex]);
+      } else {
+        res.status(404).json({ error: "Session not found" });
+      }
+    } catch (error) {
+      console.error("Error confirming session:", error);
+      res.status(500).json({ error: "Failed to confirm session" });
+    }
+  });
+
   app.get("/api/volunteer-opportunities", async (req, res) => {
     try {
       const opportunities = [
