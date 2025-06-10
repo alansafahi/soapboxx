@@ -130,7 +130,8 @@ export default function CheckInSystem() {
 
   const checkInMutation = useMutation({
     mutationFn: async (checkInData: any) => {
-      return await apiRequest("/api/checkins", "POST", checkInData);
+      const response = await apiRequest("POST", "/api/checkins", checkInData);
+      return await response.json();
     },
     onSuccess: (data) => {
       toast({
