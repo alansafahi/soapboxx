@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, Crown, Medal, TrendingUp } from "lucide-react";
+import { Trophy, Crown, Medal, TrendingUp, Users, Gift } from "lucide-react";
 
 interface LeaderboardEntry {
   id: number;
@@ -22,6 +22,9 @@ interface UserScore {
   prayerChampionPoints: number;
   serviceHours: number;
   isAnonymous: boolean;
+  referralCount?: number;
+  referralPoints?: number;
+  referralTier?: string;
 }
 
 export default function LeaderboardWidget() {
@@ -30,9 +33,19 @@ export default function LeaderboardWidget() {
     queryKey: ["/api/users/score"],
   });
 
+  // Fetch user referral stats
+  const { data: referralStats } = useQuery({
+    queryKey: ["/api/referrals/stats"],
+  });
+
   // Fetch weekly faithfulness leaderboard (top 3)
   const { data: weeklyLeaderboard } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/leaderboard/weekly-faithfulness"],
+  });
+
+  // Fetch referral leaderboard
+  const { data: referralLeaderboard } = useQuery<LeaderboardEntry[]>({
+    queryKey: ["/api/leaderboard/referrals"],
   });
 
   const getRankIcon = (rank: number) => {
@@ -60,7 +73,7 @@ export default function LeaderboardWidget() {
                 {userScore.isAnonymous ? "Private" : "Public"}
               </Badge>
             </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-4 gap-3 text-center">
               <div>
                 <div className="text-lg font-bold text-blue-600">{userScore.weeklyPoints}</div>
                 <div className="text-xs text-gray-500">This Week</div>
@@ -70,10 +83,24 @@ export default function LeaderboardWidget() {
                 <div className="text-xs text-gray-500">Day Streak</div>
               </div>
               <div>
+                <div className="text-lg font-bold text-purple-600">{referralStats?.totalReferrals || 0}</div>
+                <div className="text-xs text-gray-500">Referrals</div>
+              </div>
+              <div>
                 <div className="text-lg font-bold text-green-600">{userScore.totalPoints}</div>
                 <div className="text-xs text-gray-500">Total Points</div>
               </div>
             </div>
+            
+            {/* Referral Tier Badge */}
+            {referralStats?.currentTier && (
+              <div className="mt-3 flex items-center justify-center">
+                <Badge variant="outline" className="bg-gradient-to-r from-purple-100 to-pink-100 border-purple-300">
+                  <Gift className="h-3 w-3 mr-1" />
+                  {referralStats.currentTier} Advocate
+                </Badge>
+              </div>
+            )}
           </div>
         )}
 
@@ -115,6 +142,38 @@ export default function LeaderboardWidget() {
             </div>
           )}
         </div>
+
+        {/* Top Referrers Section */}
+        {referralLeaderboard && referralLeaderboard.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="h-4 w-4 text-purple-600" />
+              <span className="text-sm font-medium text-gray-700">Top Referrers</span>
+            </div>
+            
+            <div className="space-y-2">
+              {referralLeaderboard.slice(0, 3).map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-2 border border-purple-100"
+                >
+                  <div className="flex items-center gap-2">
+                    {getRankIcon(entry.rank)}
+                    <span className="text-sm font-medium text-gray-800">
+                      {entry.entityName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3 text-purple-600" />
+                    <span className="text-sm font-bold text-purple-600">
+                      {entry.score}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* View Full Leaderboard Button */}
         <Button

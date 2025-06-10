@@ -2344,16 +2344,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const userScore = await storage.getUserScore(userId);
-      res.json(userScore || { 
-        totalPoints: 0, 
-        weeklyPoints: 0, 
-        monthlyPoints: 0, 
-        currentStreak: 0, 
-        faithfulnessScore: 0,
-        prayerChampionPoints: 0,
-        serviceHours: 0,
-        isAnonymous: false
-      });
+      const referralStats = await storage.getUserReferralStats(userId);
+      
+      // Get user's current referral tier
+      const rewardTiers = await storage.getReferralRewardTiers();
+      let currentTier = 'Bronze';
+      if (referralStats.successfulReferrals >= 50) currentTier = 'Platinum';
+      else if (referralStats.successfulReferrals >= 25) currentTier = 'Gold';
+      else if (referralStats.successfulReferrals >= 10) currentTier = 'Silver';
+      
+      const scoreWithReferrals = {
+        ...(userScore || { 
+          totalPoints: 0, 
+          weeklyPoints: 0, 
+          monthlyPoints: 0, 
+          currentStreak: 0, 
+          faithfulnessScore: 0,
+          prayerChampionPoints: 0,
+          serviceHours: 0,
+          isAnonymous: false
+        }),
+        referralCount: referralStats.successfulReferrals,
+        referralPoints: referralStats.totalPointsEarned,
+        referralTier: currentTier
+      };
+      
+      res.json(scoreWithReferrals);
     } catch (error) {
       console.error("Error fetching user score:", error);
       res.status(500).json({ message: "Failed to fetch user score" });
