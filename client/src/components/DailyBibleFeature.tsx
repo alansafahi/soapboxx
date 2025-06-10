@@ -292,13 +292,9 @@ export function DailyBibleFeature() {
     try {
       await recordReadingMutation.mutateAsync({
         dailyVerseId: dailyVerse.id,
-        verseReference: dailyVerse.verseReference,
-        readingTime: new Date().toISOString(),
-        reflection: reflection,
+        reflectionText: reflection,
         emotionalReaction: emotionalReaction,
         audioListened: isAudioPlaying,
-        completedReflection: !!reflection,
-        sharedVerse: false,
       });
       setHasReadToday(true);
     } catch (error) {
