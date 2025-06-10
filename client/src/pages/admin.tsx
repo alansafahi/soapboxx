@@ -57,7 +57,13 @@ function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
     queryKey: [queryKey],
   });
 
-  console.log('Draft query result:', { drafts, isLoading, error, churchId });
+  console.log('Draft query result:', { 
+    drafts: drafts, 
+    isLoading, 
+    error: error?.message || error, 
+    churchId,
+    queryKey 
+  });
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
