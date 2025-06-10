@@ -870,6 +870,13 @@ export default function AdminPortal() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedChurch, setSelectedChurch] = useState<number | null>(null);
+  
+  // Dialog state management
+  const [isChurchDialogOpen, setIsChurchDialogOpen] = useState(false);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [isDevotionalDialogOpen, setIsDevotionalDialogOpen] = useState(false);
+  const [isSeriesDialogOpen, setIsSeriesDialogOpen] = useState(false);
+  const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
@@ -1052,6 +1059,8 @@ export default function AdminPortal() {
         title: "Success",
         description: "Devotional published successfully!",
       });
+      setDevotionalForm({ title: '', category: '', verseReference: '', content: '', churchId: selectedChurch });
+      setIsDevotionalDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/devotionals"] });
     },
     onError: (error) => {
@@ -1072,6 +1081,8 @@ export default function AdminPortal() {
         title: "Success",
         description: "Weekly series created successfully!",
       });
+      setWeeklySeriesForm({ title: '', description: '', startDate: '', endDate: '', frequency: '', churchId: selectedChurch });
+      setIsSeriesDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/weekly-series"] });
     },
     onError: (error) => {
@@ -1092,6 +1103,8 @@ export default function AdminPortal() {
         title: "Success",
         description: "Sermon media uploaded successfully!",
       });
+      setSermonMediaForm({ title: '', speaker: '', mediaType: '', date: '', description: '', churchId: selectedChurch });
+      setIsMediaDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/sermon-media"] });
     },
     onError: (error) => {
@@ -1116,8 +1129,9 @@ export default function AdminPortal() {
         title: "Success",
         description: "Devotional draft saved successfully!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/drafts/devotionals"] });
       setDevotionalForm({ title: '', category: '', verseReference: '', content: '', churchId: selectedChurch });
+      setIsDevotionalDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/devotionals"] });
     },
     onError: (error) => {
       toast({
@@ -1482,7 +1496,7 @@ export default function AdminPortal() {
                 <Building className="h-5 w-5" />
                 Churches
               </CardTitle>
-              <Dialog>
+              <Dialog open={isChurchDialogOpen} onOpenChange={setIsChurchDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full">
                     <Plus className="h-4 w-4 mr-2" />
