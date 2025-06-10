@@ -90,7 +90,7 @@ export const userChurches = pgTable("user_churches", {
   userChurchUnique: unique().on(table.userId, table.churchId),
 }));
 
-// Events table
+// Events table - Enhanced for comprehensive management
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   churchId: integer("church_id").notNull().references(() => churches.id),
@@ -100,22 +100,148 @@ export const events = pgTable("events", {
   eventDate: timestamp("event_date").notNull(),
   endDate: timestamp("end_date"),
   location: text("location"),
+  address: text("address"),
   isOnline: boolean("is_online").default(false),
+  onlineLink: varchar("online_link"),
   maxAttendees: integer("max_attendees"),
+  minAttendees: integer("min_attendees"),
   isPublic: boolean("is_public").default(true),
-  category: varchar("category", { length: 50 }), // service, bible_study, community_service, social
+  requiresApproval: boolean("requires_approval").default(false),
+  category: varchar("category", { length: 50 }), // service, bible_study, community_service, social, youth, worship, outreach
+  subcategory: varchar("subcategory", { length: 50 }), // More specific categorization
+  priority: varchar("priority", { length: 20 }).default("normal"), // low, normal, high, urgent
+  status: varchar("status", { length: 20 }).default("scheduled"), // draft, scheduled, ongoing, completed, cancelled
   imageUrl: varchar("image_url"),
+  attachments: jsonb("attachments"), // Array of file URLs and metadata
+  tags: text("tags").array(),
+  ageGroups: text("age_groups").array(), // children, youth, adults, seniors, all
+  cost: decimal("cost", { precision: 10, scale: 2 }).default("0.00"),
+  currency: varchar("currency", { length: 3 }).default("USD"),
+  registrationDeadline: timestamp("registration_deadline"),
+  cancellationDeadline: timestamp("cancellation_deadline"),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: jsonb("recurring_pattern"), // Pattern details for recurring events
+  parentEventId: integer("parent_event_id").references((): any => events.id), // For recurring event instances
+  reminderSettings: jsonb("reminder_settings"), // Notification timing preferences
+  customFields: jsonb("custom_fields"), // Flexible additional data
+  notes: text("notes"), // Internal organizer notes
+  publicNotes: text("public_notes"), // Notes visible to attendees
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Event RSVPs
+// Event RSVPs - Enhanced with more detailed tracking
 export const eventRsvps = pgTable("event_rsvps", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id").notNull().references(() => events.id),
   userId: varchar("user_id").notNull().references(() => users.id),
-  status: varchar("status", { length: 20 }).default("attending"), // attending, maybe, not_attending
+  status: varchar("status", { length: 20 }).default("attending"), // attending, maybe, not_attending, pending_approval, waitlisted
+  responseDate: timestamp("response_date").defaultNow(),
+  guestCount: integer("guest_count").default(0),
+  guestNames: text("guest_names").array(),
+  specialRequests: text("special_requests"),
+  checkedIn: boolean("checked_in").default(false),
+  checkedInAt: timestamp("checked_in_at"),
+  checkedInBy: varchar("checked_in_by").references(() => users.id),
+  feedback: text("feedback"), // Post-event feedback
+  rating: integer("rating"), // 1-5 star rating
+  remindersSent: integer("reminders_sent").default(0),
+  lastReminderSent: timestamp("last_reminder_sent"),
+  customResponses: jsonb("custom_responses"), // Responses to custom RSVP questions
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userEventUnique: unique().on(table.userId, table.eventId),
+}));
+
+// Event volunteer roles and assignments
+export const eventVolunteers = pgTable("event_volunteers", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: varchar("role", { length: 100 }).notNull(), // setup, cleanup, registration, tech, worship, childcare, security
+  description: text("description"),
+  timeCommitment: varchar("time_commitment", { length: 100 }), // e.g., "2 hours before event"
+  requirements: text("requirements"),
+  status: varchar("status", { length: 20 }).default("assigned"), // assigned, confirmed, completed, no_show
+  assignedBy: varchar("assigned_by").notNull().references(() => users.id),
+  confirmedAt: timestamp("confirmed_at"),
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event notifications and reminders
+export const eventNotifications = pgTable("event_notifications", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  recipientId: varchar("recipient_id").notNull().references(() => users.id),
+  notificationType: varchar("notification_type", { length: 50 }).notNull(), // reminder, update, cancellation, rsvp_confirmation
+  message: text("message").notNull(),
+  channelType: varchar("channel_type", { length: 20 }).notNull(), // email, sms, push, in_app
+  status: varchar("status", { length: 20 }).default("pending"), // pending, sent, delivered, failed
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event updates and announcements
+export const eventUpdates = pgTable("event_updates", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  updateType: varchar("update_type", { length: 30 }).notNull(), // general, schedule_change, location_change, cancellation, important
+  isPublic: boolean("is_public").default(true),
+  notifyAttendees: boolean("notify_attendees").default(false),
+  attachments: jsonb("attachments"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event check-in tracking
+export const eventCheckIns = pgTable("event_check_ins", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  checkedInAt: timestamp("checked_in_at").defaultNow(),
+  checkedInBy: varchar("checked_in_by").notNull().references(() => users.id),
+  checkInMethod: varchar("check_in_method", { length: 20 }).default("manual"), // manual, qr_code, nfc, self_service
+  notes: text("notes"),
+  guestCount: integer("guest_count").default(0),
+});
+
+// Event recurring patterns
+export const eventRecurrenceRules = pgTable("event_recurrence_rules", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  frequency: varchar("frequency", { length: 20 }).notNull(), // daily, weekly, monthly, yearly, custom
+  interval: integer("interval").default(1), // Every X frequency (e.g., every 2 weeks)
+  daysOfWeek: text("days_of_week").array(), // For weekly: ['monday', 'wednesday', 'friday']
+  dayOfMonth: integer("day_of_month"), // For monthly: specific day of month
+  weekOfMonth: integer("week_of_month"), // For monthly: 1st, 2nd, 3rd, 4th, -1 (last)
+  monthsOfYear: text("months_of_year").array(), // For yearly
+  endType: varchar("end_type", { length: 20 }).notNull(), // never, after_count, by_date
+  endAfterCount: integer("end_after_count"), // Number of occurrences
+  endByDate: timestamp("end_by_date"),
+  exceptions: jsonb("exceptions"), // Dates to skip
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event analytics and metrics
+export const eventMetrics = pgTable("event_metrics", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  metricType: varchar("metric_type", { length: 50 }).notNull(), // attendance, engagement, feedback_score, cost_per_attendee
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(),
+  unit: varchar("unit", { length: 20 }), // count, percentage, dollars, hours
+  recordedAt: timestamp("recorded_at").defaultNow(),
+  recordedBy: varchar("recorded_by").references(() => users.id),
+  notes: text("notes"),
 });
 
 // Community discussions
@@ -1292,14 +1418,42 @@ export const userInspirationHistoryRelations = relations(userInspirationHistory,
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Event management types
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = typeof events.$inferInsert;
+export type EventRsvp = typeof eventRsvps.$inferSelect;
+export type InsertEventRsvp = typeof eventRsvps.$inferInsert;
+export type EventVolunteer = typeof eventVolunteers.$inferSelect;
+export type InsertEventVolunteer = typeof eventVolunteers.$inferInsert;
+export type EventNotification = typeof eventNotifications.$inferSelect;
+export type InsertEventNotification = typeof eventNotifications.$inferInsert;
+export type EventUpdate = typeof eventUpdates.$inferSelect;
+export type InsertEventUpdate = typeof eventUpdates.$inferInsert;
+export type EventCheckIn = typeof eventCheckIns.$inferSelect;
+export type InsertEventCheckIn = typeof eventCheckIns.$inferInsert;
+export type EventRecurrenceRule = typeof eventRecurrenceRules.$inferSelect;
+export type InsertEventRecurrenceRule = typeof eventRecurrenceRules.$inferInsert;
+export type EventMetric = typeof eventMetrics.$inferSelect;
+export type InsertEventMetric = typeof eventMetrics.$inferInsert;
+
+// Event form schemas  
+export type InsertEventForm = z.infer<typeof insertEventSchema>;
+export type InsertEventRsvpForm = z.infer<typeof insertEventRsvpSchema>;
+
+export const insertEventVolunteerSchema = createInsertSchema(eventVolunteers).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEventVolunteerForm = z.infer<typeof insertEventVolunteerSchema>;
+
+export const insertEventUpdateSchema = createInsertSchema(eventUpdates).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEventUpdateForm = z.infer<typeof insertEventUpdateSchema>;
+
 export type InsertChurch = typeof churches.$inferInsert;
 export type Church = typeof churches.$inferSelect;
-
-export type InsertEvent = typeof events.$inferInsert;
-export type Event = typeof events.$inferSelect;
-
-export type InsertEventRsvp = typeof eventRsvps.$inferInsert;
-export type EventRsvp = typeof eventRsvps.$inferSelect;
 
 export type InsertDiscussion = typeof discussions.$inferInsert;
 export type Discussion = typeof discussions.$inferSelect;
@@ -1371,12 +1525,6 @@ export const insertChurchSchema = createInsertSchema(churches).omit({
   updatedAt: true,
 });
 
-export const insertEventSchema = createInsertSchema(events).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 export const insertDiscussionSchema = createInsertSchema(discussions).omit({
   id: true,
   authorId: true,
@@ -1407,11 +1555,6 @@ export const insertPrayerUpdateSchema = createInsertSchema(prayerUpdates).omit({
 });
 
 export const insertPrayerAssignmentSchema = createInsertSchema(prayerAssignments).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertEventRsvpSchema = createInsertSchema(eventRsvps).omit({
   id: true,
   createdAt: true,
 });
