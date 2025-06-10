@@ -1846,6 +1846,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Notification system routes
+  app.get("/api/notifications/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const settings = await storage.getNotificationSettings(userId);
+      res.json(settings || {
+        userId,
+        pushEnabled: true,
+        emailEnabled: true,
+        scriptureNotifications: true,
+        eventNotifications: true,
+        messageNotifications: true,
+        prayerNotifications: true,
+        scriptureTime: "06:00",
+        timezone: "America/Los_Angeles",
+        quietHoursStart: "22:00",
+        quietHoursEnd: "07:00",
+        weekendNotifications: true
+      });
+    } catch (error) {
+      console.error("Error getting notification settings:", error);
+      res.status(500).json({ message: "Failed to get notification settings" });
+    }
+  });
+
+  app.post("/api/notifications/settings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const settings = await storage.upsertNotificationSettings({
+        userId,
+        ...req.body
+      });
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating notification settings:", error);
+      res.status(500).json({ message: "Failed to update notification settings" });
+    }
+  });
+
+  app.get("/api/notifications/scheduled", isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = req.query.churchId ? parseInt(req.query.churchId) : undefined;
+      const notifications = await storage.getScheduledNotifications(churchId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error getting scheduled notifications:", error);
+      res.status(500).json({ message: "Failed to get scheduled notifications" });
+    }
+  });
+
+  app.post("/api/notifications/scheduled", isAuthenticated, async (req: any, res) => {
+    try {
+      const createdBy = req.user?.claims?.sub;
+      const notification = await storage.createScheduledNotification({
+        createdBy,
+        ...req.body
+      });
+      res.json(notification);
+    } catch (error) {
+      console.error("Error creating scheduled notification:", error);
+      res.status(500).json({ message: "Failed to create scheduled notification" });
+    }
+  });
+
+  app.put("/api/notifications/scheduled/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const notification = await storage.updateScheduledNotification(id, req.body);
+      res.json(notification);
+    } catch (error) {
+      console.error("Error updating scheduled notification:", error);
+      res.status(500).json({ message: "Failed to update scheduled notification" });
+    }
+  });
+
+  app.delete("/api/notifications/scheduled/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteScheduledNotification(id);
+      res.json({ message: "Scheduled notification deleted" });
+    } catch (error) {
+      console.error("Error deleting scheduled notification:", error);
+      res.status(500).json({ message: "Failed to delete scheduled notification" });
+    }
+  });
+
+  app.get("/api/scripture-schedules", isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = req.query.churchId ? parseInt(req.query.churchId) : undefined;
+      const schedules = await storage.getScriptureSchedules(churchId);
+      res.json(schedules);
+    } catch (error) {
+      console.error("Error getting scripture schedules:", error);
+      res.status(500).json({ message: "Failed to get scripture schedules" });
+    }
+  });
+
+  app.post("/api/scripture-schedules", isAuthenticated, async (req: any, res) => {
+    try {
+      const createdBy = req.user?.claims?.sub;
+      const schedule = await storage.createScriptureSchedule({
+        createdBy,
+        ...req.body
+      });
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error creating scripture schedule:", error);
+      res.status(500).json({ message: "Failed to create scripture schedule" });
+    }
+  });
+
+  app.put("/api/scripture-schedules/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const schedule = await storage.updateScriptureSchedule(id, req.body);
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error updating scripture schedule:", error);
+      res.status(500).json({ message: "Failed to update scripture schedule" });
+    }
+  });
+
+  app.delete("/api/scripture-schedules/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteScriptureSchedule(id);
+      res.json({ message: "Scripture schedule deleted" });
+    } catch (error) {
+      console.error("Error deleting scripture schedule:", error);
+      res.status(500).json({ message: "Failed to delete scripture schedule" });
+    }
+  });
+
+  app.get("/api/notifications/deliveries", isAuthenticated, async (req: any, res) => {
+    try {
+      const notificationId = req.query.notificationId ? parseInt(req.query.notificationId) : undefined;
+      const userId = req.query.userId || undefined;
+      const deliveries = await storage.getNotificationDeliveries(notificationId, userId);
+      res.json(deliveries);
+    } catch (error) {
+      console.error("Error getting notification deliveries:", error);
+      res.status(500).json({ message: "Failed to get notification deliveries" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Setup WebSocket server for real-time chat

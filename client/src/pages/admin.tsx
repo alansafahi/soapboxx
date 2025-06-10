@@ -47,6 +47,33 @@ const prayerFollowUpFormSchema = insertPrayerFollowUpSchema.extend({
 
 const prayerAssignmentFormSchema = insertPrayerAssignmentSchema.extend({});
 
+// Notification form schemas
+const notificationFormSchema = z.object({
+  type: z.enum(["scripture", "event", "message", "prayer"]),
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(1, "Content is required"),
+  scheduledFor: z.string().min(1, "Schedule date/time is required"),
+  timezone: z.string().default("America/Los_Angeles"),
+  targetAudience: z.enum(["all", "members", "leaders", "group"]),
+  targetGroupId: z.coerce.number().optional(),
+  isRecurring: z.boolean().default(false),
+  recurringPattern: z.enum(["daily", "weekly", "monthly"]).optional(),
+  recurringDays: z.array(z.string()).optional(),
+  endDate: z.string().optional(),
+});
+
+const scriptureScheduleFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  scriptures: z.array(z.string()).min(1, "At least one scripture is required"),
+  targetAudience: z.enum(["all", "members", "leaders", "group"]),
+  targetGroupId: z.coerce.number().optional(),
+  scheduleTime: z.string().min(1, "Schedule time is required"),
+  timezone: z.string().default("America/Los_Angeles"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().optional(),
+});
+
 type ChurchFormData = z.infer<typeof churchFormSchema>;
 type EventFormData = z.infer<typeof eventFormSchema>;
 type DevotionalFormData = z.infer<typeof devotionalFormSchema>;
@@ -54,6 +81,8 @@ type WeeklySeriesFormData = z.infer<typeof weeklySeriesFormSchema>;
 type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 type PrayerFollowUpFormData = z.infer<typeof prayerFollowUpFormSchema>;
 type PrayerAssignmentFormData = z.infer<typeof prayerAssignmentFormSchema>;
+type NotificationFormData = z.infer<typeof notificationFormSchema>;
+type ScriptureScheduleFormData = z.infer<typeof scriptureScheduleFormSchema>;
 
 // File type validation function
 function validateFileType(file: File, mediaType: string): boolean {
@@ -3227,6 +3256,10 @@ export default function AdminPortal() {
                     Member management coming soon...
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="notifications" className="space-y-6">
+                <NotificationManagementSystem selectedChurch={selectedChurch} />
               </TabsContent>
             </Tabs>
           ) : (
