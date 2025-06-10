@@ -125,6 +125,7 @@ export function EventManagement() {
 
   const { data: userChurches = [] } = useQuery({
     queryKey: ["/api/users/churches"],
+    staleTime: 0, // Force refresh to pick up new church associations
   });
 
   const createEventMutation = useMutation({
@@ -186,7 +187,9 @@ export function EventManagement() {
 
   // Determine the default church for the admin
   const userChurchesData = Array.isArray(userChurches) ? userChurches as Church[] : [];
-  const defaultChurchId = userChurchesData.length > 0 ? userChurchesData[0].id : 0;
+  // Priority: 1) Grace Community Church (admin preference), 2) First church in list
+  const defaultChurchId = userChurchesData.find(church => church.name === "Grace Community Church")?.id || 
+                          (userChurchesData.length > 0 ? userChurchesData[0].id : 0);
 
   const form = useForm<EventForm>({
     resolver: zodResolver(eventFormSchema),
@@ -228,6 +231,12 @@ export function EventManagement() {
       form.setValue("churchId", defaultChurchId);
     }
   }, [userChurchesData, defaultChurchId, form]);
+
+  // Debug: Log current user churches to verify Grace Community Church is included
+  useEffect(() => {
+    console.log("User churches:", userChurchesData);
+    console.log("Default church ID:", defaultChurchId);
+  }, [userChurchesData, defaultChurchId]);
 
   const onCreateSubmit = (data: EventForm) => {
     // Convert datetime-local strings to ISO strings
