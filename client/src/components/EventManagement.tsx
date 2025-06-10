@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -123,6 +123,10 @@ export function EventManagement() {
     queryKey: ["/api/churches"],
   });
 
+  const { data: userChurches = [] } = useQuery({
+    queryKey: ["/api/users/churches"],
+  });
+
   const createEventMutation = useMutation({
     mutationFn: async (data: EventForm) => {
       const response = await fetch("/api/events", {
@@ -180,12 +184,16 @@ export function EventManagement() {
     },
   });
 
+  // Determine the default church for the admin
+  const userChurchesData = Array.isArray(userChurches) ? userChurches as Church[] : [];
+  const defaultChurchId = userChurchesData.length > 0 ? userChurchesData[0].id : 0;
+
   const form = useForm<EventForm>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: "",
       description: "",
-      churchId: 0,
+      churchId: defaultChurchId,
       eventDate: "",
       endDate: "",
       location: "",
@@ -213,6 +221,13 @@ export function EventManagement() {
   const editForm = useForm<EventForm>({
     resolver: zodResolver(eventFormSchema),
   });
+
+  // Update form when user's church data becomes available
+  useEffect(() => {
+    if (userChurchesData.length > 0 && defaultChurchId > 0) {
+      form.setValue("churchId", defaultChurchId);
+    }
+  }, [userChurchesData, defaultChurchId, form]);
 
   const onCreateSubmit = (data: EventForm) => {
     // Convert datetime-local strings to ISO strings
@@ -327,20 +342,32 @@ export function EventManagement() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Church</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                        {userChurchesData.length <= 1 ? (
+                          // Single church - display as read-only field
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select church" />
-                            </SelectTrigger>
+                            <Input 
+                              value={userChurchesData[0]?.name || "No church assigned"} 
+                              disabled 
+                              className="bg-muted"
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {churchesData.map((church) => (
-                              <SelectItem key={church.id} value={church.id.toString()}>
-                                {church.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        ) : (
+                          // Multiple churches - show dropdown
+                          <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select church" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {userChurchesData.map((church) => (
+                                <SelectItem key={church.id} value={church.id.toString()}>
+                                  {church.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
