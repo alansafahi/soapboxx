@@ -1133,8 +1133,8 @@ export const counselingSessions = pgTable("counseling_sessions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Volunteer & Event Sign-Ups
-export const volunteerOpportunities = pgTable("volunteer_opportunities", {
+// Legacy volunteer opportunities (for existing event sign-ups)
+export const legacyVolunteerOpportunities = pgTable("legacy_volunteer_opportunities", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id").references(() => events.id),
   title: varchar("title", { length: 255 }).notNull(),
@@ -1155,7 +1155,7 @@ export const volunteerOpportunities = pgTable("volunteer_opportunities", {
 
 export const volunteerSignUps = pgTable("volunteer_sign_ups", {
   id: serial("id").primaryKey(),
-  opportunityId: integer("opportunity_id").notNull().references(() => volunteerOpportunities.id),
+  opportunityId: integer("opportunity_id").notNull().references(() => legacyVolunteerOpportunities.id),
   volunteerId: varchar("volunteer_id").notNull().references(() => users.id),
   signUpDate: timestamp("sign_up_date").defaultNow(),
   status: varchar("status", { length: 20 }).default("signed_up"), // signed_up, confirmed, completed, cancelled
@@ -1598,6 +1598,211 @@ export const insertBibleVerseShareSchema = createInsertSchema(bibleVerseShares).
 // Bible in a Day Zod Schemas
 export const insertBibleInADaySessionSchema = createInsertSchema(bibleInADaySessions).omit({ id: true, startedAt: true });
 export const insertBibleInADaySectionProgressSchema = createInsertSchema(bibleInADaySectionProgress).omit({ id: true, startedAt: true });
+
+// Volunteer Management System
+
+// Volunteer roles
+export const volunteerRoles = pgTable("volunteer_roles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  requiredSkills: text("required_skills").array(),
+  department: varchar("department", { length: 50 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Volunteer profiles
+export const volunteers = pgTable("volunteers", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  firstName: varchar("first_name", { length: 50 }).notNull(),
+  lastName: varchar("last_name", { length: 50 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 20 }),
+  address: text("address"),
+  dateOfBirth: timestamp("date_of_birth"),
+  emergencyContactName: varchar("emergency_contact_name", { length: 100 }),
+  emergencyContactPhone: varchar("emergency_contact_phone", { length: 20 }),
+  skills: text("skills").array(),
+  interests: text("interests").array(),
+  availability: jsonb("availability"), // {monday: [{start: "09:00", end: "17:00"}], ...}
+  backgroundCheck: boolean("background_check").default(false),
+  backgroundCheckDate: timestamp("background_check_date"),
+  orientation: boolean("orientation").default(false),
+  orientationDate: timestamp("orientation_date"),
+  status: varchar("status", { length: 20 }).default("active"), // active, inactive, pending
+  joinedAt: timestamp("joined_at").defaultNow(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Volunteer role assignments
+export const volunteerRoleAssignments = pgTable("volunteer_role_assignments", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  roleId: integer("role_id").notNull().references(() => volunteerRoles.id),
+  assignedBy: varchar("assigned_by").notNull().references(() => users.id),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+  expiresAt: timestamp("expires_at"),
+  notes: text("notes"),
+});
+
+// Volunteer opportunities/events
+export const volunteerOpportunities = pgTable("volunteer_opportunities", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  roleId: integer("role_id").references(() => volunteerRoles.id),
+  coordinatorId: varchar("coordinator_id").references(() => users.id),
+  location: varchar("location", { length: 200 }),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  volunteersNeeded: integer("volunteers_needed").default(1),
+  volunteersRegistered: integer("volunteers_registered").default(0),
+  requiredSkills: text("required_skills").array(),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: jsonb("recurring_pattern"), // {frequency: "weekly", interval: 1, daysOfWeek: [1,3,5]}
+  status: varchar("status", { length: 20 }).default("open"), // open, closed, cancelled, completed
+  priority: varchar("priority", { length: 20 }).default("medium"), // low, medium, high, urgent
+  isPublic: boolean("is_public").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Volunteer registrations for opportunities
+export const volunteerRegistrations = pgTable("volunteer_registrations", {
+  id: serial("id").primaryKey(),
+  opportunityId: integer("opportunity_id").notNull().references(() => volunteerOpportunities.id),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  registeredAt: timestamp("registered_at").defaultNow(),
+  status: varchar("status", { length: 20 }).default("registered"), // registered, confirmed, cancelled, no_show, completed
+  notes: text("notes"),
+  checkInTime: timestamp("check_in_time"),
+  checkOutTime: timestamp("check_out_time"),
+  hoursServed: decimal("hours_served", { precision: 4, scale: 2 }),
+  feedback: text("feedback"),
+  rating: integer("rating"), // 1-5 stars
+});
+
+// Volunteer hour tracking
+export const volunteerHours = pgTable("volunteer_hours", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  opportunityId: integer("opportunity_id").references(() => volunteerOpportunities.id),
+  roleId: integer("role_id").references(() => volunteerRoles.id),
+  date: timestamp("date").notNull(),
+  startTime: varchar("start_time").notNull(),
+  endTime: varchar("end_time").notNull(),
+  hoursServed: decimal("hours_served", { precision: 4, scale: 2 }).notNull(),
+  description: text("description"),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, approved, rejected
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Volunteer certifications/training
+export const volunteerCertifications = pgTable("volunteer_certifications", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  issuingOrganization: varchar("issuing_organization", { length: 100 }),
+  issuedDate: timestamp("issued_date"),
+  expirationDate: timestamp("expiration_date"),
+  certificateNumber: varchar("certificate_number", { length: 100 }),
+  documentUrl: varchar("document_url", { length: 500 }),
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Volunteer communication/notifications
+export const volunteerCommunications = pgTable("volunteer_communications", {
+  id: serial("id").primaryKey(),
+  fromUserId: varchar("from_user_id").notNull().references(() => users.id),
+  toVolunteerId: integer("to_volunteer_id").references(() => volunteers.id),
+  opportunityId: integer("opportunity_id").references(() => volunteerOpportunities.id),
+  type: varchar("type", { length: 20 }).notNull(), // email, sms, notification, announcement
+  subject: varchar("subject", { length: 200 }),
+  message: text("message").notNull(),
+  sentAt: timestamp("sent_at").defaultNow(),
+  readAt: timestamp("read_at"),
+  status: varchar("status", { length: 20 }).default("sent"), // sent, delivered, read, failed
+});
+
+// Volunteer awards/recognition
+export const volunteerAwards = pgTable("volunteer_awards", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  awardType: varchar("award_type", { length: 50 }).notNull(), // service_hours, years_of_service, special_recognition
+  title: varchar("title", { length: 100 }).notNull(),
+  description: text("description"),
+  hoursThreshold: integer("hours_threshold"),
+  yearsThreshold: integer("years_threshold"),
+  awardedBy: varchar("awarded_by").notNull().references(() => users.id),
+  awardedAt: timestamp("awarded_at").defaultNow(),
+  certificateUrl: varchar("certificate_url", { length: 500 }),
+  isPublic: boolean("is_public").default(true),
+});
+
+// Volunteer feedback and surveys
+export const volunteerFeedback = pgTable("volunteer_feedback", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  opportunityId: integer("opportunity_id").references(() => volunteerOpportunities.id),
+  feedbackType: varchar("feedback_type", { length: 20 }).notNull(), // experience, suggestion, complaint, compliment
+  rating: integer("rating"), // 1-5 stars
+  subject: varchar("subject", { length: 200 }),
+  message: text("message").notNull(),
+  isAnonymous: boolean("is_anonymous").default(false),
+  status: varchar("status", { length: 20 }).default("open"), // open, reviewed, resolved, closed
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  response: text("response"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Volunteer Management Types
+export type VolunteerRole = typeof volunteerRoles.$inferSelect;
+export type InsertVolunteerRole = typeof volunteerRoles.$inferInsert;
+export type Volunteer = typeof volunteers.$inferSelect;
+export type InsertVolunteer = typeof volunteers.$inferInsert;
+export type VolunteerRoleAssignment = typeof volunteerRoleAssignments.$inferSelect;
+export type InsertVolunteerRoleAssignment = typeof volunteerRoleAssignments.$inferInsert;
+export type VolunteerOpportunity = typeof volunteerOpportunities.$inferSelect;
+export type InsertVolunteerOpportunity = typeof volunteerOpportunities.$inferInsert;
+export type VolunteerRegistration = typeof volunteerRegistrations.$inferSelect;
+export type InsertVolunteerRegistration = typeof volunteerRegistrations.$inferInsert;
+export type VolunteerHours = typeof volunteerHours.$inferSelect;
+export type InsertVolunteerHours = typeof volunteerHours.$inferInsert;
+export type VolunteerCertification = typeof volunteerCertifications.$inferSelect;
+export type InsertVolunteerCertification = typeof volunteerCertifications.$inferInsert;
+export type VolunteerCommunication = typeof volunteerCommunications.$inferSelect;
+export type InsertVolunteerCommunication = typeof volunteerCommunications.$inferInsert;
+export type VolunteerAward = typeof volunteerAwards.$inferSelect;
+export type InsertVolunteerAward = typeof volunteerAwards.$inferInsert;
+export type VolunteerFeedback = typeof volunteerFeedback.$inferSelect;
+export type InsertVolunteerFeedback = typeof volunteerFeedback.$inferInsert;
+
+// Volunteer Management Zod Schemas
+export const insertVolunteerRoleSchema = createInsertSchema(volunteerRoles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVolunteerSchema = createInsertSchema(volunteers).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVolunteerRoleAssignmentSchema = createInsertSchema(volunteerRoleAssignments).omit({ id: true, assignedAt: true });
+export const insertVolunteerOpportunitySchema = createInsertSchema(volunteerOpportunities).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVolunteerRegistrationSchema = createInsertSchema(volunteerRegistrations).omit({ id: true, registeredAt: true });
+export const insertVolunteerHoursSchema = createInsertSchema(volunteerHours).omit({ id: true, createdAt: true });
+export const insertVolunteerCertificationSchema = createInsertSchema(volunteerCertifications).omit({ id: true, createdAt: true });
+export const insertVolunteerCommunicationSchema = createInsertSchema(volunteerCommunications).omit({ id: true, sentAt: true });
+export const insertVolunteerAwardSchema = createInsertSchema(volunteerAwards).omit({ id: true, awardedAt: true });
+export const insertVolunteerFeedbackSchema = createInsertSchema(volunteerFeedback).omit({ id: true, createdAt: true });
 export const insertBibleInADayBadgeSchema = createInsertSchema(bibleInADayBadges).omit({ id: true, earnedAt: true });
 
 // Event management types

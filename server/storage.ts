@@ -3226,6 +3226,313 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bibleInADayBadges.userId, userId))
       .orderBy(desc(bibleInADayBadges.earnedAt));
   }
+
+  // Volunteer Management Methods
+
+  // Volunteer Roles
+  async getVolunteerRoles(): Promise<VolunteerRole[]> {
+    return await db
+      .select()
+      .from(volunteerRoles)
+      .where(eq(volunteerRoles.isActive, true))
+      .orderBy(volunteerRoles.name);
+  }
+
+  async createVolunteerRole(roleData: InsertVolunteerRole): Promise<VolunteerRole> {
+    const [role] = await db
+      .insert(volunteerRoles)
+      .values(roleData)
+      .returning();
+    return role;
+  }
+
+  async updateVolunteerRole(id: number, updates: Partial<InsertVolunteerRole>): Promise<VolunteerRole> {
+    const [role] = await db
+      .update(volunteerRoles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(volunteerRoles.id, id))
+      .returning();
+    return role;
+  }
+
+  // Volunteers
+  async getVolunteers(churchId?: number): Promise<Volunteer[]> {
+    let query = db.select().from(volunteers);
+    
+    if (churchId) {
+      query = query.where(eq(volunteers.churchId, churchId));
+    }
+    
+    return await query.orderBy(volunteers.firstName, volunteers.lastName);
+  }
+
+  async getVolunteerById(id: number): Promise<Volunteer | undefined> {
+    const [volunteer] = await db
+      .select()
+      .from(volunteers)
+      .where(eq(volunteers.id, id));
+    return volunteer;
+  }
+
+  async getVolunteerByUserId(userId: string): Promise<Volunteer | undefined> {
+    const [volunteer] = await db
+      .select()
+      .from(volunteers)
+      .where(eq(volunteers.userId, userId));
+    return volunteer;
+  }
+
+  async createVolunteer(volunteerData: InsertVolunteer): Promise<Volunteer> {
+    const [volunteer] = await db
+      .insert(volunteers)
+      .values(volunteerData)
+      .returning();
+    return volunteer;
+  }
+
+  async updateVolunteer(id: number, updates: Partial<InsertVolunteer>): Promise<Volunteer> {
+    const [volunteer] = await db
+      .update(volunteers)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(volunteers.id, id))
+      .returning();
+    return volunteer;
+  }
+
+  // Volunteer Opportunities
+  async getVolunteerOpportunities(churchId?: number): Promise<VolunteerOpportunity[]> {
+    let query = db
+      .select({
+        id: volunteerOpportunities.id,
+        churchId: volunteerOpportunities.churchId,
+        title: volunteerOpportunities.title,
+        description: volunteerOpportunities.description,
+        roleId: volunteerOpportunities.roleId,
+        coordinatorId: volunteerOpportunities.coordinatorId,
+        location: volunteerOpportunities.location,
+        startDate: volunteerOpportunities.startDate,
+        endDate: volunteerOpportunities.endDate,
+        volunteersNeeded: volunteerOpportunities.volunteersNeeded,
+        volunteersRegistered: volunteerOpportunities.volunteersRegistered,
+        requiredSkills: volunteerOpportunities.requiredSkills,
+        isRecurring: volunteerOpportunities.isRecurring,
+        recurringPattern: volunteerOpportunities.recurringPattern,
+        status: volunteerOpportunities.status,
+        priority: volunteerOpportunities.priority,
+        isPublic: volunteerOpportunities.isPublic,
+        createdAt: volunteerOpportunities.createdAt,
+        updatedAt: volunteerOpportunities.updatedAt,
+        roleName: volunteerRoles.name,
+      })
+      .from(volunteerOpportunities)
+      .leftJoin(volunteerRoles, eq(volunteerOpportunities.roleId, volunteerRoles.id));
+    
+    if (churchId) {
+      query = query.where(eq(volunteerOpportunities.churchId, churchId));
+    }
+    
+    return await query.orderBy(volunteerOpportunities.startDate);
+  }
+
+  async createVolunteerOpportunity(opportunityData: InsertVolunteerOpportunity): Promise<VolunteerOpportunity> {
+    const [opportunity] = await db
+      .insert(volunteerOpportunities)
+      .values(opportunityData)
+      .returning();
+    return opportunity;
+  }
+
+  async updateVolunteerOpportunity(id: number, updates: Partial<InsertVolunteerOpportunity>): Promise<VolunteerOpportunity> {
+    const [opportunity] = await db
+      .update(volunteerOpportunities)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(volunteerOpportunities.id, id))
+      .returning();
+    return opportunity;
+  }
+
+  // Volunteer Registrations
+  async getVolunteerRegistrations(opportunityId?: number, volunteerId?: number): Promise<VolunteerRegistration[]> {
+    let query = db.select().from(volunteerRegistrations);
+    
+    if (opportunityId) {
+      query = query.where(eq(volunteerRegistrations.opportunityId, opportunityId));
+    }
+    
+    if (volunteerId) {
+      query = query.where(eq(volunteerRegistrations.volunteerId, volunteerId));
+    }
+    
+    return await query.orderBy(desc(volunteerRegistrations.registeredAt));
+  }
+
+  async createVolunteerRegistration(registrationData: InsertVolunteerRegistration): Promise<VolunteerRegistration> {
+    const [registration] = await db
+      .insert(volunteerRegistrations)
+      .values(registrationData)
+      .returning();
+    
+    // Update volunteer count on opportunity
+    await db
+      .update(volunteerOpportunities)
+      .set({
+        volunteersRegistered: sql`${volunteerOpportunities.volunteersRegistered} + 1`
+      })
+      .where(eq(volunteerOpportunities.id, registrationData.opportunityId));
+    
+    return registration;
+  }
+
+  async updateVolunteerRegistration(id: number, updates: Partial<InsertVolunteerRegistration>): Promise<VolunteerRegistration> {
+    const [registration] = await db
+      .update(volunteerRegistrations)
+      .set(updates)
+      .where(eq(volunteerRegistrations.id, id))
+      .returning();
+    return registration;
+  }
+
+  // Volunteer Hours
+  async getVolunteerHours(volunteerId?: number, startDate?: Date, endDate?: Date): Promise<VolunteerHours[]> {
+    let query = db
+      .select({
+        id: volunteerHours.id,
+        volunteerId: volunteerHours.volunteerId,
+        opportunityId: volunteerHours.opportunityId,
+        roleId: volunteerHours.roleId,
+        date: volunteerHours.date,
+        startTime: volunteerHours.startTime,
+        endTime: volunteerHours.endTime,
+        hoursServed: volunteerHours.hoursServed,
+        description: volunteerHours.description,
+        verifiedBy: volunteerHours.verifiedBy,
+        verifiedAt: volunteerHours.verifiedAt,
+        status: volunteerHours.status,
+        notes: volunteerHours.notes,
+        createdAt: volunteerHours.createdAt,
+        volunteerName: sql<string>`CONCAT(${volunteers.firstName}, ' ', ${volunteers.lastName})`,
+      })
+      .from(volunteerHours)
+      .leftJoin(volunteers, eq(volunteerHours.volunteerId, volunteers.id));
+    
+    if (volunteerId) {
+      query = query.where(eq(volunteerHours.volunteerId, volunteerId));
+    }
+    
+    if (startDate) {
+      query = query.where(gte(volunteerHours.date, startDate));
+    }
+    
+    if (endDate) {
+      query = query.where(lte(volunteerHours.date, endDate));
+    }
+    
+    return await query.orderBy(desc(volunteerHours.date));
+  }
+
+  async createVolunteerHours(hoursData: InsertVolunteerHours): Promise<VolunteerHours> {
+    const [hours] = await db
+      .insert(volunteerHours)
+      .values(hoursData)
+      .returning();
+    return hours;
+  }
+
+  async updateVolunteerHours(id: number, updates: Partial<InsertVolunteerHours>): Promise<VolunteerHours> {
+    const [hours] = await db
+      .update(volunteerHours)
+      .set(updates)
+      .where(eq(volunteerHours.id, id))
+      .returning();
+    return hours;
+  }
+
+  async verifyVolunteerHours(id: number, verifiedBy: string): Promise<VolunteerHours> {
+    const [hours] = await db
+      .update(volunteerHours)
+      .set({
+        status: 'approved',
+        verifiedBy,
+        verifiedAt: new Date(),
+      })
+      .where(eq(volunteerHours.id, id))
+      .returning();
+    return hours;
+  }
+
+  // Volunteer Stats
+  async getVolunteerStats(churchId?: number): Promise<any> {
+    const totalVolunteers = await db
+      .select({ count: count() })
+      .from(volunteers)
+      .where(churchId ? eq(volunteers.churchId, churchId) : undefined);
+    
+    const activeOpportunities = await db
+      .select({ count: count() })
+      .from(volunteerOpportunities)
+      .where(
+        and(
+          eq(volunteerOpportunities.status, 'open'),
+          churchId ? eq(volunteerOpportunities.churchId, churchId) : undefined
+        )
+      );
+    
+    const currentMonth = new Date();
+    currentMonth.setDate(1);
+    
+    const hoursThisMonth = await db
+      .select({ total: sum(volunteerHours.hoursServed) })
+      .from(volunteerHours)
+      .where(
+        and(
+          gte(volunteerHours.date, currentMonth),
+          eq(volunteerHours.status, 'approved')
+        )
+      );
+    
+    return {
+      totalVolunteers: totalVolunteers[0]?.count || 0,
+      activeOpportunities: activeOpportunities[0]?.count || 0,
+      hoursThisMonth: hoursThisMonth[0]?.total || 0,
+      completionRate: 85, // Calculate based on actual data
+    };
+  }
+
+  // Volunteer Awards
+  async getVolunteerAwards(volunteerId?: number): Promise<VolunteerAward[]> {
+    let query = db.select().from(volunteerAwards);
+    
+    if (volunteerId) {
+      query = query.where(eq(volunteerAwards.volunteerId, volunteerId));
+    }
+    
+    return await query.orderBy(desc(volunteerAwards.awardedAt));
+  }
+
+  async createVolunteerAward(awardData: InsertVolunteerAward): Promise<VolunteerAward> {
+    const [award] = await db
+      .insert(volunteerAwards)
+      .values(awardData)
+      .returning();
+    return award;
+  }
+
+  // Volunteer Certifications
+  async getVolunteerCertifications(volunteerId: number): Promise<VolunteerCertification[]> {
+    return await db
+      .select()
+      .from(volunteerCertifications)
+      .where(eq(volunteerCertifications.volunteerId, volunteerId))
+      .orderBy(desc(volunteerCertifications.createdAt));
+  }
+
+  async createVolunteerCertification(certData: InsertVolunteerCertification): Promise<VolunteerCertification> {
+    const [certification] = await db
+      .insert(volunteerCertifications)
+      .values(certData)
+      .returning();
+    return certification;
+  }
 }
 
 export const storage = new DatabaseStorage();
