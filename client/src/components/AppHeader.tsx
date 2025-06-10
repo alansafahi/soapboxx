@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import soapboxLogo from "@assets/SoapBx logo_1749541085059.jpeg";
 
 export default function AppHeader() {
   const { user } = useAuth();
@@ -40,7 +41,7 @@ export default function AppHeader() {
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
               <img 
-                src="/attached_assets/SoapBx logo_1749541085059.jpeg" 
+                src={soapboxLogo} 
                 alt="SoapBox Logo" 
                 className="w-8 h-8 rounded-lg object-cover"
               />
