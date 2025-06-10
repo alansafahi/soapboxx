@@ -1108,6 +1108,7 @@ export default function AdminPortal() {
         description: "Sermon media uploaded successfully!",
       });
       setSermonMediaForm({ title: '', speaker: '', mediaType: '', date: '', description: '', churchId: selectedChurch });
+      setSermonMediaErrors({ title: false, speaker: false, date: false });
       setIsMediaDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/sermon-media"] });
     },
@@ -1184,6 +1185,7 @@ export default function AdminPortal() {
         description: "Sermon media draft saved successfully!",
       });
       setSermonMediaForm({ title: '', speaker: '', mediaType: '', date: '', description: '', churchId: selectedChurch });
+      setSermonMediaErrors({ title: false, speaker: false, date: false });
       setIsMediaDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/drafts/sermon-media"] });
     },
@@ -1221,6 +1223,13 @@ export default function AdminPortal() {
     date: '',
     description: '',
     churchId: selectedChurch,
+  });
+
+  // Form validation errors
+  const [sermonMediaErrors, setSermonMediaErrors] = useState({
+    title: false,
+    speaker: false,
+    date: false,
   });
 
   const handlePublishDevotional = () => {
@@ -1288,10 +1297,30 @@ export default function AdminPortal() {
   };
 
   const handleUploadSermonMedia = () => {
-    if (!sermonMediaForm.title || !sermonMediaForm.speaker || !sermonMediaForm.date) {
+    // Reset previous errors
+    setSermonMediaErrors({
+      title: false,
+      speaker: false,
+      date: false,
+    });
+
+    // Check for missing required fields
+    const missingFields = [];
+    const newErrors = {
+      title: !sermonMediaForm.title,
+      speaker: !sermonMediaForm.speaker,
+      date: !sermonMediaForm.date,
+    };
+
+    if (newErrors.title) missingFields.push("Title");
+    if (newErrors.speaker) missingFields.push("Speaker");
+    if (newErrors.date) missingFields.push("Date");
+
+    if (missingFields.length > 0) {
+      setSermonMediaErrors(newErrors);
       toast({
-        title: "Error",
-        description: "Please fill in all required fields including date",
+        title: "Missing Required Fields",
+        description: `Please fill in: ${missingFields.join(", ")}`,
         variant: "destructive",
       });
       return;
@@ -2124,22 +2153,44 @@ export default function AdminPortal() {
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <Label htmlFor="media-title">Title</Label>
+                              <Label htmlFor="media-title" className={sermonMediaErrors.title ? "text-red-600" : ""}>
+                                Title {sermonMediaErrors.title && <span className="text-red-600">*</span>}
+                              </Label>
                               <Input 
                                 id="media-title" 
                                 placeholder="Sunday Service - Finding Hope"
                                 value={sermonMediaForm.title}
-                                onChange={(e) => setSermonMediaForm({...sermonMediaForm, title: e.target.value})}
+                                onChange={(e) => {
+                                  setSermonMediaForm({...sermonMediaForm, title: e.target.value});
+                                  if (sermonMediaErrors.title) {
+                                    setSermonMediaErrors({...sermonMediaErrors, title: false});
+                                  }
+                                }}
+                                className={sermonMediaErrors.title ? "border-red-500 focus:border-red-500" : ""}
                               />
+                              {sermonMediaErrors.title && (
+                                <p className="text-sm text-red-600 mt-1">Title is required</p>
+                              )}
                             </div>
                             <div>
-                              <Label htmlFor="media-speaker">Speaker</Label>
+                              <Label htmlFor="media-speaker" className={sermonMediaErrors.speaker ? "text-red-600" : ""}>
+                                Speaker {sermonMediaErrors.speaker && <span className="text-red-600">*</span>}
+                              </Label>
                               <Input 
                                 id="media-speaker" 
                                 placeholder="Pastor John Smith"
                                 value={sermonMediaForm.speaker}
-                                onChange={(e) => setSermonMediaForm({...sermonMediaForm, speaker: e.target.value})}
+                                onChange={(e) => {
+                                  setSermonMediaForm({...sermonMediaForm, speaker: e.target.value});
+                                  if (sermonMediaErrors.speaker) {
+                                    setSermonMediaErrors({...sermonMediaErrors, speaker: false});
+                                  }
+                                }}
+                                className={sermonMediaErrors.speaker ? "border-red-500 focus:border-red-500" : ""}
                               />
+                              {sermonMediaErrors.speaker && (
+                                <p className="text-sm text-red-600 mt-1">Speaker is required</p>
+                              )}
                             </div>
                             <div>
                               <Label htmlFor="media-type">Media Type</Label>
@@ -2158,13 +2209,24 @@ export default function AdminPortal() {
                               </Select>
                             </div>
                             <div>
-                              <Label htmlFor="media-date">Date</Label>
+                              <Label htmlFor="media-date" className={sermonMediaErrors.date ? "text-red-600" : ""}>
+                                Date {sermonMediaErrors.date && <span className="text-red-600">*</span>}
+                              </Label>
                               <Input 
                                 id="media-date" 
                                 type="date"
                                 value={sermonMediaForm.date}
-                                onChange={(e) => setSermonMediaForm({...sermonMediaForm, date: e.target.value})}
+                                onChange={(e) => {
+                                  setSermonMediaForm({...sermonMediaForm, date: e.target.value});
+                                  if (sermonMediaErrors.date) {
+                                    setSermonMediaErrors({...sermonMediaErrors, date: false});
+                                  }
+                                }}
+                                className={sermonMediaErrors.date ? "border-red-500 focus:border-red-500" : ""}
                               />
+                              {sermonMediaErrors.date && (
+                                <p className="text-sm text-red-600 mt-1">Date is required</p>
+                              )}
                             </div>
                             <div>
                               <Label htmlFor="media-file">File Upload</Label>
