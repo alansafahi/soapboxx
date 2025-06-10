@@ -1413,7 +1413,7 @@ export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: nu
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="members">
             <Users className="h-4 w-4 mr-2" />
             Members
@@ -1429,10 +1429,6 @@ export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: nu
           <TabsTrigger value="volunteers">
             <ClipboardList className="h-4 w-4 mr-2" />
             Volunteers
-          </TabsTrigger>
-          <TabsTrigger value="media">
-            <Video className="h-4 w-4 mr-2" />
-            Media
           </TabsTrigger>
         </TabsList>
 
@@ -1450,10 +1446,6 @@ export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: nu
 
         <TabsContent value="volunteers">
           <VolunteerManagement />
-        </TabsContent>
-
-        <TabsContent value="media">
-          <MediaLivestream />
         </TabsContent>
       </Tabs>
     </div>
