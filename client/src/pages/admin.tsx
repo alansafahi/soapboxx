@@ -1642,7 +1642,10 @@ export default function AdminPortal() {
                           Debug: selectedChurch = {JSON.stringify(selectedChurch)}
                         </div>
                         <div className="mb-4 p-2 bg-blue-100 dark:bg-blue-900/20 rounded text-sm">
-                          Test: This tab content is rendering properly
+                          Test: This tab content is rendering properly - {new Date().toISOString()}
+                        </div>
+                        <div className="mb-4 p-2 bg-green-100 dark:bg-green-900/20 rounded text-sm">
+                          Component Test: About to render DraftDevotionalsList
                         </div>
                         <DraftDevotionalsList churchId={selectedChurch} />
                       </TabsContent>
