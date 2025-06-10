@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Clock, BookOpen, Award, CheckCircle, Play, Pause, RotateCcw, Star } from 'lucide-react';
+import { Clock, BookOpen, Award, CheckCircle, Play, Pause, RotateCcw, Star, Volume2, Share2, Twitter, Facebook, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BibleSection {
@@ -239,54 +239,76 @@ export function BibleInADayFeature() {
       <div className="max-w-4xl mx-auto p-6">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Bible in a Day
+            Explore the Story of the Bible in Just One Day
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Experience the complete story of God's love through an accelerated journey
+            Discover God's amazing love story from Creation to New Creation through curated passages, guided reflections, and spiritual insights
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
             selectedSessionType === 'fast_track' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' : ''
           }`} onClick={() => setSelectedSessionType('fast_track')}>
             <CardHeader>
               <div className="flex items-center space-x-2">
                 <Clock className="h-5 w-5 text-blue-600" />
-                <CardTitle>Fast Track (6 Hours)</CardTitle>
+                <CardTitle>Fast Track</CardTitle>
               </div>
               <CardDescription>
-                Essential Bible narrative in focused sections
+                ~60 minutes • 20 key passages
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                <li>• 4 core sections</li>
-                <li>• Key biblical themes</li>
+                <li>• Essential Bible narrative</li>
                 <li>• Perfect for busy schedules</li>
-                <li>• Guided reflections</li>
+                <li>• Core themes highlighted</li>
+                <li>• Quick but meaningful</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-            selectedSessionType === 'full_immersion' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-950' : ''
-          }`} onClick={() => setSelectedSessionType('full_immersion')}>
+            selectedSessionType === 'deep_dive' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-950' : ''
+          }`} onClick={() => setSelectedSessionType('deep_dive')}>
             <CardHeader>
               <div className="flex items-center space-x-2">
                 <BookOpen className="h-5 w-5 text-purple-600" />
-                <CardTitle>Full Immersion (10 Hours)</CardTitle>
+                <CardTitle>Deep Dive</CardTitle>
               </div>
               <CardDescription>
-                Complete biblical story with deep exploration
+                ~3-5 hours • 40+ passages with context
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                <li>• All 8 major sections</li>
-                <li>• Comprehensive coverage</li>
-                <li>• In-depth reflections</li>
-                <li>• Ultimate spiritual challenge</li>
+                <li>• Comprehensive exploration</li>
+                <li>• Includes minor prophets</li>
+                <li>• Rich historical context</li>
+                <li>• Deep spiritual insights</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+            selectedSessionType === 'audio_only' ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-950' : ''
+          }`} onClick={() => setSelectedSessionType('audio_only')}>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Volume2 className="h-5 w-5 text-green-600" />
+                <CardTitle>Audio-Only Mode</CardTitle>
+              </div>
+              <CardDescription>
+                ~45 minutes • Listen while you go
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                <li>• Perfect for commuting</li>
+                <li>• Narrated explanations</li>
+                <li>• Background music</li>
+                <li>• Hands-free experience</li>
               </ul>
             </CardContent>
           </Card>
@@ -328,53 +350,106 @@ export function BibleInADayFeature() {
   }
 
   if (isSessionComplete && !activeSession.isCompleted) {
-    return (
-      <div className="max-w-2xl mx-auto p-6">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">🎉 Journey Complete!</CardTitle>
-            <CardDescription>
-              You've experienced the entire Bible story. How was your experience?
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label>Rate Your Experience (1-5 stars)</Label>
-              <div className="flex space-x-2 mt-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Button
-                    key={star}
-                    variant={finalRating >= star ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFinalRating(star)}
-                  >
-                    <Star className="h-4 w-4" />
-                  </Button>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="final-reflection">Final Reflection</Label>
-              <Textarea
-                id="final-reflection"
-                placeholder="What was the most meaningful part of your journey? How has this experience impacted your faith?"
-                value={finalReflection}
-                onChange={(e) => setFinalReflection(e.target.value)}
-                className="mt-2"
-                rows={4}
-              />
-            </div>
+    const shareText = `I just completed the Bible In A Day journey on SoapBox! What an incredible experience discovering God's love story from Creation to New Creation. #BibleInADay #SoapBoxApp`;
+    const shareUrl = window.location.origin;
 
-            <Button 
-              onClick={handleCompleteSession}
-              disabled={finalRating === 0 || completeSessionMutation.isPending}
-              className="w-full"
-            >
-              {completeSessionMutation.isPending ? 'Completing...' : 'Complete Journey'}
-            </Button>
-          </CardContent>
-        </Card>
+    const handleShare = (platform: string) => {
+      let url = '';
+      switch (platform) {
+        case 'twitter':
+          url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+          break;
+        case 'facebook':
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+          break;
+        case 'copy':
+          navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+          toast({ title: "Copied to clipboard!", description: "Share link copied successfully." });
+          return;
+      }
+      if (url) window.open(url, '_blank');
+    };
+
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Card>
+            <CardHeader className="text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900 dark:to-blue-900 rounded-full mb-4">
+                <Award className="h-10 w-10 text-green-600 dark:text-green-400" />
+              </div>
+              <CardTitle className="text-3xl mb-2">Journey Complete!</CardTitle>
+              <CardDescription className="text-lg">
+                You've experienced God's amazing love story from Creation to New Creation
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="border-b pb-6">
+                <h3 className="text-lg font-semibold mb-4">Share Your Achievement</h3>
+                <div className="flex justify-center space-x-3">
+                  <Button onClick={() => handleShare('twitter')} variant="outline" size="sm">
+                    <Twitter className="h-4 w-4 mr-2" />
+                    Twitter
+                  </Button>
+                  <Button onClick={() => handleShare('facebook')} variant="outline" size="sm">
+                    <Facebook className="h-4 w-4 mr-2" />
+                    Facebook
+                  </Button>
+                  <Button onClick={() => handleShare('copy')} variant="outline" size="sm">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Copy Link
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label>Rate Your Experience (1-5 stars)</Label>
+                <div className="flex space-x-2 mt-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Button
+                      key={star}
+                      variant={finalRating >= star ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setFinalRating(star)}
+                    >
+                      <Star className={`h-4 w-4 ${finalRating >= star ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="final-reflection">Final Reflection</Label>
+                <Textarea
+                  id="final-reflection"
+                  placeholder="What was the most meaningful part of your journey? How has this experience impacted your faith?"
+                  value={finalReflection}
+                  onChange={(e) => setFinalReflection(e.target.value)}
+                  className="mt-2"
+                  rows={4}
+                />
+              </div>
+
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={handleCompleteSession}
+                  disabled={finalRating === 0 || completeSessionMutation.isPending}
+                  className="flex-1"
+                >
+                  {completeSessionMutation.isPending ? 'Completing...' : 'Complete Journey'}
+                </Button>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  New Journey
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }
