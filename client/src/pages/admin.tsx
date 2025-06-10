@@ -49,27 +49,14 @@ type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 
 // Draft management components
 function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
-  console.log('DraftDevotionalsList rendered with churchId:', churchId);
-  
-  const queryKey = churchId ? `/api/drafts/devotionals?churchId=${churchId}` : '/api/drafts/devotionals';
+  // Always fetch all drafts regardless of selected church
+  const queryKey = '/api/drafts/devotionals';
   
   const { data: drafts, isLoading, error } = useQuery({
     queryKey: [queryKey],
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
-
-  console.log('Draft query result:', { 
-    drafts: Array.isArray(drafts) ? drafts.length + ' drafts' : drafts, 
-    isLoading, 
-    error: error?.message || error, 
-    churchId,
-    queryKey 
-  });
-
-  if (error) {
-    console.error('Draft query error:', error);
-  }
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -147,7 +134,8 @@ function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
 }
 
 function DraftSeriesList({ churchId }: { churchId: number | null }) {
-  const queryKey = churchId ? `/api/drafts/weekly-series?churchId=${churchId}` : '/api/drafts/weekly-series';
+  // Always fetch all drafts regardless of selected church
+  const queryKey = '/api/drafts/weekly-series';
   
   const { data: drafts, isLoading } = useQuery({
     queryKey: [queryKey],
@@ -229,7 +217,8 @@ function DraftSeriesList({ churchId }: { churchId: number | null }) {
 }
 
 function DraftMediaList({ churchId }: { churchId: number | null }) {
-  const queryKey = churchId ? `/api/drafts/sermon-media?churchId=${churchId}` : '/api/drafts/sermon-media';
+  // Always fetch all drafts regardless of selected church
+  const queryKey = '/api/drafts/sermon-media';
   
   const { data: drafts, isLoading } = useQuery({
     queryKey: [queryKey],
@@ -1642,15 +1631,7 @@ export default function AdminPortal() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/20 rounded border">
-                      <h3 className="font-semibold text-red-800 dark:text-red-200">Debug Test</h3>
-                      <p className="text-red-700 dark:text-red-300">
-                        This should always be visible. Selected church: {JSON.stringify(selectedChurch)}
-                      </p>
-                      <p className="text-red-700 dark:text-red-300">
-                        Timestamp: {new Date().toLocaleTimeString()}
-                      </p>
-                    </div>
+
                     <Tabs defaultValue="devotional-drafts" className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="devotional-drafts">Devotional Drafts</TabsTrigger>
@@ -1659,15 +1640,6 @@ export default function AdminPortal() {
                       </TabsList>
                       
                       <TabsContent value="devotional-drafts" className="space-y-4">
-                        <div className="mb-4 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded text-sm">
-                          Debug: selectedChurch = {JSON.stringify(selectedChurch)}
-                        </div>
-                        <div className="mb-4 p-2 bg-blue-100 dark:bg-blue-900/20 rounded text-sm">
-                          Test: This tab content is rendering properly - {new Date().toISOString()}
-                        </div>
-                        <div className="mb-4 p-2 bg-green-100 dark:bg-green-900/20 rounded text-sm">
-                          Component Test: About to render DraftDevotionalsList
-                        </div>
                         <DraftDevotionalsList churchId={selectedChurch} />
                       </TabsContent>
                       
