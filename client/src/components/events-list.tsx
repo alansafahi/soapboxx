@@ -632,12 +632,10 @@ export default function EventsList() {
                               </div>
                             )}
                             
-                            {event.attendeeCount !== undefined && (
-                              <div className="flex items-center">
-                                <Users className="w-4 h-4 mr-2 text-gray-400" />
-                                <span>{event.attendeeCount} attending</span>
-                              </div>
-                            )}
+                            <div className="flex items-center">
+                              <Users className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>RSVP Available</span>
+                            </div>
                           </div>
                           
                           {/* Event Description */}
@@ -695,7 +693,7 @@ export default function EventsList() {
                                       <strong>Date:</strong> {format(new Date(event.eventDate), "PPP")}
                                     </div>
                                     <div>
-                                      <strong>Time:</strong> {formatDateRange(event.eventDate, event.endDate)}
+                                      <strong>Time:</strong> {formatDateRange(event.eventDate, event.endDate || undefined)}
                                     </div>
                                     {event.location && (
                                       <div className="col-span-2">
