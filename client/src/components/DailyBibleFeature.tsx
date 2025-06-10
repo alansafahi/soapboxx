@@ -28,6 +28,7 @@ import {
   CheckCircle,
   Star
 } from "lucide-react";
+import { BibleInADayFeature } from "./BibleInADayFeature";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -447,9 +448,13 @@ export function DailyBibleFeature() {
         transition={{ delay: 0.4 }}
       >
         <Tabs defaultValue="reflection" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="reflection">Reflection</TabsTrigger>
             <TabsTrigger value="prayer">Guided Prayer</TabsTrigger>
+            <TabsTrigger value="bible-in-a-day" className="flex items-center space-x-1">
+              <Clock className="h-3 w-3" />
+              <span>Bible in a Day</span>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="reflection" className="space-y-4">
@@ -494,6 +499,10 @@ export function DailyBibleFeature() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="bible-in-a-day" className="space-y-4">
+            <BibleInADayFeature />
           </TabsContent>
         </Tabs>
       </motion.div>
