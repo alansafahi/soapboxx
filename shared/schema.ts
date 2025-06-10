@@ -1527,9 +1527,54 @@ export const userInspirationHistoryRelations = relations(userInspirationHistory,
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Bible in a Day sessions
+export const bibleInADaySessions = pgTable("bible_in_a_day_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  currentSectionIndex: integer("current_section_index").default(0),
+  totalTimeSpent: integer("total_time_spent").default(0), // in minutes
+  isCompleted: boolean("is_completed").default(false),
+  reflectionNotes: text("reflection_notes"),
+  finalRating: integer("final_rating"), // 1-5 stars
+  sessionType: varchar("session_type", { length: 20 }).default("fast_track"), // fast_track, full_immersion
+});
+
+// Bible in a Day section progress
+export const bibleInADaySectionProgress = pgTable("bible_in_a_day_section_progress", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").notNull().references(() => bibleInADaySessions.id),
+  sectionKey: varchar("section_key", { length: 50 }).notNull(), // creation, fall_promise, christ, church_future
+  sectionTitle: varchar("section_title", { length: 100 }).notNull(),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  timeSpent: integer("time_spent").default(0), // in minutes
+  reflectionAnswer: text("reflection_answer"),
+  isCompleted: boolean("is_completed").default(false),
+});
+
+// Bible in a Day completion badges
+export const bibleInADayBadges = pgTable("bible_in_a_day_badges", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  sessionId: integer("session_id").notNull().references(() => bibleInADaySessions.id),
+  badgeType: varchar("badge_type", { length: 50 }).notNull(), // fast_track_finisher, full_immersion_finisher, first_timer, repeat_reader
+  earnedAt: timestamp("earned_at").defaultNow(),
+  shareCount: integer("share_count").default(0),
+});
+
 // Daily Bible Feature Types
 export type DailyVerse = typeof dailyVerses.$inferSelect;
 export type InsertDailyVerse = typeof dailyVerses.$inferInsert;
+
+// Bible in a Day Types
+export type BibleInADaySession = typeof bibleInADaySessions.$inferSelect;
+export type InsertBibleInADaySession = typeof bibleInADaySessions.$inferInsert;
+export type BibleInADaySectionProgress = typeof bibleInADaySectionProgress.$inferSelect;
+export type InsertBibleInADaySectionProgress = typeof bibleInADaySectionProgress.$inferInsert;
+export type BibleInADayBadge = typeof bibleInADayBadges.$inferSelect;
+export type InsertBibleInADayBadge = typeof bibleInADayBadges.$inferInsert;
 export type UserBibleStreak = typeof userBibleStreaks.$inferSelect;
 export type InsertUserBibleStreak = typeof userBibleStreaks.$inferInsert;
 export type UserBibleReading = typeof userBibleReadings.$inferSelect;

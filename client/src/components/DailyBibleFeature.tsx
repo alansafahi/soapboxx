@@ -137,11 +137,13 @@ export function DailyBibleFeature() {
     }) => {
       return await apiRequest("POST", "/api/bible/share", data);
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       setShowShareDialog(false);
       toast({
-        title: "Verse Shared",
-        description: "Your verse has been shared successfully!",
+        title: "Verse Shared Successfully",
+        description: variables.platform === "soapbox" 
+          ? "Your verse has been shared to the SoapBox community!" 
+          : "Your verse has been prepared for external sharing!",
       });
     },
     onError: () => {
@@ -187,11 +189,12 @@ export function DailyBibleFeature() {
     
     // If this is the default verse (id: 0), handle sharing differently
     if (dailyVerse.id === 0) {
-      // For default verses, just show success without database operation
       setShowShareDialog(false);
       toast({
         title: "Verse Shared",
-        description: "Your verse has been shared successfully!",
+        description: platform === "soapbox" 
+          ? "Your verse has been shared to the SoapBox community!" 
+          : "Your verse text has been prepared for external sharing!",
       });
       return;
     }
