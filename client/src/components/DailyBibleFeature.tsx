@@ -30,7 +30,9 @@ import {
   Bookmark,
   PenTool,
   Brain,
-  Rocket
+  Rocket,
+  Bell,
+  Square
 } from "lucide-react";
 import { BibleInADayFeature } from "./BibleInADayFeature";
 import { NotificationScheduler } from "./NotificationScheduler";
@@ -184,16 +186,7 @@ export function DailyBibleFeature() {
     }
   };
 
-  const handleMarkAsRead = () => {
-    if (!dailyVerse) return;
-    
-    recordReadingMutation.mutate({
-      dailyVerseId: dailyVerse.id,
-      reflectionText: reflection,
-      emotionalReaction,
-      audioListened: isAudioPlaying,
-    });
-  };
+
 
   // Audio playback functions
   const initializeAudio = () => {
@@ -293,9 +286,24 @@ export function DailyBibleFeature() {
     });
   };
 
-  const handleAudioToggle = () => {
-    setIsAudioPlaying(!isAudioPlaying);
-    // In a real implementation, this would control actual audio playback
+  const handleMarkAsRead = async () => {
+    if (!dailyVerse || hasReadToday) return;
+    
+    try {
+      await recordReadingMutation.mutateAsync({
+        dailyVerseId: dailyVerse.id,
+        verseReference: dailyVerse.verseReference,
+        readingTime: new Date().toISOString(),
+        reflection: reflection,
+        emotionalReaction: emotionalReaction,
+        audioListened: isAudioPlaying,
+        completedReflection: !!reflection,
+        sharedVerse: false,
+      });
+      setHasReadToday(true);
+    } catch (error) {
+      console.error('Error recording reading:', error);
+    }
   };
 
   const handleEmotionalReaction = (reaction: string) => {
@@ -498,6 +506,60 @@ export function DailyBibleFeature() {
               <div className="text-lg leading-relaxed text-gray-800 font-medium">
                 "{getVerseText()}"
               </div>
+
+              {/* Enhanced Audio Controls */}
+              {(dailyVerse.audioUrl || isAudioPlaying) && (
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Audio Playback</span>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={dailyVerse.audioUrl ? toggleAudioPlayback : speakVerse}
+                        disabled={!dailyVerse.audioUrl && isAudioPlaying}
+                      >
+                        {isAudioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                      </Button>
+                      {dailyVerse.audioUrl && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.speechSynthesis.cancel()}
+                        >
+                          <Square className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {dailyVerse.audioUrl && audioDuration > 0 && (
+                    <div className="space-y-2">
+                      <Slider
+                        value={[audioCurrentTime]}
+                        max={audioDuration}
+                        step={1}
+                        onValueChange={(value) => handleSeek(value[0])}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>{Math.floor(audioCurrentTime / 60)}:{(audioCurrentTime % 60).toFixed(0).padStart(2, '0')}</span>
+                        <span>{Math.floor(audioDuration / 60)}:{(audioDuration % 60).toFixed(0).padStart(2, '0')}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Volume2 className="h-4 w-4 text-gray-500" />
+                        <Slider
+                          value={[audioVolume]}
+                          max={1}
+                          step={0.1}
+                          onValueChange={(value) => handleVolumeChange(value[0])}
+                          className="w-24"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               
               {/* Micro-Actions Under Verse */}
               <div className="flex items-center justify-center space-x-3 py-2">
@@ -532,6 +594,39 @@ export function DailyBibleFeature() {
                 </Button>
               </div>
               
+              {/* Mark as Read Button */}
+              {!hasReadToday && (
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleMarkAsRead}
+                    disabled={recordReadingMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg"
+                  >
+                    {recordReadingMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Recording...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-5 w-5 mr-2" />
+                        Mark as Read Today
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {hasReadToday && (
+                <div className="flex justify-center">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                    <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                    <p className="text-green-800 font-medium">You've read today's verse!</p>
+                    <p className="text-green-600 text-sm">Great job staying consistent with your daily reading.</p>
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex items-center justify-center space-x-4">
                 <Button
@@ -824,6 +919,16 @@ export function DailyBibleFeature() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notification Scheduler Dialog */}
+      <Dialog open={showNotificationScheduler} onOpenChange={setShowNotificationScheduler}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set Daily Bible Reminders</DialogTitle>
+          </DialogHeader>
+          <NotificationScheduler />
         </DialogContent>
       </Dialog>
 
