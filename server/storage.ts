@@ -104,6 +104,21 @@ import {
   type InsertCommunityGroup,
   type CommunityGroupMember,
   type InsertCommunityGroupMember,
+  notificationSettings,
+  scheduledNotifications,
+  notificationDeliveries,
+  userDevices,
+  scriptureSchedules,
+  type NotificationSettings,
+  type InsertNotificationSettings,
+  type ScheduledNotification,
+  type InsertScheduledNotification,
+  type NotificationDelivery,
+  type InsertNotificationDelivery,
+  type UserDevice,
+  type InsertUserDevice,
+  type ScriptureSchedule,
+  type InsertScriptureSchedule,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull } from "drizzle-orm";
@@ -236,6 +251,24 @@ export interface IStorage {
   getWeeklySeries(churchId?: number): Promise<WeeklySeries[]>;
   createSermonMedia(media: InsertSermonMedia): Promise<SermonMedia>;
   getSermonMedia(churchId?: number): Promise<SermonMedia[]>;
+
+  // Notification system
+  getNotificationSettings(userId: string): Promise<NotificationSettings | undefined>;
+  upsertNotificationSettings(data: InsertNotificationSettings): Promise<NotificationSettings>;
+  
+  getScheduledNotifications(churchId?: number): Promise<ScheduledNotification[]>;
+  createScheduledNotification(data: InsertScheduledNotification): Promise<ScheduledNotification>;
+  updateScheduledNotification(id: number, data: Partial<InsertScheduledNotification>): Promise<ScheduledNotification>;
+  deleteScheduledNotification(id: number): Promise<void>;
+  
+  getScriptureSchedules(churchId?: number): Promise<ScriptureSchedule[]>;
+  createScriptureSchedule(data: InsertScriptureSchedule): Promise<ScriptureSchedule>;
+  updateScriptureSchedule(id: number, data: Partial<InsertScriptureSchedule>): Promise<ScriptureSchedule>;
+  deleteScriptureSchedule(id: number): Promise<void>;
+  
+  getNotificationDeliveries(notificationId?: number, userId?: string): Promise<NotificationDelivery[]>;
+  createNotificationDelivery(data: InsertNotificationDelivery): Promise<NotificationDelivery>;
+  updateNotificationDelivery(id: number, data: Partial<InsertNotificationDelivery>): Promise<NotificationDelivery>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1969,6 +2002,131 @@ export class DatabaseStorage implements IStorage {
     }
     
     return query.orderBy(desc(sermonMedia.createdAt));
+  }
+
+  // Notification system implementation
+  async getNotificationSettings(userId: string): Promise<NotificationSettings | undefined> {
+    const [settings] = await db
+      .select()
+      .from(notificationSettings)
+      .where(eq(notificationSettings.userId, userId));
+    return settings;
+  }
+
+  async upsertNotificationSettings(data: InsertNotificationSettings): Promise<NotificationSettings> {
+    const [settings] = await db
+      .insert(notificationSettings)
+      .values(data)
+      .onConflictDoUpdate({
+        target: notificationSettings.userId,
+        set: {
+          ...data,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return settings;
+  }
+
+  async getScheduledNotifications(churchId?: number): Promise<ScheduledNotification[]> {
+    let query = db.select().from(scheduledNotifications);
+    
+    if (churchId) {
+      query = query.where(eq(scheduledNotifications.churchId, churchId));
+    }
+    
+    return query.orderBy(desc(scheduledNotifications.createdAt));
+  }
+
+  async createScheduledNotification(data: InsertScheduledNotification): Promise<ScheduledNotification> {
+    const [notification] = await db
+      .insert(scheduledNotifications)
+      .values(data)
+      .returning();
+    return notification;
+  }
+
+  async updateScheduledNotification(id: number, data: Partial<InsertScheduledNotification>): Promise<ScheduledNotification> {
+    const [notification] = await db
+      .update(scheduledNotifications)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(scheduledNotifications.id, id))
+      .returning();
+    return notification;
+  }
+
+  async deleteScheduledNotification(id: number): Promise<void> {
+    await db
+      .delete(scheduledNotifications)
+      .where(eq(scheduledNotifications.id, id));
+  }
+
+  async getScriptureSchedules(churchId?: number): Promise<ScriptureSchedule[]> {
+    let query = db.select().from(scriptureSchedules);
+    
+    if (churchId) {
+      query = query.where(eq(scriptureSchedules.churchId, churchId));
+    }
+    
+    return query.orderBy(desc(scriptureSchedules.createdAt));
+  }
+
+  async createScriptureSchedule(data: InsertScriptureSchedule): Promise<ScriptureSchedule> {
+    const [schedule] = await db
+      .insert(scriptureSchedules)
+      .values(data)
+      .returning();
+    return schedule;
+  }
+
+  async updateScriptureSchedule(id: number, data: Partial<InsertScriptureSchedule>): Promise<ScriptureSchedule> {
+    const [schedule] = await db
+      .update(scriptureSchedules)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(scriptureSchedules.id, id))
+      .returning();
+    return schedule;
+  }
+
+  async deleteScriptureSchedule(id: number): Promise<void> {
+    await db
+      .delete(scriptureSchedules)
+      .where(eq(scriptureSchedules.id, id));
+  }
+
+  async getNotificationDeliveries(notificationId?: number, userId?: string): Promise<NotificationDelivery[]> {
+    let query = db.select().from(notificationDeliveries);
+    
+    const conditions = [];
+    if (notificationId) {
+      conditions.push(eq(notificationDeliveries.notificationId, notificationId));
+    }
+    if (userId) {
+      conditions.push(eq(notificationDeliveries.userId, userId));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return query.orderBy(desc(notificationDeliveries.createdAt));
+  }
+
+  async createNotificationDelivery(data: InsertNotificationDelivery): Promise<NotificationDelivery> {
+    const [delivery] = await db
+      .insert(notificationDeliveries)
+      .values(data)
+      .returning();
+    return delivery;
+  }
+
+  async updateNotificationDelivery(id: number, data: Partial<InsertNotificationDelivery>): Promise<NotificationDelivery> {
+    const [delivery] = await db
+      .update(notificationDeliveries)
+      .set(data)
+      .where(eq(notificationDeliveries.id, id))
+      .returning();
+    return delivery;
   }
 }
 
