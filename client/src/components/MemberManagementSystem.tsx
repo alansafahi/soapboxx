@@ -34,9 +34,7 @@ function MemberDirectory() {
     queryKey: ["/api/members"],
   });
 
-  console.log("Members data:", members);
-  console.log("Is loading:", isLoading);
-  console.log("Error:", error);
+
 
   const filteredMembers = members.filter((member: any) => {
     const matchesSearch = member.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,8 +44,10 @@ function MemberDirectory() {
   });
 
   const updateMemberMutation = useMutation({
-    mutationFn: (data: { id: string; updates: any }) => 
-      apiRequest(`/api/members/${data.id}`, { method: "PUT", body: data.updates }),
+    mutationFn: async (data: { id: string; updates: any }) => {
+      const response = await apiRequest("PUT", `/api/members/${data.id}`, data.updates);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
       toast({ title: "Member updated successfully" });
@@ -113,16 +113,22 @@ function MemberDirectory() {
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              {member.phoneNumber && (
+              {member.churchAffiliation && (
                 <div className="flex items-center gap-2 text-sm">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{member.phoneNumber}</span>
+                  <Building className="h-4 w-4 text-muted-foreground" />
+                  <span className="truncate">{member.churchAffiliation}</span>
                 </div>
               )}
-              {member.address && (
+              {member.denomination && (
                 <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="truncate">{member.address}</span>
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <span>{member.denomination}</span>
+                </div>
+              )}
+              {member.interests && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Heart className="h-4 w-4 text-muted-foreground" />
+                  <span className="truncate">{member.interests}</span>
                 </div>
               )}
               {member.joinedDate && (
