@@ -23,7 +23,9 @@ const eventFormSchema = z.object({
   description: z.string().min(1, "Description is required"),
   churchId: z.number().min(1, "Church is required"),
   eventDate: z.string().min(1, "Start date and time is required"),
-  endDate: z.string().min(1, "End date and time is required"),
+  endDate: z.string().refine((val) => val && val.trim().length > 0, {
+    message: "End date and time is required"
+  }),
   location: z.string().optional(),
   address: z.string().optional(),
   category: z.string().min(1, "Category is required"),
