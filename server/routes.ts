@@ -3178,6 +3178,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/leaderboard/referrals', async (req, res) => {
+    try {
+      const leaderboard = await storage.getReferralLeaderboard();
+      
+      // Map to LeaderboardEntry format expected by frontend
+      const mappedLeaderboard = leaderboard.map((entry, index) => ({
+        id: index + 1,
+        rank: index + 1,
+        score: entry.totalReferrals,
+        entityName: entry.firstName || 'Anonymous User',
+        userId: entry.userId
+      }));
+      
+      res.json(mappedLeaderboard);
+    } catch (error) {
+      console.error("Error fetching referral leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch referral leaderboard" });
+    }
+  });
+
   // Bible in a Day routes
   app.post('/api/bible-in-a-day/sessions', isAuthenticated, async (req: any, res) => {
     try {
