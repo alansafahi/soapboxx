@@ -3634,11 +3634,11 @@ export class DatabaseStorage implements IStorage {
 
   // Community statistics
   async getBibleReadingCountSince(date: Date): Promise<number> {
-    const readings = await db
-      .select()
+    const result = await db
+      .select({ count: count() })
       .from(userBibleReadings)
       .where(gte(userBibleReadings.readDate, date));
-    return readings.length;
+    return result[0]?.count || 0;
   }
 
   // Referral Rewards System Implementation

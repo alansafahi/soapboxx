@@ -67,14 +67,13 @@ function Router() {
             <Route path="*" component={Landing} />
           ) : (
             <>
-              <Route path="/" component={() => <Home referralCode={referralCode} />} />
+              <Route path="/bible/read" component={BibleReader} />
+              <Route path="/bible" component={BiblePage} />
               <Route path="/community" component={Community} />
               <Route path="/churches" component={Churches} />
               <Route path="/events" component={Events} />
               <Route path="/prayer" component={Prayer} />
               <Route path="/prayers" component={Prayer} />
-              <Route path="/bible" component={BiblePage} />
-              <Route path="/bible/read" component={BibleReader} />
               <Route path="/discussions" component={Community} />
               <Route path="/devotionals" component={Community} />
               <Route path="/members" component={Community} />
@@ -85,6 +84,7 @@ function Router() {
               <Route path="/admin" component={AdminPortal} />
               <Route path="/member-management" component={AdminPortal} />
               <Route path="/profile" component={Profile} />
+              <Route path="/" component={() => <Home referralCode={referralCode} />} />
               <Route component={NotFound} />
             </>
           )}
