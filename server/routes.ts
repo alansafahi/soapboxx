@@ -2843,7 +2843,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/events/today", isAuthenticated, async (req: any, res) => {
+  app.get("/api/events/today", async (req, res) => {
     try {
       const today = new Date();
       const startOfDay = new Date(today);
