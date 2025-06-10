@@ -100,7 +100,7 @@ export function BibleInADayFeature() {
 
   // Fetch session progress
   const { data: sessionProgress } = useQuery<any[]>({
-    queryKey: ['/api/bible-in-a-day/sessions', activeSession?.id, 'progress'],
+    queryKey: [`/api/bible-in-a-day/sessions/${activeSession?.id}/progress`],
     enabled: !!activeSession?.id,
   });
 
@@ -133,7 +133,7 @@ export function BibleInADayFeature() {
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/bible-in-a-day/sessions', activeSession?.id, 'progress'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/bible-in-a-day/sessions/${activeSession?.id}/progress`] });
     },
   });
 
@@ -144,7 +144,8 @@ export function BibleInADayFeature() {
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/bible-in-a-day/sessions', activeSession?.id, 'progress'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/bible-in-a-day/sessions/${activeSession?.id}/progress`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/bible-in-a-day/sessions/active'] });
       toast({ title: "Section Complete!", description: "Great progress on your journey." });
     },
   });
@@ -165,9 +166,14 @@ export function BibleInADayFeature() {
     },
   });
 
-  const currentSection = BIBLE_SECTIONS[currentSectionIndex];
+  // Calculate current section based on session progress
   const completedSections = sessionProgress?.filter((p: any) => p.isCompleted) || [];
   const totalProgress = (completedSections.length / BIBLE_SECTIONS.length) * 100;
+  
+  // Find the current section - either the first incomplete one or the last section if all complete
+  const currentSectionFromProgress = sessionProgress?.find((p: any) => !p.isCompleted);
+  const currentSectionKey = currentSectionFromProgress?.sectionKey || BIBLE_SECTIONS[0].id;
+  const currentSection = BIBLE_SECTIONS.find(s => s.id === currentSectionKey) || BIBLE_SECTIONS[currentSectionIndex];
 
   const handleStartSession = () => {
     startSessionMutation.mutate(selectedSessionType);
@@ -176,14 +182,39 @@ export function BibleInADayFeature() {
   const handleStartSection = () => {
     if (!activeSession) return;
     
-    setIsReading(true);
-    setSectionStartTime(new Date());
+    // Check if section progress already exists for this section
+    const existingProgress = sessionProgress?.find((p: any) => 
+      p.sectionKey === currentSection.id
+    );
     
-    createProgressMutation.mutate({
-      sessionId: activeSession.id,
-      sectionKey: currentSection.id,
-      sectionTitle: currentSection.title,
-    });
+    if (existingProgress) {
+      // If section is already completed, move to next section
+      if (existingProgress.isCompleted) {
+        const currentIndex = BIBLE_SECTIONS.findIndex(s => s.id === currentSection.id);
+        if (currentIndex < BIBLE_SECTIONS.length - 1) {
+          const nextSection = BIBLE_SECTIONS[currentIndex + 1];
+          createProgressMutation.mutate({
+            sessionId: activeSession.id,
+            sectionKey: nextSection.id,
+            sectionTitle: nextSection.title,
+          });
+        }
+      } else {
+        // Resume reading current section
+        setIsReading(true);
+        setSectionStartTime(new Date());
+      }
+    } else {
+      // Create new section progress
+      setIsReading(true);
+      setSectionStartTime(new Date());
+      
+      createProgressMutation.mutate({
+        sessionId: activeSession.id,
+        sectionKey: currentSection.id,
+        sectionTitle: currentSection.title,
+      });
+    }
   };
 
   const handleCompleteSection = () => {
@@ -201,14 +232,10 @@ export function BibleInADayFeature() {
         progressId: currentProgress.id,
         reflectionAnswer,
       });
-    }
-
-    setReflectionAnswer('');
-    setIsReading(false);
-    setSectionStartTime(null);
-
-    if (currentSectionIndex < BIBLE_SECTIONS.length - 1) {
-      setCurrentSectionIndex(prev => prev + 1);
+      
+      setReflectionAnswer('');
+      setIsReading(false);
+      setSectionStartTime(null);
     }
   };
 
