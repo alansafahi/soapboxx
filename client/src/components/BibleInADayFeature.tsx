@@ -181,9 +181,8 @@ export function BibleInADayFeature() {
     
     createProgressMutation.mutate({
       sessionId: activeSession.id,
-      sectionName: currentSection.title,
-      sectionOrder: currentSectionIndex + 1,
-      estimatedDuration: currentSection.estimatedMinutes,
+      sectionKey: currentSection.id,
+      sectionTitle: currentSection.title,
     });
   };
 
@@ -194,7 +193,7 @@ export function BibleInADayFeature() {
     }
 
     const currentProgress = sessionProgress?.find((p: any) => 
-      p.sectionName === currentSection.title && !p.isCompleted
+      p.sectionKey === currentSection.id && !p.isCompleted
     );
 
     if (currentProgress) {
