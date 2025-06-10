@@ -10,6 +10,7 @@ import {
   boolean,
   real,
   unique,
+  decimal,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -786,6 +787,165 @@ export const notificationResponses = pgTable("notification_responses", {
   responseType: varchar("response_type", { length: 20 }).notNull(), // poll_vote, rsvp, survey_response, prayer_response
   responseData: text("response_data"), // JSON with response details
   respondedAt: timestamp("responded_at").defaultNow(),
+});
+
+// Family relationships and household management
+export const families = pgTable("families", {
+  id: serial("id").primaryKey(),
+  familyName: varchar("family_name", { length: 255 }).notNull(),
+  headOfHouseholdId: varchar("head_of_household_id").references(() => users.id),
+  address: varchar("address", { length: 500 }),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 50 }),
+  zipCode: varchar("zip_code", { length: 10 }),
+  homePhone: varchar("home_phone", { length: 20 }),
+  familyPhoto: varchar("family_photo", { length: 255 }),
+  churchId: integer("church_id").references(() => churches.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const familyMembers = pgTable("family_members", {
+  id: serial("id").primaryKey(),
+  familyId: integer("family_id").notNull().references(() => families.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  relationship: varchar("relationship", { length: 50 }).notNull(), // parent, child, spouse, guardian, dependent
+  isPrimaryContact: boolean("is_primary_contact").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Member attendance tracking
+export const attendanceRecords = pgTable("attendance_records", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  serviceDate: timestamp("service_date").notNull(),
+  serviceType: varchar("service_type", { length: 50 }).notNull(), // sunday_service, wednesday_service, special_event
+  checkedInAt: timestamp("checked_in_at").defaultNow(),
+  checkedInBy: varchar("checked_in_by").references(() => users.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Member lifecycle events
+export const memberEvents = pgTable("member_events", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  eventType: varchar("event_type", { length: 50 }).notNull(), // baptism, confirmation, wedding, birth, death, graduation, anniversary
+  eventDate: timestamp("event_date").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  location: varchar("location", { length: 255 }),
+  celebrant: varchar("celebrant", { length: 255 }), // Pastor or officiant
+  witnesses: text("witnesses").array(),
+  photos: text("photos").array(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Pastoral care and visits
+export const pastoralCareRecords = pgTable("pastoral_care_records", {
+  id: serial("id").primaryKey(),
+  memberId: varchar("member_id").notNull().references(() => users.id),
+  pastorId: varchar("pastor_id").notNull().references(() => users.id),
+  visitType: varchar("visit_type", { length: 50 }).notNull(), // home_visit, hospital_visit, counseling, phone_call, spiritual_guidance
+  visitDate: timestamp("visit_date").notNull(),
+  duration: integer("duration"), // minutes
+  location: varchar("location", { length: 255 }),
+  purpose: text("purpose"),
+  summary: text("summary"),
+  followUpNeeded: boolean("follow_up_needed").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  privacy: varchar("privacy", { length: 20 }).default("confidential"), // public, private, confidential
+  churchId: integer("church_id").references(() => churches.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Member skills and ministry involvement
+export const memberSkills = pgTable("member_skills", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  skillCategory: varchar("skill_category", { length: 50 }).notNull(), // music, technology, teaching, counseling, maintenance, administration
+  skillName: varchar("skill_name", { length: 100 }).notNull(),
+  proficiencyLevel: varchar("proficiency_level", { length: 20 }).default("beginner"), // beginner, intermediate, advanced, expert
+  yearsOfExperience: integer("years_of_experience"),
+  certifications: text("certifications").array(),
+  willingness: varchar("willingness", { length: 20 }).default("available"), // available, maybe, not_available
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ministry leadership and roles
+export const ministryRoles = pgTable("ministry_roles", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  ministryName: varchar("ministry_name", { length: 100 }).notNull(),
+  role: varchar("role", { length: 100 }).notNull(), // leader, co_leader, member, volunteer
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  isActive: boolean("is_active").default(true),
+  responsibilities: text("responsibilities").array(),
+  timeCommitment: varchar("time_commitment", { length: 100 }), // weekly hours or description
+  churchId: integer("church_id").references(() => churches.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Member giving and stewardship
+export const givingRecords = pgTable("giving_records", {
+  id: serial("id").primaryKey(),
+  memberId: varchar("member_id").notNull().references(() => users.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("USD"),
+  givingType: varchar("giving_type", { length: 50 }).notNull(), // tithe, offering, special_project, mission, building_fund
+  method: varchar("method", { length: 50 }).notNull(), // cash, check, online, bank_transfer, card
+  giftDate: timestamp("gift_date").notNull(),
+  designation: varchar("designation", { length: 255 }),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringFrequency: varchar("recurring_frequency", { length: 20 }), // weekly, monthly, yearly
+  taxDeductible: boolean("tax_deductible").default(true),
+  acknowledgmentSent: boolean("acknowledgment_sent").default(false),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Member onboarding process
+export const memberOnboarding = pgTable("member_onboarding", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  currentStep: integer("current_step").default(1),
+  totalSteps: integer("total_steps").default(7),
+  steps: text("steps"), // JSON array of onboarding steps
+  stepProgress: text("step_progress"), // JSON object tracking completion
+  assignedMentor: varchar("assigned_mentor").references(() => users.id),
+  startDate: timestamp("start_date").defaultNow(),
+  completedDate: timestamp("completed_date"),
+  isCompleted: boolean("is_completed").default(false),
+  notes: text("notes"),
+  churchId: integer("church_id").references(() => churches.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Member communication log
+export const memberCommunications = pgTable("member_communications", {
+  id: serial("id").primaryKey(),
+  memberId: varchar("member_id").notNull().references(() => users.id),
+  communicationType: varchar("communication_type", { length: 50 }).notNull(), // email, phone, text, mail, in_person
+  direction: varchar("direction", { length: 10 }).notNull(), // inbound, outbound
+  subject: varchar("subject", { length: 255 }),
+  content: text("content"),
+  sentBy: varchar("sent_by").references(() => users.id),
+  sentAt: timestamp("sent_at").notNull(),
+  deliveryStatus: varchar("delivery_status", { length: 20 }).default("sent"), // sent, delivered, read, failed
+  responseReceived: boolean("response_received").default(false),
+  followUpRequired: boolean("follow_up_required").default(false),
+  churchId: integer("church_id").references(() => churches.id),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Relations
