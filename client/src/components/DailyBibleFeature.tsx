@@ -270,6 +270,30 @@ export function DailyBibleFeature() {
     
     const defaultShareText = `"${getVerseText()}" - ${dailyVerse.verseReference} 🙏 #DailyBible #SoapBoxSuperApp`;
     const finalShareText = shareText || defaultShareText;
+    const shareUrl = window.location.origin + '/bible';
+    
+    // Handle external sharing platforms directly
+    if (platform === 'facebook' || platform === 'twitter') {
+      let url = '';
+      switch (platform) {
+        case 'twitter':
+          url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(finalShareText)}&url=${encodeURIComponent(shareUrl)}`;
+          break;
+        case 'facebook':
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(finalShareText)}&hashtag=${encodeURIComponent('#DailyBible')}`;
+          break;
+      }
+      if (url) {
+        window.open(url, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+      }
+      setShowShareDialog(false);
+      toast({
+        title: "Verse Shared",
+        description: "Your verse is ready to share on " + platform.charAt(0).toUpperCase() + platform.slice(1),
+      });
+      return;
+    }
+    
     setShareText(finalShareText);
     
     // If this is the default verse (id: 0), handle sharing differently

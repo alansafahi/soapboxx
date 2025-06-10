@@ -388,14 +388,17 @@ export function BibleInADayFeature() {
           url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
           break;
         case 'facebook':
-          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+          // Use Facebook's standard sharer URL for better compatibility
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}&hashtag=${encodeURIComponent('#BibleInADay')}`;
           break;
         case 'copy':
           navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
           toast({ title: "Copied to clipboard!", description: "Share link copied successfully." });
           return;
       }
-      if (url) window.open(url, '_blank');
+      if (url) {
+        window.open(url, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+      }
     };
 
     return (
