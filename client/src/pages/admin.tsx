@@ -1692,6 +1692,7 @@ export default function AdminPortal() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedChurch, setSelectedChurch] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState("dashboard");
   
   // Dialog state management
   const [isChurchDialogOpen, setIsChurchDialogOpen] = useState(false);
@@ -2490,7 +2491,7 @@ export default function AdminPortal() {
         {/* Main Content */}
         <div className="lg:col-span-3">
           {selectedChurch ? (
-            <Tabs defaultValue="dashboard" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="dashboard">
                   <Building className="h-4 w-4 mr-2" />
@@ -2516,7 +2517,7 @@ export default function AdminPortal() {
 
               <TabsContent value="dashboard" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card>
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab("ministry")}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -2527,7 +2528,7 @@ export default function AdminPortal() {
                       </div>
                     </CardContent>
                   </Card>
-                  <Card>
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab("ministry")}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -2538,7 +2539,7 @@ export default function AdminPortal() {
                       </div>
                     </CardContent>
                   </Card>
-                  <Card>
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab("ministry")}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -2549,7 +2550,7 @@ export default function AdminPortal() {
                       </div>
                     </CardContent>
                   </Card>
-                  <Card>
+                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab("people")}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
