@@ -386,14 +386,18 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
     },
   });
 
-  const { data: members = [] } = useQuery({
+  const { data: members = [], isLoading: membersLoading } = useQuery({
     queryKey: ["/api/members", selectedChurch],
-    queryFn: () => {
+    queryFn: async () => {
       const url = selectedChurch 
         ? `/api/members?churchId=${selectedChurch}`
         : "/api/members";
-      return apiRequest(url);
+      console.log('Fetching members from:', url);
+      const result = await apiRequest(url);
+      console.log('Members result:', result);
+      return result;
     },
+    enabled: !!selectedChurch,
   });
 
   const createSessionMutation = useMutation({
@@ -547,11 +551,19 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {members.map((member: any) => (
-                            <SelectItem key={member.id} value={member.id}>
-                              {member.fullName}
+                          {membersLoading ? (
+                            <SelectItem value="loading" disabled>Loading members...</SelectItem>
+                          ) : members && Array.isArray(members) && members.length > 0 ? (
+                            members.map((member: any) => (
+                              <SelectItem key={member.id} value={member.id}>
+                                {member.fullName}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-members" disabled>
+                              {selectedChurch ? "No members found for this church" : "Please select a church first"}
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
