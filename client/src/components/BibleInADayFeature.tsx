@@ -536,9 +536,14 @@ export function BibleInADayFeature() {
                   {currentSection.content}
                 </p>
                 <div className="mt-4 text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-                    Continue reading the full section in your Bible or Bible app...
-                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.open(`/bible/read?section=${currentSection.id}&verses=${encodeURIComponent(currentSection.keyVerses.join(','))}`, '_blank')}
+                    className="text-sm"
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Continue Reading Full Section in SoapBox Bible
+                  </Button>
                 </div>
               </div>
 
