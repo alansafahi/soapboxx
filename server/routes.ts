@@ -1410,6 +1410,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Member Management API Routes
+  app.get("/api/members", async (req, res) => {
+    try {
+      const members = [
+        {
+          id: "1",
+          fullName: "John Smith",
+          email: "john@example.com",
+          phoneNumber: "+1 555-0123",
+          address: "123 Main St, Anytown, USA",
+          membershipStatus: "active",
+          joinedDate: "2023-01-15",
+          notes: "Active volunteer and regular attendee"
+        },
+        {
+          id: "2", 
+          fullName: "Mary Johnson",
+          email: "mary@example.com",
+          phoneNumber: "+1 555-0456",
+          address: "456 Oak Ave, Anytown, USA",
+          membershipStatus: "new_member",
+          joinedDate: "2024-11-01",
+          notes: "Recently joined, interested in choir"
+        }
+      ];
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+      res.status(500).json({ error: "Failed to fetch members" });
+    }
+  });
+
+  app.get("/api/counseling-sessions", async (req, res) => {
+    try {
+      const sessions = [
+        {
+          id: "1",
+          sessionType: "counseling",
+          scheduledTime: "2024-06-15T14:00:00Z",
+          duration: 60,
+          location: "Pastor's Office",
+          status: "confirmed"
+        }
+      ];
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching counseling sessions:", error);
+      res.status(500).json({ error: "Failed to fetch counseling sessions" });
+    }
+  });
+
+  app.post("/api/counseling-sessions", async (req, res) => {
+    try {
+      const newSession = {
+        id: Date.now().toString(),
+        ...req.body,
+        status: "pending"
+      };
+      res.json(newSession);
+    } catch (error) {
+      console.error("Error creating counseling session:", error);
+      res.status(400).json({ error: "Failed to create counseling session" });
+    }
+  });
+
+  app.get("/api/volunteer-opportunities", async (req, res) => {
+    try {
+      const opportunities = [
+        {
+          id: "1",
+          title: "Sunday Greeter",
+          description: "Welcome visitors and members at the main entrance",
+          maxVolunteers: 3,
+          currentSignUps: 1,
+          startTime: "2024-06-16T09:00:00Z",
+          endTime: "2024-06-16T12:00:00Z",
+          location: "Main Entrance",
+          isActive: true
+        }
+      ];
+      res.json(opportunities);
+    } catch (error) {
+      console.error("Error fetching volunteer opportunities:", error);
+      res.status(500).json({ error: "Failed to fetch volunteer opportunities" });
+    }
+  });
+
+  app.post("/api/volunteer-opportunities", async (req, res) => {
+    try {
+      const newOpportunity = {
+        id: Date.now().toString(),
+        ...req.body,
+        currentSignUps: 0,
+        isActive: true
+      };
+      res.json(newOpportunity);
+    } catch (error) {
+      console.error("Error creating volunteer opportunity:", error);
+      res.status(400).json({ error: "Failed to create volunteer opportunity" });
+    }
+  });
+
+  app.get("/api/livestreams", async (req, res) => {
+    try {
+      const streams = [
+        {
+          id: "1",
+          title: "Sunday Service",
+          description: "Weekly worship service with Pastor Johnson",
+          scheduledStart: "2024-06-16T10:00:00Z",
+          streamUrl: "https://youtube.com/live/example",
+          status: "scheduled",
+          viewerCount: 0,
+          chatEnabled: true,
+          recordingEnabled: true
+        }
+      ];
+      res.json(streams);
+    } catch (error) {
+      console.error("Error fetching livestreams:", error);
+      res.status(500).json({ error: "Failed to fetch livestreams" });
+    }
+  });
+
+  app.post("/api/livestreams", async (req, res) => {
+    try {
+      const newStream = {
+        id: Date.now().toString(),
+        ...req.body,
+        status: "scheduled",
+        viewerCount: 0
+      };
+      res.json(newStream);
+    } catch (error) {
+      console.error("Error creating livestream:", error);
+      res.status(400).json({ error: "Failed to create livestream" });
+    }
+  });
+
+  app.get("/api/sermon-archive", async (req, res) => {
+    try {
+      const sermons = [
+        {
+          id: "1",
+          title: "Walking in Faith",
+          speaker: "Pastor Johnson",
+          series: "Living by Faith",
+          scripture: "Hebrews 11:1-6",
+          sermonDate: "2024-06-09",
+          duration: 2700,
+          viewCount: 145,
+          featured: true
+        }
+      ];
+      res.json(sermons);
+    } catch (error) {
+      console.error("Error fetching sermon archive:", error);
+      res.status(500).json({ error: "Failed to fetch sermon archive" });
+    }
+  });
+
+  app.post("/api/sermon-archive", async (req, res) => {
+    try {
+      const newSermon = {
+        id: Date.now().toString(),
+        ...req.body,
+        viewCount: 0,
+        featured: false
+      };
+      res.json(newSermon);
+    } catch (error) {
+      console.error("Error creating sermon archive entry:", error);
+      res.status(400).json({ error: "Failed to create sermon archive entry" });
+    }
+  });
+
   // Comprehensive Leaderboard API Endpoints
   // 1. Weekly Faithfulness Score
   app.get('/api/leaderboard/weekly-faithfulness', isAuthenticated, async (req: any, res) => {

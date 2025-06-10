@@ -19,8 +19,8 @@ import {
   Users, UserCheck2, Calendar, MapPin, Phone, Mail, 
   Heart, Building, Clock, Plus, Edit, Trash2, Search, 
   Filter, UserPlus, HeartHandshake, ClipboardList, 
-  Live, Archive, PlayCircle, Video, Headphones, User,
-  Home, Star, UserCog, BookOpen
+  Archive, PlayCircle, Video, Headphones, User,
+  Home, Star, UserCog, BookOpen, Radio
 } from "lucide-react";
 
 // Member Directory Component

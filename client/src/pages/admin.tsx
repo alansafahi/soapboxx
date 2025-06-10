@@ -2537,10 +2537,10 @@ export default function AdminPortal() {
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="management">Management</TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
                 <TabsTrigger value="content">Content</TabsTrigger>
-                <TabsTrigger value="published">Published</TabsTrigger>
                 <TabsTrigger value="discussions">Discussions</TabsTrigger>
                 <TabsTrigger value="prayers">Prayers</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
@@ -3260,7 +3260,25 @@ export default function AdminPortal() {
               </TabsContent>
 
               <TabsContent value="notifications" className="space-y-6">
-                <NotificationManagementSystem selectedChurch={selectedChurch} />
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Notification Management</h3>
+                    <Badge variant="outline">Coming Soon</Badge>
+                  </div>
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Settings className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h4 className="text-lg font-medium mb-2">Advanced Notifications</h4>
+                      <p className="text-muted-foreground">
+                        Push notification system with scheduling and targeting capabilities will be available soon.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="management" className="space-y-6">
+                <MemberManagementSystem />
               </TabsContent>
             </Tabs>
           ) : (
