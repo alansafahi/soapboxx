@@ -1791,6 +1791,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update session status endpoint
+  app.put("/api/counseling-sessions/:id/status", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ error: "Status is required" });
+      }
+
+      const validStatuses = ["scheduled", "in_progress", "completed", "cancelled", "no_show", "rescheduled"];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      
+      const sessionIndex = sessionsData.findIndex(session => session.id === id);
+      if (sessionIndex !== -1) {
+        sessionsData[sessionIndex] = { 
+          ...sessionsData[sessionIndex], 
+          status,
+          updatedAt: new Date().toISOString()
+        };
+        res.json(sessionsData[sessionIndex]);
+      } else {
+        res.status(404).json({ error: "Session not found" });
+      }
+    } catch (error) {
+      console.error("Error updating session status:", error);
+      res.status(500).json({ error: "Failed to update session status" });
+    }
+  });
+
   // Confirm session endpoint
   app.patch("/api/counseling-sessions/:id/confirm", async (req, res) => {
     try {

@@ -21,6 +21,7 @@ import { insertChurchSchema, insertEventSchema, insertDevotionalSchema, insertWe
 import { ChurchProfileManager } from "@/components/church-profile-manager";
 import { MemberManagementSystem } from "@/components/MemberManagementSystem";
 import { SessionsManagement } from "@/components/SessionsManagement";
+import { CounselingManagement } from "@/components/CounselingManagement";
 
 const churchFormSchema = insertChurchSchema.extend({
   latitude: z.coerce.number().optional(),
@@ -2536,9 +2537,10 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-8">
+              <TabsList className="grid w-full grid-cols-9">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="management">Management</TabsTrigger>
+                <TabsTrigger value="counseling">Counseling</TabsTrigger>
                 <TabsTrigger value="sessions">Sessions</TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
@@ -3273,6 +3275,10 @@ export default function AdminPortal() {
 
               <TabsContent value="management" className="space-y-6">
                 <MemberManagementSystem selectedChurch={selectedChurch} />
+              </TabsContent>
+
+              <TabsContent value="counseling" className="space-y-6">
+                <CounselingManagement selectedChurch={selectedChurch} />
               </TabsContent>
 
               <TabsContent value="sessions" className="space-y-6">
