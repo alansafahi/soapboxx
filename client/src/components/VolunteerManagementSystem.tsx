@@ -46,8 +46,21 @@ import {
   Target,
   BarChart3
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { motion } from "framer-motion";
+
+// Safe date formatting utility
+const formatSafeDate = (dateString: string | null | undefined, formatStr: string = "MMM dd, yyyy"): string => {
+  if (!dateString) return "Date TBD";
+  
+  try {
+    const date = typeof dateString === 'string' ? parseISO(dateString) : new Date(dateString);
+    if (!isValid(date)) return "Invalid Date";
+    return format(date, formatStr);
+  } catch (error) {
+    return "Invalid Date";
+  }
+};
 import { useToast } from "@/hooks/use-toast";
 
 interface Volunteer {
@@ -343,7 +356,7 @@ export default function VolunteerManagementSystem() {
                     <div>
                       <p className="font-medium">{opportunity.title}</p>
                       <p className="text-sm text-gray-500">
-                        {format(new Date(opportunity.startDate), "MMM dd, yyyy")}
+                        {formatSafeDate(opportunity.startDate)}
                       </p>
                     </div>
                   </div>
