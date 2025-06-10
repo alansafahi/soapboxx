@@ -202,7 +202,7 @@ import {
   type InsertMediaCollectionItem,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike, isNotNull } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)

@@ -1134,28 +1134,73 @@ export function DailyBibleFeature() {
       >
         <Card className="bg-gradient-to-r from-green-50 to-blue-50">
           <CardContent className="p-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                You're not alone in this journey
-              </h3>
-              <p className="text-gray-600">
-                Join thousands of believers reading God's Word daily
-              </p>
-              <div className="flex items-center justify-center mt-4 space-x-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {communityStatsData?.todayReads?.toLocaleString() || '0'}
+            {/* Show community stats if there's activity, otherwise show invite */}
+            {communityStatsData && (communityStatsData.todayReads > 0 || communityStatsData.weekReads > 0) ? (
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  You're not alone in this journey
+                </h3>
+                <p className="text-gray-600">
+                  Join thousands of believers reading God's Word daily
+                </p>
+                <div className="flex items-center justify-center mt-4 space-x-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {communityStatsData.todayReads.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500">Read today</div>
                   </div>
-                  <div className="text-sm text-gray-500">Read today</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {communityStatsData?.weekReads?.toLocaleString() || '0'}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {communityStatsData.weekReads.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500">This week</div>
                   </div>
-                  <div className="text-sm text-gray-500">This week</div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-3 text-gray-800">
+                  🌟 Start a Spiritual Journey Together
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Invite friends and family to join you in daily Bible reading and grow in faith together
+                </p>
+                <div className="bg-white rounded-lg p-4 border-2 border-dashed border-purple-200 mb-4">
+                  <p className="text-sm font-medium text-purple-700 mb-2">Share this invitation link:</p>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={`${window.location.origin}?invited=true`}
+                      readOnly
+                      className="flex-1 text-sm bg-purple-50 border border-purple-200 rounded px-3 py-2 text-purple-800"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}?invited=true`);
+                        toast({
+                          title: "Invitation link copied!",
+                          description: "Share this with friends and family to invite them to join your spiritual journey.",
+                          duration: 3000,
+                        });
+                      }}
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-4"
+                    >
+                      Copy Link
+                    </Button>
+                  </div>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                  <p className="text-sm text-blue-800 italic font-medium">
+                    "As iron sharpens iron, so one person sharpens another." - Proverbs 27:17
+                  </p>
+                </div>
+                <p className="text-xs text-gray-500 mt-3">
+                  Build accountability and encouragement in your daily Bible reading
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
