@@ -1552,6 +1552,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
           denomination: "Baptist",
           interests: "Family ministry, outreach, Bible study",
           notes: "Visiting family, considering membership"
+        },
+        {
+          id: "11",
+          fullName: "Pastor Miguel Rodriguez",
+          email: "miguel.rodriguez@email.com",
+          phoneNumber: "+1 555-0111",
+          address: "111 Ministry Lane, Springfield, IL 62711",
+          membershipStatus: "active",
+          joinedDate: "2020-01-15",
+          churchId: "1,2",
+          churchAffiliation: "Grace Community Church, Church On The Way",
+          denomination: "Multi-denominational",
+          interests: "Inter-church ministry, pastoral care, community outreach",
+          notes: "Associate pastor serving both congregations, coordinates joint ministries"
+        },
+        {
+          id: "12",
+          fullName: "Rachel Kim",
+          email: "rachel.kim@email.com",
+          phoneNumber: "+1 555-0222",
+          address: "222 Unity Street, Springfield, IL 62712",
+          membershipStatus: "active",
+          joinedDate: "2021-09-10",
+          churchId: "2,3",
+          churchAffiliation: "Church On The Way, La Mesa",
+          denomination: "Baptist/Pentecostal",
+          interests: "Worship ministry, youth programs, cross-cultural ministry",
+          notes: "Worship leader who serves at both churches, bilingual ministry coordinator"
+        },
+        {
+          id: "13",
+          fullName: "Dr. Thomas Bennett",
+          email: "thomas.bennett@email.com",
+          phoneNumber: "+1 555-0333",
+          address: "333 Scholar Drive, Springfield, IL 62713",
+          membershipStatus: "active",
+          joinedDate: "2019-05-20",
+          churchId: "1,3",
+          churchAffiliation: "Grace Community Church, La Mesa",
+          denomination: "Non-denominational/Baptist",
+          interests: "Biblical studies, teaching, seminary education",
+          notes: "Theology professor who teaches Bible studies at both churches"
         }
       ];
 
@@ -1562,9 +1604,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Filter by church if churchId is provided
       if (churchId) {
-        filteredMembers = membersData.filter(member => 
-          member.churchId === String(churchId)
-        );
+        filteredMembers = membersData.filter(member => {
+          // Handle members who belong to multiple churches (comma-separated churchIds)
+          const memberChurchIds = member.churchId.split(',').map(id => id.trim());
+          return memberChurchIds.includes(String(churchId));
+        });
       }
       res.json(filteredMembers);
     } catch (error) {
