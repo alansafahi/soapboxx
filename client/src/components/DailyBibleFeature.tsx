@@ -101,6 +101,8 @@ export function DailyBibleFeature() {
   const [showJournalNote, setShowJournalNote] = useState(false);
   const [journalNote, setJournalNote] = useState("");
   const [showETHOSDialog, setShowETHOSDialog] = useState(false);
+  const [ethosResponse, setEthosResponse] = useState<string>('');
+  const [showEthosResponse, setShowEthosResponse] = useState(false);
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
   const [currentJourneyType, setCurrentJourneyType] = useState("reading");
@@ -379,11 +381,15 @@ export function DailyBibleFeature() {
       response = `Thank you for your question about ${verseRef}. This parable teaches us about the importance of having a receptive heart to God's word. Consider how you can cultivate good spiritual soil in your life through prayer, study, and removing distractions that might hinder spiritual growth.`;
     }
     
-    // Show response in a toast
+    // Show response in dedicated panel
+    setEthosResponse(response);
+    setShowEthosResponse(true);
+    
+    // Also show a brief toast notification
     toast({
-      title: "ETHOS Response",
-      description: response,
-      duration: 8000,
+      title: "ETHOS Response Ready",
+      description: "Scroll down to see the detailed spiritual insight.",
+      duration: 3000,
     });
   };
 
@@ -922,6 +928,55 @@ export function DailyBibleFeature() {
               <span className="font-semibold">Launch Bible in a Day</span>
             </TabsTrigger>
           </TabsList>
+          
+          {/* ETHOS Response Panel */}
+          {showEthosResponse && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-6"
+            >
+              <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Brain className="h-5 w-5 text-purple-600" />
+                      <CardTitle className="text-purple-800">ETHOS Spiritual Insight</CardTitle>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowEthosResponse(false)}
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-white rounded-lg p-4 border border-purple-100">
+                    <p className="text-gray-800 leading-relaxed">{ethosResponse}</p>
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <div className="flex items-center space-x-2 text-sm text-purple-600">
+                      <Bookmark className="h-4 w-4" />
+                      <span>Save this insight</span>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => setShowETHOSDialog(true)}>
+                        Ask Another Question
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Share2 className="h-4 w-4 mr-1" />
+                        Share
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
           
           <TabsContent value="reflection" className="space-y-4">
             <Card>
