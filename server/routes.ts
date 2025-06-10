@@ -1657,12 +1657,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/counseling-sessions", async (req, res) => {
     try {
+      const { memberId, churchId, ...sessionData } = req.body;
+      
+      // Find member details if memberId is provided
+      let memberInfo = {};
+      if (memberId) {
+        const member = membersData.find(m => m.id === memberId);
+        if (member) {
+          memberInfo = {
+            memberName: member.fullName,
+            memberEmail: member.email
+          };
+        }
+      }
+      
+      // Find church name if churchId is provided
+      let churchInfo = {};
+      if (churchId) {
+        const churchMap = {
+          "1": "Grace Community Church",
+          "2": "Church On The Way", 
+          "3": "La Mesa"
+        };
+        churchInfo = {
+          churchName: churchMap[churchId] || "Unknown Church"
+        };
+      }
+      
       const newSession = {
         id: Date.now().toString(),
-        ...req.body,
-        status: "pending",
+        memberId,
+        churchId,
+        ...memberInfo,
+        ...churchInfo,
+        ...sessionData,
+        status: sessionData.status || "pending",
         createdAt: new Date().toISOString()
       };
+      
       sessionsData.push(newSession);
       res.json(newSession);
     } catch (error) {

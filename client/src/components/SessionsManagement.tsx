@@ -393,11 +393,11 @@ function SessionFormDialog({
   };
 
   const handleMemberSelect = (memberId: string) => {
-    const selectedMember = members.find(member => member.id === memberId);
+    const selectedMember = members.find(member => member.id.toString() === memberId);
     if (selectedMember) {
       setFormData(prev => ({
         ...prev,
-        memberId: selectedMember.id,
+        memberId: selectedMember.id.toString(),
         memberName: selectedMember.fullName,
         memberEmail: selectedMember.email,
       }));
@@ -423,7 +423,7 @@ function SessionFormDialog({
               </SelectTrigger>
               <SelectContent>
                 {members.map((member: any) => (
-                  <SelectItem key={member.id} value={member.id}>
+                  <SelectItem key={member.id} value={member.id.toString()}>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       <div>
