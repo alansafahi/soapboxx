@@ -62,7 +62,11 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  CalendarIcon,
 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const counselingSessionSchema = z.object({
   memberId: z.string().min(1, "Please select a member"),
@@ -397,14 +401,70 @@ export function CounselingManagement({ selectedChurch }: CounselingManagementPro
                     control={form.control}
                     name="scheduledTime"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>Date & Time</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="datetime-local"
-                            {...field}
-                          />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(new Date(field.value), "MMM d, yyyy 'at' h:mm a")
+                                ) : (
+                                  <span>Pick a date and time</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={field.value ? new Date(field.value) : undefined}
+                              onSelect={(date) => {
+                                if (date) {
+                                  // If we have an existing time, preserve it
+                                  const existingTime = field.value ? new Date(field.value) : new Date();
+                                  const newDateTime = new Date(date);
+                                  newDateTime.setHours(existingTime.getHours());
+                                  newDateTime.setMinutes(existingTime.getMinutes());
+                                  field.onChange(newDateTime.toISOString().slice(0, 16));
+                                }
+                              }}
+                              disabled={(date) =>
+                                date < new Date(new Date().setHours(0, 0, 0, 0))
+                              }
+                              initialFocus
+                            />
+                            <div className="p-3 border-t">
+                              <label className="text-sm font-medium">Time</label>
+                              <Input
+                                type="time"
+                                value={field.value ? format(new Date(field.value), "HH:mm") : ""}
+                                onChange={(e) => {
+                                  if (field.value && e.target.value) {
+                                    const date = new Date(field.value);
+                                    const [hours, minutes] = e.target.value.split(':');
+                                    date.setHours(parseInt(hours), parseInt(minutes));
+                                    field.onChange(date.toISOString().slice(0, 16));
+                                  } else if (e.target.value) {
+                                    // If no date selected, use today
+                                    const date = new Date();
+                                    const [hours, minutes] = e.target.value.split(':');
+                                    date.setHours(parseInt(hours), parseInt(minutes));
+                                    field.onChange(date.toISOString().slice(0, 16));
+                                  }
+                                }}
+                                className="mt-1"
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -685,14 +745,70 @@ export function CounselingManagement({ selectedChurch }: CounselingManagementPro
                   control={form.control}
                   name="scheduledTime"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Date & Time</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="datetime-local"
-                          {...field}
-                        />
-                      </FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(new Date(field.value), "MMM d, yyyy 'at' h:mm a")
+                              ) : (
+                                <span>Pick a date and time</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={field.value ? new Date(field.value) : undefined}
+                            onSelect={(date) => {
+                              if (date) {
+                                // If we have an existing time, preserve it
+                                const existingTime = field.value ? new Date(field.value) : new Date();
+                                const newDateTime = new Date(date);
+                                newDateTime.setHours(existingTime.getHours());
+                                newDateTime.setMinutes(existingTime.getMinutes());
+                                field.onChange(newDateTime.toISOString().slice(0, 16));
+                              }
+                            }}
+                            disabled={(date) =>
+                              date < new Date(new Date().setHours(0, 0, 0, 0))
+                            }
+                            initialFocus
+                          />
+                          <div className="p-3 border-t">
+                            <label className="text-sm font-medium">Time</label>
+                            <Input
+                              type="time"
+                              value={field.value ? format(new Date(field.value), "HH:mm") : ""}
+                              onChange={(e) => {
+                                if (field.value && e.target.value) {
+                                  const date = new Date(field.value);
+                                  const [hours, minutes] = e.target.value.split(':');
+                                  date.setHours(parseInt(hours), parseInt(minutes));
+                                  field.onChange(date.toISOString().slice(0, 16));
+                                } else if (e.target.value) {
+                                  // If no date selected, use today
+                                  const date = new Date();
+                                  const [hours, minutes] = e.target.value.split(':');
+                                  date.setHours(parseInt(hours), parseInt(minutes));
+                                  field.onChange(date.toISOString().slice(0, 16));
+                                }
+                              }}
+                              className="mt-1"
+                            />
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
