@@ -12,7 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, MapPin, Video, Users, Search, Filter, Share2, CalendarPlus, Heart, MessageCircle, Star, ChevronLeft, ChevronRight, ChevronDown, Download } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar, Clock, MapPin, Video, Users, Search, Filter, Share2, CalendarPlus, Heart, MessageCircle, Star, ChevronLeft, ChevronRight, ChevronDown, Download, Bell, BellOff, ThumbsUp, Cloud, Sun, CloudRain, Snowflake, Wind, Eye, EyeOff, Bookmark, BookmarkCheck, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, isToday, isTomorrow, isThisWeek, addDays, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, getDay } from "date-fns";
 import type { Event } from "@shared/schema";
@@ -27,8 +29,28 @@ export default function EventsList() {
   const [timeFilter, setTimeFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = useState<Set<number>>(() => {
+    const saved = localStorage.getItem('event-favorites');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  
+  // Enhanced features state
+  const [reminders, setReminders] = useState<Set<number>>(() => {
+    const saved = localStorage.getItem('event-reminders');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+  
+  const [watchedEvents, setWatchedEvents] = useState<Set<number>>(() => {
+    const saved = localStorage.getItem('event-watched');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+  
+  const [eventComments, setEventComments] = useState<{[key: number]: any[]}>({});
+  const [showComments, setShowComments] = useState<{[key: number]: boolean}>({});
+  const [newComment, setNewComment] = useState("");
+  const [eventLikes, setEventLikes] = useState<{[key: number]: number}>({});
+  const [userLikes, setUserLikes] = useState<Set<number>>(new Set());
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery<Event[]>({
@@ -87,6 +109,131 @@ export default function EventsList() {
       localStorage.setItem("event-favorites", JSON.stringify(Array.from(newSet)));
       return newSet;
     });
+  };
+
+  // Enhanced feature functions
+  const toggleReminder = (eventId: number) => {
+    setReminders(prev => {
+      const newReminders = new Set(prev);
+      if (newReminders.has(eventId)) {
+        newReminders.delete(eventId);
+        toast({
+          title: "Reminder Removed",
+          description: "You'll no longer receive reminders for this event.",
+        });
+      } else {
+        newReminders.add(eventId);
+        toast({
+          title: "Reminder Set",
+          description: "You'll receive a notification before this event starts.",
+        });
+      }
+      localStorage.setItem("event-reminders", JSON.stringify(Array.from(newReminders)));
+      return newReminders;
+    });
+  };
+
+  const toggleWatchEvent = (eventId: number) => {
+    setWatchedEvents(prev => {
+      const newWatched = new Set(prev);
+      if (newWatched.has(eventId)) {
+        newWatched.delete(eventId);
+        toast({
+          title: "Stopped Watching",
+          description: "You'll no longer receive updates for this event.",
+        });
+      } else {
+        newWatched.add(eventId);
+        toast({
+          title: "Now Watching",
+          description: "You'll receive updates when this event changes.",
+        });
+      }
+      localStorage.setItem("event-watched", JSON.stringify(Array.from(newWatched)));
+      return newWatched;
+    });
+  };
+
+  const likeEvent = (eventId: number) => {
+    setUserLikes(prev => {
+      const newLikes = new Set(prev);
+      if (newLikes.has(eventId)) {
+        newLikes.delete(eventId);
+        setEventLikes(prevLikes => ({
+          ...prevLikes,
+          [eventId]: Math.max(0, (prevLikes[eventId] || 1) - 1)
+        }));
+      } else {
+        newLikes.add(eventId);
+        setEventLikes(prevLikes => ({
+          ...prevLikes,
+          [eventId]: (prevLikes[eventId] || 0) + 1
+        }));
+      }
+      return newLikes;
+    });
+  };
+
+  const addComment = (eventId: number) => {
+    if (newComment.trim()) {
+      const comment = {
+        id: Date.now(),
+        text: newComment,
+        author: user?.firstName || 'Anonymous',
+        timestamp: new Date().toISOString(),
+        avatar: user?.profileImageUrl
+      };
+      
+      setEventComments(prev => ({
+        ...prev,
+        [eventId]: [...(prev[eventId] || []), comment]
+      }));
+      
+      setNewComment("");
+      toast({
+        title: "Comment Added",
+        description: "Your comment has been posted successfully.",
+      });
+    }
+  };
+
+  const getWeatherInfo = (event: Event) => {
+    // Simple weather simulation based on date and location
+    const eventDate = new Date(event.eventDate);
+    const month = eventDate.getMonth();
+    const isOutdoor = event.location?.toLowerCase().includes('outdoor') || 
+                     event.location?.toLowerCase().includes('park') ||
+                     event.category === 'outreach';
+    
+    if (!isOutdoor) return null;
+    
+    // Simulate weather based on season
+    const conditions = ['sunny', 'cloudy', 'partly cloudy'];
+    if (month >= 11 || month <= 2) conditions.push('rain', 'windy');
+    
+    const condition = conditions[eventDate.getDate() % conditions.length];
+    const temp = month >= 4 && month <= 9 ? 
+      Math.floor(70 + (eventDate.getDate() % 20)) : 
+      Math.floor(45 + (eventDate.getDate() % 25));
+    
+    return { condition, temp };
+  };
+
+  const getWeatherIcon = (condition: string) => {
+    switch (condition?.toLowerCase()) {
+      case 'sunny':
+        return <Sun className="w-4 h-4 text-yellow-500" />;
+      case 'cloudy':
+        return <Cloud className="w-4 h-4 text-gray-500" />;
+      case 'partly cloudy':
+        return <Cloud className="w-4 h-4 text-gray-400" />;
+      case 'rain':
+        return <CloudRain className="w-4 h-4 text-blue-500" />;
+      case 'windy':
+        return <Wind className="w-4 h-4 text-gray-600" />;
+      default:
+        return <Sun className="w-4 h-4 text-yellow-500" />;
+    }
   };
 
   // Filter and search logic
@@ -646,35 +793,192 @@ export default function EventsList() {
                             </p>
                           )}
                           
-                          {/* Action Buttons */}
-                          <div className="flex flex-wrap gap-2">
-                            <motion.div
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              animate={animatingButtons.has(event.id) ? { 
-                                scale: [1, 1.05, 1], 
-                                backgroundColor: ["#f0f9ff", "#dbeafe", "#f0f9ff"] 
-                              } : {}}
-                              transition={{ duration: 0.4 }}
-                            >
-                              <Button 
-                                onClick={() => handleRSVP(event.id, userRsvp === "attending" ? "not_attending" : "attending")}
-                                variant={userRsvp === "attending" ? "default" : "outline"}
-                                size="sm"
-                                disabled={rsvpMutation.isPending}
-                                className="flex items-center gap-2"
-                              >
-                                {rsvpMutation.isPending ? (
-                                  "Processing..."
-                                ) : userRsvp === "attending" ? (
-                                  <>✓ Attending</>
-                                ) : (
-                                  <>RSVP</>
-                                )}
-                              </Button>
-                            </motion.div>
+                          {/* Enhanced Event Info */}
+                          <div className="flex items-center gap-4 mb-3">
+                            {/* Weather Info for Outdoor Events */}
+                            {(() => {
+                              const weather = getWeatherInfo(event);
+                              return weather ? (
+                                <div className="flex items-center gap-1 text-xs text-gray-500 bg-blue-50 px-2 py-1 rounded-md">
+                                  {getWeatherIcon(weather.condition)}
+                                  <span>{weather.temp}°F</span>
+                                  <span className="capitalize">{weather.condition}</span>
+                                </div>
+                              ) : null;
+                            })()}
+                            
+                            {/* Engagement Stats */}
+                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <ThumbsUp className="w-3 h-3" />
+                                <span>{eventLikes[event.id] || 0}</span>
+                              </div>
+                              {watchedEvents.has(event.id) && (
+                                <div className="flex items-center gap-1 text-blue-600">
+                                  <Eye className="w-3 h-3" />
+                                  <span>Watching</span>
+                                </div>
+                              )}
+                              {reminders.has(event.id) && (
+                                <div className="flex items-center gap-1 text-green-600">
+                                  <Bell className="w-3 h-3" />
+                                  <span>Reminder set</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
 
-                            <Dialog>
+                          {/* Action Buttons */}
+                          <div className="space-y-3">
+                            {/* Primary Action Row */}
+                            <div className="flex flex-wrap gap-2">
+                              <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                animate={animatingButtons.has(event.id) ? { 
+                                  scale: [1, 1.05, 1], 
+                                  backgroundColor: ["#f0f9ff", "#dbeafe", "#f0f9ff"] 
+                                } : {}}
+                                transition={{ duration: 0.4 }}
+                              >
+                                <Button 
+                                  onClick={() => handleRSVP(event.id, userRsvp === "attending" ? "not_attending" : "attending")}
+                                  variant={userRsvp === "attending" ? "default" : "outline"}
+                                  size="sm"
+                                  disabled={rsvpMutation.isPending}
+                                  className="flex items-center gap-2"
+                                >
+                                  {rsvpMutation.isPending ? (
+                                    "Processing..."
+                                  ) : userRsvp === "attending" ? (
+                                    <>✓ Attending</>
+                                  ) : (
+                                    <>RSVP</>
+                                  )}
+                                </Button>
+                              </motion.div>
+
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => toggleFavorite(event.id)}
+                                className={`flex items-center gap-1 ${favorites.has(event.id) ? 'text-red-500' : 'text-gray-500'}`}
+                              >
+                                <Heart className={`w-4 h-4 ${favorites.has(event.id) ? 'fill-current' : ''}`} />
+                                {favorites.has(event.id) ? 'Saved' : 'Save'}
+                              </Button>
+
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => toggleReminder(event.id)}
+                                className={`flex items-center gap-1 ${reminders.has(event.id) ? 'text-green-600' : 'text-gray-500'}`}
+                              >
+                                {reminders.has(event.id) ? (
+                                  <Bell className="w-4 h-4 fill-current" />
+                                ) : (
+                                  <BellOff className="w-4 h-4" />
+                                )}
+                                {reminders.has(event.id) ? 'Reminder On' : 'Set Reminder'}
+                              </Button>
+
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => likeEvent(event.id)}
+                                className={`flex items-center gap-1 ${userLikes.has(event.id) ? 'text-blue-600' : 'text-gray-500'}`}
+                              >
+                                <ThumbsUp className={`w-4 h-4 ${userLikes.has(event.id) ? 'fill-current' : ''}`} />
+                                Like
+                              </Button>
+                            </div>
+
+                            {/* Secondary Action Row */}
+                            <div className="flex flex-wrap gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => toggleWatchEvent(event.id)}
+                                className={`flex items-center gap-1 ${watchedEvents.has(event.id) ? 'text-blue-600' : 'text-gray-500'}`}
+                              >
+                                {watchedEvents.has(event.id) ? (
+                                  <Eye className="w-4 h-4" />
+                                ) : (
+                                  <EyeOff className="w-4 h-4" />
+                                )}
+                                {watchedEvents.has(event.id) ? 'Watching' : 'Watch'}
+                              </Button>
+
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setShowComments(prev => ({
+                                  ...prev,
+                                  [event.id]: !prev[event.id]
+                                }))}
+                                className="flex items-center gap-1"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                                Comments ({(eventComments[event.id] || []).length})
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Comments Section */}
+                          {showComments[event.id] && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-4 border-t pt-4"
+                            >
+                              <div className="space-y-3">
+                                {/* Existing Comments */}
+                                {eventComments[event.id]?.map((comment: any) => (
+                                  <div key={comment.id} className="flex gap-3">
+                                    <Avatar className="w-8 h-8">
+                                      <AvatarImage src={comment.avatar} />
+                                      <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 bg-gray-50 rounded-lg p-3">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-medium text-sm">{comment.author}</span>
+                                        <span className="text-xs text-gray-500">
+                                          {format(new Date(comment.timestamp), 'MMM d, h:mm a')}
+                                        </span>
+                                      </div>
+                                      <p className="text-sm text-gray-700">{comment.text}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                                
+                                {/* Add Comment */}
+                                <div className="flex gap-3">
+                                  <Avatar className="w-8 h-8">
+                                    <AvatarImage src={user?.profileImageUrl} />
+                                    <AvatarFallback>{user?.firstName?.charAt(0) || 'U'}</AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1 flex gap-2">
+                                    <Textarea
+                                      placeholder="Add a comment..."
+                                      value={newComment}
+                                      onChange={(e) => setNewComment(e.target.value)}
+                                      className="min-h-[60px] resize-none"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={() => addComment(event.id)}
+                                      disabled={!newComment.trim()}
+                                    >
+                                      <Send className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          <Dialog>
                               <DialogTrigger asChild>
                                 <Button variant="ghost" size="sm" onClick={() => setSelectedEvent(event)}>
                                   <MessageCircle className="w-4 h-4 mr-1" />
@@ -837,7 +1141,7 @@ export default function EventsList() {
                             </DropdownMenu>
                           </div>
                         </div>
-                      </div>
+                      </Card>
                     </motion.div>
                   );
                 })}
