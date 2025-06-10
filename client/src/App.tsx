@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import Header from "@/components/Header";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -28,24 +29,34 @@ function Router() {
 
   return (
     <>
-      <Switch>
-        {isLoading || !isAuthenticated ? (
-          <Route path="*" component={Landing} />
-        ) : (
-          <>
-            <Route path="/" component={Home} />
-            <Route path="/community" component={Community} />
-            <Route path="/churches" component={Churches} />
-            <Route path="/events" component={Events} />
-            <Route path="/prayer" component={Prayer} />
-            <Route path="/messages" component={Messages} />
-            <Route path="/chat" component={Chat} />
-            <Route path="/leaderboard" component={Leaderboard} />
-            <Route path="/admin" component={AdminPortal} />
-            <Route path="/profile" component={Profile} />
-          </>
-        )}
-      </Switch>
+      <Header />
+      <main className="min-h-screen bg-gray-50">
+        <Switch>
+          {isLoading || !isAuthenticated ? (
+            <Route path="*" component={Landing} />
+          ) : (
+            <>
+              <Route path="/" component={Home} />
+              <Route path="/community" component={Community} />
+              <Route path="/churches" component={Churches} />
+              <Route path="/events" component={Events} />
+              <Route path="/prayer" component={Prayer} />
+              <Route path="/prayers" component={Prayer} />
+              <Route path="/discussions" component={Community} />
+              <Route path="/devotionals" component={Community} />
+              <Route path="/members" component={Community} />
+              <Route path="/gamification" component={Leaderboard} />
+              <Route path="/messages" component={Messages} />
+              <Route path="/chat" component={Chat} />
+              <Route path="/leaderboard" component={Leaderboard} />
+              <Route path="/admin" component={AdminPortal} />
+              <Route path="/member-management" component={AdminPortal} />
+              <Route path="/profile" component={Profile} />
+              <Route component={NotFound} />
+            </>
+          )}
+        </Switch>
+      </main>
       
       {needsOnboarding && (
         <WelcomeWizard 
