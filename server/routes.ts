@@ -3020,6 +3020,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Referral Rewards System Routes
+  app.get('/api/referrals/code', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      let referralCode = user?.referralCode;
+      if (!referralCode) {
+        referralCode = await storage.generateReferralCode(userId);
+      }
+      
+      res.json({ referralCode });
+    } catch (error) {
+      console.error("Error generating referral code:", error);
+      res.status(500).json({ message: "Failed to generate referral code" });
+    }
+  });
+
+  app.post('/api/referrals/validate', async (req, res) => {
+    try {
+      const { referralCode } = req.body;
+      if (!referralCode) {
+        return res.status(400).json({ message: "Referral code required" });
+      }
+
+      const referral = await storage.getReferralByCode(referralCode);
+      const isValid = !!referral;
+      
+      res.json({ valid: isValid, referralCode });
+    } catch (error) {
+      console.error("Error validating referral code:", error);
+      res.status(500).json({ message: "Failed to validate referral code" });
+    }
+  });
+
+  app.post('/api/referrals/process', isAuthenticated, async (req: any, res) => {
+    try {
+      const refereeId = req.user.claims.sub;
+      const { referralCode } = req.body;
+
+      if (!referralCode) {
+        return res.status(400).json({ message: "Referral code required" });
+      }
+
+      // Find the referrer by their referral code
+      const referrer = await storage.getUserByReferralCode(referralCode);
+      if (!referrer) {
+        return res.status(404).json({ message: "Invalid referral code" });
+      }
+
+      // Check if user was already referred
+      const existingReferral = await storage.getUserReferralAsReferee(refereeId);
+      if (existingReferral) {
+        return res.status(400).json({ message: "User already referred by someone else" });
+      }
+
+      // Create referral record
+      const referral = await storage.createReferral({
+        referrerId: referrer.id,
+        refereeId,
+        referralCode,
+        status: 'completed'
+      });
+
+      // Process rewards immediately
+      const rewards = await storage.processReferralReward(referral.id);
+      
+      res.json({
+        success: true,
+        referral,
+        rewards,
+        message: `Welcome! You earned ${rewards.refereePoints} points, and ${referrer.firstName || 'your friend'} earned ${rewards.referrerPoints} points!`
+      });
+    } catch (error) {
+      console.error("Error processing referral:", error);
+      res.status(500).json({ message: "Failed to process referral" });
+    }
+  });
+
+  app.get('/api/referrals/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getUserReferralStats(userId);
+      const milestones = await storage.checkReferralMilestones(userId);
+      
+      res.json({
+        ...stats,
+        recentMilestones: milestones
+      });
+    } catch (error) {
+      console.error("Error fetching referral stats:", error);
+      res.status(500).json({ message: "Failed to fetch referral stats" });
+    }
+  });
+
+  app.get('/api/referrals/my-referrals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const referrals = await storage.getUserReferrals(userId);
+      
+      // Get referee details for each referral
+      const referralsWithDetails = await Promise.all(
+        referrals.map(async (referral) => {
+          const referee = await storage.getUser(referral.refereeId);
+          return {
+            ...referral,
+            referee: {
+              firstName: referee?.firstName,
+              profileImageUrl: referee?.profileImageUrl,
+              joinedAt: referee?.createdAt
+            }
+          };
+        })
+      );
+      
+      res.json(referralsWithDetails);
+    } catch (error) {
+      console.error("Error fetching user referrals:", error);
+      res.status(500).json({ message: "Failed to fetch referrals" });
+    }
+  });
+
+  app.get('/api/referrals/reward-tiers', async (req, res) => {
+    try {
+      const tiers = await storage.getReferralRewardTiers();
+      res.json(tiers);
+    } catch (error) {
+      console.error("Error fetching reward tiers:", error);
+      res.status(500).json({ message: "Failed to fetch reward tiers" });
+    }
+  });
+
+  app.get('/api/referrals/leaderboard', async (req, res) => {
+    try {
+      const leaderboard = await storage.getReferralLeaderboard();
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching referral leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch referral leaderboard" });
+    }
+  });
+
   // Bible in a Day routes
   app.post('/api/bible-in-a-day/sessions', isAuthenticated, async (req: any, res) => {
     try {
