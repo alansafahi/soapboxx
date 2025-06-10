@@ -51,22 +51,17 @@ type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
   console.log('DraftDevotionalsList rendered with churchId:', churchId);
   
+  const queryKey = churchId ? `/api/drafts/devotionals?churchId=${churchId}` : '/api/drafts/devotionals';
+  
   const { data: drafts, isLoading, error } = useQuery({
-    queryKey: ['/api/drafts/devotionals', churchId],
-    queryFn: () => {
-      const url = churchId ? `/api/drafts/devotionals?churchId=${churchId}` : '/api/drafts/devotionals';
-      console.log('Making API request to:', url);
-      return apiRequest(url);
-    },
+    queryKey: [queryKey],
   });
 
   console.log('Draft query result:', { drafts, isLoading, error, churchId });
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/drafts/devotionals/${id}/publish`, {
-        method: 'PATCH',
-      });
+      return apiRequest('PATCH', `/api/drafts/devotionals/${id}/publish`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/devotionals'] });
@@ -76,9 +71,7 @@ function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/drafts/devotionals/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/drafts/devotionals/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/devotionals'] });
@@ -142,12 +135,10 @@ function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
 }
 
 function DraftSeriesList({ churchId }: { churchId: number | null }) {
+  const queryKey = churchId ? `/api/drafts/weekly-series?churchId=${churchId}` : '/api/drafts/weekly-series';
+  
   const { data: drafts, isLoading } = useQuery({
-    queryKey: ['/api/drafts/weekly-series', churchId],
-    queryFn: () => {
-      const url = churchId ? `/api/drafts/weekly-series?churchId=${churchId}` : '/api/drafts/weekly-series';
-      return apiRequest(url);
-    },
+    queryKey: [queryKey],
   });
 
   const publishMutation = useMutation({
@@ -230,12 +221,10 @@ function DraftSeriesList({ churchId }: { churchId: number | null }) {
 }
 
 function DraftMediaList({ churchId }: { churchId: number | null }) {
+  const queryKey = churchId ? `/api/drafts/sermon-media?churchId=${churchId}` : '/api/drafts/sermon-media';
+  
   const { data: drafts, isLoading } = useQuery({
-    queryKey: ['/api/drafts/sermon-media', churchId],
-    queryFn: () => {
-      const url = churchId ? `/api/drafts/sermon-media?churchId=${churchId}` : '/api/drafts/sermon-media';
-      return apiRequest(url);
-    },
+    queryKey: [queryKey],
   });
 
   const publishMutation = useMutation({
@@ -1659,6 +1648,9 @@ export default function AdminPortal() {
                       <TabsContent value="devotional-drafts" className="space-y-4">
                         <div className="mb-4 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded text-sm">
                           Debug: selectedChurch = {JSON.stringify(selectedChurch)}
+                        </div>
+                        <div className="mb-4 p-2 bg-blue-100 dark:bg-blue-900/20 rounded text-sm">
+                          Test: This tab content is rendering properly
                         </div>
                         <DraftDevotionalsList churchId={selectedChurch} />
                       </TabsContent>
