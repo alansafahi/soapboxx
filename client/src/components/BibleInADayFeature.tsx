@@ -197,25 +197,12 @@ export function BibleInADayFeature() {
       p.sectionKey === currentSection.id
     );
     
-    if (existingProgress) {
-      // If section is already completed, move to next section
-      if (existingProgress.isCompleted) {
-        const currentIndex = BIBLE_SECTIONS.findIndex(s => s.id === currentSection.id);
-        if (currentIndex < BIBLE_SECTIONS.length - 1) {
-          const nextSection = BIBLE_SECTIONS[currentIndex + 1];
-          createProgressMutation.mutate({
-            sessionId: activeSession.id,
-            sectionKey: nextSection.id,
-            sectionTitle: nextSection.title,
-          });
-        }
-      } else {
-        // Resume reading current section
-        setIsReading(true);
-        setSectionStartTime(new Date());
-      }
-    } else {
-      // Create new section progress
+    if (existingProgress && !existingProgress.isCompleted) {
+      // Section already started but not completed - just set reading state
+      setIsReading(true);
+      setSectionStartTime(new Date());
+    } else if (!existingProgress) {
+      // Create new section progress and set reading state
       setIsReading(true);
       setSectionStartTime(new Date());
       
@@ -225,6 +212,7 @@ export function BibleInADayFeature() {
         sectionTitle: currentSection.title,
       });
     }
+    // If section is completed, the component will automatically show the next section
   };
 
   const handleCompleteSection = () => {
@@ -524,7 +512,7 @@ export function BibleInADayFeature() {
         </CardHeader>
         
         <CardContent>
-          {!shouldShowReadingState ? (
+          {!shouldShowReadingState && !isReading ? (
             <div className="text-center py-8">
               <Button onClick={handleStartSection} size="lg" className="mb-4">
                 <Play className="h-4 w-4 mr-2" />
