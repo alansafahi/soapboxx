@@ -230,12 +230,12 @@ export default function CheckInSystem() {
                     </Button>
                   </DialogTrigger>
                   
-                  <DialogContent className="max-w-lg">
+                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Daily Spiritual Check-In</DialogTitle>
                     </DialogHeader>
                     
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {/* Check-In Type Selection */}
                       <div>
                         <label className="text-sm font-medium mb-3 block">
@@ -280,7 +280,7 @@ export default function CheckInSystem() {
 
                       {/* Mood Selection */}
                       <div>
-                        <label className="text-sm font-medium mb-3 block">
+                        <label className="text-sm font-medium mb-2 block">
                           How are you feeling? (Optional)
                         </label>
                         <div className="grid grid-cols-4 gap-2">
@@ -288,14 +288,14 @@ export default function CheckInSystem() {
                             <button
                               key={mood.value}
                               onClick={() => setSelectedMood(mood.value === selectedMood ? "" : mood.value)}
-                              className={`p-3 rounded-lg border text-center transition-colors ${
+                              className={`p-2 rounded-lg border text-center transition-colors ${
                                 selectedMood === mood.value
                                   ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
                                   : "border-gray-200 hover:border-gray-300"
                               }`}
                             >
-                              <div className="text-2xl mb-1">{mood.emoji}</div>
-                              <div className="text-xs">{mood.label}</div>
+                              <div className="text-lg mb-1">{mood.emoji}</div>
+                              <div className="text-xs leading-tight">{mood.label}</div>
                             </button>
                           ))}
                         </div>
@@ -311,7 +311,7 @@ export default function CheckInSystem() {
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
                           className="resize-none"
-                          rows={3}
+                          rows={2}
                         />
                       </div>
 
@@ -331,7 +331,6 @@ export default function CheckInSystem() {
                         onClick={handleCheckIn}
                         disabled={checkInMutation.isPending || (selectedType === "Custom" && !customType.trim())}
                         className="w-full"
-                        size="lg"
                       >
                         {checkInMutation.isPending ? "Checking In..." : "Complete Check-In"}
                       </Button>
