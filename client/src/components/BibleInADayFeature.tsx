@@ -376,8 +376,15 @@ export function BibleInADayFeature() {
           url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
           break;
         case 'facebook':
-          // Use Facebook's standard sharer URL for better compatibility
-          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}&hashtag=${encodeURIComponent('#BibleInADay')}`;
+          // Use modern Facebook sharing - only URL is supported, text must be added manually
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+          // Copy text to clipboard for user to paste
+          navigator.clipboard.writeText(shareText).then(() => {
+            toast({ 
+              title: "Text copied to clipboard", 
+              description: "Paste the copied text into your Facebook post" 
+            });
+          });
           break;
         case 'copy':
           navigator.clipboard.writeText(`${shareText} ${shareUrl}`);

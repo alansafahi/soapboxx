@@ -280,7 +280,15 @@ export function DailyBibleFeature() {
           url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(finalShareText)}&url=${encodeURIComponent(shareUrl)}`;
           break;
         case 'facebook':
-          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(finalShareText)}&hashtag=${encodeURIComponent('#DailyBible')}`;
+          // Use modern Facebook sharing - only URL is supported, text must be added manually
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+          // Copy text to clipboard for user to paste
+          navigator.clipboard.writeText(finalShareText).then(() => {
+            toast({ 
+              title: "Text copied to clipboard", 
+              description: "Paste the copied text into your Facebook post" 
+            });
+          });
           break;
       }
       if (url) {
