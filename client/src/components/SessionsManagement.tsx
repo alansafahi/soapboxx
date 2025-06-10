@@ -59,6 +59,8 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  console.log("SessionsManagement selectedChurch:", selectedChurch);
+
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["/api/counseling-sessions", selectedChurch],
     queryFn: async () => {
@@ -71,16 +73,19 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
     enabled: !!selectedChurch,
   });
 
-  const { data: members = [] } = useQuery({
+  const { data: members = [], isLoading: membersLoading, error: membersError } = useQuery({
     queryKey: ["/api/members", selectedChurch],
     queryFn: async () => {
       const url = selectedChurch 
         ? `/api/members?churchId=${selectedChurch}`
         : "/api/members";
-      console.log("Fetching members from:", url);
+      console.log("Fetching members from:", url, "for church:", selectedChurch);
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      console.log("Members data received:", data);
+      console.log("Members data received:", data, "count:", data.length);
       return data;
     },
     enabled: !!selectedChurch,

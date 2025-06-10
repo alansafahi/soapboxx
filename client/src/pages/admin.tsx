@@ -3276,7 +3276,7 @@ export default function AdminPortal() {
               </TabsContent>
 
               <TabsContent value="sessions" className="space-y-6">
-                <SessionsManagement />
+                <SessionsManagement selectedChurch={selectedChurch} />
               </TabsContent>
             </Tabs>
           ) : (
