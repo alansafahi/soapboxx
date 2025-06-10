@@ -457,7 +457,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         eventId,
         userId,
         role: role || 'General Volunteer',
-        notes: notes || ''
+        assignedBy: req.user.claims.sub,
+        description: notes || ''
       };
       
       const volunteer = await storage.addEventVolunteer(volunteerData);
@@ -498,9 +499,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const notificationData = {
         eventId,
-        title,
-        message,
+        message: `${title}: ${message}`,
         notificationType: notificationType || 'general',
+        recipientId: req.user.claims.sub,
+        channelType: 'push',
         scheduledFor: scheduledFor ? new Date(scheduledFor) : new Date()
       };
       
@@ -532,7 +534,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         eventId,
         title,
         content,
-        priority: priority || 'normal'
+        authorId: req.user.claims.sub,
+        updateType: priority || 'normal'
       };
       
       const update = await storage.createEventUpdate(updateData);
@@ -562,7 +565,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const checkInData = {
         eventId,
         userId,
-        checkInTime: new Date()
+        checkedInBy: req.user.claims.sub,
+        checkedInAt: new Date()
       };
       
       const checkIn = await storage.checkInToEvent(checkInData);
@@ -591,10 +595,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const recurrenceData = {
         eventId,
-        pattern,
-        frequency,
+        frequency: frequency || 'weekly',
+        endType: endDate ? 'date' : 'count',
         endDate: endDate ? new Date(endDate) : undefined,
-        maxOccurrences
+        maxOccurrences: maxOccurrences || 10
       };
       
       const recurrence = await storage.createEventRecurrence(recurrenceData);
