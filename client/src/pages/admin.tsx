@@ -55,15 +55,21 @@ function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
   
   const { data: drafts, isLoading, error } = useQuery({
     queryKey: [queryKey],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   console.log('Draft query result:', { 
-    drafts: drafts, 
+    drafts: Array.isArray(drafts) ? drafts.length + ' drafts' : drafts, 
     isLoading, 
     error: error?.message || error, 
     churchId,
     queryKey 
   });
+
+  if (error) {
+    console.error('Draft query error:', error);
+  }
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
