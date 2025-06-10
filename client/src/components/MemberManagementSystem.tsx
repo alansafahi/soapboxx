@@ -24,6 +24,7 @@ import {
   Home, Star, UserCog, BookOpen, Radio, CheckCircle,
   Clock3, AlertCircle
 } from "lucide-react";
+import { SessionsManagement } from "./SessionsManagement";
 
 // Member Directory Component
 function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurch?: number | null }) {
@@ -589,10 +590,16 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="confession">Confession</SelectItem>
-                          <SelectItem value="counseling">Counseling</SelectItem>
-                          <SelectItem value="crisis_prayer">Crisis Prayer</SelectItem>
-                          <SelectItem value="spiritual_guidance">Spiritual Guidance</SelectItem>
+                          <SelectItem value="Individual Counseling">Individual Counseling</SelectItem>
+                          <SelectItem value="Couples Counseling">Couples Counseling</SelectItem>
+                          <SelectItem value="Family Counseling">Family Counseling</SelectItem>
+                          <SelectItem value="Grief Counseling">Grief Counseling</SelectItem>
+                          <SelectItem value="Marriage Preparation">Marriage Preparation</SelectItem>
+                          <SelectItem value="Crisis Intervention">Crisis Intervention</SelectItem>
+                          <SelectItem value="Spiritual Direction">Spiritual Direction</SelectItem>
+                          <SelectItem value="Addiction Support">Addiction Support</SelectItem>
+                          <SelectItem value="Youth Counseling">Youth Counseling</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -859,10 +866,16 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="confession">Confession</SelectItem>
-                        <SelectItem value="counseling">Counseling</SelectItem>
-                        <SelectItem value="crisis_prayer">Crisis Prayer</SelectItem>
-                        <SelectItem value="spiritual_guidance">Spiritual Guidance</SelectItem>
+                        <SelectItem value="Individual Counseling">Individual Counseling</SelectItem>
+                        <SelectItem value="Couples Counseling">Couples Counseling</SelectItem>
+                        <SelectItem value="Family Counseling">Family Counseling</SelectItem>
+                        <SelectItem value="Grief Counseling">Grief Counseling</SelectItem>
+                        <SelectItem value="Marriage Preparation">Marriage Preparation</SelectItem>
+                        <SelectItem value="Crisis Intervention">Crisis Intervention</SelectItem>
+                        <SelectItem value="Spiritual Direction">Spiritual Direction</SelectItem>
+                        <SelectItem value="Addiction Support">Addiction Support</SelectItem>
+                        <SelectItem value="Youth Counseling">Youth Counseling</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -1400,7 +1413,7 @@ export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: nu
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="members">
             <Users className="h-4 w-4 mr-2" />
             Members
@@ -1408,6 +1421,10 @@ export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: nu
           <TabsTrigger value="counseling">
             <HeartHandshake className="h-4 w-4 mr-2" />
             Counseling
+          </TabsTrigger>
+          <TabsTrigger value="sessions">
+            <Calendar className="h-4 w-4 mr-2" />
+            Sessions
           </TabsTrigger>
           <TabsTrigger value="volunteers">
             <ClipboardList className="h-4 w-4 mr-2" />

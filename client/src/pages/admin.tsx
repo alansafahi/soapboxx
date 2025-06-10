@@ -2537,11 +2537,9 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-9">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="management">Management</TabsTrigger>
-                <TabsTrigger value="counseling">Counseling</TabsTrigger>
-                <TabsTrigger value="sessions">Sessions</TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
                 <TabsTrigger value="content">Content</TabsTrigger>
@@ -3277,13 +3275,7 @@ export default function AdminPortal() {
                 <MemberManagementSystem selectedChurch={selectedChurch} />
               </TabsContent>
 
-              <TabsContent value="counseling" className="space-y-6">
-                <CounselingManagement selectedChurch={selectedChurch} />
-              </TabsContent>
 
-              <TabsContent value="sessions" className="space-y-6">
-                <SessionsManagement selectedChurch={selectedChurch} />
-              </TabsContent>
             </Tabs>
           ) : (
             <Card>
