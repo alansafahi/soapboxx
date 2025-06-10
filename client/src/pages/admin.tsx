@@ -71,6 +71,334 @@ function DevotionalStats() {
   );
 }
 
+// Published series viewer
+function PublishedSeries() {
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
+  
+  const { data: series, isLoading } = useQuery({
+    queryKey: ['/api/weekly-series'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (isLoading) return <div className="text-center py-4">Loading published series...</div>;
+
+  const seriesList = Array.isArray(series) ? series : [];
+  const publishedSeries = seriesList.filter(s => s.isPublished && s.publishedAt);
+
+  // Filter by selected year and month
+  const filteredSeries = publishedSeries.filter(s => {
+    const publishedDate = new Date(s.publishedAt);
+    const matchesYear = publishedDate.getFullYear() === selectedYear;
+    const matchesMonth = selectedMonth === 'all' || publishedDate.getMonth() === selectedMonth;
+    return matchesYear && matchesMonth;
+  });
+
+  // Get available years and months for filters
+  const yearsList = publishedSeries.map(s => new Date(s.publishedAt).getFullYear());
+  const uniqueYears = new Set(yearsList);
+  const availableYears = Array.from(uniqueYears).sort((a, b) => b - a);
+  
+  const monthsList = selectedYear ? 
+    publishedSeries
+      .filter(s => new Date(s.publishedAt).getFullYear() === selectedYear)
+      .map(s => new Date(s.publishedAt).getMonth()) : [];
+  const uniqueMonths = new Set(monthsList);
+  const availableMonths = Array.from(uniqueMonths).sort((a, b) => a - b);
+
+  // Group filtered series by month and year
+  const groupedByMonth = filteredSeries.reduce((acc: any, seriesItem: any) => {
+    const publishedDate = new Date(seriesItem.publishedAt);
+    const monthKey = `${publishedDate.getFullYear()}-${publishedDate.getMonth()}`;
+    const monthName = publishedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    if (!acc[monthKey]) {
+      acc[monthKey] = {
+        monthName,
+        series: []
+      };
+    }
+    acc[monthKey].series.push(seriesItem);
+    return acc;
+  }, {});
+
+  // Sort each month's series by date (newest first)
+  Object.values(groupedByMonth).forEach((month: any) => {
+    month.series.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+  });
+
+  const monthEntries = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
+  
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Published Series</h3>
+        <Badge variant="outline">{filteredSeries.length} series</Badge>
+      </div>
+      
+      {/* Year and Month Filters */}
+      <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Year:</label>
+          <Select value={selectedYear.toString()} onValueChange={(value) => {
+            setSelectedYear(parseInt(value));
+            setSelectedMonth('all');
+          }}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Month:</label>
+          <Select value={selectedMonth.toString()} onValueChange={(value) => {
+            setSelectedMonth(value === 'all' ? 'all' : parseInt(value));
+          }}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Months</SelectItem>
+              {availableMonths.map(monthIndex => (
+                <SelectItem key={monthIndex} value={monthIndex.toString()}>
+                  {monthNames[monthIndex]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      {monthEntries.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No published series found
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {monthEntries.map(([monthKey, { monthName, series }]: [string, any]) => (
+            <div key={monthKey} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <h4 className="font-medium">{monthName}</h4>
+                <Badge variant="secondary" className="text-xs">{series.length}</Badge>
+              </div>
+              
+              <div className="grid gap-3">
+                {series.map((seriesItem: any) => (
+                  <Card key={seriesItem.id} className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Book className="h-4 w-4 text-purple-600" />
+                          <h5 className="font-medium">{seriesItem.title}</h5>
+                          <Badge variant="outline" className="text-xs">{seriesItem.category}</Badge>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                          {seriesItem.description?.substring(0, 120)}...
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(seriesItem.publishedAt).toLocaleDateString()}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {seriesItem.duration} weeks
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Published sermon media viewer
+function PublishedSermonMedia() {
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
+  
+  const { data: media, isLoading } = useQuery({
+    queryKey: ['/api/sermon-media'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (isLoading) return <div className="text-center py-4">Loading published sermon media...</div>;
+
+  const mediaList = Array.isArray(media) ? media : [];
+  const publishedMedia = mediaList.filter(m => m.isPublished && m.publishedAt);
+
+  // Filter by selected year and month
+  const filteredMedia = publishedMedia.filter(m => {
+    const publishedDate = new Date(m.publishedAt);
+    const matchesYear = publishedDate.getFullYear() === selectedYear;
+    const matchesMonth = selectedMonth === 'all' || publishedDate.getMonth() === selectedMonth;
+    return matchesYear && matchesMonth;
+  });
+
+  // Get available years and months for filters
+  const yearsList = publishedMedia.map(m => new Date(m.publishedAt).getFullYear());
+  const uniqueYears = new Set(yearsList);
+  const availableYears = Array.from(uniqueYears).sort((a, b) => b - a);
+  
+  const monthsList = selectedYear ? 
+    publishedMedia
+      .filter(m => new Date(m.publishedAt).getFullYear() === selectedYear)
+      .map(m => new Date(m.publishedAt).getMonth()) : [];
+  const uniqueMonths = new Set(monthsList);
+  const availableMonths = Array.from(uniqueMonths).sort((a, b) => a - b);
+
+  // Group filtered media by month and year
+  const groupedByMonth = filteredMedia.reduce((acc: any, mediaItem: any) => {
+    const publishedDate = new Date(mediaItem.publishedAt);
+    const monthKey = `${publishedDate.getFullYear()}-${publishedDate.getMonth()}`;
+    const monthName = publishedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    if (!acc[monthKey]) {
+      acc[monthKey] = {
+        monthName,
+        media: []
+      };
+    }
+    acc[monthKey].media.push(mediaItem);
+    return acc;
+  }, {});
+
+  // Sort each month's media by date (newest first)
+  Object.values(groupedByMonth).forEach((month: any) => {
+    month.media.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+  });
+
+  const monthEntries = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
+  
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Published Sermon Media</h3>
+        <Badge variant="outline">{filteredMedia.length} media files</Badge>
+      </div>
+      
+      {/* Year and Month Filters */}
+      <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Year:</label>
+          <Select value={selectedYear.toString()} onValueChange={(value) => {
+            setSelectedYear(parseInt(value));
+            setSelectedMonth('all');
+          }}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">Month:</label>
+          <Select value={selectedMonth.toString()} onValueChange={(value) => {
+            setSelectedMonth(value === 'all' ? 'all' : parseInt(value));
+          }}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Months</SelectItem>
+              {availableMonths.map(monthIndex => (
+                <SelectItem key={monthIndex} value={monthIndex.toString()}>
+                  {monthNames[monthIndex]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      {monthEntries.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No published sermon media found
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {monthEntries.map(([monthKey, { monthName, media }]: [string, any]) => (
+            <div key={monthKey} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <h4 className="font-medium">{monthName}</h4>
+                <Badge variant="secondary" className="text-xs">{media.length}</Badge>
+              </div>
+              
+              <div className="grid gap-3">
+                {media.map((mediaItem: any) => (
+                  <Card key={mediaItem.id} className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {mediaItem.mediaType === 'video' ? (
+                            <Video className="h-4 w-4 text-red-600" />
+                          ) : (
+                            <Music className="h-4 w-4 text-green-600" />
+                          )}
+                          <h5 className="font-medium">{mediaItem.title}</h5>
+                          <Badge variant="outline" className="text-xs">{mediaItem.mediaType}</Badge>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                          {mediaItem.description?.substring(0, 120)}...
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(mediaItem.publishedAt).toLocaleDateString()}
+                          </span>
+                          {mediaItem.duration && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {mediaItem.duration}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Published devotionals viewer
 function PublishedDevotionals() {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -1896,7 +2224,25 @@ export default function AdminPortal() {
               </TabsContent>
 
               <TabsContent value="published" className="space-y-6">
-                <PublishedDevotionals />
+                <Tabs defaultValue="devotionals" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="devotionals">Devotionals</TabsTrigger>
+                    <TabsTrigger value="series">Series</TabsTrigger>
+                    <TabsTrigger value="media">Sermon Media</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="devotionals" className="space-y-4">
+                    <PublishedDevotionals />
+                  </TabsContent>
+                  
+                  <TabsContent value="series" className="space-y-4">
+                    <PublishedSeries />
+                  </TabsContent>
+                  
+                  <TabsContent value="media" className="space-y-4">
+                    <PublishedSermonMedia />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
               <TabsContent value="discussions" className="space-y-6">
