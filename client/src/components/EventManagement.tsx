@@ -261,6 +261,7 @@ export function EventManagement() {
 
   const onCreateSubmit = (data: EventForm) => {
     console.log("Form data before submission:", data);
+    console.log("Form validation errors:", form.formState.errors);
     
     // Validate that both dates are provided
     if (!data.eventDate || !data.endDate) {
