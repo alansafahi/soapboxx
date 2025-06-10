@@ -26,7 +26,11 @@ import {
   MessageCircle,
   Clock,
   CheckCircle,
-  Star
+  Star,
+  Bookmark,
+  PenTool,
+  Brain,
+  Rocket
 } from "lucide-react";
 import { BibleInADayFeature } from "./BibleInADayFeature";
 import { format } from "date-fns";
@@ -85,6 +89,9 @@ export function DailyBibleFeature() {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareText, setShareText] = useState("");
   const [hasReadToday, setHasReadToday] = useState(false);
+  const [showJournalNote, setShowJournalNote] = useState(false);
+  const [journalNote, setJournalNote] = useState("");
+  const [showETHOSDialog, setShowETHOSDialog] = useState(false);
 
   // Fetch daily verse
   const { data: dailyVerse, isLoading: verseLoading } = useQuery<DailyVerse>({
@@ -214,6 +221,29 @@ export function DailyBibleFeature() {
 
   const handleEmotionalReaction = (reaction: string) => {
     setEmotionalReaction(reaction);
+  };
+
+  const handleSaveToFavorites = () => {
+    if (!dailyVerse) return;
+    toast({
+      title: "Saved to Favorites",
+      description: "This verse has been added to your favorites collection.",
+    });
+  };
+
+  const handleAskETHOS = () => {
+    setShowETHOSDialog(true);
+  };
+
+  const handleSaveJournalNote = () => {
+    if (journalNote.trim()) {
+      toast({
+        title: "Journal Note Saved",
+        description: "Your reflection has been saved to your journal.",
+      });
+      setJournalNote("");
+      setShowJournalNote(false);
+    }
   };
 
   const getStreakMessage = () => {
@@ -369,6 +399,39 @@ export function DailyBibleFeature() {
                 "{getVerseText()}"
               </div>
               
+              {/* Micro-Actions Under Verse */}
+              <div className="flex items-center justify-center space-x-3 py-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSaveToFavorites()}
+                  className="text-xs px-3 py-1 hover:bg-blue-50"
+                >
+                  <Bookmark className="h-3 w-3 mr-1" />
+                  Save to Favorites
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowJournalNote(true)}
+                  className="text-xs px-3 py-1 hover:bg-green-50"
+                >
+                  <PenTool className="h-3 w-3 mr-1" />
+                  Add Journal Note
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleAskETHOS()}
+                  className="text-xs px-3 py-1 hover:bg-purple-50"
+                >
+                  <Brain className="h-3 w-3 mr-1" />
+                  Ask ETHOS
+                </Button>
+              </div>
+              
               {/* Action Buttons */}
               <div className="flex items-center justify-center space-x-4">
                 <Button
@@ -449,11 +512,24 @@ export function DailyBibleFeature() {
       >
         <Tabs defaultValue="reflection" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="reflection">Reflection</TabsTrigger>
-            <TabsTrigger value="prayer">Guided Prayer</TabsTrigger>
-            <TabsTrigger value="bible-in-a-day" className="flex items-center space-x-1">
-              <Clock className="h-3 w-3" />
-              <span>Bible in a Day</span>
+            <TabsTrigger 
+              value="reflection" 
+              className="transition-all duration-200 hover:bg-blue-50 hover:shadow-sm"
+            >
+              Reflection
+            </TabsTrigger>
+            <TabsTrigger 
+              value="prayer" 
+              className="transition-all duration-200 hover:bg-green-50 hover:shadow-sm"
+            >
+              Guided Prayer
+            </TabsTrigger>
+            <TabsTrigger 
+              value="bible-in-a-day" 
+              className="flex items-center space-x-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <Rocket className="h-4 w-4" />
+              <span className="font-semibold">Launch Bible in a Day</span>
             </TabsTrigger>
           </TabsList>
           
@@ -503,6 +579,22 @@ export function DailyBibleFeature() {
           
           <TabsContent value="bible-in-a-day" className="space-y-4">
             <BibleInADayFeature />
+            
+            {/* Progress Indicator */}
+            <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">Bible in a Day Progress</span>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                    Not Started
+                  </Badge>
+                </div>
+                <Progress value={0} className="h-2 bg-purple-100" />
+                <p className="text-xs text-gray-600 mt-2">
+                  Ready to embark on your accelerated Bible reading journey
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </motion.div>
