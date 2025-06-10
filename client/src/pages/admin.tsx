@@ -84,7 +84,7 @@ function PublishedDevotionals() {
   const publishedDevotionals = devotionalList.filter(d => d.isPublished && d.publishedAt);
 
   // Group by month and year
-  const groupedByMonth = publishedDevotionals.reduce((acc, devotional) => {
+  const groupedByMonth = publishedDevotionals.reduce((acc: any, devotional: any) => {
     const publishedDate = new Date(devotional.publishedAt);
     const monthKey = `${publishedDate.getFullYear()}-${publishedDate.getMonth()}`;
     const monthName = publishedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -100,8 +100,8 @@ function PublishedDevotionals() {
   }, {});
 
   // Sort each month's devotionals by date (newest first)
-  Object.values(groupedByMonth).forEach(month => {
-    month.devotionals.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+  Object.values(groupedByMonth).forEach((month: any) => {
+    month.devotionals.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
   });
 
   const months = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
