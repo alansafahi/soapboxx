@@ -9,9 +9,14 @@ import ChurchDiscovery from "@/components/church-discovery";
 import LeaderboardWidget from "@/components/leaderboard-widget";
 import MobileNav from "@/components/mobile-nav";
 import CheckInSystem from "@/components/CheckInSystem";
+import { ReferralWelcome } from "@/components/ReferralWelcome";
 import { useQuery } from "@tanstack/react-query";
 
-export default function Home() {
+interface HomeProps {
+  referralCode?: string | null;
+}
+
+export default function Home({ referralCode }: HomeProps = {}) {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
 
@@ -52,6 +57,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-warm-white dark:bg-gray-900 pt-16">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Referral Welcome Banner */}
+        {referralCode && (
+          <div className="mb-6">
+            <ReferralWelcome referralCode={referralCode} />
+          </div>
+        )}
+        
         {/* Main Social Feed Layout - Twitter/Facebook Style */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Primary Feed Column */}

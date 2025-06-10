@@ -67,7 +67,7 @@ function Router() {
             <Route path="*" component={Landing} />
           ) : (
             <>
-              <Route path="/" component={Home} />
+              <Route path="/" component={() => <Home referralCode={referralCode} />} />
               <Route path="/community" component={Community} />
               <Route path="/churches" component={Churches} />
               <Route path="/events" component={Events} />

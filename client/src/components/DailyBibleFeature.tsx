@@ -1171,14 +1171,14 @@ export function DailyBibleFeature() {
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
-                      value={`${window.location.origin}?ref=${user?.referralCode || 'SOAPBOX'}`}
+                      value={`${window.location.origin}?ref=${(user as any)?.referralCode || 'SOAPBOX'}`}
                       readOnly
                       className="flex-1 text-sm bg-purple-50 border border-purple-200 rounded px-3 py-2 text-purple-800"
                     />
                     <Button
                       size="sm"
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}?ref=${user?.referralCode || 'SOAPBOX'}`);
+                        navigator.clipboard.writeText(`${window.location.origin}?ref=${(user as any)?.referralCode || 'SOAPBOX'}`);
                         toast({
                           title: "Invitation link copied!",
                           description: "Share this with friends and family. You'll both earn bonus points when they join!",
