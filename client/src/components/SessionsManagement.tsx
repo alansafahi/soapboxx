@@ -77,8 +77,11 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
       const url = selectedChurch 
         ? `/api/members?churchId=${selectedChurch}`
         : "/api/members";
+      console.log("Fetching members from:", url);
       const response = await fetch(url);
-      return response.json();
+      const data = await response.json();
+      console.log("Members data received:", data);
+      return data;
     },
     enabled: !!selectedChurch,
   });

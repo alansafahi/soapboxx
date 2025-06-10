@@ -1548,17 +1548,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/members", async (req, res) => {
     try {
       const { churchId } = req.query;
+      console.log("Members API called with churchId:", churchId);
       
       let filteredMembers = membersData;
       
       // Filter by church if churchId is provided
       if (churchId) {
-        filteredMembers = membersData.filter(member => 
-          member.churchAffiliation && 
-          member.churchAffiliation.toLowerCase().includes(churchId.toString().toLowerCase())
-        );
+        const churchMap: Record<string, string> = {
+          "1": "Grace Community Church",
+          "2": "Church On The Way", 
+          "3": "La Mesa"
+        };
+        
+        const churchName = churchMap[String(churchId)];
+        console.log("Church mapping - ID:", churchId, "Name:", churchName);
+        
+        if (churchName) {
+          filteredMembers = membersData.filter(member => 
+            member.churchAffiliation && 
+            member.churchAffiliation.includes(churchName)
+          );
+          console.log(`Filtered members for ${churchName}:`, filteredMembers.length);
+        }
       }
       
+      console.log("Returning members:", filteredMembers.map(m => ({ id: m.id, name: m.fullName, church: m.churchAffiliation })));
       res.json(filteredMembers);
     } catch (error) {
       console.error("Error fetching members:", error);
