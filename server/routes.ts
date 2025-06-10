@@ -1421,6 +1421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "123 Main St, Springfield, IL 62701",
           membershipStatus: "active",
           joinedDate: "2023-01-15",
+          churchId: "1",
           churchAffiliation: "Grace Community Church",
           denomination: "Non-denominational",
           interests: "Youth ministry, music, missions",
@@ -1434,6 +1435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "456 Oak Ave, Springfield, IL 62702",
           membershipStatus: "new_member",
           joinedDate: "2024-11-01",
+          churchId: "1",
           churchAffiliation: "Grace Community Church",
           denomination: "Non-denominational",
           interests: "Choir, women's ministry, Bible study",
@@ -1447,6 +1449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "789 Pine Rd, Springfield, IL 62703",
           membershipStatus: "active",
           joinedDate: "2022-03-20",
+          churchId: "2",
           churchAffiliation: "Church On The Way",
           denomination: "Pentecostal",
           interests: "Teaching, men's ministry, prayer",
@@ -1460,6 +1463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "234 Elm St, Springfield, IL 62704",
           membershipStatus: "active",
           joinedDate: "2021-08-12",
+          churchId: "1",
           churchAffiliation: "Grace Community Church",
           denomination: "Non-denominational",
           interests: "Worship, children's ministry, creative arts",
@@ -1473,6 +1477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "567 Maple Dr, Springfield, IL 62705",
           membershipStatus: "visitor",
           joinedDate: "2024-12-01",
+          churchId: "3",
           churchAffiliation: "La Mesa",
           denomination: "Baptist",
           interests: "Small groups, community service, sports",
@@ -1486,7 +1491,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "890 Cedar Ln, Springfield, IL 62706",
           membershipStatus: "active",
           joinedDate: "2020-06-14",
-          churchAffiliation: "Church On The Way, Grace Community Church",
+          churchId: "2",
+          churchAffiliation: "Church On The Way",
           denomination: "Pentecostal",
           interests: "Women's ministry, prayer, counseling",
           notes: "Women's ministry leader, prayer team coordinator"
@@ -1499,6 +1505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "345 Birch Ave, Springfield, IL 62707",
           membershipStatus: "active",
           joinedDate: "2019-11-30",
+          churchId: "3",
           churchAffiliation: "La Mesa",
           denomination: "Baptist",
           interests: "Leadership, finances, facility management",
@@ -1512,6 +1519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "678 Walnut St, Springfield, IL 62708",
           membershipStatus: "new_member",
           joinedDate: "2024-10-15",
+          churchId: "1",
           churchAffiliation: "Grace Community Church",
           denomination: "Non-denominational",
           interests: "Discipleship, hospitality, newcomer ministry",
@@ -1525,6 +1533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "912 Hickory Ct, Springfield, IL 62709",
           membershipStatus: "inactive",
           joinedDate: "2018-04-22",
+          churchId: "2",
           churchAffiliation: "Church On The Way",
           denomination: "Pentecostal",
           interests: "Missions, evangelism, technology",
@@ -1538,7 +1547,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "456 Spruce Way, Springfield, IL 62710",
           membershipStatus: "visitor",
           joinedDate: "2024-12-08",
-          churchAffiliation: "La Mesa, Grace Community Church",
+          churchId: "3",
+          churchAffiliation: "La Mesa",
           denomination: "Baptist",
           interests: "Family ministry, outreach, Bible study",
           notes: "Visiting family, considering membership"
@@ -1552,20 +1562,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Filter by church if churchId is provided
       if (churchId) {
-        const churchMap: Record<string, string> = {
-          "1": "Grace Community Church",
-          "2": "Church On The Way", 
-          "3": "La Mesa"
-        };
-        
-        const churchName = churchMap[String(churchId)];
-        
-        if (churchName) {
-          filteredMembers = membersData.filter(member => 
-            member.churchAffiliation && 
-            member.churchAffiliation.includes(churchName)
-          );
-        }
+        filteredMembers = membersData.filter(member => 
+          member.churchId === String(churchId)
+        );
       }
       res.json(filteredMembers);
     } catch (error) {
