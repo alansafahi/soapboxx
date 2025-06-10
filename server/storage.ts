@@ -792,7 +792,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(users)
-      .orderBy(asc(users.name));
+      .orderBy(asc(users.firstName));
   }
 
   // User stats and achievements

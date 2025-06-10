@@ -577,6 +577,95 @@ export const communityGroupMembers = pgTable("community_group_members", {
   groupUserUnique: unique().on(table.groupId, table.userId),
 }));
 
+// Push notification system
+export const notificationSettings = pgTable("notification_settings", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  pushEnabled: boolean("push_enabled").default(true),
+  emailEnabled: boolean("email_enabled").default(true),
+  scriptureNotifications: boolean("scripture_notifications").default(true),
+  eventNotifications: boolean("event_notifications").default(true),
+  messageNotifications: boolean("message_notifications").default(true),
+  prayerNotifications: boolean("prayer_notifications").default(true),
+  scriptureTime: varchar("scripture_time", { length: 5 }).default("06:00"), // HH:MM format
+  timezone: varchar("timezone", { length: 50 }).default("America/Los_Angeles"),
+  quietHoursStart: varchar("quiet_hours_start", { length: 5 }).default("22:00"),
+  quietHoursEnd: varchar("quiet_hours_end", { length: 5 }).default("07:00"),
+  weekendNotifications: boolean("weekend_notifications").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const scheduledNotifications = pgTable("scheduled_notifications", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  type: varchar("type", { length: 20 }).notNull(), // scripture, event, message, prayer
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  timezone: varchar("timezone", { length: 50 }).default("America/Los_Angeles"),
+  targetAudience: varchar("target_audience", { length: 20 }).default("all"), // all, members, leaders, group
+  targetGroupId: integer("target_group_id").references(() => communityGroups.id),
+  targetUserIds: text("target_user_ids").array(), // specific user IDs
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: varchar("recurring_pattern", { length: 20 }), // daily, weekly, monthly
+  recurringDays: text("recurring_days").array(), // ['monday', 'tuesday'] for weekly
+  endDate: timestamp("end_date"),
+  status: varchar("status", { length: 20 }).default("scheduled"), // scheduled, sent, cancelled, failed
+  sentAt: timestamp("sent_at"),
+  sentCount: integer("sent_count").default(0),
+  deliveredCount: integer("delivered_count").default(0),
+  openedCount: integer("opened_count").default(0),
+  metadata: text("metadata"), // JSON string for additional data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const notificationDeliveries = pgTable("notification_deliveries", {
+  id: serial("id").primaryKey(),
+  notificationId: integer("notification_id").notNull().references(() => scheduledNotifications.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  deliveryMethod: varchar("delivery_method", { length: 20 }).notNull(), // push, email, sms
+  status: varchar("status", { length: 20 }).default("pending"), // pending, sent, delivered, failed, opened
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  openedAt: timestamp("opened_at"),
+  failureReason: text("failure_reason"),
+  deviceToken: varchar("device_token", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userDevices = pgTable("user_devices", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  deviceToken: varchar("device_token", { length: 255 }).notNull(),
+  platform: varchar("platform", { length: 20 }).notNull(), // ios, android, web
+  deviceInfo: text("device_info"), // JSON string with device details
+  isActive: boolean("is_active").default(true),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const scriptureSchedules = pgTable("scripture_schedules", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  scriptures: text("scriptures").array().notNull(), // Array of scripture references
+  targetAudience: varchar("target_audience", { length: 20 }).default("all"),
+  targetGroupId: integer("target_group_id").references(() => communityGroups.id),
+  scheduleTime: varchar("schedule_time", { length: 5 }).notNull(), // HH:MM format
+  timezone: varchar("timezone", { length: 50 }).default("America/Los_Angeles"),
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  currentIndex: integer("current_index").default(0), // Track current scripture
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userChurches: many(userChurches),
@@ -843,6 +932,22 @@ export type CommunityGroup = typeof communityGroups.$inferSelect;
 
 export type InsertCommunityGroupMember = typeof communityGroupMembers.$inferInsert;
 export type CommunityGroupMember = typeof communityGroupMembers.$inferSelect;
+
+// Notification system type definitions
+export type NotificationSettings = typeof notificationSettings.$inferSelect;
+export type InsertNotificationSettings = typeof notificationSettings.$inferInsert;
+
+export type ScheduledNotification = typeof scheduledNotifications.$inferSelect;
+export type InsertScheduledNotification = typeof scheduledNotifications.$inferInsert;
+
+export type NotificationDelivery = typeof notificationDeliveries.$inferSelect;
+export type InsertNotificationDelivery = typeof notificationDeliveries.$inferInsert;
+
+export type UserDevice = typeof userDevices.$inferSelect;
+export type InsertUserDevice = typeof userDevices.$inferInsert;
+
+export type ScriptureSchedule = typeof scriptureSchedules.$inferSelect;
+export type InsertScriptureSchedule = typeof scriptureSchedules.$inferInsert;
 
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({
