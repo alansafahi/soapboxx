@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, MapPin, Video, Users, Search, Filter, Share2, CalendarPlus, Heart, MessageCircle, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Clock, MapPin, Video, Users, Search, Filter, Share2, CalendarPlus, Heart, MessageCircle, Star, ChevronLeft, ChevronRight, ChevronDown, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, isToday, isTomorrow, isThisWeek, addDays, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, getDay } from "date-fns";
 import type { Event } from "@shared/schema";
@@ -721,46 +722,119 @@ export default function EventsList() {
                               Share
                             </Button>
 
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => {
-                                const startDate = new Date(event.eventDate);
-                                const endDate = event.endDate ? new Date(event.endDate) : addDays(startDate, 1);
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="flex items-center gap-1"
+                                >
+                                  <CalendarPlus className="w-4 h-4" />
+                                  Add to Calendar
+                                  <ChevronDown className="w-3 h-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    const startDate = new Date(event.eventDate);
+                                    const endDate = event.endDate ? new Date(event.endDate) : addDays(startDate, 1);
+                                    
+                                    const formatGoogleDate = (date: Date) => {
+                                      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+                                    };
+                                    
+                                    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location || '')}`;
+                                    window.open(googleUrl, '_blank');
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-green-500 rounded-sm"></div>
+                                    Google Calendar
+                                  </div>
+                                </DropdownMenuItem>
                                 
-                                const formatDate = (date: Date) => {
-                                  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-                                };
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    const startDate = new Date(event.eventDate);
+                                    const endDate = event.endDate ? new Date(event.endDate) : addDays(startDate, 1);
+                                    
+                                    const formatOutlookDate = (date: Date) => {
+                                      return date.toISOString();
+                                    };
+                                    
+                                    const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${formatOutlookDate(startDate)}&enddt=${formatOutlookDate(endDate)}&body=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location || '')}`;
+                                    window.open(outlookUrl, '_blank');
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
+                                    Outlook
+                                  </div>
+                                </DropdownMenuItem>
                                 
-                                const icsContent = [
-                                  'BEGIN:VCALENDAR',
-                                  'VERSION:2.0',
-                                  'PRODID:-//Church Events//EN',
-                                  'BEGIN:VEVENT',
-                                  `DTSTART:${formatDate(startDate)}`,
-                                  `DTEND:${formatDate(endDate)}`,
-                                  `SUMMARY:${event.title.replace(/,/g, '\\,')}`,
-                                  `DESCRIPTION:${(event.description || '').replace(/,/g, '\\,').replace(/\n/g, '\\n')}`,
-                                  `LOCATION:${(event.location || '').replace(/,/g, '\\,')}`,
-                                  `UID:${event.id}@church-events`,
-                                  'END:VEVENT',
-                                  'END:VCALENDAR'
-                                ].join('\r\n');
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    const startDate = new Date(event.eventDate);
+                                    const endDate = event.endDate ? new Date(event.endDate) : addDays(startDate, 1);
+                                    
+                                    const yahooUrl = `https://calendar.yahoo.com/?v=60&view=d&type=20&title=${encodeURIComponent(event.title)}&st=${Math.floor(startDate.getTime()/1000)}&dur=${Math.floor((endDate.getTime() - startDate.getTime())/1000/3600)}&desc=${encodeURIComponent(event.description || '')}&in_loc=${encodeURIComponent(event.location || '')}`;
+                                    window.open(yahooUrl, '_blank');
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 bg-purple-600 rounded-sm"></div>
+                                    Yahoo Calendar
+                                  </div>
+                                </DropdownMenuItem>
                                 
-                                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-                                const link = document.createElement('a');
-                                link.href = URL.createObjectURL(blob);
-                                link.download = `${event.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                URL.revokeObjectURL(link.href);
-                              }}
-                              className="flex items-center gap-1"
-                            >
-                              <CalendarPlus className="w-4 h-4" />
-                              Add to Calendar
-                            </Button>
+                                <DropdownMenuSeparator />
+                                
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    const startDate = new Date(event.eventDate);
+                                    const endDate = event.endDate ? new Date(event.endDate) : addDays(startDate, 1);
+                                    
+                                    const formatDate = (date: Date) => {
+                                      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+                                    };
+                                    
+                                    const icsContent = [
+                                      'BEGIN:VCALENDAR',
+                                      'VERSION:2.0',
+                                      'PRODID:-//Church Events//EN',
+                                      'BEGIN:VEVENT',
+                                      `DTSTART:${formatDate(startDate)}`,
+                                      `DTEND:${formatDate(endDate)}`,
+                                      `SUMMARY:${event.title.replace(/,/g, '\\,')}`,
+                                      `DESCRIPTION:${(event.description || '').replace(/,/g, '\\,').replace(/\n/g, '\\n')}`,
+                                      `LOCATION:${(event.location || '').replace(/,/g, '\\,')}`,
+                                      `UID:${event.id}@church-events`,
+                                      'END:VEVENT',
+                                      'END:VCALENDAR'
+                                    ].join('\r\n');
+                                    
+                                    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+                                    const link = document.createElement('a');
+                                    link.href = URL.createObjectURL(blob);
+                                    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    URL.revokeObjectURL(link.href);
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Download className="w-4 h-4" />
+                                    Download ICS File
+                                  </div>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       </div>
