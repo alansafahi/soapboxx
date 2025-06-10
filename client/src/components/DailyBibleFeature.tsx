@@ -33,8 +33,10 @@ import {
   Rocket
 } from "lucide-react";
 import { BibleInADayFeature } from "./BibleInADayFeature";
+import { NotificationScheduler } from "./NotificationScheduler";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import { Slider } from "@/components/ui/slider";
 
 interface DailyVerse {
   id: number;
@@ -84,6 +86,9 @@ export function DailyBibleFeature() {
   const [selectedVersion, setSelectedVersion] = useState<string>("niv");
   const [reflection, setReflection] = useState("");
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioCurrentTime, setAudioCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [audioVolume, setAudioVolume] = useState(1);
   const [showMeditativeMode, setShowMeditativeMode] = useState(false);
   const [emotionalReaction, setEmotionalReaction] = useState<string>("");
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -92,6 +97,8 @@ export function DailyBibleFeature() {
   const [showJournalNote, setShowJournalNote] = useState(false);
   const [journalNote, setJournalNote] = useState("");
   const [showETHOSDialog, setShowETHOSDialog] = useState(false);
+  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
+  const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
 
   // Fetch daily verse
   const { data: dailyVerse, isLoading: verseLoading } = useQuery<DailyVerse>({
@@ -187,6 +194,78 @@ export function DailyBibleFeature() {
       audioListened: isAudioPlaying,
     });
   };
+
+  // Audio playback functions
+  const initializeAudio = () => {
+    if (dailyVerse?.audioUrl && !audioRef) {
+      const audio = new Audio(dailyVerse.audioUrl);
+      audio.addEventListener('loadedmetadata', () => {
+        setAudioDuration(audio.duration);
+      });
+      audio.addEventListener('timeupdate', () => {
+        setAudioCurrentTime(audio.currentTime);
+      });
+      audio.addEventListener('ended', () => {
+        setIsAudioPlaying(false);
+        setAudioCurrentTime(0);
+      });
+      audio.volume = audioVolume;
+      setAudioRef(audio);
+    }
+  };
+
+  const toggleAudioPlayback = () => {
+    if (!audioRef) {
+      initializeAudio();
+      return;
+    }
+
+    if (isAudioPlaying) {
+      audioRef.pause();
+      setIsAudioPlaying(false);
+    } else {
+      audioRef.play();
+      setIsAudioPlaying(true);
+    }
+  };
+
+  const handleVolumeChange = (newVolume: number) => {
+    setAudioVolume(newVolume);
+    if (audioRef) {
+      audioRef.volume = newVolume;
+    }
+  };
+
+  const handleSeek = (newTime: number) => {
+    if (audioRef) {
+      audioRef.currentTime = newTime;
+      setAudioCurrentTime(newTime);
+    }
+  };
+
+  // Text-to-speech for verses without audio URLs
+  const speakVerse = () => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(`${dailyVerse?.verseReference}. ${getVerseText()}`);
+      utterance.rate = 0.8;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+      setIsAudioPlaying(true);
+      utterance.onend = () => setIsAudioPlaying(false);
+    }
+  };
+
+  useEffect(() => {
+    initializeAudio();
+    return () => {
+      if (audioRef) {
+        audioRef.pause();
+        audioRef.removeEventListener('loadedmetadata', () => {});
+        audioRef.removeEventListener('timeupdate', () => {});
+        audioRef.removeEventListener('ended', () => {});
+      }
+    };
+  }, [dailyVerse?.audioUrl]);
 
   const handleShare = (platform: string) => {
     if (!dailyVerse) return;
@@ -380,16 +459,37 @@ export function DailyBibleFeature() {
                     </SelectContent>
                   </Select>
                   
-                  {dailyVerse.audioUrl && (
+                  <div className="flex items-center space-x-2">
+                    {dailyVerse.audioUrl ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleAudioPlayback}
+                        className="bg-white/80"
+                      >
+                        {isAudioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={speakVerse}
+                        className="bg-white/80"
+                        disabled={isAudioPlaying}
+                      >
+                        <Volume2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleAudioToggle}
+                      onClick={() => setShowNotificationScheduler(true)}
                       className="bg-white/80"
                     >
-                      {isAudioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                      <Bell className="h-4 w-4" />
                     </Button>
-                  )}
+                  </div>
                 </div>
               </div>
             </CardHeader>
