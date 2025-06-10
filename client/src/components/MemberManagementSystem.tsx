@@ -1444,6 +1444,10 @@ export function MemberManagementSystem({ selectedChurch }: { selectedChurch?: nu
           <CounselingScheduling selectedChurch={selectedChurch} />
         </TabsContent>
 
+        <TabsContent value="sessions">
+          <SessionsManagement selectedChurch={selectedChurch} />
+        </TabsContent>
+
         <TabsContent value="volunteers">
           <VolunteerManagement />
         </TabsContent>
