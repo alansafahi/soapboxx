@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, BookOpen, Video, Music, FileText, Edit, Trash2, Eye } from "lucide-react";
+import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, BookOpen, Video, Music, FileText, Edit, Trash2, Eye, Book } from "lucide-react";
 import { insertChurchSchema, insertEventSchema, insertDevotionalSchema, insertWeeklySeriesSchema, insertSermonMediaSchema } from "@shared/schema";
 import { ChurchProfileManager } from "@/components/church-profile-manager";
 
@@ -67,6 +67,106 @@ function DevotionalStats() {
   return (
     <div className="text-sm text-gray-600 dark:text-gray-400">
       Published: {publishedThisMonth} devotionals this month
+    </div>
+  );
+}
+
+// Published devotionals viewer
+function PublishedDevotionals() {
+  const { data: devotionals, isLoading } = useQuery({
+    queryKey: ['/api/devotionals'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (isLoading) return <div className="text-center py-4">Loading published devotionals...</div>;
+
+  const devotionalList = Array.isArray(devotionals) ? devotionals : [];
+  const publishedDevotionals = devotionalList.filter(d => d.isPublished && d.publishedAt);
+
+  // Group by month and year
+  const groupedByMonth = publishedDevotionals.reduce((acc, devotional) => {
+    const publishedDate = new Date(devotional.publishedAt);
+    const monthKey = `${publishedDate.getFullYear()}-${publishedDate.getMonth()}`;
+    const monthName = publishedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    if (!acc[monthKey]) {
+      acc[monthKey] = {
+        monthName,
+        devotionals: []
+      };
+    }
+    acc[monthKey].devotionals.push(devotional);
+    return acc;
+  }, {});
+
+  // Sort each month's devotionals by date (newest first)
+  Object.values(groupedByMonth).forEach(month => {
+    month.devotionals.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+  });
+
+  const months = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Published Devotionals</h3>
+        <Badge variant="outline">{publishedDevotionals.length} total</Badge>
+      </div>
+      
+      {months.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No published devotionals found
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {months.map(([monthKey, { monthName, devotionals }]) => (
+            <div key={monthKey} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <h4 className="font-medium">{monthName}</h4>
+                <Badge variant="secondary" className="text-xs">{devotionals.length}</Badge>
+              </div>
+              
+              <div className="grid gap-3">
+                {devotionals.map((devotional) => (
+                  <Card key={devotional.id} className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <BookOpen className="h-4 w-4 text-blue-600" />
+                          <h5 className="font-medium">{devotional.title}</h5>
+                          <Badge variant="outline" className="text-xs">{devotional.category}</Badge>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                          {devotional.content.substring(0, 120)}...
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>
+                            Published: {new Date(devotional.publishedAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                          {devotional.verseReference && (
+                            <span className="flex items-center gap-1">
+                              <Book className="h-3 w-3" />
+                              {devotional.verseReference}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -1131,11 +1231,12 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="events">Events</TabsTrigger>
                 <TabsTrigger value="content">Content</TabsTrigger>
+                <TabsTrigger value="published">Published</TabsTrigger>
                 <TabsTrigger value="discussions">Discussions</TabsTrigger>
                 <TabsTrigger value="prayers">Prayers</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
@@ -1725,6 +1826,10 @@ export default function AdminPortal() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="published" className="space-y-6">
+                <PublishedDevotionals />
               </TabsContent>
 
               <TabsContent value="discussions" className="space-y-6">
