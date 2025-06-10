@@ -92,6 +92,124 @@ export const userChurches = pgTable("user_churches", {
   userChurchUnique: unique().on(table.userId, table.churchId),
 }));
 
+// User Preferences and Settings for UX Improvements
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  language: varchar("language", { length: 10 }).default("en"), // ISO language codes
+  timezone: varchar("timezone", { length: 50 }).default("UTC"),
+  theme: varchar("theme", { length: 20 }).default("light"), // light, dark, auto
+  fontSize: varchar("font_size", { length: 10 }).default("medium"), // small, medium, large
+  readingSpeed: varchar("reading_speed", { length: 10 }).default("normal"), // slow, normal, fast
+  audioEnabled: boolean("audio_enabled").default(true),
+  audioSpeed: real("audio_speed").default(1.0),
+  familyMode: boolean("family_mode").default(false), // Child-friendly content
+  offlineMode: boolean("offline_mode").default(false),
+  syncEnabled: boolean("sync_enabled").default(true),
+  notificationsEnabled: boolean("notifications_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Push Notification Preferences
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  dailyReading: boolean("daily_reading").default(true),
+  prayerReminders: boolean("prayer_reminders").default(true),
+  communityUpdates: boolean("community_updates").default(true),
+  eventReminders: boolean("event_reminders").default(true),
+  friendActivity: boolean("friend_activity").default(false),
+  dailyReadingTime: varchar("daily_reading_time").default("08:00"), // HH:MM format
+  prayerTimes: text("prayer_times").array().default([]), // Array of HH:MM times
+  customSchedules: jsonb("custom_schedules"), // Complex scheduling rules
+  quietHours: jsonb("quiet_hours"), // Start/end times for no notifications
+  weekendPreferences: jsonb("weekend_preferences"), // Different settings for weekends
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Offline Content Storage
+export const offlineContent = pgTable("offline_content", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  contentType: varchar("content_type", { length: 50 }).notNull(), // verse, devotional, audio, commentary
+  contentId: varchar("content_id").notNull(), // Reference to the actual content
+  contentData: jsonb("content_data").notNull(), // Full content stored for offline access
+  downloadedAt: timestamp("downloaded_at").defaultNow(),
+  lastAccessedAt: timestamp("last_accessed_at"),
+  fileSize: integer("file_size"), // Size in bytes
+  priority: integer("priority").default(0), // Higher priority content kept longer
+  expiresAt: timestamp("expires_at"), // Auto-cleanup old content
+  isStarred: boolean("is_starred").default(false), // User-marked favorites
+});
+
+// Cross-Platform Sync Data
+export const syncData = pgTable("sync_data", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  deviceId: varchar("device_id").notNull(),
+  deviceType: varchar("device_type", { length: 20 }).notNull(), // mobile, tablet, desktop, web
+  platform: varchar("platform", { length: 20 }).notNull(), // ios, android, windows, mac, web
+  lastSyncAt: timestamp("last_sync_at").defaultNow(),
+  syncToken: varchar("sync_token").notNull(),
+  readingProgress: jsonb("reading_progress"), // Current reading positions
+  bookmarks: jsonb("bookmarks"), // Saved verses and positions
+  notes: jsonb("notes"), // User notes and highlights
+  preferences: jsonb("preferences"), // Device-specific preferences
+  isActive: boolean("is_active").default(true),
+});
+
+// AI Personalization Data
+export const userPersonalization = pgTable("user_personalization", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  readingPatterns: jsonb("reading_patterns"), // Times, frequency, preferred books
+  topicInterests: text("topic_interests").array(), // Biblical topics of interest
+  difficultyLevel: varchar("difficulty_level", { length: 20 }).default("intermediate"),
+  readingGoals: jsonb("reading_goals"), // Personal reading objectives
+  engagementScore: real("engagement_score").default(0), // AI-calculated engagement
+  contentRecommendations: jsonb("content_recommendations"), // AI-generated suggestions
+  learningStyle: varchar("learning_style", { length: 20 }).default("mixed"), // visual, auditory, reading
+  spiritualMaturity: varchar("spiritual_maturity", { length: 20 }).default("growing"), // new, growing, mature
+  lastRecommendationUpdate: timestamp("last_recommendation_update"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Content Translations for Multilingual Support
+export const contentTranslations = pgTable("content_translations", {
+  id: serial("id").primaryKey(),
+  contentType: varchar("content_type", { length: 50 }).notNull(), // verse, devotional, commentary
+  contentId: varchar("content_id").notNull(),
+  language: varchar("language", { length: 10 }).notNull(),
+  translatedTitle: text("translated_title"),
+  translatedContent: text("translated_content").notNull(),
+  translatedBy: varchar("translated_by"), // Translator/source
+  translationSource: varchar("translation_source", { length: 100 }), // Bible version, etc.
+  qualityScore: real("quality_score"), // AI or human review score
+  isVerified: boolean("is_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Family-Friendly Content Versions
+export const familyContent = pgTable("family_content", {
+  id: serial("id").primaryKey(),
+  originalContentId: varchar("original_content_id").notNull(),
+  contentType: varchar("content_type", { length: 50 }).notNull(),
+  ageGroup: varchar("age_group", { length: 20 }).notNull(), // preschool, elementary, teen
+  simplifiedTitle: text("simplified_title"),
+  simplifiedContent: text("simplified_content").notNull(),
+  illustrations: jsonb("illustrations"), // Image URLs and descriptions
+  audioUrl: varchar("audio_url"), // Child-friendly narration
+  interactiveElements: jsonb("interactive_elements"), // Games, quizzes, activities
+  parentalNotes: text("parental_notes"), // Discussion guides for parents
+  lessonObjectives: text("lesson_objectives").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Enhanced Friend/Connection System
 export const friendships = pgTable("friendships", {
   id: serial("id").primaryKey(),
@@ -2369,4 +2487,68 @@ export const insertMediaCollectionSchema = createInsertSchema(mediaCollections).
 export const insertMediaCollectionItemSchema = createInsertSchema(mediaCollectionItems).omit({
   id: true,
   createdAt: true,
+});
+
+// UX Improvement Types and Schemas
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertUserPreferences = typeof userPreferences.$inferInsert;
+
+export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreferences = typeof notificationPreferences.$inferInsert;
+
+export type OfflineContent = typeof offlineContent.$inferSelect;
+export type InsertOfflineContent = typeof offlineContent.$inferInsert;
+
+export type SyncData = typeof syncData.$inferSelect;
+export type InsertSyncData = typeof syncData.$inferInsert;
+
+export type UserPersonalization = typeof userPersonalization.$inferSelect;
+export type InsertUserPersonalization = typeof userPersonalization.$inferInsert;
+
+export type ContentTranslations = typeof contentTranslations.$inferSelect;
+export type InsertContentTranslations = typeof contentTranslations.$inferInsert;
+
+export type FamilyContent = typeof familyContent.$inferSelect;
+export type InsertFamilyContent = typeof familyContent.$inferInsert;
+
+// UX Improvement Insert Schemas
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationPreferencesSchema = createInsertSchema(notificationPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOfflineContentSchema = createInsertSchema(offlineContent).omit({
+  id: true,
+  downloadedAt: true,
+});
+
+export const insertSyncDataSchema = createInsertSchema(syncData).omit({
+  id: true,
+  lastSyncAt: true,
+});
+
+export const insertUserPersonalizationSchema = createInsertSchema(userPersonalization).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastRecommendationUpdate: true,
+});
+
+export const insertContentTranslationsSchema = createInsertSchema(contentTranslations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFamilyContentSchema = createInsertSchema(familyContent).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
