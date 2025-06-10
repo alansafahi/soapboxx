@@ -135,7 +135,7 @@ export function DailyBibleFeature() {
       platform: string;
       shareText: string;
     }) => {
-      return await apiRequest("/api/bible/share", "POST", data);
+      return await apiRequest("POST", "/api/bible/share", data);
     },
     onSuccess: () => {
       setShowShareDialog(false);
