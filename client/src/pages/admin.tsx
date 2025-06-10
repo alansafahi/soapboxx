@@ -71,6 +71,31 @@ function DevotionalStats() {
   );
 }
 
+// Media Library Stats component
+function MediaLibraryStats() {
+  const { data: media, isLoading } = useQuery({
+    queryKey: ['/api/sermon-media'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (isLoading) return <div className="text-sm text-gray-600 dark:text-gray-400">Loading library stats...</div>;
+
+  const mediaList = Array.isArray(media) ? media : [];
+  
+  // Count by media type
+  const audioCounts = mediaList.filter(m => m.mediaType === 'audio').length;
+  const videoCounts = mediaList.filter(m => m.mediaType === 'video').length;
+  const documentCounts = mediaList.filter(m => m.mediaType === 'document').length;
+  
+  const totalFiles = audioCounts + videoCounts + documentCounts;
+
+  return (
+    <div className="text-sm text-gray-600 dark:text-gray-400">
+      Library: {audioCounts} audio, {videoCounts} video{documentCounts > 0 ? `, ${documentCounts} document` : ''} files ({totalFiles} total)
+    </div>
+  );
+}
+
 // Published series viewer
 function PublishedSeries() {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -2136,9 +2161,7 @@ export default function AdminPortal() {
                           </div>
                         </DialogContent>
                       </Dialog>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Library: 24 audio, 8 video files
-                      </div>
+                      <MediaLibraryStats />
                     </CardContent>
                   </Card>
                 </div>
