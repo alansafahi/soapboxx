@@ -312,6 +312,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/events/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
       const event = await storage.getEvent(id);
       if (!event) {
         return res.status(404).json({ message: "Event not found" });

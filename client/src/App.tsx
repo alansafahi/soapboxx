@@ -28,12 +28,8 @@ function Router() {
   // Check if user needs onboarding
   const needsOnboarding = isAuthenticated && user && !(user as any).hasCompletedOnboarding && !showWelcomeWizard;
 
-  // Don't show the main header on admin routes since they have their own header
-  const isAdminRoute = location.startsWith('/admin') || location.startsWith('/member-management');
-
   return (
     <>
-      {!isAdminRoute && <Header />}
       <main className="min-h-screen bg-gray-50">
         <Switch>
           {isLoading || !isAuthenticated ? (
