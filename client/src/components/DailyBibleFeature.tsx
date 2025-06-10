@@ -108,13 +108,7 @@ export function DailyBibleFeature() {
       emotionalReaction?: string;
       audioListened?: boolean;
     }) => {
-      return await apiRequest("/api/bible/reading", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      return await apiRequest("/api/bible/reading", "POST", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bible/streak"] });
@@ -141,13 +135,7 @@ export function DailyBibleFeature() {
       platform: string;
       shareText: string;
     }) => {
-      return await apiRequest("/api/bible/share", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      return await apiRequest("/api/bible/share", "POST", data);
     },
     onSuccess: () => {
       setShowShareDialog(false);
@@ -373,7 +361,7 @@ export function DailyBibleFeature() {
                   onClick={() => setShowMeditativeMode(true)}
                   className="bg-white/80"
                 >
-                  <PrayingHands className="h-4 w-4 mr-2" />
+                  <HandHeart className="h-4 w-4 mr-2" />
                   Pause & Reflect
                 </Button>
                 

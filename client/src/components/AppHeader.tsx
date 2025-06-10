@@ -18,6 +18,7 @@ export default function AppHeader() {
   const navigationItems = [
     { href: "/", label: "Churches" },
     { href: "/events", label: "Events" },
+    { href: "/bible", label: "Daily Bible" },
     { href: "/messages", label: "Messages" },
     { href: "/admin", label: "Admin Portal" },
   ];

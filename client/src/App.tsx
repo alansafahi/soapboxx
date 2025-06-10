@@ -17,6 +17,7 @@ import Events from "@/pages/events";
 import Prayer from "@/pages/prayer";
 import Messages from "@/pages/messages";
 import Leaderboard from "@/pages/leaderboard";
+import BiblePage from "@/pages/bible";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { useState } from "react";
 
@@ -43,6 +44,7 @@ function Router() {
               <Route path="/events" component={Events} />
               <Route path="/prayer" component={Prayer} />
               <Route path="/prayers" component={Prayer} />
+              <Route path="/bible" component={BiblePage} />
               <Route path="/discussions" component={Community} />
               <Route path="/devotionals" component={Community} />
               <Route path="/members" component={Community} />
