@@ -40,7 +40,7 @@ export default function AppHeader() {
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
               <img 
-                src="/attached_assets/SoapBx logo_1749447146620.jpeg" 
+                src="/attached_assets/SoapBx logo_1749541085059.jpeg" 
                 alt="SoapBox Logo" 
                 className="w-8 h-8 rounded-lg object-cover"
               />
