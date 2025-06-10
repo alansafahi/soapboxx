@@ -2593,11 +2593,11 @@ export default function AdminPortal() {
                   </TabsContent>
 
                   <TabsContent value="counseling" className="space-y-6">
-                    <CounselingManagement />
+                    <CounselingManagement selectedChurch={selectedChurch} />
                   </TabsContent>
 
                   <TabsContent value="sessions" className="space-y-6">
-                    <SessionsManagement />
+                    <SessionsManagement selectedChurch={selectedChurch} />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
