@@ -20,12 +20,31 @@ import Leaderboard from "@/pages/leaderboard";
 import BiblePage from "@/pages/bible";
 import BibleReader from "@/pages/BibleReader";
 import WelcomeWizard from "@/components/welcome-wizard";
-import { useState } from "react";
+import { ReferralWelcome } from "@/components/ReferralWelcome";
+import { useState, useEffect } from "react";
 
 function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [showWelcomeWizard, setShowWelcomeWizard] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
   const [location] = useLocation();
+
+  // Extract referral code from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      // Store in localStorage for persistence across auth flow
+      localStorage.setItem('pendingReferralCode', refCode);
+    } else {
+      // Check if we have a stored referral code from auth flow
+      const storedRefCode = localStorage.getItem('pendingReferralCode');
+      if (storedRefCode) {
+        setReferralCode(storedRefCode);
+      }
+    }
+  }, [location]);
 
   // Check if user needs onboarding
   const needsOnboarding = isAuthenticated && user && !(user as any).hasCompletedOnboarding && !showWelcomeWizard;

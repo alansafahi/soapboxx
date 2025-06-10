@@ -3811,6 +3811,53 @@ export class DatabaseStorage implements IStorage {
     return referralCode;
   }
 
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.referralCode, referralCode));
+    return user;
+  }
+
+  async getUserReferralAsReferee(userId: string): Promise<Referral | undefined> {
+    const [referral] = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.refereeId, userId));
+    return referral;
+  }
+
+  async getReferralLeaderboard(): Promise<Array<{
+    userId: string;
+    firstName: string | null;
+    profileImageUrl: string | null;
+    totalReferrals: number;
+    totalPointsEarned: number;
+  }>> {
+    const leaderboard = await db
+      .select({
+        userId: referrals.referrerId,
+        firstName: users.firstName,
+        profileImageUrl: users.profileImageUrl,
+        totalReferrals: sql`COUNT(${referrals.id})`.as('totalReferrals'),
+        totalPointsEarned: sql`SUM(${referrals.referrerPointsAwarded})`.as('totalPointsEarned')
+      })
+      .from(referrals)
+      .innerJoin(users, eq(referrals.referrerId, users.id))
+      .where(eq(referrals.status, 'rewarded'))
+      .groupBy(referrals.referrerId, users.firstName, users.profileImageUrl)
+      .orderBy(sql`COUNT(${referrals.id}) DESC`)
+      .limit(10);
+
+    return leaderboard.map(entry => ({
+      userId: entry.userId,
+      firstName: entry.firstName,
+      profileImageUrl: entry.profileImageUrl,
+      totalReferrals: Number(entry.totalReferrals),
+      totalPointsEarned: Number(entry.totalPointsEarned) || 0
+    }));
+  }
+
   private async addUserPoints(userId: string, points: number): Promise<void> {
     // Check if user has a score record
     const [existingScore] = await db

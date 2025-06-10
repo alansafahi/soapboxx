@@ -87,7 +87,7 @@ interface BibleBadge {
 export function DailyBibleFeature() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [selectedVersion, setSelectedVersion] = useState<string>("niv");
   const [reflection, setReflection] = useState("");
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
