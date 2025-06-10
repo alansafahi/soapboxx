@@ -45,6 +45,8 @@ export const users = pgTable("users", {
   interests: text("interests").array(),
   hasCompletedOnboarding: boolean("has_completed_onboarding").default(false),
   onboardingData: jsonb("onboarding_data"), // Store wizard responses
+  referredBy: varchar("referred_by"), // ID of user who referred this user
+  referralCode: varchar("referral_code").unique(), // This user's unique referral code
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1622,6 +1624,49 @@ export const insertBibleVerseShareSchema = createInsertSchema(bibleVerseShares).
 export const insertBibleInADaySessionSchema = createInsertSchema(bibleInADaySessions).omit({ id: true, startedAt: true });
 export const insertBibleInADaySectionProgressSchema = createInsertSchema(bibleInADaySectionProgress).omit({ id: true, startedAt: true });
 
+// Referral Rewards System
+export const referrals = pgTable("referrals", {
+  id: serial("id").primaryKey(),
+  referrerId: varchar("referrer_id").notNull().references(() => users.id),
+  refereeId: varchar("referee_id").notNull().references(() => users.id),
+  referralCode: varchar("referral_code").notNull(),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, completed, rewarded
+  referrerPointsAwarded: integer("referrer_points_awarded").default(0),
+  refereePointsAwarded: integer("referee_points_awarded").default(0),
+  referrerRewardedAt: timestamp("referrer_rewarded_at"),
+  refereeRewardedAt: timestamp("referee_rewarded_at"),
+  completedAt: timestamp("completed_at"), // When referee completed onboarding
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Referral reward tiers and bonuses
+export const referralRewards = pgTable("referral_rewards", {
+  id: serial("id").primaryKey(),
+  tier: varchar("tier", { length: 20 }).notNull(), // bronze, silver, gold, platinum
+  minReferrals: integer("min_referrals").notNull(),
+  referrerBasePoints: integer("referrer_base_points").default(500), // Base points for each successful referral
+  refereeWelcomePoints: integer("referee_welcome_points").default(250), // Welcome bonus for new users
+  tierBonusPoints: integer("tier_bonus_points").default(0), // Additional bonus for reaching tier
+  bonusDescription: text("bonus_description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Referral milestones and special rewards
+export const referralMilestones = pgTable("referral_milestones", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  milestoneType: varchar("milestone_type", { length: 50 }).notNull(), // first_referral, fifth_referral, tenth_referral, etc.
+  totalReferrals: integer("total_referrals").notNull(),
+  bonusPoints: integer("bonus_points").notNull(),
+  badgeAwarded: varchar("badge_awarded", { length: 100 }),
+  achievedAt: timestamp("achieved_at").defaultNow(),
+  pointsAwarded: boolean("points_awarded").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Volunteer Management System
 
 // Volunteer roles
@@ -1953,6 +1998,37 @@ export type InsertNotificationDelivery = typeof notificationDeliveries.$inferIns
 
 export type UserDevice = typeof userDevices.$inferSelect;
 export type InsertUserDevice = typeof userDevices.$inferInsert;
+
+// Referral system type definitions
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = typeof referrals.$inferInsert;
+
+export type ReferralReward = typeof referralRewards.$inferSelect;
+export type InsertReferralReward = typeof referralRewards.$inferInsert;
+
+export type ReferralMilestone = typeof referralMilestones.$inferSelect;
+export type InsertReferralMilestone = typeof referralMilestones.$inferInsert;
+
+// Referral form schemas
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralForm = z.infer<typeof insertReferralSchema>;
+
+export const insertReferralRewardSchema = createInsertSchema(referralRewards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReferralRewardForm = z.infer<typeof insertReferralRewardSchema>;
+
+export const insertReferralMilestoneSchema = createInsertSchema(referralMilestones).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertReferralMilestoneForm = z.infer<typeof insertReferralMilestoneSchema>;
 
 export type ScriptureSchedule = typeof scriptureSchedules.$inferSelect;
 export type InsertScriptureSchedule = typeof scriptureSchedules.$inferInsert;

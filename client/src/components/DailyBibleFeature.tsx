@@ -1171,17 +1171,17 @@ export function DailyBibleFeature() {
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
-                      value={`${window.location.origin}?invited=true`}
+                      value={`${window.location.origin}?ref=${user?.referralCode || 'SOAPBOX'}`}
                       readOnly
                       className="flex-1 text-sm bg-purple-50 border border-purple-200 rounded px-3 py-2 text-purple-800"
                     />
                     <Button
                       size="sm"
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}?invited=true`);
+                        navigator.clipboard.writeText(`${window.location.origin}?ref=${user?.referralCode || 'SOAPBOX'}`);
                         toast({
                           title: "Invitation link copied!",
-                          description: "Share this with friends and family to invite them to join your spiritual journey.",
+                          description: "Share this with friends and family. You'll both earn bonus points when they join!",
                           duration: 3000,
                         });
                       }}
@@ -1189,6 +1189,15 @@ export function DailyBibleFeature() {
                     >
                       Copy Link
                     </Button>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-3 border border-yellow-200 mb-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🎁</span>
+                    <div>
+                      <p className="text-sm font-semibold text-orange-800">Referral Rewards</p>
+                      <p className="text-xs text-orange-700">You earn 500 points • They get 250 welcome points</p>
+                    </div>
                   </div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">

@@ -200,6 +200,15 @@ import {
   type InsertMediaCollection,
   type MediaCollectionItem,
   type InsertMediaCollectionItem,
+  referrals,
+  referralRewards,
+  referralMilestones,
+  type Referral,
+  type InsertReferral,
+  type ReferralReward,
+  type InsertReferralReward,
+  type ReferralMilestone,
+  type InsertReferralMilestone,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte } from "drizzle-orm";
@@ -416,6 +425,17 @@ export interface IStorage {
   addMediaToCollection(collectionId: number, mediaFileId: number): Promise<MediaCollectionItem>;
   removeMediaFromCollection(collectionId: number, mediaFileId: number): Promise<void>;
   getCollectionMedia(collectionId: number): Promise<MediaFile[]>;
+
+  // Referral Rewards System
+  createReferral(referral: InsertReferral): Promise<Referral>;
+  getReferralByCode(referralCode: string): Promise<Referral | undefined>;
+  getUserReferrals(userId: string): Promise<Referral[]>;
+  updateReferral(id: number, updates: Partial<Referral>): Promise<Referral>;
+  processReferralReward(referralId: number): Promise<{ referrerPoints: number; refereePoints: number }>;
+  getUserReferralStats(userId: string): Promise<{ totalReferrals: number; successfulReferrals: number; totalPointsEarned: number }>;
+  getReferralRewardTiers(): Promise<ReferralReward[]>;
+  checkReferralMilestones(userId: string): Promise<ReferralMilestone[]>;
+  generateReferralCode(userId: string): Promise<string>;
 
   // Daily Bible Feature
   getDailyVerse(date?: Date): Promise<DailyVerse | undefined>;
@@ -3619,6 +3639,204 @@ export class DatabaseStorage implements IStorage {
       .from(userBibleReadings)
       .where(gte(userBibleReadings.readDate, date));
     return readings.length;
+  }
+
+  // Referral Rewards System Implementation
+  async createReferral(referral: InsertReferral): Promise<Referral> {
+    const [newReferral] = await db
+      .insert(referrals)
+      .values(referral)
+      .returning();
+    return newReferral;
+  }
+
+  async getReferralByCode(referralCode: string): Promise<Referral | undefined> {
+    const [referral] = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referralCode, referralCode));
+    return referral;
+  }
+
+  async getUserReferrals(userId: string): Promise<Referral[]> {
+    return await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referrerId, userId))
+      .orderBy(desc(referrals.createdAt));
+  }
+
+  async updateReferral(id: number, updates: Partial<Referral>): Promise<Referral> {
+    const [updatedReferral] = await db
+      .update(referrals)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(referrals.id, id))
+      .returning();
+    return updatedReferral;
+  }
+
+  async processReferralReward(referralId: number): Promise<{ referrerPoints: number; refereePoints: number }> {
+    const [referral] = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.id, referralId));
+
+    if (!referral || referral.status === 'rewarded') {
+      return { referrerPoints: 0, refereePoints: 0 };
+    }
+
+    // Get active reward tiers
+    const rewardTiers = await this.getReferralRewardTiers();
+    const bronzeTier = rewardTiers.find(tier => tier.tier === 'bronze') || {
+      referrerBasePoints: 500,
+      refereeWelcomePoints: 250,
+      tierBonusPoints: 0
+    };
+
+    const referrerPoints = bronzeTier.referrerBasePoints || 500;
+    const refereePoints = bronzeTier.refereeWelcomePoints || 250;
+
+    // Award points to both users
+    await this.addUserPoints(referral.referrerId, referrerPoints);
+    await this.addUserPoints(referral.refereeId, refereePoints);
+
+    // Update referral status
+    await this.updateReferral(referralId, {
+      status: 'rewarded',
+      referrerPointsAwarded: referrerPoints,
+      refereePointsAwarded: refereePoints,
+      referrerRewardedAt: new Date(),
+      refereeRewardedAt: new Date(),
+      completedAt: new Date()
+    });
+
+    // Check for milestones
+    await this.checkReferralMilestones(referral.referrerId);
+
+    return { referrerPoints, refereePoints };
+  }
+
+  async getUserReferralStats(userId: string): Promise<{ totalReferrals: number; successfulReferrals: number; totalPointsEarned: number }> {
+    const userReferrals = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referrerId, userId));
+
+    const totalReferrals = userReferrals.length;
+    const successfulReferrals = userReferrals.filter(r => r.status === 'rewarded').length;
+    const totalPointsEarned = userReferrals.reduce((sum, r) => sum + (r.referrerPointsAwarded || 0), 0);
+
+    return {
+      totalReferrals,
+      successfulReferrals,
+      totalPointsEarned
+    };
+  }
+
+  async getReferralRewardTiers(): Promise<ReferralReward[]> {
+    return await db
+      .select()
+      .from(referralRewards)
+      .where(eq(referralRewards.isActive, true))
+      .orderBy(referralRewards.minReferrals);
+  }
+
+  async checkReferralMilestones(userId: string): Promise<ReferralMilestone[]> {
+    const stats = await this.getUserReferralStats(userId);
+    const existingMilestones = await db
+      .select()
+      .from(referralMilestones)
+      .where(eq(referralMilestones.userId, userId));
+
+    const newMilestones: ReferralMilestone[] = [];
+
+    // Define milestone thresholds and rewards
+    const milestoneThresholds = [
+      { type: 'first_referral', threshold: 1, points: 100, badge: 'Evangelist Seed' },
+      { type: 'fifth_referral', threshold: 5, points: 300, badge: 'Community Builder' },
+      { type: 'tenth_referral', threshold: 10, points: 500, badge: 'Spiritual Mentor' },
+      { type: 'twenty_fifth_referral', threshold: 25, points: 1000, badge: 'Faith Ambassador' },
+      { type: 'fiftieth_referral', threshold: 50, points: 2000, badge: 'Kingdom Multiplier' }
+    ];
+
+    for (const milestone of milestoneThresholds) {
+      if (stats.successfulReferrals >= milestone.threshold) {
+        const alreadyAwarded = existingMilestones.some(m => m.milestoneType === milestone.type);
+        
+        if (!alreadyAwarded) {
+          const [newMilestone] = await db
+            .insert(referralMilestones)
+            .values({
+              userId,
+              milestoneType: milestone.type,
+              totalReferrals: stats.successfulReferrals,
+              bonusPoints: milestone.points,
+              badgeAwarded: milestone.badge,
+              pointsAwarded: false
+            })
+            .returning();
+
+          // Award bonus points
+          await this.addUserPoints(userId, milestone.points);
+          
+          // Mark points as awarded
+          await db
+            .update(referralMilestones)
+            .set({ pointsAwarded: true })
+            .where(eq(referralMilestones.id, newMilestone.id));
+
+          newMilestones.push(newMilestone);
+        }
+      }
+    }
+
+    return newMilestones;
+  }
+
+  async generateReferralCode(userId: string): Promise<string> {
+    // Create a unique referral code based on user ID and timestamp
+    const timestamp = Date.now().toString(36);
+    const userHash = userId.slice(-6);
+    const referralCode = `SB${userHash}${timestamp}`.toUpperCase();
+
+    // Update user with referral code if they don't have one
+    const user = await this.getUser(userId);
+    if (user && !user.referralCode) {
+      await db
+        .update(users)
+        .set({ referralCode })
+        .where(eq(users.id, userId));
+    }
+
+    return referralCode;
+  }
+
+  private async addUserPoints(userId: string, points: number): Promise<void> {
+    // Check if user has a score record
+    const [existingScore] = await db
+      .select()
+      .from(userScores)
+      .where(eq(userScores.userId, userId));
+
+    if (existingScore) {
+      await db
+        .update(userScores)
+        .set({
+          totalPoints: sql`${userScores.totalPoints} + ${points}`,
+          updatedAt: new Date()
+        })
+        .where(eq(userScores.userId, userId));
+    } else {
+      await db
+        .insert(userScores)
+        .values({
+          userId,
+          totalPoints: points,
+          level: 1,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+    }
   }
 }
 
