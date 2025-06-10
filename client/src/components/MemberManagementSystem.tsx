@@ -32,7 +32,6 @@ function MemberDirectory() {
 
   const { data: members = [], isLoading, error } = useQuery({
     queryKey: ["/api/members"],
-    queryFn: () => apiRequest("/api/members"),
   });
 
   console.log("Members data:", members);
