@@ -2491,7 +2491,7 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs defaultValue="dashboard" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="dashboard">
                   <Building className="h-4 w-4 mr-2" />
                   Dashboard
@@ -2503,6 +2503,10 @@ export default function AdminPortal() {
                 <TabsTrigger value="ministry">
                   <Heart className="h-4 w-4 mr-2" />
                   Ministry
+                </TabsTrigger>
+                <TabsTrigger value="volunteers">
+                  <HeartHandshake className="h-4 w-4 mr-2" />
+                  Volunteers
                 </TabsTrigger>
                 <TabsTrigger value="media">
                   <Video className="h-4 w-4 mr-2" />
@@ -3106,6 +3110,10 @@ export default function AdminPortal() {
                     <PrayerManagementSystem />
                   </TabsContent>
                 </Tabs>
+              </TabsContent>
+
+              <TabsContent value="volunteers" className="space-y-6">
+                <VolunteerManagementSystem />
               </TabsContent>
 
               <TabsContent value="media" className="space-y-6">
