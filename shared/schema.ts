@@ -165,6 +165,14 @@ export const prayerRequests = pgTable("prayer_requests", {
   prayerCount: integer("prayer_count").default(0),
   isPublic: boolean("is_public").default(true),
   category: varchar("category", { length: 50 }), // health, family, guidance, gratitude, other
+  status: varchar("status", { length: 20 }).default("pending"), // pending, approved, flagged, archived
+  moderationNotes: text("moderation_notes"),
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  priority: varchar("priority", { length: 10 }).default("normal"), // urgent, high, normal, low
+  followUpDate: timestamp("follow_up_date"),
+  lastFollowUpAt: timestamp("last_follow_up_at"),
+  isUrgent: boolean("is_urgent").default(false),
+  tags: text("tags").array(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -176,6 +184,41 @@ export const prayerResponses = pgTable("prayer_responses", {
   userId: varchar("user_id").notNull().references(() => users.id),
   responseType: varchar("response_type", { length: 20 }).default("prayed"), // "prayed" or "support"
   content: text("content"), // Support message content (null for simple "prayed" responses)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Prayer follow-ups for admin tracking
+export const prayerFollowUps = pgTable("prayer_follow_ups", {
+  id: serial("id").primaryKey(),
+  prayerRequestId: integer("prayer_request_id").notNull().references(() => prayerRequests.id),
+  adminId: varchar("admin_id").notNull().references(() => users.id),
+  followUpType: varchar("follow_up_type", { length: 20 }).notNull(), // check_in, update, encouragement, resolved
+  notes: text("notes"),
+  nextFollowUpDate: timestamp("next_follow_up_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Prayer updates from members
+export const prayerUpdates = pgTable("prayer_updates", {
+  id: serial("id").primaryKey(),
+  prayerRequestId: integer("prayer_request_id").notNull().references(() => prayerRequests.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  updateType: varchar("update_type", { length: 20 }).notNull(), // progress, answered, testimony, request_change
+  content: text("content").notNull(),
+  isPublic: boolean("is_public").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Prayer assignments for pastoral care
+export const prayerAssignments = pgTable("prayer_assignments", {
+  id: serial("id").primaryKey(),
+  prayerRequestId: integer("prayer_request_id").notNull().references(() => prayerRequests.id),
+  assignedBy: varchar("assigned_by").notNull().references(() => users.id),
+  assignedTo: varchar("assigned_to").notNull().references(() => users.id),
+  role: varchar("role", { length: 30 }).notNull(), // pastor, prayer_team, counselor
+  notes: text("notes"),
+  status: varchar("status", { length: 20 }).default("active"), // active, completed, transferred
+  completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -831,6 +874,21 @@ export const insertPrayerRequestSchema = createInsertSchema(prayerRequests).omit
   prayerCount: true,
   isAnswered: true,
   answeredAt: true,
+});
+
+export const insertPrayerFollowUpSchema = createInsertSchema(prayerFollowUps).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPrayerUpdateSchema = createInsertSchema(prayerUpdates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPrayerAssignmentSchema = createInsertSchema(prayerAssignments).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertEventRsvpSchema = createInsertSchema(eventRsvps).omit({
