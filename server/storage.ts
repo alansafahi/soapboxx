@@ -36,8 +36,26 @@ import {
   mediaFiles,
   mediaCollections,
   mediaCollectionItems,
+  dailyVerses,
+  userBibleStreaks,
+  userBibleReadings,
+  bibleBadges,
+  userBibleBadges,
+  bibleVerseShares,
   type User,
   type UpsertUser,
+  type DailyVerse,
+  type InsertDailyVerse,
+  type UserBibleStreak,
+  type InsertUserBibleStreak,
+  type UserBibleReading,
+  type InsertUserBibleReading,
+  type BibleBadge,
+  type InsertBibleBadge,
+  type UserBibleBadge,
+  type InsertUserBibleBadge,
+  type BibleVerseShare,
+  type InsertBibleVerseShare,
   type Church,
   type InsertChurch,
   type UserChurch,
@@ -368,6 +386,19 @@ export interface IStorage {
   addMediaToCollection(collectionId: number, mediaFileId: number): Promise<MediaCollectionItem>;
   removeMediaFromCollection(collectionId: number, mediaFileId: number): Promise<void>;
   getCollectionMedia(collectionId: number): Promise<MediaFile[]>;
+
+  // Daily Bible Feature
+  getDailyVerse(date?: Date): Promise<DailyVerse | undefined>;
+  createDailyVerse(verse: InsertDailyVerse): Promise<DailyVerse>;
+  getUserBibleStreak(userId: string): Promise<UserBibleStreak | undefined>;
+  updateUserBibleStreak(userId: string, updates: Partial<InsertUserBibleStreak>): Promise<UserBibleStreak>;
+  recordBibleReading(reading: InsertUserBibleReading): Promise<UserBibleReading>;
+  getUserBibleReadings(userId: string): Promise<UserBibleReading[]>;
+  getBibleBadges(): Promise<BibleBadge[]>;
+  getUserBibleBadges(userId: string): Promise<UserBibleBadge[]>;
+  awardBibleBadge(userId: string, badgeId: number): Promise<UserBibleBadge>;
+  shareBibleVerse(share: InsertBibleVerseShare): Promise<BibleVerseShare>;
+  getBibleVerseShares(dailyVerseId: number): Promise<BibleVerseShare[]>;
 }
 
 export class DatabaseStorage implements IStorage {

@@ -1246,6 +1246,76 @@ export const devotionalMedia = pgTable("devotional_media", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Daily Bible Feature Tables
+export const dailyVerses = pgTable("daily_verses", {
+  id: serial("id").primaryKey(),
+  date: timestamp("date").notNull(),
+  verseReference: varchar("verse_reference", { length: 100 }).notNull(), // e.g., "John 3:16"
+  verseText: text("verse_text").notNull(),
+  verseTextNiv: text("verse_text_niv"),
+  verseTextKjv: text("verse_text_kjv"),
+  verseTextEsv: text("verse_text_esv"),
+  verseTextNlt: text("verse_text_nlt"),
+  theme: varchar("theme", { length: 200 }), // e.g., "Peace in Uncertainty"
+  reflectionPrompt: text("reflection_prompt"),
+  guidedPrayer: text("guided_prayer"),
+  backgroundImageUrl: varchar("background_image_url"),
+  audioUrl: varchar("audio_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userBibleStreaks = pgTable("user_bible_streaks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastReadDate: timestamp("last_read_date"),
+  totalDaysRead: integer("total_days_read").default(0),
+  versesMemorized: integer("verses_memorized").default(0),
+  graceDaysUsed: integer("grace_days_used").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userBibleReadings = pgTable("user_bible_readings", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  dailyVerseId: integer("daily_verse_id").notNull().references(() => dailyVerses.id),
+  readAt: timestamp("read_at").defaultNow(),
+  reflectionText: text("reflection_text"),
+  emotionalReaction: varchar("emotional_reaction", { length: 50 }), // "fire", "pray", "heart", "peace"
+  audioListened: boolean("audio_listened").default(false),
+  shared: boolean("shared").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const bibleBadges = pgTable("bible_badges", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  iconUrl: varchar("icon_url"),
+  requirement: jsonb("requirement"), // {"type": "streak", "value": 7}
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userBibleBadges = pgTable("user_bible_badges", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: integer("badge_id").notNull().references(() => bibleBadges.id),
+  earnedAt: timestamp("earned_at").defaultNow(),
+});
+
+export const bibleVerseShares = pgTable("bible_verse_shares", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  dailyVerseId: integer("daily_verse_id").notNull().references(() => dailyVerses.id),
+  platform: varchar("platform", { length: 50 }), // "soapbox", "facebook", "twitter", "instagram"
+  shareText: text("share_text"),
+  reactions: integer("reactions").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userChurches: many(userChurches),
@@ -1456,6 +1526,28 @@ export const userInspirationHistoryRelations = relations(userInspirationHistory,
 // Export types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Daily Bible Feature Types
+export type DailyVerse = typeof dailyVerses.$inferSelect;
+export type InsertDailyVerse = typeof dailyVerses.$inferInsert;
+export type UserBibleStreak = typeof userBibleStreaks.$inferSelect;
+export type InsertUserBibleStreak = typeof userBibleStreaks.$inferInsert;
+export type UserBibleReading = typeof userBibleReadings.$inferSelect;
+export type InsertUserBibleReading = typeof userBibleReadings.$inferInsert;
+export type BibleBadge = typeof bibleBadges.$inferSelect;
+export type InsertBibleBadge = typeof bibleBadges.$inferInsert;
+export type UserBibleBadge = typeof userBibleBadges.$inferSelect;
+export type InsertUserBibleBadge = typeof userBibleBadges.$inferInsert;
+export type BibleVerseShare = typeof bibleVerseShares.$inferSelect;
+export type InsertBibleVerseShare = typeof bibleVerseShares.$inferInsert;
+
+// Daily Bible Zod Schemas
+export const insertDailyVerseSchema = createInsertSchema(dailyVerses);
+export const insertUserBibleStreakSchema = createInsertSchema(userBibleStreaks);
+export const insertUserBibleReadingSchema = createInsertSchema(userBibleReadings).omit({ id: true, createdAt: true });
+export const insertBibleBadgeSchema = createInsertSchema(bibleBadges);
+export const insertUserBibleBadgeSchema = createInsertSchema(userBibleBadges);
+export const insertBibleVerseShareSchema = createInsertSchema(bibleVerseShares).omit({ id: true, createdAt: true });
 
 // Event management types
 export type Event = typeof events.$inferSelect;
