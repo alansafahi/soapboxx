@@ -143,9 +143,7 @@ function DraftSeriesList({ churchId }: { churchId: number | null }) {
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/drafts/weekly-series/${id}/publish`, {
-        method: 'PATCH',
-      });
+      return apiRequest('PATCH', `/api/drafts/weekly-series/${id}/publish`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/weekly-series'] });
@@ -155,9 +153,7 @@ function DraftSeriesList({ churchId }: { churchId: number | null }) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/drafts/weekly-series/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/drafts/weekly-series/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/weekly-series'] });
@@ -229,9 +225,7 @@ function DraftMediaList({ churchId }: { churchId: number | null }) {
 
   const publishMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/drafts/sermon-media/${id}/publish`, {
-        method: 'PATCH',
-      });
+      return apiRequest('PATCH', `/api/drafts/sermon-media/${id}/publish`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/sermon-media'] });
@@ -241,9 +235,7 @@ function DraftMediaList({ churchId }: { churchId: number | null }) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/drafts/sermon-media/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/drafts/sermon-media/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/sermon-media'] });
