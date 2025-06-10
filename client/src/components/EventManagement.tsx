@@ -7,15 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, MessageSquare, UserCheck, Bell, BarChart } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -79,6 +78,11 @@ interface Event {
   updatedAt: string;
 }
 
+interface Church {
+  id: number;
+  name: string;
+}
+
 const categories = [
   { value: "worship", label: "Worship Service" },
   { value: "bible_study", label: "Bible Study" },
@@ -105,19 +109,10 @@ const statuses = [
   { value: "cancelled", label: "Cancelled", color: "bg-red-100 text-red-800" },
 ];
 
-const ageGroups = [
-  { value: "children", label: "Children (0-12)" },
-  { value: "youth", label: "Youth (13-18)" },
-  { value: "adults", label: "Adults (19-64)" },
-  { value: "seniors", label: "Seniors (65+)" },
-  { value: "all", label: "All Ages" },
-];
-
 export function EventManagement() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
 
   const { data: events = [], isLoading } = useQuery({
@@ -129,7 +124,15 @@ export function EventManagement() {
   });
 
   const createEventMutation = useMutation({
-    mutationFn: (data: EventForm) => apiRequest("/api/events", { method: "POST", body: data }),
+    mutationFn: async (data: EventForm) => {
+      const response = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create event");
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setIsCreateDialogOpen(false);
@@ -141,8 +144,15 @@ export function EventManagement() {
   });
 
   const updateEventMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<EventForm> }) =>
-      apiRequest(`/api/events/${id}`, { method: "PUT", body: data }),
+    mutationFn: async ({ id, data }: { id: number; data: Partial<EventForm> }) => {
+      const response = await fetch(`/api/events/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to update event");
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setIsEditDialogOpen(false);
@@ -154,7 +164,13 @@ export function EventManagement() {
   });
 
   const deleteEventMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/events/${id}`, { method: "DELETE" }),
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/events/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete event");
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({ title: "Event deleted successfully" });
@@ -257,6 +273,9 @@ export function EventManagement() {
     return <div className="flex justify-center items-center h-64">Loading events...</div>;
   }
 
+  const eventsData = Array.isArray(events) ? events as Event[] : [];
+  const churchesData = Array.isArray(churches) ? churches as Church[] : [];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -304,7 +323,7 @@ export function EventManagement() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {(churches as any[]).map((church) => (
+                            {churchesData.map((church) => (
                               <SelectItem key={church.id} value={church.id.toString()}>
                                 {church.name}
                               </SelectItem>
@@ -353,35 +372,6 @@ export function EventManagement() {
                         <FormLabel>End Date & Time</FormLabel>
                         <FormControl>
                           <Input type="datetime-local" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Main Sanctuary" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Full address" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -464,108 +454,6 @@ export function EventManagement() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="maxAttendees"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Max Attendees</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="e.g., 100" {...field} onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="cost"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cost ($)</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <FormField
-                    control={form.control}
-                    name="isPublic"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Public Event</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="requiresApproval"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Requires Approval</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isOnline"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Online Event</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isRecurring"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Recurring Event</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="publicNotes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Public Notes</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Notes visible to attendees" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                     Cancel
@@ -589,7 +477,7 @@ export function EventManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {events.length === 0 ? (
+            {eventsData.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No events yet</h3>
@@ -601,7 +489,7 @@ export function EventManagement() {
               </div>
             ) : (
               <div className="space-y-4">
-                {(events as Event[]).map((event) => (
+                {eventsData.map((event) => (
                   <div key={event.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2">
@@ -654,82 +542,6 @@ export function EventManagement() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Event</DialogTitle>
-          </DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
-              {/* Same form fields as create form */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={editForm.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Event Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter event title" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="churchId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Church</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select church" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {(churches as any[]).map((church) => (
-                            <SelectItem key={church.id} value={church.id.toString()}>
-                              {church.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={editForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Enter event description" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={updateEventMutation.isPending}>
-                  {updateEventMutation.isPending ? "Updating..." : "Update Event"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
