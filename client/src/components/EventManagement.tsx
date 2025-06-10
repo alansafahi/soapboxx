@@ -262,24 +262,21 @@ export function EventManagement() {
   }, [userChurchesData, defaultChurchId]);
 
   const onCreateSubmit = (data: EventForm) => {
-    console.log("Form data before submission:", data);
+    console.log("=== FORM SUBMISSION DEBUG ===");
+    console.log("Form data received:", data);
     console.log("Form validation errors:", form.formState.errors);
+    console.log("Form is valid:", form.formState.isValid);
+    console.log("endDate value:", `'${data.endDate}'`);
+    console.log("endDate length:", data.endDate?.length);
     
-    // Validate that both dates are provided
-    if (!data.eventDate || !data.endDate) {
-      toast({
-        title: "Validation Error",
-        description: "Both start and end date/time are required",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    // This should never be reached if validation is working
+    console.log("WARNING: Form submission function was called despite potential validation issues");
+    
     // Convert datetime-local strings to ISO strings
     const formattedData = {
       ...data,
       eventDate: new Date(data.eventDate).toISOString(),
-      endDate: new Date(data.endDate).toISOString(),
+      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
     };
     console.log("Formatted data for submission:", formattedData);
     createEventMutation.mutate(formattedData);
