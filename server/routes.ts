@@ -283,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       };
 
-      const friendship = await storage.sendFriendRequest(friendshipData);
+      const friendship = await storage.sendFriendRequest(friendshipData.requesterId, friendshipData.addresseeId);
       res.status(201).json(friendship);
     } catch (error) {
       console.error('Send friend request error:', error);

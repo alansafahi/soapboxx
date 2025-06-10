@@ -1,8 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import CommunityFeed from "@/components/community-feed";
+import EnhancedCommunityFeed from "@/components/enhanced-community-feed";
 import MobileNav from "@/components/mobile-nav";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Users, MessageCircle } from "lucide-react";
 
 export default function CommunityPage() {
   const { toast } = useToast();
@@ -42,13 +46,42 @@ export default function CommunityPage() {
     <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Community Discussions</h1>
-          <p className="text-gray-600 mt-1">Connect with fellow believers and share your thoughts</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Community</h1>
+              <p className="text-gray-600 mt-1">Connect with fellow believers and share your faith journey</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm">
+                <Users className="h-4 w-4 mr-2" />
+                Groups
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <CommunityFeed />
+        <Tabs defaultValue="enhanced" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="enhanced" className="flex items-center space-x-2">
+              <Sparkles className="h-4 w-4" />
+              <span>Enhanced Feed</span>
+            </TabsTrigger>
+            <TabsTrigger value="classic" className="flex items-center space-x-2">
+              <MessageCircle className="h-4 w-4" />
+              <span>Classic View</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="enhanced">
+            <EnhancedCommunityFeed />
+          </TabsContent>
+          
+          <TabsContent value="classic">
+            <CommunityFeed />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <MobileNav />

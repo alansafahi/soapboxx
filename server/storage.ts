@@ -3899,6 +3899,390 @@ export class DatabaseStorage implements IStorage {
         });
     }
   }
+
+  // Enhanced Social & Community Features Implementation
+  async getEnhancedCommunityFeed(userId: string, filters: any): Promise<any[]> {
+    let baseQuery = db
+      .select({
+        id: discussions.id,
+        type: sql`'discussion'`.as('type'),
+        title: discussions.title,
+        content: discussions.content,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        },
+        church: {
+          id: churches.id,
+          name: churches.name,
+        },
+        isPublic: discussions.isPublic,
+        visibility: sql`CASE WHEN ${discussions.isPublic} THEN 'public' ELSE 'friends' END`.as('visibility'),
+        tags: discussions.tags,
+        createdAt: discussions.createdAt,
+        updatedAt: discussions.updatedAt,
+      })
+      .from(discussions)
+      .innerJoin(users, eq(discussions.authorId, users.id))
+      .leftJoin(churches, eq(discussions.churchId, churches.id));
+
+    // Apply filters
+    if (filters.type !== 'all' && filters.type === 'discussion') {
+      // Already filtered to discussions
+    }
+
+    if (filters.timeRange !== 'all') {
+      const now = new Date();
+      let startDate;
+      
+      switch (filters.timeRange) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+      }
+      
+      if (startDate) {
+        baseQuery = baseQuery.where(gte(discussions.createdAt, startDate));
+      }
+    }
+
+    if (filters.search) {
+      baseQuery = baseQuery.where(
+        or(
+          ilike(discussions.title, `%${filters.search}%`),
+          ilike(discussions.content, `%${filters.search}%`)
+        )
+      );
+    }
+
+    // Apply sorting
+    switch (filters.sortBy) {
+      case 'popular':
+        baseQuery = baseQuery.orderBy(desc(discussions.createdAt)); // Placeholder for engagement score
+        break;
+      case 'recent':
+      default:
+        baseQuery = baseQuery.orderBy(desc(discussions.createdAt));
+        break;
+    }
+
+    const posts = await baseQuery.limit(50);
+
+    // Add reactions and comment counts
+    const postsWithReactions = await Promise.all(
+      posts.map(async (post) => {
+        const reactions = await this.getPostReactions(post.id, 'discussion');
+        const commentCount = await this.getDiscussionCommentCount(post.id);
+        
+        return {
+          ...post,
+          reactions,
+          commentCount,
+        };
+      })
+    );
+
+    return postsWithReactions;
+  }
+
+  async getPostReactions(postId: number, targetType: string): Promise<any[]> {
+    const reactionSummary = await db
+      .select({
+        reactionType: reactions.reactionType,
+        emoji: reactions.emoji,
+        count: sql`COUNT(*)`.as('count'),
+      })
+      .from(reactions)
+      .where(
+        and(
+          eq(reactions.targetId, postId),
+          eq(reactions.targetType, targetType)
+        )
+      )
+      .groupBy(reactions.reactionType, reactions.emoji);
+
+    return reactionSummary.map(r => ({
+      type: r.reactionType,
+      emoji: r.emoji,
+      count: Number(r.count),
+      userReacted: false, // TODO: Check if current user reacted
+    }));
+  }
+
+  async getDiscussionCommentCount(discussionId: number): Promise<number> {
+    const result = await db
+      .select({ count: sql`COUNT(*)`.as('count') })
+      .from(discussionComments)
+      .where(eq(discussionComments.discussionId, discussionId));
+    
+    return Number(result[0]?.count || 0);
+  }
+
+  async addReaction(reactionData: any): Promise<any> {
+    // Check if reaction already exists
+    const existing = await db
+      .select()
+      .from(reactions)
+      .where(
+        and(
+          eq(reactions.userId, reactionData.userId),
+          eq(reactions.targetId, reactionData.targetId),
+          eq(reactions.targetType, reactionData.targetType),
+          eq(reactions.reactionType, reactionData.reactionType)
+        )
+      );
+
+    if (existing.length > 0) {
+      // Update existing reaction
+      const [updated] = await db
+        .update(reactions)
+        .set({
+          emoji: reactionData.emoji,
+          intensity: reactionData.intensity,
+          updatedAt: new Date(),
+        })
+        .where(eq(reactions.id, existing[0].id))
+        .returning();
+      return updated;
+    } else {
+      // Create new reaction
+      const [newReaction] = await db
+        .insert(reactions)
+        .values({
+          userId: reactionData.userId,
+          targetType: reactionData.targetType,
+          targetId: reactionData.targetId,
+          reactionType: reactionData.reactionType,
+          emoji: reactionData.emoji,
+          intensity: reactionData.intensity || 1,
+        })
+        .returning();
+      return newReaction;
+    }
+  }
+
+  async removeReaction(userId: string, targetId: number, reactionType: string): Promise<void> {
+    await db
+      .delete(reactions)
+      .where(
+        and(
+          eq(reactions.userId, userId),
+          eq(reactions.targetId, targetId),
+          eq(reactions.reactionType, reactionType)
+        )
+      );
+  }
+
+  async getCommunityGroups(userId: string): Promise<any[]> {
+    const userGroups = await db
+      .select({
+        id: communityGroups.id,
+        name: communityGroups.name,
+        description: communityGroups.description,
+        category: communityGroups.category,
+        tags: communityGroups.tags,
+        memberCount: communityGroups.memberCount,
+        isPrivate: communityGroups.isPrivate,
+        isActive: communityGroups.isActive,
+        userRole: communityGroupMembers.role,
+        joinedAt: communityGroupMembers.joinedAt,
+        createdAt: communityGroups.createdAt,
+      })
+      .from(communityGroups)
+      .leftJoin(
+        communityGroupMembers,
+        and(
+          eq(communityGroupMembers.groupId, communityGroups.id),
+          eq(communityGroupMembers.userId, userId)
+        )
+      )
+      .where(eq(communityGroups.isActive, true))
+      .orderBy(desc(communityGroups.createdAt));
+
+    return userGroups;
+  }
+
+  async createCommunityGroup(groupData: any): Promise<any> {
+    const [newGroup] = await db
+      .insert(communityGroups)
+      .values({
+        name: groupData.name,
+        description: groupData.description,
+        category: groupData.category,
+        tags: groupData.tags,
+        createdBy: groupData.createdBy,
+        isPrivate: groupData.isPrivate || false,
+        isActive: true,
+        memberCount: 1,
+      })
+      .returning();
+
+    // Add creator as group leader
+    await db
+      .insert(communityGroupMembers)
+      .values({
+        groupId: newGroup.id,
+        userId: groupData.createdBy,
+        role: 'leader',
+      });
+
+    return newGroup;
+  }
+
+  async joinCommunityGroup(memberData: any): Promise<void> {
+    await db
+      .insert(communityGroupMembers)
+      .values({
+        groupId: memberData.groupId,
+        userId: memberData.userId,
+        role: memberData.role || 'member',
+      })
+      .onConflictDoNothing();
+
+    // Update member count
+    await db
+      .update(communityGroups)
+      .set({
+        memberCount: sql`${communityGroups.memberCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(communityGroups.id, memberData.groupId));
+  }
+
+  async leaveCommunityGroup(userId: string, groupId: number): Promise<void> {
+    await db
+      .delete(communityGroupMembers)
+      .where(
+        and(
+          eq(communityGroupMembers.userId, userId),
+          eq(communityGroupMembers.groupId, groupId)
+        )
+      );
+
+    // Update member count
+    await db
+      .update(communityGroups)
+      .set({
+        memberCount: sql`${communityGroups.memberCount} - 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(communityGroups.id, groupId));
+  }
+
+  async getUserFriends(userId: string): Promise<any[]> {
+    const friendsList = await db
+      .select({
+        id: friendships.id,
+        friendId: sql`CASE WHEN ${friendships.requesterId} = ${userId} THEN ${friendships.addresseeId} ELSE ${friendships.requesterId} END`.as('friendId'),
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        status: friendships.status,
+        createdAt: friendships.createdAt,
+      })
+      .from(friendships)
+      .innerJoin(
+        users,
+        or(
+          and(eq(friendships.requesterId, userId), eq(users.id, friendships.addresseeId)),
+          and(eq(friendships.addresseeId, userId), eq(users.id, friendships.requesterId))
+        )
+      )
+      .where(
+        and(
+          or(
+            eq(friendships.requesterId, userId),
+            eq(friendships.addresseeId, userId)
+          ),
+          eq(friendships.status, 'accepted')
+        )
+      );
+
+    return friendsList;
+  }
+
+  async sendFriendRequest(friendshipData: any): Promise<any> {
+    const [friendship] = await db
+      .insert(friendships)
+      .values({
+        requesterId: friendshipData.requesterId,
+        addresseeId: friendshipData.addresseeId,
+        status: 'pending',
+      })
+      .returning();
+
+    return friendship;
+  }
+
+  async respondToFriendRequest(friendshipId: number, status: string): Promise<any> {
+    const [updatedFriendship] = await db
+      .update(friendships)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(eq(friendships.id, friendshipId))
+      .returning();
+
+    return updatedFriendship;
+  }
+
+  async createCommunityReflection(reflectionData: any): Promise<any> {
+    const [reflection] = await db
+      .insert(communityReflections)
+      .values({
+        userId: reflectionData.userId,
+        verseId: reflectionData.verseId,
+        groupId: reflectionData.groupId,
+        title: reflectionData.title,
+        content: reflectionData.content,
+        tags: reflectionData.tags,
+        visibility: reflectionData.visibility || 'public',
+        isAnonymous: reflectionData.isAnonymous || false,
+      })
+      .returning();
+
+    return reflection;
+  }
+
+  async getCommunityReflections(filters: any): Promise<any[]> {
+    let query = db
+      .select({
+        id: communityReflections.id,
+        title: communityReflections.title,
+        content: communityReflections.content,
+        tags: communityReflections.tags,
+        visibility: communityReflections.visibility,
+        isAnonymous: communityReflections.isAnonymous,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+        },
+        createdAt: communityReflections.createdAt,
+      })
+      .from(communityReflections)
+      .leftJoin(users, eq(communityReflections.userId, users.id))
+      .orderBy(desc(communityReflections.createdAt));
+
+    if (filters.verseId) {
+      query = query.where(eq(communityReflections.verseId, filters.verseId));
+    }
+
+    if (filters.groupId) {
+      query = query.where(eq(communityReflections.groupId, filters.groupId));
+    }
+
+    return await query.limit(50);
+  }
 }
 
 export const storage = new DatabaseStorage();
