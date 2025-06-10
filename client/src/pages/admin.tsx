@@ -2565,7 +2565,7 @@ export default function AdminPortal() {
 
               <TabsContent value="people" className="space-y-6">
                 <Tabs defaultValue="members" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="members">
                       <Users className="h-4 w-4 mr-2" />
                       Members
@@ -2573,6 +2573,14 @@ export default function AdminPortal() {
                     <TabsTrigger value="volunteers">
                       <HeartHandshake className="h-4 w-4 mr-2" />
                       Volunteers
+                    </TabsTrigger>
+                    <TabsTrigger value="counseling">
+                      <Heart className="h-4 w-4 mr-2" />
+                      Counseling
+                    </TabsTrigger>
+                    <TabsTrigger value="sessions">
+                      <ClipboardList className="h-4 w-4 mr-2" />
+                      Other Sessions
                     </TabsTrigger>
                   </TabsList>
 
@@ -2582,6 +2590,14 @@ export default function AdminPortal() {
 
                   <TabsContent value="volunteers" className="space-y-6">
                     <VolunteerManagementSystem />
+                  </TabsContent>
+
+                  <TabsContent value="counseling" className="space-y-6">
+                    <CounselingManagement />
+                  </TabsContent>
+
+                  <TabsContent value="sessions" className="space-y-6">
+                    <SessionsManagement />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
