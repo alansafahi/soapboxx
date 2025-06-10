@@ -59,7 +59,7 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  console.log("SessionsManagement selectedChurch:", selectedChurch);
+
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["/api/counseling-sessions", selectedChurch],
@@ -79,13 +79,11 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
       const url = selectedChurch 
         ? `/api/members?churchId=${selectedChurch}`
         : "/api/members";
-      console.log("Fetching members from:", url, "for church:", selectedChurch);
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Members data received:", data, "count:", data.length);
       return data;
     },
     enabled: !!selectedChurch,
@@ -430,7 +428,15 @@ function SessionFormDialog({
                 <SelectValue placeholder="Choose a member..." />
               </SelectTrigger>
               <SelectContent>
-                {members && members.length > 0 ? (
+                {membersLoading ? (
+                  <SelectItem value="loading" disabled>
+                    Loading members...
+                  </SelectItem>
+                ) : membersError ? (
+                  <SelectItem value="error" disabled>
+                    Error loading members
+                  </SelectItem>
+                ) : members && members.length > 0 ? (
                   members.map((member: any) => (
                     <SelectItem key={member.id} value={member.id.toString()}>
                       <div className="flex items-center gap-2">
@@ -444,7 +450,7 @@ function SessionFormDialog({
                   ))
                 ) : (
                   <SelectItem value="no-members" disabled>
-                    No members available
+                    No members found for this church
                   </SelectItem>
                 )}
               </SelectContent>
