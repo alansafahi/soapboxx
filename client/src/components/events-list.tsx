@@ -65,6 +65,89 @@ export default function EventsList() {
     },
   });
 
+  // Load favorites from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("event-favorites");
+    if (saved) {
+      setFavorites(new Set(JSON.parse(saved)));
+    }
+  }, []);
+
+  // Save favorites to localStorage
+  const toggleFavorite = (eventId: number) => {
+    setFavorites(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(eventId)) {
+        newSet.delete(eventId);
+      } else {
+        newSet.add(eventId);
+      }
+      localStorage.setItem("event-favorites", JSON.stringify(Array.from(newSet)));
+      return newSet;
+    });
+  };
+
+  // Filter and search logic
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = categoryFilter === "all" || event.category === categoryFilter;
+    
+    const eventDate = new Date(event.eventDate);
+    const now = new Date();
+    const matchesTime = (() => {
+      switch (timeFilter) {
+        case "favorites": return favorites.has(event.id);
+        case "today": return isToday(eventDate);
+        case "tomorrow": return isTomorrow(eventDate);
+        case "this-week": return isThisWeek(eventDate);
+        case "upcoming": return eventDate >= now;
+        case "past": return eventDate < now;
+        default: return true;
+      }
+    })();
+    
+    return matchesSearch && matchesCategory && matchesTime;
+  });
+
+  // Get smart date label
+  const getDateLabel = (date: Date) => {
+    if (isToday(date)) return "Today";
+    if (isTomorrow(date)) return "Tomorrow";
+    if (isThisWeek(date)) return format(date, "EEEE");
+    return format(date, "MMM d");
+  };
+
+  // Share event function
+  const shareEvent = async (event: Event) => {
+    const shareData = {
+      title: event.title,
+      text: `Join us for ${event.title} at ${event.location || 'our church'}`,
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(`${shareData.title} - ${shareData.text} ${shareData.url}`);
+        toast({
+          title: "Link Copied",
+          description: "Event details copied to clipboard",
+        });
+      }
+    } else {
+      navigator.clipboard.writeText(`${shareData.title} - ${shareData.text} ${shareData.url}`);
+      toast({
+        title: "Link Copied",
+        description: "Event details copied to clipboard",
+      });
+    }
+  };
+
   const handleRSVP = (eventId: number, status: string) => {
     // Add animation state
     setAnimatingButtons(prev => new Set([...Array.from(prev), eventId]));
@@ -84,7 +167,7 @@ export default function EventsList() {
     rsvpMutation.mutate({ eventId, status });
   };
 
-  const formatEventDate = (date: string) => {
+  const formatEventDate = (date: string | Date) => {
     const eventDate = new Date(date);
     return {
       month: eventDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
@@ -97,7 +180,7 @@ export default function EventsList() {
     };
   };
 
-  const formatDateRange = (start: string, end?: string) => {
+  const formatDateRange = (start: string | Date, end?: string | Date) => {
     const startDate = new Date(start);
     const startTime = startDate.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
@@ -128,6 +211,12 @@ export default function EventsList() {
         return 'bg-green-100 text-green-800';
       case 'social':
         return 'bg-purple-100 text-purple-800';
+      case 'youth':
+        return 'bg-pink-100 text-pink-800';
+      case 'music':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'outreach':
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -157,116 +246,348 @@ export default function EventsList() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Upcoming Events</CardTitle>
-          <Button variant="ghost" size="sm">
-            View Calendar
-          </Button>
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        {events.length === 0 ? (
-          <div className="text-center py-8">
-            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No upcoming events</h3>
-            <p className="text-gray-600">Check back soon for community events and activities!</p>
+    <div className="space-y-6">
+      {/* Enhanced Header with Search and Filters */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Church Events
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+              >
+                List
+              </Button>
+              <Button
+                variant={viewMode === "calendar" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("calendar")}
+              >
+                Calendar
+              </Button>
+            </div>
           </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {events.map((event) => {
-              const dateInfo = formatEventDate(event.eventDate);
-              return (
-                <div key={event.id} className="py-6 first:pt-0 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-4 -mx-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0">
-                      <div className="w-16 h-16 bg-light-blue rounded-xl flex flex-col items-center justify-center">
-                        <span className="text-xs text-faith-blue font-medium">
-                          {dateInfo.month}
-                        </span>
-                        <span className="text-lg font-bold text-faith-blue">
-                          {dateInfo.day}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-1">{event.title}</h3>
-                          {event.category && (
-                            <Badge className={getCategoryColor(event.category)}>
-                              {event.category.replace('_', ' ')}
-                            </Badge>
-                          )}
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search events by title, description, or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-40">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="service">Service</SelectItem>
+                <SelectItem value="bible_study">Bible Study</SelectItem>
+                <SelectItem value="community_service">Community Service</SelectItem>
+                <SelectItem value="social">Social</SelectItem>
+                <SelectItem value="youth">Youth</SelectItem>
+                <SelectItem value="music">Music</SelectItem>
+                <SelectItem value="outreach">Outreach</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={timeFilter} onValueChange={setTimeFilter}>
+              <SelectTrigger className="w-40">
+                <Clock className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Time" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                <SelectItem value="this-week">This Week</SelectItem>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="past">Past Events</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {favorites.size > 0 && (
+              <Button
+                variant={timeFilter === "favorites" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTimeFilter(timeFilter === "favorites" ? "all" : "favorites")}
+                className="flex items-center gap-2"
+              >
+                <Heart className={`w-4 h-4 ${timeFilter === "favorites" ? "fill-current text-white" : "text-red-500"}`} />
+                Favorites ({favorites.size})
+              </Button>
+            )}
+          </div>
+
+          {/* Quick Stats */}
+          <div className="flex gap-4 text-sm text-gray-600">
+            <span>{filteredEvents.length} events found</span>
+            {searchTerm && <span>• Searching for "{searchTerm}"</span>}
+            {categoryFilter !== "all" && <span>• {categoryFilter.replace('_', ' ')} category</span>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Events Display */}
+      <Card>
+        <CardContent className="p-0">
+          {filteredEvents.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-medium text-gray-900 mb-2">
+                {searchTerm || categoryFilter !== "all" || timeFilter !== "all" 
+                  ? "No events match your filters" 
+                  : "No upcoming events"}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm || categoryFilter !== "all" || timeFilter !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "Check back soon for community events and activities!"}
+              </p>
+              {(searchTerm || categoryFilter !== "all" || timeFilter !== "all") && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSearchTerm("");
+                    setCategoryFilter("all");
+                    setTimeFilter("all");
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              <AnimatePresence>
+                {filteredEvents.map((event, index) => {
+                  const dateInfo = formatEventDate(event.eventDate);
+                  const eventDate = new Date(event.eventDate);
+                  const isFavorite = favorites.has(event.id);
+                  const userRsvp = rsvpStatus.get(event.id);
+                  
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className="p-6 hover:bg-gray-50 transition-colors group"
+                    >
+                      <div className="flex items-start space-x-4">
+                        {/* Enhanced Date Display */}
+                        <div className="flex-shrink-0">
+                          <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex flex-col items-center justify-center border border-blue-200 relative">
+                            <span className="text-xs text-blue-600 font-medium uppercase tracking-wide">
+                              {dateInfo.month}
+                            </span>
+                            <span className="text-xl font-bold text-blue-800">
+                              {dateInfo.day}
+                            </span>
+                            <span className="text-xs text-blue-600">
+                              {getDateLabel(eventDate)}
+                            </span>
+                            {isToday(eventDate) && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      
-                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                        {event.description}
-                      </p>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                        <span className="flex items-center">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {formatDateRange(event.eventDate, event.endDate || undefined)}
-                        </span>
-                        <span className="flex items-center">
-                          {event.isOnline ? (
-                            <>
-                              <Video className="w-4 h-4 mr-1" />
-                              Online
-                            </>
-                          ) : (
-                            <>
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {event.location || "Location TBD"}
-                            </>
+
+                        <div className="flex-1 min-w-0">
+                          {/* Event Header */}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-semibold text-gray-900 text-lg">{event.title}</h3>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleFavorite(event.id)}
+                                  className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Heart className={`w-4 h-4 ${isFavorite ? "fill-current text-red-500" : "text-gray-400"}`} />
+                                </Button>
+                              </div>
+                              
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {event.category && (
+                                  <Badge className={getCategoryColor(event.category)}>
+                                    {event.category.replace('_', ' ')}
+                                  </Badge>
+                                )}
+                                {event.priority === 'high' && (
+                                  <Badge variant="destructive">High Priority</Badge>
+                                )}
+                                {userRsvp && (
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                    ✓ {userRsvp}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Event Details */}
+                          <div className="text-sm text-gray-600 space-y-2 mb-4">
+                            <div className="flex items-center">
+                              <Clock className="w-4 h-4 mr-2 text-gray-400" />
+                              <span className="font-medium">
+                                {formatDateRange(event.eventDate, event.endDate || undefined)}
+                              </span>
+                            </div>
+                            
+                            {event.location && (
+                              <div className="flex items-center">
+                                {event.isOnline ? (
+                                  <Video className="w-4 h-4 mr-2 text-gray-400" />
+                                ) : (
+                                  <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                                )}
+                                <span>{event.location}</span>
+                              </div>
+                            )}
+                            
+                            {event.attendeeCount !== undefined && (
+                              <div className="flex items-center">
+                                <Users className="w-4 h-4 mr-2 text-gray-400" />
+                                <span>{event.attendeeCount} attending</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Event Description */}
+                          {event.description && (
+                            <p className="text-sm text-gray-700 mb-4 line-clamp-2 leading-relaxed">
+                              {event.description}
+                            </p>
                           )}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500 flex items-center">
-                          <Users className="w-4 h-4 mr-1" />
-                          {event.maxAttendees ? `${Math.floor(Math.random() * event.maxAttendees)} / ${event.maxAttendees}` : `${Math.floor(Math.random() * 50)} attending`}
-                        </span>
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                        >
-                          <Button 
-                            size="sm"
-                            onClick={() => handleRSVP(event.id, "attending")}
-                            disabled={rsvpMutation.isPending}
-                            className={`transition-all duration-300 ${
-                              rsvpStatus.get(event.id) === "attending"
-                                ? 'bg-green-500 hover:bg-green-600 text-white'
-                                : 'bg-faith-blue hover:bg-blue-600 text-white'
-                            }`}
-                          >
-                            <motion.span
-                              animate={animatingButtons.has(event.id) ? {
-                                scale: [1, 1.1, 1]
+                          
+                          {/* Action Buttons */}
+                          <div className="flex flex-wrap gap-2">
+                            <motion.div
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              animate={animatingButtons.has(event.id) ? { 
+                                scale: [1, 1.05, 1], 
+                                backgroundColor: ["#f0f9ff", "#dbeafe", "#f0f9ff"] 
                               } : {}}
                               transition={{ duration: 0.4 }}
                             >
-                              {rsvpMutation.isPending ? "RSVPing..." : 
-                               rsvpStatus.get(event.id) === "attending" ? "Attending ✓" : "RSVP"}
-                            </motion.span>
-                          </Button>
-                        </motion.div>
+                              <Button 
+                                onClick={() => handleRSVP(event.id, userRsvp === "attending" ? "not_attending" : "attending")}
+                                variant={userRsvp === "attending" ? "default" : "outline"}
+                                size="sm"
+                                disabled={rsvpMutation.isPending}
+                                className="flex items-center gap-2"
+                              >
+                                {rsvpMutation.isPending ? (
+                                  "Processing..."
+                                ) : userRsvp === "attending" ? (
+                                  <>✓ Attending</>
+                                ) : (
+                                  <>RSVP</>
+                                )}
+                              </Button>
+                            </motion.div>
+
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => setSelectedEvent(event)}>
+                                  <MessageCircle className="w-4 h-4 mr-1" />
+                                  Details
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    <Calendar className="w-5 h-5" />
+                                    {event.title}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                      <strong>Date:</strong> {format(new Date(event.eventDate), "PPP")}
+                                    </div>
+                                    <div>
+                                      <strong>Time:</strong> {formatDateRange(event.eventDate, event.endDate)}
+                                    </div>
+                                    {event.location && (
+                                      <div className="col-span-2">
+                                        <strong>Location:</strong> {event.location}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {event.description && (
+                                    <div>
+                                      <strong>Description:</strong>
+                                      <p className="mt-2 text-gray-700">{event.description}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => shareEvent(event)}
+                              className="flex items-center gap-1"
+                            >
+                              <Share2 className="w-4 h-4" />
+                              Share
+                            </Button>
+
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                const calendarUrl = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART:${new Date(event.eventDate).toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTEND:${new Date(event.endDate || addDays(new Date(event.eventDate), 1)).toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+SUMMARY:${event.title}
+DESCRIPTION:${event.description || ''}
+LOCATION:${event.location || ''}
+END:VEVENT
+END:VCALENDAR`;
+                                const link = document.createElement('a');
+                                link.href = calendarUrl;
+                                link.download = `${event.title}.ics`;
+                                link.click();
+                              }}
+                              className="flex items-center gap-1"
+                            >
+                              <CalendarPlus className="w-4 h-4" />
+                              Add to Calendar
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
