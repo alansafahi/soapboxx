@@ -73,6 +73,9 @@ function DevotionalStats() {
 
 // Published devotionals viewer
 function PublishedDevotionals() {
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
+  
   const { data: devotionals, isLoading } = useQuery({
     queryKey: ['/api/devotionals'],
     staleTime: 5 * 60 * 1000,
@@ -83,8 +86,26 @@ function PublishedDevotionals() {
   const devotionalList = Array.isArray(devotionals) ? devotionals : [];
   const publishedDevotionals = devotionalList.filter(d => d.isPublished && d.publishedAt);
 
-  // Group by month and year
-  const groupedByMonth = publishedDevotionals.reduce((acc: any, devotional: any) => {
+  // Filter by selected year and month
+  const filteredDevotionals = publishedDevotionals.filter(d => {
+    const publishedDate = new Date(d.publishedAt);
+    const matchesYear = publishedDate.getFullYear() === selectedYear;
+    const matchesMonth = selectedMonth === 'all' || publishedDate.getMonth() === selectedMonth;
+    return matchesYear && matchesMonth;
+  });
+
+  // Get available years and months for filters
+  const yearsList = publishedDevotionals.map(d => new Date(d.publishedAt).getFullYear());
+  const availableYears = Array.from(new Set(yearsList)).sort((a, b) => b - a);
+  
+  const monthsList = selectedYear ? 
+    publishedDevotionals
+      .filter(d => new Date(d.publishedAt).getFullYear() === selectedYear)
+      .map(d => new Date(d.publishedAt).getMonth()) : [];
+  const availableMonths = Array.from(new Set(monthsList)).sort((a, b) => a - b);
+
+  // Group filtered devotionals by month and year
+  const groupedByMonth = filteredDevotionals.reduce((acc: any, devotional: any) => {
     const publishedDate = new Date(devotional.publishedAt);
     const monthKey = `${publishedDate.getFullYear()}-${publishedDate.getMonth()}`;
     const monthName = publishedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -105,6 +126,11 @@ function PublishedDevotionals() {
   });
 
   const months = Object.entries(groupedByMonth).sort(([a], [b]) => b.localeCompare(a));
+  
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   return (
     <div className="space-y-6">
