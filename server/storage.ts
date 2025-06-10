@@ -453,6 +453,9 @@ export interface IStorage {
   
   awardBibleInADayBadge(userId: string, sessionId: number, badgeType: string): Promise<BibleInADayBadge>;
   getUserBibleInADayBadges(userId: string): Promise<BibleInADayBadge[]>;
+  
+  // Community statistics
+  getBibleReadingCountSince(date: Date): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {

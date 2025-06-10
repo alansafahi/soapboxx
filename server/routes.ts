@@ -2812,6 +2812,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Community statistics route
+  app.get("/api/bible/community-stats", async (req, res) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      weekAgo.setHours(0, 0, 0, 0);
+
+      // Get today's reading count
+      const todayReads = await storage.getBibleReadingCountSince(today);
+      
+      // Get this week's reading count
+      const weekReads = await storage.getBibleReadingCountSince(weekAgo);
+
+      res.json({
+        todayReads,
+        weekReads
+      });
+    } catch (error) {
+      console.error("Error fetching community stats:", error);
+      res.status(500).json({ message: "Failed to fetch community statistics" });
+    }
+  });
+
   // Daily Bible Feature API Routes
   app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
     try {
