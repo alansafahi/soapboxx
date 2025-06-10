@@ -408,6 +408,22 @@ export interface IStorage {
   awardBibleBadge(userId: string, badgeId: number): Promise<UserBibleBadge>;
   shareBibleVerse(share: InsertBibleVerseShare): Promise<BibleVerseShare>;
   getBibleVerseShares(dailyVerseId: number): Promise<BibleVerseShare[]>;
+  
+  // Bible in a Day operations
+  createBibleInADaySession(session: InsertBibleInADaySession): Promise<BibleInADaySession>;
+  getBibleInADaySession(sessionId: number): Promise<BibleInADaySession | undefined>;
+  getUserActiveBibleInADaySession(userId: string): Promise<BibleInADaySession | undefined>;
+  getUserBibleInADaySessions(userId: string): Promise<BibleInADaySession[]>;
+  updateBibleInADaySession(sessionId: number, updates: Partial<BibleInADaySession>): Promise<BibleInADaySession>;
+  completeBibleInADaySession(sessionId: number, finalRating?: number, reflectionNotes?: string): Promise<BibleInADaySession>;
+  
+  createBibleInADaySectionProgress(progress: InsertBibleInADaySectionProgress): Promise<BibleInADaySectionProgress>;
+  getBibleInADaySectionProgress(sessionId: number): Promise<BibleInADaySectionProgress[]>;
+  updateBibleInADaySectionProgress(progressId: number, updates: Partial<BibleInADaySectionProgress>): Promise<BibleInADaySectionProgress>;
+  completeBibleInADaySection(progressId: number, reflectionAnswer?: string): Promise<BibleInADaySectionProgress>;
+  
+  awardBibleInADayBadge(userId: string, sessionId: number, badgeType: string): Promise<BibleInADayBadge>;
+  getUserBibleInADayBadges(userId: string): Promise<BibleInADayBadge[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3090,6 +3106,125 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(users, eq(bibleVerseShares.userId, users.id))
       .where(eq(bibleVerseShares.dailyVerseId, dailyVerseId))
       .orderBy(desc(bibleVerseShares.createdAt));
+  }
+
+  // Bible in a Day operations
+  async createBibleInADaySession(session: InsertBibleInADaySession): Promise<BibleInADaySession> {
+    const [newSession] = await db
+      .insert(bibleInADaySessions)
+      .values(session)
+      .returning();
+    return newSession;
+  }
+
+  async getBibleInADaySession(sessionId: number): Promise<BibleInADaySession | undefined> {
+    const [session] = await db
+      .select()
+      .from(bibleInADaySessions)
+      .where(eq(bibleInADaySessions.id, sessionId));
+    return session;
+  }
+
+  async getUserActiveBibleInADaySession(userId: string): Promise<BibleInADaySession | undefined> {
+    const [session] = await db
+      .select()
+      .from(bibleInADaySessions)
+      .where(and(
+        eq(bibleInADaySessions.userId, userId),
+        eq(bibleInADaySessions.isCompleted, false)
+      ))
+      .orderBy(desc(bibleInADaySessions.startedAt))
+      .limit(1);
+    return session;
+  }
+
+  async getUserBibleInADaySessions(userId: string): Promise<BibleInADaySession[]> {
+    return await db
+      .select()
+      .from(bibleInADaySessions)
+      .where(eq(bibleInADaySessions.userId, userId))
+      .orderBy(desc(bibleInADaySessions.startedAt));
+  }
+
+  async updateBibleInADaySession(sessionId: number, updates: Partial<BibleInADaySession>): Promise<BibleInADaySession> {
+    const [updatedSession] = await db
+      .update(bibleInADaySessions)
+      .set(updates)
+      .where(eq(bibleInADaySessions.id, sessionId))
+      .returning();
+    return updatedSession;
+  }
+
+  async completeBibleInADaySession(sessionId: number, finalRating?: number, reflectionNotes?: string): Promise<BibleInADaySession> {
+    const [completedSession] = await db
+      .update(bibleInADaySessions)
+      .set({
+        isCompleted: true,
+        completedAt: new Date(),
+        finalRating,
+        reflectionNotes,
+      })
+      .where(eq(bibleInADaySessions.id, sessionId))
+      .returning();
+    return completedSession;
+  }
+
+  async createBibleInADaySectionProgress(progress: InsertBibleInADaySectionProgress): Promise<BibleInADaySectionProgress> {
+    const [newProgress] = await db
+      .insert(bibleInADaySectionProgress)
+      .values(progress)
+      .returning();
+    return newProgress;
+  }
+
+  async getBibleInADaySectionProgress(sessionId: number): Promise<BibleInADaySectionProgress[]> {
+    return await db
+      .select()
+      .from(bibleInADaySectionProgress)
+      .where(eq(bibleInADaySectionProgress.sessionId, sessionId))
+      .orderBy(asc(bibleInADaySectionProgress.id));
+  }
+
+  async updateBibleInADaySectionProgress(progressId: number, updates: Partial<BibleInADaySectionProgress>): Promise<BibleInADaySectionProgress> {
+    const [updatedProgress] = await db
+      .update(bibleInADaySectionProgress)
+      .set(updates)
+      .where(eq(bibleInADaySectionProgress.id, progressId))
+      .returning();
+    return updatedProgress;
+  }
+
+  async completeBibleInADaySection(progressId: number, reflectionAnswer?: string): Promise<BibleInADaySectionProgress> {
+    const [completedSection] = await db
+      .update(bibleInADaySectionProgress)
+      .set({
+        isCompleted: true,
+        completedAt: new Date(),
+        reflectionAnswer,
+      })
+      .where(eq(bibleInADaySectionProgress.id, progressId))
+      .returning();
+    return completedSection;
+  }
+
+  async awardBibleInADayBadge(userId: string, sessionId: number, badgeType: string): Promise<BibleInADayBadge> {
+    const [badge] = await db
+      .insert(bibleInADayBadges)
+      .values({
+        userId,
+        sessionId,
+        badgeType,
+      })
+      .returning();
+    return badge;
+  }
+
+  async getUserBibleInADayBadges(userId: string): Promise<BibleInADayBadge[]> {
+    return await db
+      .select()
+      .from(bibleInADayBadges)
+      .where(eq(bibleInADayBadges.userId, userId))
+      .orderBy(desc(bibleInADayBadges.earnedAt));
   }
 }
 

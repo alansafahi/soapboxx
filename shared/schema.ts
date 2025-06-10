@@ -1594,6 +1594,11 @@ export const insertBibleBadgeSchema = createInsertSchema(bibleBadges);
 export const insertUserBibleBadgeSchema = createInsertSchema(userBibleBadges);
 export const insertBibleVerseShareSchema = createInsertSchema(bibleVerseShares).omit({ id: true, createdAt: true });
 
+// Bible in a Day Zod Schemas
+export const insertBibleInADaySessionSchema = createInsertSchema(bibleInADaySessions).omit({ id: true, startedAt: true });
+export const insertBibleInADaySectionProgressSchema = createInsertSchema(bibleInADaySectionProgress).omit({ id: true, startedAt: true });
+export const insertBibleInADayBadgeSchema = createInsertSchema(bibleInADayBadges).omit({ id: true, earnedAt: true });
+
 // Event management types
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = typeof events.$inferInsert;

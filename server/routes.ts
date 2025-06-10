@@ -22,6 +22,8 @@ import {
   insertDailyVerseSchema,
   insertUserBibleReadingSchema,
   insertBibleVerseShareSchema,
+  insertBibleInADaySessionSchema,
+  insertBibleInADaySectionProgressSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -2954,6 +2956,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching bible verse shares:", error);
       res.status(500).json({ message: "Failed to fetch bible verse shares" });
+    }
+  });
+
+  // Bible in a Day routes
+  app.post('/api/bible-in-a-day/sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const sessionData = { ...req.body, userId };
+      const session = await storage.createBibleInADaySession(sessionData);
+      res.json(session);
+    } catch (error) {
+      console.error("Error creating Bible in a Day session:", error);
+      res.status(500).json({ message: "Failed to create session" });
+    }
+  });
+
+  app.get('/api/bible-in-a-day/sessions/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const session = await storage.getUserActiveBibleInADaySession(userId);
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching active Bible in a Day session:", error);
+      res.status(500).json({ message: "Failed to fetch active session" });
+    }
+  });
+
+  app.get('/api/bible-in-a-day/sessions/:sessionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionId = parseInt(req.params.sessionId);
+      const session = await storage.getBibleInADaySession(sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching Bible in a Day session:", error);
+      res.status(500).json({ message: "Failed to fetch session" });
+    }
+  });
+
+  app.put('/api/bible-in-a-day/sessions/:sessionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionId = parseInt(req.params.sessionId);
+      const session = await storage.updateBibleInADaySession(sessionId, req.body);
+      res.json(session);
+    } catch (error) {
+      console.error("Error updating Bible in a Day session:", error);
+      res.status(500).json({ message: "Failed to update session" });
+    }
+  });
+
+  app.post('/api/bible-in-a-day/sessions/:sessionId/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionId = parseInt(req.params.sessionId);
+      const { finalRating, reflectionNotes } = req.body;
+      const session = await storage.completeBibleInADaySession(sessionId, finalRating, reflectionNotes);
+      
+      // Award completion badge
+      const userId = req.user.claims.sub;
+      const badgeType = session.sessionType === 'fast_track' ? 'fast_track_finisher' : 'full_immersion_finisher';
+      await storage.awardBibleInADayBadge(userId, sessionId, badgeType);
+      
+      res.json(session);
+    } catch (error) {
+      console.error("Error completing Bible in a Day session:", error);
+      res.status(500).json({ message: "Failed to complete session" });
+    }
+  });
+
+  app.get('/api/bible-in-a-day/sessions/:sessionId/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionId = parseInt(req.params.sessionId);
+      const progress = await storage.getBibleInADaySectionProgress(sessionId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching section progress:", error);
+      res.status(500).json({ message: "Failed to fetch progress" });
+    }
+  });
+
+  app.post('/api/bible-in-a-day/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const progress = await storage.createBibleInADaySectionProgress(req.body);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error creating section progress:", error);
+      res.status(500).json({ message: "Failed to create progress" });
+    }
+  });
+
+  app.put('/api/bible-in-a-day/progress/:progressId', isAuthenticated, async (req: any, res) => {
+    try {
+      const progressId = parseInt(req.params.progressId);
+      const progress = await storage.updateBibleInADaySectionProgress(progressId, req.body);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error updating section progress:", error);
+      res.status(500).json({ message: "Failed to update progress" });
+    }
+  });
+
+  app.post('/api/bible-in-a-day/progress/:progressId/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const progressId = parseInt(req.params.progressId);
+      const { reflectionAnswer } = req.body;
+      const progress = await storage.completeBibleInADaySection(progressId, reflectionAnswer);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error completing section:", error);
+      res.status(500).json({ message: "Failed to complete section" });
+    }
+  });
+
+  app.get('/api/bible-in-a-day/badges', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const badges = await storage.getUserBibleInADayBadges(userId);
+      res.json(badges);
+    } catch (error) {
+      console.error("Error fetching Bible in a Day badges:", error);
+      res.status(500).json({ message: "Failed to fetch badges" });
     }
   });
 
