@@ -47,6 +47,30 @@ type DevotionalFormData = z.infer<typeof devotionalFormSchema>;
 type WeeklySeriesFormData = z.infer<typeof weeklySeriesFormSchema>;
 type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 
+// Stats component
+function DevotionalStats() {
+  const { data: devotionals } = useQuery({
+    queryKey: ['/api/devotionals'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const devotionalList = Array.isArray(devotionals) ? devotionals : [];
+  const thisMonth = new Date();
+  const monthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+  
+  const publishedThisMonth = devotionalList.filter(d => {
+    if (!d.publishedAt) return false;
+    const publishedDate = new Date(d.publishedAt);
+    return publishedDate >= monthStart;
+  }).length;
+
+  return (
+    <div className="text-sm text-gray-600 dark:text-gray-400">
+      Published: {publishedThisMonth} devotionals this month
+    </div>
+  );
+}
+
 // Draft management components
 function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
   // Always fetch all drafts regardless of selected church
@@ -65,6 +89,9 @@ function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/devotionals'] });
       queryClient.invalidateQueries({ queryKey: ['/api/devotionals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts'] });
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ['/api/drafts/devotionals'] });
     },
   });
 
@@ -74,6 +101,9 @@ function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/drafts/devotionals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/drafts'] });
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ['/api/drafts/devotionals'] });
     },
   });
 
@@ -1396,9 +1426,7 @@ export default function AdminPortal() {
                           </div>
                         </DialogContent>
                       </Dialog>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Published: 12 devotionals this month
-                      </div>
+                      <DevotionalStats />
                     </CardContent>
                   </Card>
 
