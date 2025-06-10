@@ -46,18 +46,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const upload = multer({ 
     storage: storage_multer,
-    fileFilter: (req, file, cb) => {
-      // Only allow image files
-      if (file.mimetype.startsWith('image/')) {
-        cb(null, true);
-      } else {
-        cb(new Error('Only image files are allowed!'));
-      }
-    },
     limits: {
-      fileSize: 5 * 1024 * 1024 // 5MB limit
+      fileSize: 50 * 1024 * 1024 // 50MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      // Allow various file types for media management
+      const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mov|avi|mp3|wav|m4a|pdf|doc|docx|ppt|pptx/;
+      const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+      const mimetype = allowedTypes.test(file.mimetype);
+
+      if (mimetype && extname) {
+        return cb(null, true);
+      } else {
+        cb(new Error('Unsupported file type'));
+      }
     }
   });
+
+  // Helper function to determine file type from mime type
+  const getFileType = (mimeType: string): string => {
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType.startsWith('video/')) return 'video';
+    if (mimeType.startsWith('audio/')) return 'audio';
+    return 'document';
+  };
 
   // Serve uploaded files statically
   app.use('/uploads', (req, res, next) => {
@@ -2988,6 +3000,210 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error getting notification deliveries:", error);
       res.status(500).json({ message: "Failed to get notification deliveries" });
+    }
+  });
+
+  // Media Management API Routes
+  app.post('/api/media/upload', isAuthenticated, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const userId = req.user.claims.sub;
+      const file = req.file;
+      
+      // Create media file record
+      const mediaFileData = {
+        churchId: req.body.churchId ? parseInt(req.body.churchId) : null,
+        uploadedBy: userId,
+        fileName: file.filename,
+        originalName: file.originalname,
+        fileType: getFileType(file.mimetype),
+        mimeType: file.mimetype,
+        fileSize: file.size,
+        filePath: file.path,
+        publicUrl: `/uploads/${file.filename}`,
+        category: req.body.category || 'general',
+        title: req.body.title || file.originalname,
+        description: req.body.description || null,
+        tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+        isPublic: req.body.isPublic === 'true',
+        isApproved: false,
+        status: 'pending',
+      };
+
+      const mediaFile = await storage.createMediaFile(mediaFileData);
+      res.json(mediaFile);
+    } catch (error) {
+      console.error('Error uploading media file:', error);
+      res.status(500).json({ message: 'Failed to upload media file' });
+    }
+  });
+
+  app.get('/api/media/files', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = req.query.churchId ? parseInt(req.query.churchId) : undefined;
+      const mediaFiles = await storage.getMediaFiles(churchId);
+      res.json(mediaFiles);
+    } catch (error) {
+      console.error('Error fetching media files:', error);
+      res.status(500).json({ message: 'Failed to fetch media files' });
+    }
+  });
+
+  app.get('/api/media/files/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const mediaFile = await storage.getMediaFile(id);
+      
+      if (!mediaFile) {
+        return res.status(404).json({ message: 'Media file not found' });
+      }
+      
+      res.json(mediaFile);
+    } catch (error) {
+      console.error('Error fetching media file:', error);
+      res.status(500).json({ message: 'Failed to fetch media file' });
+    }
+  });
+
+  app.patch('/api/media/files/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const mediaFile = await storage.updateMediaFile(id, updates);
+      res.json(mediaFile);
+    } catch (error) {
+      console.error('Error updating media file:', error);
+      res.status(500).json({ message: 'Failed to update media file' });
+    }
+  });
+
+  app.delete('/api/media/files/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Get file info to delete physical file
+      const mediaFile = await storage.getMediaFile(id);
+      if (mediaFile && mediaFile.filePath) {
+        try {
+          fs.unlinkSync(mediaFile.filePath);
+        } catch (fileError) {
+          console.warn('Failed to delete physical file:', fileError);
+        }
+      }
+      
+      await storage.deleteMediaFile(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting media file:', error);
+      res.status(500).json({ message: 'Failed to delete media file' });
+    }
+  });
+
+  app.get('/api/media/collections', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = req.query.churchId ? parseInt(req.query.churchId) : undefined;
+      const collections = await storage.getMediaCollections(churchId);
+      res.json(collections);
+    } catch (error) {
+      console.error('Error fetching media collections:', error);
+      res.status(500).json({ message: 'Failed to fetch media collections' });
+    }
+  });
+
+  app.post('/api/media/collections', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const collectionData = {
+        ...req.body,
+        createdBy: userId,
+      };
+      
+      const collection = await storage.createMediaCollection(collectionData);
+      res.json(collection);
+    } catch (error) {
+      console.error('Error creating media collection:', error);
+      res.status(500).json({ message: 'Failed to create media collection' });
+    }
+  });
+
+  app.get('/api/media/collections/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const collection = await storage.getMediaCollection(id);
+      
+      if (!collection) {
+        return res.status(404).json({ message: 'Collection not found' });
+      }
+      
+      res.json(collection);
+    } catch (error) {
+      console.error('Error fetching media collection:', error);
+      res.status(500).json({ message: 'Failed to fetch media collection' });
+    }
+  });
+
+  app.patch('/api/media/collections/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const collection = await storage.updateMediaCollection(id, updates);
+      res.json(collection);
+    } catch (error) {
+      console.error('Error updating media collection:', error);
+      res.status(500).json({ message: 'Failed to update media collection' });
+    }
+  });
+
+  app.delete('/api/media/collections/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMediaCollection(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting media collection:', error);
+      res.status(500).json({ message: 'Failed to delete media collection' });
+    }
+  });
+
+  app.post('/api/media/collections/:id/items', isAuthenticated, async (req: any, res) => {
+    try {
+      const collectionId = parseInt(req.params.id);
+      const { mediaFileId } = req.body;
+      
+      const item = await storage.addMediaToCollection(collectionId, mediaFileId);
+      res.json(item);
+    } catch (error) {
+      console.error('Error adding media to collection:', error);
+      res.status(500).json({ message: 'Failed to add media to collection' });
+    }
+  });
+
+  app.delete('/api/media/collections/:id/items/:mediaFileId', isAuthenticated, async (req: any, res) => {
+    try {
+      const collectionId = parseInt(req.params.id);
+      const mediaFileId = parseInt(req.params.mediaFileId);
+      
+      await storage.removeMediaFromCollection(collectionId, mediaFileId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error removing media from collection:', error);
+      res.status(500).json({ message: 'Failed to remove media from collection' });
+    }
+  });
+
+  app.get('/api/media/collections/:id/items', isAuthenticated, async (req: any, res) => {
+    try {
+      const collectionId = parseInt(req.params.id);
+      const mediaFiles = await storage.getCollectionMedia(collectionId);
+      res.json(mediaFiles);
+    } catch (error) {
+      console.error('Error fetching collection media:', error);
+      res.status(500).json({ message: 'Failed to fetch collection media' });
     }
   });
 
