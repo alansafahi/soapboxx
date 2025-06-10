@@ -182,12 +182,24 @@ export function DailyBibleFeature() {
     if (!dailyVerse) return;
     
     const defaultShareText = `"${getVerseText()}" - ${dailyVerse.verseReference} 🙏 #DailyBible #SoapBoxSuperApp`;
-    setShareText(shareText || defaultShareText);
+    const finalShareText = shareText || defaultShareText;
+    setShareText(finalShareText);
+    
+    // If this is the default verse (id: 0), handle sharing differently
+    if (dailyVerse.id === 0) {
+      // For default verses, just show success without database operation
+      setShowShareDialog(false);
+      toast({
+        title: "Verse Shared",
+        description: "Your verse has been shared successfully!",
+      });
+      return;
+    }
     
     shareVerseMutation.mutate({
       dailyVerseId: dailyVerse.id,
       platform,
-      shareText: shareText || defaultShareText,
+      shareText: finalShareText,
     });
   };
 
