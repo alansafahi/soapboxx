@@ -2934,14 +2934,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/bible/share', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      console.log("Bible share request:", { body: req.body, userId });
+      
       const shareData = insertBibleVerseShareSchema.parse({
         ...req.body,
         userId,
       });
+      console.log("Parsed share data:", shareData);
+      
       const share = await storage.shareBibleVerse(shareData);
+      console.log("Share result:", share);
       res.json(share);
     } catch (error) {
       console.error("Error sharing bible verse:", error);
+      console.error("Error details:", error.message, error.stack);
       res.status(500).json({ message: "Failed to share bible verse" });
     }
   });
