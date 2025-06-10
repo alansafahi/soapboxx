@@ -19,6 +19,8 @@ import Messages from "@/pages/messages";
 import Leaderboard from "@/pages/leaderboard";
 import BiblePage from "@/pages/bible";
 import BibleReader from "@/pages/BibleReader";
+import FeatureTestPage from "@/pages/feature-test";
+import SettingsPage from "@/pages/settings";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import { useState, useEffect } from "react";
@@ -84,6 +86,8 @@ function Router() {
               <Route path="/admin" component={AdminPortal} />
               <Route path="/member-management" component={AdminPortal} />
               <Route path="/profile" component={Profile} />
+              <Route path="/settings" component={SettingsPage} />
+              <Route path="/test-features" component={FeatureTestPage} />
               <Route path="/" component={() => <Home referralCode={referralCode} />} />
               <Route component={NotFound} />
             </>

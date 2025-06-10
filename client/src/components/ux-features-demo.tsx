@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   Brain, 
   Download, 
-  Sync, 
+  RefreshCw as Sync, 
   Globe, 
   Bell, 
   Users, 
