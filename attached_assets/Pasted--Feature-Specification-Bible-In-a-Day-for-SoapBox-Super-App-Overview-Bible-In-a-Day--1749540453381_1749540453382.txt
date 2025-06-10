@@ -1,0 +1,91 @@
+**Feature Specification: Bible In a Day for SoapBox Super App**
+
+---
+
+**Overview:**
+"Bible In a Day" is an immersive feature designed to give users a high-level understanding of the Bible's core narrative through a curated journey across key scriptures, multimedia elements, and guided reflection prompts. It is ideal for seekers, new believers, and users who want a refreshingly big-picture view of the Bible in a short timeframe.
+
+---
+
+**User Flow:**
+
+1. **Start Screen:**
+
+   * Welcome Message: "Explore the Story of the Bible in Just One Day"
+   * Button: "Begin Journey"
+   * Estimated time: Choose Fast Track (\~60 min) or Deep Dive (\~3-5 hrs)
+
+2. **Track Selector:**
+
+   * Fast Track (20 key passages)
+   * Deep Dive (40+ passages, includes context + minor prophets and epistles)
+   * Audio-Only Mode
+
+3. **Segment Navigation (6 Total):**
+
+   1. Creation (Genesis 1–3)
+
+   2. Fall & Promise (Genesis 12, Exodus 20, Isaiah 53)
+
+   3. Kings & Prophets (1 Samuel 16, Psalms, Isaiah 9)
+
+   4. Christ the Messiah (Luke 2, Matthew 5, John 1, John 19)
+
+   5. Church Born (Acts 2, Romans 8)
+
+   6. Future Hope (Revelation 21)
+
+   * Each includes:
+
+     * Title slide
+     * Selected verses
+     * Short narrated explainer (1–3 min)
+     * Optional video/animation
+     * Reflection prompt (journal or prayer)
+
+4. **Progress Tracker:**
+
+   * Shows sections completed, total time elapsed
+   * Allows break/resume later
+
+5. **Completion Screen:**
+
+   * Confetti animation + badge: "Bible In a Day Completed!"
+   * Shareable image for socials ("I completed the Bible in a Day! #SoapBoxSuperApp")
+   * Suggested next steps: Join a devotional plan, join a church channel, or read full Gospel of John
+
+6. **Admin Features:**
+
+   * See which users completed it
+   * Integration with leaderboard
+   * Recommend plans based on this journey
+
+---
+
+**Content Sources:**
+
+* Licensed versions: ESV, NLT, KJV (depending on user setting)
+* All verses pre-loaded and cached
+* Multimedia assets include pastoral commentary, music, and cinematic animations
+
+---
+
+**Stretch Features:**
+
+* Personalized "Bible in a Day" based on mood or spiritual goal
+* Multilingual support
+* Family-friendly version with illustrations for children
+
+---
+
+**Technical Needs:**
+
+* Audio/video streaming
+* Offline reading capability
+* User progress storage (linked to profile)
+* Cross-platform compatibility (iOS, Android, Web)
+
+---
+
+**Primary Goal:**
+Turn high-level biblical exposure into daily spiritual habits, deeper engagement, and community participation.
