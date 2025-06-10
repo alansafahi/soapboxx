@@ -310,6 +310,8 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
         isLoading={createSessionMutation.isPending}
         members={members}
         selectedChurch={selectedChurch}
+        membersLoading={membersLoading}
+        membersError={membersError}
       />
 
       {/* Edit Session Dialog */}
@@ -326,6 +328,8 @@ export function SessionsManagement({ selectedChurch }: { selectedChurch?: number
           isLoading={updateSessionMutation.isPending}
           members={members}
           selectedChurch={selectedChurch}
+          membersLoading={membersLoading}
+          membersError={membersError}
         />
       )}
 
@@ -366,6 +370,8 @@ function SessionFormDialog({
   isLoading = false,
   members = [],
   selectedChurch = null,
+  membersLoading = false,
+  membersError = null,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -375,6 +381,8 @@ function SessionFormDialog({
   isLoading?: boolean;
   members?: any[];
   selectedChurch?: number | null;
+  membersLoading?: boolean;
+  membersError?: any;
 }) {
   const [formData, setFormData] = useState({
     memberId: initialData?.memberId || "",
