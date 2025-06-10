@@ -725,20 +725,36 @@ export default function EventsList() {
                               variant="ghost" 
                               size="sm"
                               onClick={() => {
-                                const calendarUrl = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART:${new Date(event.eventDate).toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTEND:${new Date(event.endDate || addDays(new Date(event.eventDate), 1)).toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-SUMMARY:${event.title}
-DESCRIPTION:${event.description || ''}
-LOCATION:${event.location || ''}
-END:VEVENT
-END:VCALENDAR`;
+                                const startDate = new Date(event.eventDate);
+                                const endDate = event.endDate ? new Date(event.endDate) : addDays(startDate, 1);
+                                
+                                const formatDate = (date: Date) => {
+                                  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+                                };
+                                
+                                const icsContent = [
+                                  'BEGIN:VCALENDAR',
+                                  'VERSION:2.0',
+                                  'PRODID:-//Church Events//EN',
+                                  'BEGIN:VEVENT',
+                                  `DTSTART:${formatDate(startDate)}`,
+                                  `DTEND:${formatDate(endDate)}`,
+                                  `SUMMARY:${event.title.replace(/,/g, '\\,')}`,
+                                  `DESCRIPTION:${(event.description || '').replace(/,/g, '\\,').replace(/\n/g, '\\n')}`,
+                                  `LOCATION:${(event.location || '').replace(/,/g, '\\,')}`,
+                                  `UID:${event.id}@church-events`,
+                                  'END:VEVENT',
+                                  'END:VCALENDAR'
+                                ].join('\r\n');
+                                
+                                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
                                 const link = document.createElement('a');
-                                link.href = calendarUrl;
-                                link.download = `${event.title}.ics`;
+                                link.href = URL.createObjectURL(blob);
+                                link.download = `${event.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
+                                document.body.appendChild(link);
                                 link.click();
+                                document.body.removeChild(link);
+                                URL.revokeObjectURL(link.href);
                               }}
                               className="flex items-center gap-1"
                             >
