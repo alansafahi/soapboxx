@@ -376,7 +376,7 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  console.log('CounselingScheduling selectedChurch:', selectedChurch);
+
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["/api/counseling-sessions", selectedChurch],
