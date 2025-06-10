@@ -2882,6 +2882,206 @@ export class DatabaseStorage implements IStorage {
       .where(eq(mediaCollectionItems.collectionId, collectionId))
       .orderBy(desc(mediaCollectionItems.addedAt));
   }
+
+  // Daily Bible Feature Implementation
+  async getDailyVerse(date?: Date): Promise<DailyVerse | undefined> {
+    const targetDate = date || new Date();
+    targetDate.setHours(0, 0, 0, 0);
+    
+    const [verse] = await db
+      .select()
+      .from(dailyVerses)
+      .where(eq(dailyVerses.date, targetDate))
+      .limit(1);
+    return verse;
+  }
+
+  async createDailyVerse(verse: InsertDailyVerse): Promise<DailyVerse> {
+    const [newVerse] = await db
+      .insert(dailyVerses)
+      .values(verse)
+      .returning();
+    return newVerse;
+  }
+
+  async getUserBibleStreak(userId: string): Promise<UserBibleStreak | undefined> {
+    const [streak] = await db
+      .select()
+      .from(userBibleStreaks)
+      .where(eq(userBibleStreaks.userId, userId));
+    return streak;
+  }
+
+  async updateUserBibleStreak(userId: string, updates: Partial<InsertUserBibleStreak>): Promise<UserBibleStreak> {
+    const existingStreak = await this.getUserBibleStreak(userId);
+    
+    if (existingStreak) {
+      const [updatedStreak] = await db
+        .update(userBibleStreaks)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(eq(userBibleStreaks.userId, userId))
+        .returning();
+      return updatedStreak;
+    } else {
+      const [newStreak] = await db
+        .insert(userBibleStreaks)
+        .values({
+          userId,
+          ...updates,
+        })
+        .returning();
+      return newStreak;
+    }
+  }
+
+  async recordBibleReading(reading: InsertUserBibleReading): Promise<UserBibleReading> {
+    const [newReading] = await db
+      .insert(userBibleReadings)
+      .values(reading)
+      .returning();
+
+    // Update user's streak
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const streak = await this.getUserBibleStreak(reading.userId);
+    const lastReadDate = streak?.lastReadDate ? new Date(streak.lastReadDate) : null;
+    
+    if (lastReadDate) {
+      lastReadDate.setHours(0, 0, 0, 0);
+    }
+
+    let currentStreak = streak?.currentStreak || 0;
+    let longestStreak = streak?.longestStreak || 0;
+    let totalDaysRead = (streak?.totalDaysRead || 0) + 1;
+
+    // Check if this continues the streak
+    if (lastReadDate) {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      if (lastReadDate.getTime() === yesterday.getTime()) {
+        // Continue streak
+        currentStreak += 1;
+      } else if (lastReadDate.getTime() !== today.getTime()) {
+        // Reset streak (reading after a gap)
+        currentStreak = 1;
+      }
+    } else {
+      // First reading
+      currentStreak = 1;
+    }
+
+    if (currentStreak > longestStreak) {
+      longestStreak = currentStreak;
+    }
+
+    await this.updateUserBibleStreak(reading.userId, {
+      currentStreak,
+      longestStreak,
+      lastReadDate: today,
+      totalDaysRead,
+    });
+
+    return newReading;
+  }
+
+  async getUserBibleReadings(userId: string): Promise<UserBibleReading[]> {
+    return await db
+      .select()
+      .from(userBibleReadings)
+      .where(eq(userBibleReadings.userId, userId))
+      .orderBy(desc(userBibleReadings.readAt));
+  }
+
+  async getBibleBadges(): Promise<BibleBadge[]> {
+    return await db
+      .select()
+      .from(bibleBadges)
+      .orderBy(asc(bibleBadges.id));
+  }
+
+  async getUserBibleBadges(userId: string): Promise<UserBibleBadge[]> {
+    return await db
+      .select({
+        id: userBibleBadges.id,
+        userId: userBibleBadges.userId,
+        badgeId: userBibleBadges.badgeId,
+        earnedAt: userBibleBadges.earnedAt,
+        badge: {
+          id: bibleBadges.id,
+          name: bibleBadges.name,
+          description: bibleBadges.description,
+          iconUrl: bibleBadges.iconUrl,
+          requirement: bibleBadges.requirement,
+        }
+      })
+      .from(userBibleBadges)
+      .innerJoin(bibleBadges, eq(userBibleBadges.badgeId, bibleBadges.id))
+      .where(eq(userBibleBadges.userId, userId))
+      .orderBy(desc(userBibleBadges.earnedAt));
+  }
+
+  async awardBibleBadge(userId: string, badgeId: number): Promise<UserBibleBadge> {
+    // Check if user already has this badge
+    const existing = await db
+      .select()
+      .from(userBibleBadges)
+      .where(
+        and(
+          eq(userBibleBadges.userId, userId),
+          eq(userBibleBadges.badgeId, badgeId)
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    const [badge] = await db
+      .insert(userBibleBadges)
+      .values({
+        userId,
+        badgeId,
+      })
+      .returning();
+    return badge;
+  }
+
+  async shareBibleVerse(share: InsertBibleVerseShare): Promise<BibleVerseShare> {
+    const [newShare] = await db
+      .insert(bibleVerseShares)
+      .values(share)
+      .returning();
+    return newShare;
+  }
+
+  async getBibleVerseShares(dailyVerseId: number): Promise<BibleVerseShare[]> {
+    return await db
+      .select({
+        id: bibleVerseShares.id,
+        userId: bibleVerseShares.userId,
+        dailyVerseId: bibleVerseShares.dailyVerseId,
+        platform: bibleVerseShares.platform,
+        shareText: bibleVerseShares.shareText,
+        reactions: bibleVerseShares.reactions,
+        createdAt: bibleVerseShares.createdAt,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(bibleVerseShares)
+      .innerJoin(users, eq(bibleVerseShares.userId, users.id))
+      .where(eq(bibleVerseShares.dailyVerseId, dailyVerseId))
+      .orderBy(desc(bibleVerseShares.createdAt));
+  }
 }
 
 export const storage = new DatabaseStorage();

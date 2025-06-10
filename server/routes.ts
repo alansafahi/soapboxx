@@ -19,6 +19,9 @@ import {
   insertSermonMediaSchema,
   insertCheckInSchema,
   insertQrCodeSchema,
+  insertDailyVerseSchema,
+  insertUserBibleReadingSchema,
+  insertBibleVerseShareSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -2804,6 +2807,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting scheduled notification:", error);
       res.status(500).json({ message: "Failed to delete scheduled notification" });
+    }
+  });
+
+  // Daily Bible Feature API Routes
+  app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
+    try {
+      const { date } = req.query;
+      const targetDate = date ? new Date(date) : new Date();
+      const verse = await storage.getDailyVerse(targetDate);
+      
+      if (!verse) {
+        // Return a default verse if no verse is set for today
+        const defaultVerse = {
+          id: 0,
+          date: targetDate,
+          verseReference: "John 3:16",
+          verseText: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+          verseTextNiv: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+          verseTextKjv: "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+          verseTextEsv: "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
+          verseTextNlt: "For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
+          theme: "God's Love",
+          reflectionPrompt: "How does knowing God's immense love for you change the way you see yourself and others today?",
+          guidedPrayer: "Heavenly Father, thank you for your incredible love demonstrated through Jesus. Help me to receive your love fully and share it with others today. Amen.",
+          backgroundImageUrl: null,
+          audioUrl: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        return res.json(defaultVerse);
+      }
+      
+      res.json(verse);
+    } catch (error) {
+      console.error("Error fetching daily verse:", error);
+      res.status(500).json({ message: "Failed to fetch daily verse" });
+    }
+  });
+
+  app.post('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
+    try {
+      const verseData = insertDailyVerseSchema.parse(req.body);
+      const verse = await storage.createDailyVerse(verseData);
+      res.json(verse);
+    } catch (error) {
+      console.error("Error creating daily verse:", error);
+      res.status(500).json({ message: "Failed to create daily verse" });
+    }
+  });
+
+  app.get('/api/bible/streak', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const streak = await storage.getUserBibleStreak(userId);
+      res.json(streak || {
+        userId,
+        currentStreak: 0,
+        longestStreak: 0,
+        lastReadDate: null,
+        totalDaysRead: 0,
+        versesMemorized: 0,
+        graceDaysUsed: 0,
+      });
+    } catch (error) {
+      console.error("Error fetching bible streak:", error);
+      res.status(500).json({ message: "Failed to fetch bible streak" });
+    }
+  });
+
+  app.post('/api/bible/reading', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const readingData = insertUserBibleReadingSchema.parse({
+        ...req.body,
+        userId,
+      });
+      const reading = await storage.recordBibleReading(readingData);
+      
+      // Check for badge achievements
+      const streak = await storage.getUserBibleStreak(userId);
+      const badges = await storage.getBibleBadges();
+      
+      // Award streak badges
+      for (const badge of badges) {
+        if (badge.requirement && typeof badge.requirement === 'object') {
+          const req_obj = badge.requirement as any;
+          if (req_obj.type === 'streak' && streak && streak.currentStreak >= req_obj.value) {
+            await storage.awardBibleBadge(userId, badge.id);
+          }
+          if (req_obj.type === 'total_days' && streak && streak.totalDaysRead >= req_obj.value) {
+            await storage.awardBibleBadge(userId, badge.id);
+          }
+        }
+      }
+      
+      res.json(reading);
+    } catch (error) {
+      console.error("Error recording bible reading:", error);
+      res.status(500).json({ message: "Failed to record bible reading" });
+    }
+  });
+
+  app.get('/api/bible/readings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const readings = await storage.getUserBibleReadings(userId);
+      res.json(readings);
+    } catch (error) {
+      console.error("Error fetching bible readings:", error);
+      res.status(500).json({ message: "Failed to fetch bible readings" });
+    }
+  });
+
+  app.get('/api/bible/badges', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const badges = await storage.getUserBibleBadges(userId);
+      res.json(badges);
+    } catch (error) {
+      console.error("Error fetching bible badges:", error);
+      res.status(500).json({ message: "Failed to fetch bible badges" });
+    }
+  });
+
+  app.post('/api/bible/share', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const shareData = insertBibleVerseShareSchema.parse({
+        ...req.body,
+        userId,
+      });
+      const share = await storage.shareBibleVerse(shareData);
+      res.json(share);
+    } catch (error) {
+      console.error("Error sharing bible verse:", error);
+      res.status(500).json({ message: "Failed to share bible verse" });
+    }
+  });
+
+  app.get('/api/bible/shares/:dailyVerseId', async (req, res) => {
+    try {
+      const dailyVerseId = parseInt(req.params.dailyVerseId);
+      const shares = await storage.getBibleVerseShares(dailyVerseId);
+      res.json(shares);
+    } catch (error) {
+      console.error("Error fetching bible verse shares:", error);
+      res.status(500).json({ message: "Failed to fetch bible verse shares" });
     }
   });
 
