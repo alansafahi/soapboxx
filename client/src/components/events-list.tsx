@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -7,8 +7,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Video, Users } from "lucide-react";
-import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Clock, MapPin, Video, Users, Search, Filter, Share2, CalendarPlus, Heart, MessageCircle, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { format, isToday, isTomorrow, isThisWeek, addDays } from "date-fns";
 import type { Event } from "@shared/schema";
 
 export default function EventsList() {
@@ -16,6 +21,12 @@ export default function EventsList() {
   const { toast } = useToast();
   const [rsvpStatus, setRsvpStatus] = useState<Map<number, string>>(new Map());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery<Event[]>({
