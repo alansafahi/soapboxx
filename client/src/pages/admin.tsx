@@ -49,10 +49,13 @@ type SermonMediaFormData = z.infer<typeof sermonMediaFormSchema>;
 
 // Draft management components
 function DraftDevotionalsList({ churchId }: { churchId: number | null }) {
+  console.log('DraftDevotionalsList rendered with churchId:', churchId);
+  
   const { data: drafts, isLoading, error } = useQuery({
     queryKey: ['/api/drafts/devotionals', churchId],
     queryFn: () => {
       const url = churchId ? `/api/drafts/devotionals?churchId=${churchId}` : '/api/drafts/devotionals';
+      console.log('Making API request to:', url);
       return apiRequest(url);
     },
   });
@@ -1654,6 +1657,9 @@ export default function AdminPortal() {
                       </TabsList>
                       
                       <TabsContent value="devotional-drafts" className="space-y-4">
+                        <div className="mb-4 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded text-sm">
+                          Debug: selectedChurch = {JSON.stringify(selectedChurch)}
+                        </div>
                         <DraftDevotionalsList churchId={selectedChurch} />
                       </TabsContent>
                       
