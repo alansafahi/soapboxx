@@ -1411,9 +1411,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Member Management API Routes
-  app.get("/api/members", async (req, res) => {
-    try {
-      const members = [
+  // In-memory storage for member data
+  let membersData = [
         {
           id: "1",
           fullName: "John Smith",
@@ -1545,7 +1544,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           notes: "Visiting family, considering membership"
         }
       ];
-      res.json(members);
+
+  app.get("/api/members", async (req, res) => {
+    try {
+      res.json(membersData);
     } catch (error) {
       console.error("Error fetching members:", error);
       res.status(500).json({ error: "Failed to fetch members" });
@@ -1558,13 +1560,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       
-      // In a real app, this would update the database
-      // For now, we'll just return success
-      res.json({ 
-        id, 
-        ...updates,
-        message: "Member updated successfully" 
-      });
+      // Find and update the member in our in-memory storage
+      const memberIndex = membersData.findIndex(member => member.id === id);
+      if (memberIndex !== -1) {
+        membersData[memberIndex] = { ...membersData[memberIndex], ...updates };
+        res.json(membersData[memberIndex]);
+      } else {
+        res.status(404).json({ error: "Member not found" });
+      }
     } catch (error) {
       console.error("Error updating member:", error);
       res.status(500).json({ error: "Failed to update member" });
