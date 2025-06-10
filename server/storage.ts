@@ -3702,290 +3702,586 @@ export class DatabaseStorage implements IStorage {
     // Get active reward tiers
     const rewardTiers = await this.getReferralRewardTiers();
     const bronzeTier = rewardTiers.find(tier => tier.tier === 'bronze') || {
-      referrerPoints: 100,
-      refereePoints: 50
+      referrerBasePoints: 500,
+      refereeWelcomePoints: 250,
+      tierBonusPoints: 0
     };
 
-    // Award points to both parties
-    await this.addUserPoints(referral.referrerId, bronzeTier.referrerPoints);
-    await this.addUserPoints(referral.referredUserId, bronzeTier.refereePoints);
+    const referrerPoints = bronzeTier.referrerBasePoints || 500;
+    const refereePoints = bronzeTier.refereeWelcomePoints || 250;
 
-    // Mark referral as rewarded
-    await this.updateReferral(referralId, { status: 'rewarded' });
+    // Award points to both users
+    await this.addUserPoints(referral.referrerId, referrerPoints);
+    await this.addUserPoints(referral.refereeId, refereePoints);
+
+    // Update referral status
+    await this.updateReferral(referralId, {
+      status: 'rewarded',
+      referrerPointsAwarded: referrerPoints,
+      refereePointsAwarded: refereePoints,
+      referrerRewardedAt: new Date(),
+      refereeRewardedAt: new Date(),
+      completedAt: new Date()
+    });
+
+    // Check for milestones
+    await this.checkReferralMilestones(referral.referrerId);
+
+    return { referrerPoints, refereePoints };
+  }
+
+  async getUserReferralStats(userId: string): Promise<{ totalReferrals: number; successfulReferrals: number; totalPointsEarned: number }> {
+    const userReferrals = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referrerId, userId));
+
+    const totalReferrals = userReferrals.length;
+    const successfulReferrals = userReferrals.filter(r => r.status === 'rewarded').length;
+    const totalPointsEarned = userReferrals.reduce((sum, r) => sum + (r.referrerPointsAwarded || 0), 0);
 
     return {
-      referrerPoints: bronzeTier.referrerPoints,
-      refereePoints: bronzeTier.refereePoints
+      totalReferrals,
+      successfulReferrals,
+      totalPointsEarned
     };
   }
 
-  // Church Admin Dashboard Methods
-
-  // Get user's primary church relationship
-  async getUserChurch(userId: string): Promise<{ churchId: number; role: string } | null> {
-    const [userChurch] = await db
-      .select({
-        churchId: userChurches.churchId,
-        role: userChurches.role
-      })
-      .from(userChurches)
-      .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true)
-      ))
-      .limit(1);
-    
-    return userChurch || null;
-  }
-
-  // Member Analytics
-  async getChurchMemberCount(churchId: number): Promise<number> {
-    const result = await db
-      .select({ count: count() })
-      .from(userChurches)
-      .where(and(
-        eq(userChurches.churchId, churchId),
-        eq(userChurches.isActive, true)
-      ));
-    return result[0]?.count || 0;
-  }
-
-  async getActiveChurchMembers(churchId: number): Promise<number> {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const result = await db
-      .select({ count: count() })
-      .from(userChurches)
-      .innerJoin(users, eq(userChurches.userId, users.id))
-      .where(and(
-        eq(userChurches.churchId, churchId),
-        eq(userChurches.isActive, true),
-        gte(users.updatedAt, thirtyDaysAgo)
-      ));
-    
-    return result[0]?.count || 0;
-  }
-
-  async getNewMembersThisMonth(churchId: number): Promise<number> {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-    
-    const result = await db
-      .select({ count: count() })
-      .from(userChurches)
-      .where(and(
-        eq(userChurches.churchId, churchId),
-        eq(userChurches.isActive, true),
-        gte(userChurches.joinedAt, startOfMonth)
-      ));
-    
-    return result[0]?.count || 0;
-  }
-
-  async getMemberEngagementMetrics(churchId: number, options?: {
-    period?: string;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<{
-    averageEngagement: number;
-    attendanceRate: number;
-    volunteerParticipation: number;
-    donationParticipation: number;
-    eventParticipation: number;
-  }> {
-    // Calculate engagement metrics based on actual data
-    const totalMembers = await this.getChurchMemberCount(churchId);
-    
-    // For now, return calculated percentages - in production, this would query actual engagement data
-    return {
-      averageEngagement: 72,
-      attendanceRate: 68,
-      volunteerParticipation: 35,
-      donationParticipation: 45,
-      eventParticipation: 58
-    };
-  }
-
-  // Communication Campaigns
-  async getCommunicationCampaigns(churchId: number): Promise<any[]> {
+  async getReferralRewardTiers(): Promise<ReferralReward[]> {
     return await db
       .select()
-      .from(communicationCampaigns)
-      .where(eq(communicationCampaigns.churchId, churchId))
-      .orderBy(desc(communicationCampaigns.createdAt));
+      .from(referralRewards)
+      .where(eq(referralRewards.isActive, true))
+      .orderBy(referralRewards.minReferrals);
   }
 
-  async createCommunicationCampaign(campaignData: any): Promise<any> {
-    const [campaign] = await db
-      .insert(communicationCampaigns)
-      .values(campaignData)
-      .returning();
-    return campaign;
-  }
-
-  // Enhanced Volunteer Management
-  async getEnhancedVolunteerRoles(churchId: number): Promise<any[]> {
-    return await db
+  async checkReferralMilestones(userId: string): Promise<ReferralMilestone[]> {
+    const stats = await this.getUserReferralStats(userId);
+    const existingMilestones = await db
       .select()
-      .from(enhancedVolunteerRoles)
-      .where(and(
-        eq(enhancedVolunteerRoles.churchId, churchId),
-        eq(enhancedVolunteerRoles.isActive, true)
-      ))
-      .orderBy(enhancedVolunteerRoles.name);
+      .from(referralMilestones)
+      .where(eq(referralMilestones.userId, userId));
+
+    const newMilestones: ReferralMilestone[] = [];
+
+    // Define milestone thresholds and rewards
+    const milestoneThresholds = [
+      { type: 'first_referral', threshold: 1, points: 100, badge: 'Evangelist Seed' },
+      { type: 'fifth_referral', threshold: 5, points: 300, badge: 'Community Builder' },
+      { type: 'tenth_referral', threshold: 10, points: 500, badge: 'Spiritual Mentor' },
+      { type: 'twenty_fifth_referral', threshold: 25, points: 1000, badge: 'Faith Ambassador' },
+      { type: 'fiftieth_referral', threshold: 50, points: 2000, badge: 'Kingdom Multiplier' }
+    ];
+
+    for (const milestone of milestoneThresholds) {
+      if (stats.successfulReferrals >= milestone.threshold) {
+        const alreadyAwarded = existingMilestones.some(m => m.milestoneType === milestone.type);
+        
+        if (!alreadyAwarded) {
+          const [newMilestone] = await db
+            .insert(referralMilestones)
+            .values({
+              userId,
+              milestoneType: milestone.type,
+              totalReferrals: stats.successfulReferrals,
+              bonusPoints: milestone.points,
+              badgeAwarded: milestone.badge,
+              pointsAwarded: false
+            })
+            .returning();
+
+          // Award bonus points
+          await this.addUserPoints(userId, milestone.points);
+          
+          // Mark points as awarded
+          await db
+            .update(referralMilestones)
+            .set({ pointsAwarded: true })
+            .where(eq(referralMilestones.id, newMilestone.id));
+
+          newMilestones.push(newMilestone);
+        }
+      }
+    }
+
+    return newMilestones;
   }
 
-  async createEnhancedVolunteerRole(roleData: any): Promise<any> {
-    const [role] = await db
-      .insert(enhancedVolunteerRoles)
-      .values(roleData)
+  async generateReferralCode(userId: string): Promise<string> {
+    // Create a unique referral code based on user ID and timestamp
+    const timestamp = Date.now().toString(36);
+    const userHash = userId.slice(-6);
+    const referralCode = `SB${userHash}${timestamp}`.toUpperCase();
+
+    // Update user with referral code if they don't have one
+    const user = await this.getUser(userId);
+    if (user && !user.referralCode) {
+      await db
+        .update(users)
+        .set({ referralCode })
+        .where(eq(users.id, userId));
+    }
+
+    return referralCode;
+  }
+
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.referralCode, referralCode));
+    return user;
+  }
+
+  async getUserReferralAsReferee(userId: string): Promise<Referral | undefined> {
+    const [referral] = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.refereeId, userId));
+    return referral;
+  }
+
+  async getReferralLeaderboard(): Promise<Array<{
+    userId: string;
+    firstName: string | null;
+    profileImageUrl: string | null;
+    totalReferrals: number;
+    totalPointsEarned: number;
+  }>> {
+    const leaderboard = await db
+      .select({
+        userId: referrals.referrerId,
+        firstName: users.firstName,
+        profileImageUrl: users.profileImageUrl,
+        totalReferrals: sql`COUNT(${referrals.id})`.as('totalReferrals'),
+        totalPointsEarned: sql`SUM(${referrals.referrerPointsAwarded})`.as('totalPointsEarned')
+      })
+      .from(referrals)
+      .innerJoin(users, eq(referrals.referrerId, users.id))
+      .where(eq(referrals.status, 'rewarded'))
+      .groupBy(referrals.referrerId, users.firstName, users.profileImageUrl)
+      .orderBy(sql`COUNT(${referrals.id}) DESC`)
+      .limit(10);
+
+    return leaderboard.map(entry => ({
+      userId: entry.userId,
+      firstName: entry.firstName,
+      profileImageUrl: entry.profileImageUrl,
+      totalReferrals: Number(entry.totalReferrals),
+      totalPointsEarned: Number(entry.totalPointsEarned) || 0
+    }));
+  }
+
+  private async addUserPoints(userId: string, points: number): Promise<void> {
+    // Check if user has a score record
+    const [existingScore] = await db
+      .select()
+      .from(userScores)
+      .where(eq(userScores.userId, userId));
+
+    if (existingScore) {
+      await db
+        .update(userScores)
+        .set({
+          totalPoints: sql`${userScores.totalPoints} + ${points}`,
+          updatedAt: new Date()
+        })
+        .where(eq(userScores.userId, userId));
+    } else {
+      await db
+        .insert(userScores)
+        .values({
+          userId,
+          totalPoints: points,
+          level: 1,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+    }
+  }
+
+  // Enhanced Social & Community Features Implementation
+  async getEnhancedCommunityFeed(userId: string, filters: any): Promise<any[]> {
+    let baseQuery = db
+      .select({
+        id: discussions.id,
+        type: sql`'discussion'`.as('type'),
+        title: discussions.title,
+        content: discussions.content,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        },
+        church: {
+          id: churches.id,
+          name: churches.name,
+        },
+        isPublic: discussions.isPublic,
+        visibility: sql`CASE WHEN ${discussions.isPublic} THEN 'public' ELSE 'friends' END`.as('visibility'),
+        tags: discussions.tags,
+        createdAt: discussions.createdAt,
+        updatedAt: discussions.updatedAt,
+      })
+      .from(discussions)
+      .innerJoin(users, eq(discussions.authorId, users.id))
+      .leftJoin(churches, eq(discussions.churchId, churches.id));
+
+    // Apply filters
+    if (filters.type !== 'all' && filters.type === 'discussion') {
+      // Already filtered to discussions
+    }
+
+    if (filters.timeRange !== 'all') {
+      const now = new Date();
+      let startDate;
+      
+      switch (filters.timeRange) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+      }
+      
+      if (startDate) {
+        baseQuery = baseQuery.where(gte(discussions.createdAt, startDate));
+      }
+    }
+
+    if (filters.search) {
+      baseQuery = baseQuery.where(
+        or(
+          ilike(discussions.title, `%${filters.search}%`),
+          ilike(discussions.content, `%${filters.search}%`)
+        )
+      );
+    }
+
+    // Apply sorting
+    switch (filters.sortBy) {
+      case 'popular':
+        baseQuery = baseQuery.orderBy(desc(discussions.createdAt)); // Placeholder for engagement score
+        break;
+      case 'recent':
+      default:
+        baseQuery = baseQuery.orderBy(desc(discussions.createdAt));
+        break;
+    }
+
+    const posts = await baseQuery.limit(50);
+
+    // Add reactions and comment counts
+    const postsWithReactions = await Promise.all(
+      posts.map(async (post) => {
+        const reactions = await this.getPostReactions(post.id, 'discussion');
+        const commentCount = await this.getDiscussionCommentCount(post.id);
+        
+        return {
+          ...post,
+          reactions,
+          commentCount,
+        };
+      })
+    );
+
+    return postsWithReactions;
+  }
+
+  async getPostReactions(postId: number, targetType: string): Promise<any[]> {
+    const reactionSummary = await db
+      .select({
+        reactionType: reactions.reactionType,
+        emoji: reactions.emoji,
+        count: sql`COUNT(*)`.as('count'),
+      })
+      .from(reactions)
+      .where(
+        and(
+          eq(reactions.targetId, postId),
+          eq(reactions.targetType, targetType)
+        )
+      )
+      .groupBy(reactions.reactionType, reactions.emoji);
+
+    return reactionSummary.map(r => ({
+      type: r.reactionType,
+      emoji: r.emoji,
+      count: Number(r.count),
+      userReacted: false, // TODO: Check if current user reacted
+    }));
+  }
+
+  async getDiscussionCommentCount(discussionId: number): Promise<number> {
+    const result = await db
+      .select({ count: sql`COUNT(*)`.as('count') })
+      .from(discussionComments)
+      .where(eq(discussionComments.discussionId, discussionId));
+    
+    return Number(result[0]?.count || 0);
+  }
+
+  async addReaction(reactionData: any): Promise<any> {
+    // Check if reaction already exists
+    const existing = await db
+      .select()
+      .from(reactions)
+      .where(
+        and(
+          eq(reactions.userId, reactionData.userId),
+          eq(reactions.targetId, reactionData.targetId),
+          eq(reactions.targetType, reactionData.targetType),
+          eq(reactions.reactionType, reactionData.reactionType)
+        )
+      );
+
+    if (existing.length > 0) {
+      // Update existing reaction
+      const [updated] = await db
+        .update(reactions)
+        .set({
+          emoji: reactionData.emoji,
+          intensity: reactionData.intensity,
+          updatedAt: new Date(),
+        })
+        .where(eq(reactions.id, existing[0].id))
+        .returning();
+      return updated;
+    } else {
+      // Create new reaction
+      const [newReaction] = await db
+        .insert(reactions)
+        .values({
+          userId: reactionData.userId,
+          targetType: reactionData.targetType,
+          targetId: reactionData.targetId,
+          reactionType: reactionData.reactionType,
+          emoji: reactionData.emoji,
+          intensity: reactionData.intensity || 1,
+        })
+        .returning();
+      return newReaction;
+    }
+  }
+
+  async removeReaction(userId: string, targetId: number, reactionType: string): Promise<void> {
+    await db
+      .delete(reactions)
+      .where(
+        and(
+          eq(reactions.userId, userId),
+          eq(reactions.targetId, targetId),
+          eq(reactions.reactionType, reactionType)
+        )
+      );
+  }
+
+  async getCommunityGroups(userId: string): Promise<any[]> {
+    const userGroups = await db
+      .select({
+        id: communityGroups.id,
+        name: communityGroups.name,
+        description: communityGroups.description,
+        category: communityGroups.category,
+        tags: communityGroups.tags,
+        memberCount: communityGroups.memberCount,
+        isPrivate: communityGroups.isPrivate,
+        isActive: communityGroups.isActive,
+        userRole: communityGroupMembers.role,
+        joinedAt: communityGroupMembers.joinedAt,
+        createdAt: communityGroups.createdAt,
+      })
+      .from(communityGroups)
+      .leftJoin(
+        communityGroupMembers,
+        and(
+          eq(communityGroupMembers.groupId, communityGroups.id),
+          eq(communityGroupMembers.userId, userId)
+        )
+      )
+      .where(eq(communityGroups.isActive, true))
+      .orderBy(desc(communityGroups.createdAt));
+
+    return userGroups;
+  }
+
+  async createCommunityGroup(groupData: any): Promise<any> {
+    const [newGroup] = await db
+      .insert(communityGroups)
+      .values({
+        name: groupData.name,
+        description: groupData.description,
+        category: groupData.category,
+        tags: groupData.tags,
+        createdBy: groupData.createdBy,
+        isPrivate: groupData.isPrivate || false,
+        isActive: true,
+        memberCount: 1,
+      })
       .returning();
-    return role;
+
+    // Add creator as group leader
+    await db
+      .insert(communityGroupMembers)
+      .values({
+        groupId: newGroup.id,
+        userId: groupData.createdBy,
+        role: 'leader',
+      });
+
+    return newGroup;
   }
 
-  // Donation Management
-  async getDonationSummary(churchId: number): Promise<{
-    totalAmount: number;
-    totalDonations: number;
-    uniqueDonors: number;
-    averageDonation: number;
-    monthlyGrowth: number;
-    goalProgress: number;
-  }> {
-    const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1);
-    
-    const totalResult = await db
-      .select({
-        totalAmount: sql<number>`COALESCE(SUM(${donations.amount}), 0)`,
-        totalCount: count()
+  async joinCommunityGroup(memberData: any): Promise<void> {
+    await db
+      .insert(communityGroupMembers)
+      .values({
+        groupId: memberData.groupId,
+        userId: memberData.userId,
+        role: memberData.role || 'member',
       })
-      .from(donations)
-      .where(and(
-        eq(donations.churchId, churchId),
-        gte(donations.donationDate, startOfYear)
-      ));
+      .onConflictDoNothing();
 
-    const uniqueDonorsResult = await db
-      .select({
-        uniqueCount: sql<number>`COUNT(DISTINCT ${donations.donorId})`
+    // Update member count
+    await db
+      .update(communityGroups)
+      .set({
+        memberCount: sql`${communityGroups.memberCount} + 1`,
+        updatedAt: new Date(),
       })
-      .from(donations)
-      .where(and(
-        eq(donations.churchId, churchId),
-        gte(donations.donationDate, startOfYear),
-        isNotNull(donations.donorId)
-      ));
-
-    const total = totalResult[0];
-    const uniqueDonors = uniqueDonorsResult[0]?.uniqueCount || 0;
-    
-    return {
-      totalAmount: Number(total?.totalAmount) || 0,
-      totalDonations: total?.totalCount || 0,
-      uniqueDonors,
-      averageDonation: total?.totalCount ? Number(total.totalAmount) / total.totalCount : 0,
-      monthlyGrowth: 8.5, // Calculate based on month-over-month comparison
-      goalProgress: 65 // Calculate based on annual goal
-    };
+      .where(eq(communityGroups.id, memberData.groupId));
   }
 
-  async getDonations(churchId: number, options: {
-    page: number;
-    limit: number;
-    startDate?: string;
-    endDate?: string;
-    categoryId?: number;
-  }): Promise<any[]> {
+  async leaveCommunityGroup(userId: string, groupId: number): Promise<void> {
+    await db
+      .delete(communityGroupMembers)
+      .where(
+        and(
+          eq(communityGroupMembers.userId, userId),
+          eq(communityGroupMembers.groupId, groupId)
+        )
+      );
+
+    // Update member count
+    await db
+      .update(communityGroups)
+      .set({
+        memberCount: sql`${communityGroups.memberCount} - 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(communityGroups.id, groupId));
+  }
+
+  async getUserFriends(userId: string): Promise<any[]> {
+    const friendsList = await db
+      .select({
+        id: friendships.id,
+        friendId: sql`CASE WHEN ${friendships.requesterId} = ${userId} THEN ${friendships.addresseeId} ELSE ${friendships.requesterId} END`.as('friendId'),
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        status: friendships.status,
+        createdAt: friendships.createdAt,
+      })
+      .from(friendships)
+      .innerJoin(
+        users,
+        or(
+          and(eq(friendships.requesterId, userId), eq(users.id, friendships.addresseeId)),
+          and(eq(friendships.addresseeId, userId), eq(users.id, friendships.requesterId))
+        )
+      )
+      .where(
+        and(
+          or(
+            eq(friendships.requesterId, userId),
+            eq(friendships.addresseeId, userId)
+          ),
+          eq(friendships.status, 'accepted')
+        )
+      );
+
+    return friendsList;
+  }
+
+  async sendFriendRequest(friendshipData: any): Promise<any> {
+    const [friendship] = await db
+      .insert(friendships)
+      .values({
+        requesterId: friendshipData.requesterId,
+        addresseeId: friendshipData.addresseeId,
+        status: 'pending',
+      })
+      .returning();
+
+    return friendship;
+  }
+
+  async respondToFriendRequest(friendshipId: number, status: string): Promise<any> {
+    const [updatedFriendship] = await db
+      .update(friendships)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(eq(friendships.id, friendshipId))
+      .returning();
+
+    return updatedFriendship;
+  }
+
+  async createCommunityReflection(reflectionData: any): Promise<any> {
+    const [reflection] = await db
+      .insert(communityReflections)
+      .values({
+        userId: reflectionData.userId,
+        verseId: reflectionData.verseId,
+        groupId: reflectionData.groupId,
+        title: reflectionData.title,
+        content: reflectionData.content,
+        tags: reflectionData.tags,
+        visibility: reflectionData.visibility || 'public',
+        isAnonymous: reflectionData.isAnonymous || false,
+      })
+      .returning();
+
+    return reflection;
+  }
+
+  async getCommunityReflections(filters: any): Promise<any[]> {
     let query = db
-      .select()
-      .from(donations)
-      .where(eq(donations.churchId, churchId));
+      .select({
+        id: communityReflections.id,
+        title: communityReflections.title,
+        content: communityReflections.content,
+        tags: communityReflections.tags,
+        visibility: communityReflections.visibility,
+        isAnonymous: communityReflections.isAnonymous,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+        },
+        createdAt: communityReflections.createdAt,
+      })
+      .from(communityReflections)
+      .leftJoin(users, eq(communityReflections.userId, users.id))
+      .orderBy(desc(communityReflections.createdAt));
 
-    if (options.startDate) {
-      query = query.where(gte(donations.donationDate, new Date(options.startDate)));
-    }
-    if (options.endDate) {
-      query = query.where(lte(donations.donationDate, new Date(options.endDate)));
-    }
-    if (options.categoryId) {
-      query = query.where(eq(donations.categoryId, options.categoryId));
-    }
-
-    return await query
-      .orderBy(desc(donations.donationDate))
-      .limit(options.limit)
-      .offset((options.page - 1) * options.limit);
-  }
-
-  async getDonationCategories(churchId: number): Promise<any[]> {
-    return await db
-      .select()
-      .from(donationCategories)
-      .where(and(
-        eq(donationCategories.churchId, churchId),
-        eq(donationCategories.isActive, true)
-      ))
-      .orderBy(donationCategories.sortOrder, donationCategories.name);
-  }
-
-  async createDonationCategory(categoryData: any): Promise<any> {
-    const [category] = await db
-      .insert(donationCategories)
-      .values(categoryData)
-      .returning();
-    return category;
-  }
-
-  // Campus Management
-  async getCampuses(churchId: number): Promise<any[]> {
-    return await db
-      .select()
-      .from(campuses)
-      .where(eq(campuses.churchId, churchId))
-      .orderBy(desc(campuses.isPrimary), campuses.name);
-  }
-
-  async createCampus(campusData: any): Promise<any> {
-    const [campus] = await db
-      .insert(campuses)
-      .values(campusData)
-      .returning();
-    return campus;
-  }
-
-  // Spiritual Growth Tracking
-  async getSpiritualGrowthTracking(churchId: number, options: {
-    category?: string;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<any[]> {
-    let query = db
-      .select()
-      .from(spiritualGrowthTracking)
-      .where(eq(spiritualGrowthTracking.churchId, churchId));
-
-    if (options.category) {
-      query = query.where(eq(spiritualGrowthTracking.growthCategory, options.category));
-    }
-    if (options.startDate) {
-      query = query.where(gte(spiritualGrowthTracking.achievedDate, new Date(options.startDate)));
-    }
-    if (options.endDate) {
-      query = query.where(lte(spiritualGrowthTracking.achievedDate, new Date(options.endDate)));
+    if (filters.verseId) {
+      query = query.where(eq(communityReflections.verseId, filters.verseId));
     }
 
-    return await query.orderBy(desc(spiritualGrowthTracking.achievedDate));
-  }
+    if (filters.groupId) {
+      query = query.where(eq(communityReflections.groupId, filters.groupId));
+    }
 
-  async createSpiritualGrowthTracking(trackingData: any): Promise<any> {
-    const [tracking] = await db
-      .insert(spiritualGrowthTracking)
-      .values(trackingData)
-      .returning();
-    return tracking;
+    return await query.limit(50);
   }
 }
 
