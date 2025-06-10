@@ -42,7 +42,10 @@ export const getQueryFn: <T>(options: {
       url += `?q=${encodeURIComponent(searchTerm)}`;
     }
     
-    const res = await fetch(url, {
+    // Ensure URL is absolute
+    const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+    
+    const res = await fetch(fullUrl, {
       credentials: "include",
     });
 
