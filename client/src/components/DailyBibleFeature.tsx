@@ -1191,13 +1191,19 @@ export function DailyBibleFeature() {
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-3 border border-yellow-200 mb-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">🎁</span>
-                    <div>
-                      <p className="text-sm font-semibold text-orange-800">Referral Rewards</p>
-                      <p className="text-xs text-orange-700">You earn 500 points • They get 250 welcome points</p>
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200 mb-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">✨</span>
+                      <p className="text-sm font-semibold text-orange-800">Share the Light. Earn the Rewards.</p>
                     </div>
+                    <div className="text-xs text-orange-700 space-y-1">
+                      <p className="font-medium">When you invite a friend to SoapBox:</p>
+                      <p>• You earn 500 points toward spiritual milestones</p>
+                      <p>• They start with 250 bonus points to kickstart their journey</p>
+                      <p className="italic font-medium mt-2">Faith grows stronger when shared.</p>
+                    </div>
+                  </div>
                   </div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
