@@ -96,14 +96,13 @@ interface Church {
 }
 
 const categories = [
-  { value: "worship", label: "Worship Service" },
+  { value: "service", label: "Service" },
   { value: "bible_study", label: "Bible Study" },
   { value: "community_service", label: "Community Service" },
   { value: "social", label: "Social Event" },
   { value: "youth", label: "Youth Ministry" },
+  { value: "music", label: "Music" },
   { value: "outreach", label: "Outreach" },
-  { value: "prayer", label: "Prayer Meeting" },
-  { value: "fellowship", label: "Fellowship" },
 ];
 
 const priorities = [
