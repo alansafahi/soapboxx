@@ -1436,8 +1436,19 @@ export type InsertEventRecurrenceRule = typeof eventRecurrenceRules.$inferInsert
 export type EventMetric = typeof eventMetrics.$inferSelect;
 export type InsertEventMetric = typeof eventMetrics.$inferInsert;
 
-// Event form schemas  
+// Event form schemas
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 export type InsertEventForm = z.infer<typeof insertEventSchema>;
+
+export const insertEventRsvpSchema = createInsertSchema(eventRsvps).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 export type InsertEventRsvpForm = z.infer<typeof insertEventRsvpSchema>;
 
 export const insertEventVolunteerSchema = createInsertSchema(eventVolunteers).omit({

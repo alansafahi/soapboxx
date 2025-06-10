@@ -354,7 +354,288 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid RSVP data", errors: error.errors });
       }
       console.error("Error creating RSVP:", error);
-      res.status(500).json({ message: "Failed to RSVP to event" });
+      res.status(500).json({ message: "Failed to create RSVP" });
+    }
+  });
+
+  app.put('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const updates = req.body;
+      const updatedEvent = await storage.updateEvent(eventId, updates);
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+
+  app.delete('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      await storage.deleteEvent(eventId);
+      res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+
+  app.get('/api/events/upcoming', async (req, res) => {
+    try {
+      const { churchId, limit } = req.query;
+      const events = await storage.getUpcomingEvents(
+        churchId ? parseInt(churchId as string) : undefined,
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching upcoming events:", error);
+      res.status(500).json({ message: "Failed to fetch upcoming events" });
+    }
+  });
+
+  app.get('/api/events/search', async (req, res) => {
+    try {
+      const { q, churchId } = req.query;
+      if (!q) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      const events = await storage.searchEvents(
+        q as string,
+        churchId ? parseInt(churchId as string) : undefined
+      );
+      res.json(events);
+    } catch (error) {
+      console.error("Error searching events:", error);
+      res.status(500).json({ message: "Failed to search events" });
+    }
+  });
+
+  app.put('/api/events/:id/rsvp', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const { status } = req.body;
+      const updatedRsvp = await storage.updateEventRsvp(eventId, userId, status);
+      res.json(updatedRsvp);
+    } catch (error) {
+      console.error("Error updating RSVP:", error);
+      res.status(500).json({ message: "Failed to update RSVP" });
+    }
+  });
+
+  app.get('/api/events/:id/rsvps', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const rsvps = await storage.getEventRsvps(eventId);
+      res.json(rsvps);
+    } catch (error) {
+      console.error("Error fetching event RSVPs:", error);
+      res.status(500).json({ message: "Failed to fetch event RSVPs" });
+    }
+  });
+
+  app.get('/api/events/:id/attendance-stats', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const stats = await storage.getEventAttendanceStats(eventId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching attendance stats:", error);
+      res.status(500).json({ message: "Failed to fetch attendance stats" });
+    }
+  });
+
+  app.post('/api/events/:id/volunteers', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const { role, notes } = req.body;
+      
+      const volunteerData = {
+        eventId,
+        userId,
+        role: role || 'General Volunteer',
+        notes: notes || ''
+      };
+      
+      const volunteer = await storage.addEventVolunteer(volunteerData);
+      res.json(volunteer);
+    } catch (error) {
+      console.error("Error adding volunteer:", error);
+      res.status(500).json({ message: "Failed to add volunteer" });
+    }
+  });
+
+  app.delete('/api/events/:id/volunteers/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.params.userId;
+      await storage.removeEventVolunteer(eventId, userId);
+      res.json({ message: "Volunteer removed successfully" });
+    } catch (error) {
+      console.error("Error removing volunteer:", error);
+      res.status(500).json({ message: "Failed to remove volunteer" });
+    }
+  });
+
+  app.get('/api/events/:id/volunteers', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const volunteers = await storage.getEventVolunteers(eventId);
+      res.json(volunteers);
+    } catch (error) {
+      console.error("Error fetching volunteers:", error);
+      res.status(500).json({ message: "Failed to fetch volunteers" });
+    }
+  });
+
+  app.post('/api/events/:id/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const { title, message, notificationType, scheduledFor } = req.body;
+      
+      const notificationData = {
+        eventId,
+        title,
+        message,
+        notificationType: notificationType || 'general',
+        scheduledFor: scheduledFor ? new Date(scheduledFor) : new Date()
+      };
+      
+      const notification = await storage.createEventNotification(notificationData);
+      res.json(notification);
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      res.status(500).json({ message: "Failed to create notification" });
+    }
+  });
+
+  app.get('/api/events/:id/notifications', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const notifications = await storage.getEventNotifications(eventId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post('/api/events/:id/updates', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const { title, content, priority } = req.body;
+      
+      const updateData = {
+        eventId,
+        title,
+        content,
+        priority: priority || 'normal'
+      };
+      
+      const update = await storage.createEventUpdate(updateData);
+      res.json(update);
+    } catch (error) {
+      console.error("Error creating event update:", error);
+      res.status(500).json({ message: "Failed to create event update" });
+    }
+  });
+
+  app.get('/api/events/:id/updates', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const updates = await storage.getEventUpdates(eventId);
+      res.json(updates);
+    } catch (error) {
+      console.error("Error fetching event updates:", error);
+      res.status(500).json({ message: "Failed to fetch event updates" });
+    }
+  });
+
+  app.post('/api/events/:id/checkin', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const checkInData = {
+        eventId,
+        userId,
+        checkInTime: new Date()
+      };
+      
+      const checkIn = await storage.checkInToEvent(checkInData);
+      res.json(checkIn);
+    } catch (error) {
+      console.error("Error checking in to event:", error);
+      res.status(500).json({ message: "Failed to check in to event" });
+    }
+  });
+
+  app.get('/api/events/:id/checkins', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const checkIns = await storage.getEventCheckIns(eventId);
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error fetching check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch check-ins" });
+    }
+  });
+
+  app.post('/api/events/:id/recurrence', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const { pattern, frequency, endDate, maxOccurrences } = req.body;
+      
+      const recurrenceData = {
+        eventId,
+        pattern,
+        frequency,
+        endDate: endDate ? new Date(endDate) : undefined,
+        maxOccurrences
+      };
+      
+      const recurrence = await storage.createEventRecurrence(recurrenceData);
+      res.json(recurrence);
+    } catch (error) {
+      console.error("Error creating recurrence rule:", error);
+      res.status(500).json({ message: "Failed to create recurrence rule" });
+    }
+  });
+
+  app.get('/api/events/:id/recurrence', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const recurrence = await storage.getEventRecurrence(eventId);
+      res.json(recurrence);
+    } catch (error) {
+      console.error("Error fetching recurrence:", error);
+      res.status(500).json({ message: "Failed to fetch recurrence" });
+    }
+  });
+
+  app.get('/api/events/:id/metrics', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const metrics = await storage.getEventMetrics(eventId);
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching event metrics:", error);
+      res.status(500).json({ message: "Failed to fetch event metrics" });
+    }
+  });
+
+  app.put('/api/events/:id/metrics', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const metricsData = req.body;
+      const metrics = await storage.updateEventMetrics(eventId, metricsData);
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error updating event metrics:", error);
+      res.status(500).json({ message: "Failed to update event metrics" });
     }
   });
 

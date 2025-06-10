@@ -165,9 +165,43 @@ export interface IStorage {
   getEvents(churchId?: number): Promise<Event[]>;
   getEvent(id: number): Promise<Event | undefined>;
   createEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: number, updates: Partial<Event>): Promise<Event>;
+  deleteEvent(id: number): Promise<void>;
   getUserEvents(userId: string): Promise<Event[]>;
+  getUpcomingEvents(churchId?: number, limit?: number): Promise<Event[]>;
+  searchEvents(query: string, churchId?: number): Promise<Event[]>;
+  
+  // Event RSVP operations
   rsvpEvent(rsvp: InsertEventRsvp): Promise<EventRsvp>;
+  updateEventRsvp(eventId: number, userId: string, status: string): Promise<EventRsvp>;
   getUserEventRsvp(eventId: number, userId: string): Promise<EventRsvp | undefined>;
+  getEventRsvps(eventId: number): Promise<(EventRsvp & { user: User })[]>;
+  getEventAttendanceStats(eventId: number): Promise<{ attending: number; tentative: number; declined: number; total: number }>;
+  
+  // Event volunteer operations
+  addEventVolunteer(volunteer: InsertEventVolunteer): Promise<EventVolunteer>;
+  removeEventVolunteer(eventId: number, userId: string): Promise<void>;
+  getEventVolunteers(eventId: number): Promise<(EventVolunteer & { user: User })[]>;
+  
+  // Event notifications
+  createEventNotification(notification: InsertEventNotification): Promise<EventNotification>;
+  getEventNotifications(eventId: number): Promise<EventNotification[]>;
+  
+  // Event updates
+  createEventUpdate(update: InsertEventUpdate): Promise<EventUpdate>;
+  getEventUpdates(eventId: number): Promise<EventUpdate[]>;
+  
+  // Event check-ins
+  checkInToEvent(checkIn: InsertEventCheckIn): Promise<EventCheckIn>;
+  getEventCheckIns(eventId: number): Promise<(EventCheckIn & { user: User })[]>;
+  
+  // Event recurrence
+  createEventRecurrence(rule: InsertEventRecurrenceRule): Promise<EventRecurrenceRule>;
+  getEventRecurrence(eventId: number): Promise<EventRecurrenceRule | undefined>;
+  
+  // Event metrics
+  getEventMetrics(eventId: number): Promise<EventMetric | undefined>;
+  updateEventMetrics(eventId: number, metrics: Partial<InsertEventMetric>): Promise<EventMetric>;
   
   // Discussion operations
   getDiscussions(churchId?: number): Promise<Discussion[]>;
@@ -561,6 +595,279 @@ export class DatabaseStorage implements IStorage {
         eq(eventRsvps.userId, userId)
       ));
     return rsvp;
+  }
+
+  async updateEvent(id: number, updates: Partial<Event>): Promise<Event> {
+    const [updatedEvent] = await db
+      .update(events)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(events.id, id))
+      .returning();
+    return updatedEvent;
+  }
+
+  async deleteEvent(id: number): Promise<void> {
+    await db.delete(events).where(eq(events.id, id));
+  }
+
+  async getUpcomingEvents(churchId?: number, limit = 10): Promise<Event[]> {
+    const now = new Date();
+    const query = db
+      .select()
+      .from(events)
+      .where(and(
+        churchId ? eq(events.churchId, churchId) : undefined,
+        sql`${events.eventDate} >= ${now}`
+      ))
+      .orderBy(asc(events.eventDate))
+      .limit(limit);
+    
+    return await query;
+  }
+
+  async searchEvents(query: string, churchId?: number): Promise<Event[]> {
+    return await db
+      .select()
+      .from(events)
+      .where(and(
+        churchId ? eq(events.churchId, churchId) : undefined,
+        or(
+          ilike(events.title, `%${query}%`),
+          ilike(events.description, `%${query}%`),
+          ilike(events.category, `%${query}%`)
+        )
+      ))
+      .orderBy(asc(events.eventDate));
+  }
+
+  async updateEventRsvp(eventId: number, userId: string, status: string): Promise<EventRsvp> {
+    const [updatedRsvp] = await db
+      .update(eventRsvps)
+      .set({ status })
+      .where(and(
+        eq(eventRsvps.eventId, eventId),
+        eq(eventRsvps.userId, userId)
+      ))
+      .returning();
+    return updatedRsvp;
+  }
+
+  async getEventRsvps(eventId: number): Promise<(EventRsvp & { user: User })[]> {
+    return await db
+      .select({
+        id: eventRsvps.id,
+        eventId: eventRsvps.eventId,
+        userId: eventRsvps.userId,
+        status: eventRsvps.status,
+        createdAt: eventRsvps.createdAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          bio: users.bio,
+          mobileNumber: users.mobileNumber,
+          address: users.address,
+          city: users.city,
+          state: users.state,
+          zipCode: users.zipCode,
+          country: users.country,
+          denomination: users.denomination,
+          interests: users.interests,
+          hasCompletedOnboarding: users.hasCompletedOnboarding,
+          onboardingData: users.onboardingData,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(eventRsvps)
+      .innerJoin(users, eq(eventRsvps.userId, users.id))
+      .where(eq(eventRsvps.eventId, eventId)) as any;
+  }
+
+  async getEventAttendanceStats(eventId: number): Promise<{ attending: number; tentative: number; declined: number; total: number }> {
+    const [stats] = await db
+      .select({
+        attending: sql<number>`COUNT(*) FILTER (WHERE ${eventRsvps.status} = 'attending')`,
+        tentative: sql<number>`COUNT(*) FILTER (WHERE ${eventRsvps.status} = 'tentative')`,
+        declined: sql<number>`COUNT(*) FILTER (WHERE ${eventRsvps.status} = 'declined')`,
+        total: count()
+      })
+      .from(eventRsvps)
+      .where(eq(eventRsvps.eventId, eventId));
+    
+    return {
+      attending: Number(stats.attending) || 0,
+      tentative: Number(stats.tentative) || 0,
+      declined: Number(stats.declined) || 0,
+      total: stats.total
+    };
+  }
+
+  async addEventVolunteer(volunteer: InsertEventVolunteer): Promise<EventVolunteer> {
+    const [newVolunteer] = await db.insert(eventVolunteers).values(volunteer).returning();
+    
+    // Track activity
+    await this.trackUserActivity({
+      userId: volunteer.userId,
+      activityType: 'event_volunteer',
+      entityId: volunteer.eventId,
+      points: 15,
+    });
+    
+    return newVolunteer;
+  }
+
+  async removeEventVolunteer(eventId: number, userId: string): Promise<void> {
+    await db
+      .delete(eventVolunteers)
+      .where(and(
+        eq(eventVolunteers.eventId, eventId),
+        eq(eventVolunteers.userId, userId)
+      ));
+  }
+
+  async getEventVolunteers(eventId: number): Promise<(EventVolunteer & { user: User })[]> {
+    return await db
+      .select({
+        id: eventVolunteers.id,
+        eventId: eventVolunteers.eventId,
+        userId: eventVolunteers.userId,
+        role: eventVolunteers.role,
+        notes: eventVolunteers.notes,
+        createdAt: eventVolunteers.createdAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          bio: users.bio,
+          mobileNumber: users.mobileNumber,
+          address: users.address,
+          city: users.city,
+          state: users.state,
+          zipCode: users.zipCode,
+          country: users.country,
+          denomination: users.denomination,
+          interests: users.interests,
+          hasCompletedOnboarding: users.hasCompletedOnboarding,
+          onboardingData: users.onboardingData,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(eventVolunteers)
+      .innerJoin(users, eq(eventVolunteers.userId, users.id))
+      .where(eq(eventVolunteers.eventId, eventId)) as any;
+  }
+
+  async createEventNotification(notification: InsertEventNotification): Promise<EventNotification> {
+    const [newNotification] = await db.insert(eventNotifications).values(notification).returning();
+    return newNotification;
+  }
+
+  async getEventNotifications(eventId: number): Promise<EventNotification[]> {
+    return await db
+      .select()
+      .from(eventNotifications)
+      .where(eq(eventNotifications.eventId, eventId))
+      .orderBy(desc(eventNotifications.createdAt));
+  }
+
+  async createEventUpdate(update: InsertEventUpdate): Promise<EventUpdate> {
+    const [newUpdate] = await db.insert(eventUpdates).values(update).returning();
+    return newUpdate;
+  }
+
+  async getEventUpdates(eventId: number): Promise<EventUpdate[]> {
+    return await db
+      .select()
+      .from(eventUpdates)
+      .where(eq(eventUpdates.eventId, eventId))
+      .orderBy(desc(eventUpdates.createdAt));
+  }
+
+  async checkInToEvent(checkIn: InsertEventCheckIn): Promise<EventCheckIn> {
+    const [newCheckIn] = await db.insert(eventCheckIns).values(checkIn).returning();
+    
+    // Track activity
+    await this.trackUserActivity({
+      userId: checkIn.userId,
+      activityType: 'event_attendance',
+      entityId: checkIn.eventId,
+      points: 20,
+    });
+    
+    return newCheckIn;
+  }
+
+  async getEventCheckIns(eventId: number): Promise<(EventCheckIn & { user: User })[]> {
+    return await db
+      .select({
+        id: eventCheckIns.id,
+        eventId: eventCheckIns.eventId,
+        userId: eventCheckIns.userId,
+        checkInTime: eventCheckIns.checkInTime,
+        createdAt: eventCheckIns.createdAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          bio: users.bio,
+          mobileNumber: users.mobileNumber,
+          address: users.address,
+          city: users.city,
+          state: users.state,
+          zipCode: users.zipCode,
+          country: users.country,
+          denomination: users.denomination,
+          interests: users.interests,
+          hasCompletedOnboarding: users.hasCompletedOnboarding,
+          onboardingData: users.onboardingData,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(eventCheckIns)
+      .innerJoin(users, eq(eventCheckIns.userId, users.id))
+      .where(eq(eventCheckIns.eventId, eventId)) as any;
+  }
+
+  async createEventRecurrence(rule: InsertEventRecurrenceRule): Promise<EventRecurrenceRule> {
+    const [newRule] = await db.insert(eventRecurrenceRules).values(rule).returning();
+    return newRule;
+  }
+
+  async getEventRecurrence(eventId: number): Promise<EventRecurrenceRule | undefined> {
+    const [rule] = await db
+      .select()
+      .from(eventRecurrenceRules)
+      .where(eq(eventRecurrenceRules.eventId, eventId));
+    return rule;
+  }
+
+  async getEventMetrics(eventId: number): Promise<EventMetric | undefined> {
+    const [metrics] = await db
+      .select()
+      .from(eventMetrics)
+      .where(eq(eventMetrics.eventId, eventId));
+    return metrics;
+  }
+
+  async updateEventMetrics(eventId: number, metrics: Partial<InsertEventMetric>): Promise<EventMetric> {
+    const [updatedMetrics] = await db
+      .insert(eventMetrics)
+      .values({ eventId, ...metrics })
+      .onConflictDoUpdate({
+        target: eventMetrics.eventId,
+        set: { ...metrics, updatedAt: new Date() }
+      })
+      .returning();
+    return updatedMetrics;
   }
 
   // Discussion operations
