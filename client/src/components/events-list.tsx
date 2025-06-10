@@ -118,15 +118,54 @@ export default function EventsList() {
           return newSet;
         });
       }, 400);
-      toast({
-        title: "RSVP Updated",
-        description: `You are now ${status.replace('_', ' ')} this event.`,
-      });
+      
+      // Auto-add to calendar and set reminder for positive RSVPs
+      if (status === 'attending' || status === 'maybe') {
+        const event = (events as Event[]).find((e: Event) => e.id === eventId);
+        if (event) {
+          // Automatically set reminder
+          setReminders(prev => new Set(prev).add(eventId));
+          
+          // Show toast with calendar option
+          toast({
+            title: "RSVP Updated",
+            description: `You are now ${status.replace('_', ' ')} this event.`,
+            action: (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => addToGoogleCalendar(event)}
+                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                >
+                  Add to Calendar
+                </button>
+              </div>
+            ),
+          });
+        }
+      } else {
+        toast({
+          title: "RSVP Updated",
+          description: `You are now ${status.replace('_', ' ')} this event.`,
+        });
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
     },
   });
 
   // Helper functions
+  const addToGoogleCalendar = (event: Event) => {
+    const startDate = new Date(event.eventDate);
+    const endDate = event.endDate ? new Date(event.endDate) : addDays(startDate, 1);
+    
+    const formatGoogleDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    };
+    
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location || '')}`;
+    window.open(googleUrl, '_blank');
+  };
+
   const formatEventDate = (dateString: string) => {
     const date = new Date(dateString);
     return {
