@@ -600,23 +600,38 @@ export const scheduledNotifications = pgTable("scheduled_notifications", {
   id: serial("id").primaryKey(),
   churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
-  type: varchar("type", { length: 20 }).notNull(), // scripture, event, message, prayer
+  type: varchar("type", { length: 20 }).notNull(), // scripture, event, message, prayer, emergency, reminder, birthday, anniversary
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   scheduledFor: timestamp("scheduled_for").notNull(),
   timezone: varchar("timezone", { length: 50 }).default("America/Los_Angeles"),
-  targetAudience: varchar("target_audience", { length: 20 }).default("all"), // all, members, leaders, group
+  priority: varchar("priority", { length: 20 }).default("normal"), // low, normal, high, urgent, emergency
+  targetAudience: varchar("target_audience", { length: 20 }).default("all"), // all, members, leaders, group, location, age_group, ministry, attendance
   targetGroupId: integer("target_group_id").references(() => communityGroups.id),
+  targetLocation: varchar("target_location", { length: 100 }), // Campus or location targeting
+  targetAgeGroup: varchar("target_age_group", { length: 20 }), // youth, adults, seniors
+  targetMinistry: varchar("target_ministry", { length: 50 }), // choir, volunteers, small_groups
+  targetAttendance: varchar("target_attendance", { length: 20 }), // regular, newcomers, inactive
+  targetTags: text("target_tags").array(), // Custom user tags
   targetUserIds: text("target_user_ids").array(), // specific user IDs
   isRecurring: boolean("is_recurring").default(false),
-  recurringPattern: varchar("recurring_pattern", { length: 20 }), // daily, weekly, monthly
+  recurringPattern: varchar("recurring_pattern", { length: 20 }), // daily, weekly, monthly, yearly
   recurringDays: text("recurring_days").array(), // ['monday', 'tuesday'] for weekly
+  recurringInterval: integer("recurring_interval").default(1), // Every X days/weeks/months
   endDate: timestamp("end_date"),
   status: varchar("status", { length: 20 }).default("scheduled"), // scheduled, sent, cancelled, failed
   sentAt: timestamp("sent_at"),
   sentCount: integer("sent_count").default(0),
   deliveredCount: integer("delivered_count").default(0),
   openedCount: integer("opened_count").default(0),
+  clickCount: integer("click_count").default(0),
+  responseCount: integer("response_count").default(0),
+  mediaUrls: text("media_urls").array(), // Images, videos, audio attachments
+  interactiveElements: text("interactive_elements"), // JSON for polls, surveys, RSVP buttons
+  abTestGroup: varchar("ab_test_group", { length: 10 }), // A, B, control
+  weatherDependent: boolean("weather_dependent").default(false),
+  weatherConditions: text("weather_conditions").array(), // rain, snow, severe
+  autoOptimize: boolean("auto_optimize").default(false), // AI-optimized send times
   metadata: text("metadata"), // JSON string for additional data
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -656,14 +671,121 @@ export const scriptureSchedules = pgTable("scripture_schedules", {
   scriptures: text("scriptures").array().notNull(), // Array of scripture references
   targetAudience: varchar("target_audience", { length: 20 }).default("all"),
   targetGroupId: integer("target_group_id").references(() => communityGroups.id),
+  targetLocation: varchar("target_location", { length: 100 }),
+  targetAgeGroup: varchar("target_age_group", { length: 20 }),
+  targetMinistry: varchar("target_ministry", { length: 50 }),
+  targetTags: text("target_tags").array(),
   scheduleTime: varchar("schedule_time", { length: 5 }).notNull(), // HH:MM format
   timezone: varchar("timezone", { length: 50 }).default("America/Los_Angeles"),
   isActive: boolean("is_active").default(true),
   startDate: timestamp("start_date").defaultNow(),
   endDate: timestamp("end_date"),
   currentIndex: integer("current_index").default(0), // Track current scripture
+  personalizedContent: boolean("personalized_content").default(false),
+  includeReflection: boolean("include_reflection").default(false),
+  audioEnabled: boolean("audio_enabled").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User segmentation and tagging
+export const userTags = pgTable("user_tags", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  tag: varchar("tag", { length: 50 }).notNull(),
+  value: text("value"), // Optional tag value
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User engagement analytics
+export const userEngagementMetrics = pgTable("user_engagement_metrics", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  notificationsReceived: integer("notifications_received").default(0),
+  notificationsOpened: integer("notifications_opened").default(0),
+  notificationsClicked: integer("notifications_clicked").default(0),
+  averageOpenTime: integer("average_open_time"), // seconds after receiving
+  lastEngagement: timestamp("last_engagement"),
+  engagementScore: integer("engagement_score").default(0), // 0-100
+  preferredNotificationTypes: text("preferred_notification_types").array(),
+  optOutCategories: text("opt_out_categories").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// A/B Testing for notifications
+export const notificationAbTests = pgTable("notification_ab_tests", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  churchId: integer("church_id").references(() => churches.id),
+  testType: varchar("test_type", { length: 20 }).notNull(), // subject, content, time, frequency
+  variantA: text("variant_a").notNull(), // JSON configuration
+  variantB: text("variant_b").notNull(), // JSON configuration
+  controlGroup: text("control_group"), // JSON configuration
+  targetAudience: text("target_audience").notNull(),
+  status: varchar("status", { length: 20 }).default("draft"), // draft, running, completed, paused
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  sampleSize: integer("sample_size"),
+  confidenceLevel: integer("confidence_level").default(95),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  results: text("results"), // JSON with test results
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Emergency broadcast system
+export const emergencyBroadcasts = pgTable("emergency_broadcasts", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  severity: varchar("severity", { length: 20 }).notNull(), // info, warning, alert, critical
+  targetLocations: text("target_locations").array(), // Specific campus/location targeting
+  targetRadius: integer("target_radius"), // Geographic radius in miles
+  overrideSettings: boolean("override_settings").default(true), // Override user notification preferences
+  sendImmediately: boolean("send_immediately").default(true),
+  scheduledFor: timestamp("scheduled_for"),
+  channels: text("channels").array(), // push, sms, email, app_alert
+  status: varchar("status", { length: 20 }).default("draft"), // draft, sent, cancelled
+  sentAt: timestamp("sent_at"),
+  recipientCount: integer("recipient_count").default(0),
+  deliveredCount: integer("delivered_count").default(0),
+  acknowledgedCount: integer("acknowledged_count").default(0),
+  metadata: text("metadata"), // Additional emergency data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Weather-based notification triggers
+export const weatherTriggers = pgTable("weather_triggers", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  location: varchar("location", { length: 100 }).notNull(), // City, State or coordinates
+  conditions: text("conditions").array().notNull(), // rain, snow, temperature, wind, etc.
+  threshold: text("threshold"), // JSON with condition thresholds
+  notificationTemplate: text("notification_template").notNull(),
+  isActive: boolean("is_active").default(true),
+  lastTriggered: timestamp("last_triggered"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Interactive notification responses
+export const notificationResponses = pgTable("notification_responses", {
+  id: serial("id").primaryKey(),
+  notificationId: integer("notification_id").notNull().references(() => scheduledNotifications.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  responseType: varchar("response_type", { length: 20 }).notNull(), // poll_vote, rsvp, survey_response, prayer_response
+  responseData: text("response_data"), // JSON with response details
+  respondedAt: timestamp("responded_at").defaultNow(),
 });
 
 // Relations
