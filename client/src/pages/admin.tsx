@@ -123,6 +123,34 @@ function PublishedSeries() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { toast } = useToast();
+
+  const deleteSeriesMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/weekly-series/${id}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Weekly series deleted successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/weekly-series"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete weekly series. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteSeries = (seriesItem: any) => {
+    if (window.confirm(`Are you sure you want to delete "${seriesItem.title}"? This action cannot be undone.`)) {
+      deleteSeriesMutation.mutate(seriesItem.id);
+    }
+  };
+
   if (isLoading) return <div className="text-center py-4">Loading published series...</div>;
 
   const seriesList = Array.isArray(series) ? series : [];
@@ -262,6 +290,17 @@ function PublishedSeries() {
                           </span>
                         </div>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteSeries(seriesItem)}
+                          disabled={deleteSeriesMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -283,6 +322,34 @@ function PublishedSermonMedia() {
     queryKey: ['/api/sermon-media'],
     staleTime: 5 * 60 * 1000,
   });
+
+  const { toast } = useToast();
+
+  const deleteMediaMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/sermon-media/${id}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Sermon media deleted successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/sermon-media"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete sermon media. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteMedia = (mediaItem: any) => {
+    if (window.confirm(`Are you sure you want to delete "${mediaItem.title}"? This action cannot be undone.`)) {
+      deleteMediaMutation.mutate(mediaItem.id);
+    }
+  };
 
   if (isLoading) return <div className="text-center py-4">Loading published sermon media...</div>;
 
@@ -428,6 +495,17 @@ function PublishedSermonMedia() {
                             </span>
                           )}
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteMedia(mediaItem)}
+                          disabled={deleteMediaMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </Card>
