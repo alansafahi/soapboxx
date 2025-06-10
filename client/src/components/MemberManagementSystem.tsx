@@ -49,7 +49,7 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
       return fetch(url).then(res => res.json());
     },
     staleTime: 0, // Always refetch to avoid cache issues
-    cacheTime: 30000, // Keep cache for 30 seconds only
+    gcTime: 30000, // Keep cache for 30 seconds only
   });
 
 
