@@ -113,10 +113,8 @@ export function BibleInADayFeature() {
   const startSessionMutation = useMutation({
     mutationFn: async (sessionType: 'fast_track' | 'deep_dive' | 'audio_only') => {
       const targetDuration = sessionType === 'fast_track' ? 60 : sessionType === 'deep_dive' ? 300 : 45;
-      return await apiRequest('/api/bible-in-a-day/sessions', {
-        method: 'POST',
-        body: { sessionType, targetDuration },
-      });
+      const response = await apiRequest('POST', '/api/bible-in-a-day/sessions', { sessionType, targetDuration });
+      return await response.json();
     },
     onSuccess: () => {
       refetchActiveSession();
@@ -131,10 +129,8 @@ export function BibleInADayFeature() {
   // Create section progress mutation
   const createProgressMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/bible-in-a-day/progress', {
-        method: 'POST',
-        body: data,
-      });
+      const response = await apiRequest('POST', '/api/bible-in-a-day/progress', data);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/bible-in-a-day/sessions', activeSession?.id, 'progress'] });
@@ -144,10 +140,8 @@ export function BibleInADayFeature() {
   // Complete section mutation
   const completeSectionMutation = useMutation({
     mutationFn: async ({ progressId, reflectionAnswer }: { progressId: number; reflectionAnswer: string }) => {
-      return await apiRequest(`/api/bible-in-a-day/progress/${progressId}/complete`, {
-        method: 'POST',
-        body: { reflectionAnswer },
-      });
+      const response = await apiRequest('POST', `/api/bible-in-a-day/progress/${progressId}/complete`, { reflectionAnswer });
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/bible-in-a-day/sessions', activeSession?.id, 'progress'] });
@@ -158,16 +152,14 @@ export function BibleInADayFeature() {
   // Complete session mutation
   const completeSessionMutation = useMutation({
     mutationFn: async ({ sessionId, finalRating, reflectionNotes }: { sessionId: number; finalRating: number; reflectionNotes: string }) => {
-      return await apiRequest(`/api/bible-in-a-day/sessions/${sessionId}/complete`, {
-        method: 'POST',
-        body: { finalRating, reflectionNotes },
-      });
+      const response = await apiRequest('POST', `/api/bible-in-a-day/sessions/${sessionId}/complete`, { finalRating, reflectionNotes });
+      return await response.json();
     },
     onSuccess: () => {
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ['/api/bible-in-a-day/badges'] });
       toast({ 
-        title: "🎉 Journey Complete!", 
+        title: "Journey Complete!", 
         description: "You've completed the Bible in a Day! Check your new badge.",
       });
     },

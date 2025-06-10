@@ -1535,10 +1535,11 @@ export const bibleInADaySessions = pgTable("bible_in_a_day_sessions", {
   completedAt: timestamp("completed_at"),
   currentSectionIndex: integer("current_section_index").default(0),
   totalTimeSpent: integer("total_time_spent").default(0), // in minutes
+  targetDuration: integer("target_duration").default(60), // in minutes
   isCompleted: boolean("is_completed").default(false),
   reflectionNotes: text("reflection_notes"),
   finalRating: integer("final_rating"), // 1-5 stars
-  sessionType: varchar("session_type", { length: 20 }).default("fast_track"), // fast_track, full_immersion
+  sessionType: varchar("session_type", { length: 20 }).default("fast_track"), // fast_track, deep_dive, audio_only
 });
 
 // Bible in a Day section progress
