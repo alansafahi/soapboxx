@@ -23,6 +23,7 @@ import { MemberManagementSystem } from "@/components/MemberManagementSystem";
 import { SessionsManagement } from "@/components/SessionsManagement";
 import { CounselingManagement } from "@/components/CounselingManagement";
 import { EventManagement } from "@/components/EventManagement";
+import MediaManagementSystem from "@/components/MediaManagementSystem";
 
 const churchFormSchema = insertChurchSchema.extend({
   latitude: z.coerce.number().optional(),
@@ -2538,7 +2539,7 @@ export default function AdminPortal() {
         <div className="lg:col-span-3">
           {selectedChurch ? (
             <Tabs defaultValue="dashboard" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="dashboard">
                   <Building className="h-4 w-4 mr-2" />
                   Dashboard
@@ -2550,6 +2551,10 @@ export default function AdminPortal() {
                 <TabsTrigger value="ministry">
                   <Heart className="h-4 w-4 mr-2" />
                   Ministry
+                </TabsTrigger>
+                <TabsTrigger value="media">
+                  <Video className="h-4 w-4 mr-2" />
+                  Media
                 </TabsTrigger>
                 <TabsTrigger value="settings">
                   <Settings className="h-4 w-4 mr-2" />

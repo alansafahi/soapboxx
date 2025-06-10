@@ -1699,3 +1699,90 @@ export const insertSermonMediaSchema = createInsertSchema(sermonMedia).omit({
 }).extend({
   date: z.string().transform((str) => new Date(str)),
 });
+
+// Media files table for comprehensive media management
+export const mediaFiles = pgTable("media_files", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  originalName: varchar("original_name", { length: 255 }).notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(), // image, video, audio, document, other
+  mimeType: varchar("mime_type", { length: 100 }).notNull(),
+  fileSize: integer("file_size").notNull(), // in bytes
+  filePath: varchar("file_path", { length: 500 }).notNull(),
+  publicUrl: varchar("public_url", { length: 500 }),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  category: varchar("category", { length: 100 }), // sermon, worship, event, announcement, etc.
+  title: varchar("title", { length: 200 }),
+  description: text("description"),
+  tags: text("tags").array(),
+  isPublic: boolean("is_public").default(false),
+  isApproved: boolean("is_approved").default(false),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  downloadCount: integer("download_count").default(0),
+  viewCount: integer("view_count").default(0),
+  duration: integer("duration"), // for audio/video files in seconds
+  dimensions: jsonb("dimensions"), // for images/videos {width, height}
+  metadata: jsonb("metadata"), // additional file metadata
+  status: varchar("status", { length: 20 }).default("active"), // active, archived, deleted
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Media collections/albums for organizing media
+export const mediaCollections = pgTable("media_collections", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  coverImageId: integer("cover_image_id").references(() => mediaFiles.id),
+  isPublic: boolean("is_public").default(false),
+  itemCount: integer("item_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Junction table for media files in collections
+export const mediaCollectionItems = pgTable("media_collection_items", {
+  id: serial("id").primaryKey(),
+  collectionId: integer("collection_id").references(() => mediaCollections.id),
+  mediaFileId: integer("media_file_id").references(() => mediaFiles.id),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  collectionMediaUnique: unique().on(table.collectionId, table.mediaFileId),
+}));
+
+// Media management type definitions
+export type MediaFile = typeof mediaFiles.$inferSelect;
+export type InsertMediaFile = typeof mediaFiles.$inferInsert;
+
+export type MediaCollection = typeof mediaCollections.$inferSelect;
+export type InsertMediaCollection = typeof mediaCollections.$inferInsert;
+
+export type MediaCollectionItem = typeof mediaCollectionItems.$inferSelect;
+export type InsertMediaCollectionItem = typeof mediaCollectionItems.$inferInsert;
+
+// Media management schemas
+export const insertMediaFileSchema = createInsertSchema(mediaFiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  downloadCount: true,
+  viewCount: true,
+});
+
+export const insertMediaCollectionSchema = createInsertSchema(mediaCollections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  itemCount: true,
+});
+
+export const insertMediaCollectionItemSchema = createInsertSchema(mediaCollectionItems).omit({
+  id: true,
+  createdAt: true,
+});
