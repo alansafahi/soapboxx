@@ -51,7 +51,7 @@ import {
   Clock3,
 } from "lucide-react";
 
-export function SessionsManagement() {
+export function SessionsManagement({ selectedChurch }: { selectedChurch?: number | null }) {
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -60,7 +60,27 @@ export function SessionsManagement() {
   const queryClient = useQueryClient();
 
   const { data: sessions = [], isLoading } = useQuery({
-    queryKey: ["/api/counseling-sessions"],
+    queryKey: ["/api/counseling-sessions", selectedChurch],
+    queryFn: async () => {
+      const url = selectedChurch 
+        ? `/api/counseling-sessions?churchId=${selectedChurch}`
+        : "/api/counseling-sessions";
+      const response = await fetch(url);
+      return response.json();
+    },
+    enabled: !!selectedChurch,
+  });
+
+  const { data: members = [] } = useQuery({
+    queryKey: ["/api/members", selectedChurch],
+    queryFn: async () => {
+      const url = selectedChurch 
+        ? `/api/members?churchId=${selectedChurch}`
+        : "/api/members";
+      const response = await fetch(url);
+      return response.json();
+    },
+    enabled: !!selectedChurch,
   });
 
   const createSessionMutation = useMutation({
@@ -282,6 +302,8 @@ export function SessionsManagement() {
         onSubmit={(data) => createSessionMutation.mutate(data)}
         title="Schedule New Session"
         isLoading={createSessionMutation.isPending}
+        members={members}
+        selectedChurch={selectedChurch}
       />
 
       {/* Edit Session Dialog */}
@@ -296,6 +318,8 @@ export function SessionsManagement() {
           title="Edit Session"
           initialData={selectedSession}
           isLoading={updateSessionMutation.isPending}
+          members={members}
+          selectedChurch={selectedChurch}
         />
       )}
 
@@ -334,6 +358,8 @@ function SessionFormDialog({
   title,
   initialData = null,
   isLoading = false,
+  members = [],
+  selectedChurch = null,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -341,8 +367,11 @@ function SessionFormDialog({
   title: string;
   initialData?: any;
   isLoading?: boolean;
+  members?: any[];
+  selectedChurch?: number | null;
 }) {
   const [formData, setFormData] = useState({
+    memberId: initialData?.memberId || "",
     memberName: initialData?.memberName || "",
     memberEmail: initialData?.memberEmail || "",
     sessionType: initialData?.sessionType || "counseling",
@@ -351,6 +380,7 @@ function SessionFormDialog({
     location: initialData?.location || "",
     notes: initialData?.notes || "",
     status: initialData?.status || "pending",
+    churchId: selectedChurch?.toString() || "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -360,6 +390,18 @@ function SessionFormDialog({
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleMemberSelect = (memberId: string) => {
+    const selectedMember = members.find(member => member.id === memberId);
+    if (selectedMember) {
+      setFormData(prev => ({
+        ...prev,
+        memberId: selectedMember.id,
+        memberName: selectedMember.fullName,
+        memberEmail: selectedMember.email,
+      }));
+    }
   };
 
   return (
@@ -373,27 +415,39 @@ function SessionFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="memberName">Member Name</Label>
-              <Input
-                id="memberName"
-                value={formData.memberName}
-                onChange={(e) => handleChange("memberName", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="memberEmail">Member Email</Label>
-              <Input
-                id="memberEmail"
-                type="email"
-                value={formData.memberEmail}
-                onChange={(e) => handleChange("memberEmail", e.target.value)}
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="member">Select Member</Label>
+            <Select value={formData.memberId} onValueChange={handleMemberSelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a member..." />
+              </SelectTrigger>
+              <SelectContent>
+                {members.map((member: any) => (
+                  <SelectItem key={member.id} value={member.id}>
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">{member.fullName}</div>
+                        <div className="text-sm text-muted-foreground">{member.email}</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+          
+          {formData.memberName && (
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Selected Member</Label>
+                <div className="p-2 bg-muted rounded-md">
+                  <div className="font-medium">{formData.memberName}</div>
+                  <div className="text-sm text-muted-foreground">{formData.memberEmail}</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">

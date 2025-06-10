@@ -1590,7 +1590,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   let sessionsData = [
     {
       id: "1",
+      churchId: "1",
+      churchName: "Grace Community Church",
       sessionType: "counseling",
+      memberId: "1",
       memberName: "John Smith",
       memberEmail: "john.smith@email.com",
       scheduledTime: "2024-06-15T14:00:00Z",
@@ -1602,7 +1605,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
     {
       id: "2",
+      churchId: "1",
+      churchName: "Grace Community Church",
       sessionType: "pastoral_care",
+      memberId: "2",
       memberName: "Mary Johnson",
       memberEmail: "mary.johnson@email.com",
       scheduledTime: "2024-06-16T16:00:00Z",
@@ -1614,7 +1620,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
     {
       id: "3",
+      churchId: "2",
+      churchName: "Church On The Way",
       sessionType: "prayer",
+      memberId: "3",
       memberName: "David Wilson",
       memberEmail: "david.wilson@email.com",
       scheduledTime: "2024-06-17T18:00:00Z",
@@ -1628,7 +1637,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/counseling-sessions", async (req, res) => {
     try {
-      res.json(sessionsData);
+      const { churchId } = req.query;
+      
+      let filteredSessions = sessionsData;
+      
+      // Filter by church if churchId is provided
+      if (churchId) {
+        filteredSessions = sessionsData.filter(session => 
+          session.churchId === churchId.toString()
+        );
+      }
+      
+      res.json(filteredSessions);
     } catch (error) {
       console.error("Error fetching counseling sessions:", error);
       res.status(500).json({ error: "Failed to fetch counseling sessions" });
