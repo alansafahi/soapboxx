@@ -30,10 +30,14 @@ function MemberDirectory() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const { toast } = useToast();
 
-  const { data: members = [], isLoading } = useQuery({
+  const { data: members = [], isLoading, error } = useQuery({
     queryKey: ["/api/members"],
     queryFn: () => apiRequest("/api/members"),
   });
+
+  console.log("Members data:", members);
+  console.log("Is loading:", isLoading);
+  console.log("Error:", error);
 
   const filteredMembers = members.filter((member: any) => {
     const matchesSearch = member.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
