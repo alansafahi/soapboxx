@@ -376,6 +376,8 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  console.log('CounselingScheduling selectedChurch:', selectedChurch);
+
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["/api/counseling-sessions", selectedChurch],
     queryFn: () => {
@@ -393,7 +395,11 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
         ? `/api/members?churchId=${selectedChurch}`
         : "/api/members";
       console.log('Fetching members from:', url);
-      const result = await apiRequest(url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
       console.log('Members result:', result);
       return result;
     },
