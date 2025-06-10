@@ -967,6 +967,7 @@ export default function AdminPortal() {
       churchForm.reset();
       setLogoFile(null);
       setLogoPreview(null);
+      setIsChurchDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["/api/churches"] });
     },
     onError: (error) => {
@@ -1154,8 +1155,9 @@ export default function AdminPortal() {
         title: "Success",
         description: "Weekly series draft saved successfully!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/drafts/weekly-series"] });
       setWeeklySeriesForm({ title: '', description: '', startDate: '', endDate: '', frequency: '', churchId: selectedChurch });
+      setIsSeriesDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/weekly-series"] });
     },
     onError: (error) => {
       toast({
@@ -1178,8 +1180,9 @@ export default function AdminPortal() {
         title: "Success",
         description: "Sermon media draft saved successfully!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/drafts/sermon-media"] });
       setSermonMediaForm({ title: '', speaker: '', mediaType: '', date: '', description: '', churchId: selectedChurch });
+      setIsMediaDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/drafts/sermon-media"] });
     },
     onError: (error) => {
       toast({
@@ -1897,7 +1900,7 @@ export default function AdminPortal() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Dialog>
+                      <Dialog open={isDevotionalDialogOpen} onOpenChange={setIsDevotionalDialogOpen}>
                         <DialogTrigger asChild>
                           <Button className="w-full">
                             <Plus className="h-4 w-4 mr-2" />
@@ -1994,7 +1997,7 @@ export default function AdminPortal() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Dialog>
+                      <Dialog open={isSeriesDialogOpen} onOpenChange={setIsSeriesDialogOpen}>
                         <DialogTrigger asChild>
                           <Button className="w-full">
                             <Plus className="h-4 w-4 mr-2" />
@@ -2101,7 +2104,7 @@ export default function AdminPortal() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Dialog>
+                      <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>
                         <DialogTrigger asChild>
                           <Button className="w-full">
                             <Upload className="h-4 w-4 mr-2" />
