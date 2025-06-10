@@ -1729,6 +1729,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete published content endpoints
+  app.delete('/api/devotionals/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(devotionals).where(eq(devotionals.id, Number(id)));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting devotional:", error);
+      res.status(500).json({ message: "Failed to delete devotional" });
+    }
+  });
+
+  app.delete('/api/weekly-series/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(weeklySeries).where(eq(weeklySeries.id, Number(id)));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting weekly series:", error);
+      res.status(500).json({ message: "Failed to delete weekly series" });
+    }
+  });
+
+  app.delete('/api/sermon-media/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(sermonMedia).where(eq(sermonMedia.id, Number(id)));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting sermon media:", error);
+      res.status(500).json({ message: "Failed to delete sermon media" });
+    }
+  });
+
   app.delete('/api/drafts/weekly-series/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;

@@ -451,6 +451,34 @@ function PublishedDevotionals() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { toast } = useToast();
+
+  const deleteDevotionalMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/devotionals/${id}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Devotional deleted successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/devotionals"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete devotional. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteDevotional = (devotional: any) => {
+    if (window.confirm(`Are you sure you want to delete "${devotional.title}"? This action cannot be undone.`)) {
+      deleteDevotionalMutation.mutate(devotional.id);
+    }
+  };
+
   if (isLoading) return <div className="text-center py-4">Loading published devotionals...</div>;
 
   const devotionalList = Array.isArray(devotionals) ? devotionals : [];
@@ -595,6 +623,17 @@ function PublishedDevotionals() {
                             </span>
                           )}
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteDevotional(devotional)}
+                          disabled={deleteDevotionalMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </Card>
