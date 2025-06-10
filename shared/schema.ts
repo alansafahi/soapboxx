@@ -92,6 +92,114 @@ export const userChurches = pgTable("user_churches", {
   userChurchUnique: unique().on(table.userId, table.churchId),
 }));
 
+// Enhanced Friend/Connection System
+export const friendships = pgTable("friendships", {
+  id: serial("id").primaryKey(),
+  requesterId: varchar("requester_id").notNull().references(() => users.id),
+  addresseeId: varchar("addressee_id").notNull().references(() => users.id),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, accepted, declined, blocked
+  requestMessage: text("request_message"),
+  connectionType: varchar("connection_type", { length: 30 }).default("friend"), // friend, prayer_partner, mentor, mentee
+  closenessLevel: integer("closeness_level").default(1), // 1-5 scale for relationship strength
+  sharedInterests: text("shared_interests").array(),
+  lastInteraction: timestamp("last_interaction"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  friendshipUnique: unique().on(table.requesterId, table.addresseeId),
+}));
+
+// Community Groups for Topic-based Discussions
+export const communityGroups = pgTable("community_groups", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }).notNull(), // bible_study, prayer, youth, worship, etc.
+  type: varchar("type", { length: 30 }).notNull().default("open"), // open, closed, private
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  coverImageUrl: varchar("cover_image_url"),
+  rules: text("rules"),
+  tags: text("tags").array(),
+  memberCount: integer("member_count").default(0),
+  maxMembers: integer("max_members"),
+  requiresApproval: boolean("requires_approval").default(false),
+  isActive: boolean("is_active").default(true),
+  settings: jsonb("settings"), // Privacy settings, notification preferences, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Community Group Memberships
+export const communityGroupMembers = pgTable("community_group_members", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull().references(() => communityGroups.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: varchar("role", { length: 50 }).default("member"), // member, moderator, admin
+  permissions: text("permissions").array(),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+}, (table) => ({
+  groupMemberUnique: unique().on(table.groupId, table.userId),
+}));
+
+// Enhanced Reactions System with Emoji Support
+export const reactions = pgTable("reactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  targetType: varchar("target_type", { length: 30 }).notNull(), // post, prayer, discussion, verse_share, etc.
+  targetId: integer("target_id").notNull(),
+  reactionType: varchar("reaction_type", { length: 30 }).notNull(), // like, love, pray, amen, heart, fire, etc.
+  emoji: varchar("emoji", { length: 10 }), // Store actual emoji character
+  intensity: integer("intensity").default(1), // 1-5 for reaction strength
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userTargetReactionUnique: unique().on(table.userId, table.targetType, table.targetId, table.reactionType),
+}));
+
+// Community Reflections for Enhanced Sharing
+export const communityReflections = pgTable("community_reflections", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  targetType: varchar("target_type", { length: 30 }).notNull(), // verse, prayer, discussion
+  targetId: integer("target_id").notNull(),
+  reflection: text("reflection").notNull(),
+  isPublic: boolean("is_public").default(true),
+  tags: text("tags").array(),
+  moodTone: varchar("mood_tone", { length: 30 }), // grateful, hopeful, seeking, peaceful, etc.
+  groupId: integer("group_id").references(() => communityGroups.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Real-time Engagement Tracking
+export const engagementSessions = pgTable("engagement_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  sessionType: varchar("session_type", { length: 30 }).notNull(), // reading, praying, discussion, group_chat
+  targetType: varchar("target_type", { length: 30 }), // verse, prayer, group, discussion
+  targetId: integer("target_id"),
+  startedAt: timestamp("started_at").defaultNow(),
+  endedAt: timestamp("ended_at"),
+  isActive: boolean("is_active").default(true),
+  metadata: jsonb("metadata"), // Store session-specific data
+});
+
+// Live Activity Feed for Real-time Updates
+export const activityFeed = pgTable("activity_feed", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  activityType: varchar("activity_type", { length: 50 }).notNull(), // shared_verse, joined_group, prayer_answered, etc.
+  targetType: varchar("target_type", { length: 30 }),
+  targetId: integer("target_id"),
+  groupId: integer("group_id").references(() => communityGroups.id),
+  visibility: varchar("visibility", { length: 20 }).default("public"), // public, friends, group
+  content: text("content"),
+  metadata: jsonb("metadata"),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Events table - Enhanced for comprehensive management
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
@@ -552,15 +660,7 @@ export const inspirationBookmarks = pgTable("inspiration_bookmarks", {
   userInspirationBookmarkUnique: unique().on(table.userId, table.inspirationId),
 }));
 
-// Friend relationships
-export const friendships = pgTable("friendships", {
-  id: serial("id").primaryKey(),
-  requesterId: varchar("requester_id").notNull().references(() => users.id),
-  addresseeId: varchar("addressee_id").notNull().references(() => users.id),
-  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, accepted, rejected, blocked
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// Enhanced friend relationships are defined above
 
 // Chat conversations
 export const conversations = pgTable("conversations", {
@@ -718,32 +818,7 @@ export const challengeParticipants = pgTable("challenge_participants", {
   challengeUserUnique: unique().on(table.challengeId, table.userId),
 }));
 
-// Community Groups table
-export const communityGroups = pgTable("community_groups", {
-  id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
-  name: varchar("name", { length: 100 }).notNull(),
-  description: text("description"),
-  category: varchar("category", { length: 50 }), // youth, adults, seniors, ministry, etc.
-  tags: text("tags").array(),
-  leaderId: varchar("leader_id").references(() => users.id),
-  maxMembers: integer("max_members"),
-  isPrivate: boolean("is_private").default(false),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const communityGroupMembers = pgTable("community_group_members", {
-  id: serial("id").primaryKey(),
-  groupId: integer("group_id").notNull().references(() => communityGroups.id),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  role: varchar("role", { length: 50 }).default("member"), // member, moderator, leader
-  joinedAt: timestamp("joined_at").defaultNow(),
-  isActive: boolean("is_active").default(true),
-}, (table) => ({
-  groupUserUnique: unique().on(table.groupId, table.userId),
-}));
+// Enhanced community groups are defined above
 
 // Push notification system
 export const notificationSettings = pgTable("notification_settings", {
@@ -2033,6 +2108,28 @@ export type InsertReferralMilestoneForm = z.infer<typeof insertReferralMilestone
 export type ScriptureSchedule = typeof scriptureSchedules.$inferSelect;
 export type InsertScriptureSchedule = typeof scriptureSchedules.$inferInsert;
 
+// Enhanced Social & Community Feature Types
+export type Friendship = typeof friendships.$inferSelect;
+export type InsertFriendship = typeof friendships.$inferInsert;
+
+export type CommunityGroup = typeof communityGroups.$inferSelect;
+export type InsertCommunityGroup = typeof communityGroups.$inferInsert;
+
+export type CommunityGroupMember = typeof communityGroupMembers.$inferSelect;
+export type InsertCommunityGroupMember = typeof communityGroupMembers.$inferInsert;
+
+export type Reaction = typeof reactions.$inferSelect;
+export type InsertReaction = typeof reactions.$inferInsert;
+
+export type CommunityReflection = typeof communityReflections.$inferSelect;
+export type InsertCommunityReflection = typeof communityReflections.$inferInsert;
+
+export type EngagementSession = typeof engagementSessions.$inferSelect;
+export type InsertEngagementSession = typeof engagementSessions.$inferInsert;
+
+export type ActivityFeed = typeof activityFeed.$inferSelect;
+export type InsertActivityFeed = typeof activityFeed.$inferInsert;
+
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({
   id: true,
@@ -2070,6 +2167,46 @@ export const insertPrayerUpdateSchema = createInsertSchema(prayerUpdates).omit({
 });
 
 export const insertPrayerAssignmentSchema = createInsertSchema(prayerAssignments).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Enhanced Social & Community Insert Schemas
+export const insertFriendshipSchema = createInsertSchema(friendships).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommunityGroupSchema = createInsertSchema(communityGroups).omit({
+  id: true,
+  memberCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommunityGroupMemberSchema = createInsertSchema(communityGroupMembers).omit({
+  id: true,
+  joinedAt: true,
+});
+
+export const insertReactionSchema = createInsertSchema(reactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCommunityReflectionSchema = createInsertSchema(communityReflections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEngagementSessionSchema = createInsertSchema(engagementSessions).omit({
+  id: true,
+  startedAt: true,
+});
+
+export const insertActivityFeedSchema = createInsertSchema(activityFeed).omit({
   id: true,
   createdAt: true,
 });
