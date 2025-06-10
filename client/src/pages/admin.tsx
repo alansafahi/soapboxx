@@ -3156,6 +3156,10 @@ export default function AdminPortal() {
                 </Tabs>
               </TabsContent>
 
+              <TabsContent value="media" className="space-y-6">
+                <MediaManagementSystem />
+              </TabsContent>
+
               <TabsContent value="settings" className="space-y-6">
                 <ChurchProfileManager churchId={selectedChurch} />
               </TabsContent>

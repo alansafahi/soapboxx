@@ -33,6 +33,9 @@ import {
   sermonMedia,
   checkIns,
   qrCodes,
+  mediaFiles,
+  mediaCollections,
+  mediaCollectionItems,
   type User,
   type UpsertUser,
   type Church,
@@ -143,6 +146,12 @@ import {
   type InsertUserDevice,
   type ScriptureSchedule,
   type InsertScriptureSchedule,
+  type MediaFile,
+  type InsertMediaFile,
+  type MediaCollection,
+  type InsertMediaCollection,
+  type MediaCollectionItem,
+  type InsertMediaCollectionItem,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull } from "drizzle-orm";
@@ -342,6 +351,23 @@ export interface IStorage {
   updateQrCode(id: string, updates: Partial<QrCode>): Promise<QrCode>;
   deleteQrCode(id: string): Promise<void>;
   validateQrCode(id: string): Promise<{ valid: boolean; qrCode?: QrCode }>;
+  
+  // Media management operations
+  createMediaFile(mediaFile: InsertMediaFile): Promise<MediaFile>;
+  getMediaFiles(churchId?: number): Promise<MediaFile[]>;
+  getMediaFile(id: number): Promise<MediaFile | undefined>;
+  updateMediaFile(id: number, updates: Partial<MediaFile>): Promise<MediaFile>;
+  deleteMediaFile(id: number): Promise<void>;
+  
+  createMediaCollection(collection: InsertMediaCollection): Promise<MediaCollection>;
+  getMediaCollections(churchId?: number): Promise<MediaCollection[]>;
+  getMediaCollection(id: number): Promise<MediaCollection | undefined>;
+  updateMediaCollection(id: number, updates: Partial<MediaCollection>): Promise<MediaCollection>;
+  deleteMediaCollection(id: number): Promise<void>;
+  
+  addMediaToCollection(collectionId: number, mediaFileId: number): Promise<MediaCollectionItem>;
+  removeMediaFromCollection(collectionId: number, mediaFileId: number): Promise<void>;
+  getCollectionMedia(collectionId: number): Promise<MediaFile[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2676,6 +2702,154 @@ export class DatabaseStorage implements IStorage {
     }
 
     return { valid, qrCode };
+  }
+
+  // Media management operations
+  async createMediaFile(mediaFileData: InsertMediaFile): Promise<MediaFile> {
+    const [mediaFile] = await db
+      .insert(mediaFiles)
+      .values(mediaFileData)
+      .returning();
+    return mediaFile;
+  }
+
+  async getMediaFiles(churchId?: number): Promise<MediaFile[]> {
+    let query = db.select().from(mediaFiles);
+    
+    if (churchId) {
+      query = query.where(eq(mediaFiles.churchId, churchId));
+    }
+    
+    return query.orderBy(desc(mediaFiles.createdAt));
+  }
+
+  async getMediaFile(id: number): Promise<MediaFile | undefined> {
+    const [mediaFile] = await db
+      .select()
+      .from(mediaFiles)
+      .where(eq(mediaFiles.id, id));
+    return mediaFile;
+  }
+
+  async updateMediaFile(id: number, updates: Partial<MediaFile>): Promise<MediaFile> {
+    const [mediaFile] = await db
+      .update(mediaFiles)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(mediaFiles.id, id))
+      .returning();
+    return mediaFile;
+  }
+
+  async deleteMediaFile(id: number): Promise<void> {
+    await db
+      .delete(mediaFiles)
+      .where(eq(mediaFiles.id, id));
+  }
+
+  async createMediaCollection(collectionData: InsertMediaCollection): Promise<MediaCollection> {
+    const [collection] = await db
+      .insert(mediaCollections)
+      .values(collectionData)
+      .returning();
+    return collection;
+  }
+
+  async getMediaCollections(churchId?: number): Promise<MediaCollection[]> {
+    let query = db.select().from(mediaCollections);
+    
+    if (churchId) {
+      query = query.where(eq(mediaCollections.churchId, churchId));
+    }
+    
+    return query.orderBy(desc(mediaCollections.createdAt));
+  }
+
+  async getMediaCollection(id: number): Promise<MediaCollection | undefined> {
+    const [collection] = await db
+      .select()
+      .from(mediaCollections)
+      .where(eq(mediaCollections.id, id));
+    return collection;
+  }
+
+  async updateMediaCollection(id: number, updates: Partial<MediaCollection>): Promise<MediaCollection> {
+    const [collection] = await db
+      .update(mediaCollections)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(mediaCollections.id, id))
+      .returning();
+    return collection;
+  }
+
+  async deleteMediaCollection(id: number): Promise<void> {
+    await db
+      .delete(mediaCollections)
+      .where(eq(mediaCollections.id, id));
+  }
+
+  async addMediaToCollection(collectionId: number, mediaFileId: number): Promise<MediaCollectionItem> {
+    const [item] = await db
+      .insert(mediaCollectionItems)
+      .values({
+        collectionId,
+        mediaFileId,
+      })
+      .returning();
+    return item;
+  }
+
+  async removeMediaFromCollection(collectionId: number, mediaFileId: number): Promise<void> {
+    await db
+      .delete(mediaCollectionItems)
+      .where(
+        and(
+          eq(mediaCollectionItems.collectionId, collectionId),
+          eq(mediaCollectionItems.mediaFileId, mediaFileId)
+        )
+      );
+  }
+
+  async getCollectionMedia(collectionId: number): Promise<MediaFile[]> {
+    return await db
+      .select({
+        id: mediaFiles.id,
+        churchId: mediaFiles.churchId,
+        uploadedBy: mediaFiles.uploadedBy,
+        fileName: mediaFiles.fileName,
+        originalName: mediaFiles.originalName,
+        fileType: mediaFiles.fileType,
+        mimeType: mediaFiles.mimeType,
+        fileSize: mediaFiles.fileSize,
+        filePath: mediaFiles.filePath,
+        publicUrl: mediaFiles.publicUrl,
+        thumbnailUrl: mediaFiles.thumbnailUrl,
+        category: mediaFiles.category,
+        title: mediaFiles.title,
+        description: mediaFiles.description,
+        tags: mediaFiles.tags,
+        isPublic: mediaFiles.isPublic,
+        isApproved: mediaFiles.isApproved,
+        approvedBy: mediaFiles.approvedBy,
+        approvedAt: mediaFiles.approvedAt,
+        downloadCount: mediaFiles.downloadCount,
+        viewCount: mediaFiles.viewCount,
+        duration: mediaFiles.duration,
+        dimensions: mediaFiles.dimensions,
+        metadata: mediaFiles.metadata,
+        status: mediaFiles.status,
+        createdAt: mediaFiles.createdAt,
+        updatedAt: mediaFiles.updatedAt,
+      })
+      .from(mediaFiles)
+      .innerJoin(mediaCollectionItems, eq(mediaFiles.id, mediaCollectionItems.mediaFileId))
+      .where(eq(mediaCollectionItems.collectionId, collectionId))
+      .orderBy(desc(mediaCollectionItems.addedAt));
   }
 }
 
