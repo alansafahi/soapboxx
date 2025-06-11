@@ -469,6 +469,13 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     }
   };
 
+  // Set email verification status from server
+  useEffect(() => {
+    if (emailStatus?.emailVerified && !wizardData.emailVerified) {
+      setWizardData(prev => ({ ...prev, emailVerified: true }));
+    }
+  }, [emailStatus, wizardData.emailVerified]);
+
   // Auto-advance when email is verified
   useEffect(() => {
     if (currentStep === 1 && wizardData.emailVerified) {
