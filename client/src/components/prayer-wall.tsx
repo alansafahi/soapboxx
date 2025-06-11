@@ -14,7 +14,9 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock, Send, ChevronDown, ChevronUp, Share, Bookmark, Eye, MapPin, Award, TrendingUp, Zap, Filter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,28 +28,53 @@ const prayerRequestSchema = z.object({
   title: z.string().optional(),
   content: z.string().min(1, "Prayer request content is required"),
   isAnonymous: z.boolean().default(false),
-  category: z.string().optional(),
+  category: z.string().default("general"),
   churchId: z.number().optional(),
   isPublic: z.boolean().default(true),
+  isUrgent: z.boolean().default(false),
+  isSilent: z.boolean().default(false),
 });
 
 const commentSchema = z.object({
   content: z.string().min(1, "Comment cannot be empty"),
 });
 
+const updateSchema = z.object({
+  content: z.string().min(1, "Update cannot be empty"),
+});
+
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
 type CommentFormData = z.infer<typeof commentSchema>;
+type UpdateFormData = z.infer<typeof updateSchema>;
+
+const prayerCategories = [
+  { id: 'all', label: 'All Prayers', icon: '🙏', color: 'gray' },
+  { id: 'health', label: 'Health', icon: '💊', color: 'red' },
+  { id: 'career', label: 'Career', icon: '💼', color: 'blue' },
+  { id: 'relationships', label: 'Relationships', icon: '❤️', color: 'pink' },
+  { id: 'spiritual', label: 'Spiritual Growth', icon: '✝️', color: 'purple' },
+  { id: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦', color: 'green' },
+  { id: 'urgent', label: 'Urgent', icon: '⚡', color: 'yellow' },
+  { id: 'general', label: 'General', icon: '🤲', color: 'gray' },
+];
 
 export default function PrayerWall() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedTab, setSelectedTab] = useState('prayers');
+  const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
   const [prayedRequests, setPrayedRequests] = useState<Set<number>>(new Set());
   const [likedRequests, setLikedRequests] = useState<Set<number>>(new Set());
+  const [bookmarkedRequests, setBookmarkedRequests] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+  const [showWhosPraying, setShowWhosPraying] = useState<Map<number, boolean>>(new Map());
   const [supportComments, setSupportComments] = useState<Map<number, string>>(new Map());
   const [supportMessages, setSupportMessages] = useState<Map<number, any[]>>(new Map());
+  const [prayerCircles, setPrayerCircles] = useState<any[]>([]);
+  const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),
