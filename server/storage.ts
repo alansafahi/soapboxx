@@ -224,6 +224,11 @@ export interface IStorage {
   searchUsers(query: string): Promise<User[]>;
   completeOnboarding(userId: string, onboardingData: any): Promise<void>;
   
+  // Email verification operations
+  setEmailVerificationToken(userId: string, token: string): Promise<void>;
+  verifyEmailToken(token: string): Promise<User | null>;
+  markEmailAsVerified(userId: string): Promise<void>;
+  
   // Church operations
   getChurches(): Promise<Church[]>;
   getNearbyChurches(lat?: number, lng?: number, limit?: number): Promise<Church[]>;

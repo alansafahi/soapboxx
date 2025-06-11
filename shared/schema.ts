@@ -52,6 +52,9 @@ export const users = pgTable("users", {
   totpSecret: varchar("totp_secret"), // Encrypted TOTP secret
   backupCodes: text("backup_codes").array(), // Encrypted backup codes
   twoFactorSetupAt: timestamp("two_factor_setup_at"),
+  emailVerified: boolean("email_verified").default(false),
+  emailVerificationToken: varchar("email_verification_token"),
+  emailVerificationSentAt: timestamp("email_verification_sent_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
