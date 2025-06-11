@@ -950,4 +950,3 @@ export default function DonationDemo() {
   );
 }
 
-export default DonationDemo;
