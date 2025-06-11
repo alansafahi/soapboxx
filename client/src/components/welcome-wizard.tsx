@@ -226,12 +226,30 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     mutationFn: async () => {
       return await apiRequest("POST", "/api/auth/send-verification");
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setEmailSent(true);
-      toast({
-        title: "Verification Email Sent",
-        description: "Check your inbox for the verification email.",
-      });
+      
+      // In development, fetch the verification token for easy testing
+      try {
+        const tokenData = await apiRequest("GET", "/api/auth/dev/verification-token");
+        if (tokenData.token) {
+          setEmailVerificationToken(tokenData.token.substring(0, 6)); // Use first 6 chars as demo
+          toast({
+            title: "Verification Email Sent",
+            description: `Development mode: Token auto-filled for testing (${tokenData.email})`,
+          });
+        } else {
+          toast({
+            title: "Verification Email Sent",
+            description: "Check your inbox for the verification email.",
+          });
+        }
+      } catch {
+        toast({
+          title: "Verification Email Sent",
+          description: "Check your inbox for the verification email.",
+        });
+      }
     },
     onError: (error: any) => {
       toast({

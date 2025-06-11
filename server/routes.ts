@@ -202,6 +202,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Development helper endpoint to get the current verification token
+  app.get('/api/auth/dev/verification-token', isAuthenticated, async (req: any, res) => {
+    try {
+      if (process.env.NODE_ENV !== 'development') {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      const userId = req.user.claims.sub;
+      const token = await storage.getEmailVerificationToken(userId);
+      
+      res.json({ 
+        token: token || null,
+        email: req.user.claims.email 
+      });
+    } catch (error) {
+      console.error("Error getting verification token:", error);
+      res.status(500).json({ message: "Failed to get verification token" });
+    }
+  });
+
   // 2FA Routes
   // Setup TOTP (Time-based One-Time Password)
   app.post('/api/auth/2fa/setup/totp', isAuthenticated, async (req: any, res) => {

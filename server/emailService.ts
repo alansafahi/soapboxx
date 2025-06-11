@@ -31,6 +31,15 @@ export class EmailService {
     try {
       const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${data.token}`;
       
+      // In development, log the verification token for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`\n=== EMAIL VERIFICATION DEBUG ===`);
+        console.log(`Email: ${data.email}`);
+        console.log(`Verification Token: ${data.token}`);
+        console.log(`Verification URL: ${verificationUrl}`);
+        console.log(`================================\n`);
+      }
+      
       const mailOptions = {
         from: process.env.FROM_EMAIL || 'noreply@soapboxsuperapp.com',
         to: data.email,
