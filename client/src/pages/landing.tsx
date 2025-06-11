@@ -158,7 +158,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-faith-blue to-blue-600">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-500 to-blue-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Join Your Faith Community?
@@ -169,7 +169,7 @@ export default function Landing() {
           <Button 
             onClick={() => window.location.href = '/api/login'}
             size="lg"
-            className="bg-white text-faith-blue hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
+            className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
           >
             Get Started Today
           </Button>
