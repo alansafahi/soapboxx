@@ -335,6 +335,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tour completion tracking
+  app.post('/api/auth/complete-tour', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Update user to mark tour as completed
+      await storage.updateUserProfile(userId, { 
+        hasCompletedTour: true 
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Tour completed successfully" 
+      });
+    } catch (error) {
+      console.error("Error completing tour:", error);
+      res.status(500).json({ message: "Failed to complete tour" });
+    }
+  });
+
+  // Get user's primary role for tour personalization
+  app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get user's church memberships and roles
+      const memberships = await storage.getUserChurches(userId);
+      
+      if (memberships.length === 0) {
+        return res.json({ primaryRole: "member" });
+      }
+
+      // Determine primary role based on highest authority
+      const roleHierarchy = {
+        "pastor": 5,
+        "associate_pastor": 4,
+        "ministry_leader": 3,
+        "youth_leader": 3,
+        "volunteer": 2,
+        "member": 1
+      };
+
+      let primaryRole = "member";
+      let highestAuthority = 0;
+
+      for (const membership of memberships) {
+        const authority = roleHierarchy[membership.role as keyof typeof roleHierarchy] || 1;
+        if (authority > highestAuthority) {
+          highestAuthority = authority;
+          primaryRole = membership.role;
+        }
+      }
+
+      res.json({ primaryRole });
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      res.status(500).json({ message: "Failed to fetch user role" });
+    }
+  });
+
   // Direct email verification test endpoint (no auth required)
   app.post('/api/auth/send-verification-direct', async (req, res) => {
     try {

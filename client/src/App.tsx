@@ -36,6 +36,7 @@ import EmailVerification from "@/pages/EmailVerification";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
+import PersonalizedTour from "@/components/PersonalizedTour";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
