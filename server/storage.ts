@@ -4286,6 +4286,76 @@ export class DatabaseStorage implements IStorage {
 
     return await query.limit(50);
   }
+
+  // Journey Management Implementation
+  async getUserJourneyPreferences(userId: string): Promise<UserJourneyPreferences | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(userJourneyPreferences)
+      .where(eq(userJourneyPreferences.userId, userId))
+      .limit(1);
+    
+    return preferences;
+  }
+
+  async updateUserJourneyPreferences(userId: string, preferences: Partial<InsertUserJourneyPreferences>): Promise<UserJourneyPreferences> {
+    const existing = await this.getUserJourneyPreferences(userId);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(userJourneyPreferences)
+        .set({ ...preferences, updatedAt: new Date() })
+        .where(eq(userJourneyPreferences.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(userJourneyPreferences)
+        .values({
+          userId,
+          ...preferences,
+        })
+        .returning();
+      return created;
+    }
+  }
+
+  async getAvailableJourneyTypes(): Promise<{type: string, name: string, description: string}[]> {
+    // Return static journey types for now - these could be stored in DB later
+    return [
+      { type: "reading", name: "Scripture Reading", description: "Daily verses with reflection questions" },
+      { type: "audio", name: "Audio Bible", description: "Listen to God's Word with guided meditation" },
+      { type: "meditation", name: "Contemplative Reading", description: "Deep spiritual reflection and prayer" },
+      { type: "study", name: "Bible Study", description: "In-depth study with commentary and notes" }
+    ];
+  }
+
+  async getSeriesByType(journeyType: string): Promise<{name: string, description: string, totalVerses: number}[]> {
+    const series = await db
+      .select({
+        name: dailyVerses.seriesName,
+        description: sql<string>`'Series description'`, // Placeholder for now
+        totalVerses: count(dailyVerses.id)
+      })
+      .from(dailyVerses)
+      .where(eq(dailyVerses.journeyType, journeyType))
+      .groupBy(dailyVerses.seriesName);
+    
+    return series.map(s => ({
+      name: s.name || '',
+      description: s.description,
+      totalVerses: s.totalVerses
+    }));
+  }
+
+  async switchUserJourney(userId: string, journeyType: string, seriesName?: string): Promise<UserJourneyPreferences> {
+    return await this.updateUserJourneyPreferences(userId, {
+      currentJourneyType: journeyType,
+      currentSeries: seriesName,
+      seriesProgress: 0,
+      updatedAt: new Date()
+    });
+  }
 }
 
 export const storage = new DatabaseStorage();
