@@ -202,19 +202,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Development helper endpoint to get the current verification token
-  app.get('/api/auth/dev/verification-token', isAuthenticated, async (req: any, res) => {
+  // Development helper endpoint to get verification token by email (no auth required)
+  app.get('/api/auth/dev/verification-token/:email', async (req, res) => {
     try {
       if (process.env.NODE_ENV !== 'development') {
         return res.status(404).json({ message: "Not found" });
       }
 
-      const userId = req.user.claims.sub;
-      const token = await storage.getEmailVerificationToken(userId);
+      const email = req.params.email;
+      const users = await storage.getAllUsers();
+      const user = users.find(u => u.email === email);
+      
+      if (!user) {
+        return res.json({ 
+          token: null,
+          email: email,
+          message: "User not found with that email"
+        });
+      }
+
+      const token = await storage.getEmailVerificationToken(user.id);
       
       res.json({ 
         token: token || null,
-        email: req.user.claims.email 
+        email: email,
+        userId: user.id,
+        message: token ? "Here's your verification token" : "No verification token found"
       });
     } catch (error) {
       console.error("Error getting verification token:", error);
