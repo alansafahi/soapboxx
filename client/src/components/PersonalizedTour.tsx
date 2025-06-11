@@ -271,7 +271,7 @@ const tourConfigs: RoleTourConfig[] = [
         title: "Volunteer Management",
         description: "Recruit, train, and schedule volunteers for your ministry.",
         icon: UserCheck,
-        target: "/",
+        target: "/events",
         action: "Manage Volunteers",
         highlight: "Connect with volunteers and provide meaningful opportunities to serve."
       },
