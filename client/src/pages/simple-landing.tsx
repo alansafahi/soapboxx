@@ -2,6 +2,19 @@ import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
 import soapboxLogo from "@assets/SoapBx logo_1749625213720.jpeg";
 
+// SoapBox Logo Component
+const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: string; showText?: boolean }) => (
+  <div className="flex items-center space-x-3">
+    <div className={`${className} bg-black rounded-lg flex items-center justify-center p-1.5`}>
+      <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="currentColor">
+        {/* Megaphone/Speaker Icon */}
+        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+      </svg>
+    </div>
+    {showText && <span className="text-xl font-bold text-gray-900">SoapBox</span>}
+  </div>
+);
+
 export default function SimpleLanding() {
   return (
     <div className="min-h-screen bg-white" style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
@@ -9,14 +22,8 @@ export default function SimpleLanding() {
       <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <img 
-                src={soapboxLogo} 
-                alt="SoapBox" 
-                className="w-8 h-8 rounded-lg object-cover cursor-pointer"
-                onClick={() => window.location.href = '/'}
-              />
-              <span className="text-xl font-bold text-gray-900">SoapBox</span>
+            <div onClick={() => window.location.href = '/'} className="cursor-pointer">
+              <SoapBoxLogo />
             </div>
             
             <div className="hidden md:flex items-center space-x-8">
@@ -267,13 +274,8 @@ export default function SimpleLanding() {
           <div className="grid md:grid-cols-4 gap-8">
             {/* Brand Section */}
             <div className="md:col-span-2">
-              <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src={soapboxLogo} 
-                  alt="SoapBox" 
-                  className="w-8 h-8 rounded-lg object-cover"
-                />
-                <span className="text-xl font-bold">SoapBox</span>
+              <div className="mb-4">
+                <SoapBoxLogo className="w-8 h-8" />
               </div>
               <p className="text-gray-400 mb-4 max-w-md">
                 Empowering faith communities worldwide with innovative technology that brings people together, deepens spiritual connections, and transforms lives.
