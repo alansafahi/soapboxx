@@ -30,15 +30,28 @@ import EnhancedChurchesDemo from "@/pages/EnhancedChurchesDemo";
 import ChurchesEnhanced from "@/pages/ChurchesEnhanced";
 import RoleManagement from "@/pages/RoleManagement";
 import DonationDemo from "@/pages/DonationDemo";
+import RoleUpgradeDemo from "@/pages/RoleUpgradeDemo";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
+import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 function AppRouter() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [showWelcomeWizard, setShowWelcomeWizard] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [show2FAOnboarding, setShow2FAOnboarding] = useState(false);
+  const [userRole, setUserRole] = useState("");
+  const [churchName, setChurchName] = useState("");
   const [location] = useLocation();
+
+  // Check if user needs 2FA onboarding
+  const { data: onboardingData } = useQuery({
+    queryKey: ["/api/auth/2fa/onboarding-status"],
+    enabled: isAuthenticated && !!user,
+    retry: false,
+  });
 
   // Extract referral code from URL parameters
   useEffect(() => {
@@ -108,6 +121,7 @@ function AppRouter() {
               <Route path="/security" component={SecuritySettings} />
               <Route path="/test-features" component={FeatureTestPage} />
               <Route path="/donation-demo" component={DonationDemo} />
+              <Route path="/role-upgrade-demo" component={RoleUpgradeDemo} />
               <Route path="*" component={NotFound} />
             </>
           )}
