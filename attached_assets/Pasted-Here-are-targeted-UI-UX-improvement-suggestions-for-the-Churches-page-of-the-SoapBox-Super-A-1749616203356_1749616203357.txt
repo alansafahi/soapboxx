@@ -1,0 +1,96 @@
+Here are **targeted UI/UX improvement suggestions** for the **Churches page** of the SoapBox Super App Admin Portal, based on the screenshot:
+
+---
+
+### 🧭 Navigation & Layout
+
+**1. Collapse Sidebar Menu**
+
+* Allow toggling/minimizing the left sidebar for better focus and space on smaller screens.
+* Add icons alongside menu items to help quickly identify sections visually.
+
+**2. Tab Filtering or Categorization**
+
+* If this list grows, it becomes unmanageable. Add filters or tabs (e.g., by denomination, location, or status).
+* Optional: Add search or alphabetic filter (A–Z scroll bar or segmented buttons).
+
+---
+
+### 🖼️ Visual Hierarchy
+
+**3. Visual Differentiation for Selected Church**
+
+* Right now, the selected item (e.g., “Christ the King Lutheran Church”) uses a slightly darker shade of blue.
+* Improve by adding:
+
+  * A border or highlight glow
+  * Icons for quick actions (🖊️ Edit, 📊 Stats, 🗑️ Delete)
+
+**4. Better Section Titles**
+
+* “Churches” could use a subtitle or stat like: “11 Active Churches”
+* Add sorting options (e.g., Newest, Most Active)
+
+---
+
+### ⚙️ Functionality
+
+**5. Quick Action Buttons per Row**
+
+* Add inline action icons to each row:
+
+  * 📅 Add Event
+  * 🙏 New Prayer
+  * 📖 Add Devotional
+  * 🖊️ Edit
+  * ❌ Remove
+
+**6. Detect Duplicates**
+
+* Two “Grace Community Church” entries—highlight possible duplicates with a warning or merge option.
+
+---
+
+### 🎨 Aesthetic Tweaks
+
+**7. Adjust Button Design**
+
+* “+ Add Church” button is large and center-heavy. Consider moving it to the right-hand corner with a floating "+" icon to match the FAB in the bottom right.
+
+**8. Color Coding**
+
+* Differentiate churches by status:
+
+  * Active (green tag)
+  * Pending (yellow)
+  * Inactive (gray)
+  * Invite Sent (blue)
+
+---
+
+### 📱 Mobile & Accessibility
+
+**9. Responsive Design Check**
+
+* Ensure this layout gracefully stacks for smaller screens.
+* Add tooltip support for icons.
+* Use larger hit areas for tapping rows or icons on mobile.
+
+---
+
+### ✅ Bonus: Admin Utility Features
+
+**10. Bulk Actions**
+
+* Checkbox on each row → bulk email, tag, or delete.
+
+**11. Last Activity / Engagement Stats**
+
+* Show church engagement stats directly in this list:
+
+  * “Last event: June 1”
+  * “17 active users”
+
+---
+
+Would you like me to mock up a redesign or code sample for any of these suggestions?
