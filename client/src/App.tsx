@@ -133,6 +133,7 @@ function AppRouter() {
               <Route path="/donation-demo" component={DonationDemo} />
               <Route path="/role-upgrade-demo" component={RoleUpgradeDemo} />
               <Route path="/phone-verification" component={PhoneVerification} />
+              <Route path="/email-verification" component={EmailVerification} />
             </>
           )}
         </Switch>
