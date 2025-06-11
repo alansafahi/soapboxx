@@ -1,47 +1,32 @@
 import { Button } from "@/components/ui/button";
+import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight } from "lucide-react";
 import soapboxLogo from "@assets/SoapBx logo_1749625213720.jpeg";
 
 export default function SimpleLanding() {
   return (
-    <div style={{ 
-      width: '100vw', 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)',
-      margin: 0,
-      padding: 0,
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50"
+         style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
       {/* Header */}
-      <header style={{
-        background: 'rgba(255, 255, 255, 0.9)',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '16px 24px'
-      }}>
-        <div style={{ 
-          maxWidth: '1200px', 
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img 
-              src={soapboxLogo} 
-              alt="SoapBox Logo" 
-              style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover' }}
-            />
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
-              SoapBox Super App
-            </span>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <img 
+                src={soapboxLogo} 
+                alt="SoapBox Logo" 
+                className="w-10 h-10 rounded-xl object-cover cursor-pointer"
+                onClick={() => window.location.href = '/'}
+              />
+              <span className="text-xl font-bold text-gray-900">SoapBox Super App</span>
+            </div>
+            
+            <Button 
+              onClick={() => window.location.href = '/api/login'}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+            >
+              Sign In
+            </Button>
           </div>
-          
-          <Button 
-            onClick={() => window.location.href = '/api/login'}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Sign In
-          </Button>
         </div>
       </header>
 
