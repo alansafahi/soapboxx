@@ -191,7 +191,7 @@ export default function Landing() {
             Connecting faith communities through modern technology
           </p>
           <p className="text-sm text-gray-500">
-            © 2024 Soapbox. Built with faith and community in mind.
+            © 2025 SoapBox Super App. Built with faith and community in mind.
           </p>
         </div>
       </footer>
