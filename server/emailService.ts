@@ -66,7 +66,7 @@ export class EmailService {
     try {
       const msg = {
         to: data.email,
-        from: 'noreply@soapboxsuperapp.com', // Use a verified sender address
+        from: 'verification@soapboxsuperapp.com', // Use a verified sender address
         subject: 'Verify Your SoapBox Super App Account',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -108,8 +108,22 @@ export class EmailService {
       await sgMail.send(msg);
       console.log('✅ Verification email sent successfully via SendGrid to:', data.email);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('SendGrid email error:', error);
+      
+      // If SendGrid fails due to authentication, provide helpful guidance
+      if (error.code === 403) {
+        console.log('\n⚠️  SendGrid Authentication Error:');
+        console.log('   - Verify your SendGrid API key is valid');
+        console.log('   - Check that the sender email is verified in SendGrid');
+        console.log('   - For testing, the verification code is logged above: ' + data.token);
+        console.log('   - Email would be sent to: ' + data.email);
+        console.log('\n📧 Email Content Preview:');
+        console.log('   Subject: Verify Your SoapBox Super App Account');
+        console.log('   Verification Code: ' + data.token);
+        console.log('   Recipient: ' + data.email);
+      }
+      
       return false;
     }
   }
