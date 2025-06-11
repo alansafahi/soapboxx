@@ -46,6 +46,7 @@ function AppRouter() {
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [show2FAOnboarding, setShow2FAOnboarding] = useState(false);
+  const [showPersonalizedTour, setShowPersonalizedTour] = useState(false);
   const [userRole, setUserRole] = useState("");
   const [churchName, setChurchName] = useState("");
   const [location] = useLocation();
@@ -85,6 +86,23 @@ function AppRouter() {
 
   // Check if user needs onboarding
   const needsOnboarding = isAuthenticated && user && !(user as any).has_completed_onboarding && !forceHideOnboarding;
+
+  // Fetch user's primary role for tour personalization
+  const { data: userRoleData } = useQuery({
+    queryKey: ["/api/auth/user-role"],
+    enabled: isAuthenticated && !!user && !needsOnboarding && !show2FAOnboarding,
+    retry: false,
+  });
+
+  // Show personalized tour after onboarding is complete and user hasn't completed tour
+  useEffect(() => {
+    if (isAuthenticated && user && (user as any).has_completed_onboarding && 
+        !(user as any).hasCompletedTour && !needsOnboarding && !show2FAOnboarding && 
+        !forceHideOnboarding && userRoleData?.primaryRole) {
+      setShowPersonalizedTour(true);
+      setUserRole(userRoleData.primaryRole);
+    }
+  }, [isAuthenticated, user, needsOnboarding, show2FAOnboarding, forceHideOnboarding, userRoleData]);
   
   // Debug logging for onboarding state
   console.log("Onboarding check:", {
@@ -179,6 +197,31 @@ function AppRouter() {
         }}
         userRole={userRole}
         churchName={churchName}
+      />
+
+      {/* Personalized Tour - Shows after onboarding completion */}
+      <PersonalizedTour
+        isOpen={showPersonalizedTour}
+        onComplete={async () => {
+          setShowPersonalizedTour(false);
+          
+          // Mark tour as completed in the backend
+          try {
+            const response = await fetch('/api/auth/complete-tour', {
+              method: 'POST',
+              credentials: 'include',
+            });
+            
+            if (response.ok) {
+              // Refresh user data to update hasCompletedTour flag
+              await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+              await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+            }
+          } catch (error) {
+            console.error("Error completing tour:", error);
+          }
+        }}
+        userRole={userRole}
       />
     </>
   );
