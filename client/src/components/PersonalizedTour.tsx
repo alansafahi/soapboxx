@@ -68,7 +68,7 @@ const tourConfigs: RoleTourConfig[] = [
         title: "Role Management",
         description: "Add staff members and assign permissions to build your leadership team.",
         icon: Shield,
-        target: "/role-management",
+        target: "/admin",
         action: "Assign Roles",
         highlight: "💡 Tip: Invite a Lead Pastor or Social Manager to help manage your community."
       },
@@ -77,7 +77,7 @@ const tourConfigs: RoleTourConfig[] = [
         title: "Donations Setup",
         description: "Connect Stripe to start receiving secure online gifts and offerings.",
         icon: Gift,
-        target: "/donation-demo",
+        target: "/donations",
         action: "Setup Giving",
         highlight: "Enable digital giving to support your church's mission and ministries."
       },
@@ -86,7 +86,7 @@ const tourConfigs: RoleTourConfig[] = [
         title: "Church Analytics",
         description: "Track prayer growth, member engagement, and giving patterns.",
         icon: BarChart3,
-        target: "/",
+        target: "/leaderboard",
         action: "View Analytics",
         highlight: "Monitor your church's spiritual health and community growth."
       },
@@ -95,7 +95,7 @@ const tourConfigs: RoleTourConfig[] = [
         title: "Announcements",
         description: "Send updates and broadcasts to your entire church community.",
         icon: Megaphone,
-        target: "/admin",
+        target: "/community",
         action: "Send Broadcast",
         highlight: "Keep your congregation informed with church-wide communications."
       }
@@ -479,9 +479,18 @@ export default function PersonalizedTour({ isOpen, onComplete, userRole }: Perso
     
     // Map common role variations to our tour configs
     const roleMapping: Record<string, string> = {
+      "church_owner": "church_owner",
+      "owner": "church_owner",
+      "church_admin": "church_admin",
+      "admin": "church_admin",
+      "administrator": "church_admin",
       "pastor": "pastor",
+      "lead_pastor": "pastor",
       "associate_pastor": "pastor",
       "assistant_pastor": "pastor",
+      "social_manager": "social_manager",
+      "social_media_manager": "social_manager",
+      "communications": "social_manager",
       "ministry_leader": "ministry_leader",
       "team_leader": "ministry_leader",
       "youth_leader": "youth_leader",
