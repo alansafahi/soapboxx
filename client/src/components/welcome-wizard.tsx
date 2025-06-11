@@ -7,6 +7,8 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   Church, 
   Heart, 
@@ -23,6 +25,7 @@ import {
   MapPin,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Sparkles,
   Target,
   X
@@ -37,6 +40,7 @@ interface WelcomeWizardProps {
 
 interface WizardData {
   denomination: string;
+  denominationCustom?: string;
   interests: string[];
   ageGroup: string;
   churchSize: string;
@@ -45,15 +49,36 @@ interface WizardData {
 }
 
 const denominations = [
-  { id: "non-denominational", label: "Non-Denominational", description: "Community-focused worship" },
-  { id: "baptist", label: "Baptist", description: "Traditional evangelical approach" },
-  { id: "methodist", label: "Methodist", description: "Social justice and service" },
-  { id: "presbyterian", label: "Presbyterian", description: "Reformed theological tradition" },
-  { id: "pentecostal", label: "Pentecostal", description: "Spirit-filled worship" },
-  { id: "episcopal", label: "Episcopal", description: "Anglican tradition" },
-  { id: "lutheran", label: "Lutheran", description: "Grace-centered teaching" },
-  { id: "catholic", label: "Catholic", description: "Traditional Catholic mass" },
-  { id: "exploring", label: "Still Exploring", description: "Open to different traditions" }
+  // Main Denominations
+  { id: "non-denominational", label: "Non-Denominational", description: "Community-focused worship", category: "main" },
+  { id: "baptist", label: "Baptist", description: "Traditional evangelical approach", category: "main" },
+  { id: "methodist", label: "Methodist", description: "Social justice and service", category: "main" },
+  { id: "presbyterian", label: "Presbyterian", description: "Reformed theological tradition", category: "main" },
+  { id: "pentecostal", label: "Pentecostal", description: "Spirit-filled worship", category: "main" },
+  { id: "evangelical", label: "Evangelical", description: "Bible-centered evangelical faith", category: "main" },
+  { id: "assemblies-of-god", label: "Assemblies of God", description: "Pentecostal movement with strong missions focus", category: "main" },
+  { id: "orthodox-eastern", label: "Orthodox (Eastern)", description: "Ancient Eastern Christian tradition", category: "main" },
+  { id: "seventh-day-adventist", label: "Seventh-day Adventist", description: "Sabbath-observing Protestant denomination", category: "main" },
+  { id: "episcopal", label: "Episcopal", description: "Anglican tradition", category: "main" },
+  { id: "lutheran", label: "Lutheran", description: "Grace-centered teaching", category: "main" },
+  { id: "catholic", label: "Catholic", description: "Traditional Catholic mass", category: "main" },
+  
+  // Other Traditions
+  { id: "reformed", label: "Reformed", description: "Calvinist theological roots; often overlaps with Presbyterian", category: "other" },
+  { id: "charismatic", label: "Charismatic", description: "Spirit-filled worship, distinct from Pentecostal", category: "other" },
+  { id: "church-of-christ", label: "Church of Christ", description: "Non-instrumental, New Testament-centered", category: "other" },
+  { id: "ame", label: "AME (African Methodist Episcopal)", description: "Historic Black denomination with Methodist roots", category: "other" },
+  { id: "mennonite", label: "Mennonite / Anabaptist", description: "Peace-oriented, simple-living Christian tradition", category: "other" },
+  { id: "quaker", label: "Quaker (Friends)", description: "Emphasizes silence, inner light, and pacifism", category: "other" },
+  { id: "messianic-jewish", label: "Messianic Jewish", description: "Jewish believers in Jesus (Yeshua)", category: "other" },
+  { id: "foursquare", label: "Foursquare", description: "Christ-centered Pentecostal tradition", category: "other" },
+  { id: "coptic-orthodox", label: "Coptic Orthodox", description: "Ancient Egyptian Christian tradition", category: "other" },
+  { id: "lds", label: "LDS (Mormon) ⚠️", description: "Restorationist, theologically distinct", category: "other" },
+  { id: "jehovahs-witnesses", label: "Jehovah's Witnesses ⚠️", description: "Non-Trinitarian, Bible-focused movement", category: "other" },
+  { id: "other-specify", label: "Other (Please Specify)", description: "Freeform option for full inclusivity", category: "other" },
+  
+  // Exploring
+  { id: "exploring", label: "Still Exploring", description: "Open to different traditions", category: "main" }
 ];
 
 const interests = [
@@ -101,6 +126,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [wizardData, setWizardData] = useState<WizardData>({
     denomination: "",
+    denominationCustom: "",
     interests: [],
     ageGroup: "",
     churchSize: "",
@@ -108,6 +134,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     meetingStyle: ""
   });
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [showOtherTraditions, setShowOtherTraditions] = useState(false);
   const { toast } = useToast();
 
   const steps = [
@@ -236,7 +263,13 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const canProceed = () => {
     switch (currentStep) {
       case 0: return true;
-      case 1: return wizardData.denomination !== "";
+      case 1: {
+        if (wizardData.denomination === "") return false;
+        if (wizardData.denomination === "other-specify") {
+          return wizardData.denominationCustom !== undefined && wizardData.denominationCustom.trim() !== "";
+        }
+        return true;
+      }
       case 2: return wizardData.interests.length > 0;
       case 3: return wizardData.ageGroup !== "" && wizardData.churchSize !== "";
       default: return true;
@@ -356,12 +389,13 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                       onValueChange={(value) => updateWizardData("denomination", value)}
                       className="space-y-3"
                     >
-                      {denominations.map((denom) => (
+                      {/* Main Denominations */}
+                      {denominations.filter(d => d.category === 'main').map((denom, index) => (
                         <motion.div
                           key={denom.id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: denominations.indexOf(denom) * 0.1 }}
+                          transition={{ delay: index * 0.05 }}
                           className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           <RadioGroupItem value={denom.id} id={denom.id} />
@@ -371,7 +405,69 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                           </Label>
                         </motion.div>
                       ))}
+
+                      {/* Other Traditions - Collapsible */}
+                      <Collapsible open={showOtherTraditions} onOpenChange={setShowOtherTraditions}>
+                        <CollapsibleTrigger asChild>
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 }}
+                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
+                            <div>
+                              <div className="font-medium">Other Traditions</div>
+                              <div className="text-sm text-gray-600">Additional denominations and movements</div>
+                            </div>
+                            <ChevronDown className={`h-4 w-4 transition-transform ${showOtherTraditions ? 'rotate-180' : ''}`} />
+                          </motion.div>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="space-y-3 mt-3">
+                          {denominations.filter(d => d.category === 'other').map((denom, index) => (
+                            <motion.div
+                              key={denom.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors ml-4"
+                            >
+                              <RadioGroupItem value={denom.id} id={denom.id} />
+                              <Label htmlFor={denom.id} className="flex-1 cursor-pointer">
+                                <div className="font-medium">{denom.label}</div>
+                                <div className="text-sm text-gray-600">{denom.description}</div>
+                              </Label>
+                            </motion.div>
+                          ))}
+                        </CollapsibleContent>
+                      </Collapsible>
                     </RadioGroup>
+
+                    {/* Custom denomination input for "Other" selection */}
+                    {wizardData.denomination === "other-specify" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-4"
+                      >
+                        <Label htmlFor="custom-denomination" className="text-sm font-medium">
+                          Please specify your denomination or tradition:
+                        </Label>
+                        <Input
+                          id="custom-denomination"
+                          value={wizardData.denominationCustom || ""}
+                          onChange={(e) => updateWizardData("denominationCustom", e.target.value)}
+                          placeholder="Enter your denomination..."
+                          className="mt-2"
+                        />
+                      </motion.div>
+                    )}
+
+                    {/* Helpful note */}
+                    <div className="text-center">
+                      <p className="text-sm text-gray-500">
+                        Don't see your tradition? Choose 'Other' and specify.
+                      </p>
+                    </div>
                   </div>
                 )}
 
