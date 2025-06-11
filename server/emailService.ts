@@ -105,8 +105,20 @@ export class EmailService {
         `
       };
 
-      await sgMail.send(msg);
+      const response = await sgMail.send(msg);
       console.log('✅ Verification email sent successfully via SendGrid to:', data.email);
+      console.log('SendGrid Response Status:', response[0].statusCode);
+      if (response[0].headers['x-message-id']) {
+        console.log('Message ID:', response[0].headers['x-message-id']);
+      }
+      
+      // Gmail delivery tips for user
+      console.log('\n📧 Gmail Delivery Notes:');
+      console.log('   - Check spam/junk folder');
+      console.log('   - Look for emails from support@soapboxsuperapp.com');
+      console.log('   - Gmail may delay delivery by a few minutes');
+      console.log('   - Verification code: ' + data.token);
+      
       return true;
     } catch (error: any) {
       console.error('SendGrid email error:', error);

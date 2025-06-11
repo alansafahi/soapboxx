@@ -20,6 +20,12 @@ export default function EmailVerification() {
     queryKey: ['/api/auth/email-verification-status'],
   });
 
+  // Get development token for testing
+  const { data: devToken } = useQuery({
+    queryKey: ['/api/auth/dev/verification-token'],
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
   // Check for token in URL parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -130,6 +136,18 @@ export default function EmailVerification() {
             </Alert>
           ) : (
             <>
+              {/* Development Helper - Show verification code */}
+              {devToken && (
+                <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-800 dark:text-blue-200">
+                    <strong>Testing Mode:</strong> Latest verification code: <span className="font-mono text-lg">{devToken}</span>
+                    <br />
+                    <small>Check your email spam folder or use this code directly.</small>
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="token" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Verification Token
