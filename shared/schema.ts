@@ -47,6 +47,11 @@ export const users = pgTable("users", {
   onboardingData: jsonb("onboarding_data"), // Store wizard responses
   referredBy: varchar("referred_by"), // ID of user who referred this user
   referralCode: varchar("referral_code").unique(), // This user's unique referral code
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorMethod: varchar("two_factor_method"), // 'totp', 'email', 'sms'
+  totpSecret: varchar("totp_secret"), // Encrypted TOTP secret
+  backupCodes: text("backup_codes").array(), // Encrypted backup codes
+  twoFactorSetupAt: timestamp("two_factor_setup_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -2893,6 +2898,30 @@ export type InsertOfflineContent = typeof offlineContent.$inferInsert;
 
 export type SyncData = typeof syncData.$inferSelect;
 export type InsertSyncData = typeof syncData.$inferInsert;
+
+// Two-Factor Authentication tokens table
+export const twoFactorTokens = pgTable("two_factor_tokens", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  token: varchar("token", { length: 10 }).notNull(), // 6-8 digit code
+  type: varchar("type", { length: 20 }).notNull(), // 'email', 'sms', 'backup'
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  attempts: integer("attempts").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 2FA type definitions and schemas
+export type TwoFactorToken = typeof twoFactorTokens.$inferSelect;
+export type InsertTwoFactorToken = typeof twoFactorTokens.$inferInsert;
+
+export const insertTwoFactorTokenSchema = createInsertSchema(twoFactorTokens).omit({
+  id: true,
+  createdAt: true,
+  usedAt: true,
+  attempts: true,
+});
 
 export type UserPersonalization = typeof userPersonalization.$inferSelect;
 export type InsertUserPersonalization = typeof userPersonalization.$inferInsert;

@@ -1,0 +1,44 @@
+Yes — **SoapBox Super App should absolutely support 2FA**, and the choice between **mobile (SMS/Authenticator App)** or **email-based 2FA** depends on user type, threat model, and ease of use. Here's how to decide:
+
+---
+
+## 🔐 Recommended 2FA Strategy for SoapBox Super App
+
+| **User Role**                   | **2FA Method**                                                         | **Why**                                      |
+| ------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------- |
+| **Owner / Super Admin**         | 🔒 **TOTP App (Authy / Google Authenticator)** + Optional Backup Email | Strongest protection against privilege abuse |
+| **Church Admins**               | 📱 **SMS or TOTP**                                                     | Balanced security + ease of use              |
+| **Pastors / Ministers / Staff** | ✉️ **Email or Optional TOTP**                                          | Email is easier, but less secure than TOTP   |
+| **Regular Members**             | ✅ **Optional Email 2FA**                                               | Low barrier for adoption; not enforced       |
+
+---
+
+## 🔎 Mobile vs. Email 2FA: Trade-offs
+
+|                    | **Email 2FA** | **SMS 2FA**               | **Authenticator App (TOTP)** |
+| ------------------ | ------------- | ------------------------- | ---------------------------- |
+| **Ease of Use**    | ✅ Easy        | ✅ Easy                    | ❌ Needs setup                |
+| **Security**       | ❌ Weak        | ⚠️ Medium (SIM swap risk) | ✅ Strong                     |
+| **Delivery Speed** | ✅ Fast        | ⚠️ Sometimes delayed      | ✅ Instant                    |
+| **Works Offline**  | ❌ No          | ❌ No                      | ✅ Yes                        |
+| **Cost**           | ✅ Free        | ⚠️ Carrier fees           | ✅ Free                       |
+
+---
+
+## 🔧 Suggested Implementation Stack
+
+* **Email 2FA**: Built-in with Supabase, Firebase, or SendGrid
+* **TOTP**: Use [speakeasy](https://github.com/speakeasyjs/speakeasy) for Node.js backend or Supabase’s `auth.mfa.totp`
+* **SMS (optional)**: Twilio or AWS SNS for SMS fallback
+
+---
+
+## ✅ Final Recommendation
+
+> Implement **TOTP (Authenticator App)** as the primary 2FA method for **admins and leaders**, and provide **Email-based 2FA** as a fallback or optional layer for general users.
+
+This provides robust protection for high-risk accounts without overcomplicating the experience for everyday members.
+
+---
+
+Want help adding this in Supabase or Firebase?
