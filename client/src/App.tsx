@@ -172,6 +172,7 @@ function AppRouter() {
               <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="/email-verification" component={EmailVerification} />
               <Route path="/tour-testing" component={TourTesting} />
+              <Route path="/tour-test" component={TourTestPage} />
             </>
           )}
         </Switch>
