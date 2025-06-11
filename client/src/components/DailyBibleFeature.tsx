@@ -164,7 +164,7 @@ export function DailyBibleFeature() {
       emotionalReaction?: string;
       audioListened?: boolean;
     }) => {
-      return await apiRequest("/api/bible/reading", "POST", data);
+      return await apiRequest("POST", "/api/bible/reading", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bible/streak"] });
