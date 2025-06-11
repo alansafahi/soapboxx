@@ -136,6 +136,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Email verification routes for new members
+  app.post('/api/auth/send-verification', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: "Email required" });
+      }
+
+      // Find user by email
+      const allUsers = await storage.getAllUsers();
+      const user = allUsers.find(u => u.email === email);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      // Generate new verification token
+      const token = emailService.generateVerificationToken();
+      await storage.setEmailVerificationToken(user.id, token);
+      
+      // Try to send email, but don't fail if it doesn't work
+      try {
+        await emailService.sendVerificationEmail({
+          email: user.email!,
+          firstName: user.firstName || 'Member',
+          token: token,
+        });
+        console.log(`Verification email sent to ${email} with token: ${token}`);
+      } catch (emailError) {
+        console.log(`Email delivery failed, but token ${token} stored for development testing`);
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Verification code generated",
+        devToken: process.env.NODE_ENV === 'development' ? token : undefined
+      });
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      res.status(500).json({ message: "Failed to generate verification code" });
+    }
+  });
+
   app.post('/api/auth/verify-email', async (req, res) => {
     try {
       const { token } = req.body;
