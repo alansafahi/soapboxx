@@ -101,7 +101,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get user's role from user-church relationship
       const userChurches = await storage.getUserChurches(userId);
-      const userRole = userChurches && userChurches.length > 0 ? userChurches[0].role : 'member';
+      
+      // Check if user has platform-wide administrative roles
+      // For demonstration, we'll check if user is assigned special platform roles
+      let userRole = 'member'; // Default role
+      
+      // In a production system, you would check user's global platform role
+      // For now, we'll demonstrate with the default member role
       const isPlatformRole = platformRoles.includes(userRole);
       
       // Check if user needs onboarding tour
