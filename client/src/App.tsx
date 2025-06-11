@@ -42,6 +42,7 @@ import { useQuery } from "@tanstack/react-query";
 function AppRouter() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [showWelcomeWizard, setShowWelcomeWizard] = useState(false);
+  const [forceHideOnboarding, setForceHideOnboarding] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [show2FAOnboarding, setShow2FAOnboarding] = useState(false);
   const [userRole, setUserRole] = useState("");
@@ -82,7 +83,16 @@ function AppRouter() {
   }, [location]);
 
   // Check if user needs onboarding
-  const needsOnboarding = isAuthenticated && user && !(user as any).has_completed_onboarding;
+  const needsOnboarding = isAuthenticated && user && !(user as any).has_completed_onboarding && !forceHideOnboarding;
+  
+  // Debug logging for onboarding state
+  console.log("Onboarding check:", {
+    isAuthenticated,
+    hasUser: !!user,
+    hasCompletedOnboarding: (user as any)?.has_completed_onboarding,
+    forceHideOnboarding,
+    needsOnboarding
+  });
 
   // Show loading spinner during initial auth check
   if (isLoading) {
@@ -142,7 +152,8 @@ function AppRouter() {
       {needsOnboarding && (
         <WelcomeWizard 
           onComplete={() => {
-            // Refresh user data to update has_completed_onboarding status
+            // Force hide onboarding and refresh user data
+            setForceHideOnboarding(true);
             queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
           }} 
         />

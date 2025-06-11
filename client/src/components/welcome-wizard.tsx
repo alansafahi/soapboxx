@@ -902,12 +902,16 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                 </Button>
               ) : (
                 <Button 
-                  onClick={() => {
+                  onClick={async () => {
                     console.log("Complete Setup clicked - forcing refresh");
                     // Force invalidate all user-related queries to sync state
-                    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-                    queryClient.invalidateQueries({ queryKey: ["/api/auth/2fa/onboarding-status"] });
-                    onComplete();
+                    await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+                    await queryClient.invalidateQueries({ queryKey: ["/api/auth/2fa/onboarding-status"] });
+                    // Add a small delay to ensure queries refresh
+                    setTimeout(() => {
+                      console.log("Calling onComplete after delay");
+                      onComplete();
+                    }, 500);
                   }} 
                   variant="outline"
                 >
