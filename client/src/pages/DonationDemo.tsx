@@ -480,6 +480,17 @@ export default function DonationDemo() {
                     rows={3}
                   />
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="newsletter"
+                    checked={shareNewsletter}
+                    onCheckedChange={setShareNewsletter}
+                  />
+                  <Label htmlFor="newsletter" className="text-sm">
+                    Keep me updated on the impact of my gift
+                  </Label>
+                </div>
               </div>
 
               <Separator />
@@ -525,42 +536,105 @@ export default function DonationDemo() {
           </Card>
         </div>
 
-        {/* Sidebar */}
+        {/* Enhanced Sidebar */}
         <div className="space-y-6">
-          {/* Impact Section */}
+          {/* Live Giving Feed */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Your Impact</CardTitle>
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <Zap className="h-5 w-5" />
+                <span>Live Community Giving</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {RECENT_GIFTS.map((gift, index) => (
+                <div key={index} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="font-medium">{gift.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">${gift.amount}</div>
+                    <div className="text-xs text-gray-500">{gift.timeAgo}</div>
+                  </div>
+                </div>
+              ))}
+              <div className="text-center text-xs text-gray-500 pt-2 border-t">
+                <span className="font-medium">12 people</span> gave in the last hour
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Giving Badges */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <Trophy className="h-5 w-5" />
+                <span>Giving Badges</span>
+              </CardTitle>
+              <CardDescription>
+                Unlock badges as you give
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {GIVING_BADGES.map((badge) => (
+                <div key={badge.id} className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                    getCurrentAmount() >= badge.threshold 
+                      ? 'bg-yellow-100 text-yellow-800' 
+                      : 'bg-gray-100 text-gray-400'
+                  }`}>
+                    {badge.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className={`text-sm font-medium ${
+                      getCurrentAmount() >= badge.threshold 
+                        ? 'text-yellow-800' 
+                        : 'text-gray-400'
+                    }`}>
+                      {badge.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      ${badge.threshold}+ total giving
+                    </div>
+                  </div>
+                  {getCurrentAmount() >= badge.threshold && (
+                    <Star className="h-4 w-4 text-yellow-500" />
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Impact Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span>Community Impact</span>
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Community Support</p>
-                    <p className="text-sm text-gray-600">Help families in need</p>
-                  </div>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">3,900</div>
+                  <div className="text-xs text-gray-600">Lives Reached</div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Church className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Ministry Growth</p>
-                    <p className="text-sm text-gray-600">Expand outreach programs</p>
-                  </div>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">$45K</div>
+                  <div className="text-xs text-gray-600">This Month</div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Heart className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Lives Transformed</p>
-                    <p className="text-sm text-gray-600">Support spiritual growth</p>
-                  </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">127</div>
+                  <div className="text-xs text-gray-600">Active Givers</div>
                 </div>
+                <div>
+                  <div className="text-2xl font-bold text-orange-600">15</div>
+                  <div className="text-xs text-gray-600">Churches</div>
+                </div>
+              </div>
+              <div className="text-center text-xs text-gray-500 pt-2 border-t">
+                Updated in real-time
               </div>
             </CardContent>
           </Card>
@@ -575,24 +649,15 @@ export default function DonationDemo() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">PCI DSS Compliant</Badge>
-                <Badge variant="outline">SSL Encrypted</Badge>
-                <Badge variant="outline">Stripe Secured</Badge>
+                <Badge variant="outline">
+                  <Lock className="h-3 w-3 mr-1" />
+                  SSL Encrypted
+                </Badge>
+                <Badge variant="outline">PCI Compliant</Badge>
+                <Badge variant="outline">Bank-Level Security</Badge>
               </div>
               <p className="text-sm text-gray-600">
-                We use bank-level security to protect your donation. Your card details are never stored on our servers.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Tax Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Tax Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">
-                Your donation may be tax-deductible. You'll receive a receipt for your records and tax filing purposes.
+                Your donation is processed through industry-leading security protocols. Card details are never stored.
               </p>
             </CardContent>
           </Card>
