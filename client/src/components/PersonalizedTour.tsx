@@ -49,50 +49,205 @@ interface RoleTourConfig {
 
 const tourConfigs: RoleTourConfig[] = [
   {
+    role: "church_owner",
+    displayName: "Church Owner",
+    welcomeMessage: "Welcome to SoapBox! As the church owner, you'll set up the infrastructure and governance for your spiritual community.",
+    color: "bg-indigo-100 text-indigo-800",
+    steps: [
+      {
+        id: "church_settings",
+        title: "Church Settings",
+        description: "Set your church name, denomination, and branding to create your unique identity.",
+        icon: Church,
+        target: "/admin",
+        action: "Configure Church",
+        highlight: "Start by personalizing your church profile and branding."
+      },
+      {
+        id: "role_management",
+        title: "Role Management",
+        description: "Add staff members and assign permissions to build your leadership team.",
+        icon: Shield,
+        target: "/role-management",
+        action: "Assign Roles",
+        highlight: "💡 Tip: Invite a Lead Pastor or Social Manager to help manage your community."
+      },
+      {
+        id: "donations_setup",
+        title: "Donations Setup",
+        description: "Connect Stripe to start receiving secure online gifts and offerings.",
+        icon: Gift,
+        target: "/donation-demo",
+        action: "Setup Giving",
+        highlight: "Enable digital giving to support your church's mission and ministries."
+      },
+      {
+        id: "analytics",
+        title: "Church Analytics",
+        description: "Track prayer growth, member engagement, and giving patterns.",
+        icon: BarChart3,
+        target: "/",
+        action: "View Analytics",
+        highlight: "Monitor your church's spiritual health and community growth."
+      },
+      {
+        id: "broadcasts",
+        title: "Announcements",
+        description: "Send updates and broadcasts to your entire church community.",
+        icon: Megaphone,
+        target: "/admin",
+        action: "Send Broadcast",
+        highlight: "Keep your congregation informed with church-wide communications."
+      }
+    ]
+  },
+  {
+    role: "church_admin",
+    displayName: "Church Admin",
+    welcomeMessage: "Welcome to SoapBox! As a church admin, you'll manage day-to-day operations and keep your community connected.",
+    color: "bg-blue-100 text-blue-800",
+    steps: [
+      {
+        id: "members_panel",
+        title: "Members Panel",
+        description: "View and manage your church community, track attendance, and member details.",
+        icon: Users,
+        target: "/admin",
+        action: "Manage Members",
+        highlight: "Your central hub for managing church membership and engagement."
+      },
+      {
+        id: "events_creation",
+        title: "Events Management",
+        description: "Create small groups, Bible studies, services, and special church events.",
+        icon: Calendar,
+        target: "/events",
+        action: "Create Events",
+        highlight: "💡 Tip: Consider syncing with your church calendar system."
+      },
+      {
+        id: "devotionals",
+        title: "Daily Bible & Devotionals",
+        description: "Add custom spiritual content and reading plans for your congregation.",
+        icon: BookOpen,
+        target: "/bible",
+        action: "Add Content",
+        highlight: "Create personalized spiritual growth experiences for your members."
+      },
+      {
+        id: "prayer_moderation",
+        title: "Prayer Wall Moderation",
+        description: "Approve, respond to, and manage prayer requests from your community.",
+        icon: Heart,
+        target: "/prayer",
+        action: "Moderate Prayers",
+        highlight: "Foster a safe and supportive prayer environment."
+      },
+      {
+        id: "announcements",
+        title: "Pinned Messages",
+        description: "Keep everyone informed with important updates and announcements.",
+        icon: MessageSquare,
+        target: "/community",
+        action: "Post Updates",
+        highlight: "💡 Bonus: Add a welcome devotional for new members."
+      }
+    ]
+  },
+  {
     role: "pastor",
-    displayName: "Pastor",
-    welcomeMessage: "Welcome to SoapBox! As a pastor, you have access to powerful tools to shepherd your congregation and manage church operations.",
+    displayName: "Lead Pastor",
+    welcomeMessage: "Welcome to SoapBox! As a pastor, you'll provide spiritual leadership and meaningful content for your congregation.",
     color: "bg-purple-100 text-purple-800",
     steps: [
       {
-        id: "dashboard",
-        title: "Church Dashboard",
-        description: "Monitor attendance, engagement metrics, and member activity from your central dashboard.",
-        icon: BarChart3,
-        target: "/",
-        action: "View Dashboard"
-      },
-      {
-        id: "members",
-        title: "Member Management",
-        description: "Manage member profiles, track spiritual growth, and assign ministry roles.",
-        icon: Users,
+        id: "sermons",
+        title: "Sermon Management",
+        description: "Upload or schedule this Sunday's sermon and share God's Word.",
+        icon: Music,
         target: "/admin",
-        action: "Manage Members"
+        action: "Upload Sermon",
+        highlight: "Share your weekly messages and build a sermon library."
       },
       {
-        id: "prayers",
-        title: "Prayer Wall",
-        description: "Monitor and respond to prayer requests from your congregation.",
+        id: "prayer_responses",
+        title: "Prayer Requests",
+        description: "Respond to your flock directly and provide spiritual guidance.",
         icon: Heart,
         target: "/prayer",
-        action: "View Prayers"
+        action: "Respond to Prayers",
+        highlight: "Connect personally with members through prayer and support."
       },
       {
-        id: "events",
-        title: "Event Planning",
-        description: "Create and manage church events, services, and special programs.",
+        id: "upcoming_events",
+        title: "Service Promotion",
+        description: "Promote next week's service and upcoming spiritual events.",
         icon: Calendar,
         target: "/events",
-        action: "Plan Events"
+        action: "Promote Services",
+        highlight: "💡 Tip: Link Bible passages to upcoming events for deeper engagement."
       },
       {
-        id: "communications",
-        title: "Church Communications",
-        description: "Send announcements, newsletters, and targeted messages to your congregation.",
+        id: "member_messages",
+        title: "Pastoral Care",
+        description: "Start conversations with church members and provide personal guidance.",
+        icon: MessageSquare,
+        target: "/messages",
+        action: "Message Members",
+        highlight: "Build meaningful relationships through direct communication."
+      },
+      {
+        id: "spiritual_dashboard",
+        title: "Spiritual Dashboard",
+        description: "Monitor spiritual engagement, growth patterns, and community health.",
+        icon: BarChart3,
+        target: "/",
+        action: "View Insights",
+        highlight: "Track your congregation's spiritual journey and engagement levels."
+      }
+    ]
+  },
+  {
+    role: "social_manager",
+    displayName: "Social Manager",
+    welcomeMessage: "Welcome to SoapBox! As the social manager, you'll drive community interaction, media, and engagement across the platform.",
+    color: "bg-pink-100 text-pink-800",
+    steps: [
+      {
+        id: "posts_announcements",
+        title: "Posts & Announcements",
+        description: "Create engaging updates, reminders, and community content.",
         icon: Megaphone,
+        target: "/community",
+        action: "Create Posts",
+        highlight: "Drive engagement with compelling content and timely announcements."
+      },
+      {
+        id: "media_gallery",
+        title: "Media Gallery",
+        description: "Upload worship images, event videos, and visual content.",
+        icon: Camera,
         target: "/admin",
-        action: "Send Messages"
+        action: "Manage Media",
+        highlight: "💡 Tip: Use design templates for professional-looking posts."
+      },
+      {
+        id: "engagement_monitoring",
+        title: "Community Engagement",
+        description: "Monitor comments, likes, and conversations happening in your community.",
+        icon: MessageSquare,
+        target: "/community",
+        action: "Monitor Activity",
+        highlight: "Stay on top of community conversations and respond to member interactions."
+      },
+      {
+        id: "gamification_management",
+        title: "Leaderboard & Badges",
+        description: "Encourage engagement through gamification elements and achievements.",
+        icon: Target,
+        target: "/leaderboard",
+        action: "Manage Rewards",
+        highlight: "Boost participation with badges, challenges, and recognition systems."
       }
     ]
   },
@@ -103,12 +258,22 @@ const tourConfigs: RoleTourConfig[] = [
     color: "bg-blue-100 text-blue-800",
     steps: [
       {
-        id: "team",
-        title: "Your Ministry Team",
-        description: "View and coordinate with your ministry team members and volunteers.",
+        id: "team_management",
+        title: "Team Coordination",
+        description: "Manage your ministry team, assign roles, and coordinate activities.",
         icon: Users,
+        target: "/admin",
+        action: "Manage Team",
+        highlight: "Build and coordinate your ministry team for maximum impact."
+      },
+      {
+        id: "volunteers",
+        title: "Volunteer Management",
+        description: "Recruit, train, and schedule volunteers for your ministry.",
+        icon: UserCheck,
         target: "/",
-        action: "View Team"
+        action: "Manage Volunteers",
+        highlight: "Connect with volunteers and provide meaningful opportunities to serve."
       },
       {
         id: "events",
@@ -116,15 +281,8 @@ const tourConfigs: RoleTourConfig[] = [
         description: "Create events specific to your ministry and track attendance.",
         icon: Calendar,
         target: "/events",
-        action: "Create Event"
-      },
-      {
-        id: "community",
-        title: "Ministry Community",
-        description: "Foster community within your ministry through discussions and prayer.",
-        icon: MessageSquare,
-        target: "/community",
-        action: "Engage Community"
+        action: "Create Event",
+        highlight: "Plan impactful ministry events that align with your mission."
       },
       {
         id: "resources",
@@ -132,63 +290,61 @@ const tourConfigs: RoleTourConfig[] = [
         description: "Access and share resources relevant to your ministry focus.",
         icon: BookOpen,
         target: "/bible",
-        action: "Browse Resources"
+        action: "Browse Resources",
+        highlight: "💡 Tip: Create resource libraries specific to your ministry's needs."
       }
     ]
   },
   {
     role: "member",
     displayName: "Church Member",
-    welcomeMessage: "Welcome to your church community! Here's how to make the most of your SoapBox experience.",
+    welcomeMessage: "Welcome to your church community! Here's how to connect, grow, and engage in your faith journey.",
     color: "bg-green-100 text-green-800",
     steps: [
       {
-        id: "dashboard",
-        title: "Your Dashboard",
-        description: "Track your Bible reading streak, prayer count, and spiritual growth milestones.",
-        icon: BarChart3,
-        target: "/",
-        action: "View Dashboard"
+        id: "find_church",
+        title: "Find Your Circle",
+        description: "Join a spiritual community near you and connect with local believers.",
+        icon: Church,
+        target: "/churches",
+        action: "Find Churches",
+        highlight: "Start by connecting with a church community that feels like home."
       },
       {
-        id: "community",
-        title: "Community Hub",
-        description: "Join discussions, share testimonies, and connect with fellow believers.",
-        icon: Users,
-        target: "/community",
-        action: "Explore Community"
-      },
-      {
-        id: "prayer",
-        title: "Prayer Wall",
-        description: "Share prayer requests and support others in their faith journey.",
-        icon: Heart,
-        target: "/prayer",
-        action: "Visit Prayer Wall"
-      },
-      {
-        id: "bible",
-        title: "Bible Reading",
-        description: "Follow reading plans, track progress, and grow in God's Word daily.",
+        id: "daily_bible",
+        title: "Daily Bible Reading",
+        description: "Start your scripture journey with guided reading plans and devotionals.",
         icon: BookOpen,
         target: "/bible",
-        action: "Start Reading"
+        action: "Start Reading",
+        highlight: "Build a consistent habit of daily scripture reading and meditation."
       },
       {
-        id: "events",
-        title: "Church Events",
-        description: "Discover upcoming services, small groups, and ministry opportunities.",
-        icon: Calendar,
-        target: "/events",
-        action: "View Events"
+        id: "prayer_wall",
+        title: "Prayer Wall",
+        description: "Request prayer or pray for others in your community.",
+        icon: Heart,
+        target: "/prayer",
+        action: "Join Prayer",
+        highlight: "Share your prayer needs and support others through intercession."
       },
       {
-        id: "gamification",
-        title: "Faith Journey",
-        description: "Track achievements, participate in challenges, and see your spiritual growth.",
+        id: "spiritual_progress",
+        title: "Spiritual Growth",
+        description: "Track your faith journey with badges, achievements, and progress milestones.",
         icon: Target,
         target: "/leaderboard",
-        action: "View Progress"
+        action: "View Progress",
+        highlight: "💡 Bonus: Ask about ministry interests for future matching opportunities."
+      },
+      {
+        id: "pastoral_care",
+        title: "Connect with Pastor",
+        description: "Need guidance? Reach out to your pastor anytime for spiritual support.",
+        icon: MessageSquare,
+        target: "/messages",
+        action: "Message Pastor",
+        highlight: "Build a relationship with your spiritual leader for guidance and support."
       }
     ]
   },
@@ -200,35 +356,48 @@ const tourConfigs: RoleTourConfig[] = [
     steps: [
       {
         id: "opportunities",
-        title: "Volunteer Opportunities",
-        description: "Find service opportunities that match your skills and passion.",
+        title: "Service Opportunities",
+        description: "Find volunteer opportunities that match your skills, passion, and availability.",
         icon: Target,
         target: "/",
-        action: "Find Opportunities"
+        action: "Find Opportunities",
+        highlight: "Discover meaningful ways to serve your church and community."
       },
       {
         id: "schedule",
-        title: "Your Schedule",
-        description: "Manage your volunteer commitments and upcoming service times.",
+        title: "Volunteer Schedule",
+        description: "Manage your service commitments and upcoming volunteer times.",
         icon: Calendar,
         target: "/events",
-        action: "View Schedule"
+        action: "View Schedule",
+        highlight: "Stay organized with your volunteer commitments and service schedule."
       },
       {
         id: "team",
-        title: "Volunteer Team",
-        description: "Connect with other volunteers and ministry leaders.",
+        title: "Volunteer Community",
+        description: "Connect with other volunteers, share experiences, and build relationships.",
         icon: Users,
         target: "/community",
-        action: "Meet Team"
+        action: "Meet Team",
+        highlight: "Build friendships with fellow volunteers who share your heart for service."
       },
       {
         id: "training",
-        title: "Training Resources",
-        description: "Access training materials and resources for your volunteer role.",
+        title: "Training & Resources",
+        description: "Access training materials, guides, and resources for your volunteer role.",
         icon: BookOpen,
         target: "/bible",
-        action: "Access Training"
+        action: "Access Training",
+        highlight: "Grow in your volunteer skills and spiritual development."
+      },
+      {
+        id: "impact",
+        title: "Service Impact",
+        description: "Track your volunteer hours and see the impact of your service.",
+        icon: BarChart3,
+        target: "/leaderboard",
+        action: "View Impact",
+        highlight: "💡 Bonus: Celebrate your service milestones and volunteer achievements."
       }
     ]
   },
@@ -240,35 +409,48 @@ const tourConfigs: RoleTourConfig[] = [
     steps: [
       {
         id: "youth_events",
-        title: "Youth Events",
-        description: "Create engaging events and activities for your youth group.",
+        title: "Youth Events & Activities",
+        description: "Create engaging events, fun activities, and meaningful youth gatherings.",
         icon: Gamepad2,
         target: "/events",
-        action: "Plan Youth Event"
+        action: "Plan Youth Event",
+        highlight: "Design events that connect with young hearts and build lasting faith."
       },
       {
         id: "youth_community",
         title: "Youth Community",
-        description: "Foster a safe space for young people to connect and share.",
+        description: "Foster a safe, supportive space for young people to connect and share.",
         icon: Coffee,
         target: "/community",
-        action: "Build Community"
+        action: "Build Community",
+        highlight: "Create an authentic community where youth feel valued and heard."
       },
       {
         id: "parent_communication",
-        title: "Parent Communication",
-        description: "Keep parents informed about youth activities and their child's participation.",
+        title: "Parent Connection",
+        description: "Keep parents informed about youth activities and their child's spiritual growth.",
         icon: MessageSquare,
-        target: "/",
-        action: "Message Parents"
+        target: "/messages",
+        action: "Message Parents",
+        highlight: "Build strong partnerships with parents in youth spiritual development."
       },
       {
-        id: "discipleship",
+        id: "youth_discipleship",
         title: "Youth Discipleship",
-        description: "Track spiritual growth and provide age-appropriate Bible study resources.",
+        description: "Access age-appropriate Bible studies, discussion guides, and spiritual growth resources.",
         icon: BookOpen,
         target: "/bible",
-        action: "Youth Resources"
+        action: "Explore Resources",
+        highlight: "Guide young people in their faith journey with relevant, engaging content."
+      },
+      {
+        id: "youth_engagement",
+        title: "Engagement Tracking",
+        description: "Monitor youth participation, spiritual milestones, and community involvement.",
+        icon: Target,
+        target: "/leaderboard",
+        action: "Track Growth",
+        highlight: "💡 Tip: Use gamification to encourage consistent spiritual habits and community involvement."
       }
     ]
   }

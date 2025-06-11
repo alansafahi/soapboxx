@@ -1,0 +1,95 @@
+Here’s a structured, **role-based personalized tour** strategy for the SoapBox Super App. The goal is to **boost engagement, reduce onboarding friction, and ensure every user knows where to go and why** based on their responsibilities.
+
+---
+
+## 🎯 OVERVIEW: Role-Based Personalized Tour Framework
+
+Each tour adapts based on the user’s **assigned role** immediately after signup/login or church join confirmation.
+
+---
+
+## 👥 ROLES & CUSTOM TOURS
+
+### 1. **Church Owner / Super Admin**
+
+**Goal**: Set up infrastructure and governance
+**Tour Stops**:
+
+1. 🏛 **Church Settings** → “Set your church name, denomination, and branding”
+2. 🔐 **Role Management** → “Add staff and assign permissions”
+3. 💸 **Donations Setup** → “Connect Stripe to start receiving gifts”
+4. 📊 **Analytics** → “Track prayer growth, member engagement, and giving”
+5. ✉️ **Broadcasts / Announcements** → “Send updates to your church community”
+
+🧠 *Bonus*: Prompt to invite a Lead Pastor or Social Manager
+
+---
+
+### 2. **Church Admin**
+
+**Goal**: Manage day-to-day operations
+**Tour Stops**:
+
+1. 👥 **Members Panel** → “View and manage your community”
+2. 📅 **Events** → “Create small groups, Bible studies, and services”
+3. ✝️ **Daily Bible / Devotionals** → “Add custom spiritual content”
+4. 🙏 **Prayer Wall Moderation** → “Approve or respond to prayer requests”
+5. 📌 **Pinned Posts / Messages** → “Keep everyone informed”
+
+🧠 *Bonus*: Suggest syncing calendar or adding welcome devotional
+
+---
+
+### 3. **Lead Pastor / Pastor / Minister**
+
+**Goal**: Spiritual leadership & content
+**Tour Stops**:
+
+1. 📖 **Sermons** → “Upload or schedule this Sunday’s sermon”
+2. 🔊 **Prayer Requests** → “Respond to your flock directly”
+3. 📅 **Upcoming Events** → “Promote next week’s service”
+4. 💬 **Messages** → “Start a conversation with church members”
+5. 📌 **Spiritual Dashboard** → “Monitor spiritual engagement”
+
+🧠 *Bonus*: Recommend linking Bible passages to upcoming events
+
+---
+
+### 4. **Social Manager / Staff**
+
+**Goal**: Community interaction, media, and engagement
+**Tour Stops**:
+
+1. 📣 **Posts / Announcements** → “Create engaging updates and reminders”
+2. 📸 **Media Gallery** → “Upload worship images, event videos”
+3. 💬 **Comments / Likes** → “See where the conversation’s happening”
+4. 🎯 **Leaderboard / Badges** → “Encourage engagement with gamification”
+
+🧠 *Bonus*: Offer Canva-style design templates or post scheduler
+
+---
+
+### 5. **Regular Member**
+
+**Goal**: Connect, grow, and engage
+**Tour Stops**:
+
+1. 🧭 **Find a Church / Circle** → “Join a spiritual community near you”
+2. 📖 **Daily Bible** → “Start your scripture journey”
+3. 🙏 **Prayer Wall** → “Request or pray for others”
+4. 🏆 **Badges / Progress** → “Track your spiritual growth”
+5. 💬 **Message a Pastor** → “Need guidance? Reach out anytime”
+
+🧠 *Bonus*: Ask about ministry interests for future matching
+
+---
+
+## 🛠️ TOUR TECH RECOMMENDATIONS
+
+* Use a **lightweight library** like `react-joyride` or `shepherd.js`
+* Trigger on first login, store `tour_complete` boolean per role in Supabase
+* Provide a **“Skip” and “Restart Tour”** option under Profile → Help
+
+---
+
+Would you like a JSON-based config structure for a reusable tour system you can load dynamically based on role ID?
