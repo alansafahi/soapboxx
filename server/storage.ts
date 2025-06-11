@@ -226,6 +226,7 @@ export interface IStorage {
   
   // Email verification operations
   setEmailVerificationToken(userId: string, token: string): Promise<void>;
+  getEmailVerificationToken(userId: string): Promise<string | null>;
   verifyEmailToken(token: string): Promise<User | null>;
   markEmailAsVerified(userId: string): Promise<void>;
   
@@ -584,6 +585,15 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
+  }
+
+  async getEmailVerificationToken(userId: string): Promise<string | null> {
+    const [user] = await db
+      .select({ emailVerificationToken: users.emailVerificationToken })
+      .from(users)
+      .where(eq(users.id, userId));
+    
+    return user?.emailVerificationToken || null;
   }
 
   async verifyEmailToken(token: string): Promise<User | null> {
