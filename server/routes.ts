@@ -133,6 +133,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to verify app functionality without authentication
+  app.get('/api/test', async (req, res) => {
+    res.json({ 
+      message: "SoapBox Super App is running!", 
+      timestamp: new Date().toISOString(),
+      status: "healthy" 
+    });
+  });
+
+  // Development bypass for authentication - creates a demo user
+  if (process.env.NODE_ENV === 'development') {
+    app.get('/api/auth/demo', async (req, res) => {
+      try {
+        // Create or get demo user
+        const demoUser = await storage.upsertUser({
+          id: 'demo-user-123',
+          email: 'demo@soapboxsuperapp.com',
+          firstName: 'Demo',
+          lastName: 'User',
+          profileImageUrl: null,
+        });
+
+        // Set up session manually
+        req.session.passport = {
+          user: {
+            claims: {
+              sub: 'demo-user-123',
+              email: 'demo@soapboxsuperapp.com',
+              first_name: 'Demo',
+              last_name: 'User',
+              exp: Math.floor(Date.now() / 1000) + 86400 // 24 hours
+            }
+          }
+        };
+
+        res.json({ 
+          message: "Demo authentication successful", 
+          user: demoUser 
+        });
+      } catch (error) {
+        console.error("Demo auth error:", error);
+        res.status(500).json({ message: "Demo authentication failed" });
+      }
+    });
+  }
+
   // Role Management Routes
   app.get('/api/roles', isAuthenticated, async (req: any, res) => {
     try {
