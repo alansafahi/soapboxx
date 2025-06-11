@@ -5700,7 +5700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }));
       }
     });
-  });
+  }); // Close WebSocket connection handler
 
   // SMS Verification API Routes
   app.post('/api/auth/phone/send-verification', isAuthenticated, async (req: any, res) => {
@@ -5805,8 +5805,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "SMS test failed" });
     }
   });
-
-
 
   return httpServer;
 }
