@@ -1611,17 +1611,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async joinChurch(userId: string, churchId: number): Promise<void> {
-    await db
-      .insert(userChurches)
-      .values({
-        userId,
-        churchId,
-        roleId: 9, // Default member role ID
-      })
-      .onConflictDoUpdate({
-        target: [userChurches.userId, userChurches.churchId],
-        set: { isActive: true },
-      });
+    // First, check if the user is already a member
+    const existing = await db
+      .select()
+      .from(userChurches)
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.churchId, churchId)
+      ))
+      .limit(1);
+
+    if (existing.length > 0) {
+      // User already exists, just reactivate
+      await db
+        .update(userChurches)
+        .set({ 
+          isActive: true,
+          joinedAt: new Date()
+        })
+        .where(and(
+          eq(userChurches.userId, userId),
+          eq(userChurches.churchId, churchId)
+        ));
+    } else {
+      // Insert new membership with minimal required fields
+      await db
+        .insert(userChurches)
+        .values({
+          userId,
+          churchId,
+          role: 'member', // Using role column instead of roleId
+          isActive: true,
+          joinedAt: new Date()
+        });
+    }
       
     // Track activity
     await this.trackUserActivity({
