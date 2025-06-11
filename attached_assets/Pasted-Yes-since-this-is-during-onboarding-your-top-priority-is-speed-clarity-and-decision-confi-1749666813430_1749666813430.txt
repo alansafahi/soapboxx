@@ -1,0 +1,78 @@
+Yes — since this is **during onboarding**, your top priority is **speed, clarity, and decision confidence**, not full-scale discovery. That **does change the recommendation** slightly. Here's a revised approach optimized for **simplicity + scalability**:
+
+---
+
+## ✅ Revised Strategy for Onboarding Church Selection
+
+### 🎯 GOAL: Help the user **quickly choose or skip** church selection without overwhelm — while laying groundwork for deeper exploration later.
+
+---
+
+### ✅ 1. **Smart Suggestions (Top 3–5)**
+
+Show a **curated shortlist** based on:
+
+* 📍 User’s **location** (auto-detected or zip code input earlier)
+* 🙏 **Denomination or preferences** from earlier onboarding steps
+* 🧠 **Match %** (simple logic like shared ministries or church size)
+
+**Example Display:**
+
+```plaintext
+Christ the King Lutheran – 45% Match
+📍 1.2 miles • Lutheran • 200 members
+[Join This Church]
+```
+
+---
+
+### ✅ 2. **Search Bar (Optional, Non-Required)**
+
+Allow users to:
+
+* 🔍 Type partial names or locations
+* 🧭 Use “Search near me” button
+
+If nothing matches, suggest:
+
+> “Didn’t find your church? Skip for now or join later in Settings.”
+
+---
+
+### ✅ 3. **“Skip for Now” Button**
+
+Always offer a **clear opt-out**, especially for:
+
+* Visitors
+* Unaffiliated seekers
+* Users from unlisted churches
+
+> ⏭️ *“I’ll join a church later”*
+
+---
+
+### ✅ 4. **Minimal UI, No Filters During Onboarding**
+
+Avoid dropdowns, multi-selects, or infinite scroll here. Save that power for **the full Church Discovery tab post-onboarding**.
+
+---
+
+### 🔄 Onboarding Display Design Summary
+
+| Element            | UX Pattern                                            |
+| ------------------ | ----------------------------------------------------- |
+| Suggested Churches | Top 3–5 with Join CTA                                 |
+| Search             | Lightweight input w/ debounce                         |
+| Skip Option        | Button under list: “Join later”                       |
+| Match % Badge      | Shown only if data available                          |
+| Performance        | Preload from cached region list or Supabase geo-query |
+
+---
+
+### ✅ Final Call: Keep it Fast, Friendly, Forgiving
+
+> Think of this like Netflix asking for favorite genres — **quick guesswork now, richer customization later.**
+
+---
+
+Would you like a clean React component or mockup for this simplified onboarding church selector?

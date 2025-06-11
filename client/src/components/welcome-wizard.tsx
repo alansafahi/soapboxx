@@ -190,6 +190,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const [showOtherTraditions, setShowOtherTraditions] = useState(false);
   const [showDenominationDisclaimer, setShowDenominationDisclaimer] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [churchSearchQuery, setChurchSearchQuery] = useState("");
   const { toast } = useToast();
 
   const steps = [
@@ -269,6 +270,22 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     }
   });
 
+  // Load all churches for search functionality
+  const { data: allChurches = [] } = useQuery({
+    queryKey: ["/api/churches"],
+    enabled: currentStep >= 4, // Only load when needed
+  });
+
+  // Filter churches based on search query
+  const filteredChurches = churchSearchQuery.length > 0 
+    ? allChurches.filter((church: any) => 
+        church.name.toLowerCase().includes(churchSearchQuery.toLowerCase()) ||
+        church.denomination?.toLowerCase().includes(churchSearchQuery.toLowerCase()) ||
+        church.address?.toLowerCase().includes(churchSearchQuery.toLowerCase()) ||
+        church.city?.toLowerCase().includes(churchSearchQuery.toLowerCase())
+      )
+    : [];
+
   const joinChurch = useMutation({
     mutationFn: async (churchId: number) => {
       return await apiRequest("POST", `/api/churches/${churchId}/join`);
@@ -282,6 +299,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       completeOnboarding.mutate(wizardData);
     },
     onError: (error) => {
+      console.error("Error joining church:", error);
       toast({
         title: "Error Joining Church",
         description: "Please try again or skip for now.",
@@ -717,68 +735,124 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                 {currentStep === 4 && (
                   <div className="space-y-6">
                     <div className="text-center">
-                      <h2 className="text-2xl font-bold mb-2">Your Recommendations</h2>
-                      <p className="text-gray-600">Churches that match your preferences</p>
+                      <h2 className="text-2xl font-bold mb-2">Find Your Church Community</h2>
+                      <p className="text-gray-600">Connect with a church that matches your preferences</p>
+                    </div>
+
+                    {/* Search Section */}
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <Input
+                          placeholder="Search churches by name or location..."
+                          value={churchSearchQuery}
+                          onChange={(e) => setChurchSearchQuery(e.target.value)}
+                          className="pl-10"
+                        />
+                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      </div>
                     </div>
                     
-                    {recommendations.length > 0 ? (
+                    {/* Smart Suggestions */}
+                    {!churchSearchQuery && recommendations.length > 0 && (
                       <div className="space-y-4">
-                        {recommendations.map((church, index) => (
+                        <h3 className="font-semibold text-gray-900">Suggested for You</h3>
+                        {recommendations.slice(0, 3).map((church, index) => (
                           <motion.div
                             key={church.id}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="p-6 border rounded-lg hover:shadow-md transition-shadow"
+                            className="p-4 border rounded-lg hover:shadow-sm transition-all"
                           >
-                            <div className="flex justify-between items-start mb-3">
-                              <div>
-                                <h3 className="text-lg font-semibold">{church.name}</h3>
-                                <p className="text-gray-600">{church.denomination}</p>
-                                <p className="text-sm text-gray-500">{church.address}</p>
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900">{church.name}</h4>
+                                <p className="text-sm text-gray-600">{church.denomination}</p>
+                                <p className="text-xs text-gray-500 mt-1">{church.address}</p>
                               </div>
-                              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                              <Badge variant="secondary" className="bg-[#5A2671]/10 text-[#5A2671] text-xs">
                                 {church.score}% Match
                               </Badge>
                             </div>
                             
-                            {church.matchingInterests?.length > 0 && (
-                              <div className="mb-4">
-                                <p className="text-sm font-medium mb-2">Matching Interests:</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {church.matchingInterests.map((interest: string) => {
-                                    const interestData = interests.find(i => i.id === interest);
-                                    return (
-                                      <Badge key={interest} variant="outline" className="text-xs">
-                                        {interestData?.label}
-                                      </Badge>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-                            
                             <Button
                               onClick={() => joinChurch.mutate(church.id)}
                               disabled={joinChurch.isPending}
-                              className="w-full"
+                              size="sm"
+                              className="w-full mt-3"
                             >
-                              {joinChurch.isPending ? "Joining..." : "Join This Church"}
+                              {joinChurch.isPending ? "Connecting..." : "Join This Church"}
                             </Button>
                           </motion.div>
                         ))}
                       </div>
-                    ) : (
+                    )}
+
+                    {/* Search Results */}
+                    {churchSearchQuery && (
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-gray-900">Search Results</h3>
+                        {filteredChurches.length > 0 ? (
+                          <div className="space-y-3">
+                            {filteredChurches.slice(0, 5).map((church, index) => (
+                              <motion.div
+                                key={church.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="p-4 border rounded-lg hover:shadow-sm transition-all"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex-1">
+                                    <h4 className="font-medium text-gray-900">{church.name}</h4>
+                                    <p className="text-sm text-gray-600">{church.denomination}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{church.address}</p>
+                                  </div>
+                                </div>
+                                
+                                <Button
+                                  onClick={() => joinChurch.mutate(church.id)}
+                                  disabled={joinChurch.isPending}
+                                  size="sm"
+                                  className="w-full mt-3"
+                                >
+                                  {joinChurch.isPending ? "Connecting..." : "Join This Church"}
+                                </Button>
+                              </motion.div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6">
+                            <Church className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                            <p className="text-gray-500 text-sm">No churches found matching your search.</p>
+                            <p className="text-xs text-gray-400 mt-1">Try a different search term or skip for now.</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* No Suggestions Fallback */}
+                    {!churchSearchQuery && recommendations.length === 0 && (
                       <div className="text-center py-8">
                         <Church className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                        <p className="text-gray-500">No recommendations available yet.</p>
+                        <h3 className="font-medium text-gray-900 mb-2">No Church Suggestions Yet</h3>
+                        <p className="text-sm text-gray-500 mb-4">Try searching for churches in your area or browse all available churches.</p>
+                        <Button
+                          onClick={() => setChurchSearchQuery("")}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Browse All Churches
+                        </Button>
                       </div>
                     )}
                     
-                    <div className="text-center">
-                      <Button variant="outline" onClick={onComplete}>
-                        Skip for Now
+                    {/* Skip Option */}
+                    <div className="text-center pt-4 border-t">
+                      <Button variant="ghost" onClick={onComplete} className="text-gray-600">
+                        I'll join a church later
                       </Button>
+                      <p className="text-xs text-gray-400 mt-2">You can always connect with churches from the Churches tab</p>
                     </div>
                   </div>
                 )}
