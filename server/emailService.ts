@@ -117,7 +117,8 @@ export class EmailService {
       console.log('   - Check spam/junk folder');
       console.log('   - Look for emails from support@soapboxsuperapp.com');
       console.log('   - Gmail may delay delivery by a few minutes');
-      console.log('   - Verification code: ' + data.token);
+      console.log('   - Email subject: "Verify Your Email - SoapBox Super App"');
+      console.log('   - From: support@soapboxsuperapp.com');
       
       return true;
     } catch (error: any) {
