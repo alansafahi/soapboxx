@@ -222,6 +222,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve test page in development
+  app.get('/test-email-verification', (req, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(404).send('Not found');
+    }
+    res.sendFile(path.join(__dirname, '../test-email-verification.html'));
+  });
+
   // 2FA Routes
   // Setup TOTP (Time-based One-Time Password)
   app.post('/api/auth/2fa/setup/totp', isAuthenticated, async (req: any, res) => {
