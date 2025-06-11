@@ -949,3 +949,5 @@ export default function DonationDemo() {
     </div>
   );
 }
+
+export default DonationDemo;
