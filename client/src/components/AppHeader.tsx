@@ -22,6 +22,7 @@ export default function AppHeader() {
     { href: "/bible", label: "Daily Bible" },
     { href: "/messages", label: "Messages" },
     { href: "/admin", label: "Admin Portal" },
+    { href: "/role-management", label: "Role Management" },
   ];
 
   const isActiveRoute = (href: string) => {
