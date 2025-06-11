@@ -52,6 +52,7 @@ import {
   volunteerHours,
   volunteerAwards,
   volunteerCertifications,
+  userTourCompletions,
   type User,
   type UpsertUser,
   type DailyVerse,
@@ -229,6 +230,11 @@ export interface IStorage {
   getEmailVerificationToken(userId: string): Promise<string | null>;
   verifyEmailToken(token: string): Promise<User | null>;
   markEmailAsVerified(userId: string): Promise<void>;
+  
+  // Tour completion operations
+  getTourCompletion(userId: string, tourType: string): Promise<any>;
+  saveTourCompletion(data: any): Promise<any>;
+  updateTourCompletion(userId: string, tourType: string, data: any): Promise<any>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -623,6 +629,53 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
+  }
+
+  // Tour completion operations
+  async getTourCompletion(userId: string, tourType: string): Promise<any> {
+    const [completion] = await db
+      .select()
+      .from(userTourCompletions)
+      .where(and(
+        eq(userTourCompletions.userId, userId),
+        eq(userTourCompletions.role, tourType)
+      ));
+    return completion;
+  }
+
+  async saveTourCompletion(data: any): Promise<any> {
+    const [completion] = await db
+      .insert(userTourCompletions)
+      .values({
+        userId: data.userId,
+        role: data.tourType,
+        completedAt: data.completedAt || new Date(),
+        tourVersion: data.tourVersion || "1.0"
+      })
+      .onConflictDoUpdate({
+        target: [userTourCompletions.userId, userTourCompletions.role],
+        set: {
+          completedAt: data.completedAt || new Date(),
+          tourVersion: data.tourVersion || "1.0"
+        }
+      })
+      .returning();
+    return completion;
+  }
+
+  async updateTourCompletion(userId: string, tourType: string, data: any): Promise<any> {
+    const [completion] = await db
+      .update(userTourCompletions)
+      .set({
+        completedAt: data.completedAt || new Date(),
+        tourVersion: data.tourVersion || "1.0"
+      })
+      .where(and(
+        eq(userTourCompletions.userId, userId),
+        eq(userTourCompletions.role, tourType)
+      ))
+      .returning();
+    return completion;
   }
 
   // Church operations

@@ -86,6 +86,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tour status endpoint
+  app.get('/api/tour/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user has platform roles (SoapBox Owner, System Admin, Support Agent)
+      const platformRoles = ['soapbox_owner', 'system_admin', 'support_agent'];
+      
+      // Get user's role from user-church relationship
+      const userChurches = await storage.getUserChurches(userId);
+      const userRole = userChurches && userChurches.length > 0 ? userChurches[0].role : 'member';
+      const isPlatformRole = platformRoles.includes(userRole);
+      
+      // Check if user needs onboarding tour
+      const tourCompletion = await storage.getTourCompletion(userId, userRole);
+      const shouldShowTour = isPlatformRole && (!tourCompletion || !tourCompletion.completedAt);
+      
+      res.json({
+        shouldShowTour,
+        userRole,
+        isNewUser: !user.createdAt || Date.now() - new Date(user.createdAt).getTime() < 24 * 60 * 60 * 1000,
+        hasNewRoleAssignment: shouldShowTour
+      });
+    } catch (error) {
+      console.error("Error checking tour status:", error);
+      res.status(500).json({ message: "Failed to check tour status" });
+    }
+  });
+
+  // Complete tour endpoint
+  app.post('/api/tour/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { role } = req.body;
+      
+      if (!role) {
+        return res.status(400).json({ message: "Role is required" });
+      }
+
+      await storage.saveTourCompletion({
+        userId,
+        tourType: role,
+        stepIndex: -1, // -1 indicates full tour completion
+        completed: true,
+        completedAt: new Date()
+      });
+      
+      res.json({ success: true, message: "Tour marked as completed" });
+    } catch (error) {
+      console.error("Error completing tour:", error);
+      res.status(500).json({ message: "Failed to complete tour" });
+    }
+  });
+
   // Test SMS endpoint
   app.post('/api/test-sms', async (req, res) => {
     try {
