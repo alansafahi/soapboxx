@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight } from "lucide-react";
+import soapboxLogo from "@assets/SoapBx logo_1749625213720.jpeg";
 
 export default function Landing() {
   return (
@@ -10,10 +11,12 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-faith-blue rounded-xl flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900">Soapbox</span>
+              <img 
+                src={soapboxLogo} 
+                alt="SoapBox Logo" 
+                className="w-10 h-10 rounded-xl object-cover"
+              />
+              <span className="text-2xl font-bold text-gray-900">SoapBox Super App</span>
             </div>
             
             <Button 
@@ -177,10 +180,12 @@ export default function Landing() {
       <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-faith-blue rounded-lg flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold">Soapbox</span>
+            <img 
+              src={soapboxLogo} 
+              alt="SoapBox Logo" 
+              className="w-8 h-8 rounded-lg object-cover"
+            />
+            <span className="text-xl font-bold">SoapBox Super App</span>
           </div>
           <p className="text-gray-400 mb-4">
             Connecting faith communities through modern technology
