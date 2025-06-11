@@ -14,6 +14,16 @@ window.addEventListener('unhandledrejection', (event) => {
     return;
   }
   
+  // Suppress 404 errors from failed API requests to prevent global error display
+  if (event.reason && event.reason.message && 
+      (event.reason.message.includes('404') || 
+       event.reason.message.includes('Not Found') ||
+       event.reason.message.includes('not found'))) {
+    event.preventDefault();
+    console.warn('API request failed:', event.reason.message);
+    return;
+  }
+  
   // Log other errors for debugging
   console.error('Unhandled promise rejection:', event.reason);
 });
