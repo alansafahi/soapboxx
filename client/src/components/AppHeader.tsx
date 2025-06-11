@@ -90,8 +90,78 @@ export default function AppHeader() {
         </div>
       </header>
 
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-0`}>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-64 lg:bg-white lg:border-r lg:border-gray-200">
+        {/* Sidebar Header */}
+        <div className="flex items-center h-16 px-6 border-b border-gray-200">
+          <img 
+            src={soapboxLogo} 
+            alt="SoapBox Logo" 
+            className="h-8 w-8 rounded-full object-cover"
+          />
+          <span className="ml-3 font-bold text-lg text-gray-900">SoapBox</span>
+        </div>
+
+        {/* Navigation */}
+        <nav className="mt-6 px-4 space-y-2">
+          {navigationItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Link key={item.href} href={item.href}>
+                <div
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActiveRoute(item.href)
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  <IconComponent className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User Profile Section */}
+        <div className="absolute bottom-0 w-full border-t border-gray-200 p-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="w-full justify-start p-2">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.profileImageUrl || ""} />
+                    <AvatarFallback>
+                      {user?.firstName?.[0] || 'U'}{user?.lastName?.[0] || ''}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-gray-900">
+                      {user?.firstName} {user?.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
+                  </div>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuItem>
+                <Link href="/profile">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/settings">Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar */}
+      <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -105,7 +175,6 @@ export default function AppHeader() {
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="h-5 w-5" />
@@ -113,7 +182,7 @@ export default function AppHeader() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="mt-6 px-4 space-y-2">
           {navigationItems.map((item) => {
             const IconComponent = item.icon;
             return (
@@ -121,7 +190,7 @@ export default function AppHeader() {
                 <div
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActiveRoute(item.href)
-                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+                      ? "bg-blue-50 text-blue-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                   onClick={() => setSidebarOpen(false)}
@@ -135,7 +204,7 @@ export default function AppHeader() {
         </nav>
 
         {/* User Profile Section */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="absolute bottom-0 w-full border-t border-gray-200 p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="w-full justify-start p-2">
