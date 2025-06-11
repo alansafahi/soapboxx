@@ -41,6 +41,12 @@ import fs from "fs";
 import express from "express";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Ensure API routes are handled by Express and not intercepted by frontend
+  app.use('/api', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  });
+
   // Create uploads directory if it doesn't exist
   const uploadsDir = path.join(process.cwd(), 'uploads');
   if (!fs.existsSync(uploadsDir)) {
@@ -4106,9 +4112,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test API endpoint to verify routing
+  app.get("/api/test-payment", (req, res) => {
+    res.json({ success: true, message: "Payment API is working" });
+  });
+
   // Stripe Payment Integration
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
+      // Force JSON response headers
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Cache-Control', 'no-cache');
+      
       console.log("Payment intent request:", req.body);
       const { amount, currency = 'usd', metadata = {} } = req.body;
 
