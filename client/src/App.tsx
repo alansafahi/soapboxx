@@ -76,6 +76,7 @@ function AppRouter() {
           {!isAuthenticated ? (
             <>
               <Route path="/" component={SimpleLanding} />
+              <Route path="/demo" component={DemoPage} />
               <Route path="*" component={SimpleLanding} />
             </>
           ) : (
