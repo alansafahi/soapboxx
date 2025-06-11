@@ -277,7 +277,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
         setCurrentStep(2); // Move to denomination step
       } else {
         toast({
-          title: "Failed to Send",
+          title: "Unable to Send Email",
           description: error.message || "Failed to send verification email",
           variant: "destructive",
         });
@@ -476,12 +476,12 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     }
   }, [emailStatus, wizardData.emailVerified]);
 
-  // Auto-advance when email is verified (disabled for testing)
-  // useEffect(() => {
-  //   if (currentStep === 1 && wizardData.emailVerified) {
-  //     setTimeout(() => setCurrentStep(2), 500); // Small delay for UX
-  //   }
-  // }, [currentStep, wizardData.emailVerified]);
+  // Auto-advance when email is verified
+  useEffect(() => {
+    if (currentStep === 1 && wizardData.emailVerified) {
+      setTimeout(() => setCurrentStep(2), 1000); // Brief delay for UX
+    }
+  }, [currentStep, wizardData.emailVerified]);
 
   // Add escape key handler
   useEffect(() => {
@@ -592,17 +592,38 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="w-16 h-16 mx-auto bg-[#5A2671] rounded-full flex items-center justify-center mb-4"
+                        className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${
+                          wizardData.emailVerified ? 'bg-green-500' : 'bg-[#5A2671]'
+                        }`}
                       >
-                        <Mail className="h-8 w-8 text-white" />
+                        {wizardData.emailVerified ? (
+                          <CheckCircle className="h-8 w-8 text-white" />
+                        ) : (
+                          <Mail className="h-8 w-8 text-white" />
+                        )}
                       </motion.div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                        {wizardData.emailVerified ? 'Email Verified!' : 'Verify Your Email'}
+                      </h2>
                       <p className="text-gray-600">
-                        To ensure secure access to SoapBox features, please verify your email address.
+                        {wizardData.emailVerified 
+                          ? 'Your email is verified. Moving to the next step...'
+                          : 'To ensure secure access to SoapBox features, please verify your email address.'
+                        }
                       </p>
                     </div>
 
-                    {!emailSent ? (
+                    {wizardData.emailVerified ? (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center space-x-3">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <div className="text-sm text-green-800">
+                            <p className="font-medium">Email verification complete!</p>
+                            <p>Automatically proceeding to denomination selection...</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : !emailSent ? (
                       <div className="space-y-4">
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <div className="flex items-start space-x-3">
