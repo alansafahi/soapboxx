@@ -6,9 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import AppHeader from "@/components/AppHeader";
 import NotFound from "@/pages/not-found";
-import SimpleLanding from "@/pages/simple-landing";
-import DemoPage from "@/pages/demo";
 import Home from "@/pages/home";
+import DemoPage from "@/pages/demo";
 import AdminPortal from "@/pages/admin";
 import EnhancedAdminPortal from "@/pages/admin-enhanced";
 import Profile from "@/pages/profile";
@@ -75,9 +74,11 @@ function AppRouter() {
         <Switch>
           {!isAuthenticated ? (
             <>
-              <Route path="/" component={SimpleLanding} />
               <Route path="/demo" component={DemoPage} />
-              <Route path="*" component={SimpleLanding} />
+              <Route path="*" component={() => {
+                window.location.href = '/api/login';
+                return <div>Redirecting to login...</div>;
+              }} />
             </>
           ) : (
             <>
@@ -131,8 +132,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter>
-          <Toaster />
           <AppRouter />
+          <Toaster />
         </WouterRouter>
       </TooltipProvider>
     </QueryClientProvider>
