@@ -43,6 +43,47 @@ import path from "path";
 import fs from "fs";
 import express from "express";
 
+// Configure multer for file uploads
+const storage_multer = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage_multer,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|mp3|mp4|avi|mov/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'));
+    }
+  }
+});
+
+// Helper function to determine file type
+function getFileType(mimetype: string): string {
+  if (mimetype.startsWith('image/')) return 'image';
+  if (mimetype.startsWith('video/')) return 'video';
+  if (mimetype.startsWith('audio/')) return 'audio';
+  if (mimetype.includes('pdf')) return 'document';
+  if (mimetype.includes('word') || mimetype.includes('document')) return 'document';
+  return 'other';
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Ensure API routes are handled by Express and not intercepted by frontend
   app.use('/api', (req, res, next) => {
@@ -5661,6 +5702,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+
+
   // SMS Verification API Routes
   app.post('/api/auth/phone/send-verification', isAuthenticated, async (req: any, res) => {
     try {
@@ -5763,6 +5806,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("SMS test error:", error);
       res.status(500).json({ message: "SMS test failed" });
     }
+  });
+
+  const httpServer = createServer(app);
+  const wss = new WebSocketServer({ server: httpServer });
+
+  wss.on('connection', (ws) => {
+    console.log('WebSocket connection established');
+    
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        // Handle WebSocket messages here
+        ws.send(JSON.stringify({ type: 'ack', received: data }));
+      } catch (error) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('WebSocket connection closed');
+    });
   });
 
   return httpServer;
