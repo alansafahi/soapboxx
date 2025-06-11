@@ -25,6 +25,7 @@ import SettingsPage from "@/pages/settings";
 import PrayerWallPreview from "@/pages/PrayerWallPreview";
 import ChurchManagementDemo from "@/pages/ChurchManagementDemo";
 import EnhancedChurchesDemo from "@/pages/EnhancedChurchesDemo";
+import ChurchesEnhanced from "@/pages/ChurchesEnhanced";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import { useState, useEffect } from "react";
@@ -95,6 +96,7 @@ function Router() {
               <Route path="/prayer-wall-preview" component={PrayerWallPreview} />
               <Route path="/church-management-demo" component={ChurchManagementDemo} />
               <Route path="/enhanced-churches-demo" component={EnhancedChurchesDemo} />
+              <Route path="/churches-enhanced" component={ChurchesEnhanced} />
               <Route path="/" component={() => <Home referralCode={referralCode} />} />
               <Route component={NotFound} />
             </>
