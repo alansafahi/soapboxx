@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import crypto from 'crypto';
 
 export interface EmailVerificationData {
@@ -9,18 +10,27 @@ export interface EmailVerificationData {
 
 export class EmailService {
   private transporter: nodemailer.Transporter;
+  private useSendGrid: boolean;
 
   constructor() {
-    // Configure nodemailer with a generic SMTP setup
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    this.useSendGrid = !!process.env.SENDGRID_API_KEY;
+    
+    if (this.useSendGrid) {
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+      console.log('Email service initialized with SendGrid');
+    } else {
+      // Configure nodemailer with a generic SMTP setup
+      this.transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+      console.log('Email service initialized with SMTP');
+    }
   }
 
   generateVerificationToken(): string {
@@ -41,6 +51,71 @@ export class EmailService {
         console.log(`================================\n`);
       }
 
+      if (this.useSendGrid) {
+        return this.sendWithSendGrid(data, verificationUrl);
+      } else {
+        return this.sendWithSMTP(data, verificationUrl);
+      }
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      return false;
+    }
+  }
+
+  private async sendWithSendGrid(data: EmailVerificationData, verificationUrl: string): Promise<boolean> {
+    try {
+      const msg = {
+        to: data.email,
+        from: 'noreply@soapboxsuperapp.com', // Use a verified sender address
+        subject: 'Verify Your SoapBox Super App Account',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #5A2671; margin: 0;">SoapBox Super App</h1>
+              <p style="color: #666; margin: 5px 0;">Welcome to Your Spiritual Community</p>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+              <h2 style="color: #333; margin-top: 0;">Welcome${data.firstName ? `, ${data.firstName}` : ''}!</h2>
+              
+              <p style="color: #666; line-height: 1.6;">
+                Thank you for joining the SoapBox Super App community. To complete your registration and start connecting with your spiritual community, please verify your email address.
+              </p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <div style="background: #5A2671; color: white; padding: 20px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 24px; letter-spacing: 2px;">
+                  ${data.token}
+                </div>
+              </div>
+              
+              <p style="color: #666; line-height: 1.6; text-align: center;">
+                Enter this verification code in the app to complete your registration.
+              </p>
+              
+              <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
+                This code will expire in 10 minutes for security purposes.
+              </p>
+            </div>
+            
+            <div style="text-align: center; color: #999; font-size: 12px;">
+              <p>© 2025 SoapBox Super App. All rights reserved.</p>
+              <p>Building stronger spiritual communities through technology.</p>
+            </div>
+          </div>
+        `
+      };
+
+      await sgMail.send(msg);
+      console.log('✅ Verification email sent successfully via SendGrid to:', data.email);
+      return true;
+    } catch (error) {
+      console.error('SendGrid email error:', error);
+      return false;
+    }
+  }
+
+  private async sendWithSMTP(data: EmailVerificationData, verificationUrl: string): Promise<boolean> {
+    try {
       // Check if SMTP is properly configured
       if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
         console.log('SMTP not configured, but token is logged above for testing');
