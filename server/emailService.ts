@@ -43,7 +43,7 @@ export class EmailService {
 
       // Check if SMTP is properly configured
       if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.log('SMTP not configured, skipping email send in development');
+        console.log('SMTP not configured, but token is logged above for testing');
         return process.env.NODE_ENV === 'development'; // Return true in dev mode
       }
       
