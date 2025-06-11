@@ -16,7 +16,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-06-20",
 });
 import { db } from "./db";
-import { userInspirationHistory, prayerResponses, conversationParticipants, devotionals, weeklySeries, sermonMedia } from "@shared/schema";
+import { userInspirationHistory, prayerResponses, conversationParticipants, devotionals, weeklySeries, sermonMedia, userTourCompletions } from "@shared/schema";
 import { and, eq, desc } from "drizzle-orm";
 import { 
   insertChurchSchema,
@@ -5284,6 +5284,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create content category" });
     }
   });
+
+  // Role-based Tour API Routes
+  app.get("/api/tour/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's current role from user-church relationship
+      const userChurches = await storage.getUserChurches(userId);
+      const currentRole = userChurches && userChurches.length > 0 ? userChurches[0].role : 'member';
+      
+      // Check if user has completed tour for this role
+      const tourCompletions = await db
+        .select()
+        .from(userTourCompletions)
+        .where(and(
+          eq(userTourCompletions.userId, userId),
+          eq(userTourCompletions.role, currentRole)
+        ));
+
+      const hasCompletedTour = tourCompletions.length > 0;
+      
+      // Determine if tour should be shown
+      const isNewUser = !user.hasCompletedOnboarding;
+      const hasNewRoleAssignment = false; // TODO: Implement role change tracking
+      const shouldShowTour = (isNewUser || hasNewRoleAssignment) && !hasCompletedTour;
+
+      res.json({
+        shouldShowTour,
+        userRole: currentRole,
+        isNewUser,
+        hasNewRoleAssignment,
+      });
+    } catch (error) {
+      console.error("Error fetching tour status:", error);
+      res.status(500).json({ message: "Failed to fetch tour status" });
+    }
+  });
+
+  app.post("/api/tour/complete", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { role } = req.body;
+
+      if (!role) {
+        return res.status(400).json({ message: "Role is required" });
+      }
+
+      // Insert or update tour completion record
+      await db
+        .insert(userTourCompletions)
+        .values({
+          userId,
+          role,
+          tourVersion: "1.0",
+        })
+        .onConflictDoUpdate({
+          target: [userTourCompletions.userId, userTourCompletions.role],
+          set: {
+            completedAt: new Date(),
+            tourVersion: "1.0",
+          },
+        });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking tour as completed:", error);
+      res.status(500).json({ message: "Failed to mark tour as completed" });
     }
   });
 

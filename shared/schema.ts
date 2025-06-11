@@ -981,6 +981,17 @@ export const challengeParticipants = pgTable("challenge_participants", {
   challengeUserUnique: unique().on(table.challengeId, table.userId),
 }));
 
+// Tour completion tracking
+export const userTourCompletions = pgTable("user_tour_completions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: varchar("role", { length: 50 }).notNull(),
+  completedAt: timestamp("completed_at").defaultNow(),
+  tourVersion: varchar("tour_version", { length: 20 }).default("1.0"),
+}, (table) => ({
+  userRoleUnique: unique().on(table.userId, table.role),
+}));
+
 // Enhanced community groups are defined above
 
 // Push notification system
