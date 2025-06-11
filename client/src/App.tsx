@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -32,7 +32,7 @@ import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import { useState, useEffect } from "react";
 
-function Router() {
+function AppRouter() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [showWelcomeWizard, setShowWelcomeWizard] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -128,8 +128,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <WouterRouter>
+          <Toaster />
+          <AppRouter />
+        </WouterRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
