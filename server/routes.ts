@@ -335,6 +335,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct email verification test endpoint (no auth required)
+  app.post('/api/auth/send-verification-direct', async (req, res) => {
+    try {
+      const { userId, email } = req.body;
+
+      if (!userId || !email) {
+        return res.status(400).json({ message: "UserId and email are required" });
+      }
+
+      // Generate verification token
+      const token = emailService.generateVerificationToken();
+      
+      // Store token in database
+      await storage.setEmailVerificationToken(userId, token);
+
+      // Send verification email
+      const success = await emailService.sendVerificationEmail({
+        email,
+        firstName: "Test",
+        token,
+      });
+
+      if (success) {
+        res.json({
+          success: true,
+          message: "Verification email sent successfully",
+          email,
+          devToken: token // For testing purposes
+        });
+      } else {
+        res.status(500).json({ message: "Failed to send verification email" });
+      }
+    } catch (error) {
+      console.error("Error sending direct verification email:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+
   // Development helper endpoint to get verification token by email (no auth required)
   app.get('/api/auth/dev/verification-token/:email', async (req, res) => {
     try {
