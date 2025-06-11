@@ -5328,5 +5328,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test SMS endpoint (for demonstration)
+  app.post('/api/test-sms', async (req, res) => {
+    try {
+      const { phoneNumber } = req.body;
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number required" });
+      }
+
+      const { smsService } = await import('./smsService');
+      const result = await smsService.sendPhoneVerification('test-user', phoneNumber);
+      
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          message: "SMS verification code sent successfully",
+          verificationId: result.verificationId 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: result.message 
+        });
+      }
+    } catch (error) {
+      console.error("SMS test error:", error);
+      res.status(500).json({ message: "SMS test failed" });
+    }
+  });
+
   return httpServer;
 }

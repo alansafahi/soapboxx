@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SMS Verification Test</title>
+    <script>
+        async function testSMS() {
+            const phoneNumber = document.getElementById('phoneInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.innerHTML = 'Sending SMS verification...';
+                
+                const response = await fetch('/api/auth/phone/send-verification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ phoneNumber: phoneNumber })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `✅ SMS sent successfully!<br>Verification ID: ${result.verificationId || 'Generated'}<br>Check your phone for the 6-digit code.`;
+                } else {
+                    resultDiv.innerHTML = `❌ Error: ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Network error: ${error.message}`;
+            }
+        }
+        
+        async function verifyCode() {
+            const code = document.getElementById('codeInput').value;
+            const resultDiv = document.getElementById('verifyResult');
+            
+            try {
+                resultDiv.innerHTML = 'Verifying code...';
+                
+                const response = await fetch('/api/auth/phone/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ verificationCode: code })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `✅ Phone verified successfully!`;
+                } else {
+                    resultDiv.innerHTML = `❌ Verification failed: ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Network error: ${error.message}`;
+            }
+        }
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        input { padding: 10px; margin: 5px; width: 200px; }
+        button { padding: 10px 20px; background: #5A2671; color: white; border: none; cursor: pointer; }
+        button:hover { background: #4a1d5c; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ddd; min-height: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>SoapBox SMS Verification Test</h2>
+        
+        <div>
+            <h3>Step 1: Send Verification Code</h3>
+            <input type="tel" id="phoneInput" placeholder="+1234567890" />
+            <button onclick="testSMS()">Send SMS</button>
+            <div class="result" id="result">Enter a phone number and click Send SMS</div>
+        </div>
+        
+        <div>
+            <h3>Step 2: Verify Code</h3>
+            <input type="text" id="codeInput" placeholder="123456" maxlength="6" />
+            <button onclick="verifyCode()">Verify Code</button>
+            <div class="result" id="verifyResult">Enter the 6-digit code from SMS</div>
+        </div>
+    </div>
+</body>
+</html>
