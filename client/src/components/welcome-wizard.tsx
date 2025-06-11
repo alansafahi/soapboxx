@@ -224,7 +224,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   // Email verification mutations
   const sendVerificationEmail = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/auth/send-verification", "POST");
+      return await apiRequest("POST", "/api/auth/send-verification");
     },
     onSuccess: () => {
       setEmailSent(true);
@@ -244,7 +244,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
 
   const verifyEmail = useMutation({
     mutationFn: async (token: string) => {
-      return await apiRequest("/api/auth/verify-email", "POST", { token });
+      return await apiRequest("POST", "/api/auth/verify-email", { token });
     },
     onSuccess: () => {
       setWizardData(prev => ({ ...prev, emailVerified: true }));
