@@ -30,7 +30,8 @@ import {
   Target,
   X,
   HelpCircle,
-  Calendar
+  Calendar,
+  Info
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -150,16 +151,21 @@ const ministryCategories = [
 ];
 
 const ageGroups = [
+  { id: "13-17", label: "13-17", description: "Teen & Student Ministry" },
   { id: "18-25", label: "18-25", description: "College & Young Adult" },
   { id: "26-35", label: "26-35", description: "Young Professional" },
   { id: "36-50", label: "36-50", description: "Family & Career" },
-  { id: "51-65", label: "51+", description: "Mature Adult" }
+  { id: "51-65", label: "51-65", description: "Mature Adult" },
+  { id: "65+", label: "65+", description: "Senior Ministry" }
 ];
 
 const churchSizes = [
-  { id: "small", label: "Small (50-200)", description: "Intimate community feel" },
-  { id: "medium", label: "Medium (200-800)", description: "Balanced programs and community" },
-  { id: "large", label: "Large (800+)", description: "Diverse ministries and resources" }
+  { id: "house", label: "🏠 House/Micro Church (1-50)", description: "Close-knit, often home-based" },
+  { id: "small", label: "⛪ Small Church (51-200)", description: "Intimate community feel" },
+  { id: "medium", label: "🏛️ Medium Church (201-500)", description: "Balanced programs & groups" },
+  { id: "large", label: "🏢 Large Church (501-1,999)", description: "Expanded ministries" },
+  { id: "mega", label: "🏟️ Mega Church (2,000-9,999)", description: "Large scale, multi-service" },
+  { id: "multisite", label: "🌐 Multisite Network (10,000+)", description: "Multi-campus, global reach" }
 ];
 
 const musicStyles = [
@@ -222,9 +228,12 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
         // Size preference
         const memberCount = church.memberCount || 300;
         if (
-          (data.churchSize === "small" && memberCount <= 200) ||
-          (data.churchSize === "medium" && memberCount > 200 && memberCount <= 800) ||
-          (data.churchSize === "large" && memberCount > 800)
+          (data.churchSize === "house" && memberCount <= 50) ||
+          (data.churchSize === "small" && memberCount > 50 && memberCount <= 200) ||
+          (data.churchSize === "medium" && memberCount > 200 && memberCount <= 500) ||
+          (data.churchSize === "large" && memberCount > 500 && memberCount <= 1999) ||
+          (data.churchSize === "mega" && memberCount > 1999 && memberCount <= 9999) ||
+          (data.churchSize === "multisite" && memberCount > 9999)
         ) {
           score += 20;
         }
