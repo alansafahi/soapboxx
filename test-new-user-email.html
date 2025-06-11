@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test New User Email Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .button { background: #5A2671; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border-color: #b6d4ea; color: #0c5460; }
+        #log { background: #f8f9fa; padding: 10px; border-radius: 5px; height: 200px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Email Verification for info@soapboxsuperapp.com</h1>
+        
+        <div class="step info">
+            <h3>Instructions:</h3>
+            <p>1. First, login with Replit Auth to create a user</p>
+            <p>2. Update the user's email to info@soapboxsuperapp.com</p>
+            <p>3. Test email verification with real SendGrid delivery</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 1: Login with Replit Auth</h3>
+            <button class="button" onclick="loginWithReplit()">Login with Replit</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Update Email Address</h3>
+            <input type="email" id="emailInput" class="input" value="info@soapboxsuperapp.com" placeholder="Enter email address">
+            <button class="button" onclick="updateEmail()">Update Email</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Send Verification Email</h3>
+            <button class="button" onclick="sendVerification()">Send Verification Email</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Verify Email</h3>
+            <input type="text" id="tokenInput" class="input" placeholder="Enter 6-digit verification code">
+            <button class="button" onclick="verifyEmail()">Verify Email</button>
+        </div>
+
+        <div class="step">
+            <h3>Test Log:</h3>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function loginWithReplit() {
+            log('Redirecting to Replit Auth...');
+            window.location.href = '/api/login';
+        }
+
+        async function updateEmail() {
+            const email = document.getElementById('emailInput').value;
+            if (!email) {
+                log('ERROR: Please enter an email address');
+                return;
+            }
+
+            try {
+                log(`Updating email to: ${email}`);
+                const response = await fetch('/api/auth/update-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    log(`SUCCESS: Email updated to ${email}`);
+                } else {
+                    log(`ERROR: ${result.message}`);
+                }
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function sendVerification() {
+            const email = document.getElementById('emailInput').value;
+            
+            try {
+                log(`Sending verification email to: ${email}`);
+                const response = await fetch('/api/auth/send-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    log(`SUCCESS: Verification email sent!`);
+                    if (result.devToken) {
+                        log(`Development token: ${result.devToken}`);
+                        document.getElementById('tokenInput').value = result.devToken;
+                    }
+                } else {
+                    log(`ERROR: ${result.message}`);
+                }
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function verifyEmail() {
+            const token = document.getElementById('tokenInput').value;
+            
+            if (!token) {
+                log('ERROR: Please enter verification token');
+                return;
+            }
+
+            try {
+                log(`Verifying email with token: ${token}`);
+                const response = await fetch('/api/auth/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    log(`SUCCESS: Email verified successfully!`);
+                } else {
+                    log(`ERROR: ${result.message}`);
+                }
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        // Check if user is already logged in
+        window.onload = async function() {
+            try {
+                const response = await fetch('/api/auth/user');
+                if (response.ok) {
+                    const user = await response.json();
+                    log(`User already logged in: ${user.email || user.id}`);
+                    if (user.email) {
+                        document.getElementById('emailInput').value = user.email;
+                    }
+                } else {
+                    log('No user logged in. Please login first.');
+                }
+            } catch (error) {
+                log('Not authenticated. Please login first.');
+            }
+        };
+    </script>
+</body>
+</html>

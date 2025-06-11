@@ -301,6 +301,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user email address
+  app.post('/api/auth/update-email', isAuthenticated, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      const userId = req.user.claims.sub;
+      
+      // Update user email and reset verification status
+      await storage.updateUserProfile(userId, { 
+        email, 
+        emailVerified: false 
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Email updated successfully",
+        email 
+      });
+    } catch (error) {
+      console.error("Error updating email:", error);
+      res.status(500).json({ message: "Failed to update email" });
+    }
+  });
+
   // Development helper endpoint to get verification token by email (no auth required)
   app.get('/api/auth/dev/verification-token/:email', async (req, res) => {
     try {
