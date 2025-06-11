@@ -5808,26 +5808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-  const wss = new WebSocketServer({ server: httpServer });
 
-  wss.on('connection', (ws) => {
-    console.log('WebSocket connection established');
-    
-    ws.on('message', (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        // Handle WebSocket messages here
-        ws.send(JSON.stringify({ type: 'ack', received: data }));
-      } catch (error) {
-        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
-      }
-    });
-    
-    ws.on('close', () => {
-      console.log('WebSocket connection closed');
-    });
-  });
 
   return httpServer;
 }
