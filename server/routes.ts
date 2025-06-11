@@ -4,6 +4,14 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { roleManager } from "./role-system";
+import Stripe from "stripe";
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2024-06-20",
+});
 import { db } from "./db";
 import { userInspirationHistory, prayerResponses, conversationParticipants, devotionals, weeklySeries, sermonMedia } from "@shared/schema";
 import { and, eq, desc } from "drizzle-orm";
@@ -4095,6 +4103,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating donation category:", error);
       res.status(500).json({ message: "Failed to create donation category" });
+    }
+  });
+
+  // Stripe Payment Integration
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, currency = 'usd', metadata = {} } = req.body;
+
+      if (!amount || amount < 50) { // Minimum $0.50
+        return res.status(400).json({ 
+          error: "Invalid amount. Minimum donation is $0.50" 
+        });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency,
+        metadata: {
+          ...metadata,
+          source: 'soapbox_donation_page'
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id 
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ 
+        error: "Error creating payment intent: " + error.message 
+      });
+    }
+  });
+
+  app.post("/api/confirm-donation", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { 
+        paymentIntentId, 
+        amount, 
+        churchId, 
+        isRecurring, 
+        dedicationType, 
+        dedicationName, 
+        dedicationMessage,
+        donorName,
+        donorEmail,
+        isAnonymous = false,
+        subscribeNewsletter = false 
+      } = req.body;
+
+      // Verify payment with Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ 
+          error: "Payment not completed" 
+        });
+      }
+
+      // Store donation in database
+      const donationData = {
+        userId,
+        churchId: churchId ? parseInt(churchId) : null,
+        amount,
+        paymentMethod: 'credit_card',
+        stripePaymentIntentId: paymentIntentId,
+        isRecurring,
+        dedicationType,
+        dedicationName,
+        dedicationMessage,
+        donorName,
+        donorEmail,
+        isAnonymous,
+        subscribeNewsletter,
+        status: 'completed'
+      };
+
+      const donation = await storage.createDonation(donationData);
+
+      // Update user giving stats for badge tracking
+      await storage.updateUserGivingStats(userId, amount);
+
+      res.json({ 
+        success: true, 
+        donation,
+        message: "Thank you for your generous donation!" 
+      });
+    } catch (error: any) {
+      console.error("Error confirming donation:", error);
+      res.status(500).json({ 
+        error: "Error processing donation: " + error.message 
+      });
+    }
+  });
+
+  app.get("/api/donation-campaigns", async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      
+      if (churchId) {
+        const campaigns = await storage.getActiveCampaigns(parseInt(churchId as string));
+        res.json(campaigns);
+      } else {
+        // Return all active campaigns for demo
+        const allCampaigns = await storage.getAllActiveCampaigns();
+        res.json(allCampaigns);
+      }
+    } catch (error: any) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ 
+        error: "Error fetching campaigns: " + error.message 
+      });
     }
   });
 
