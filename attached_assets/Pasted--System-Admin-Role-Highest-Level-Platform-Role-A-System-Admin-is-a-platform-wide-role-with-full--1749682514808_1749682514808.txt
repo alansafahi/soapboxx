@@ -1,0 +1,134 @@
+👤 System Admin Role (Highest-Level Platform Role)
+A System Admin is a platform-wide role with full oversight of the SoapBox Super App across all churches, users, and data. This role exists above Super Admins and Church Admins, with responsibilities focused on governance, compliance, infrastructure, and operational continuity.
+
+✅ Core Capabilities of a System Admin
+🏛 Platform Governance
+View and manage all churches on the platform
+
+
+Create, suspend, archive, or delete any church instance
+
+
+Promote/demote Super Admins and Church Admins
+
+
+Access platform-wide status dashboards and system health
+
+
+Onboard or verify new churches and denominations
+
+
+
+🔐 Security & Compliance
+Access audit logs for all user and admin activity
+
+
+Review and resolve abuse reports (spam, harassment, fake churches)
+
+
+Configure and enforce content moderation policies
+
+
+Handle GDPR/CCPA requests for data export or deletion
+
+
+Set security requirements (2FA, password policies, rate limits)
+
+
+
+📊 Cross-Church Analytics & Reporting
+View platform-wide metrics:
+
+
+Active users, growth by region
+
+
+Donation flow and volume across churches
+
+
+Leaderboards and engagement stats
+
+
+Export reports for leadership, investors, or audits
+
+
+Monitor church activity by category (denomination, location, size)
+
+
+
+⚙️ System Configuration & Feature Management
+Enable or disable global features (e.g., gamification, leaderboards)
+
+
+Modify default templates for:
+
+
+Denominations
+
+
+Ministry categories
+
+
+Role permissions
+
+
+Control feature flags or A/B tests across the platform
+
+
+
+💸 Billing & Financial Oversight
+View and manage platform-level Stripe Connect account
+
+
+Monitor all transaction flows between churches and donors
+
+
+Adjust SaaS pricing tiers and usage plans
+
+
+Issue fee refunds, credits, or usage-based billing overrides
+
+
+
+🧰 Role Management & Developer Tools
+Masquerade as any user or admin (with audit logging)
+
+
+Create, edit, and delete custom roles
+
+
+Access dev/staging environments and internal tools
+
+
+Manage user support tickets across all churches
+
+
+Send platform-wide system notifications
+
+
+
+🔒 Boundaries / Restrictions
+A System Admin should not:
+Edit or post public-facing content (e.g., sermons, prayers)
+
+
+Be listed in any church’s member directory
+
+
+Access personal DMs or prayer notes unless flagged
+
+
+
+🏷️ Suggested UI Label:
+Role: System Admin  
+Access: Full platform access (all churches, all users)
+
+
+🧠 Bonus Recommendations:
+Add a “Stealth Mode / Ghost View” for auditing without alerting users
+
+
+Include a visible "Accessed by System Admin" audit trail on sensitive actions
+
+
+Log impersonation sessions with reason and timestamp

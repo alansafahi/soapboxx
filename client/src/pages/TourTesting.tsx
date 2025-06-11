@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import PersonalizedTour from "@/components/PersonalizedTour";
+import InteractiveTour from "@/components/InteractiveTour";
 import { Users, Church, Heart, Settings, UserCheck } from "lucide-react";
 
 const roleOptions = [
@@ -66,15 +67,21 @@ const roleOptions = [
 
 export default function TourTesting() {
   const [showTour, setShowTour] = useState(false);
+  const [showInteractiveTour, setShowInteractiveTour] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
 
-  const startTour = (role: string) => {
+  const startTour = (role: string, type: "original" | "interactive" = "interactive") => {
     setSelectedRole(role);
-    setShowTour(true);
+    if (type === "interactive") {
+      setShowInteractiveTour(true);
+    } else {
+      setShowTour(true);
+    }
   };
 
   const completeTour = () => {
     setShowTour(false);
+    setShowInteractiveTour(false);
     setSelectedRole("");
   };
 
@@ -83,12 +90,19 @@ export default function TourTesting() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Personalized Tour Testing
+            Interactive Tour Testing
           </h1>
-          <p className="text-gray-600">
-            Test the personalized welcome tour experience for different user roles.
-            Each role receives tailored content and feature highlights.
+          <p className="text-gray-600 mb-4">
+            Experience guided walkthroughs that showcase real app features with role-specific content.
           </p>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="font-medium text-blue-900 mb-2">🎯 New Interactive Tour Experience</h3>
+            <p className="text-sm text-blue-800">
+              Each tour navigates through actual app pages, highlights key features, and provides contextual tips. 
+              Tours include auto-play mode and step-by-step navigation through real functionality.
+            </p>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
