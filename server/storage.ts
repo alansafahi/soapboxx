@@ -1611,6 +1611,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async joinChurch(userId: string, churchId: number): Promise<void> {
+    console.log(`Storage: joinChurch called for user ${userId} and church ${churchId}`);
+    
     // First, check if the user is already a member
     const existing = await db
       .select()
@@ -1622,6 +1624,7 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
 
     if (existing.length > 0) {
+      console.log(`User ${userId} already exists in church ${churchId}, reactivating`);
       // User already exists, just reactivate
       await db
         .update(userChurches)
@@ -1634,6 +1637,7 @@ export class DatabaseStorage implements IStorage {
           eq(userChurches.churchId, churchId)
         ));
     } else {
+      console.log(`Creating new membership for user ${userId} in church ${churchId}`);
       // Insert new membership with minimal required fields
       await db
         .insert(userChurches)
@@ -1645,6 +1649,8 @@ export class DatabaseStorage implements IStorage {
           joinedAt: new Date()
         });
     }
+    
+    console.log(`Successfully processed church join for user ${userId} and church ${churchId}`);
       
     // Track activity
     await this.trackUserActivity({

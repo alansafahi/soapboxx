@@ -288,9 +288,11 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
 
   const joinChurch = useMutation({
     mutationFn: async (churchId: number) => {
+      console.log("Joining church with ID:", churchId);
       return await apiRequest("POST", `/api/churches/${churchId}/join`);
     },
     onSuccess: (_, churchId) => {
+      console.log("Successfully joined church:", churchId);
       toast({
         title: "Church Joined Successfully!",
         description: "You've connected with this church. Welcome to the community!",

@@ -856,7 +856,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const churchId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
+      console.log(`User ${userId} attempting to join church ${churchId}`);
       await storage.joinChurch(userId, churchId);
+      console.log(`Successfully joined user ${userId} to church ${churchId}`);
       res.json({ message: "Successfully joined church" });
     } catch (error) {
       console.error("Error joining church:", error);
