@@ -1183,6 +1183,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Prayer Wall endpoints
+  app.post('/api/prayers/:id/react', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const { reaction } = req.body;
+      
+      if (!['heart', 'fire', 'praise', 'praying'].includes(reaction)) {
+        return res.status(400).json({ message: "Invalid reaction type" });
+      }
+      
+      // For now, return success - storage implementation would track reactions
+      res.json({ message: "Reaction added", reaction });
+    } catch (error) {
+      console.error("Error adding reaction:", error);
+      res.status(500).json({ message: "Failed to add reaction" });
+    }
+  });
+
+  app.post('/api/prayers/:id/bookmark', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // For now, return success - storage implementation would track bookmarks
+      res.json({ message: "Prayer bookmarked", prayerId });
+    } catch (error) {
+      console.error("Error bookmarking prayer:", error);
+      res.status(500).json({ message: "Failed to bookmark prayer" });
+    }
+  });
+
+  app.get('/api/prayer-circles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Mock prayer circles data for demonstration
+      const prayerCircles = [
+        {
+          id: 1,
+          name: "Youth Ministry Circle",
+          description: "Private prayer group for youth ministry",
+          memberCount: 15,
+          activePrayers: 3,
+          isPrivate: true,
+          createdAt: new Date()
+        },
+        {
+          id: 2,
+          name: "Recovery Support Group",
+          description: "Prayer circle for addiction recovery support",
+          memberCount: 8,
+          activePrayers: 2,
+          isPrivate: false,
+          createdAt: new Date()
+        },
+        {
+          id: 3,
+          name: "Women's Ministry Circle",
+          description: "Prayer fellowship for women in ministry",
+          memberCount: 22,
+          activePrayers: 5,
+          isPrivate: false,
+          createdAt: new Date()
+        }
+      ];
+      
+      res.json(prayerCircles);
+    } catch (error) {
+      console.error("Error fetching prayer circles:", error);
+      res.status(500).json({ message: "Failed to fetch prayer circles" });
+    }
+  });
+
+  app.post('/api/prayer-circles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { name, description, isPrivate } = req.body;
+      
+      if (!name || name.trim().length === 0) {
+        return res.status(400).json({ message: "Circle name is required" });
+      }
+      
+      // For now, return mock created circle
+      const newCircle = {
+        id: Date.now(),
+        name: name.trim(),
+        description: description || "",
+        memberCount: 1,
+        activePrayers: 0,
+        isPrivate: isPrivate || false,
+        createdBy: userId,
+        createdAt: new Date()
+      };
+      
+      res.json(newCircle);
+    } catch (error) {
+      console.error("Error creating prayer circle:", error);
+      res.status(500).json({ message: "Failed to create prayer circle" });
+    }
+  });
+
   app.post('/api/prayers/:id/support', isAuthenticated, async (req: any, res) => {
     try {
       const prayerRequestId = parseInt(req.params.id);

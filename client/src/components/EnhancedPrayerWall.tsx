@@ -82,7 +82,7 @@ export default function EnhancedPrayerWall() {
   // Filter prayers by category
   const filteredPrayers = selectedCategory === 'all' 
     ? prayerRequests 
-    : prayerRequests.filter(prayer => prayer.category === selectedCategory);
+    : prayerRequests.filter(prayer => (prayer.category || 'general') === selectedCategory);
 
   // Create prayer request mutation
   const createPrayerMutation = useMutation({
@@ -153,7 +153,7 @@ export default function EnhancedPrayerWall() {
     },
     onSuccess: (_, prayerId) => {
       setBookmarkedRequests(prev => {
-        const newSet = new Set(prev);
+        const newSet = new Set(Array.from(prev));
         if (newSet.has(prayerId)) {
           newSet.delete(prayerId);
         } else {
@@ -172,7 +172,7 @@ export default function EnhancedPrayerWall() {
 
   const toggleExpandCard = (prayerId: number) => {
     setExpandedCards(prev => {
-      const newSet = new Set(prev);
+      const newSet = new Set(Array.from(prev));
       if (newSet.has(prayerId)) {
         newSet.delete(prayerId);
       } else {
@@ -435,12 +435,12 @@ export default function EnhancedPrayerWall() {
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                              {prayer.isAnonymous ? '?' : getInitials(prayer.authorName || 'Anonymous')}
+                              {prayer.isAnonymous ? '?' : getInitials(authorName)}
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="font-semibold">
-                                  {prayer.isAnonymous ? 'Anonymous' : prayer.authorName}
+                                  {authorName}
                                 </span>
                                 {prayer.isUrgent && (
                                   <Badge variant="destructive" className="text-xs flex items-center gap-1">
@@ -451,14 +451,14 @@ export default function EnhancedPrayerWall() {
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-500">
                                 <MapPin className="w-3 h-3" />
-                                {prayer.churchName || 'Community Prayer'}
+                                {churchName}
                                 <span>•</span>
-                                <span>{formatDistanceToNow(new Date(prayer.createdAt))} ago</span>
+                                <span>{prayer.createdAt ? formatDistanceToNow(new Date(prayer.createdAt)) : 'Recently'} ago</span>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl">{getCategoryIcon(prayer.category)}</span>
+                            <span className="text-2xl">{getCategoryIcon(prayer.category || 'general')}</span>
                             <Button 
                               variant="ghost" 
                               size="sm"
