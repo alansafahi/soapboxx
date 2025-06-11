@@ -91,7 +91,8 @@ export default function AppHeader() {
       </header>
 
       {/* Desktop Sidebar - Always Visible */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
+      <div className="fixed inset-y-0 left-0 z-[9999] w-64 bg-yellow-400 border-r-2 border-black shadow-lg" style={{display: 'block !important'}}>
+        <div className="p-4 text-center text-black text-xl font-bold">SIDEBAR TEST</div>
         {/* Sidebar Header */}
         <div className="flex items-center h-16 px-6 border-b border-gray-200">
           <img 
@@ -99,7 +100,7 @@ export default function AppHeader() {
             alt="SoapBox Logo" 
             className="h-8 w-8 rounded-full object-cover"
           />
-          <span className="ml-3 font-bold text-lg text-gray-900">SoapBox</span>
+          <span className="ml-3 font-bold text-lg text-black">SoapBox</span>
         </div>
 
         {/* Navigation */}

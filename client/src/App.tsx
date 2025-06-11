@@ -1,10 +1,11 @@
-import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
+import { Switch, Route, useLocation, Router as WouterRouter, Link } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import AppHeader from "@/components/AppHeader";
+import { Home, Church, Calendar, BookOpen, Heart, Mail, Settings } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import DemoPage from "@/pages/demo";
@@ -69,8 +70,59 @@ function AppRouter() {
 
   return (
     <>
+      {isAuthenticated && (
+        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg">
+          <div className="flex items-center h-16 px-6 border-b border-gray-200">
+            <span className="font-bold text-lg text-gray-900">SoapBox Super App</span>
+          </div>
+          <nav className="mt-6 px-4 space-y-2">
+            <Link href="/">
+              <div className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                <Home className="h-5 w-5" />
+                <span>Home</span>
+              </div>
+            </Link>
+            <Link href="/churches">
+              <div className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                <Church className="h-5 w-5" />
+                <span>Churches</span>
+              </div>
+            </Link>
+            <Link href="/events">
+              <div className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                <Calendar className="h-5 w-5" />
+                <span>Events</span>
+              </div>
+            </Link>
+            <Link href="/bible">
+              <div className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                <BookOpen className="h-5 w-5" />
+                <span>Daily Bible</span>
+              </div>
+            </Link>
+            <Link href="/prayer">
+              <div className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                <Heart className="h-5 w-5" />
+                <span>Prayer Wall</span>
+              </div>
+            </Link>
+            <Link href="/messages">
+              <div className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                <Mail className="h-5 w-5" />
+                <span>Messages</span>
+              </div>
+            </Link>
+            <Link href="/admin">
+              <div className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                <Settings className="h-5 w-5" />
+                <span>Admin Portal</span>
+              </div>
+            </Link>
+          </nav>
+        </div>
+      )}
       {isAuthenticated && <AppHeader />}
-      <main className={isAuthenticated ? "min-h-screen bg-gray-50 lg:ml-64" : ""}>
+      <main className={isAuthenticated ? "min-h-screen bg-gray-50 ml-64" : ""}>
         <Switch>
           {!isAuthenticated ? (
             <>
