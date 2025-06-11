@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
-import soapboxLogo from "@assets/SoapBx logo_1749626952136.jpeg";
+import soapboxLogo from "@assets/SoapBx logo_1749627505398.jpeg";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,7 +12,7 @@ const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: s
       alt="SoapBox" 
       className={`${className} rounded-lg object-cover`}
     />
-    {showText && <span className="text-xl font-bold text-gray-900">SoapBox</span>}
+    {showText && <span className="text-xl font-bold text-gray-900">SoapBox Super App</span>}
   </div>
 );
 
@@ -102,7 +102,7 @@ export default function SimpleLanding() {
           </h1>
           
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Connect, grow, and thrive with SoapBox - the all-in-one platform that brings 
+            Connect, grow, and thrive with SoapBox Super App - the all-in-one platform that brings 
             your faith community together through prayer, events, discussions, and spiritual growth.
           </p>
           
@@ -321,7 +321,7 @@ export default function SimpleLanding() {
             Ready to Transform Your Community?
           </h2>
           <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
-            Schedule a personalized demo to see how SoapBox can revolutionize your faith community's digital experience.
+            Schedule a personalized demo to see how SoapBox Super App can revolutionize your faith community's digital experience.
           </p>
           
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 max-w-2xl mx-auto shadow-2xl">
