@@ -24,7 +24,8 @@ export class EmailService {
   }
 
   generateVerificationToken(): string {
-    return crypto.randomBytes(32).toString('hex');
+    // Generate a 6-digit numeric code for better user experience
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   async sendVerificationEmail(data: EmailVerificationData): Promise<boolean> {
