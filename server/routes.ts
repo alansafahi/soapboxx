@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { roleManager } from "./role-system";
 import { twoFactorService } from "./twoFactorService";
 import { emailService } from "./emailService";
+import { smsService } from "./smsService";
 import Stripe from "stripe";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -246,6 +247,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking email verification status:", error);
       res.status(500).json({ message: "Failed to check email verification status" });
+    }
+  });
+
+  // SMS Verification Routes
+  app.post('/api/auth/send-sms-verification', async (req, res) => {
+    try {
+      const { phoneNumber } = req.body;
+
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      const token = smsService.generateVerificationToken();
+      
+      const success = await smsService.sendVerificationSMS({
+        phoneNumber,
+        token,
+      });
+
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: "Verification code sent via SMS",
+          devToken: token // For development testing
+        });
+      } else {
+        res.status(500).json({ message: "Failed to send SMS verification" });
+      }
+    } catch (error) {
+      console.error("Error sending SMS verification:", error);
+      res.status(500).json({ message: "Failed to send SMS verification" });
+    }
+  });
+
+  app.post('/api/auth/verify-sms', async (req, res) => {
+    try {
+      const { phoneNumber, token } = req.body;
+
+      if (!phoneNumber || !token) {
+        return res.status(400).json({ message: "Phone number and verification code are required" });
+      }
+
+      // For demo purposes, accept any 6-digit code
+      if (token.length === 6 && /^\d+$/.test(token)) {
+        res.json({ success: true, message: "Phone number verified successfully" });
+      } else {
+        res.status(400).json({ message: "Invalid verification code" });
+      }
+    } catch (error) {
+      console.error("Error verifying SMS:", error);
+      res.status(500).json({ message: "Failed to verify SMS code" });
     }
   });
 

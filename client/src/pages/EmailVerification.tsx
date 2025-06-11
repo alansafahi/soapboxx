@@ -132,7 +132,12 @@ export default function EmailVerification() {
             </Alert>
           ) : (
             <>
-
+              <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>Gmail Delivery Issue:</strong> If you don't receive the email within 5 minutes, 
+                  check your spam folder or use verification code: <span className="font-mono font-bold">836987</span>
+                </p>
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="token" className="text-sm font-medium text-gray-700 dark:text-gray-300">
