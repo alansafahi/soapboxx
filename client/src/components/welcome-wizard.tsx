@@ -221,10 +221,20 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     queryKey: ["/api/churches"],
   });
 
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
+
   // Email verification mutations
   const sendVerificationEmail = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/auth/send-verification");
+      if (!user?.email) {
+        throw new Error("User email not found");
+      }
+      return await apiRequest("POST", "/api/auth/send-verification", { 
+        email: user.email 
+      });
     },
     onSuccess: async () => {
       setEmailSent(true);
