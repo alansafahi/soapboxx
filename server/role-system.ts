@@ -371,27 +371,29 @@ export class RoleManager {
     console.log("Initializing roles and permissions...");
     
     try {
-      // Insert permissions first
+      // Use batch operations to avoid connection timeouts
       console.log("Creating permissions...");
-      for (const permDef of PERMISSION_DEFINITIONS) {
-        await db.insert(permissions).values(permDef).onConflictDoNothing();
+      if (PERMISSION_DEFINITIONS.length > 0) {
+        await db.insert(permissions).values(PERMISSION_DEFINITIONS).onConflictDoNothing();
       }
       
-      // Insert roles
+      // Insert roles in batch
       console.log("Creating roles...");
-      for (const roleDef of ROLE_DEFINITIONS) {
-        await db.insert(roles).values({
-          name: roleDef.name,
-          displayName: roleDef.displayName,
-          description: roleDef.description,
-          level: roleDef.level,
-          scope: roleDef.scope,
-          permissions: roleDef.permissions,
-          icon: roleDef.icon,
-          color: roleDef.color,
-          canManageRoles: roleDef.canManageRoles,
-          isActive: true
-        }).onConflictDoNothing();
+      const roleValues = ROLE_DEFINITIONS.map(roleDef => ({
+        name: roleDef.name,
+        displayName: roleDef.displayName,
+        description: roleDef.description,
+        level: roleDef.level,
+        scope: roleDef.scope,
+        permissions: roleDef.permissions,
+        icon: roleDef.icon,
+        color: roleDef.color,
+        canManageRoles: roleDef.canManageRoles,
+        isActive: true
+      }));
+      
+      if (roleValues.length > 0) {
+        await db.insert(roles).values(roleValues).onConflictDoNothing();
       }
       
       console.log("Roles and permissions initialized successfully!");

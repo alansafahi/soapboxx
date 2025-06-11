@@ -113,9 +113,9 @@ export class SMSService {
       // Update user's phone number as verified
       await db.update(users)
         .set({ 
-          // Assuming we add phone number field to users table
-          // phoneNumber: phoneNumber,
-          // phoneVerified: true
+          phoneNumber: phoneNumber,
+          phoneVerified: true,
+          updatedAt: new Date()
         })
         .where(eq(users.id, userId));
 

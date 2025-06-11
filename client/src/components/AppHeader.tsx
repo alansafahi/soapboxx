@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X } from "lucide-react";
+import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
@@ -26,6 +26,7 @@ export default function AppHeader() {
     { href: "/prayer", label: "Prayer Wall", icon: Heart },
     { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/donation-demo", label: "Donations", icon: DollarSign },
+    { href: "/phone-verification", label: "Phone Verification", icon: Smartphone },
     { href: "/admin", label: "Admin Portal", icon: Settings },
     { href: "/role-management", label: "Role Management", icon: Users },
   ];
