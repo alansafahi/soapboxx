@@ -5253,5 +5253,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // SMS Verification API Routes
+  app.post('/api/auth/phone/send-verification', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { phoneNumber } = req.body;
+
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      const { smsService } = await import('./smsService');
+      const result = await smsService.sendPhoneVerification(userId, phoneNumber);
+
+      if (result.success) {
+        res.json({ 
+          message: result.message,
+          verificationId: result.verificationId 
+        });
+      } else {
+        res.status(400).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Error sending phone verification:", error);
+      res.status(500).json({ message: "Failed to send verification code" });
+    }
+  });
+
+  app.post('/api/auth/phone/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { code, phoneNumber } = req.body;
+
+      if (!code || !phoneNumber) {
+        return res.status(400).json({ message: "Code and phone number are required" });
+      }
+
+      const { smsService } = await import('./smsService');
+      const result = await smsService.verifySMSCode(userId, code, phoneNumber);
+
+      if (result.success) {
+        res.json({ message: result.message });
+      } else {
+        res.status(400).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Error verifying phone:", error);
+      res.status(500).json({ message: "Failed to verify phone number" });
+    }
+  });
+
+  // Check if user needs 2FA onboarding (only for role upgrades)
+  app.get('/api/auth/2fa/onboarding-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { roleUpgradeService } = await import('./roleUpgradeService');
+      const onboardingStatus = await roleUpgradeService.needsOnboarding(userId);
+      res.json(onboardingStatus);
+    } catch (error) {
+      console.error("Error checking onboarding status:", error);
+      res.status(500).json({ message: "Failed to check onboarding status" });
+    }
+  });
+
+  // SMS Service configuration status
+  app.get('/api/auth/sms/config', isAuthenticated, async (req: any, res) => {
+    try {
+      const { smsService } = await import('./smsService');
+      const configStatus = smsService.getConfigStatus();
+      res.json(configStatus);
+    } catch (error) {
+      console.error("Error checking SMS config:", error);
+      res.status(500).json({ message: "Failed to check SMS configuration" });
+    }
+  });
+
   return httpServer;
 }

@@ -31,6 +31,7 @@ import ChurchesEnhanced from "@/pages/ChurchesEnhanced";
 import RoleManagement from "@/pages/RoleManagement";
 import DonationDemo from "@/pages/DonationDemo";
 import RoleUpgradeDemo from "@/pages/RoleUpgradeDemo";
+import PhoneVerification from "@/pages/PhoneVerification";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
@@ -131,6 +132,7 @@ function AppRouter() {
               <Route path="/test-features" component={FeatureTestPage} />
               <Route path="/donation-demo" component={DonationDemo} />
               <Route path="/role-upgrade-demo" component={RoleUpgradeDemo} />
+              <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="*" component={NotFound} />
             </>
           )}

@@ -14,7 +14,7 @@ export interface RoleUpgradeNotification {
 }
 
 export class RoleUpgradeService {
-  // Roles that require 2FA
+  // Roles that require enhanced 2FA (TOTP + backup codes)
   private privilegedRoles = [
     'super_admin',
     'lead_pastor', 
@@ -23,6 +23,9 @@ export class RoleUpgradeService {
     'admin',
     'staff'
   ];
+
+  // Regular members only need email verification
+  // If they add mobile number, SMS verification via Twilio is required
 
   // Check if role requires 2FA
   private requiresTwoFactor(role: string): boolean {
