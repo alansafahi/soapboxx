@@ -13,21 +13,21 @@
   --card-foreground: hsl(222, 84%, 4.9%);
   --border: hsl(214, 32%, 91%);
   --input: hsl(214, 32%, 91%);
-  --primary: hsl(260, 65%, 55%);
+  --primary: #5A2671;
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(260, 20%, 95%);
-  --secondary-foreground: hsl(260, 65%, 35%);
-  --accent: hsl(260, 20%, 95%);
-  --accent-foreground: hsl(260, 65%, 35%);
+  --secondary: hsl(283, 50%, 95%);
+  --secondary-foreground: #5A2671;
+  --accent: hsl(283, 30%, 95%);
+  --accent-foreground: #5A2671;
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(260, 65%, 55%);
+  --ring: #5A2671;
   --radius: 0.75rem;
   
   /* SoapBox brand colors */
-  --soapbox-purple: hsl(260, 65%, 55%);
-  --soapbox-purple-light: hsl(260, 50%, 85%);
-  --soapbox-purple-dark: hsl(260, 65%, 35%);
+  --soapbox-purple: #5A2671;
+  --soapbox-purple-light: hsl(283, 50%, 85%);
+  --soapbox-purple-dark: hsl(283, 50%, 25%);
   --soapbox-accent: hsl(43, 74%, 49%);
   --warm-white: hsl(210, 40%, 98%);
 }
@@ -139,5 +139,30 @@
   
   .hover\:bg-faith-blue:hover {
     background-color: var(--faith-blue);
+  }
+  
+  /* SoapBox purple utilities */
+  .bg-soapbox-purple {
+    background-color: var(--soapbox-purple);
+  }
+  
+  .text-soapbox-purple {
+    color: var(--soapbox-purple);
+  }
+  
+  .border-soapbox-purple {
+    border-color: var(--soapbox-purple);
+  }
+  
+  .hover\:bg-soapbox-purple:hover {
+    background-color: var(--soapbox-purple);
+  }
+  
+  .hover\:text-soapbox-purple:hover {
+    color: var(--soapbox-purple);
+  }
+  
+  .gradient-soapbox {
+    background: linear-gradient(to right, #5A2671, #7A3691);
   }
 }

@@ -93,13 +93,13 @@ export default function AppHeader() {
       {/* Desktop Sidebar - Always Visible */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:flex lg:flex-col bg-white border-r border-gray-200 shadow-lg">
         {/* Sidebar Header */}
-        <div className="flex items-center h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+        <div className="flex items-center h-16 px-6 border-b border-gray-200" style={{background: 'linear-gradient(to right, #5A2671, #7A3691)'}}>
           <img 
             src={soapboxLogo} 
             alt="SoapBox Logo" 
             className="h-8 w-8 rounded-full object-cover"
           />
-          <span className="ml-3 font-bold text-lg text-blue-900">SoapBox Super App</span>
+          <span className="ml-3 font-bold text-lg text-white">SoapBox Super App</span>
         </div>
 
         {/* Navigation */}
@@ -111,9 +111,10 @@ export default function AppHeader() {
                 <div
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActiveRoute(item.href)
-                      ? "bg-blue-50 text-blue-700"
+                      ? "text-white"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
+                  style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
                 >
                   <IconComponent className="h-5 w-5" />
                   <span>{item.label}</span>
@@ -190,9 +191,10 @@ export default function AppHeader() {
                 <div
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActiveRoute(item.href)
-                      ? "bg-blue-50 text-blue-700"
+                      ? "text-white"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
+                  style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <IconComponent className="h-5 w-5" />
