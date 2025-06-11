@@ -1,16 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
-import soapboxLogo from "@assets/SoapBx logo_1749625213720.jpeg";
+import soapboxLogo from "@assets/SoapBx logo_1749626952136.jpeg";
 
 // SoapBox Logo Component
 const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: string; showText?: boolean }) => (
   <div className="flex items-center space-x-3">
-    <div className={`${className} bg-black rounded-lg flex items-center justify-center p-1.5`}>
-      <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="currentColor">
-        {/* Megaphone/Speaker Icon */}
-        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-      </svg>
-    </div>
+    <img 
+      src={soapboxLogo} 
+      alt="SoapBox" 
+      className={`${className} rounded-lg object-cover`}
+    />
     {showText && <span className="text-xl font-bold text-gray-900">SoapBox</span>}
   </div>
 );
