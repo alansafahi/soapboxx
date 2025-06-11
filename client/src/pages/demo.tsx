@@ -80,13 +80,23 @@ export default function DemoPage() {
             </ul>
           </div>
 
-          <Button 
-            onClick={setupDemoAuth}
-            className="w-full bg-blue-600 hover:bg-blue-700"
-            disabled={apiStatus !== 'healthy'}
-          >
-            Enter Demo App
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              onClick={() => window.location.href = '/api/login'}
+              className="w-full bg-purple-600 hover:bg-purple-700"
+            >
+              Login with Replit
+            </Button>
+            
+            <Button 
+              onClick={setupDemoAuth}
+              variant="outline"
+              className="w-full"
+              disabled={apiStatus !== 'healthy'}
+            >
+              Enter Demo Mode
+            </Button>
+          </div>
 
           {apiStatus === 'error' && (
             <p className="text-xs text-red-600 text-center">
