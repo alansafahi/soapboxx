@@ -91,8 +91,9 @@ export default function AppHeader() {
       </header>
 
       {/* Desktop Sidebar - Always Visible */}
-      <div className="fixed inset-y-0 left-0 z-[9999] w-64 bg-yellow-400 border-r-2 border-black shadow-lg" style={{display: 'block !important'}}>
-        <div className="p-4 text-center text-black text-xl font-bold">SIDEBAR TEST</div>
+      <div className="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-red-500 border-r-4 border-black shadow-lg"
+           style={{display: 'flex !important', position: 'fixed !important', left: '0px !important', top: '0px !important', height: '100vh !important', width: '256px !important', zIndex: '99999 !important', backgroundColor: 'red !important'}}>
+        <div className="p-4 text-center text-white text-xl font-bold bg-black border-b-4 border-white">🔴 SIDEBAR TEST - VISIBLE? 🔴</div>
         {/* Sidebar Header */}
         <div className="flex items-center h-16 px-6 border-b border-gray-200">
           <img 
