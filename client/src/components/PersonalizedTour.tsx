@@ -139,48 +139,56 @@ const tourConfigs: RoleTourConfig[] = [
   {
     role: "member",
     displayName: "Church Member",
-    welcomeMessage: "Welcome to your church community! Discover how to connect, grow, and contribute to your faith journey.",
+    welcomeMessage: "Welcome to your church community! Here's how to make the most of your SoapBox experience.",
     color: "bg-green-100 text-green-800",
     steps: [
       {
-        id: "community",
-        title: "Connect with Community",
-        description: "Join discussions, share experiences, and build relationships with fellow members.",
-        icon: Users,
-        target: "/community",
-        action: "Join Community"
+        id: "dashboard",
+        title: "Your Dashboard",
+        description: "Track your Bible reading streak, prayer count, and spiritual growth milestones.",
+        icon: BarChart3,
+        target: "/",
+        action: "View Dashboard"
       },
       {
-        id: "events",
-        title: "Church Events",
-        description: "Discover upcoming events, services, and activities you can participate in.",
-        icon: Calendar,
-        target: "/events",
-        action: "Browse Events"
+        id: "community",
+        title: "Community Hub",
+        description: "Join discussions, share testimonies, and connect with fellow believers.",
+        icon: Users,
+        target: "/community",
+        action: "Explore Community"
       },
       {
         id: "prayer",
-        title: "Prayer & Support",
+        title: "Prayer Wall",
         description: "Share prayer requests and support others in their faith journey.",
         icon: Heart,
         target: "/prayer",
-        action: "Join Prayer"
+        action: "Visit Prayer Wall"
       },
       {
         id: "bible",
-        title: "Bible Study",
-        description: "Access daily readings, study plans, and spiritual growth resources.",
+        title: "Bible Reading",
+        description: "Follow reading plans, track progress, and grow in God's Word daily.",
         icon: BookOpen,
         target: "/bible",
         action: "Start Reading"
       },
       {
-        id: "giving",
-        title: "Digital Giving",
-        description: "Support your church and ministries through secure online giving.",
-        icon: Gift,
-        target: "/",
-        action: "Give Securely"
+        id: "events",
+        title: "Church Events",
+        description: "Discover upcoming services, small groups, and ministry opportunities.",
+        icon: Calendar,
+        target: "/events",
+        action: "View Events"
+      },
+      {
+        id: "gamification",
+        title: "Faith Journey",
+        description: "Track achievements, participate in challenges, and see your spiritual growth.",
+        icon: Target,
+        target: "/leaderboard",
+        action: "View Progress"
       }
     ]
   },
