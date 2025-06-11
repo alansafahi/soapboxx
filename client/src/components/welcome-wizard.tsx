@@ -411,16 +411,17 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
 
   const canProceed = () => {
     switch (currentStep) {
-      case 0: return true;
-      case 1: {
+      case 0: return true; // Welcome step
+      case 1: return wizardData.emailVerified === true; // Email verification step
+      case 2: { // Denomination step
         if (wizardData.denomination === "") return false;
         if (wizardData.denomination === "other-specify") {
           return wizardData.denominationCustom !== undefined && wizardData.denominationCustom.trim() !== "";
         }
         return true;
       }
-      case 2: return wizardData.interests.length > 0;
-      case 3: return wizardData.ageGroup !== "" && wizardData.churchSize !== "";
+      case 3: return wizardData.interests.length > 0; // Interests step
+      case 4: return wizardData.ageGroup !== "" && wizardData.churchSize !== ""; // Preferences step
       default: return true;
     }
   };
