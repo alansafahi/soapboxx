@@ -31,7 +31,7 @@ export class EmailService {
     try {
       const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${data.token}`;
       
-      // In development, log the verification token for testing
+      // Always log verification info in development for testing
       if (process.env.NODE_ENV === 'development') {
         console.log(`\n=== EMAIL VERIFICATION DEBUG ===`);
         console.log(`Email: ${data.email}`);
@@ -39,9 +39,15 @@ export class EmailService {
         console.log(`Verification URL: ${verificationUrl}`);
         console.log(`================================\n`);
       }
+
+      // Check if SMTP is properly configured
+      if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.log('SMTP not configured, skipping email send in development');
+        return process.env.NODE_ENV === 'development'; // Return true in dev mode
+      }
       
       const mailOptions = {
-        from: process.env.FROM_EMAIL || 'noreply@soapboxsuperapp.com',
+        from: process.env.SMTP_USER || 'noreply@soapboxsuperapp.com',
         to: data.email,
         subject: 'Verify Your SoapBox Super App Account',
         html: `
@@ -79,10 +85,23 @@ export class EmailService {
         `,
       };
 
-      await this.transporter.sendMail(mailOptions);
+      // First verify SMTP connection
+      await this.transporter.verify();
+      
+      // Send the email
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('Email sent successfully:', result.messageId);
       return true;
+      
     } catch (error) {
-      console.error('Failed to send verification email:', error);
+      console.error('Failed to send verification email:', error.message);
+      
+      // In development, still return true since we log the token
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Email delivery failed but token is logged above for testing');
+        return true;
+      }
+      
       return false;
     }
   }
