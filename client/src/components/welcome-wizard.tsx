@@ -530,6 +530,122 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div className="text-center">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="w-16 h-16 mx-auto bg-[#5A2671] rounded-full flex items-center justify-center mb-4"
+                      >
+                        <Mail className="h-8 w-8 text-white" />
+                      </motion.div>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
+                      <p className="text-gray-600">
+                        To ensure secure access to SoapBox features, please verify your email address.
+                      </p>
+                    </div>
+
+                    {!emailSent ? (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start space-x-3">
+                            <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                            <div className="text-sm text-blue-800">
+                              <p className="font-medium mb-1">Why verify your email?</p>
+                              <ul className="space-y-1 text-xs">
+                                <li>• Secure account recovery</li>
+                                <li>• Important church notifications</li>
+                                <li>• Prayer request updates</li>
+                                <li>• Event reminders</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          onClick={() => sendVerificationEmail.mutate()}
+                          disabled={sendVerificationEmail.isPending}
+                          className="w-full bg-[#5A2671] hover:bg-[#4A1F5A] text-white py-3"
+                        >
+                          {sendVerificationEmail.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Sending Verification Email...
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="mr-2 h-4 w-4" />
+                              Send Verification Email
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-center space-x-3">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <div className="text-sm text-green-800">
+                              <p className="font-medium">Verification email sent!</p>
+                              <p>Check your inbox and enter the verification code below.</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label htmlFor="verification-token" className="text-sm font-medium">
+                            Verification Code
+                          </Label>
+                          <Input
+                            id="verification-token"
+                            type="text"
+                            placeholder="Enter 6-digit code"
+                            value={emailVerificationToken}
+                            onChange={(e) => setEmailVerificationToken(e.target.value)}
+                            className="text-center text-lg tracking-widest"
+                            maxLength={6}
+                          />
+                        </div>
+
+                        <div className="flex space-x-3">
+                          <Button
+                            onClick={() => verifyEmail.mutate(emailVerificationToken)}
+                            disabled={!emailVerificationToken || emailVerificationToken.length !== 6 || verifyEmail.isPending}
+                            className="flex-1 bg-[#5A2671] hover:bg-[#4A1F5A] text-white"
+                          >
+                            {verifyEmail.isPending ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Verifying...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Verify Email
+                              </>
+                            )}
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            onClick={() => sendVerificationEmail.mutate()}
+                            disabled={sendVerificationEmail.isPending}
+                            className="border-[#5A2671] text-[#5A2671] hover:bg-[#5A2671] hover:text-white"
+                          >
+                            {sendVerificationEmail.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Resend"
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {currentStep === 2 && (
+                  <div className="space-y-6">
+                    <div className="text-center">
                       <h2 className="text-2xl font-bold mb-2">What's Your Denomination?</h2>
                       <p className="text-gray-600">Choose the tradition that resonates with you</p>
                     </div>
@@ -657,7 +773,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                   </div>
                 )}
 
-                {currentStep === 2 && (
+                {currentStep === 3 && (
                   <div className="space-y-6">
                     <div className="text-center">
                       <h2 className="text-2xl font-bold mb-2">What Ministry Areas Interest You?</h2>
@@ -800,7 +916,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                   </div>
                 )}
 
-                {currentStep === 4 && (
+                {currentStep === 5 && (
                   <div className="space-y-6">
                     <div className="text-center">
                       <h2 className="text-2xl font-bold mb-2">Find Your Church Community</h2>
