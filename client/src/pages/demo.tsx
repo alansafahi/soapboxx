@@ -36,7 +36,7 @@ export default function DemoPage() {
       setDemoUser(demoUserData);
       
       // Redirect to main app
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     } catch (error) {
       console.error('Demo setup failed:', error);
     }

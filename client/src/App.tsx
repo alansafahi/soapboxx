@@ -75,10 +75,7 @@ function AppRouter() {
           {!isAuthenticated ? (
             <>
               <Route path="/demo" component={DemoPage} />
-              <Route path="*" component={() => {
-                window.location.href = '/api/login';
-                return <div>Redirecting to login...</div>;
-              }} />
+              <Route path="*" component={DemoPage} />
             </>
           ) : (
             <>
