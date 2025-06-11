@@ -160,12 +160,12 @@ const ageGroups = [
 ];
 
 const churchSizes = [
-  { id: "house", label: "🏠 House/Micro Church (1-50)", description: "Close-knit, often home-based" },
-  { id: "small", label: "⛪ Small Church (51-200)", description: "Intimate community feel" },
-  { id: "medium", label: "🏛️ Medium Church (201-500)", description: "Balanced programs & groups" },
-  { id: "large", label: "🏢 Large Church (501-1,999)", description: "Expanded ministries" },
-  { id: "mega", label: "🏟️ Mega Church (2,000-9,999)", description: "Large scale, multi-service" },
-  { id: "multisite", label: "🌐 Multisite Network (10,000+)", description: "Multi-campus, global reach" }
+  { id: "house", label: "House/Micro Church (1-50)", description: "Close-knit, often home-based" },
+  { id: "small", label: "Small Church (51-200)", description: "Intimate community feel" },
+  { id: "medium", label: "Medium Church (201-500)", description: "Balanced programs & groups" },
+  { id: "large", label: "Large Church (501-1,999)", description: "Expanded ministries" },
+  { id: "mega", label: "Mega Church (2,000-9,999)", description: "Large scale, multi-service" },
+  { id: "multisite", label: "Multisite Network (10,000+)", description: "Multi-campus, global reach" }
 ];
 
 const musicStyles = [

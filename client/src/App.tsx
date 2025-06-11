@@ -151,10 +151,18 @@ function AppRouter() {
       
       {needsOnboarding && (
         <WelcomeWizard 
-          onComplete={() => {
-            // Force hide onboarding and refresh user data
+          onComplete={async () => {
+            // Force hide onboarding immediately
             setForceHideOnboarding(true);
-            queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+            
+            // Refresh user data and wait for it to complete
+            await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+            await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+            
+            // Small delay to ensure UI updates
+            setTimeout(() => {
+              console.log("Onboarding completed, showing main app");
+            }, 100);
           }} 
         />
       )}
