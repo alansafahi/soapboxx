@@ -31,7 +31,11 @@ import {
   X,
   HelpCircle,
   Calendar,
-  Info
+  Info,
+  Mail,
+  CheckCircle,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -49,6 +53,7 @@ interface WizardData {
   churchSize: string;
   musicStyle: string;
   meetingStyle: string;
+  emailVerified?: boolean;
 }
 
 const denominations = [
@@ -198,11 +203,14 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [churchSearchQuery, setChurchSearchQuery] = useState("");
   const [joiningChurchId, setJoiningChurchId] = useState<number | null>(null);
+  const [emailVerificationToken, setEmailVerificationToken] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const steps = [
     "Welcome",
+    "Email Verification",
     "Denomination",
     "Interests",
     "Preferences",
@@ -211,6 +219,48 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
 
   const { data: churches } = useQuery({
     queryKey: ["/api/churches"],
+  });
+
+  // Email verification mutations
+  const sendVerificationEmail = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("/api/auth/send-verification", "POST");
+    },
+    onSuccess: () => {
+      setEmailSent(true);
+      toast({
+        title: "Verification Email Sent",
+        description: "Check your inbox for the verification email.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Send",
+        description: error.message || "Failed to send verification email",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const verifyEmail = useMutation({
+    mutationFn: async (token: string) => {
+      return await apiRequest("/api/auth/verify-email", "POST", { token });
+    },
+    onSuccess: () => {
+      setWizardData(prev => ({ ...prev, emailVerified: true }));
+      toast({
+        title: "Email Verified",
+        description: "Your email has been verified successfully!",
+      });
+      setCurrentStep(2); // Move to denomination step
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Invalid verification token",
+        variant: "destructive",
+      });
+    }
   });
 
   const generateRecommendations = useMutation({
