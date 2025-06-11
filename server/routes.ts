@@ -4109,9 +4109,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe Payment Integration
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
+      console.log("Payment intent request:", req.body);
       const { amount, currency = 'usd', metadata = {} } = req.body;
 
-      if (!amount || amount < 50) { // Minimum $0.50
+      if (!amount || amount < 0.5) { // Minimum $0.50
         return res.status(400).json({ 
           error: "Invalid amount. Minimum donation is $0.50" 
         });
