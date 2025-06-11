@@ -40,6 +40,255 @@ interface InteractiveTourConfig {
 
 const tourConfigs: InteractiveTourConfig[] = [
   {
+    role: "soapbox_owner",
+    displayName: "SoapBox Owner",
+    welcomeMessage: "Welcome to your platform governance center. You have ultimate authority over all policies, security, and platform operations.",
+    color: "bg-purple-100 text-purple-800 border-purple-200",
+    steps: [
+      {
+        id: "platform_overview",
+        title: "Platform Governance Dashboard",
+        description: "Your command center for global platform oversight",
+        page: "/admin/dashboard",
+        position: "center",
+        content: "As SoapBox Owner, you control all platform policies, user roles, security governance, and audits. This dashboard provides real-time insights into platform health, user engagement, and system performance across all churches.",
+        tips: [
+          "Monitor global user growth and church engagement",
+          "Review security audit logs and compliance reports",
+          "Manage feature flags and platform-wide settings",
+          "Override any restrictions across the entire system"
+        ],
+        nextAction: "Let's explore user and role management capabilities"
+      },
+      {
+        id: "user_management",
+        title: "Global User & Role Management",
+        description: "Complete authority over all platform users and roles",
+        page: "/admin/users",
+        position: "center",
+        content: "Control every aspect of user management across all churches. Create custom roles, assign System Admins, manage Support Agents, and oversee all church administrators from this central hub.",
+        tips: [
+          "Grant or revoke System Admin and Support Agent roles",
+          "Create custom platform-wide roles with specific permissions",
+          "View comprehensive user activity and audit trails",
+          "Manage multi-church administrators and regional oversight"
+        ],
+        nextAction: "Next we'll review global analytics and reporting"
+      },
+      {
+        id: "analytics",
+        title: "Global Analytics & Financial Oversight",
+        description: "Platform-wide metrics and financial authority",
+        page: "/admin/analytics",
+        position: "center",
+        content: "Access comprehensive analytics spanning all churches, users, and financial transactions. Export data for business intelligence, monitor revenue streams, and track platform growth metrics.",
+        tips: [
+          "View cross-church analytics and engagement patterns",
+          "Monitor all financial transactions and donation flows",
+          "Export data for offline analysis and reporting",
+          "Track feature usage and subscription tier performance"
+        ],
+        nextAction: "Let's explore security and compliance features"
+      },
+      {
+        id: "security",
+        title: "Security & Compliance Center",
+        description: "Platform security governance and audit controls",
+        page: "/admin/security",
+        position: "center",
+        content: "Enforce security policies, review audit logs, and manage compliance requirements across the entire platform. Configure global security settings and monitor potential threats.",
+        tips: [
+          "Set platform-wide security policies and requirements",
+          "Review comprehensive audit trails for all admin actions",
+          "Manage GDPR/CCPA compliance and data protection",
+          "Configure content moderation and abuse prevention"
+        ],
+        nextAction: "Finally, let's review system configuration options"
+      },
+      {
+        id: "system_config",
+        title: "System Configuration & Infrastructure",
+        description: "Core platform settings and infrastructure management",
+        page: "/admin/system",
+        position: "center",
+        content: "Configure global feature flags, manage API integrations, control system-wide settings, and coordinate with development teams on platform updates and maintenance.",
+        tips: [
+          "Enable/disable features across all churches",
+          "Manage API keys and third-party integrations",
+          "Control mobile app versions and feature rollouts",
+          "Send platform-wide notifications and announcements"
+        ],
+        nextAction: "You now have complete platform governance capabilities"
+      }
+    ]
+  },
+  {
+    role: "system_admin",
+    displayName: "System Admin",
+    welcomeMessage: "Access your comprehensive system administration tools for managing all churches, users, and platform operations.",
+    color: "bg-red-100 text-red-800 border-red-200",
+    steps: [
+      {
+        id: "admin_dashboard",
+        title: "System Administration Hub",
+        description: "Central control for platform-wide administration",
+        page: "/admin/dashboard",
+        position: "center",
+        content: "Your system administration dashboard provides full oversight of all churches, users, billing, and platform operations. Monitor system health, manage support tickets, and ensure smooth operations across the entire platform.",
+        tips: [
+          "View all churches and their activity status",
+          "Monitor user engagement and growth metrics",
+          "Access comprehensive billing and subscription data",
+          "Review system health and performance indicators"
+        ],
+        nextAction: "Let's explore church and user management tools"
+      },
+      {
+        id: "church_management",
+        title: "Church & User Administration",
+        description: "Comprehensive management of all platform entities",
+        page: "/admin/churches",
+        position: "center",
+        content: "Manage all churches on the platform including creation, suspension, and deletion. Assign Church Admins, manage user roles, and ensure compliance with platform policies.",
+        tips: [
+          "Create, suspend, or archive church instances",
+          "Promote/demote Super Admins and Church Admins",
+          "Verify new churches and denominations",
+          "Impersonate users for support purposes with full audit logging"
+        ],
+        nextAction: "Now let's review moderation and security tools"
+      },
+      {
+        id: "moderation",
+        title: "Content Moderation & Security",
+        description: "Platform-wide content and security oversight",
+        page: "/admin/moderation",
+        position: "center",
+        content: "Monitor and moderate content across all churches. Handle abuse reports, enforce community guidelines, and maintain platform security through comprehensive monitoring tools.",
+        tips: [
+          "Review flagged content and abuse reports",
+          "Configure global content moderation policies",
+          "Access audit logs for all administrative actions",
+          "Manage security settings and user restrictions"
+        ],
+        nextAction: "Let's examine billing and financial oversight capabilities"
+      },
+      {
+        id: "billing",
+        title: "Billing & Financial Management",
+        description: "Platform-wide financial oversight and management",
+        page: "/admin/billing",
+        position: "center",
+        content: "Oversee all financial transactions, manage subscription tiers, handle billing disputes, and monitor revenue across the platform. Full access to Stripe Connect and payment processing.",
+        tips: [
+          "View all transaction flows and payment processing",
+          "Adjust pricing tiers and subscription plans",
+          "Issue refunds, credits, and billing overrides",
+          "Monitor church financial activity and donation flows"
+        ],
+        nextAction: "Finally, let's explore support and ticket management"
+      },
+      {
+        id: "support",
+        title: "Support & Ticket Management",
+        description: "Platform-wide support operations and user assistance",
+        page: "/admin/support",
+        position: "center",
+        content: "Manage support tickets across all churches, assist users with technical issues, and coordinate with Support Agents. Access tools for user impersonation and issue resolution.",
+        tips: [
+          "View and manage all platform support tickets",
+          "Escalate complex issues to development teams",
+          "Send platform-wide system notifications",
+          "Access developer tools and staging environments"
+        ],
+        nextAction: "You now have full system administration capabilities"
+      }
+    ]
+  },
+  {
+    role: "support_agent",
+    displayName: "Support Agent",
+    welcomeMessage: "Welcome to your support center! Help users across the platform with assistance, troubleshooting, and issue resolution.",
+    color: "bg-green-100 text-green-800 border-green-200",
+    steps: [
+      {
+        id: "support_dashboard",
+        title: "Support Agent Dashboard",
+        description: "Your central hub for user assistance and issue management",
+        page: "/support/dashboard",
+        position: "center",
+        content: "Monitor support tickets, live chat requests, and user issues across all churches. Prioritize urgent matters and track your response times and resolution metrics.",
+        tips: [
+          "View incoming support tickets and live chat requests",
+          "Categorize issues by type and urgency level",
+          "Track response times and customer satisfaction",
+          "Access user account information securely"
+        ],
+        nextAction: "Let's explore user assistance and troubleshooting tools"
+      },
+      {
+        id: "user_assistance",
+        title: "User Assistance & Account Management",
+        description: "Help users with account issues and platform navigation",
+        page: "/support/users",
+        position: "center",
+        content: "Assist users with password resets, account verification, church affiliation changes, and general platform guidance. Access tools for account management and user support.",
+        tips: [
+          "Securely impersonate users to reproduce issues",
+          "Help with password resets and login problems",
+          "Assist with church affiliation and role changes",
+          "Guide users through onboarding and feature adoption"
+        ],
+        nextAction: "Now let's look at community moderation tools"
+      },
+      {
+        id: "moderation",
+        title: "Community Moderation",
+        description: "Monitor and moderate community content and interactions",
+        page: "/support/moderation",
+        position: "center",
+        content: "Review prayer wall posts, forum discussions, and community interactions. Flag inappropriate content, respond to spiritual support requests, and escalate pastoral care needs.",
+        tips: [
+          "Monitor prayer wall and community posts for guidelines violations",
+          "Provide compassionate responses to spiritual support requests",
+          "Flag and escalate abusive or inappropriate content",
+          "Forward spiritual care needs to appropriate church leaders"
+        ],
+        nextAction: "Let's examine billing and subscription support capabilities"
+      },
+      {
+        id: "billing_support",
+        title: "Billing & Subscription Support",
+        description: "Assist users with payment and subscription issues",
+        page: "/support/billing",
+        position: "center",
+        content: "Help resolve payment failures, subscription changes, and billing inquiries. Apply promotional codes, adjust plans, and coordinate with finance teams for refunds.",
+        tips: [
+          "Resolve credit card failures and payment issues",
+          "Apply promotional codes and upgrade user plans",
+          "Explain subscription benefits and feature access",
+          "Coordinate refunds and charge dispute resolution"
+        ],
+        nextAction: "Finally, let's review knowledge management and feedback collection"
+      },
+      {
+        id: "knowledge",
+        title: "Knowledge Base & Feedback Collection",
+        description: "Maintain help resources and gather user insights",
+        page: "/support/knowledge",
+        position: "center",
+        content: "Update help center articles, document common issues, and collect user feedback for product improvements. Track frequently requested features and pain points.",
+        tips: [
+          "Update help center articles when features change",
+          "Document solutions for recurring technical problems",
+          "Collect and categorize user feedback and feature requests",
+          "Generate reports on support trends and user needs"
+        ],
+        nextAction: "You're ready to provide excellent platform-wide support!"
+      }
+    ]
+  },
+  {
     role: "member",
     displayName: "Church Member",
     welcomeMessage: "Let's explore how to connect, grow, and engage in your faith journey!",

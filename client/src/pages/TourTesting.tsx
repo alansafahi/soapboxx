@@ -4,9 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import PersonalizedTour from "@/components/PersonalizedTour";
 import InteractiveTour from "@/components/InteractiveTour";
-import { Users, Church, Heart, Settings, UserCheck } from "lucide-react";
+import { Users, Church, Heart, Settings, UserCheck, ShieldCheck, Settings2, Headphones } from "lucide-react";
 
 const roleOptions = [
+  {
+    id: "soapbox_owner",
+    name: "SoapBox Owner",
+    description: "Ultimate platform authority with governance over all policies and security",
+    icon: ShieldCheck,
+    color: "bg-purple-100 text-purple-800"
+  },
+  {
+    id: "system_admin",
+    name: "System Admin", 
+    description: "Full platform access across all churches, users, logs and billing",
+    icon: Settings2,
+    color: "bg-red-100 text-red-800"
+  },
+  {
+    id: "support_agent",
+    name: "Support Agent",
+    description: "Platform-wide support for user assistance and troubleshooting",
+    icon: Headphones,
+    color: "bg-green-100 text-green-800"
+  },
   {
     id: "church_owner",
     name: "Church Owner",

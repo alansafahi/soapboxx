@@ -1,0 +1,103 @@
+SoapBox Owner — Master Role Responsibilities
+Role Level: Tier 0 — Highest system authority
+Scope: Full governance over all data, users, admins, churches, configurations, and infrastructure integrations
+
+🔐 1. Full System Access & Permissions Management
+Grant, revoke, or edit permissions for System Admins, Church Super Admins, and Support Agents
+
+Create, archive, or merge global roles (e.g., new partner tiers, special access levels)
+
+Override any lower-level restrictions (e.g., locked accounts, regional settings)
+
+View audit trails and access logs for all admin activities across the platform
+
+🛠 2. Platform Configuration & Infrastructure Oversight
+Configure global feature flags (enable/disable new features platform-wide or per-region)
+
+Update core system settings: API keys, webhooks, database settings, 3rd party integrations (e.g., Supabase, Stripe, Twilio)
+
+Manage mobile app versions (force updates, rollout beta features)
+
+Coordinate with dev team on deployment schedules and incident response plans
+
+📊 3. Global Analytics & Reporting
+View high-level dashboards: user growth, church participation, active sessions, conversion funnels, revenue, prayer wall activity
+
+Export raw analytics for offline processing or BI tools (e.g., CSV, JSON API)
+
+Drill into reports by region, church, role, date range, campaign, etc.
+
+🏛 4. Global Church Management
+View, create, edit, or deactivate any church profile
+
+Assign or replace Church Super Admins across all churches
+
+Merge duplicate churches, correct metadata (e.g., name, location, denomination)
+
+View church activity logs, event participation, engagement heatmaps
+
+🧩 5. Marketplace / Feature Tier Management
+Define global subscription tiers, limits, and access rules (e.g., Premium Churches get livestream and donations)
+
+Add or remove premium features from user or church accounts
+
+View revenue by tier, usage of tier-specific features, and payment success/failure rates
+
+🧾 6. Finance & Billing Authority
+View and export all financial transactions across all churches and users
+
+Manage payout schedules, payment gateways (e.g., Stripe), and tax settings
+
+Adjust user or church credits, apply discounts, or override billing disputes
+
+Trigger bulk plan changes or refund workflows
+
+📬 7. Communications & Branding
+Push platform-wide notifications, announcements, or alerts to all users or admins
+
+Edit global default branding, platform theme, tone, and onboarding copy
+
+Manage templated email communications (e.g., new account welcome, alert emails)
+
+🧠 8. AI & Automation Oversight
+Configure and review system-wide automation rules (e.g., support triage, content moderation, gamification)
+
+Review AI-generated content, summaries, or moderation logs for quality control
+
+Set global policy on AI behavior (ethics, personalization, escalation limits)
+
+🕵️ 9. Security & Compliance Management
+Enforce MFA, password policy, and encryption standards platform-wide
+
+Review security logs, intrusion attempts, and server health
+
+Approve DPA/GDPR/CCPA compliance features and audit processes
+
+Configure IP blacklists, content filtering, abuse throttling, and spam detection logic
+
+🧪 10. Developer & Partner Integrations
+Approve and manage API keys for external developers and integration partners
+
+View logs of API usage, rate limits, and errors
+
+Manage webhook subscriptions and trusted partner connections
+
+Activate sandbox/test environments for churches or external tools
+
+🧰 Tooling & Features Required for SoapBox Owner Dashboard
+Role Manager UI for granting/revoking access to all other roles
+
+Audit Log Viewer for every role, action, and user
+
+Global Settings Panel (feature flags, branding, keys, tier toggles)
+
+Church & User Explorer with full read/write access
+
+Financial Hub for revenue, subscriptions, refunds, and payouts
+
+System Health & Security Monitor with alerts + logs
+
+Global Notification Composer (with preview, send, schedule)
+
+DevOps Hooks Interface (for managing API/webhook integration endpoints)
+

@@ -1,0 +1,96 @@
+ SoapBox Support Agent — Detailed Role Responsibilities
+📞 1. User Issue Triage & Support
+Monitor support inbox, live chat, and support ticket queue (Zendesk/Freshdesk/etc.)
+
+Categorize tickets by type: technical issue, billing, feature request, user error, spam
+
+Respond to incoming user issues within 1–2 hours during business hours
+
+Escalate complex issues to dev, admin, or church partners as needed
+
+Resolve common issues (e.g. password resets, login failures, profile bugs)
+
+🔎 2. Technical Troubleshooting
+Use internal tools to impersonate user sessions securely (with audit logging)
+
+Reproduce bugs across iOS, Android, and Web clients
+
+Collect logs and relevant metadata from affected sessions
+
+Report reproducible bugs into internal bug tracker (Jira/Linear)
+
+💬 3. Community & Prayer Wall Moderation
+Monitor prayer wall posts and forum content for inappropriate or abusive language
+
+Flag, mute, or ban accounts that violate community guidelines
+
+Provide kind, human responses to spiritual or pastoral support requests when appropriate
+
+Forward escalated spiritual care needs to Church Super Admin or assigned pastor
+
+🛠 4. Account Management
+Manually verify, deactivate, or restore user accounts as needed
+
+Assist with merging duplicate accounts
+
+Help users update church affiliation, role, or contact info
+
+Provide assistance during onboarding flow (e.g., selecting a church, role, or ministry)
+
+💳 5. Billing & Subscription Support
+Resolve failed payment issues (credit card expired, insufficient funds, etc.)
+
+Adjust plans manually for churches or users (e.g. apply promo codes, upgrade tiers)
+
+Explain plan benefits to confused users
+
+Coordinate with finance team for refunds or charge disputes
+
+📚 6. Knowledge Base & Help Center Maintenance
+Update Help Center articles when features or processes change
+
+Write internal troubleshooting guides for common problems
+
+Recommend FAQ and in-app tip improvements based on repeated tickets
+
+🔁 7. Feedback Collection & Reporting
+Tag and categorize feedback received through support
+
+Summarize frequent feature requests or complaints in weekly support digest
+
+Participate in internal user research debriefs and advocate for user pain points
+
+📊 8. Analytics & Metrics
+Track response times, satisfaction scores, and resolution times
+
+Provide weekly reports on support volume, ticket categories, and trends
+
+Recommend automation or AI improvements to reduce response load
+
+🧠 Internal Tools Needed for Support Agent Success
+To assist the dev team (e.g. Replit) in building this out:
+
+🧰 Admin Tools Required
+Secure user impersonation tool (readonly + actionable)
+
+Ticket tagging and note system (linked to user ID)
+
+Content moderation dashboard (flagged prayer/forum posts)
+
+Subscription and billing dashboard with Stripe or internal integration
+
+Notification system for flagged issues or abuse reports
+
+Church directory search with role-based controls (edit church data, contact church admins)
+
+🧪 Automations to Build
+Smart triage: auto-tagging new tickets by category/urgency
+
+Email parser for password reset / login issue templates
+
+Rule-based escalation (e.g., if user is a paying church admin → flag for priority support)
+
+Daily digest email with ticket stats, critical bugs, and flagged abuse cases
+
+In-app feedback funnel routing (e.g., “Request a feature” goes to product, not support)
+
