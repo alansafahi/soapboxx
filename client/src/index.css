@@ -13,21 +13,21 @@
   --card-foreground: hsl(222, 84%, 4.9%);
   --border: hsl(214, 32%, 91%);
   --input: hsl(214, 32%, 91%);
-  --primary: hsl(174, 70%, 41%);
+  --primary: hsl(260, 65%, 55%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(174, 20%, 95%);
-  --secondary-foreground: hsl(174, 70%, 25%);
-  --accent: hsl(174, 20%, 95%);
-  --accent-foreground: hsl(174, 70%, 25%);
+  --secondary: hsl(260, 20%, 95%);
+  --secondary-foreground: hsl(260, 65%, 35%);
+  --accent: hsl(260, 20%, 95%);
+  --accent-foreground: hsl(260, 65%, 35%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(174, 70%, 41%);
+  --ring: hsl(260, 65%, 55%);
   --radius: 0.75rem;
   
   /* SoapBox brand colors */
-  --soapbox-teal: hsl(174, 70%, 41%);
-  --soapbox-teal-light: hsl(174, 50%, 85%);
-  --soapbox-teal-dark: hsl(174, 70%, 25%);
+  --soapbox-purple: hsl(260, 65%, 55%);
+  --soapbox-purple-light: hsl(260, 50%, 85%);
+  --soapbox-purple-dark: hsl(260, 65%, 35%);
   --soapbox-accent: hsl(43, 74%, 49%);
   --warm-white: hsl(210, 40%, 98%);
 }
