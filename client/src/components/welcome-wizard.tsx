@@ -226,6 +226,12 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     retry: false,
   });
 
+  // Check email verification status on mount
+  const { data: emailStatus } = useQuery({
+    queryKey: ['/api/auth/email-verification-status'],
+    enabled: !!user,
+  });
+
   // Email verification mutations
   const sendVerificationEmail = useMutation({
     mutationFn: async () => {
@@ -262,11 +268,20 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       }
     },
     onError: (error: any) => {
-      toast({
-        title: "Failed to Send",
-        description: error.message || "Failed to send verification email",
-        variant: "destructive",
-      });
+      if (error.message === "Email is already verified") {
+        setWizardData(prev => ({ ...prev, emailVerified: true }));
+        toast({
+          title: "Email Already Verified",
+          description: "Your email is already verified. Proceeding to next step.",
+        });
+        setCurrentStep(2); // Move to denomination step
+      } else {
+        toast({
+          title: "Failed to Send",
+          description: error.message || "Failed to send verification email",
+          variant: "destructive",
+        });
+      }
     }
   });
 
@@ -453,6 +468,13 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       default: return true;
     }
   };
+
+  // Auto-advance when email is verified
+  useEffect(() => {
+    if (currentStep === 1 && wizardData.emailVerified) {
+      setTimeout(() => setCurrentStep(2), 500); // Small delay for UX
+    }
+  }, [currentStep, wizardData.emailVerified]);
 
   // Add escape key handler
   useEffect(() => {

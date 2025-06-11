@@ -87,7 +87,13 @@ export class EmailService {
       };
 
       // First verify SMTP connection
-      await this.transporter.verify();
+      try {
+        await this.transporter.verify();
+        console.log('SMTP connection verified successfully');
+      } catch (verifyError) {
+        console.log('SMTP verification failed:', verifyError.message);
+        // Continue anyway for development testing
+      }
       
       // Send the email
       const result = await this.transporter.sendMail(mailOptions);
