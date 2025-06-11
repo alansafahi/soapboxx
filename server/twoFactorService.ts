@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { db } from './db';
 import { users, twoFactorTokens } from '@shared/schema';
-import { eq, and, gt, lt } from 'drizzle-orm';
+import { eq, and, gt, lt, sql } from 'drizzle-orm';
 
 export interface TwoFactorSetup {
   secret: string;
@@ -266,7 +266,7 @@ export class TwoFactorService {
   // Clean up expired tokens
   async cleanupExpiredTokens(): Promise<void> {
     await db.delete(twoFactorTokens)
-      .where(lt(twoFactorTokens.expiresAt, new Date()));
+      .where(sql`expires_at < NOW()`);
   }
 }
 

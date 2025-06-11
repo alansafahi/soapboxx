@@ -134,6 +134,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 2FA Routes
+  // Setup TOTP (Time-based One-Time Password)
+  app.post('/api/auth/2fa/setup/totp', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.email) {
+        return res.status(400).json({ message: "User email required" });
+      }
+
+      const setup = await twoFactorService.setupTOTP(userId, user.email);
+      res.json(setup);
+    } catch (error) {
+      console.error("Error setting up TOTP:", error);
+      res.status(500).json({ message: "Failed to setup 2FA" });
+    }
+  });
+
+  // Verify TOTP setup
+  app.post('/api/auth/2fa/verify/totp', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ message: "Token required" });
+      }
+
+      const verification = await twoFactorService.verifyTOTP(userId, token);
+      
+      if (verification.isValid) {
+        await twoFactorService.enable2FA(userId, 'totp');
+        res.json({ success: true, message: "2FA enabled successfully" });
+      } else {
+        res.status(400).json({ success: false, message: verification.error || "Invalid token" });
+      }
+    } catch (error) {
+      console.error("Error verifying TOTP:", error);
+      res.status(500).json({ message: "Failed to verify 2FA" });
+    }
+  });
+
+  // Send email verification code
+  app.post('/api/auth/2fa/send-email', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.email) {
+        return res.status(400).json({ message: "User email required" });
+      }
+
+      await twoFactorService.sendEmailToken(userId, user.email);
+      res.json({ success: true, message: "Verification code sent to email" });
+    } catch (error) {
+      console.error("Error sending email token:", error);
+      res.status(500).json({ message: "Failed to send verification code" });
+    }
+  });
+
+  // Verify email token
+  app.post('/api/auth/2fa/verify/email', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ message: "Token required" });
+      }
+
+      const verification = await twoFactorService.verifyEmailToken(userId, token);
+      
+      if (verification.isValid) {
+        await twoFactorService.enable2FA(userId, 'email');
+        res.json({ success: true, message: "Email 2FA enabled successfully" });
+      } else {
+        res.status(400).json({ success: false, message: verification.error || "Invalid or expired token" });
+      }
+    } catch (error) {
+      console.error("Error verifying email token:", error);
+      res.status(500).json({ message: "Failed to verify email token" });
+    }
+  });
+
+  // Verify backup code
+  app.post('/api/auth/2fa/verify/backup', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { code } = req.body;
+
+      if (!code) {
+        return res.status(400).json({ message: "Backup code required" });
+      }
+
+      const verification = await twoFactorService.verifyBackupCode(userId, code);
+      
+      if (verification.isValid) {
+        res.json({ success: true, message: "Backup code verified" });
+      } else {
+        res.status(400).json({ success: false, message: verification.error || "Invalid backup code" });
+      }
+    } catch (error) {
+      console.error("Error verifying backup code:", error);
+      res.status(500).json({ message: "Failed to verify backup code" });
+    }
+  });
+
+  // Get 2FA status
+  app.get('/api/auth/2fa/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const isEnabled = await twoFactorService.is2FAEnabled(userId);
+      const method = await twoFactorService.get2FAMethod(userId);
+      
+      res.json({ 
+        enabled: isEnabled, 
+        method: method,
+        availableMethods: ['totp', 'email']
+      });
+    } catch (error) {
+      console.error("Error getting 2FA status:", error);
+      res.status(500).json({ message: "Failed to get 2FA status" });
+    }
+  });
+
+  // Disable 2FA
+  app.post('/api/auth/2fa/disable', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { token, method } = req.body;
+
+      if (!token || !method) {
+        return res.status(400).json({ message: "Token and method required" });
+      }
+
+      let verification;
+      if (method === 'totp') {
+        verification = await twoFactorService.verifyTOTP(userId, token);
+      } else if (method === 'email') {
+        verification = await twoFactorService.verifyEmailToken(userId, token);
+      } else {
+        return res.status(400).json({ message: "Invalid method" });
+      }
+
+      if (verification.isValid) {
+        await twoFactorService.disable2FA(userId);
+        res.json({ success: true, message: "2FA disabled successfully" });
+      } else {
+        res.status(400).json({ success: false, message: verification.error || "Invalid token" });
+      }
+    } catch (error) {
+      console.error("Error disabling 2FA:", error);
+      res.status(500).json({ message: "Failed to disable 2FA" });
+    }
+  });
+
   // Test endpoint to verify app functionality without authentication
   app.get('/api/test', async (req, res) => {
     res.json({ 

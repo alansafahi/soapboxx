@@ -23,6 +23,7 @@ import BiblePage from "@/pages/bible";
 import BibleReader from "@/pages/BibleReader";
 import FeatureTestPage from "@/pages/feature-test";
 import SettingsPage from "@/pages/settings";
+import SecuritySettings from "@/pages/SecuritySettings";
 import PrayerWallPreview from "@/pages/PrayerWallPreview";
 import ChurchManagementDemo from "@/pages/ChurchManagementDemo";
 import EnhancedChurchesDemo from "@/pages/EnhancedChurchesDemo";
@@ -104,6 +105,7 @@ function AppRouter() {
               <Route path="/role-management" component={RoleManagement} />
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
+              <Route path="/security" component={SecuritySettings} />
               <Route path="/test-features" component={FeatureTestPage} />
               <Route path="/donation-demo" component={DonationDemo} />
               <Route path="*" component={NotFound} />
