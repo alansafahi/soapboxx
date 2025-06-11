@@ -36,7 +36,7 @@ export function ReferralWelcome({ referralCode }: ReferralWelcomeProps) {
     onSuccess: (data) => {
       setHasProcessedReferral(true);
       toast({
-        title: "Welcome to SoapBox! 🎉",
+        title: "Welcome to SoapBox Super App! 🎉",
         description: data.message,
         duration: 5000,
       });
@@ -44,7 +44,7 @@ export function ReferralWelcome({ referralCode }: ReferralWelcomeProps) {
     onError: (error) => {
       console.error('Error processing referral:', error);
       toast({
-        title: "Welcome to SoapBox!",
+        title: "Welcome to SoapBox Super App!",
         description: "You've joined our spiritual community. Start your journey today!",
         duration: 3000,
       });
@@ -83,7 +83,7 @@ export function ReferralWelcome({ referralCode }: ReferralWelcomeProps) {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-purple-800">
-            Welcome to SoapBox! 
+            Welcome to SoapBox Super App! 
           </CardTitle>
           <p className="text-purple-600">
             You've been invited to join our spiritual community

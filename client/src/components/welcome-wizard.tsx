@@ -255,10 +255,14 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
         <Card className="border-0 shadow-2xl max-h-[90vh] flex flex-col">
           <CardHeader className="text-center pb-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 flex-1 justify-center">
-                <Church className="h-8 w-8 text-primary" />
+              <div className="flex items-center gap-3 flex-1 justify-center">
+                <img 
+                  src="/attached_assets/SoapBx logo_1749627505398.jpeg" 
+                  alt="SoapBox Logo" 
+                  className="h-10 w-10 rounded-full object-cover"
+                />
                 <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                  Welcome to Soapbox
+                  Welcome to SoapBox Super App
                 </CardTitle>
               </div>
               <Button
