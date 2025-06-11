@@ -32,7 +32,7 @@ import {
   HelpCircle,
   Calendar
 } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -193,6 +193,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const [churchSearchQuery, setChurchSearchQuery] = useState("");
   const [joiningChurchId, setJoiningChurchId] = useState<number | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const steps = [
     "Welcome",
@@ -267,7 +268,10 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
         title: "Welcome to Soapbox!",
         description: "Your preferences have been saved. Start exploring!",
       });
-      onComplete();
+      // Use setTimeout to ensure the toast shows before closing
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
     }
   });
 
@@ -897,7 +901,16 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                   <Target className="h-4 w-4" />
                 </Button>
               ) : (
-                <Button onClick={onComplete} variant="outline">
+                <Button 
+                  onClick={() => {
+                    console.log("Complete Setup clicked - forcing refresh");
+                    // Force invalidate all user-related queries to sync state
+                    queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+                    queryClient.invalidateQueries({ queryKey: ["/api/auth/2fa/onboarding-status"] });
+                    onComplete();
+                  }} 
+                  variant="outline"
+                >
                   Complete Setup
                 </Button>
               )}
