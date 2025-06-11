@@ -39,7 +39,7 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
 
   const { data: churches = [] } = useQuery({
     queryKey: ["/api/churches"],
-  });
+  }) as { data: any[] };
 
   const { data: members = [], isLoading, error } = useQuery({
     queryKey: ["/api/members", "church", effectiveSelectedChurch],

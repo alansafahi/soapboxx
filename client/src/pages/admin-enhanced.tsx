@@ -20,7 +20,7 @@ import {
   User, Home, MapPinIcon, UserCog, HeartHandshake, Star, TrendingUp, PanelLeftClose, PanelLeftOpen, HelpCircle, Bell 
 } from "lucide-react";
 import { insertChurchSchema, insertEventSchema, insertDevotionalSchema } from "@shared/schema";
-import { MemberManagementSystem } from "@/components/MemberManagementSystem";
+import { SimpleMemberDirectory } from "@/components/SimpleMemberDirectory";
 import { SessionsManagement } from "@/components/SessionsManagement";
 
 const churchFormSchema = insertChurchSchema;
@@ -481,7 +481,7 @@ export default function EnhancedAdminPortal() {
                   Add Member
                 </Button>
               </div>
-              <MemberManagementSystem selectedChurch={selectedChurch} />
+              <SimpleMemberDirectory selectedChurch={selectedChurch} />
             </div>
           )}
 
