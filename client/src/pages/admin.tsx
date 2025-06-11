@@ -2307,7 +2307,7 @@ export default function AdminPortal() {
               <p className="text-blue-700 text-sm mt-1">View the proposed UI improvements with sparklines, enhanced analytics, and pastor-friendly features</p>
             </div>
             <a 
-              href="/demo-enhanced-admin.html" 
+              href="/uploads/demo-enhanced-admin.html" 
               target="_blank"
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
