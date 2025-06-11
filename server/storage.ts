@@ -574,6 +574,47 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId));
   }
 
+  // Email verification operations
+  async setEmailVerificationToken(userId: string, token: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        emailVerificationToken: token,
+        emailVerificationSentAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async verifyEmailToken(token: string): Promise<User | null> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.emailVerificationToken, token));
+    
+    if (!user) return null;
+    
+    // Check if token is not expired (24 hours)
+    const tokenAge = Date.now() - (user.emailVerificationSentAt?.getTime() || 0);
+    if (tokenAge > 24 * 60 * 60 * 1000) {
+      return null; // Token expired
+    }
+    
+    return user;
+  }
+
+  async markEmailAsVerified(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationSentAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
   // Church operations
   async getChurches(): Promise<Church[]> {
     return await db

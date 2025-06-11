@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { roleManager } from "./role-system";
 import { twoFactorService } from "./twoFactorService";
+import { emailService } from "./emailService";
 import Stripe from "stripe";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -131,6 +132,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Email verification routes for new members
+  app.post('/api/auth/verify-email', async (req, res) => {
+    try {
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ message: "Verification token required" });
+      }
+
+      const user = await storage.verifyEmailToken(token);
+      
+      if (!user) {
+        return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+
+      await storage.markEmailAsVerified(user.id);
+      res.json({ success: true, message: "Email verified successfully" });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).json({ message: "Failed to verify email" });
+    }
+  });
+
+  app.post('/api/auth/resend-verification', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      const token = emailService.generateVerificationToken();
+      await storage.setEmailVerificationToken(userId, token);
+      
+      await emailService.sendVerificationEmail({
+        email: user.email!,
+        firstName: user.firstName || 'Member',
+        token: token,
+      });
+
+      res.json({ success: true, message: "Verification email sent" });
+    } catch (error) {
+      console.error("Error resending verification email:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+
+  app.get('/api/auth/email-verification-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      res.json({
+        emailVerified: user?.emailVerified || false,
+        hasEmail: !!user?.email
+      });
+    } catch (error) {
+      console.error("Error checking email verification status:", error);
+      res.status(500).json({ message: "Failed to check email verification status" });
     }
   });
 

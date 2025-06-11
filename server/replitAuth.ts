@@ -7,6 +7,7 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import { emailService } from "./emailService";
 
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
@@ -57,13 +58,30 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
+  const existingUser = await storage.getUser(claims["sub"]);
+  const userData = {
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
-  });
+  };
+
+  const user = await storage.upsertUser(userData);
+
+  // If this is a new user (first time login), send email verification
+  if (!existingUser && claims["email"]) {
+    const token = emailService.generateVerificationToken();
+    await storage.setEmailVerificationToken(claims["sub"], token);
+    
+    await emailService.sendVerificationEmail({
+      email: claims["email"],
+      firstName: claims["first_name"],
+      token: token,
+    });
+  }
+
+  return user;
 }
 
 export async function setupAuth(app: Express) {

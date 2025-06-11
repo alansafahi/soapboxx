@@ -32,6 +32,7 @@ import RoleManagement from "@/pages/RoleManagement";
 import DonationDemo from "@/pages/DonationDemo";
 import RoleUpgradeDemo from "@/pages/RoleUpgradeDemo";
 import PhoneVerification from "@/pages/PhoneVerification";
+import EmailVerification from "@/pages/EmailVerification";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
