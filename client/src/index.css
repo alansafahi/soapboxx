@@ -68,6 +68,18 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    transform: none !important;
+    position: static !important;
+  }
+  
+  html {
+    transform: none !important;
+    position: static !important;
+  }
+  
+  #root {
+    transform: none !important;
+    position: static !important;
   }
 }
 
