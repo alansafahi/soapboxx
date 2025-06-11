@@ -26,6 +26,7 @@ import PrayerWallPreview from "@/pages/PrayerWallPreview";
 import ChurchManagementDemo from "@/pages/ChurchManagementDemo";
 import EnhancedChurchesDemo from "@/pages/EnhancedChurchesDemo";
 import ChurchesEnhanced from "@/pages/ChurchesEnhanced";
+import RoleManagement from "@/pages/RoleManagement";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import { useState, useEffect } from "react";
@@ -90,6 +91,7 @@ function Router() {
               <Route path="/leaderboard" component={Leaderboard} />
               <Route path="/admin" component={EnhancedAdminPortal} />
               <Route path="/member-management" component={EnhancedAdminPortal} />
+              <Route path="/role-management" component={RoleManagement} />
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
               <Route path="/test-features" component={FeatureTestPage} />
