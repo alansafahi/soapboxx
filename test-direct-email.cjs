@@ -1,4 +1,4 @@
-const https = require('https');
+const http = require('http');
 
 const postData = JSON.stringify({
   userId: 'test-info-user',
@@ -17,7 +17,7 @@ const options = {
   }
 };
 
-const req = https.request(options, (res) => {
+const req = http.request(options, (res) => {
   console.log(`Status: ${res.statusCode}`);
   console.log(`Headers: ${JSON.stringify(res.headers)}`);
   
