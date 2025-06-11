@@ -1,5 +1,5 @@
-import { db } from './server/db.js';
-import { churches, users, userChurches, ministryRoles, roles } from './shared/schema.js';
+import { db } from './server/db.ts';
+import { churches, users, userChurches, ministryRoles, roles } from './shared/schema.ts';
 
 const denominations = [
   'Baptist', 'Methodist', 'Presbyterian', 'Lutheran', 'Pentecostal', 'Episcopal',
@@ -107,7 +107,7 @@ const cities = [
   'Minneapolis, MN', 'Tulsa, OK', 'Arlington, TX', 'New Orleans, LA', 'Wichita, KS'
 ];
 
-const roles = [
+const userRoleNames = [
   'Member', 'Volunteer', 'Ministry Leader', 'Assistant Pastor', 'Pastor',
   'Elder', 'Deacon', 'Board Member', 'Ministry Coordinator', 'Team Leader',
   'Social Media Manager', 'Communications Director', 'Worship Leader', 'Music Director',
