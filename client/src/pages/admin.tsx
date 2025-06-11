@@ -2299,6 +2299,24 @@ export default function AdminPortal() {
           <p className="text-gray-600 dark:text-gray-400">Manage your church community and events</p>
         </div>
 
+        {/* Enhanced UX Preview Banner */}
+        <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-blue-900">Enhanced UX Preview Available</h3>
+              <p className="text-blue-700 text-sm mt-1">View the proposed UI improvements with sparklines, enhanced analytics, and pastor-friendly features</p>
+            </div>
+            <a 
+              href="/demo-enhanced-admin.html" 
+              target="_blank"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              View Enhanced Preview
+            </a>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1">
