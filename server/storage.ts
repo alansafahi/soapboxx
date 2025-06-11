@@ -713,18 +713,8 @@ export class DatabaseStorage implements IStorage {
 
   async getUserEvents(userId: string): Promise<Event[]> {
     return await db
-      .select({
-        id: events.id,
-        churchId: events.churchId,
-        organizerId: events.organizerId,
-        title: events.title,
-        description: events.description,
-        eventDate: events.eventDate,
-        endDate: events.endDate,
-        location: events.location,
-        isOnline: events.isOnline,
-        maxAttendees: events.maxAttendees,
-        isPublic: events.isPublic,
+      .select()
+      .from(events)
         category: events.category,
         imageUrl: events.imageUrl,
         createdAt: events.createdAt,
@@ -983,8 +973,8 @@ export class DatabaseStorage implements IStorage {
         id: eventCheckIns.id,
         eventId: eventCheckIns.eventId,
         userId: eventCheckIns.userId,
-        checkInTime: eventCheckIns.checkInTime,
-        createdAt: eventCheckIns.createdAt,
+        checkedInAt: eventCheckIns.checkedInAt,
+        guestCount: eventCheckIns.guestCount,
         user: {
           id: users.id,
           email: users.email,
@@ -1035,10 +1025,11 @@ export class DatabaseStorage implements IStorage {
   async updateEventMetrics(eventId: number, metrics: Partial<InsertEventMetric>): Promise<EventMetric> {
     const [updatedMetrics] = await db
       .insert(eventMetrics)
-      .values({ eventId, ...metrics })
-      .onConflictDoUpdate({
-        target: eventMetrics.eventId,
-        set: { ...metrics, updatedAt: new Date() }
+      .values({ 
+        eventId, 
+        metricType: metrics.metricType || 'attendance',
+        value: metrics.value || '0',
+        ...metrics 
       })
       .returning();
     return updatedMetrics;
@@ -1452,13 +1443,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
-    return await db
-      .select()
-      .from(userAchievements)
-      .where(eq(userAchievements.userId, userId))
-      .orderBy(desc(userAchievements.unlockedAt));
-  }
+  // Duplicate function removed - implementation exists above
 
   async trackUserActivity(activity: InsertUserActivity): Promise<void> {
     await db.insert(userActivities).values(activity);
@@ -4214,31 +4199,7 @@ export class DatabaseStorage implements IStorage {
     return friendsList;
   }
 
-  async sendFriendRequest(friendshipData: any): Promise<any> {
-    const [friendship] = await db
-      .insert(friendships)
-      .values({
-        requesterId: friendshipData.requesterId,
-        addresseeId: friendshipData.addresseeId,
-        status: 'pending',
-      })
-      .returning();
-
-    return friendship;
-  }
-
-  async respondToFriendRequest(friendshipId: number, status: string): Promise<any> {
-    const [updatedFriendship] = await db
-      .update(friendships)
-      .set({
-        status,
-        updatedAt: new Date(),
-      })
-      .where(eq(friendships.id, friendshipId))
-      .returning();
-
-    return updatedFriendship;
-  }
+  // Duplicate functions removed - implementations exist above
 
   async createCommunityReflection(reflectionData: any): Promise<any> {
     const [reflection] = await db
