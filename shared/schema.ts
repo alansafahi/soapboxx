@@ -2854,8 +2854,7 @@ export type Role = typeof roles.$inferSelect;
 export type InsertRole = typeof roles.$inferInsert;
 export type Permission = typeof permissions.$inferSelect;
 export type InsertPermission = typeof permissions.$inferInsert;
-export type UserChurch = typeof userChurches.$inferSelect;
-export type InsertUserChurch = typeof userChurches.$inferInsert;
+
 
 // Create role schemas for validation
 export const insertRoleSchema = createInsertSchema(roles);
