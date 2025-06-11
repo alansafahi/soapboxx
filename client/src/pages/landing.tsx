@@ -4,10 +4,12 @@ import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight } from "lucid
 import soapboxLogo from "@assets/SoapBx logo_1749625213720.jpeg";
 
 export default function Landing() {
+  console.log('Landing component rendered');
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="relative w-full min-h-screen bg-white" style={{ position: 'relative', zIndex: 1 }}>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
+      <header className="relative bg-white border-b border-gray-200 w-full z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
