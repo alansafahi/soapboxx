@@ -56,17 +56,17 @@ export default function LeaderboardWidget() {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+    <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Trophy className="h-5 w-5 text-blue-600" />
+          <Trophy className="h-5 w-5 text-soapbox-purple" />
           Community Rankings
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* User's Current Stats */}
         {userScore && (
-          <div className="bg-white/60 rounded-lg p-3 border border-blue-100">
+          <div className="bg-white/60 rounded-lg p-3 border border-purple-100">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-gray-700">Your Progress</span>
               <Badge variant="secondary" className="text-xs">
@@ -75,19 +75,19 @@ export default function LeaderboardWidget() {
             </div>
             <div className="grid grid-cols-4 gap-3 text-center">
               <div>
-                <div className="text-lg font-bold text-blue-600">{userScore.weeklyPoints}</div>
+                <div className="text-lg font-bold text-soapbox-purple">{userScore.weeklyPoints}</div>
                 <div className="text-xs text-gray-500">This Week</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-orange-600">{userScore.currentStreak}</div>
+                <div className="text-lg font-bold text-soapbox-purple">{userScore.currentStreak}</div>
                 <div className="text-xs text-gray-500">Day Streak</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-purple-600">{referralStats?.totalReferrals || 0}</div>
+                <div className="text-lg font-bold text-soapbox-purple">{referralStats?.totalReferrals || 0}</div>
                 <div className="text-xs text-gray-500">Referrals</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-green-600">{userScore.totalPoints}</div>
+                <div className="text-lg font-bold text-soapbox-purple">{userScore.totalPoints}</div>
                 <div className="text-xs text-gray-500">Total Points</div>
               </div>
             </div>

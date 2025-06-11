@@ -1557,7 +1557,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         userId,
         churchId,
-        roleId: 1, // Default member role ID
+        roleId: 9, // Default member role ID
       })
       .onConflictDoUpdate({
         target: [userChurches.userId, userChurches.churchId],

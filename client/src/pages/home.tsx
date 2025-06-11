@@ -45,7 +45,7 @@ export default function Home({ referralCode }: HomeProps = {}) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-warm-white">
         <div className="text-center">
-          <div className="w-16 h-16 bg-faith-blue rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
+          <div className="w-16 h-16 bg-soapbox-purple rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
             <div className="w-8 h-8 bg-white rounded-full"></div>
           </div>
           <p className="text-gray-600">Loading your faith community...</p>

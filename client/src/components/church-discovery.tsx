@@ -167,7 +167,7 @@ export default function ChurchDiscovery() {
           churches.slice(0, 3).map((church) => (
             <div 
               key={church.id} 
-              className="border border-gray-100 rounded-xl p-4 hover:border-faith-blue transition-colors cursor-pointer"
+              className="border border-gray-100 rounded-xl p-4 hover:border-soapbox-purple transition-colors cursor-pointer"
             >
               <div className="flex items-start space-x-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
