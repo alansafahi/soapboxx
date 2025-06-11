@@ -77,17 +77,53 @@ export const churches = pgTable("churches", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// User-Church connections (membership)
+// Roles table - defines system roles with their capabilities
+export const roles = pgTable("roles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 50 }).notNull().unique(), // owner, super_admin, church_admin, etc.
+  displayName: varchar("display_name", { length: 100 }).notNull(),
+  description: text("description"),
+  level: integer("level").notNull(), // 1-9, where 1 is highest (owner), 9 is lowest (member)
+  scope: varchar("scope", { length: 20 }).notNull(), // system, church, ministry
+  permissions: text("permissions").array().notNull(), // Array of permission strings
+  icon: varchar("icon", { length: 50 }), // Icon identifier for UI
+  color: varchar("color", { length: 20 }), // Color for role display
+  canManageRoles: text("can_manage_roles").array(), // Which roles this role can manage
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Permissions table - defines all available permissions in the system
+export const permissions = pgTable("permissions", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  displayName: varchar("display_name", { length: 150 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }), // content, users, system, church, events, etc.
+  resource: varchar("resource", { length: 50 }), // posts, prayers, events, users, etc.
+  action: varchar("action", { length: 50 }), // create, read, update, delete, approve, moderate
+  scope: varchar("scope", { length: 20 }).default("church"), // system, church, ministry, own
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User-Church connections with role-based access
 export const userChurches = pgTable("user_churches", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   churchId: integer("church_id").notNull().references(() => churches.id),
-  role: varchar("role", { length: 50 }).default("member"), // member, moderator, content_creator, admin, pastor
-  permissions: text("permissions").array(), // Custom permissions array
+  roleId: integer("role_id").notNull().references(() => roles.id),
   title: varchar("title", { length: 100 }), // Custom title like "Youth Leader", "Worship Director"
+  department: varchar("department", { length: 100 }), // Youth Ministry, Music Ministry, etc.
   bio: text("bio"), // Role-specific bio
+  additionalPermissions: text("additional_permissions").array(), // Extra permissions beyond role
+  restrictedPermissions: text("restricted_permissions").array(), // Permissions to remove from role
+  assignedBy: varchar("assigned_by").references(() => users.id), // Who assigned this role
+  assignedAt: timestamp("assigned_at").defaultNow(),
   joinedAt: timestamp("joined_at").defaultNow(),
   isActive: boolean("is_active").default(true),
+  expiresAt: timestamp("expires_at"), // Optional role expiration
 }, (table) => ({
   userChurchUnique: unique().on(table.userId, table.churchId),
 }));
@@ -2813,9 +2849,21 @@ export const mediaCollectionItems = pgTable("media_collection_items", {
 // Media management type definitions
 export type MediaFile = typeof mediaFiles.$inferSelect;
 export type InsertMediaFile = typeof mediaFiles.$inferInsert;
-
 export type MediaCollection = typeof mediaCollections.$inferSelect;
 export type InsertMediaCollection = typeof mediaCollections.$inferInsert;
+
+// Role and Permission type definitions
+export type Role = typeof roles.$inferSelect;
+export type InsertRole = typeof roles.$inferInsert;
+export type Permission = typeof permissions.$inferSelect;
+export type InsertPermission = typeof permissions.$inferInsert;
+export type UserChurch = typeof userChurches.$inferSelect;
+export type InsertUserChurch = typeof userChurches.$inferInsert;
+
+// Create role schemas for validation
+export const insertRoleSchema = createInsertSchema(roles);
+export const insertPermissionSchema = createInsertSchema(permissions);
+export const insertUserChurchSchema = createInsertSchema(userChurches);
 
 export type MediaCollectionItem = typeof mediaCollectionItems.$inferSelect;
 export type InsertMediaCollectionItem = typeof mediaCollectionItems.$inferInsert;
