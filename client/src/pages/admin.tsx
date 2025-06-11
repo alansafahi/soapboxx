@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, BookOpen, Video, Music, FileText, Edit, Trash2, Eye, Book, AlertTriangle, UserCheck, Tag, Flag, CheckCircle, XCircle, Filter, Search, Send, UserPlus, Calendar as CalendarIcon, UserCheck2, ClipboardList, Archive, Headphones, PlayCircle, User, Home, MapPinIcon, UserCog, HeartHandshake, Star } from "lucide-react";
+import { Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, BookOpen, Video, Music, FileText, Edit, Trash2, Eye, Book, AlertTriangle, UserCheck, Tag, Flag, CheckCircle, XCircle, Filter, Search, Send, UserPlus, Calendar as CalendarIcon, UserCheck2, ClipboardList, Archive, Headphones, PlayCircle, User, Home, MapPinIcon, UserCog, HeartHandshake, Star, TrendingUp, PanelLeftClose, PanelLeftOpen, HelpCircle, Bell } from "lucide-react";
 import { insertChurchSchema, insertEventSchema, insertDevotionalSchema, insertWeeklySeriesSchema, insertSermonMediaSchema, insertPrayerFollowUpSchema, insertPrayerUpdateSchema, insertPrayerAssignmentSchema } from "@shared/schema";
 import { ChurchProfileManager } from "@/components/church-profile-manager";
 import { MemberManagementSystem } from "@/components/MemberManagementSystem";
@@ -1704,6 +1704,9 @@ export default function AdminPortal() {
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState("");
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
 
   const { data: churches = [], isLoading: churchesLoading } = useQuery({
     queryKey: ["/api/churches"],
@@ -2291,48 +2294,280 @@ export default function AdminPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
-
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Church Administration</h2>
-          <p className="text-gray-600 dark:text-gray-400">Manage your church community and events</p>
-        </div>
-
-        {/* Enhanced UX Preview Banner */}
-        <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-blue-900">Enhanced UX Preview Available</h3>
-              <p className="text-blue-700 text-sm mt-1">View the proposed UI improvements with sparklines, enhanced analytics, and pastor-friendly features</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Enhanced Header with Global Search */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">SoapBox Admin Portal</h1>
+          </div>
+          
+          {/* Global Search */}
+          <div className="flex-1 max-w-md mx-8">
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Search members, prayers, events..." 
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
             </div>
-            <a 
-              href="/uploads/demo-enhanced-admin.html" 
-              target="_blank"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              View Enhanced Preview
-            </a>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 relative">
+              <HelpCircle className="h-5 w-5" />
+            </button>
+            <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              {user?.name?.charAt(0) || 'U'}
+            </div>
           </div>
         </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building className="h-5 w-5" />
-                Churches
-              </CardTitle>
-              <Dialog open={isChurchDialogOpen} onOpenChange={setIsChurchDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Church
-                  </Button>
-                </DialogTrigger>
+      <div className="flex">
+        {/* Enhanced Sidebar */}
+        <aside className={`${sidebarCollapsed ? 'w-20' : 'w-80'} bg-white dark:bg-gray-800 shadow-lg border-r transition-all duration-300 overflow-hidden`}>
+          <div className="p-4">
+            <button 
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="w-full flex items-center justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5 text-gray-600 dark:text-gray-400" /> : <PanelLeftClose className="h-5 w-5 text-gray-600 dark:text-gray-400" />}
+            </button>
+          </div>
+          
+          {/* Church Selector */}
+          {!sidebarCollapsed && (
+            <div className="px-4 pb-4">
+              <select 
+                value={selectedChurch || ""} 
+                onChange={(e) => setSelectedChurch(Number(e.target.value))}
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">Select a Church</option>
+                {(churches as any[]).map((church) => (
+                  <option key={church.id} value={church.id}>{church.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="px-4 space-y-2">
+            <button 
+              onClick={() => setActiveTab("dashboard")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "dashboard" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <Building className="h-5 w-5" />
+              {!sidebarCollapsed && <span>Dashboard</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab("analytics")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "analytics" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <TrendingUp className="h-5 w-5" />
+              {!sidebarCollapsed && (
+                <>
+                  <span>Analytics</span>
+                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-auto">+12%</span>
+                </>
+              )}
+            </button>
+            <button 
+              onClick={() => setActiveTab("content")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "content" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <FileText className="h-5 w-5" />
+              {!sidebarCollapsed && <span>Content</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab("people")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "people" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <Users className="h-5 w-5" />
+              {!sidebarCollapsed && (
+                <>
+                  <span>People</span>
+                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-auto">234</span>
+                </>
+              )}
+            </button>
+            <button 
+              onClick={() => setActiveTab("ministry")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "ministry" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <Heart className="h-5 w-5" />
+              {!sidebarCollapsed && <span>Ministry</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab("prayers")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "prayers" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <HeartHandshake className="h-5 w-5" />
+              {!sidebarCollapsed && (
+                <>
+                  <span>Prayers</span>
+                  <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full ml-auto">7 new</span>
+                </>
+              )}
+            </button>
+            <button 
+              onClick={() => setActiveTab("media")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "media" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <Video className="h-5 w-5" />
+              {!sidebarCollapsed && <span>Media</span>}
+            </button>
+            <button 
+              onClick={() => setActiveTab("settings")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                activeTab === "settings" ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+            >
+              <Settings className="h-5 w-5" />
+              {!sidebarCollapsed && <span>Settings</span>}
+            </button>
+          </nav>
+
+          {/* Quick Actions */}
+          {!sidebarCollapsed && (
+            <div className="px-4 mt-8">
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">QUICK ACTIONS</div>
+              <div className="space-y-2">
+                <button 
+                  onClick={() => setIsEventDialogOpen(true)}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-green-700 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 rounded-lg text-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Event</span>
+                </button>
+                <button className="w-full flex items-center gap-3 px-3 py-2 text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 rounded-lg text-sm">
+                  <Plus className="h-4 w-4" />
+                  <span>New Prayer</span>
+                </button>
+                <button 
+                  onClick={() => setIsDevotionalDialogOpen(true)}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg text-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Devotional</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto p-6">
+          {/* Enhanced Dashboard Tab */}
+          {activeTab === "dashboard" && (
+            <div className="space-y-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome to your enhanced church management portal</p>
+              </div>
+
+              {/* Quick Stats with Sparklines */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <Card className="p-6 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Events This Week</p>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{(events as any[]).length}</p>
+                        <span className="text-sm text-green-600 font-medium">↗ +5%</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="w-12 h-3 bg-gradient-to-r from-blue-500 to-blue-300 rounded-full"></div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">vs last week</span>
+                      </div>
+                    </div>
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Calendar className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Prayer Requests</p>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{(prayers as any[]).length}</p>
+                        <span className="text-sm text-orange-600 font-medium">→ 0%</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="w-12 h-3 bg-gradient-to-r from-purple-500 to-purple-300 rounded-full"></div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">this month</span>
+                      </div>
+                    </div>
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Heart className="h-6 w-6 text-purple-600" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Members</p>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">234</p>
+                        <span className="text-sm text-green-600 font-medium">↗ +12%</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="w-12 h-3 bg-gradient-to-r from-green-500 to-green-300 rounded-full"></div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">vs last month</span>
+                      </div>
+                    </div>
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Users className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Volunteer Hours</p>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">156</p>
+                        <span className="text-sm text-green-600 font-medium">↗ +23%</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="w-12 h-3 bg-gradient-to-r from-orange-500 to-orange-300 rounded-full"></div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">this week</span>
+                      </div>
+                    </div>
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <HeartHandshake className="h-6 w-6 text-orange-600" />
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          )}
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Create New Church</DialogTitle>
@@ -2506,42 +2741,121 @@ export default function AdminPortal() {
               ))}
             </CardContent>
           </Card>
-        </div>
+          {/* Analytics Tab */}
+          {activeTab === "analytics" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Advanced Analytics</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Growth Metrics</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 dark:text-gray-400">Member Growth</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gradient-to-r from-green-500 to-green-300 rounded-full"></div>
+                        <span className="text-green-600 font-medium">+12%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 dark:text-gray-400">Event Attendance</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gradient-to-r from-blue-500 to-blue-300 rounded-full"></div>
+                        <span className="text-blue-600 font-medium">+5%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 dark:text-gray-400">Prayer Engagement</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gradient-to-r from-purple-500 to-purple-300 rounded-full"></div>
+                        <span className="text-purple-600 font-medium">+8%</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          )}
 
-        {/* Main Content */}
-        <div className="lg:col-span-3">
-          {selectedChurch ? (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-7">
-                <TabsTrigger value="dashboard">
-                  <Building className="h-4 w-4 mr-2" />
-                  Dashboard
-                </TabsTrigger>
-                <TabsTrigger value="analytics">
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Analytics
-                </TabsTrigger>
-                <TabsTrigger value="content">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Content
-                </TabsTrigger>
-                <TabsTrigger value="people">
-                  <Users className="h-4 w-4 mr-2" />
-                  People
-                </TabsTrigger>
-                <TabsTrigger value="ministry">
-                  <Heart className="h-4 w-4 mr-2" />
-                  Ministry
-                </TabsTrigger>
-                <TabsTrigger value="media">
-                  <Video className="h-4 w-4 mr-2" />
-                  Media
-                </TabsTrigger>
-                <TabsTrigger value="settings">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </TabsTrigger>
-              </TabsList>
+          {/* People Tab - Enhanced Member Management */}
+          {activeTab === "people" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Member Directory</h2>
+                <Button className="bg-green-600 hover:bg-green-700">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add Member
+                </Button>
+              </div>
+              <MemberManagementSystem selectedChurch={selectedChurch || 0} />
+            </div>
+          )}
+
+          {/* Ministry Tab - Sessions & Counseling */}
+          {activeTab === "ministry" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Ministry Management</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="p-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      Sessions Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SessionsManagement />
+                  </CardContent>
+                </Card>
+                <Card className="p-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <HeartHandshake className="h-5 w-5" />
+                      Prayer Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PrayerManagementSystem />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Prayers Tab */}
+          {activeTab === "prayers" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Prayer Requests</h2>
+              <PrayerManagementSystem />
+            </div>
+          )}
+
+          {/* Content Tab */}
+          {activeTab === "content" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Content Management</h2>
+              <div className="space-y-8">
+                <PublishedDevotionals />
+                <PublishedSeries />
+                <PublishedSermonMedia />
+              </div>
+            </div>
+          )}
+
+          {/* Media Tab */}
+          {activeTab === "media" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Media Library</h2>
+              <MediaLibraryStats />
+            </div>
+          )}
+
+          {/* Settings Tab */}
+          {activeTab === "settings" && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Church Settings</h2>
+              <ChurchProfileManager />
+            </div>
+          )}
 
               <TabsContent value="dashboard" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
