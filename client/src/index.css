@@ -32,6 +32,16 @@
   --warm-yellow: hsl(48, 96%, 89%);
 }
 
+/* Prevent any potential rendering duplication */
+[data-component="simple-landing"]:not(:first-of-type) {
+  display: none;
+}
+
+/* Ensure single root rendering */
+#root > div:not(:first-child) {
+  display: none;
+}
+
 .dark {
   --background: hsl(222, 84%, 4.9%);
   --foreground: hsl(210, 40%, 98%);

@@ -16,7 +16,7 @@ const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: s
 
 export default function SimpleLanding() {
   return (
-    <div className="min-h-screen bg-white" style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
+    <div className="min-h-screen bg-white" data-component="simple-landing">
       {/* Navigation */}
       <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
