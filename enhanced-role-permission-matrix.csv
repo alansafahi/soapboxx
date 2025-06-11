@@ -1,0 +1,52 @@
+Category,Permission,Owner,Regional Admin,Super Admin,Church Admin,Lead Pastor,Pastor,Minister,Social Manager,Staff,Member,Description
+System,System Management,✓,✗,✗,✗,✗,✗,✗,✗,✗,✗,Complete system administration across all churches
+System,Multi-Church Control,✓,✓,✗,✗,✗,✗,✗,✗,✗,✗,Manage multiple church organizations
+System,Audit Logs Access,✓,Regional,✓,✗,✗,✗,✗,✗,✗,✗,View system audit trails and security logs
+Church Management,Church Portal Management,✓,✓,✓,✓,✗,✗,✗,✗,✗,✗,Configure church-specific settings and branding
+Church Management,Multi-Church Assignment,✓,✓,✗,✗,✗,✗,✗,✗,✗,✗,Assign users to multiple churches
+User Management,User Management,✓,✓,✓,✓,✗,✗,✗,✗,✗,✗,Add/remove/edit user accounts
+User Management,Role Assignment,✓,✓,✓,✓,✗,✗,✗,✗,✗,✗,Assign roles to church members
+User Management,Regional Oversight,✓,✓,✗,✗,✗,✗,✗,✗,✗,✗,Oversee multiple church administrators
+Content Management,Content Moderation,✓,✓,✓,✓,✓,✗,Ministry Scope,✗,✗,✗,Review and approve/reject content
+Content Management,Content Creation,✓,✓,✓,✓,✓,✓,✓,✓,Draft Only,Submit for Review,Create various types of content
+Content Management,Content Publishing,✓,✓,✓,✓,✓,✓,Ministry,✓,✗,✗,Publish content to community
+Content Management,Content Approval,✓,✓,✓,✓,✓,✗,✗,✗,✗,✗,Approve content submitted by others
+Spiritual Content,Sermon Creation,✓,✓,✓,✓,✓,✓,✗,✗,✗,✗,Create and publish sermons
+Spiritual Content,Devotional Creation,✓,✓,✓,✓,✓,✓,✗,✗,✗,✗,Create daily devotionals and spiritual content
+Spiritual Content,Bible Study Materials,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,Create Bible study guides and materials
+Events,Event Management,✓,✓,✓,✓,✓,✓,✓,✗,Optional,✗,Manage church events and activities
+Events,Event Creation,✓,✓,✓,✓,✓,✓,✓,✗,Optional,✗,Create new events and activities
+Events,Event Moderation,✓,✓,✓,✓,✓,✓,✗,✗,✗,✗,Review and manage event content
+Events,Event Check-in,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,Check into events and activities
+Prayer Ministry,Prayer Response,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,Respond to prayer requests as ministry
+Prayer Ministry,Prayer Creation,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,Submit prayer requests
+Prayer Ministry,Prayer Moderation,✓,✓,✓,✓,✓,✓,Ministry Scope,✗,✗,✗,Review and manage prayer requests
+Prayer Ministry,Flag Inappropriate Prayers,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,Flag inappropriate content for review
+Communication,Discussion Management,✓,✓,✓,✓,✓,✓,Ministry Scope,✗,✗,✗,Moderate community discussions
+Communication,Comment Moderation,✓,✓,✓,✓,✓,✓,Ministry Scope,✗,Optional,✗,Moderate comments on posts
+Communication,Social Media Management,✓,✓,✓,✗,✗,✗,✗,✓,✗,✗,Manage church social media presence
+Communication,Public Post Creation,✓,✓,✓,✗,✗,✗,✗,✓,✗,✗,Create posts for public social media
+Community,Community Interaction,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,Like and interact with community content
+Community,Comment Creation,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,Comment on posts and discussions
+Community,Like/React to Content,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,React to posts and content
+Directory Access,Full Directory Access,✓,✓,✓,✓,✗,✗,✗,✗,✗,✗,View all member profiles and information
+Directory Access,Ministry Directory Access,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,View ministry team and volunteer information
+Directory Access,Limited Directory Access,✓,✓,✓,✓,✓,✓,✓,✗,✗,Verified Staff/Pastors/Group Leaders/Public Bios,Access to staff pastors assigned leaders and opt-in profiles
+Analytics,Analytics Access,✓,Regional,✓,✓,✓,✗,✗,✗,✗,✗,View church analytics and metrics
+Analytics,Financial Reports,✓,✗,✓,✓,✗,✗,✗,✗,✗,✗,Access financial and donation reports
+Analytics,Attendance Reports,✓,Regional,✓,✓,✓,✗,✗,✗,✗,✗,View attendance and engagement metrics
+Ministry,Volunteer Management,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,Manage volunteer programs and schedules
+Ministry,Ministry Management,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,Oversee specific ministry areas
+Ministry,Small Group Leadership,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,Lead and manage small groups
+Administration,Settings Management,✓,Regional,✓,✓,✗,✗,✗,✗,✗,✗,Configure church settings and preferences
+Administration,Backup/Export Data,✓,✗,✓,✓,✗,✗,✗,✗,✗,✗,Export church data and create backups
+Administration,Integration Management,✓,✗,✓,✓,✗,✗,✗,✗,✗,✗,Manage third-party integrations
+Administration,Administrative Assistance,✓,✓,✓,✓,✗,✗,✗,✗,✓,✗,Assist with administrative tasks
+Role Hierarchy,Role Level,1,2,3,4,5,6,7,8,9,10,Hierarchical order of authority
+Role Hierarchy,Church Scope,All Churches,Assigned Churches,Single Church,Single Church,Single Church,Single Church,Single Church,Single Church,Single Church,Single Church,Scope of church access
+Role Hierarchy,Max Role Level Can Assign,10,9,8,7,6,5,4,3,2,1,Maximum role level this role can assign to others
+Enhanced Features,Regional Church Oversight,✓,✓,✗,✗,✗,✗,✗,✗,✗,✗,Manage multiple churches in region/denomination
+Enhanced Features,Ministry-Scoped Moderation,✓,✓,✓,✓,✓,✓,✓,✗,✗,✗,Moderate content within assigned ministry areas
+Enhanced Features,Optional Staff Permissions,✓,✓,✓,✓,✗,✗,✗,✗,Configurable,✗,Church-configurable permissions for staff
+Enhanced Features,Defined Member Directory Rules,✓,✓,✓,✓,✓,✓,✓,✗,✗,Restricted Access,Clear rules for what members can see
+Enhanced Features,Role Template Support,✓,✓,✓,✓,✗,✗,✗,✗,✗,✗,Quick setup templates for different church sizes
