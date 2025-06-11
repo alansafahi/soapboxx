@@ -17,9 +17,11 @@ export default function AppHeader() {
   const [location] = useLocation();
 
   const navigationItems = [
-    { href: "/", label: "Churches" },
+    { href: "/", label: "Home" },
+    { href: "/churches", label: "Churches" },
     { href: "/events", label: "Events" },
     { href: "/bible", label: "Daily Bible" },
+    { href: "/prayer", label: "Prayer Wall" },
     { href: "/messages", label: "Messages" },
     { href: "/admin", label: "Admin Portal" },
     { href: "/role-management", label: "Role Management" },

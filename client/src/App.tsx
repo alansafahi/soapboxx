@@ -72,35 +72,38 @@ function Router() {
       <main className="min-h-screen bg-gray-50">
         <Switch>
           {!isAuthenticated ? (
-            <Route path="*" component={Landing} />
+            <>
+              <Route path="/" component={Landing} />
+              <Route path="*" component={Landing} />
+            </>
           ) : (
             <>
+              <Route path="/" component={() => <Home referralCode={referralCode} />} />
               <Route path="/bible/read" component={BibleReader} />
               <Route path="/bible" component={BiblePage} />
               <Route path="/community" component={Community} />
               <Route path="/churches" component={Churches} />
+              <Route path="/churches-enhanced" component={ChurchesEnhanced} />
+              <Route path="/enhanced-churches-demo" component={EnhancedChurchesDemo} />
+              <Route path="/church-management-demo" component={ChurchManagementDemo} />
               <Route path="/events" component={Events} />
               <Route path="/prayer" component={Prayer} />
               <Route path="/prayers" component={Prayer} />
+              <Route path="/prayer-wall-preview" component={PrayerWallPreview} />
               <Route path="/discussions" component={Community} />
               <Route path="/devotionals" component={Community} />
               <Route path="/members" component={Community} />
               <Route path="/gamification" component={Leaderboard} />
+              <Route path="/leaderboard" component={Leaderboard} />
               <Route path="/messages" component={Messages} />
               <Route path="/chat" component={Chat} />
-              <Route path="/leaderboard" component={Leaderboard} />
               <Route path="/admin" component={EnhancedAdminPortal} />
               <Route path="/member-management" component={EnhancedAdminPortal} />
               <Route path="/role-management" component={RoleManagement} />
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
               <Route path="/test-features" component={FeatureTestPage} />
-              <Route path="/prayer-wall-preview" component={PrayerWallPreview} />
-              <Route path="/church-management-demo" component={ChurchManagementDemo} />
-              <Route path="/enhanced-churches-demo" component={EnhancedChurchesDemo} />
-              <Route path="/churches-enhanced" component={ChurchesEnhanced} />
-              <Route path="/" component={() => <Home referralCode={referralCode} />} />
-              <Route component={NotFound} />
+              <Route path="*" component={NotFound} />
             </>
           )}
         </Switch>
