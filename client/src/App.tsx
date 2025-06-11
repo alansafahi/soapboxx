@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import AppHeader from "@/components/AppHeader";
 import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
+import SimpleLanding from "@/pages/simple-landing";
 import Home from "@/pages/home";
 import AdminPortal from "@/pages/admin";
 import EnhancedAdminPortal from "@/pages/admin-enhanced";
@@ -74,8 +74,8 @@ function AppRouter() {
         <Switch>
           {!isAuthenticated ? (
             <>
-              <Route path="/" component={Landing} />
-              <Route path="*" component={Landing} />
+              <Route path="/" component={SimpleLanding} />
+              <Route path="*" component={SimpleLanding} />
             </>
           ) : (
             <>
