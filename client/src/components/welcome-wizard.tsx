@@ -191,6 +191,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const [showDenominationDisclaimer, setShowDenominationDisclaimer] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [churchSearchQuery, setChurchSearchQuery] = useState("");
+  const [joiningChurchId, setJoiningChurchId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const steps = [
@@ -289,10 +290,12 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const joinChurch = useMutation({
     mutationFn: async (churchId: number) => {
       console.log("Joining church with ID:", churchId);
+      setJoiningChurchId(churchId);
       return await apiRequest("POST", `/api/churches/${churchId}/join`);
     },
     onSuccess: (_, churchId) => {
       console.log("Successfully joined church:", churchId);
+      setJoiningChurchId(null);
       toast({
         title: "Church Joined Successfully!",
         description: "You've connected with this church. Welcome to the community!",
@@ -302,6 +305,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     },
     onError: (error) => {
       console.error("Error joining church:", error);
+      setJoiningChurchId(null);
       toast({
         title: "Error Joining Church",
         description: "Please try again or skip for now.",
@@ -779,11 +783,11 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                             
                             <Button
                               onClick={() => joinChurch.mutate(church.id)}
-                              disabled={joinChurch.isPending}
+                              disabled={joiningChurchId === church.id}
                               size="sm"
                               className="w-full mt-3"
                             >
-                              {joinChurch.isPending ? "Connecting..." : "Join This Church"}
+                              {joiningChurchId === church.id ? "Connecting..." : "Join This Church"}
                             </Button>
                           </motion.div>
                         ))}
@@ -814,11 +818,11 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                                 
                                 <Button
                                   onClick={() => joinChurch.mutate(church.id)}
-                                  disabled={joinChurch.isPending}
+                                  disabled={joiningChurchId === church.id}
                                   size="sm"
                                   className="w-full mt-3"
                                 >
-                                  {joinChurch.isPending ? "Connecting..." : "Join This Church"}
+                                  {joiningChurchId === church.id ? "Connecting..." : "Join This Church"}
                                 </Button>
                               </motion.div>
                             ))}
