@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoapBox Admin Portal - Enhanced UX Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .sparkline {
+            width: 60px;
+            height: 20px;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            border-radius: 10px;
+            position: relative;
+        }
+        .sparkline::after {
+            content: '';
+            position: absolute;
+            right: 2px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+        }
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .tooltip-trigger:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .sidebar-collapsed {
+            width: 80px;
+        }
+        .sidebar-expanded {
+            width: 280px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header with Global Search -->
+    <header class="bg-white shadow-sm border-b px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h1 class="text-xl font-semibold text-gray-900">SoapBox Admin Portal</h1>
+                <div class="text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
+                    Enhanced UX Preview
+                </div>
+            </div>
+            
+            <!-- Global Search -->
+            <div class="flex-1 max-w-md mx-8">
+                <div class="relative">
+                    <input type="text" placeholder="Search members, prayers, events..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button class="p-2 text-gray-400 hover:text-gray-600 relative tooltip-trigger">
+                    <i data-lucide="help-circle" class="h-5 w-5"></i>
+                    <div class="tooltip absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        Help & Tutorials
+                    </div>
+                </button>
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                    AS
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Enhanced Sidebar -->
+        <aside id="sidebar" class="sidebar-expanded bg-white shadow-lg border-r transition-all duration-300 overflow-hidden">
+            <div class="p-4">
+                <button id="sidebar-toggle" class="w-full flex items-center justify-center p-2 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="panel-left-close" class="h-5 w-5 text-gray-600"></i>
+                </button>
+            </div>
+            
+            <!-- Church Selector -->
+            <div class="px-4 pb-4">
+                <select class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <option>Grace Community Church</option>
+                    <option>Church On The Way</option>
+                    <option>+ Add New Church</option>
+                </select>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="px-4 space-y-2">
+                <a href="#" class="nav-item active flex items-center gap-3 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg">
+                    <i data-lucide="building" class="h-5 w-5"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+                <a href="#analytics" class="nav-item flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="trending-up" class="h-5 w-5"></i>
+                    <span class="sidebar-text">Analytics</span>
+                    <span class="sidebar-text bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-auto">+12%</span>
+                </a>
+                <a href="#content" class="nav-item flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="file-text" class="h-5 w-5"></i>
+                    <span class="sidebar-text">Content</span>
+                </a>
+                <a href="#people" class="nav-item flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="users" class="h-5 w-5"></i>
+                    <span class="sidebar-text">People</span>
+                    <span class="sidebar-text bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full ml-auto">234</span>
+                </a>
+                <a href="#ministry" class="nav-item flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="heart" class="h-5 w-5"></i>
+                    <span class="sidebar-text">Ministry</span>
+                </a>
+                <a href="#prayers" class="nav-item flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="heart-handshake" class="h-5 w-5"></i>
+                    <span class="sidebar-text">Prayers</span>
+                    <span class="sidebar-text bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full ml-auto">7 new</span>
+                </a>
+                <a href="#media" class="nav-item flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="video" class="h-5 w-5"></i>
+                    <span class="sidebar-text">Media</span>
+                </a>
+                <a href="#settings" class="nav-item flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="settings" class="h-5 w-5"></i>
+                    <span class="sidebar-text">Settings</span>
+                </a>
+            </nav>
+
+            <!-- Quick Actions -->
+            <div class="px-4 mt-8">
+                <div class="sidebar-text text-xs font-medium text-gray-500 mb-3">QUICK ACTIONS</div>
+                <div class="space-y-2">
+                    <button class="w-full flex items-center gap-3 px-3 py-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-lg text-sm">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        <span class="sidebar-text">Add Event</span>
+                    </button>
+                    <button class="w-full flex items-center gap-3 px-3 py-2 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg text-sm">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        <span class="sidebar-text">New Prayer</span>
+                    </button>
+                    <button class="w-full flex items-center gap-3 px-3 py-2 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        <span class="sidebar-text">Add Devotional</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <!-- Enhanced Analytics Tab -->
+            <div id="analytics-content" class="p-6">
+                <!-- Contextual Guidance Banner -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+                    <i data-lucide="info" class="h-5 w-5 text-blue-600 mt-0.5"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-blue-900">Analytics Overview</h3>
+                        <p class="text-sm text-blue-700 mt-1">Track your church's growth and engagement trends. Use filters to view specific campuses or time periods.</p>
+                    </div>
+                    <button class="text-blue-400 hover:text-blue-600">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+
+                <!-- Enhanced Metrics Cards with Sparklines -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg p-6 shadow-sm border">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Members</p>
+                                <div class="flex items-baseline gap-2 mt-1">
+                                    <p class="text-2xl font-bold text-gray-900">234</p>
+                                    <span class="text-sm text-green-600 font-medium">↗ +12%</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="sparkline"></div>
+                                    <span class="text-xs text-gray-500">vs last month</span>
+                                </div>
+                            </div>
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i data-lucide="users" class="h-5 w-5 text-blue-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                18 New This Month
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Weekly Attendance</p>
+                                <div class="flex items-baseline gap-2 mt-1">
+                                    <p class="text-2xl font-bold text-gray-900">189</p>
+                                    <span class="text-sm text-green-600 font-medium">↗ +5%</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="sparkline"></div>
+                                    <span class="text-xs text-gray-500">80% of members</span>
+                                </div>
+                            </div>
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i data-lucide="calendar" class="h-5 w-5 text-green-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                Highly Engaged
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Prayer Requests</p>
+                                <div class="flex items-baseline gap-2 mt-1">
+                                    <p class="text-2xl font-bold text-gray-900">47</p>
+                                    <span class="text-sm text-orange-600 font-medium">→ 0%</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="w-60 h-20 bg-orange-100 rounded"></div>
+                                    <span class="text-xs text-gray-500">this month</span>
+                                </div>
+                            </div>
+                            <div class="p-2 bg-orange-100 rounded-lg">
+                                <i data-lucide="heart" class="h-5 w-5 text-orange-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
+                                7 Urgent
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Volunteer Hours</p>
+                                <div class="flex items-baseline gap-2 mt-1">
+                                    <p class="text-2xl font-bold text-gray-900">156</p>
+                                    <span class="text-sm text-green-600 font-medium">↗ +23%</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="sparkline"></div>
+                                    <span class="text-xs text-gray-500">this week</span>
+                                </div>
+                            </div>
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i data-lucide="heart-handshake" class="h-5 w-5 text-purple-600"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+                                43 Active Volunteers
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-lg p-4 mb-6 shadow-sm border">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Detailed Analytics</h3>
+                        <div class="flex gap-3">
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>All Campuses</option>
+                                <option>Main Campus</option>
+                                <option>North Campus</option>
+                                <option>Youth Center</option>
+                            </select>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>Last 30 Days</option>
+                                <option>Last 7 Days</option>
+                                <option>Last 3 Months</option>
+                                <option>This Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Placeholder -->
+                    <div class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                        <div class="text-center">
+                            <i data-lucide="bar-chart-3" class="h-12 w-12 text-gray-400 mx-auto mb-2"></i>
+                            <p class="text-gray-500">Interactive charts would appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced People Tab -->
+            <div id="people-content" class="p-6 hidden">
+                <!-- Member Directory with Enhanced UX -->
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Member Directory</h2>
+                        <p class="text-gray-600 mt-1">Manage your church members and track engagement</p>
+                    </div>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700">
+                        <i data-lucide="user-plus" class="h-4 w-4"></i>
+                        Add Member
+                    </button>
+                </div>
+
+                <!-- Filters and Search -->
+                <div class="bg-white rounded-lg p-4 mb-6 shadow-sm border">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div class="relative">
+                            <input type="text" placeholder="Search members..." 
+                                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                        </div>
+                        <select class="px-3 py-2 border border-gray-300 rounded-lg">
+                            <option>All Ministries</option>
+                            <option>Youth Ministry</option>
+                            <option>Worship Team</option>
+                            <option>Prayer Team</option>
+                            <option>Outreach</option>
+                        </select>
+                        <select class="px-3 py-2 border border-gray-300 rounded-lg">
+                            <option>All Status</option>
+                            <option>Active</option>
+                            <option>New This Month</option>
+                            <option>Inactive</option>
+                        </select>
+                        <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200">
+                            <i data-lucide="download" class="h-4 w-4"></i>
+                            Export CSV
+                        </button>
+                        <button class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-200">
+                            <i data-lucide="send" class="h-4 w-4"></i>
+                            Bulk Message
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Member Cards with Enhanced Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
+                                    SM
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900">Sarah Mitchell</h3>
+                                    <p class="text-sm text-gray-600">sarah.mitchell@email.com</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="p-1 text-gray-400 hover:text-blue-600 tooltip-trigger">
+                                    <i data-lucide="message-circle" class="h-4 w-4"></i>
+                                    <div class="tooltip absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        Send Message
+                                    </div>
+                                </button>
+                                <button class="p-1 text-gray-400 hover:text-purple-600 tooltip-trigger">
+                                    <i data-lucide="heart" class="h-4 w-4"></i>
+                                    <div class="tooltip absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        Pray for Member
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i data-lucide="calendar" class="h-4 w-4"></i>
+                                <span>Last Active: 2 days ago</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i data-lucide="users" class="h-4 w-4"></i>
+                                <span>Youth Ministry, Worship Team</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                Active
+                            </span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                Youth Leader
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-medium">
+                                    MJ
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900">Michael Johnson</h3>
+                                    <p class="text-sm text-gray-600">michael.j@email.com</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="p-1 text-gray-400 hover:text-blue-600 tooltip-trigger">
+                                    <i data-lucide="message-circle" class="h-4 w-4"></i>
+                                    <div class="tooltip absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        Send Message
+                                    </div>
+                                </button>
+                                <button class="p-1 text-gray-400 hover:text-purple-600 tooltip-trigger">
+                                    <i data-lucide="heart" class="h-4 w-4"></i>
+                                    <div class="tooltip absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        Pray for Member
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i data-lucide="calendar" class="h-4 w-4"></i>
+                                <span>Last Active: 1 hour ago</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i data-lucide="users" class="h-4 w-4"></i>
+                                <span>Prayer Team, Outreach</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
+                                New This Month
+                            </span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+                                Prayer Leader
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                                    ER
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900">Emma Rodriguez</h3>
+                                    <p class="text-sm text-gray-600">emma.rodriguez@email.com</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="p-1 text-gray-400 hover:text-blue-600 tooltip-trigger">
+                                    <i data-lucide="message-circle" class="h-4 w-4"></i>
+                                    <div class="tooltip absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        Send Message
+                                    </div>
+                                </button>
+                                <button class="p-1 text-gray-400 hover:text-purple-600 tooltip-trigger">
+                                    <i data-lucide="heart" class="h-4 w-4"></i>
+                                    <div class="tooltip absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                        Pray for Member
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i data-lucide="calendar" class="h-4 w-4"></i>
+                                <span>Last Active: 1 week ago</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <i data-lucide="users" class="h-4 w-4"></i>
+                                <span>Children's Ministry</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
+                                Dormant
+                            </span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                Children's Leader
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Ministry Tab -->
+            <div id="ministry-content" class="p-6 hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Ministry Management</h2>
+                        <p class="text-gray-600 mt-1">Organize events, prayers, and ministry activities</p>
+                    </div>
+                </div>
+
+                <!-- Color-Coded Event Categories -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg p-6 shadow-sm border border-l-4 border-l-blue-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i data-lucide="calendar" class="h-5 w-5 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Services</h3>
+                                <p class="text-sm text-gray-600">Sunday & Wednesday</p>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-900 mb-2">12</div>
+                        <div class="text-sm text-gray-600">This month</div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border border-l-4 border-l-green-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i data-lucide="heart-handshake" class="h-5 w-5 text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Outreach</h3>
+                                <p class="text-sm text-gray-600">Community events</p>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-900 mb-2">8</div>
+                        <div class="text-sm text-gray-600">This month</div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border border-l-4 border-l-purple-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i data-lucide="heart" class="h-5 w-5 text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Prayer</h3>
+                                <p class="text-sm text-gray-600">Prayer meetings</p>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-900 mb-2">6</div>
+                        <div class="text-sm text-gray-600">This month</div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border border-l-4 border-l-yellow-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2 bg-yellow-100 rounded-lg">
+                                <i data-lucide="users" class="h-5 w-5 text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Youth</h3>
+                                <p class="text-sm text-gray-600">Youth activities</p>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-900 mb-2">15</div>
+                        <div class="text-sm text-gray-600">This month</div>
+                    </div>
+                </div>
+
+                <!-- Visual Calendar View -->
+                <div class="bg-white rounded-lg p-6 shadow-sm border">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Event Calendar</h3>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Month</button>
+                            <button class="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg">Week</button>
+                            <button class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Day</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Simplified Calendar Grid -->
+                    <div class="grid grid-cols-7 gap-2 mb-4">
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Sun</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Mon</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Tue</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Wed</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Thu</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Fri</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Sat</div>
+                        
+                        <!-- Calendar days with events -->
+                        <div class="h-20 border border-gray-200 rounded p-1">
+                            <div class="text-sm text-gray-400">29</div>
+                        </div>
+                        <div class="h-20 border border-gray-200 rounded p-1">
+                            <div class="text-sm text-gray-400">30</div>
+                        </div>
+                        <div class="h-20 border border-gray-200 rounded p-1">
+                            <div class="text-sm text-gray-900">1</div>
+                        </div>
+                        <div class="h-20 border border-gray-200 rounded p-1">
+                            <div class="text-sm text-gray-900">2</div>
+                            <div class="text-xs bg-purple-100 text-purple-800 px-1 rounded mt-1">🙏 Prayer</div>
+                        </div>
+                        <div class="h-20 border border-gray-200 rounded p-1">
+                            <div class="text-sm text-gray-900">3</div>
+                        </div>
+                        <div class="h-20 border border-gray-200 rounded p-1">
+                            <div class="text-sm text-gray-900">4</div>
+                        </div>
+                        <div class="h-20 border border-gray-200 rounded p-1">
+                            <div class="text-sm text-gray-900">5</div>
+                            <div class="text-xs bg-blue-100 text-blue-800 px-1 rounded mt-1">📅 Service</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Default Dashboard -->
+            <div id="dashboard-content" class="p-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+                    <p class="text-gray-600 mt-1">Welcome to your enhanced church management portal</p>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg p-6 shadow-sm border cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Events This Week</p>
+                                <p class="text-2xl font-bold text-gray-900">8</p>
+                            </div>
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i data-lucide="calendar" class="h-6 w-6 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Active Members</p>
+                                <p class="text-2xl font-bold text-gray-900">234</p>
+                            </div>
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i data-lucide="users" class="h-6 w-6 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Prayer Requests</p>
+                                <p class="text-2xl font-bold text-gray-900">47</p>
+                            </div>
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i data-lucide="heart" class="h-6 w-6 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-sm border cursor-pointer hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Volunteer Hours</p>
+                                <p class="text-2xl font-bold text-gray-900">156</p>
+                            </div>
+                            <div class="p-2 bg-orange-100 rounded-lg">
+                                <i data-lucide="heart-handshake" class="h-6 w-6 text-orange-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg p-6 shadow-sm border">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="user-plus" class="h-4 w-4 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-900">New member joined: <span class="font-medium">Sarah Mitchell</span></p>
+                                <p class="text-xs text-gray-500">2 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="heart" class="h-4 w-4 text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-900">Prayer request submitted: <span class="font-medium">Family Health</span></p>
+                                <p class="text-xs text-gray-500">4 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="calendar" class="h-4 w-4 text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-900">Event created: <span class="font-medium">Community Outreach</span></p>
+                                <p class="text-xs text-gray-500">6 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Quick Action Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <div class="relative">
+            <button id="quick-actions-btn" class="w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                <i data-lucide="plus" class="h-6 w-6"></i>
+            </button>
+            
+            <!-- Quick Actions Menu -->
+            <div id="quick-actions-menu" class="absolute bottom-16 right-0 bg-white rounded-lg shadow-xl border p-2 w-48 hidden">
+                <button class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="calendar-plus" class="h-4 w-4 text-green-600"></i>
+                    <span class="text-sm">Add Event</span>
+                </button>
+                <button class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="heart" class="h-4 w-4 text-purple-600"></i>
+                    <span class="text-sm">New Prayer</span>
+                </button>
+                <button class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="book-open" class="h-4 w-4 text-blue-600"></i>
+                    <span class="text-sm">Add Devotional</span>
+                </button>
+                <button class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="user-plus" class="h-4 w-4 text-orange-600"></i>
+                    <span class="text-sm">Add Member</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        let sidebarCollapsed = false;
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebarCollapsed = !sidebarCollapsed;
+            
+            if (sidebarCollapsed) {
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                document.querySelectorAll('.sidebar-text').forEach(el => el.style.display = 'none');
+                sidebarToggle.innerHTML = '<i data-lucide="panel-left-open" class="h-5 w-5 text-gray-600"></i>';
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                document.querySelectorAll('.sidebar-text').forEach(el => el.style.display = 'block');
+                sidebarToggle.innerHTML = '<i data-lucide="panel-left-close" class="h-5 w-5 text-gray-600"></i>';
+            }
+            lucide.createIcons();
+        });
+
+        // Navigation functionality
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all nav items
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active', 'text-blue-600', 'bg-blue-50');
+                    item.classList.add('text-gray-700');
+                });
+                
+                // Add active class to clicked item
+                link.classList.add('active', 'text-blue-600', 'bg-blue-50');
+                link.classList.remove('text-gray-700');
+                
+                // Hide all content
+                document.querySelectorAll('[id$="-content"]').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Show relevant content
+                const target = link.getAttribute('href').substring(1);
+                if (target) {
+                    const content = document.getElementById(target + '-content');
+                    if (content) {
+                        content.classList.remove('hidden');
+                    }
+                } else {
+                    document.getElementById('dashboard-content').classList.remove('hidden');
+                }
+            });
+        });
+
+        // Quick actions menu
+        const quickActionsBtn = document.getElementById('quick-actions-btn');
+        const quickActionsMenu = document.getElementById('quick-actions-menu');
+
+        quickActionsBtn.addEventListener('click', () => {
+            quickActionsMenu.classList.toggle('hidden');
+        });
+
+        // Close quick actions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!quickActionsBtn.contains(e.target) && !quickActionsMenu.contains(e.target)) {
+                quickActionsMenu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
