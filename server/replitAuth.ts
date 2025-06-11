@@ -90,13 +90,21 @@ export async function setupAuth(app: Express) {
     domains.push('127.0.0.1:5000', 'localhost:5000');
   }
   
+  console.log('Registering authentication strategies for domains:', domains);
+  
   for (const domain of domains) {
+    const isLocalhost = domain.includes('127.0.0.1') || domain.includes('localhost');
+    const protocol = isLocalhost ? 'http' : 'https';
+    const strategyName = `replitauth:${domain}`;
+    
+    console.log(`Registering strategy: ${strategyName}`);
+    
     const strategy = new Strategy(
       {
-        name: `replitauth:${domain}`,
+        name: strategyName,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: `${protocol}://${domain}/api/callback`,
       },
       verify,
     );
@@ -107,14 +115,24 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const hostname = req.hostname;
+    const port = req.get('host')?.split(':')[1] || '';
+    const hostWithPort = port ? `${hostname}:${port}` : hostname;
+    
+    console.log(`Login attempt for hostname: ${hostname}, host: ${req.get('host')}, using strategy: replitauth:${hostWithPort}`);
+    
+    passport.authenticate(`replitauth:${hostWithPort}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const hostname = req.hostname;
+    const port = req.get('host')?.split(':')[1] || '';
+    const hostWithPort = port ? `${hostname}:${port}` : hostname;
+    
+    passport.authenticate(`replitauth:${hostWithPort}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
