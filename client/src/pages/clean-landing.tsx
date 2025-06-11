@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
-import soapboxLogo from "@assets/SoapBx logo_1749627505398.jpeg";
+import soapboxLogo from "@assets/SoapBx logo_1749686036591.jpeg";
 
 export default function CleanLanding() {
   return (

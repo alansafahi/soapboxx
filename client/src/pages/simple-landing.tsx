@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
-import soapboxLogo from "@assets/SoapBx logo_1749627505398.jpeg";
+import soapboxLogo from "@assets/SoapBx logo_1749686036591.jpeg";
 
 // SoapBox Logo Component
 const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: string; showText?: boolean }) => (
