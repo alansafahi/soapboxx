@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { roleManager } from "./role-system";
 import { db } from "./db";
 import { userInspirationHistory, prayerResponses, conversationParticipants, devotionals, weeklySeries, sermonMedia } from "@shared/schema";
 import { and, eq, desc } from "drizzle-orm";
@@ -98,6 +99,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Initialize roles and permissions in database
+  try {
+    await roleManager.initializeRolesAndPermissions();
+    console.log("Role system initialized successfully");
+  } catch (error) {
+    console.error("Error initializing role system:", error);
+  }
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -107,6 +116,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Role Management Routes
+  app.get('/api/roles', isAuthenticated, async (req: any, res) => {
+    try {
+      const roles = await roleManager.getAllRoles();
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      res.status(500).json({ message: "Failed to fetch roles" });
+    }
+  });
+
+  app.get('/api/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const permissions = await roleManager.getAllPermissions();
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching permissions:", error);
+      res.status(500).json({ message: "Failed to fetch permissions" });
+    }
+  });
+
+  app.get('/api/users/:userId/role/:churchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId, churchId } = req.params;
+      const role = await roleManager.getUserRole(userId, parseInt(churchId));
+      res.json(role);
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      res.status(500).json({ message: "Failed to fetch user role" });
+    }
+  });
+
+  app.post('/api/users/:userId/assign-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { churchId, roleName, title, department, additionalPermissions, expiresAt } = req.body;
+      const assignedBy = req.user.claims.sub;
+
+      // Check if user has permission to assign this role
+      const canAssign = await roleManager.canManageRole(assignedBy, churchId, roleName);
+      if (!canAssign) {
+        return res.status(403).json({ message: "You don't have permission to assign this role" });
+      }
+
+      await roleManager.assignRole(userId, churchId, roleName, assignedBy, {
+        title,
+        department,
+        additionalPermissions,
+        expiresAt: expiresAt ? new Date(expiresAt) : undefined
+      });
+
+      res.json({ success: true, message: "Role assigned successfully" });
+    } catch (error) {
+      console.error("Error assigning role:", error);
+      res.status(500).json({ message: "Failed to assign role" });
+    }
+  });
+
+  app.get('/api/users/:userId/permissions/:churchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId, churchId } = req.params;
+      const { permission } = req.query;
+      
+      if (permission) {
+        const hasPermission = await roleManager.hasPermission(userId, parseInt(churchId), permission as string);
+        res.json({ hasPermission });
+      } else {
+        // Get all permissions for the user
+        const userRole = await roleManager.getUserRole(userId, parseInt(churchId));
+        res.json(userRole ? userRole.permissions : []);
+      }
+    } catch (error) {
+      console.error("Error checking permissions:", error);
+      res.status(500).json({ message: "Failed to check permissions" });
     }
   });
 

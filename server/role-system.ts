@@ -266,6 +266,9 @@ export const ROLE_DEFINITIONS = [
 export const PERMISSION_DEFINITIONS = [
   // System permissions
   { name: "system.manage.all", displayName: "Manage System", description: "Full system administration", category: "system", resource: "system", action: "manage", scope: "system" },
+  { name: "billing.manage", displayName: "Manage Billing", description: "Manage billing and subscriptions", category: "system", resource: "billing", action: "manage", scope: "system" },
+  { name: "integrations.manage", displayName: "Manage Integrations", description: "Manage third-party integrations", category: "system", resource: "integrations", action: "manage", scope: "system" },
+  { name: "backups.manage", displayName: "Manage Backups", description: "Manage system backups", category: "system", resource: "backups", action: "manage", scope: "system" },
   
   // User management permissions
   { name: "users.manage.all", displayName: "Manage All Users", description: "Manage users across all churches", category: "users", resource: "users", action: "manage", scope: "system" },
@@ -278,10 +281,12 @@ export const PERMISSION_DEFINITIONS = [
   { name: "church.manage.own", displayName: "Manage Own Church", description: "Manage own church only", category: "church", resource: "churches", action: "manage", scope: "church" },
   
   // Role assignment permissions
+  { name: "roles.assign.all", displayName: "Assign Any Role", description: "Can assign any role", category: "roles", resource: "roles", action: "assign", scope: "system" },
   { name: "roles.assign.super_admin", displayName: "Assign Super Admin", description: "Can assign Super Admin roles", category: "roles", resource: "roles", action: "assign", scope: "system" },
   { name: "roles.assign.church_admin", displayName: "Assign Church Admin", description: "Can assign Church Admin roles", category: "roles", resource: "roles", action: "assign", scope: "church" },
   { name: "roles.assign.lead_pastor", displayName: "Assign Lead Pastor", description: "Can assign Lead Pastor roles", category: "roles", resource: "roles", action: "assign", scope: "church" },
   { name: "roles.assign.pastor", displayName: "Assign Pastor", description: "Can assign Pastor roles", category: "roles", resource: "roles", action: "assign", scope: "church" },
+  { name: "roles.assign.minister", displayName: "Assign Minister", description: "Can assign Minister roles", category: "roles", resource: "roles", action: "assign", scope: "church" },
   { name: "roles.assign.staff", displayName: "Assign Staff", description: "Can assign Staff roles", category: "roles", resource: "roles", action: "assign", scope: "church" },
   { name: "roles.assign.member", displayName: "Assign Member", description: "Can assign Member roles", category: "roles", resource: "roles", action: "assign", scope: "church" },
   
