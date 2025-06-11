@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
 import soapboxLogo from "@assets/SoapBx logo_1749626952136.jpeg";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 // SoapBox Logo Component
 const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: string; showText?: boolean }) => (
@@ -15,6 +17,47 @@ const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: s
 );
 
 export default function SimpleLanding() {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    const demoRequest = {
+      firstName: formData.get('firstName') as string,
+      lastName: formData.get('lastName') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      organization: formData.get('organization') as string,
+      role: formData.get('role') as string,
+      communitySize: formData.get('communitySize') as string,
+      message: formData.get('message') as string,
+    };
+
+    try {
+      // Simulate form submission - in real app this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "Demo Request Submitted!",
+        description: "We'll contact you within 24 hours to schedule your personalized demo.",
+      });
+
+      // Reset form
+      e.currentTarget.reset();
+    } catch (error) {
+      toast({
+        title: "Submission Failed",
+        description: "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white" data-component="simple-landing">
       {/* Navigation */}
@@ -73,9 +116,13 @@ export default function SimpleLanding() {
             </Button>
             <Button 
               variant="outline"
+              onClick={() => {
+                const demoSection = document.getElementById('demo-signup');
+                demoSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 text-lg rounded-full font-semibold"
             >
-              Watch Demo
+              Schedule Demo
             </Button>
           </div>
           
@@ -263,6 +310,153 @@ export default function SimpleLanding() {
           </div>
           <div className="mt-8 text-blue-100">
             No credit card required • Free to get started
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Signup Section */}
+      <section id="demo-signup" className="py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Ready to Transform Your Community?
+          </h2>
+          <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
+            Schedule a personalized demo to see how SoapBox can revolutionize your faith community's digital experience.
+          </p>
+          
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 max-w-2xl mx-auto shadow-2xl">
+            <form onSubmit={handleDemoSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                    placeholder="Enter your first name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                    placeholder="Enter your last name"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                  placeholder="Enter your email address"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
+                  Church/Organization Name *
+                </label>
+                <input
+                  type="text"
+                  id="organization"
+                  name="organization"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                  placeholder="Enter your church or organization name"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Role *
+                </label>
+                <select
+                  id="role"
+                  name="role"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                >
+                  <option value="">Select your role</option>
+                  <option value="pastor">Pastor/Minister</option>
+                  <option value="admin">Church Administrator</option>
+                  <option value="volunteer">Volunteer Coordinator</option>
+                  <option value="member">Church Member</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div>
+                <label htmlFor="communitySize" className="block text-sm font-medium text-gray-700 mb-2">
+                  Community Size
+                </label>
+                <select
+                  id="communitySize"
+                  name="communitySize"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
+                >
+                  <option value="">Select community size</option>
+                  <option value="small">Under 100 members</option>
+                  <option value="medium">100-500 members</option>
+                  <option value="large">500-1000 members</option>
+                  <option value="xl">Over 1000 members</option>
+                </select>
+              </div>
+              
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                  Tell us about your needs (Optional)
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors resize-none"
+                  placeholder="What specific features or challenges would you like to discuss during the demo?"
+                />
+              </div>
+              
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 text-lg font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                {isSubmitting ? "Submitting..." : "Schedule My Demo"}
+              </Button>
+            </form>
+            
+            <p className="text-sm text-gray-600 mt-6 text-center">
+              We'll contact you within 24 hours to schedule your personalized demo.
+            </p>
           </div>
         </div>
       </section>
