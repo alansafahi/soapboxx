@@ -25,11 +25,7 @@ export default function PhoneVerification() {
   // Send phone verification
   const sendVerificationMutation = useMutation({
     mutationFn: async (phone: string) => {
-      return apiRequest("/api/auth/phone/send-verification", {
-        method: "POST",
-        body: JSON.stringify({ phoneNumber: phone }),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("/api/auth/phone/send-verification", "POST", { phoneNumber: phone });
     },
     onSuccess: () => {
       setVerificationSent(true);
@@ -50,11 +46,7 @@ export default function PhoneVerification() {
   // Verify phone number
   const verifyPhoneMutation = useMutation({
     mutationFn: async ({ code, phone }: { code: string; phone: string }) => {
-      return apiRequest("/api/auth/phone/verify", {
-        method: "POST",
-        body: JSON.stringify({ code, phoneNumber: phone }),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("/api/auth/phone/verify", "POST", { verificationCode: code, phoneNumber: phone });
     },
     onSuccess: () => {
       toast({
