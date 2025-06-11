@@ -142,8 +142,7 @@ function AppRouter() {
       {needsOnboarding && (
         <WelcomeWizard 
           onComplete={() => {
-            setShowWelcomeWizard(true);
-            // Refresh user data
+            // Refresh user data to update has_completed_onboarding status
             queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
           }} 
         />
