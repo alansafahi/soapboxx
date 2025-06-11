@@ -201,7 +201,7 @@ const tourConfigs: RoleTourConfig[] = [
         title: "Spiritual Dashboard",
         description: "Monitor spiritual engagement, growth patterns, and community health.",
         icon: BarChart3,
-        target: "/",
+        target: "/leaderboard",
         action: "View Insights",
         highlight: "Track your congregation's spiritual journey and engagement levels."
       }
@@ -359,7 +359,7 @@ const tourConfigs: RoleTourConfig[] = [
         title: "Service Opportunities",
         description: "Find volunteer opportunities that match your skills, passion, and availability.",
         icon: Target,
-        target: "/",
+        target: "/events",
         action: "Find Opportunities",
         highlight: "Discover meaningful ways to serve your church and community."
       },
@@ -621,7 +621,6 @@ export default function PersonalizedTour({ isOpen, onComplete, userRole }: Perso
                         size="sm"
                         onClick={() => {
                           window.location.href = currentStepData.target!;
-                          onComplete();
                         }}
                         className="border-[#5A2671] text-[#5A2671] hover:bg-[#5A2671] hover:text-white"
                       >
