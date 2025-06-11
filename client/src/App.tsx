@@ -82,7 +82,7 @@ function AppRouter() {
   }, [location]);
 
   // Check if user needs onboarding
-  const needsOnboarding = isAuthenticated && user && !(user as any).hasCompletedOnboarding;
+  const needsOnboarding = isAuthenticated && user && !(user as any).has_completed_onboarding;
 
   // Show loading spinner during initial auth check
   if (isLoading) {
