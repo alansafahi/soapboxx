@@ -28,7 +28,8 @@ import {
   ChevronDown,
   Sparkles,
   Target,
-  X
+  X,
+  HelpCircle
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -73,8 +74,6 @@ const denominations = [
   { id: "messianic-jewish", label: "Messianic Jewish", description: "Jewish believers in Jesus (Yeshua)", category: "other" },
   { id: "foursquare", label: "Foursquare", description: "Christ-centered Pentecostal tradition", category: "other" },
   { id: "coptic-orthodox", label: "Coptic Orthodox", description: "Ancient Egyptian Christian tradition", category: "other" },
-  { id: "lds", label: "LDS (Mormon) ⚠️", description: "Restorationist, theologically distinct", category: "other" },
-  { id: "jehovahs-witnesses", label: "Jehovah's Witnesses ⚠️", description: "Non-Trinitarian, Bible-focused movement", category: "other" },
   { id: "other-specify", label: "Other (Please Specify)", description: "Freeform option for full inclusivity", category: "other" },
   
   // Exploring
@@ -135,6 +134,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   });
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [showOtherTraditions, setShowOtherTraditions] = useState(false);
+  const [showDenominationDisclaimer, setShowDenominationDisclaimer] = useState(false);
   const { toast } = useToast();
 
   const steps = [
@@ -462,8 +462,45 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                       </motion.div>
                     )}
 
-                    {/* Helpful note */}
-                    <div className="text-center">
+                    {/* Denomination Disclaimer */}
+                    <div className="text-center space-y-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowDenominationDisclaimer(!showDenominationDisclaimer)}
+                        className="text-sm text-[#5A2671] hover:text-[#6B3280] transition-colors flex items-center justify-center gap-2 mx-auto"
+                      >
+                        <HelpCircle className="h-4 w-4" />
+                        Don't see your denomination? Learn why
+                        <ChevronDown className={`h-3 w-3 transition-transform ${showDenominationDisclaimer ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {showDenominationDisclaimer && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-gray-50 border rounded-lg p-4 text-left max-w-md mx-auto"
+                        >
+                          <div className="space-y-3 text-sm text-gray-700">
+                            <p>
+                              We currently support a wide range of Christian denominations, including Protestant, Catholic, and Orthodox traditions.
+                            </p>
+                            <p>
+                              At this time, we do not support onboarding for churches affiliated with:
+                            </p>
+                            <ul className="list-disc list-inside space-y-1 ml-2">
+                              <li>The Church of Jesus Christ of Latter-day Saints (LDS)</li>
+                              <li>Jehovah's Witnesses</li>
+                            </ul>
+                            <p>
+                              This is due to significant structural and doctrinal differences with our platform's current features.
+                            </p>
+                            <p className="text-[#5A2671] font-medium">
+                              We remain open to expanding support in the future and deeply respect all expressions of faith.
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                      
                       <p className="text-sm text-gray-500">
                         Don't see your tradition? Choose 'Other' and specify.
                       </p>
