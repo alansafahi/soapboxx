@@ -1,5 +1,4 @@
 import { createRoot } from "react-dom/client";
-import { StrictMode } from "react";
 import App from "./App";
 import "./index.css";
 
@@ -20,7 +19,5 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+  <App />
 );
