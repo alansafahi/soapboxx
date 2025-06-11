@@ -5702,8 +5702,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-
-
   // SMS Verification API Routes
   app.post('/api/auth/phone/send-verification', isAuthenticated, async (req: any, res) => {
     try {
