@@ -90,8 +90,8 @@ export default function AppHeader() {
         </div>
       </header>
 
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-64 lg:bg-white lg:border-r lg:border-gray-200">
+      {/* Desktop Sidebar - Always Visible */}
+      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
         {/* Sidebar Header */}
         <div className="flex items-center h-16 px-6 border-b border-gray-200">
           <img 
