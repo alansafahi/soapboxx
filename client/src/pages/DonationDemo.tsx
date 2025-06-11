@@ -151,9 +151,55 @@ export default function DonationDemo() {
   const [shareNewsletter, setShareNewsletter] = useState(false);
   const [earnedBadge, setEarnedBadge] = useState<string | null>(null);
   const [showBadgeAnimation, setShowBadgeAnimation] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string>("");
+  const [paymentIntentId, setPaymentIntentId] = useState<string>("");
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   const { data: churches = [] } = useQuery<Church[]>({
     queryKey: ["/api/churches"],
+  });
+
+  // Create payment intent mutation
+  const createPaymentIntent = useMutation({
+    mutationFn: async (data: { amount: number; metadata?: any }) => {
+      const response = await apiRequest("POST", "/api/create-payment-intent", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setClientSecret(data.clientSecret);
+      setPaymentIntentId(data.paymentIntentId);
+      setShowPaymentForm(true);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to initialize payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Confirm donation mutation
+  const confirmDonation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/confirm-donation", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setShowPaymentForm(false);
+      setShowConfirmation(true);
+      toast({
+        title: "Donation Successful!",
+        description: data.message,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to process donation. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   const handleAmountSelect = (amount: number) => {
@@ -171,6 +217,46 @@ export default function DonationDemo() {
   };
 
   const handleDonate = () => {
+    const amount = getCurrentAmount();
+    
+    if (amount < 0.5) {
+      toast({
+        title: "Invalid Amount",
+        description: "Minimum donation is $0.50",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create payment intent with Stripe
+    createPaymentIntent.mutate({
+      amount,
+      metadata: {
+        churchId: selectedChurch,
+        purpose,
+        isRecurring,
+        dedicationType: honorType,
+        dedicationName: honorName,
+      }
+    });
+  };
+
+  const handlePaymentSuccess = (paymentIntentId: string) => {
+    // Confirm the donation in our system
+    confirmDonation.mutate({
+      paymentIntentId,
+      amount: getCurrentAmount(),
+      churchId: selectedChurch,
+      isRecurring,
+      dedicationType: honorType,
+      dedicationName: honorName,
+      dedicationMessage: honorName,
+      donorName,
+      donorEmail: email,
+      isAnonymous,
+      subscribeNewsletter: shareNewsletter
+    });
+
     // Check for badge unlocking
     const amount = getCurrentAmount();
     const eligibleBadge = GIVING_BADGES.find(badge => amount >= badge.threshold && !earnedBadge);
@@ -179,11 +265,6 @@ export default function DonationDemo() {
       setEarnedBadge(eligibleBadge.name);
       setShowBadgeAnimation(true);
     }
-    
-    // Simulate donation processing
-    setTimeout(() => {
-      setShowConfirmation(true);
-    }, 2000);
   };
 
   const getCurrentCampaign = () => {
@@ -198,6 +279,79 @@ export default function DonationDemo() {
     const link = `${window.location.origin}/donation-demo?church=${selectedChurch}&amount=${getCurrentAmount()}`;
     navigator.clipboard.writeText(link);
   };
+
+  // Show Stripe payment form
+  if (showPaymentForm && clientSecret) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowPaymentForm(false)}
+            className="mb-4"
+          >
+            ← Back to Donation Details
+          </Button>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <CreditCard className="h-5 w-5" />
+                <span>Complete Your Donation</span>
+              </CardTitle>
+              <CardDescription>
+                Secure payment powered by Stripe
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Donation Amount:</span>
+                  <span className="text-xl font-bold text-blue-600">${getCurrentAmount()}</span>
+                </div>
+                {selectedChurch && (
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-gray-600">To:</span>
+                    <span className="text-sm font-medium">{churches.find(c => c.id.toString() === selectedChurch)?.name}</span>
+                  </div>
+                )}
+                {honorType && honorName && (
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-gray-600">In {honorType} of:</span>
+                    <span className="text-sm font-medium">{honorName}</span>
+                  </div>
+                )}
+              </div>
+              
+              <Elements 
+                stripe={stripePromise} 
+                options={{ 
+                  clientSecret,
+                  appearance: {
+                    theme: 'stripe',
+                    variables: {
+                      colorPrimary: '#2563eb',
+                    }
+                  }
+                }}
+              >
+                <PaymentForm 
+                  amount={getCurrentAmount()} 
+                  donationData={{
+                    churchId: selectedChurch,
+                    purpose,
+                    isRecurring,
+                    dedicationType: honorType,
+                    dedicationName: honorName,
+                  }}
+                  onSuccess={handlePaymentSuccess}
+                />
+              </Elements>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (showConfirmation) {
     return (
