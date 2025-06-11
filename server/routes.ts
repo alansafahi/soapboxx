@@ -84,6 +84,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.use('/uploads', express.static(uploadsDir));
 
+  // Serve demo enhanced admin file
+  app.get('/demo-enhanced-admin.html', (req, res) => {
+    const filepath = path.join(process.cwd(), 'demo-enhanced-admin.html');
+    res.sendFile(filepath);
+  });
+
   // Auth middleware
   await setupAuth(app);
 
