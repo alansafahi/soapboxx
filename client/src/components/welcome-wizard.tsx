@@ -29,7 +29,8 @@ import {
   Sparkles,
   Target,
   X,
-  HelpCircle
+  HelpCircle,
+  Calendar
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -80,19 +81,72 @@ const denominations = [
   { id: "exploring", label: "Still Exploring", description: "Open to different traditions", category: "main" }
 ];
 
-const interests = [
-  { id: "youth", label: "Youth Ministry", icon: Users, color: "bg-blue-100 text-blue-700" },
-  { id: "music", label: "Music & Worship", icon: Music, color: "bg-purple-100 text-purple-700" },
-  { id: "bible-study", label: "Bible Study", icon: BookOpen, color: "bg-green-100 text-green-700" },
-  { id: "community-service", label: "Community Service", icon: Heart, color: "bg-red-100 text-red-700" },
-  { id: "small-groups", label: "Small Groups", icon: Users, color: "bg-yellow-100 text-yellow-700" },
-  { id: "fellowship", label: "Fellowship Events", icon: Coffee, color: "bg-orange-100 text-orange-700" },
-  { id: "missions", label: "Missions", icon: MapPin, color: "bg-indigo-100 text-indigo-700" },
-  { id: "prayer", label: "Prayer Groups", icon: Heart, color: "bg-pink-100 text-pink-700" },
-  { id: "family", label: "Family Ministry", icon: Users, color: "bg-teal-100 text-teal-700" },
-  { id: "sports", label: "Sports & Recreation", icon: Dumbbell, color: "bg-gray-100 text-gray-700" },
-  { id: "arts", label: "Arts & Creativity", icon: Palette, color: "bg-rose-100 text-rose-700" },
-  { id: "technology", label: "Tech Ministry", icon: Code, color: "bg-cyan-100 text-cyan-700" }
+const ministryCategories = [
+  {
+    id: "life-stage",
+    title: "Life Stage Ministries",
+    description: "Age and life stage focused communities",
+    icon: Users,
+    interests: [
+      { id: "youth", label: "Youth Ministry", description: "Teens and high school students", icon: Users, color: "bg-blue-100 text-blue-700" },
+      { id: "college-young-adults", label: "College & Young Adults", description: "Post-high school, transitional life phase", icon: Users, color: "bg-indigo-100 text-indigo-700" },
+      { id: "mens-ministry", label: "Men's Ministry", description: "Brotherhood, accountability, retreats", icon: Users, color: "bg-gray-100 text-gray-700" },
+      { id: "womens-ministry", label: "Women's Ministry", description: "Fellowship, mentorship, prayer circles", icon: Users, color: "bg-pink-100 text-pink-700" },
+      { id: "singles-ministry", label: "Singles Ministry", description: "Community and discipleship for unmarried adults", icon: Users, color: "bg-purple-100 text-purple-700" },
+      { id: "marriage-ministry", label: "Marriage Ministry", description: "Support for couples, counseling, enrichment", icon: Heart, color: "bg-red-100 text-red-700" },
+      { id: "family", label: "Family Ministry", description: "Families with children of all ages", icon: Users, color: "bg-teal-100 text-teal-700" },
+      { id: "childrens-ministry", label: "Children's Ministry", description: "Sunday school, VBS, family outreach", icon: Users, color: "bg-yellow-100 text-yellow-700" },
+      { id: "seniors-ministry", label: "Seniors Ministry", description: "Connection and care for older adults", icon: Users, color: "bg-orange-100 text-orange-700" }
+    ]
+  },
+  {
+    id: "spiritual-growth",
+    title: "Spiritual Growth",
+    description: "Deepen your faith and biblical understanding",
+    icon: BookOpen,
+    interests: [
+      { id: "bible-study", label: "Bible Study", description: "In-depth scripture exploration", icon: BookOpen, color: "bg-green-100 text-green-700" },
+      { id: "prayer", label: "Prayer Groups", description: "Corporate and personal prayer", icon: Heart, color: "bg-pink-100 text-pink-700" },
+      { id: "intercessory-prayer", label: "Intercessory Prayer", description: "Focused prayer warriors for church needs", icon: Heart, color: "bg-rose-100 text-rose-700" },
+      { id: "small-groups", label: "Small Groups", description: "Intimate fellowship and study", icon: Users, color: "bg-yellow-100 text-yellow-700" },
+      { id: "discipleship", label: "Mentorship & Discipleship", description: "1-on-1 spiritual guidance", icon: BookOpen, color: "bg-blue-100 text-blue-700" },
+      { id: "leadership-development", label: "Leadership Development", description: "Equip future pastors, elders, and volunteers", icon: Target, color: "bg-purple-100 text-purple-700" },
+      { id: "theology-apologetics", label: "Theology & Apologetics", description: "Deep study, defending the faith", icon: BookOpen, color: "bg-indigo-100 text-indigo-700" },
+      { id: "missions", label: "Missions", description: "Local and global Gospel outreach", icon: MapPin, color: "bg-cyan-100 text-cyan-700" },
+      { id: "evangelism-outreach", label: "Evangelism & Outreach", description: "Sharing the Gospel locally and abroad", icon: MapPin, color: "bg-teal-100 text-teal-700" }
+    ]
+  },
+  {
+    id: "creative-service",
+    title: "Creative & Service",
+    description: "Use your talents to serve and create",
+    icon: Palette,
+    interests: [
+      { id: "music", label: "Music & Worship", description: "Leading worship through music", icon: Music, color: "bg-purple-100 text-purple-700" },
+      { id: "arts", label: "Arts & Creativity", description: "Visual arts, drama, and creative expression", icon: Palette, color: "bg-rose-100 text-rose-700" },
+      { id: "technology", label: "Tech Ministry", description: "Digital tools and online presence", icon: Code, color: "bg-cyan-100 text-cyan-700" },
+      { id: "media-production", label: "Media & Production", description: "Livestream, A/V, lighting", icon: Camera, color: "bg-gray-100 text-gray-700" },
+      { id: "social-media", label: "Social Media & Content", description: "Posts, videos, digital outreach", icon: Code, color: "bg-blue-100 text-blue-700" },
+      { id: "hospitality", label: "Hospitality & Welcome", description: "Greeters, ushers, coffee teams", icon: Coffee, color: "bg-orange-100 text-orange-700" },
+      { id: "event-planning", label: "Event Planning", description: "Organize retreats, holidays, conferences", icon: Calendar, color: "bg-green-100 text-green-700" },
+      { id: "fellowship", label: "Fellowship Events", description: "Social gatherings and community building", icon: Coffee, color: "bg-yellow-100 text-yellow-700" },
+      { id: "facilities", label: "Facilities & Grounds", description: "Maintenance, setup, decor", icon: Dumbbell, color: "bg-teal-100 text-teal-700" }
+    ]
+  },
+  {
+    id: "community-outreach",
+    title: "Community Outreach",
+    description: "Serve others and share God's love",
+    icon: Heart,
+    interests: [
+      { id: "community-service", label: "Community Service", description: "Local volunteer opportunities", icon: Heart, color: "bg-red-100 text-red-700" },
+      { id: "care-counseling", label: "Care & Counseling", description: "Mental health, grief, addiction recovery", icon: Heart, color: "bg-pink-100 text-pink-700" },
+      { id: "benevolence", label: "Benevolence Ministry", description: "Financial aid, food pantry, housing support", icon: Heart, color: "bg-rose-100 text-rose-700" },
+      { id: "visitation", label: "Visitation Ministry", description: "Hospital/homebound visits, elder care", icon: Heart, color: "bg-orange-100 text-orange-700" },
+      { id: "sports", label: "Sports & Recreation", description: "Athletic programs and fitness", icon: Dumbbell, color: "bg-blue-100 text-blue-700" },
+      { id: "recovery", label: "Recovery & Support", description: "Addiction recovery and life restoration", icon: Heart, color: "bg-purple-100 text-purple-700" }
+    ]
+  }
 ];
 
 const ageGroups = [
@@ -135,6 +189,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [showOtherTraditions, setShowOtherTraditions] = useState(false);
   const [showDenominationDisclaimer, setShowDenominationDisclaimer] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const { toast } = useToast();
 
   const steps = [
@@ -258,6 +313,14 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
         ? prev.interests.filter(id => id !== interestId)
         : [...prev.interests, interestId]
     }));
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
   };
 
   const canProceed = () => {
@@ -511,39 +574,94 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="text-center">
-                      <h2 className="text-2xl font-bold mb-2">What Interests You?</h2>
-                      <p className="text-gray-600">Select activities and ministries you'd like to participate in</p>
+                      <h2 className="text-2xl font-bold mb-2">What Ministry Areas Interest You?</h2>
+                      <p className="text-gray-600">Choose areas where you'd like to get involved (select multiple)</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {interests.map((interest, index) => {
-                        const Icon = interest.icon;
-                        const isSelected = wizardData.interests.includes(interest.id);
-                        return (
-                          <motion.div
-                            key={interest.id}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.05 }}
-                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:scale-105 ${
-                              isSelected 
-                                ? 'border-primary bg-primary/5' 
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                            onClick={() => toggleInterest(interest.id)}
+                    
+                    <div className="space-y-4">
+                      {ministryCategories.map((category, categoryIndex) => (
+                        <motion.div
+                          key={category.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: categoryIndex * 0.1 }}
+                          className="border rounded-lg overflow-hidden"
+                        >
+                          {/* Category Header */}
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory(category.id)}
+                            className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
                           >
-                            <div className="flex flex-col items-center text-center space-y-2">
-                              <div className={`p-2 rounded-full ${interest.color}`}>
-                                <Icon className="h-5 w-5" />
+                            <div className="flex items-center space-x-3">
+                              <div className="p-2 rounded-lg bg-[#5A2671]/10 text-[#5A2671]">
+                                <category.icon className="h-5 w-5" />
                               </div>
-                              <span className="text-sm font-medium">{interest.label}</span>
+                              <div className="text-left">
+                                <h3 className="font-semibold text-gray-900">{category.title}</h3>
+                                <p className="text-sm text-gray-600">{category.description}</p>
+                              </div>
                             </div>
-                          </motion.div>
-                        );
-                      })}
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {category.interests.filter(interest => wizardData.interests.includes(interest.id)).length} selected
+                              </Badge>
+                              <ChevronDown 
+                                className={`h-4 w-4 transition-transform ${
+                                  expandedCategories.includes(category.id) ? 'rotate-180' : ''
+                                }`} 
+                              />
+                            </div>
+                          </button>
+
+                          {/* Category Content */}
+                          {expandedCategories.includes(category.id) && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="p-4 bg-white"
+                            >
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {category.interests.map((interest, interestIndex) => (
+                                  <motion.div
+                                    key={interest.id}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: interestIndex * 0.03 }}
+                                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                                      wizardData.interests.includes(interest.id)
+                                        ? "border-[#5A2671] bg-[#5A2671]/5"
+                                        : "border-gray-200 hover:border-gray-300"
+                                    }`}
+                                    onClick={() => toggleInterest(interest.id)}
+                                  >
+                                    <div className="flex items-start space-x-3">
+                                      <div className={`p-1.5 rounded-md ${interest.color} flex-shrink-0`}>
+                                        <interest.icon className="h-4 w-4" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <h4 className="text-sm font-medium text-gray-900 truncate">{interest.label}</h4>
+                                        <p className="text-xs text-gray-600 mt-1">{interest.description}</p>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </motion.div>
+                      ))}
                     </div>
-                    <p className="text-sm text-gray-500 text-center">
-                      Selected: {wizardData.interests.length} {wizardData.interests.length === 1 ? 'interest' : 'interests'}
-                    </p>
+
+                    <div className="text-center">
+                      <p className="text-sm text-gray-500">
+                        Selected: {wizardData.interests.length} ministry area{wizardData.interests.length !== 1 ? 's' : ''}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Click category headers to expand and explore ministries
+                      </p>
+                    </div>
                   </div>
                 )}
 
