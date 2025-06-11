@@ -1,126 +1,79 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
 import soapboxLogo from "@assets/SoapBx logo_1749627505398.jpeg";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 // SoapBox Logo Component
 const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: string; showText?: boolean }) => (
   <div className="flex items-center space-x-3">
     <img 
       src={soapboxLogo} 
-      alt="SoapBox" 
-      className={`${className} rounded-lg object-cover`}
+      alt="SoapBox Super App Logo" 
+      className={className}
     />
-    {showText && <span className="text-xl font-bold text-gray-900">SoapBox Super App</span>}
+    {showText && (
+      <span className="text-xl font-bold text-gray-900">SoapBox Super App</span>
+    )}
   </div>
 );
 
 export default function SimpleLanding() {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const formData = new FormData(e.currentTarget);
-    const demoRequest = {
-      firstName: formData.get('firstName') as string,
-      lastName: formData.get('lastName') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      organization: formData.get('organization') as string,
-      role: formData.get('role') as string,
-      communitySize: formData.get('communitySize') as string,
-      message: formData.get('message') as string,
-    };
-
-    try {
-      // Simulate form submission - in real app this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Demo Request Submitted!",
-        description: "We'll contact you within 24 hours to schedule your personalized demo.",
-      });
-
-      // Reset form
-      e.currentTarget.reset();
-    } catch (error) {
-      toast({
-        title: "Submission Failed",
-        description: "Please try again or contact us directly.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-white" data-component="simple-landing">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div onClick={() => window.location.href = '/'} className="cursor-pointer">
-              <SoapBoxLogo />
-            </div>
+            <SoapBoxLogo />
             
+            {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 font-medium">Features</a>
-              <a href="#about" className="text-gray-600 hover:text-gray-900 font-medium">About</a>
-              <a href="#contact" className="text-gray-600 hover:text-gray-900 font-medium">Contact</a>
+              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
+              <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
+              <a href="#about" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
+              <a href="#contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
             </div>
             
-            <Button 
-              onClick={() => window.location.href = '/api/login'}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-200"
-            >
-              Get Started
-            </Button>
+            {/* CTA Buttons */}
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                Sign In
+              </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                Get Started
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4 text-center bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-8">
-            <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-6">
-              Faith • Community • Connection
-            </span>
+      <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Unite Your Faith
+              <br />
+              <span className="text-blue-600">Community</span>
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              SoapBox Super App brings your congregation together with powerful tools for prayer, 
+              Bible study, events, and meaningful connections that strengthen faith and community bonds.
+            </p>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Your Faith Community,
-            <br />
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Supercharged
-            </span>
-          </h1>
-          
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Connect, grow, and thrive with SoapBox Super App - the all-in-one platform that brings 
-            your faith community together through prayer, events, discussions, and spiritual growth.
-          </p>
-          
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
-              onClick={() => window.location.href = '/api/login'}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Play className="w-5 h-5 mr-2" />
               Get Started Free
             </Button>
             <Button 
               variant="outline"
-              onClick={() => {
-                const demoSection = document.getElementById('demo-signup');
-                demoSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 text-lg rounded-full font-semibold"
+              onClick={() => window.location.href = '/demo'}
+              className="border-2 border-gray-300 hover:border-gray-400 text-gray-900 hover:text-gray-700 px-8 py-4 text-lg rounded-full font-semibold"
             >
               Schedule Demo
             </Button>
@@ -133,330 +86,205 @@ export default function SimpleLanding() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 bg-white">
+      <section id="features" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Everything Your Faith Community Needs
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Everything Your Community Needs
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Powerful tools designed to strengthen connections, deepen faith, and build lasting community bonds.
+              Comprehensive tools designed specifically for faith communities to grow, connect, and thrive together.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Prayer Wall */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100 hover:shadow-lg transition-all duration-200">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
                 <Heart className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Prayer Wall</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Share prayer requests and support your community through collective prayer and encouragement.
-              </p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Prayer Wall</h3>
+              <p className="text-gray-600">Share prayer requests and lift each other up in a sacred, supportive space.</p>
             </div>
-
-            {/* Community Events */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-100 hover:shadow-lg transition-all duration-200">
+            
+            {/* Community */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                <Calendar className="w-6 h-6 text-green-600" />
+                <Users className="w-6 h-6 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Events & Gatherings</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Organize and join church events, Bible studies, and community gatherings with seamless coordination.
-              </p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Community Hub</h3>
+              <p className="text-gray-600">Connect with fellow believers through groups, discussions, and shared experiences.</p>
             </div>
-
-            {/* Bible Reading */}
-            <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-8 rounded-2xl border border-purple-100 hover:shadow-lg transition-all duration-200">
+            
+            {/* Events */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                <MessageCircle className="w-6 h-6 text-purple-600" />
+                <Calendar className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Daily Scripture</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Follow personalized reading plans and grow in faith through guided daily scripture engagement.
-              </p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Event Management</h3>
+              <p className="text-gray-600">Organize services, study groups, and community events with seamless coordination.</p>
             </div>
-
-            {/* Community Chat */}
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition-all duration-200">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
-                <Users className="w-6 h-6 text-orange-600" />
+            
+            {/* Bible Study */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
+                <MessageCircle className="w-6 h-6 text-yellow-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Community Chat</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Connect with fellow believers through meaningful discussions and instant messaging.
-              </p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Bible Study Tools</h3>
+              <p className="text-gray-600">Interactive study guides, devotionals, and reading plans for spiritual growth.</p>
             </div>
-
+            
             {/* Volunteer Management */}
-            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 p-8 rounded-2xl border border-teal-100 hover:shadow-lg transition-all duration-200">
-              <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mb-6">
-                <Shield className="w-6 h-6 text-teal-600" />
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+                <Star className="w-6 h-6 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Volunteer Hub</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Manage volunteer opportunities and coordinate community service with smart scheduling.
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Volunteer Hub</h3>
+              <p className="text-gray-600">Coordinate service opportunities and empower members to serve with purpose.</p>
+            </div>
+            
+            {/* Communication */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                <Globe className="w-6 h-6 text-indigo-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Digital Outreach</h3>
+              <p className="text-gray-600">Reach your community with announcements, newsletters, and spiritual content.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Section */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Why Faith Communities Choose SoapBox Super App
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Built specifically for spiritual communities with the features that matter most.
+            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-900">Secure & Private</h3>
+              <p className="text-gray-600 text-lg">
+                Your community's data is protected with enterprise-grade security and privacy controls you can trust.
               </p>
             </div>
-
-            {/* Digital Giving */}
-            <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-8 rounded-2xl border border-pink-100 hover:shadow-lg transition-all duration-200">
-              <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6 text-pink-600" />
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Zap className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Digital Giving</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Secure and convenient digital donations with transparent tracking and receipt management.
+              <h3 className="text-2xl font-semibold mb-4 text-gray-900">Easy to Use</h3>
+              <p className="text-gray-600 text-lg">
+                Intuitive design that works for all ages and technical abilities. Get started in minutes, not hours.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Globe className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-900">Built for Faith</h3>
+              <p className="text-gray-600 text-lg">
+                Every feature is designed with spiritual communities in mind, supporting your unique needs and values.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 px-4 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Built for Faith Communities
-              </h2>
-              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                SoapBox Super App was created with a deep understanding of what faith communities need to thrive in the digital age. 
-                We combine spiritual purpose with cutting-edge technology to create meaningful connections.
+      {/* Testimonials Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Trusted by Faith Communities
+            </h2>
+            <p className="text-xl text-gray-600">
+              See how churches are growing and connecting with SoapBox Super App
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+              <div className="flex mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6">
+                "SoapBox Super App transformed how our congregation connects. Prayer requests are answered faster, and our community feels more united than ever."
               </p>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
-                    <Globe className="w-3 h-3 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Global Reach</h4>
-                    <p className="text-gray-600">Connect with believers worldwide</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
-                    <Shield className="w-3 h-3 text-green-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Secure & Private</h4>
-                    <p className="text-gray-600">Your faith journey stays protected</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mt-1">
-                    <Star className="w-3 h-3 text-purple-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Purpose-Driven</h4>
-                    <p className="text-gray-600">Every feature designed for spiritual growth</p>
-                  </div>
-                </div>
-              </div>
+              <div className="font-semibold text-gray-900">Pastor Michael Johnson</div>
+              <div className="text-gray-500">Grace Community Church</div>
             </div>
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-blue-600 mb-2">10,000+</div>
-                <div className="text-gray-600 mb-6">Active Communities</div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-semibold text-gray-900">500K+</div>
-                    <div className="text-sm text-gray-600">Prayers Shared</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-semibold text-gray-900">1M+</div>
-                    <div className="text-sm text-gray-600">Bible Verses Read</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-semibold text-gray-900">25K+</div>
-                    <div className="text-sm text-gray-600">Events Organized</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-semibold text-gray-900">150+</div>
-                    <div className="text-sm text-gray-600">Countries Reached</div>
-                  </div>
-                </div>
+            
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+              <div className="flex mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
               </div>
+              <p className="text-gray-600 mb-6">
+                "The volunteer coordination features saved us hours each week. Now we can focus more on ministry and less on administration."
+              </p>
+              <div className="font-semibold text-gray-900">Sarah Williams</div>
+              <div className="text-gray-500">Community Outreach Director</div>
+            </div>
+            
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+              <div className="flex mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6">
+                "Our small group Bible studies have never been more engaging. The discussion tools help everyone participate meaningfully."
+              </p>
+              <div className="font-semibold text-gray-900">David Chen</div>
+              <div className="text-gray-500">Small Groups Pastor</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-center text-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Transform Your Faith Community?
-          </h2>
-          <p className="text-xl mb-8 text-blue-100">
-            Join thousands of communities worldwide who are already using SoapBox to grow stronger together.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              onClick={() => window.location.href = '/api/login'}
-              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full shadow-lg"
-            >
-              Start Your Journey
-            </Button>
-            <Button 
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg font-semibold rounded-full"
-            >
-              Schedule Demo
-            </Button>
-          </div>
-          <div className="mt-8 text-blue-100">
-            No credit card required • Free to get started
-          </div>
-        </div>
-      </section>
-
-      {/* Demo Signup Section */}
-      <section id="demo-signup" className="py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700">
+      {/* Final CTA Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Transform Your Community?
           </h2>
           <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
-            Schedule a personalized demo to see how SoapBox Super App can revolutionize your faith community's digital experience.
+            Join thousands of faith communities using SoapBox Super App to deepen connections and strengthen their spiritual journey together.
           </p>
           
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 max-w-2xl mx-auto shadow-2xl">
-            <form onSubmit={handleDemoSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
-                    placeholder="Enter your first name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
-                    placeholder="Enter your last name"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
-                  placeholder="Enter your email address"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
-                  Church/Organization Name *
-                </label>
-                <input
-                  type="text"
-                  id="organization"
-                  name="organization"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
-                  placeholder="Enter your church or organization name"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Role *
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
-                >
-                  <option value="">Select your role</option>
-                  <option value="pastor">Pastor/Minister</option>
-                  <option value="admin">Church Administrator</option>
-                  <option value="volunteer">Volunteer Coordinator</option>
-                  <option value="member">Church Member</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="communitySize" className="block text-sm font-medium text-gray-700 mb-2">
-                  Community Size
-                </label>
-                <select
-                  id="communitySize"
-                  name="communitySize"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors"
-                >
-                  <option value="">Select community size</option>
-                  <option value="small">Under 100 members</option>
-                  <option value="medium">100-500 members</option>
-                  <option value="large">500-1000 members</option>
-                  <option value="xl">Over 1000 members</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Tell us about your needs (Optional)
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors resize-none"
-                  placeholder="What specific features or challenges would you like to discuss during the demo?"
-                />
-              </div>
-              
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 text-lg font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                {isSubmitting ? "Submitting..." : "Schedule My Demo"}
-              </Button>
-            </form>
-            
-            <p className="text-sm text-gray-600 mt-6 text-center">
-              We'll contact you within 24 hours to schedule your personalized demo.
-            </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Start Free Today
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.location.href = '/demo'}
+              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg rounded-full font-semibold transition-all duration-200"
+            >
+              Schedule Demo
+            </Button>
+          </div>
+          
+          <div className="mt-8 text-blue-100">
+            No credit card required • Free to get started
           </div>
         </div>
       </section>
@@ -466,7 +294,7 @@ export default function SimpleLanding() {
         <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="grid md:grid-cols-4 gap-8">
             {/* Brand Section */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-1">
               <div className="mb-4">
                 <SoapBoxLogo className="w-8 h-8" />
               </div>

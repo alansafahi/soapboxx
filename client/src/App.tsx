@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import AppHeader from "@/components/AppHeader";
 import NotFound from "@/pages/not-found";
 import SimpleLanding from "@/pages/simple-landing";
+import DemoPage from "@/pages/demo";
 import Home from "@/pages/home";
 import AdminPortal from "@/pages/admin";
 import EnhancedAdminPortal from "@/pages/admin-enhanced";
