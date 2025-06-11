@@ -125,13 +125,24 @@ export default function TourTesting() {
                   <p className="text-gray-600 mb-4 text-sm">
                     {role.description}
                   </p>
-                  <Button
-                    onClick={() => startTour(role.id)}
-                    className="w-full bg-[#5A2671] hover:bg-[#4A1F5A] text-white"
-                    disabled={showTour}
-                  >
-                    Start {role.name} Tour
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      onClick={() => startTour(role.id, "interactive")}
+                      className="w-full bg-[#5A2671] hover:bg-[#4A1F5A] text-white"
+                      disabled={showTour || showInteractiveTour}
+                    >
+                      Start Interactive Tour
+                    </Button>
+                    <Button
+                      onClick={() => startTour(role.id, "original")}
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                      disabled={showTour || showInteractiveTour}
+                    >
+                      Original Tour (Legacy)
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -169,6 +180,12 @@ export default function TourTesting() {
         isOpen={showTour}
         onComplete={completeTour}
         userRole={selectedRole}
+      />
+      
+      <InteractiveTour 
+        isOpen={showInteractiveTour}
+        onClose={completeTour}
+        role={selectedRole}
       />
     </div>
   );
