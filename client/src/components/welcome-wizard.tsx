@@ -509,7 +509,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3 flex-1 justify-center">
                 <img 
-                  src="/attached_assets/SoapBx logo_1749627505398.jpeg" 
+                  src="/attached_assets/SoapBx logo_1749686036591.jpeg" 
                   alt="SoapBox Logo" 
                   className="h-10 w-10 rounded-full object-cover"
                 />
