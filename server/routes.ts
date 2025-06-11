@@ -4,6 +4,7 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { roleManager } from "./role-system";
+import { twoFactorService } from "./twoFactorService";
 import Stripe from "stripe";
 
 if (!process.env.STRIPE_SECRET_KEY) {

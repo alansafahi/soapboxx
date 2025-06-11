@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { db } from './db';
 import { users, twoFactorTokens } from '@shared/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, lt } from 'drizzle-orm';
 
 export interface TwoFactorSetup {
   secret: string;
@@ -27,11 +27,11 @@ export class TwoFactorService {
     this.encryptionKey = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
     
     // Configure email transporter (using SendGrid or SMTP)
-    this.emailTransporter = nodemailer.createTransporter({
+    this.emailTransporter = nodemailer.createTransport({
       service: 'SendGrid',
       auth: {
         user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY
+        pass: process.env.SENDGRID_API_KEY || 'fake-key-for-development'
       }
     });
   }
@@ -204,7 +204,7 @@ export class TwoFactorService {
     const record = tokenRecord[0];
 
     // Check attempts
-    if (record.attempts >= record.maxAttempts) {
+    if ((record.attempts || 0) >= (record.maxAttempts || 3)) {
       return { isValid: false, error: 'Too many attempts' };
     }
 
@@ -212,7 +212,7 @@ export class TwoFactorService {
     await db.update(twoFactorTokens)
       .set({ 
         usedAt: new Date(),
-        attempts: record.attempts + 1
+        attempts: (record.attempts || 0) + 1
       })
       .where(eq(twoFactorTokens.id, record.id));
 
@@ -266,7 +266,7 @@ export class TwoFactorService {
   // Clean up expired tokens
   async cleanupExpiredTokens(): Promise<void> {
     await db.delete(twoFactorTokens)
-      .where(gt(new Date(), twoFactorTokens.expiresAt));
+      .where(lt(twoFactorTokens.expiresAt, new Date()));
   }
 }
 
