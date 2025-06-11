@@ -191,8 +191,20 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     mutationFn: async (churchId: number) => {
       return await apiRequest("POST", `/api/churches/${churchId}/join`);
     },
-    onSuccess: () => {
+    onSuccess: (_, churchId) => {
+      toast({
+        title: "Church Joined Successfully!",
+        description: "You've connected with this church. Welcome to the community!",
+      });
+      // Complete onboarding after successful church join
       completeOnboarding.mutate(wizardData);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error Joining Church",
+        description: "Please try again or skip for now.",
+        variant: "destructive",
+      });
     }
   });
 
@@ -261,7 +273,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                   alt="SoapBox Logo" 
                   className="h-10 w-10 rounded-full object-cover"
                 />
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-teal-600 bg-clip-text text-transparent">
                   Welcome to SoapBox Super App
                 </CardTitle>
               </div>
@@ -306,7 +318,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.2 }}
-                      className="w-24 h-24 mx-auto bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center"
+                      className="w-24 h-24 mx-auto bg-gradient-to-br from-primary to-teal-600 rounded-full flex items-center justify-center"
                     >
                       <Sparkles className="h-12 w-12 text-white" />
                     </motion.div>

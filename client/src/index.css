@@ -13,23 +13,23 @@
   --card-foreground: hsl(222, 84%, 4.9%);
   --border: hsl(214, 32%, 91%);
   --input: hsl(214, 32%, 91%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(210, 40%, 96%);
-  --secondary-foreground: hsl(222, 47%, 11%);
-  --accent: hsl(210, 40%, 96%);
-  --accent-foreground: hsl(222, 47%, 11%);
+  --primary: hsl(174, 70%, 41%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(174, 20%, 95%);
+  --secondary-foreground: hsl(174, 70%, 25%);
+  --accent: hsl(174, 20%, 95%);
+  --accent-foreground: hsl(174, 70%, 25%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(207, 90%, 54%);
+  --ring: hsl(174, 70%, 41%);
   --radius: 0.75rem;
   
-  /* Faith-inspired custom colors */
-  --faith-blue: hsl(207, 90%, 54%);
-  --faith-gold: hsl(43, 74%, 49%);
+  /* SoapBox brand colors */
+  --soapbox-teal: hsl(174, 70%, 41%);
+  --soapbox-teal-light: hsl(174, 50%, 85%);
+  --soapbox-teal-dark: hsl(174, 70%, 25%);
+  --soapbox-accent: hsl(43, 74%, 49%);
   --warm-white: hsl(210, 40%, 98%);
-  --light-blue: hsl(207, 73%, 95%);
-  --warm-yellow: hsl(48, 96%, 89%);
 }
 
 /* Prevent any potential rendering duplication */
