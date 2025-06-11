@@ -7,37 +7,58 @@ import { Users, Church, Heart, Settings, UserCheck } from "lucide-react";
 
 const roleOptions = [
   {
-    id: "member",
-    name: "Church Member",
-    description: "Regular church member exploring community features",
-    icon: Users,
-    color: "bg-green-100 text-green-800"
-  },
-  {
-    id: "pastor",
-    name: "Pastor",
-    description: "Church leader with full administrative access",
+    id: "church_owner",
+    name: "Church Owner",
+    description: "Full church ownership with financial and strategic oversight",
     icon: Church,
     color: "bg-purple-100 text-purple-800"
   },
   {
+    id: "church_admin",
+    name: "Church Admin",
+    description: "Administrative control and member management",
+    icon: Settings,
+    color: "bg-indigo-100 text-indigo-800"
+  },
+  {
+    id: "pastor",
+    name: "Lead Pastor",
+    description: "Spiritual leadership and pastoral care",
+    icon: Church,
+    color: "bg-purple-100 text-purple-800"
+  },
+  {
+    id: "social_manager",
+    name: "Social Manager",
+    description: "Community engagement and media management",
+    icon: Users,
+    color: "bg-pink-100 text-pink-800"
+  },
+  {
     id: "ministry_leader",
     name: "Ministry Leader",
-    description: "Leader of a specific ministry or department",
+    description: "Team coordination and ministry focus",
     icon: Settings,
     color: "bg-blue-100 text-blue-800"
   },
   {
+    id: "member",
+    name: "Church Member",
+    description: "Community participation and spiritual growth",
+    icon: Users,
+    color: "bg-green-100 text-green-800"
+  },
+  {
     id: "volunteer",
     name: "Volunteer",
-    description: "Active volunteer serving in church ministries",
+    description: "Service opportunities and community involvement",
     icon: Heart,
     color: "bg-yellow-100 text-yellow-800"
   },
   {
     id: "youth_leader",
     name: "Youth Leader",
-    description: "Leader focused on youth ministry and programs",
+    description: "Youth ministry and next generation impact",
     icon: UserCheck,
     color: "bg-orange-100 text-orange-800"
   }

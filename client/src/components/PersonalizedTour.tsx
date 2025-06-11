@@ -587,6 +587,14 @@ export default function PersonalizedTour({ isOpen, onComplete, userRole }: Perso
                 <p className="text-gray-600 text-lg leading-relaxed">
                   {currentStepData.description}
                 </p>
+
+                {currentStepData.highlight && (
+                  <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                    <p className="text-blue-800 text-sm font-medium leading-relaxed">
+                      {currentStepData.highlight}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {currentStepData.action && (
