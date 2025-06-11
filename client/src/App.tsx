@@ -38,8 +38,10 @@ import { ReferralWelcome } from "@/components/ReferralWelcome";
 import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
 import PersonalizedTour from "@/components/PersonalizedTour";
 import TourTesting from "@/pages/TourTesting";
+import TourTestPage from "@/pages/tour-test";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
 
 function AppRouter() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -95,15 +97,20 @@ function AppRouter() {
     retry: false,
   });
 
-  // Show personalized tour after onboarding is complete and user hasn't completed tour
+  // Import and use the role-based tour hook
+  const { 
+    shouldShowTour, 
+    userRole: detectedUserRole, 
+    completeTour 
+  } = useRoleBasedTour();
+
+  // Show personalized tour when detected by the role-based system
   useEffect(() => {
-    if (isAuthenticated && user && (user as any).has_completed_onboarding && 
-        !(user as any).hasCompletedTour && !needsOnboarding && !show2FAOnboarding && 
-        !forceHideOnboarding && userRoleData?.primaryRole) {
+    if (isAuthenticated && shouldShowTour && !needsOnboarding && !show2FAOnboarding && !forceHideOnboarding) {
       setShowPersonalizedTour(true);
-      setUserRole(userRoleData.primaryRole);
+      setUserRole(detectedUserRole);
     }
-  }, [isAuthenticated, user, needsOnboarding, show2FAOnboarding, forceHideOnboarding, userRoleData]);
+  }, [isAuthenticated, shouldShowTour, detectedUserRole, needsOnboarding, show2FAOnboarding, forceHideOnboarding]);
   
   // Debug logging for onboarding state
   console.log("Onboarding check:", {
