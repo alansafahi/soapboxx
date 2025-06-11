@@ -302,10 +302,9 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       setJoiningChurchId(null);
       toast({
         title: "Church Joined Successfully!",
-        description: "You've connected with this church. Welcome to the community!",
+        description: "You've connected with this church. You can add more churches or complete setup.",
       });
-      // Complete onboarding after successful church join
-      completeOnboarding.mutate(wizardData);
+      // Don't auto-complete onboarding - let user choose to add more churches or finish
     },
     onError: (error) => {
       console.error("Error joining church:", error);
