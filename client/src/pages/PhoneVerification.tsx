@@ -102,7 +102,7 @@ export default function PhoneVerification() {
             </h1>
           </div>
           <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-            Add and verify your phone number for enhanced security and SMS notifications in the SoapBox Super App.
+            Voluntarily add and verify your phone number to receive SMS notifications and enable enhanced features in the SoapBox Super App.
           </p>
         </div>
 

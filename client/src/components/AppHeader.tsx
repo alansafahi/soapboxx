@@ -26,7 +26,7 @@ export default function AppHeader() {
     { href: "/prayer", label: "Prayer Wall", icon: Heart },
     { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/donation-demo", label: "Donations", icon: DollarSign },
-    { href: "/phone-verification", label: "Phone Verification", icon: Smartphone },
+
     { href: "/admin", label: "Admin Portal", icon: Settings },
     { href: "/role-management", label: "Role Management", icon: Users },
   ];
