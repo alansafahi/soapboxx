@@ -610,10 +610,12 @@ export class DatabaseStorage implements IStorage {
         id: userChurches.id,
         userId: userChurches.userId,
         churchId: userChurches.churchId,
-        role: userChurches.role,
-        permissions: userChurches.permissions,
+        roleId: userChurches.roleId,
         title: userChurches.title,
+        department: userChurches.department,
         bio: userChurches.bio,
+        additionalPermissions: userChurches.additionalPermissions,
+        restrictedPermissions: userChurches.restrictedPermissions,
         joinedAt: userChurches.joinedAt,
         isActive: userChurches.isActive,
         user: {
@@ -656,8 +658,8 @@ export class DatabaseStorage implements IStorage {
     const [updatedMember] = await db
       .update(userChurches)
       .set({ 
-        role, 
-        permissions: permissions || [],
+        roleId: typeof role === 'string' ? parseInt(role) : role, 
+        additionalPermissions: permissions || [],
         title,
         bio 
       })
@@ -1580,7 +1582,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         userId,
         churchId,
-        role: 'member',
+        roleId: 1, // Default member role ID
       })
       .onConflictDoUpdate({
         target: [userChurches.userId, userChurches.churchId],
