@@ -711,21 +711,11 @@ export class DatabaseStorage implements IStorage {
     return newEvent;
   }
 
-  async getUserEvents(userId: string): Promise<Event[]> {
+  async getUserEvents(userId: string): Promise<any[]> {
     return await db
       .select()
       .from(events)
-        category: events.category,
-        imageUrl: events.imageUrl,
-        createdAt: events.createdAt,
-        updatedAt: events.updatedAt,
-      })
-      .from(events)
-      .innerJoin(eventRsvps, eq(events.id, eventRsvps.eventId))
-      .where(and(
-        eq(eventRsvps.userId, userId),
-        eq(eventRsvps.status, 'attending')
-      ))
+      .where(eq(events.organizerId, userId))
       .orderBy(asc(events.eventDate));
   }
 

@@ -2262,15 +2262,7 @@ export type InsertReferralMilestoneForm = z.infer<typeof insertReferralMilestone
 export type ScriptureSchedule = typeof scriptureSchedules.$inferSelect;
 export type InsertScriptureSchedule = typeof scriptureSchedules.$inferInsert;
 
-// Enhanced Social & Community Feature Types
-export type Friendship = typeof friendships.$inferSelect;
-export type InsertFriendship = typeof friendships.$inferInsert;
-
-export type CommunityGroup = typeof communityGroups.$inferSelect;
-export type InsertCommunityGroup = typeof communityGroups.$inferInsert;
-
-export type CommunityGroupMember = typeof communityGroupMembers.$inferSelect;
-export type InsertCommunityGroupMember = typeof communityGroupMembers.$inferInsert;
+// Enhanced Social & Community Feature Types (duplicates removed)
 
 export type Reaction = typeof reactions.$inferSelect;
 export type InsertReaction = typeof reactions.$inferInsert;
