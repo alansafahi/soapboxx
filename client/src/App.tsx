@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import AdminPortal from "@/pages/admin";
+import EnhancedAdminPortal from "@/pages/admin-enhanced";
 import Profile from "@/pages/profile";
 import Chat from "@/pages/chat";
 import Community from "@/pages/community";
@@ -83,8 +84,8 @@ function Router() {
               <Route path="/messages" component={Messages} />
               <Route path="/chat" component={Chat} />
               <Route path="/leaderboard" component={Leaderboard} />
-              <Route path="/admin" component={AdminPortal} />
-              <Route path="/member-management" component={AdminPortal} />
+              <Route path="/admin" component={EnhancedAdminPortal} />
+              <Route path="/member-management" component={EnhancedAdminPortal} />
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
               <Route path="/test-features" component={FeatureTestPage} />
