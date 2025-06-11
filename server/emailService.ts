@@ -66,7 +66,7 @@ export class EmailService {
     try {
       const msg = {
         to: data.email,
-        from: 'verification@soapboxsuperapp.com', // Use a verified sender address
+        from: 'support@soapboxsuperapp.com', // Use verified sender address from SendGrid
         subject: 'Verify Your SoapBox Super App Account',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
