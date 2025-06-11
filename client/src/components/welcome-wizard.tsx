@@ -476,12 +476,12 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     }
   }, [emailStatus, wizardData.emailVerified]);
 
-  // Auto-advance when email is verified
-  useEffect(() => {
-    if (currentStep === 1 && wizardData.emailVerified) {
-      setTimeout(() => setCurrentStep(2), 500); // Small delay for UX
-    }
-  }, [currentStep, wizardData.emailVerified]);
+  // Auto-advance when email is verified (disabled for testing)
+  // useEffect(() => {
+  //   if (currentStep === 1 && wizardData.emailVerified) {
+  //     setTimeout(() => setCurrentStep(2), 500); // Small delay for UX
+  //   }
+  // }, [currentStep, wizardData.emailVerified]);
 
   // Add escape key handler
   useEffect(() => {
