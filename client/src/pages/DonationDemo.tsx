@@ -149,11 +149,21 @@ const RECENT_GIFTS = [
   { name: "Anonymous", amount: 25, church: "Christ the King", timeAgo: "15 minutes ago" },
 ];
 
+type ChurchAllocation = {
+  churchId: string;
+  churchName: string;
+  percentage: number;
+  amount: number;
+};
+
 export default function DonationDemo() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState("");
+  const [churchAllocations, setChurchAllocations] = useState<ChurchAllocation[]>([]);
+  const [allocationMode, setAllocationMode] = useState<'single' | 'multiple'>('single');
+  const [allocationType, setAllocationType] = useState<'percentage' | 'amount'>('percentage');
   const [purpose, setPurpose] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [donorName, setDonorName] = useState("");
@@ -169,9 +179,126 @@ export default function DonationDemo() {
   const [paymentIntentId, setPaymentIntentId] = useState<string>("");
   const [showPaymentForm, setShowPaymentForm] = useState(false);
 
+  const { user } = useAuth();
+  
   const { data: churches = [] } = useQuery<Church[]>({
     queryKey: ["/api/churches"],
   });
+
+  const { data: userChurches = [] } = useQuery<any[]>({
+    queryKey: ["/api/user/churches"],
+    enabled: !!user,
+  });
+
+  // Auto-select user's affiliated churches on load
+  useEffect(() => {
+    if (userChurches.length > 0 && churchAllocations.length === 0) {
+      if (userChurches.length === 1) {
+        // Single church - use single mode
+        setSelectedChurch(userChurches[0].churchId.toString());
+        setAllocationMode('single');
+      } else {
+        // Multiple churches - use allocation mode with equal percentages
+        const equalPercentage = Math.floor(100 / userChurches.length);
+        const remainder = 100 - (equalPercentage * userChurches.length);
+        
+        const allocations = userChurches.map((uc, index) => {
+          const church = churches.find(c => c.id === uc.churchId);
+          return {
+            churchId: uc.churchId.toString(),
+            churchName: church?.name || `Church ${uc.churchId}`,
+            percentage: index === 0 ? equalPercentage + remainder : equalPercentage,
+            amount: 0
+          };
+        });
+        
+        setChurchAllocations(allocations);
+        setAllocationMode('multiple');
+      }
+    }
+  }, [userChurches, churches, churchAllocations.length]);
+
+  // Update amounts when total amount or allocation type changes
+  useEffect(() => {
+    if (allocationMode === 'multiple' && allocationType === 'amount') {
+      updateAmountsFromPercentages();
+    }
+  }, [selectedAmount, customAmount, allocationMode, allocationType]);
+
+  const updateAmountsFromPercentages = () => {
+    const totalAmount = getCurrentAmount();
+    if (totalAmount > 0) {
+      const updatedAllocations = churchAllocations.map(allocation => ({
+        ...allocation,
+        amount: Math.round((allocation.percentage / 100) * totalAmount * 100) / 100
+      }));
+      setChurchAllocations(updatedAllocations);
+    }
+  };
+
+  const updatePercentagesFromAmounts = () => {
+    const totalAmount = getCurrentAmount();
+    if (totalAmount > 0) {
+      const updatedAllocations = churchAllocations.map(allocation => ({
+        ...allocation,
+        percentage: Math.round((allocation.amount / totalAmount) * 100)
+      }));
+      setChurchAllocations(updatedAllocations);
+    }
+  };
+
+  const handleAllocationChange = (index: number, field: 'percentage' | 'amount', value: string) => {
+    const numValue = parseFloat(value) || 0;
+    const updatedAllocations = [...churchAllocations];
+    updatedAllocations[index] = { ...updatedAllocations[index], [field]: numValue };
+    
+    if (field === 'percentage') {
+      // Ensure percentages don't exceed 100%
+      const totalPercentage = updatedAllocations.reduce((sum, alloc) => sum + alloc.percentage, 0);
+      if (totalPercentage <= 100) {
+        setChurchAllocations(updatedAllocations);
+        if (allocationType === 'amount') {
+          updateAmountsFromPercentages();
+        }
+      }
+    } else {
+      // Update amounts and recalculate percentages
+      setChurchAllocations(updatedAllocations);
+      if (allocationType === 'percentage') {
+        updatePercentagesFromAmounts();
+      }
+    }
+  };
+
+  const addChurchAllocation = (churchId: string) => {
+    const church = churches.find(c => c.id.toString() === churchId);
+    if (church && !churchAllocations.find(alloc => alloc.churchId === churchId)) {
+      const newAllocation: ChurchAllocation = {
+        churchId,
+        churchName: church.name,
+        percentage: 0,
+        amount: 0
+      };
+      setChurchAllocations([...churchAllocations, newAllocation]);
+    }
+  };
+
+  const removeChurchAllocation = (index: number) => {
+    const updatedAllocations = churchAllocations.filter((_, i) => i !== index);
+    setChurchAllocations(updatedAllocations);
+    
+    if (updatedAllocations.length === 0) {
+      setAllocationMode('single');
+    }
+  };
+
+  const getTotalAllocationPercentage = () => {
+    return churchAllocations.reduce((sum, alloc) => sum + alloc.percentage, 0);
+  };
+
+  const getTotalAllocationAmount = () => {
+    return churchAllocations.reduce((sum, alloc) => sum + alloc.amount, 0);
+  };
 
   // Create payment intent mutation with direct fetch to bypass routing issues
   const createPaymentIntent = useMutation({
@@ -272,17 +399,59 @@ export default function DonationDemo() {
       return;
     }
 
+    // Validate allocations in multiple mode
+    if (allocationMode === 'multiple') {
+      if (churchAllocations.length === 0) {
+        toast({
+          title: "No Churches Selected",
+          description: "Please select at least one church to donate to",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (allocationType === 'percentage') {
+        const totalPercentage = getTotalAllocationPercentage();
+        if (totalPercentage !== 100) {
+          toast({
+            title: "Invalid Allocation",
+            description: `Total allocation must equal 100% (currently ${totalPercentage}%)`,
+            variant: "destructive",
+          });
+          return;
+        }
+      } else {
+        const totalAmount = getTotalAllocationAmount();
+        if (Math.abs(totalAmount - amount) > 0.01) {
+          toast({
+            title: "Invalid Allocation",
+            description: `Total allocation must equal donation amount ($${amount.toFixed(2)})`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
+
     // Create payment intent with Stripe
-    createPaymentIntent.mutate({
+    const donationData = {
       amount,
       metadata: {
-        churchId: selectedChurch,
-        purpose,
+        allocationMode,
         isRecurring,
         dedicationType: honorType,
         dedicationName: honorName,
+        purpose,
       }
-    });
+    };
+
+    if (allocationMode === 'single') {
+      donationData.metadata.churchId = selectedChurch;
+    } else {
+      donationData.metadata.churchAllocations = JSON.stringify(churchAllocations);
+    }
+
+    createPaymentIntent.mutate(donationData);
   };
 
   const handlePaymentSuccess = (paymentIntentId: string) => {
@@ -476,12 +645,31 @@ export default function DonationDemo() {
                   <span>Type:</span>
                   <span className="font-medium">{isRecurring ? "Monthly Recurring" : "One-time"}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Church:</span>
-                  <span className="font-medium">
-                    {churches.find(c => c.id.toString() === selectedChurch)?.name || "General"}
-                  </span>
-                </div>
+                {allocationMode === 'single' ? (
+                  <div className="flex justify-between">
+                    <span>Church:</span>
+                    <span className="font-medium">
+                      {churches.find(c => c.id.toString() === selectedChurch)?.name || "General"}
+                    </span>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span>Churches:</span>
+                      <span className="font-medium">Multiple</span>
+                    </div>
+                    <div className="ml-4 space-y-1">
+                      {churchAllocations.map(allocation => (
+                        <div key={allocation.churchId} className="flex justify-between text-xs">
+                          <span>{allocation.churchName}:</span>
+                          <span>
+                            ${((allocation.percentage / 100) * getCurrentAmount()).toFixed(2)} ({allocation.percentage}%)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {purpose && (
                   <div className="flex justify-between">
                     <span>Purpose:</span>
@@ -630,25 +818,190 @@ export default function DonationDemo() {
 
               <Separator />
 
-              {/* Church Selection */}
+              {/* Church Selection Mode Toggle */}
               <div className="space-y-3">
-                <Label htmlFor="church">Select Church</Label>
-                <Select value={selectedChurch} onValueChange={setSelectedChurch}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a church to support" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General Fund (All Churches)</SelectItem>
-                    {churches.map((church) => (
-                      <SelectItem key={church.id} value={church.id.toString()}>
-                        {church.name}
-                        {church.denomination && (
-                          <span className="text-gray-500 ml-2">• {church.denomination}</span>
-                        )}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-between">
+                  <Label>Church Selection</Label>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant={allocationMode === 'single' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAllocationMode('single')}
+                    >
+                      Single Church
+                    </Button>
+                    <Button
+                      variant={allocationMode === 'multiple' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAllocationMode('multiple')}
+                    >
+                      Split Between Churches
+                    </Button>
+                  </div>
+                </div>
+
+                {allocationMode === 'single' ? (
+                  <Select value={selectedChurch} onValueChange={setSelectedChurch}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a church to support" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General Fund (All Churches)</SelectItem>
+                      {userChurches.length > 0 && (
+                        <>
+                          <div className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50">
+                            Your Churches
+                          </div>
+                          {userChurches.map((uc) => {
+                            const church = churches.find(c => c.id === uc.churchId);
+                            return church ? (
+                              <SelectItem key={church.id} value={church.id.toString()}>
+                                <div className="flex items-center">
+                                  <Church className="h-3 w-3 mr-2 text-blue-500" />
+                                  {church.name}
+                                  {church.denomination && (
+                                    <span className="text-gray-500 ml-2">• {church.denomination}</span>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ) : null;
+                          })}
+                          <div className="px-2 py-1 text-xs font-medium text-gray-600">
+                            Other Churches
+                          </div>
+                        </>
+                      )}
+                      {churches
+                        .filter(church => !userChurches.some(uc => uc.churchId === church.id))
+                        .map((church) => (
+                          <SelectItem key={church.id} value={church.id.toString()}>
+                            {church.name}
+                            {church.denomination && (
+                              <span className="text-gray-500 ml-2">• {church.denomination}</span>
+                            )}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Allocation Type Toggle */}
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Allocation Method:</span>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant={allocationType === 'percentage' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setAllocationType('percentage')}
+                        >
+                          Percentage
+                        </Button>
+                        <Button
+                          variant={allocationType === 'amount' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setAllocationType('amount')}
+                        >
+                          Amount
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Church Allocations */}
+                    <div className="space-y-3">
+                      {churchAllocations.map((allocation, index) => (
+                        <div key={allocation.churchId} className="flex items-center space-x-3 p-3 border rounded-lg">
+                          <Church className="h-4 w-4 text-blue-500" />
+                          <div className="flex-1">
+                            <span className="font-medium text-sm">{allocation.churchName}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {allocationType === 'percentage' ? (
+                              <div className="flex items-center space-x-1">
+                                <Input
+                                  type="number"
+                                  value={allocation.percentage}
+                                  onChange={(e) => handleAllocationChange(index, 'percentage', e.target.value)}
+                                  className="w-16 h-8"
+                                  min="0"
+                                  max="100"
+                                />
+                                <span className="text-sm">%</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-1">
+                                <span className="text-sm">$</span>
+                                <Input
+                                  type="number"
+                                  value={allocation.amount}
+                                  onChange={(e) => handleAllocationChange(index, 'amount', e.target.value)}
+                                  className="w-20 h-8"
+                                  min="0"
+                                  step="0.01"
+                                />
+                              </div>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeChurchAllocation(index)}
+                              className="h-8 w-8 p-0"
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Add Church Button */}
+                      <Select onValueChange={addChurchAllocation}>
+                        <SelectTrigger className="border-dashed">
+                          <SelectValue placeholder="+ Add another church" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {churches
+                            .filter(church => !churchAllocations.some(alloc => alloc.churchId === church.id.toString()))
+                            .map((church) => (
+                              <SelectItem key={church.id} value={church.id.toString()}>
+                                {church.name}
+                                {church.denomination && (
+                                  <span className="text-gray-500 ml-2">• {church.denomination}</span>
+                                )}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Allocation Summary */}
+                      {churchAllocations.length > 0 && (
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex justify-between text-sm">
+                            <span>Total Allocated:</span>
+                            <span className={`font-medium ${
+                              allocationType === 'percentage' 
+                                ? getTotalAllocationPercentage() === 100 ? 'text-green-600' : 'text-orange-600'
+                                : getTotalAllocationAmount() === getCurrentAmount() ? 'text-green-600' : 'text-orange-600'
+                            }`}>
+                              {allocationType === 'percentage' 
+                                ? `${getTotalAllocationPercentage()}%`
+                                : `$${getTotalAllocationAmount().toFixed(2)}`
+                              }
+                            </span>
+                          </div>
+                          {allocationType === 'percentage' && getTotalAllocationPercentage() !== 100 && (
+                            <p className="text-xs text-orange-600 mt-1">
+                              Remaining: {100 - getTotalAllocationPercentage()}%
+                            </p>
+                          )}
+                          {allocationType === 'amount' && getTotalAllocationAmount() !== getCurrentAmount() && (
+                            <p className="text-xs text-orange-600 mt-1">
+                              Remaining: ${(getCurrentAmount() - getTotalAllocationAmount()).toFixed(2)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Campaign Progress Tracker */}
