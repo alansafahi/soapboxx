@@ -46,12 +46,21 @@ function AppRouter() {
   const [churchName, setChurchName] = useState("");
   const [location] = useLocation();
 
-  // Check if user needs 2FA onboarding
+  // Check if user needs 2FA onboarding (only for role upgrades)
   const { data: onboardingData } = useQuery({
     queryKey: ["/api/auth/2fa/onboarding-status"],
     enabled: isAuthenticated && !!user,
     retry: false,
   });
+
+  // Show 2FA onboarding only if user has pending role upgrade requiring 2FA
+  useEffect(() => {
+    if (onboardingData?.needsOnboarding) {
+      setShow2FAOnboarding(true);
+      setUserRole(onboardingData.userRole);
+      setChurchName(onboardingData.churchName);
+    }
+  }, [onboardingData]);
 
   // Extract referral code from URL parameters
   useEffect(() => {
@@ -137,6 +146,19 @@ function AppRouter() {
           }} 
         />
       )}
+
+      {/* 2FA Onboarding Modal - Only for role upgrades */}
+      <TwoFactorOnboarding
+        isOpen={show2FAOnboarding}
+        onComplete={() => {
+          setShow2FAOnboarding(false);
+          // Refresh user data and clear the pending setup flag
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/2fa/onboarding-status"] });
+        }}
+        userRole={userRole}
+        churchName={churchName}
+      />
     </>
   );
 }
