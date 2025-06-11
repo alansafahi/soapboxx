@@ -23,6 +23,7 @@ export default function AppHeader() {
     { href: "/bible", label: "Daily Bible" },
     { href: "/prayer", label: "Prayer Wall" },
     { href: "/messages", label: "Messages" },
+    { href: "/donation-demo", label: "Donations" },
     { href: "/admin", label: "Admin Portal" },
     { href: "/role-management", label: "Role Management" },
   ];

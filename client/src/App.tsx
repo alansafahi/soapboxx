@@ -27,6 +27,7 @@ import ChurchManagementDemo from "@/pages/ChurchManagementDemo";
 import EnhancedChurchesDemo from "@/pages/EnhancedChurchesDemo";
 import ChurchesEnhanced from "@/pages/ChurchesEnhanced";
 import RoleManagement from "@/pages/RoleManagement";
+import DonationDemo from "@/pages/DonationDemo";
 import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import { useState, useEffect } from "react";
@@ -103,6 +104,7 @@ function Router() {
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
               <Route path="/test-features" component={FeatureTestPage} />
+              <Route path="/donation-demo" component={DonationDemo} />
               <Route path="*" component={NotFound} />
             </>
           )}
