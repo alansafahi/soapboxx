@@ -16,14 +16,17 @@ export class SMSService {
     this.initializeTwilio();
   }
 
-  private initializeTwilio() {
+  private async initializeTwilio() {
     try {
       if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-        const twilio = require('twilio');
+        const { default: twilio } = await import('twilio');
         this.twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        console.log('Twilio SMS service initialized successfully');
+      } else {
+        console.log('Twilio credentials missing - SMS service disabled');
       }
     } catch (error) {
-      console.log('Twilio not initialized - credentials not provided');
+      console.error('Twilio initialization error:', error);
     }
   }
 
