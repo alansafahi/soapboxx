@@ -91,17 +91,15 @@ export default function AppHeader() {
       </header>
 
       {/* Desktop Sidebar - Always Visible */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-red-500 border-r-4 border-black shadow-lg"
-           style={{display: 'flex !important', position: 'fixed !important', left: '0px !important', top: '0px !important', height: '100vh !important', width: '256px !important', zIndex: '99999 !important', backgroundColor: 'red !important'}}>
-        <div className="p-4 text-center text-white text-xl font-bold bg-black border-b-4 border-white">🔴 SIDEBAR TEST - VISIBLE? 🔴</div>
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:flex lg:flex-col bg-white border-r border-gray-200 shadow-lg">
         {/* Sidebar Header */}
-        <div className="flex items-center h-16 px-6 border-b border-gray-200">
+        <div className="flex items-center h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
           <img 
             src={soapboxLogo} 
             alt="SoapBox Logo" 
             className="h-8 w-8 rounded-full object-cover"
           />
-          <span className="ml-3 font-bold text-lg text-black">SoapBox</span>
+          <span className="ml-3 font-bold text-lg text-blue-900">SoapBox Super App</span>
         </div>
 
         {/* Navigation */}
