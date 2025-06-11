@@ -37,6 +37,7 @@ import WelcomeWizard from "@/components/welcome-wizard";
 import { ReferralWelcome } from "@/components/ReferralWelcome";
 import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
 import PersonalizedTour from "@/components/PersonalizedTour";
+import TourTesting from "@/pages/TourTesting";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -163,6 +164,7 @@ function AppRouter() {
               <Route path="/role-upgrade-demo" component={RoleUpgradeDemo} />
               <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="/email-verification" component={EmailVerification} />
+              <Route path="/tour-testing" component={TourTesting} />
             </>
           )}
         </Switch>
