@@ -70,7 +70,7 @@ function AppRouter() {
   return (
     <>
       {isAuthenticated && <AppHeader />}
-      <main className="min-h-screen bg-gray-50">
+      <main className={isAuthenticated ? "min-h-screen bg-gray-50" : ""}>
         <Switch>
           {!isAuthenticated ? (
             <>
