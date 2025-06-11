@@ -198,11 +198,18 @@ export default function TwoFactorOnboarding({
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center space-x-2">
-            <Shield className="h-6 w-6 text-[#5A2671]" />
-            <DialogTitle>Security Requirement: Two-Factor Authentication</DialogTitle>
+          <div className="flex items-center justify-center space-x-3 mb-2">
+            <img 
+              src="/attached_assets/SoapBx logo_1749627505398.jpeg" 
+              alt="SoapBox Logo" 
+              className="h-8 w-8 rounded-full object-cover"
+            />
+            <div className="flex items-center space-x-2">
+              <Shield className="h-6 w-6 text-[#5A2671]" />
+              <DialogTitle className="text-[#5A2671]">Security Requirement: Two-Factor Authentication</DialogTitle>
+            </div>
           </div>
-          <DialogDescription>
+          <DialogDescription className="text-center">
             Enhanced security is required for your new role as {roleDisplayNames[userRole] || userRole}
             {churchName && ` at ${churchName}`}
           </DialogDescription>

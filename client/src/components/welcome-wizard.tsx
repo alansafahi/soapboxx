@@ -513,7 +513,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
                   alt="SoapBox Logo" 
                   className="h-10 w-10 rounded-full object-cover"
                 />
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                <CardTitle className="text-2xl font-bold text-[#5A2671]">
                   Welcome to SoapBox Super App
                 </CardTitle>
               </div>
