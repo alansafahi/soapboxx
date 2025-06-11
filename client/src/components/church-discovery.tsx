@@ -178,9 +178,9 @@ export default function ChurchDiscovery() {
                       className="w-full h-full object-cover" 
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-faith-blue to-blue-600 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-soapbox-purple to-purple-600 flex items-center justify-center">
                       <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                        <span className="text-xs font-bold text-faith-blue">
+                        <span className="text-xs font-bold text-soapbox-purple">
                           {church.name[0]}
                         </span>
                       </div>
@@ -250,7 +250,7 @@ export default function ChurchDiscovery() {
                         className={`text-xs font-medium h-7 px-3 transition-all duration-300 ${
                           joinedChurches.has(church.id)
                             ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
-                            : 'text-faith-blue hover:text-blue-600 hover:bg-blue-50'
+                            : 'text-soapbox-purple hover:text-purple-600 hover:bg-purple-50'
                         }`}
                         variant="ghost"
                       >
@@ -273,7 +273,7 @@ export default function ChurchDiscovery() {
                       {church.phone && (
                         <a 
                           href={`tel:${church.phone}`}
-                          className="text-xs text-gray-500 hover:text-faith-blue flex items-center"
+                          className="text-xs text-gray-500 hover:text-soapbox-purple flex items-center"
                         >
                           <Phone className="w-3 h-3 mr-1" />
                           Call
@@ -284,7 +284,7 @@ export default function ChurchDiscovery() {
                           href={church.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-gray-500 hover:text-faith-blue flex items-center"
+                          className="text-xs text-gray-500 hover:text-soapbox-purple flex items-center"
                         >
                           <Globe className="w-3 h-3 mr-1" />
                           Website
