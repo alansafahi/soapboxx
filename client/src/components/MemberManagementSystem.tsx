@@ -43,11 +43,18 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
 
   const { data: members = [], isLoading, error } = useQuery({
     queryKey: ["/api/members", "church", effectiveSelectedChurch],
-    queryFn: () => {
+    queryFn: async () => {
       const url = effectiveSelectedChurch === "all" 
         ? "/api/members" 
         : `/api/members?churchId=${effectiveSelectedChurch}`;
-      return fetch(url).then(res => res.json());
+      console.log('Fetching members from:', url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch members: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log('Members data received:', data);
+      return data;
     },
     staleTime: 0, // Always refetch to avoid cache issues
     gcTime: 30000, // Keep cache for 30 seconds only
@@ -64,8 +71,11 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
 
   const updateMemberMutation = useMutation({
     mutationFn: async (data: { id: string; updates: any }) => {
-      const response = await apiRequest("PUT", `/api/members/${data.id}`, data.updates);
-      return response.json();
+      const response = await apiRequest(`/api/members/${data.id}`, {
+        method: "PUT",
+        body: data.updates,
+      });
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
@@ -75,7 +85,24 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
   });
 
   if (isLoading) {
-    return <div className="p-4">Loading members...</div>;
+    return (
+      <div className="p-8 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading members...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <div className="text-red-600 mb-4">
+          <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+          <p>Error loading members: {error.message}</p>
+        </div>
+        <Button onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
   }
 
   return (
@@ -122,6 +149,28 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
           </SelectContent>
         </Select>
       </div>
+
+      {/* Debug Information */}
+      {filteredMembers.length === 0 && !isLoading && (
+        <div className="text-center py-8 bg-gray-50 rounded-lg">
+          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Members Found</h3>
+          <p className="text-gray-600 mb-4">
+            {searchTerm || statusFilter !== "all" 
+              ? "No members match your current filters." 
+              : effectiveSelectedChurch === "all" 
+                ? "No members found in the system."
+                : "No members found for the selected church."
+            }
+          </p>
+          <div className="text-xs text-gray-500 mb-4">
+            <p>Church Filter: {effectiveSelectedChurch}</p>
+            <p>Total members loaded: {members.length}</p>
+            <p>Search term: "{searchTerm}"</p>
+            <p>Status filter: {statusFilter}</p>
+          </div>
+        </div>
+      )}
 
       {/* Member Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

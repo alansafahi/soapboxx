@@ -481,7 +481,7 @@ export default function EnhancedAdminPortal() {
                   Add Member
                 </Button>
               </div>
-              {selectedChurch && <MemberManagementSystem selectedChurch={selectedChurch} />}
+              <MemberManagementSystem selectedChurch={selectedChurch} />
             </div>
           )}
 
