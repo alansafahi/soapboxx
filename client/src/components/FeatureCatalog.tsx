@@ -8,7 +8,7 @@ import {
   BookOpen, Volume2, Headphones, PlayCircle, Settings, UserCog,
   DollarSign, User, Church, Mail, Bell, Search, TrendingUp,
   Shield, Database, Globe, Smartphone, Zap, Star, Award,
-  Activity, BarChart, FileText, Camera, Video, Music
+  Activity, BarChart, FileText, Camera, Video, Music, Share2
 } from "lucide-react";
 
 interface Feature {
@@ -293,10 +293,24 @@ export default function FeatureCatalog() {
           ]
         },
         {
-          name: "Advanced Features",
-          description: "AI-powered and specialized tools",
+          name: "AI-Powered Pastoral Tools",
+          description: "Intelligent sermon creation and content distribution",
           icon: <Zap className="w-5 h-5" />,
           features: [
+            {
+              name: "Sermon Creation Studio",
+              description: "AI-powered sermon preparation with biblical research",
+              status: "Active",
+              icon: <BookOpen className="w-4 h-4" />,
+              details: ["Biblical research assistant with commentary", "Intelligent sermon outliner", "Illustration library with relevance scoring", "Content enhancer for theological accuracy"]
+            },
+            {
+              name: "Content Distribution Hub",
+              description: "Transform sermons into multi-platform content",
+              status: "Active",
+              icon: <Share2 className="w-4 h-4" />,
+              details: ["Social media posts for Facebook, Twitter, Instagram", "Email newsletters and campaigns", "Small group study guides", "Church bulletin inserts"]
+            },
             {
               name: "AI Personalization",
               description: "Intelligent content recommendations",
