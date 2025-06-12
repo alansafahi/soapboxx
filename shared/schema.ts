@@ -27,6 +27,29 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// Bible verses database for auto-population
+export const bibleVerses = pgTable("bible_verses", {
+  id: serial("id").primaryKey(),
+  reference: varchar("reference", { length: 100 }).notNull(),
+  book: varchar("book", { length: 50 }).notNull(),
+  chapter: integer("chapter").notNull(),
+  verse: varchar("verse", { length: 20 }).notNull(), // Can be "16" or "16-17"
+  text: text("text").notNull(),
+  translation: varchar("translation", { length: 20 }).default("NIV"),
+  topicTags: text("topic_tags").array(), // ["anxiety", "peace", "hope"]
+  category: varchar("category", { length: 50 }).notNull(), // "core", "topical", "devotional"
+  popularityScore: integer("popularity_score").default(1), // 1-10, higher = more popular
+  aiSummary: text("ai_summary"), // Pre-generated AI commentary
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("bible_verses_reference_idx").on(table.reference),
+  index("bible_verses_book_idx").on(table.book),
+  index("bible_verses_category_idx").on(table.category),
+  unique("unique_verse_translation").on(table.reference, table.translation),
+]);
+
 // User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
@@ -2696,6 +2719,12 @@ export const insertDonationSchema = createInsertSchema(donations).omit({ id: tru
 export const insertDonationReportSchema = createInsertSchema(donationReports).omit({ id: true, generatedAt: true });
 export const insertCampusSchema = createInsertSchema(campuses).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCampusAssignmentSchema = createInsertSchema(campusAssignments).omit({ id: true, createdAt: true, updatedAt: true });
+
+// Bible verses types and schemas
+export type BibleVerse = typeof bibleVerses.$inferSelect;
+export type InsertBibleVerse = typeof bibleVerses.$inferInsert;
+
+export const insertBibleVerseSchema = createInsertSchema(bibleVerses).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({
