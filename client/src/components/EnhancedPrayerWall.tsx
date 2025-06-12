@@ -32,7 +32,15 @@ const prayerRequestSchema = z.object({
   isSilent: z.boolean().default(false),
 });
 
+const prayerCircleSchema = z.object({
+  name: z.string().min(1, "Circle name is required"),
+  description: z.string().min(1, "Description is required"),
+  isPrivate: z.boolean().default(false),
+  maxMembers: z.number().min(2).max(100).optional(),
+});
+
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
+type PrayerCircleFormData = z.infer<typeof prayerCircleSchema>;
 
 const prayerCategories = [
   { id: 'all', label: 'All Prayers', icon: '🙏', count: 47 },
@@ -49,6 +57,7 @@ export default function EnhancedPrayerWall() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateCircleDialogOpen, setIsCreateCircleDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
   const [prayedRequests, setPrayedRequests] = useState<Set<number>>(new Set());
@@ -66,6 +75,16 @@ export default function EnhancedPrayerWall() {
       isPublic: true,
       isUrgent: false,
       isSilent: false,
+    },
+  });
+
+  const circleForm = useForm<PrayerCircleFormData>({
+    resolver: zodResolver(prayerCircleSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      isPrivate: false,
+      maxMembers: 25,
     },
   });
 
@@ -98,10 +117,33 @@ export default function EnhancedPrayerWall() {
         description: "Your prayer request has been shared with the community.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
         description: "Failed to post prayer request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create prayer circle mutation
+  const createCircleMutation = useMutation({
+    mutationFn: async (data: PrayerCircleFormData) => {
+      return await apiRequest("POST", "/api/prayer-circles", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayer-circles"] });
+      setIsCreateCircleDialogOpen(false);
+      circleForm.reset();
+      toast({
+        title: "Prayer Circle Created",
+        description: "Your prayer circle has been created successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create prayer circle. Please try again.",
         variant: "destructive",
       });
     },
@@ -633,10 +675,113 @@ export default function EnhancedPrayerWall() {
                   <Badge variant="outline">Public</Badge>
                 </div>
               </div>
-              <Button className="w-full mt-4">
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Prayer Circle
-              </Button>
+              <Dialog open={isCreateCircleDialogOpen} onOpenChange={setIsCreateCircleDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="w-full mt-4">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Prayer Circle
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Create New Prayer Circle</DialogTitle>
+                  </DialogHeader>
+                  <Form {...circleForm}>
+                    <form onSubmit={circleForm.handleSubmit((data) => createCircleMutation.mutate(data))} className="space-y-6">
+                      <FormField
+                        control={circleForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Circle Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Youth Ministry Circle" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={circleForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Describe the purpose and focus of this prayer circle..."
+                                className="min-h-[100px]"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={circleForm.control}
+                        name="maxMembers"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maximum Members (optional)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="2" 
+                                max="100" 
+                                placeholder="25"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={circleForm.control}
+                        name="isPrivate"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Private Circle</FormLabel>
+                              <div className="text-sm text-gray-600">
+                                Private circles require approval to join and are not visible in public listings
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-end gap-3">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setIsCreateCircleDialogOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          disabled={createCircleMutation.isPending}
+                          className="bg-purple-600 hover:bg-purple-700"
+                        >
+                          {createCircleMutation.isPending ? "Creating..." : "Create Circle"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </TabsContent>
