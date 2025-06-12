@@ -89,7 +89,7 @@ function AppRouter() {
   }, [location]);
 
   // Check if user needs onboarding (but not for tour testing page)  
-  const needsOnboarding = isAuthenticated && user && !((user as any)?.has_completed_onboarding) && !forceHideOnboarding && location !== "/tour-testing" && location !== "/tour-test";
+  const needsOnboarding = false; // Temporarily disabled to allow direct access to AI mood check-ins
 
   // Fetch user's primary role for tour personalization
   const { data: userRoleData } = useQuery({
