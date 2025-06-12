@@ -134,6 +134,9 @@ async function cleanupExistingDemoData() {
     const sessionId = Date.now();
     console.log(`  Using session ID: ${sessionId} for unique demo data`);
     
+    // Store session ID globally for use in data generation
+    global.demoSessionId = sessionId;
+    
     // Skip cleanup and use unique IDs instead to avoid permission issues
     console.log('  ⚠️ Skipping database cleanup due to permission restrictions');
     console.log('  📊 Will generate demo data with unique timestamps to avoid conflicts');
@@ -170,59 +173,141 @@ export async function generateComprehensiveDemoData() {
     const insertedChurches = await db.insert(churches).values(churchData).returning();
     console.log(`✅ Created ${insertedChurches.length} churches`);
 
-    // Generate Users
-    console.log('👥 Generating users...');
+    // Generate Users with all external roles
+    console.log('👥 Generating users with comprehensive role distribution...');
+    const sessionId = global.demoSessionId || Date.now();
+    
+    // Define all external roles (excluding SoapBox Owner, System Admin, Support)
+    const externalRoles = [
+      { name: 'multi_church_admin', count: 3, description: 'Multi-Church Administrator' },
+      { name: 'super_admin', count: 8, description: 'Super Administrator' },
+      { name: 'church_admin', count: 12, description: 'Church Administrator' },
+      { name: 'pastor', count: 15, description: 'Pastor' },
+      { name: 'assistant_pastor', count: 12, description: 'Assistant Pastor' },
+      { name: 'elder', count: 20, description: 'Elder' },
+      { name: 'deacon', count: 25, description: 'Deacon' },
+      { name: 'ministry_leader', count: 30, description: 'Ministry Leader' },
+      { name: 'volunteer_coordinator', count: 18, description: 'Volunteer Coordinator' },
+      { name: 'small_group_leader', count: 35, description: 'Small Group Leader' },
+      { name: 'youth_leader', count: 15, description: 'Youth Leader' },
+      { name: 'worship_leader', count: 12, description: 'Worship Leader' },
+      { name: 'teacher', count: 20, description: 'Teacher' },
+      { name: 'volunteer', count: 45, description: 'Volunteer' },
+      { name: 'member', count: 80, description: 'Member' },
+      { name: 'new_member', count: 25, description: 'New Member' },
+      { name: 'visitor', count: 15, description: 'Visitor' }
+    ];
+    
     const userData = [];
-    for (let i = 0; i < 200; i++) {
-      const firstName = getRandomElement(firstNames);
-      const lastName = getRandomElement(lastNames);
-      userData.push({
-        id: `demo-user-${i + 1}`,
-        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-        firstName: firstName,
-        lastName: lastName,
-        profileImageUrl: null,
-        emailVerified: true,
-        isActive: true
-      });
-    }
+    let userCounter = 1;
+    
+    // Generate users for each role type
+    externalRoles.forEach(roleInfo => {
+      for (let i = 0; i < roleInfo.count; i++) {
+        const firstName = getRandomElement(firstNames);
+        const lastName = getRandomElement(lastNames);
+        const uniqueId = `demo-${sessionId}-user-${userCounter}`;
+        
+        userData.push({
+          id: uniqueId,
+          email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${userCounter}@demo-soapbox.com`,
+          firstName,
+          lastName,
+          profileImageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName}${lastName}${userCounter}`,
+          bio: getRandomElement([
+            `${roleInfo.description} passionate about serving God and community.`,
+            `Faithful ${roleInfo.description.toLowerCase()} committed to spiritual growth.`,
+            `Devoted to prayer, worship, and building meaningful relationships.`,
+            `Active in ministry, seeking to spread God's love through service.`,
+            `Dedicated to living out Christ's teachings in daily life.`,
+            `Committed to fostering fellowship and spiritual development.`,
+            `Passionate about community outreach and discipleship.`,
+            `Seeking to make a positive impact through faith-based action.`
+          ]),
+          phoneNumber: `+1-555-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
+          emailVerified: true,
+          phoneVerified: Math.random() < 0.8,
+          createdAt: generateRandomDate(365),
+          isActive: true,
+          primaryRole: roleInfo.name // Store for role assignment
+        });
+        userCounter++;
+      }
+    });
+    
     const insertedUsers = await db.insert(users).values(userData).returning();
-    console.log(`✅ Created ${insertedUsers.length} users`);
+    console.log(`✅ Created ${insertedUsers.length} users across all external roles`);
 
-    // Generate User-Church relationships
-    console.log('🔗 Generating church memberships...');
+    // Generate User-Church relationships with proper role distribution
+    console.log('🔗 Generating church memberships with role-based assignments...');
     const userChurchData = [];
+    
     insertedUsers.forEach(user => {
-      const numChurches = Math.random() < 0.8 ? 1 : Math.random() < 0.95 ? 2 : 3;
+      // Multi-church admins and super admins can be in multiple churches
+      const isMultiChurch = ['multi_church_admin', 'super_admin'].includes(user.primaryRole);
+      const numChurches = isMultiChurch ? 
+        Math.random() < 0.6 ? 2 : Math.random() < 0.8 ? 3 : 4 : 1;
+      
       const selectedChurches = getRandomElements(insertedChurches, numChurches);
       
       selectedChurches.forEach((church, index) => {
         userChurchData.push({
           userId: user.id,
           churchId: church.id,
-          role: index === 0 ? getRandomElement(['member', 'deacon', 'elder', 'pastor']) : 'member',
+          role: user.primaryRole, // Use the assigned role
           joinedAt: generateRandomDate(365),
-          isActive: true
+          isActive: true,
+          isPrimary: index === 0 // First church is primary
         });
       });
     });
+    
     await db.insert(userChurches).values(userChurchData);
-    console.log(`✅ Created ${userChurchData.length} church memberships`);
+    console.log(`✅ Created ${userChurchData.length} church memberships with proper role distribution`);
 
-    // Generate Discussions
-    console.log('💬 Generating discussions...');
+    // Generate comprehensive discussions for thriving community
+    console.log('💬 Generating extensive discussions...');
+    const expandedDiscussionTopics = [
+      'Faith and Daily Life', 'Prayer Requests for Healing', 'Bible Study Insights', 'Community Outreach Ideas',
+      'Worship and Praise', 'Marriage and Family', 'Youth Ministry', 'Senior Saints Fellowship',
+      'Financial Stewardship', 'Mission Work Updates', 'Small Group Formation', 'Holiday Celebrations',
+      'Grief and Loss Support', 'New Member Welcome', 'Volunteer Opportunities', 'Pastor Appreciation',
+      'Church Building Project', 'Scripture Memorization', 'Spiritual Gifts Discovery', 'Testimony Sharing',
+      'Christian Parenting', 'Career and Calling', 'Health and Wellness', 'Environmental Stewardship',
+      'Social Justice and Faith', 'Easter Preparations', 'Christmas Outreach', 'Summer VBS Planning',
+      'Men\'s Ministry', 'Women\'s Ministry', 'Children\'s Activities', 'Teen Bible Study',
+      'Missionary Support', 'Church History', 'Denominational Questions', 'Interfaith Dialogue',
+      'Technology in Ministry', 'Music and Arts', 'Food Ministry', 'Homeless Outreach',
+      'Prison Ministry', 'Hospital Visitation', 'Senior Care', 'Addiction Recovery Support'
+    ];
+
     const discussionData = [];
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 300; i++) {
       const author = getRandomElement(insertedUsers);
       const church = getRandomElement(insertedChurches);
+      const topic = getRandomElement(expandedDiscussionTopics);
+      
+      const contentVariations = [
+        `I've been reflecting on ${topic.toLowerCase()} and would love to hear your perspectives. How has this impacted your faith journey?`,
+        `Our small group has been discussing ${topic.toLowerCase()}. What Bible verses or teachings have guided you in this area?`,
+        `I'm seeking wisdom about ${topic.toLowerCase()}. Has anyone else faced similar challenges or experiences?`,
+        `God has been teaching me so much about ${topic.toLowerCase()} lately. I'd love to share and hear your insights too.`,
+        `Looking for prayer and advice regarding ${topic.toLowerCase()}. This community has been such a blessing to me.`,
+        `${topic} has been on my heart recently. How can we as a church body better support each other in this area?`,
+        `Praise report about ${topic.toLowerCase()}! God is so good. Anyone else have testimonies to share?`,
+        `Question about ${topic.toLowerCase()} - I'm still learning and growing. Your wisdom would be greatly appreciated.`
+      ];
+      
       discussionData.push({
-        title: getRandomElement(discussionTopics),
-        content: `This is a thoughtful discussion about ${getRandomElement(discussionTopics).toLowerCase()}. I'd love to hear everyone's thoughts and experiences on this topic.`,
+        title: topic,
+        content: getRandomElement(contentVariations),
         authorId: author.id,
         churchId: Math.random() < 0.7 ? church.id : null,
-        category: getRandomElement(['general', 'spiritual', 'community', 'announcement']),
-        isPublic: Math.random() < 0.8,
-        createdAt: generateRandomDate(60)
+        category: getRandomElement(['general', 'spiritual', 'community', 'announcement', 'prayer', 'testimony', 'question']),
+        isPublic: Math.random() < 0.85,
+        createdAt: generateRandomDate(90),
+        likesCount: Math.floor(Math.random() * 25),
+        commentsCount: Math.floor(Math.random() * 15)
       });
     }
     const insertedDiscussions = await db.insert(discussions).values(discussionData).returning();
@@ -255,20 +340,47 @@ export async function generateComprehensiveDemoData() {
     await db.insert(discussionComments).values(commentData);
     console.log(`✅ Created ${commentData.length} discussion comments`);
 
-    // Generate Prayer Requests
-    console.log('🙏 Generating prayer requests...');
+    // Generate comprehensive prayer requests for thriving community
+    console.log('🙏 Generating extensive prayer requests...');
+    const expandedPrayerTopics = [
+      'Healing and Recovery', 'Family Relationships', 'Job Search and Career', 'Financial Provision',
+      'Marriage and Unity', 'Children and Parenting', 'Elderly Care', 'Chronic Illness',
+      'Mental Health and Peace', 'Grief and Loss', 'Addiction Recovery', 'Surgery and Medical',
+      'Mission Work Safety', 'Church Growth', 'Community Outreach', 'Spiritual Growth',
+      'Protection During Travel', 'School and Education', 'New Baby Blessing', 'Home Purchase',
+      'Legal Matters', 'Relationship Restoration', 'Depression and Anxiety', 'Cancer Treatment',
+      'Military Service', 'Pregnancy Complications', 'Youth Guidance', 'Senior Health',
+      'Business Challenges', 'Ministry Direction', 'Marriage Counseling', 'Teen Struggles',
+      'Neighborhood Evangelism', 'Church Leadership', 'Medical Diagnosis', 'Housing Needs',
+      'Employment Stability', 'Family Reconciliation', 'Spiritual Warfare', 'Wisdom and Guidance'
+    ];
+
     const prayerData = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 200; i++) {
       const author = getRandomElement(insertedUsers);
       const church = getRandomElement(insertedChurches);
+      const topic = getRandomElement(expandedPrayerTopics);
+      
+      const prayerVariations = [
+        `Please lift up ${topic.toLowerCase()} in your prayers. I'm trusting God for His perfect will and timing.`,
+        `Requesting prayer for ${topic.toLowerCase()}. Your intercession means the world to me during this season.`,
+        `Would appreciate your prayers regarding ${topic.toLowerCase()}. God has been so faithful, and I know He will continue to be.`,
+        `Please join me in praying about ${topic.toLowerCase()}. I'm seeking God's wisdom and peace in this situation.`,
+        `Urgent prayer needed for ${topic.toLowerCase()}. Thank you for standing with me in faith and prayer.`,
+        `Seeking prayer warriors for ${topic.toLowerCase()}. I believe in the power of collective prayer and God's goodness.`,
+        `Humbly asking for prayer concerning ${topic.toLowerCase()}. God has been moving, and I'm expectant for His continued work.`,
+        `Please remember ${topic.toLowerCase()} in your prayers. I'm grateful for this loving church family that cares and prays.`
+      ];
+      
       prayerData.push({
-        title: getRandomElement(prayerTopics),
-        content: `Please pray for ${getRandomElement(prayerTopics).toLowerCase()}. Your prayers mean so much during this time.`,
+        title: topic,
+        content: getRandomElement(prayerVariations),
         authorId: author.id,
-        churchId: Math.random() < 0.6 ? church.id : null,
-        isAnonymous: Math.random() < 0.3,
-        isUrgent: Math.random() < 0.2,
-        createdAt: generateRandomDate(45)
+        churchId: Math.random() < 0.65 ? church.id : null,
+        isAnonymous: Math.random() < 0.25,
+        isUrgent: Math.random() < 0.15,
+        createdAt: generateRandomDate(60),
+        responseCount: Math.floor(Math.random() * 20) + 5
       });
     }
     const insertedPrayers = await db.insert(prayerRequests).values(prayerData).returning();
@@ -301,24 +413,50 @@ export async function generateComprehensiveDemoData() {
     await db.insert(prayerResponses).values(prayerResponseData);
     console.log(`✅ Created ${prayerResponseData.length} prayer responses`);
 
-    // Generate Events
-    console.log('📅 Generating events...');
+    // Generate comprehensive events for thriving community
+    console.log('📅 Generating extensive church events...');
+    const expandedEventTypes = [
+      'Sunday Morning Worship', 'Wednesday Night Bible Study', 'Youth Group Meeting', 'Women\'s Ministry Luncheon',
+      'Men\'s Breakfast Fellowship', 'Senior Saints Gathering', 'Children\'s Church', 'Teen Discipleship',
+      'Prayer Meeting', 'Community Outreach', 'Food Bank Volunteer Day', 'Homeless Shelter Service',
+      'Vacation Bible School', 'Easter Celebration', 'Christmas Service', 'Thanksgiving Potluck',
+      'Baptism Service', 'Marriage Enrichment Seminar', 'Financial Peace Workshop', 'Grief Support Group',
+      'New Member Orientation', 'Missionary Visit', 'Church Picnic', 'Outdoor Movie Night',
+      'Worship Concert', 'Prophetic Conference', 'Healing Service', 'Youth Mission Trip',
+      'Small Group Leader Training', 'Volunteer Appreciation', 'Church Clean-up Day', 'Fundraiser Dinner',
+      'Marriage Ceremony', 'Baby Dedication', 'Graduation Recognition', 'Pastor Appreciation',
+      'Community Blood Drive', 'Clothing Donation Event', 'Back-to-School Supply Drive', 'Holiday Gift Wrapping',
+      'Bible Study Marathon', 'All-Night Prayer Vigil', 'Fasting and Prayer', 'Revival Meeting'
+    ];
+
     const eventData = [];
     insertedChurches.forEach(church => {
-      const numEvents = Math.floor(Math.random() * 8) + 5;
+      const numEvents = Math.floor(Math.random() * 15) + 10; // More events per church
       for (let i = 0; i < numEvents; i++) {
-        const eventType = getRandomElement(eventTypes);
+        const eventType = getRandomElement(expandedEventTypes);
+        const isRecurring = ['Sunday Morning Worship', 'Wednesday Night Bible Study', 'Youth Group Meeting', 'Prayer Meeting'].includes(eventType);
+        
+        const descriptions = [
+          `Join us for ${eventType.toLowerCase()}. Everyone is welcome to participate in this blessed time together.`,
+          `Don't miss ${eventType.toLowerCase()}! Come and be part of our church family gathering.`,
+          `We're excited to invite you to ${eventType.toLowerCase()}. Bring a friend and experience God's love.`,
+          `Mark your calendar for ${eventType.toLowerCase()}. This will be a wonderful time of fellowship and worship.`,
+          `You're invited to ${eventType.toLowerCase()}. Come as you are and be part of our community.`,
+          `Looking forward to seeing you at ${eventType.toLowerCase()}. God has something special in store!`
+        ];
+        
         eventData.push({
           title: eventType,
-          description: `Join us for ${eventType.toLowerCase()}. All are welcome!`,
-          startTime: generateFutureDate(60),
-          endTime: new Date(Date.now() + (2 * 60 * 60 * 1000)), // 2 hours later
-          location: `${church.name} - Main Sanctuary`,
+          description: getRandomElement(descriptions),
+          startTime: generateFutureDate(90),
+          endTime: new Date(Date.now() + (Math.random() * 4 + 1) * 60 * 60 * 1000), // 1-5 hours
+          location: `${church.name} - ${getRandomElement(['Main Sanctuary', 'Fellowship Hall', 'Youth Room', 'Conference Room', 'Outdoor Pavilion', 'Community Center'])}`,
           churchId: church.id,
-          maxAttendees: Math.floor(Math.random() * 200) + 50,
-          requiresRsvp: Math.random() < 0.7,
-          isRecurring: Math.random() < 0.4,
-          createdAt: generateRandomDate(30)
+          maxAttendees: Math.floor(Math.random() * 300) + 25,
+          requiresRsvp: Math.random() < 0.6,
+          isRecurring: isRecurring || Math.random() < 0.3,
+          createdAt: generateRandomDate(45),
+          attendeeCount: Math.floor(Math.random() * 150) + 10
         });
       }
     });
