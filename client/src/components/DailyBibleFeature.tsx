@@ -1310,11 +1310,14 @@ export function DailyBibleFeature() {
                   </div>
                 </div>
 
-                <Textarea
+                <SmartScriptureTextarea
                   value={reflection}
-                  onChange={(e) => setReflection(e.target.value)}
-                  placeholder="Write your thoughts and reflections here..."
-                  className="min-h-32 resize-none"
+                  onChange={setReflection}
+                  placeholder="Write your thoughts and reflections here... (Type scripture references like 'Romans 8:28' for auto-population)"
+                  label="Personal Reflection"
+                  minHeight="min-h-32"
+                  maxLength={2000}
+                  helpText="Reflect on how this verse speaks to your life. Scripture references will be automatically expanded."
                 />
               </CardContent>
             </Card>

@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, Users, UserPlus, Check, X, ArrowLeft, Search } from "lucide-react";
 import { Link } from "wouter";
+import SmartScriptureTextarea from "@/components/SmartScriptureTextarea";
 
 export default function Chat() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -610,21 +611,27 @@ export default function Chat() {
 
                 {/* Message Input */}
                 <div className="p-4 border-t">
-                  <form onSubmit={handleSendMessage} className="flex gap-2">
-                    <Input
-                      placeholder="Type your message..."
+                  <form onSubmit={handleSendMessage} className="space-y-3">
+                    <SmartScriptureTextarea
                       value={messageContent}
-                      onChange={(e) => setMessageContent(e.target.value)}
+                      onChange={setMessageContent}
+                      placeholder="Type your message... (Include scripture like 'John 3:16' for auto-population)"
+                      minHeight="min-h-[60px]"
+                      maxLength={1000}
                       disabled={sendMessageMutation.isPending}
                       className="flex-1"
                     />
-                    <Button 
-                      type="submit" 
-                      disabled={!messageContent.trim() || sendMessageMutation.isPending}
-                      size="sm"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                    <div className="flex justify-end">
+                      <Button 
+                        type="submit" 
+                        disabled={!messageContent.trim() || sendMessageMutation.isPending}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        <Send className="h-4 w-4 mr-1" />
+                        {sendMessageMutation.isPending ? 'Sending...' : 'Send'}
+                      </Button>
+                    </div>
                   </form>
                 </div>
               </CardContent>
