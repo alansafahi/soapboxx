@@ -2101,12 +2101,18 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const author = await storage.getUser(discussion.authorId);
       const authorName = author ? (author.firstName && author.lastName ? `${author.firstName} ${author.lastName}` : author.email || 'Unknown User') : 'Unknown User';
       
-      // Create a new discussion post sharing the original
-      const shareContent = `📢 **Shared Discussion: ${discussion.title}**\n\n${discussion.content}\n\n*Originally shared by ${authorName}*`;
+      // Clean up title to prevent nesting "Shared:" prefixes
+      let originalTitle = discussion.title;
+      if (originalTitle.startsWith('Shared: ')) {
+        originalTitle = originalTitle.replace(/^Shared: /, '');
+      }
+      
+      // Create cleaner share content with original title
+      const shareContent = `📢 **Shared Discussion: ${originalTitle}**\n\n${discussion.content}\n\n*Originally shared by ${authorName}*`;
       
       const sharedPost = await storage.createDiscussion({
         authorId: userId,
-        title: `Shared: ${discussion.title}`,
+        title: `Shared: ${originalTitle}`,
         content: shareContent,
         category: 'shared',
         churchId: null,
