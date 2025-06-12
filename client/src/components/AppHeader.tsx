@@ -311,24 +311,26 @@ export default function AppHeader() {
 
         {/* Navigation */}
         <nav className="mt-6 px-4 space-y-2">
-          {navigationItems.map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <Link key={item.href} href={item.href}>
-                <div
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActiveRoute(item.href)
-                      ? "text-white"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                  style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <IconComponent className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </div>
-              </Link>
-            );
+          {getVisibleGroups().map((group) => {
+            return group.items.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <Link key={item.href} href={item.href}>
+                  <div
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActiveRoute(item.href)
+                        ? "text-white"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                    style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <IconComponent className="h-5 w-5" />
+                    <span>{item.label}</span>
+                  </div>
+                </Link>
+              );
+            });
           })}
         </nav>
 
