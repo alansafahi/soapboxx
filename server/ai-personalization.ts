@@ -36,6 +36,128 @@ export interface MoodBasedContent {
 
 export class AIPersonalizationService {
   
+  private buildMoodBasedPrompt(mood: string, moodScore: number, notes?: string, userId?: string): string {
+    return `
+User's current emotional state:
+- Mood: ${mood}
+- Mood intensity (1-5): ${moodScore}
+- Additional notes: ${notes || 'None provided'}
+
+Please provide personalized spiritual content recommendations in JSON format:
+{
+  "recommendations": [
+    {
+      "type": "verse|devotional|prayer|meditation|article",
+      "title": "Meaningful title",
+      "content": "Full content text (scripture verse, prayer, devotional message)",
+      "reason": "Why this content is relevant to their mood",
+      "confidence": 0.8,
+      "priority": 1,
+      "estimatedReadTime": 3,
+      "difficulty": "beginner|intermediate|advanced",
+      "topics": ["comfort", "hope", "peace"],
+      "scriptureReferences": ["Psalm 23:4", "Romans 8:28"],
+      "actionable": true
+    }
+  ]
+}
+
+Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisdom appropriate for their emotional state.
+`;
+  }
+
+  private generateFallbackMoodContent(mood: string, moodScore: number): MoodBasedContent {
+    const fallbackContent: ContentRecommendation[] = [];
+    
+    // Basic mood-appropriate content based on mood type
+    if (mood.includes('sad') || mood.includes('down') || moodScore <= 2) {
+      fallbackContent.push({
+        type: 'verse',
+        title: 'God\'s Comfort in Sadness',
+        content: '"The Lord is close to the brokenhearted and saves those who are crushed in spirit." - Psalm 34:18',
+        reason: 'God promises to be near during difficult times',
+        confidence: 0.9,
+        priority: 1,
+        estimatedReadTime: 2,
+        difficulty: 'beginner',
+        topics: ['comfort', 'hope', 'healing'],
+        scriptureReferences: ['Psalm 34:18'],
+        actionable: true
+      });
+    } else if (mood.includes('anxious') || mood.includes('worried')) {
+      fallbackContent.push({
+        type: 'verse',
+        title: 'Peace Over Anxiety',
+        content: '"Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God." - Philippians 4:6',
+        reason: 'Biblical guidance for managing anxiety through prayer',
+        confidence: 0.9,
+        priority: 1,
+        estimatedReadTime: 2,
+        difficulty: 'beginner',
+        topics: ['peace', 'prayer', 'trust'],
+        scriptureReferences: ['Philippians 4:6'],
+        actionable: true
+      });
+    } else if (mood.includes('grateful') || mood.includes('joy') || moodScore >= 4) {
+      fallbackContent.push({
+        type: 'verse',
+        title: 'Gratitude and Joy',
+        content: '"Rejoice always, pray continually, give thanks in all circumstances; for this is God\'s will for you in Christ Jesus." - 1 Thessalonians 5:16-18',
+        reason: 'Celebrating your joyful spirit with thanksgiving',
+        confidence: 0.9,
+        priority: 1,
+        estimatedReadTime: 2,
+        difficulty: 'beginner',
+        topics: ['gratitude', 'joy', 'praise'],
+        scriptureReferences: ['1 Thessalonians 5:16-18'],
+        actionable: true
+      });
+    }
+
+    return {
+      mood,
+      moodScore,
+      recommendations: fallbackContent
+    };
+  }
+
+  async generateMoodBasedContent(userId: string, mood: string, moodScore: number, notes?: string): Promise<MoodBasedContent> {
+    try {
+      const prompt = this.buildMoodBasedPrompt(mood, moodScore, notes, userId);
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are a compassionate spiritual AI assistant that provides personalized biblical content based on user's emotional state. 
+            Analyze the user's mood and provide thoughtful, relevant scripture, prayers, and devotional content that addresses their spiritual needs.
+            Focus on comfort, encouragement, and biblical wisdom appropriate for their emotional state.
+            Always respond with JSON in the specified format.`
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 2000
+      });
+
+      const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+      
+      return {
+        mood,
+        moodScore,
+        recommendations: aiResponse.recommendations || []
+      };
+    } catch (error) {
+      console.error('Error generating mood-based content:', error);
+      return this.generateFallbackMoodContent(mood, moodScore);
+    }
+  }
+
   async generatePersonalizedRecommendations(userId: string): Promise<ContentRecommendation[]> {
     try {
       // Get user's personalization data

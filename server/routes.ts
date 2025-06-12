@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { AIPersonalizationService } from "./ai-personalization";
 import multer from "multer";
 import path from "path";
 
@@ -36,6 +37,9 @@ function getFileType(mimetype: string): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Initialize AI personalization service
+  const aiPersonalizationService = new AIPersonalizationService();
 
   // Basic test route
   app.get('/api/test', (req, res) => {
@@ -330,6 +334,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }));
       }
     });
+  });
+
+  // Mood check-in API endpoints
+  app.post('/api/mood-checkins', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { mood, moodScore, moodEmoji, notes, shareWithStaff, generatePersonalizedContent } = req.body;
+
+      // Create mood check-in record
+      const moodCheckin = await storage.createMoodCheckin({
+        userId,
+        mood,
+        moodScore,
+        moodEmoji,
+        notes,
+        shareWithStaff: shareWithStaff || false
+      });
+
+      // Generate personalized content if requested
+      let personalizedContent = null;
+      if (generatePersonalizedContent) {
+        try {
+          personalizedContent = await aiPersonalizationService.generateMoodBasedContent(
+            userId,
+            mood,
+            moodScore,
+            notes
+          );
+          
+          // Store personalized content for future reference
+          if (personalizedContent) {
+            await storage.savePersonalizedContent({
+              userId,
+              moodCheckinId: moodCheckin.id,
+              contentType: 'mood_based',
+              recommendations: personalizedContent.recommendations,
+              generatedAt: new Date()
+            });
+          }
+        } catch (aiError) {
+          console.error('Error generating personalized content:', aiError);
+          // Continue without personalized content rather than failing the whole request
+        }
+      }
+
+      res.json({
+        moodCheckin,
+        personalizedContent
+      });
+    } catch (error) {
+      console.error('Error creating mood check-in:', error);
+      res.status(500).json({ message: 'Failed to create mood check-in' });
+    }
+  });
+
+  app.get('/api/mood-checkins/recent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const recentCheckins = await storage.getRecentMoodCheckins(userId, limit);
+      res.json(recentCheckins);
+    } catch (error) {
+      console.error('Error fetching recent mood check-ins:', error);
+      res.status(500).json({ message: 'Failed to fetch mood check-ins' });
+    }
+  });
+
+  app.get('/api/mood-checkins/insights', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const days = parseInt(req.query.days as string) || 30;
+      
+      const insights = await storage.getMoodInsights(userId, days);
+      res.json(insights);
+    } catch (error) {
+      console.error('Error fetching mood insights:', error);
+      res.status(500).json({ message: 'Failed to fetch mood insights' });
+    }
+  });
+
+  app.get('/api/personalized-content/:contentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { contentId } = req.params;
+      
+      const content = await storage.getPersonalizedContent(contentId);
+      
+      // Verify content belongs to requesting user
+      if (content && content.userId === userId) {
+        res.json(content);
+      } else {
+        res.status(404).json({ message: 'Content not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching personalized content:', error);
+      res.status(500).json({ message: 'Failed to fetch personalized content' });
+    }
   });
 
   return httpServer;
