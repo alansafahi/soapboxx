@@ -311,6 +311,306 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sermon Creation Studio API Endpoints
+  app.post('/api/sermon/research', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, topic } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Check if user has pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Pastor access required" });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const prompt = `As a biblical scholar and theologian, provide comprehensive research for a sermon on ${topic ? `the topic: "${topic}"` : ''} ${scripture ? `based on the scripture: "${scripture}"` : ''}. 
+
+      Please provide:
+      1. Biblical commentary and theological insights
+      2. Historical and cultural context
+      3. Key themes and spiritual principles
+      4. Cross-references to related scripture passages
+      5. Practical applications for modern believers
+
+      Format your response as JSON with the following structure:
+      {
+        "commentary": "detailed biblical commentary",
+        "historicalContext": "historical and cultural background",
+        "keyThemes": ["theme1", "theme2", "theme3"],
+        "crossReferences": ["verse1", "verse2", "verse3"],
+        "practicalApplications": ["application1", "application2", "application3"]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a biblical scholar with deep theological knowledge. Provide accurate, doctrinally sound research for sermon preparation. Always maintain biblical accuracy and provide practical, applicable insights."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 2000
+      });
+
+      const research = JSON.parse(response.choices[0].message.content || '{}');
+      
+      res.json({
+        commentary: research.commentary || "Biblical commentary unavailable",
+        historicalContext: research.historicalContext || "Historical context unavailable",
+        keyThemes: research.keyThemes || [],
+        crossReferences: research.crossReferences || [],
+        practicalApplications: research.practicalApplications || []
+      });
+
+    } catch (error) {
+      console.error("Error generating sermon research:", error);
+      res.status(500).json({ message: "Failed to generate sermon research" });
+    }
+  });
+
+  app.post('/api/sermon/outline', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, topic, audience, length } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Check if user has pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Pastor access required" });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const lengthGuidance = {
+        short: "15-20 minutes (2000-2500 words)",
+        medium: "25-30 minutes (3000-3500 words)", 
+        long: "35-45 minutes (4000-5000 words)"
+      };
+
+      const audienceGuidance = {
+        general: "general congregation with mixed spiritual maturity",
+        youth: "young adults and teenagers with contemporary applications",
+        families: "families with children, emphasizing practical family applications",
+        seniors: "mature believers with deeper theological content",
+        seekers: "new believers and non-Christians with clear explanations"
+      };
+
+      const prompt = `Create a comprehensive sermon outline for ${topic ? `the topic: "${topic}"` : ''} ${scripture ? `based on the scripture: "${scripture}"` : ''}. 
+
+      Target audience: ${audienceGuidance[audience] || "general congregation"}
+      Sermon length: ${lengthGuidance[length] || "25-30 minutes"}
+
+      Create a structured, engaging outline with:
+      1. Compelling sermon title
+      2. Central theme/message
+      3. Engaging introduction
+      4. 3-4 main points with supporting details
+      5. Powerful conclusion
+      6. Clear call to action
+      7. Supporting scripture references
+
+      Format as JSON:
+      {
+        "title": "compelling sermon title",
+        "theme": "central message theme",
+        "introduction": "engaging opening that hooks the audience",
+        "mainPoints": ["point 1", "point 2", "point 3"],
+        "conclusion": "powerful closing message",
+        "callToAction": "specific action for congregation",
+        "scriptureReferences": ["primary verse", "supporting verse 1", "supporting verse 2"]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are an experienced pastor and preacher. Create engaging, biblically sound sermon outlines that connect with the specified audience. Focus on clear structure, practical application, and spiritual growth."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1500
+      });
+
+      const outline = JSON.parse(response.choices[0].message.content || '{}');
+      
+      res.json({
+        title: outline.title || "Untitled Sermon",
+        theme: outline.theme || "Faith and Life",
+        introduction: outline.introduction || "",
+        mainPoints: outline.mainPoints || [],
+        conclusion: outline.conclusion || "",
+        callToAction: outline.callToAction || "",
+        scriptureReferences: outline.scriptureReferences || []
+      });
+
+    } catch (error) {
+      console.error("Error generating sermon outline:", error);
+      res.status(500).json({ message: "Failed to generate sermon outline" });
+    }
+  });
+
+  app.post('/api/sermon/illustrations', isAuthenticated, async (req: any, res) => {
+    try {
+      const { topic, mainPoints, audience } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Check if user has pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Pastor access required" });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const prompt = `Find relevant sermon illustrations for a message about "${topic}" with these main points: ${mainPoints.join(', ')}. 
+      
+      Target audience: ${audience}
+      
+      Provide 4-5 compelling illustrations including:
+      - Real-life stories and examples
+      - Historical accounts
+      - Contemporary applications
+      - Metaphors and analogies
+      
+      Each illustration should be relevant, engaging, and appropriate for the audience.
+      
+      Format as JSON:
+      {
+        "illustrations": [
+          {
+            "title": "illustration title",
+            "story": "detailed story or example",
+            "application": "how it connects to the sermon point",
+            "source": "source or type of illustration",
+            "relevanceScore": 0.85
+          }
+        ]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a master storyteller and preacher. Provide powerful, appropriate illustrations that help congregations understand and remember spiritual truths. Ensure all stories are respectful, accurate, and meaningful."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 2000
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      const illustrations = result.illustrations || [];
+      
+      res.json(illustrations);
+
+    } catch (error) {
+      console.error("Error generating sermon illustrations:", error);
+      res.status(500).json({ message: "Failed to generate sermon illustrations" });
+    }
+  });
+
+  app.post('/api/sermon/enhance', isAuthenticated, async (req: any, res) => {
+    try {
+      const { outline, research } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Check if user has pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Pastor access required" });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const prompt = `Review and enhance this sermon outline based on the research provided. 
+      
+      OUTLINE:
+      Title: ${outline.title}
+      Theme: ${outline.theme}
+      Introduction: ${outline.introduction}
+      Main Points: ${outline.mainPoints.join('; ')}
+      Conclusion: ${outline.conclusion}
+      Call to Action: ${outline.callToAction}
+      
+      RESEARCH:
+      Commentary: ${research.commentary}
+      Key Themes: ${research.keyThemes.join(', ')}
+      
+      Provide specific recommendations for:
+      1. Clarity and flow improvements
+      2. Engagement optimization
+      3. Theological accuracy verification
+      4. Transition enhancements
+      5. Call-to-action strengthening
+      
+      Return enhanced outline in same format with improvements:
+      {
+        "enhancedOutline": {
+          "title": "improved title",
+          "theme": "refined theme",
+          "introduction": "enhanced introduction",
+          "mainPoints": ["improved point 1", "improved point 2", "improved point 3"],
+          "conclusion": "strengthened conclusion",
+          "callToAction": "more compelling call to action",
+          "scriptureReferences": ["references"]
+        },
+        "recommendations": ["specific improvement made 1", "specific improvement made 2"]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a sermon coach and theological editor. Analyze sermons for clarity, engagement, and biblical accuracy. Provide constructive enhancements that improve the spiritual impact and delivery effectiveness."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1500
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      
+      res.json({
+        enhancedOutline: result.enhancedOutline || outline,
+        recommendations: result.recommendations || []
+      });
+
+    } catch (error) {
+      console.error("Error enhancing sermon:", error);
+      res.status(500).json({ message: "Failed to enhance sermon" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Setup WebSocket server for real-time chat
