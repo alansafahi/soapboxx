@@ -150,9 +150,11 @@ function AppRouter() {
       {isAuthenticated && <AppHeader />}
       <main className={isAuthenticated ? "min-h-screen bg-gray-50 lg:ml-64" : ""}>
         <Switch>
+          {/* Demo route is always accessible */}
+          <Route path="/demo" component={DemoPage} />
+          
           {!isAuthenticated ? (
             <>
-              <Route path="/demo" component={DemoPage} />
               <Route path="*" component={Landing} />
             </>
           ) : (
@@ -193,7 +195,6 @@ function AppRouter() {
               <Route path="/audio-bible" component={AudioBibleDemo} />
               <Route path="/video-library" component={VideoLibrary} />
               <Route path="/ai-video-generator" component={AIVideoGenerator} />
-              <Route path="/demo" component={DemoPage} />
             </>
           )}
         </Switch>

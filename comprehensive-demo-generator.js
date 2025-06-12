@@ -3,7 +3,7 @@ import {
   churches, users, userChurches, ministryRoles, roles,
   discussions, discussionComments, discussionLikes, discussionBookmarks,
   prayerRequests, prayerResponses, prayerBookmarks,
-  events, eventRegistrations, checkins, dailyInspirations,
+  events, eventRegistrations, checkIns, dailyInspirations,
   donations, volunteers, volunteerOpportunities, volunteerRegistrations,
   bibleVerses, userInspirationHistory, referrals, achievements,
   devotionals, weeklySeriesProgress, dailyVerses, sermonMedia
@@ -330,8 +330,11 @@ export async function generateComprehensiveDemoData() {
       for (let i = 0; i < numCheckins; i++) {
         checkinData.push({
           userId: user.id,
-          date: generateRandomDate(60),
+          churchId: user.churchId || getRandomElement(insertedChurches).id,
+          checkInType: getRandomElement(['Sunday Service', 'Daily Devotional', 'Prayer Time', 'Spiritual Check-In']),
           mood: getRandomElement(['grateful', 'peaceful', 'joyful', 'hopeful', 'content', 'blessed']),
+          moodEmoji: getRandomElement(['😇', '😊', '🙏', '✨', '💝', '🌟']),
+          moodScore: Math.floor(Math.random() * 3) + 3, // 3-5 for positive moods
           notes: getRandomElement([
             'Feeling blessed today',
             'Grateful for God\'s provision',
@@ -339,11 +342,12 @@ export async function generateComprehensiveDemoData() {
             'Excited about church service',
             'Thankful for family and friends',
             'Reflecting on God\'s goodness'
-          ])
+          ]),
+          createdAt: generateRandomDate(60)
         });
       }
     });
-    await db.insert(checkins).values(checkinData);
+    await db.insert(checkIns).values(checkinData);
     console.log(`✅ Created ${checkinData.length} check-ins`);
 
     // Generate Volunteer Opportunities
