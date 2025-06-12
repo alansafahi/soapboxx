@@ -3,10 +3,10 @@ import {
   churches, users, userChurches, ministryRoles, roles,
   discussions, discussionComments, discussionLikes, discussionBookmarks,
   prayerRequests, prayerResponses, prayerBookmarks,
-  events, eventRegistrations, checkIns, dailyInspirations,
+  events, eventRsvps, checkIns, dailyInspirations,
   donations, volunteers, volunteerOpportunities, volunteerRegistrations,
   bibleVerses, userInspirationHistory, referrals, achievements,
-  devotionals, weeklySeriesProgress, dailyVerses, sermonMedia
+  devotionals, weeklySeries, dailyVerses, sermonMedia
 } from './shared/schema.js';
 
 // Comprehensive demo data for SoapBox Super App
@@ -319,7 +319,7 @@ export async function generateComprehensiveDemoData() {
         });
       });
     });
-    await db.insert(eventRegistrations).values(registrationData);
+    await db.insert(eventRsvps).values(registrationData);
     console.log(`✅ Created ${registrationData.length} event registrations`);
 
     // Generate Check-ins
