@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2 } from "lucide-react";
+import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
@@ -25,6 +25,7 @@ export default function AppHeader() {
     { href: "/bible", label: "Daily Bible", icon: BookOpen },
     { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
     { href: "/audio-routines", label: "Audio Routines", icon: Headphones },
+    { href: "/video-library", label: "Video Library", icon: PlayCircle },
     { href: "/prayer", label: "Prayer Wall", icon: Heart },
     { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/donation-demo", label: "Donations", icon: DollarSign },
