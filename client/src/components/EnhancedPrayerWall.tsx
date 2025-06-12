@@ -191,7 +191,7 @@ export default function EnhancedPrayerWall() {
   // Bookmark prayer mutation
   const bookmarkPrayerMutation = useMutation({
     mutationFn: async (prayerId: number) => {
-      return await apiRequest("POST", `/api/prayers/${prayerId}/bookmark`, {});
+      return await apiRequest(`/api/prayers/${prayerId}/bookmark`, { method: "POST", body: JSON.stringify({}) });
     },
     onSuccess: (_, prayerId) => {
       setBookmarkedRequests(prev => {
