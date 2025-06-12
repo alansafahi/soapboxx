@@ -93,14 +93,9 @@ export default function SocialFeed() {
   const bookmarkPostMutation = useMutation({
     mutationFn: async ({ postId, postType, isBookmarked }: { postId: number; postType: string; isBookmarked: boolean }) => {
       const endpoint = isBookmarked ? 'unbookmark' : 'bookmark';
-      const response = await fetch(`/api/${postType}s/${postId}/${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      return await apiRequest(`/api/${postType}s/${postId}/${endpoint}`, {
+        method: 'POST'
       });
-      if (!response.ok) throw new Error(`Failed to ${endpoint} post`);
-      return response.json();
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -114,14 +109,9 @@ export default function SocialFeed() {
   // Share post mutation
   const sharePostMutation = useMutation({
     mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
-      const response = await fetch(`/api/${postType}s/${postId}/share`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      return await apiRequest(`/api/${postType}s/${postId}/share`, {
+        method: 'POST'
       });
-      if (!response.ok) throw new Error('Failed to share post');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -137,14 +127,9 @@ export default function SocialFeed() {
     mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
       const url = `/api/${postType}s/${postId}/like`;
       console.log('Making like request to:', url);
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      return await apiRequest(url, {
+        method: 'POST'
       });
-      if (!response.ok) throw new Error('Failed to toggle like');
-      return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -159,14 +144,9 @@ export default function SocialFeed() {
   const prayerLikeMutation = useMutation({
     mutationFn: async (prayerId: number) => {
       console.log('Making prayer like request to:', `/api/prayers/${prayerId}/like`);
-      const response = await fetch(`/api/prayers/${prayerId}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      return await apiRequest(`/api/prayers/${prayerId}/like`, {
+        method: 'POST'
       });
-      if (!response.ok) throw new Error('Failed to toggle prayer like');
-      return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -184,15 +164,10 @@ export default function SocialFeed() {
         throw new Error('Comments are only supported for discussions');
       }
       
-      const response = await fetch(`/api/discussions/${postId}/comments`, {
+      return await apiRequest(`/api/discussions/${postId}/comments`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
+        body: { content }
       });
-      if (!response.ok) throw new Error('Failed to add comment');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
