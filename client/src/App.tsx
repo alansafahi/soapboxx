@@ -188,6 +188,7 @@ function AppRouter() {
               <Route path="/tour-testing" component={TourTesting} />
               <Route path="/tour-test" component={TourTestPage} />
               <Route path="/audio-routines" component={AudioRoutines} />
+              <Route path="/audio-bible" component={AudioBibleDemo} />
             </>
           )}
         </Switch>
