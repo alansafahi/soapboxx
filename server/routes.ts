@@ -686,7 +686,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // AI-powered Bible reflection endpoint
+  // AI-powered Bible reflection endpoint with content safety
   app.post('/api/bible/ai-reflection', isAuthenticated, async (req: any, res) => {
     try {
       const { verseText, verseReference, userContext, emotionalState } = req.body;
@@ -696,12 +696,36 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         return res.status(400).json({ message: "Verse text and reference are required" });
       }
 
+      // Import content safety service
+      const { contentSafety } = await import('./contentSafety');
+
+      // Validate verse reference format
+      const refValidation = contentSafety.validateVerseReference(verseReference);
+      if (!refValidation.isAllowed) {
+        return res.status(400).json({ message: refValidation.reason });
+      }
+
+      // Validate verse text content
+      const textValidation = contentSafety.validateTextContent(verseText);
+      if (!textValidation.isAllowed) {
+        return res.status(400).json({ message: refValidation.reason });
+      }
+
+      // Validate reflection context
+      if (userContext) {
+        const contextValidation = contentSafety.validateReflectionContent(userContext);
+        if (!contextValidation.isAllowed) {
+          return res.status(400).json({ message: contextValidation.reason });
+        }
+      }
+
       // Generate AI-powered reflection using OpenAI
       const openai = new (await import('openai')).default({
         apiKey: process.env.OPENAI_API_KEY,
       });
 
-      const prompt = `
+      // Create safe AI prompt with guardrails
+      const safePrompt = contentSafety.createSafeAIPrompt(`
         Generate a personalized spiritual reflection for this Bible verse:
         
         Verse: "${verseText}" - ${verseReference}
@@ -714,18 +738,14 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         3. A personalized prayer related to this verse and the user's context
         
         Respond in JSON format with keys: reflectionQuestions (array), practicalApplication (string), prayer (string)
-      `;
+      `, 'reflection');
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
-            role: "system",
-            content: "You are a wise, compassionate spiritual guide helping people engage deeply with Scripture. Provide thoughtful, personal, and practical insights."
-          },
-          {
             role: "user",
-            content: prompt
+            content: safePrompt
           }
         ],
         response_format: { type: "json_object" },
@@ -742,6 +762,72 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     } catch (error) {
       console.error("Error generating AI reflection:", error);
       res.status(500).json({ message: "Failed to generate AI reflection" });
+    }
+  });
+
+  // Verse Art Generation endpoint with comprehensive safety checks
+  app.post('/api/bible/generate-verse-art', isAuthenticated, async (req: any, res) => {
+    try {
+      const { verseText, verseReference, backgroundTheme, fontStyle, colorScheme } = req.body;
+      const userId = req.user.claims.sub;
+
+      if (!verseText || !verseReference || !backgroundTheme) {
+        return res.status(400).json({ message: "Verse text, reference, and background theme are required" });
+      }
+
+      // Import content safety service
+      const { contentSafety } = await import('./contentSafety');
+
+      // Comprehensive validation for verse art
+      const artValidation = contentSafety.validateVerseArtRequest(verseText, verseReference, backgroundTheme);
+      if (!artValidation.isAllowed) {
+        return res.status(400).json({ message: artValidation.reason });
+      }
+
+      // Generate AI artwork using DALL-E
+      const openai = new (await import('openai')).default({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      // Create safe prompt for image generation
+      const imagePrompt = contentSafety.createSafeAIPrompt(`
+        Create beautiful, faith-inspired artwork for a Bible verse with these specifications:
+        - Background: ${backgroundTheme} theme
+        - Style: ${fontStyle} typography
+        - Color scheme: ${colorScheme}
+        - Text overlay: "${verseText}" - ${verseReference}
+        
+        The image should be inspirational, family-friendly, and suitable for Christian social media sharing.
+        Include elegant typography that's easy to read over the background.
+        Make it Instagram-ready with good contrast and beautiful composition.
+      `, 'verse-art');
+
+      const imageResponse = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: imagePrompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+      });
+
+      const imageUrl = imageResponse.data[0].url;
+      
+      const artData = {
+        imageUrl,
+        verseReference,
+        verseText,
+        backgroundTheme,
+        fontStyle,
+        colorScheme
+      };
+
+      // Log the art generation for analytics
+      console.log(`Verse art generated for user ${userId}, verse: ${verseReference}, theme: ${backgroundTheme}`);
+      
+      res.json(artData);
+    } catch (error) {
+      console.error("Error generating verse art:", error);
+      res.status(500).json({ message: "Failed to generate verse art" });
     }
   });
 

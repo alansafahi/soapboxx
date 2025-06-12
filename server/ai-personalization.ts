@@ -123,21 +123,37 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
 
   async generateMoodBasedContent(userId: string, mood: string, moodScore: number, notes?: string): Promise<MoodBasedContent> {
     try {
-      const prompt = this.buildMoodBasedPrompt(mood, moodScore, notes, userId);
+      // Import content safety service
+      const { contentSafety } = await import('./contentSafety');
+
+      // Validate mood input
+      const moodValidation = contentSafety.validateTextContent(mood);
+      if (!moodValidation.isAllowed) {
+        console.warn(`Invalid mood content blocked: ${moodValidation.reason}`);
+        return this.generateFallbackMoodContent(mood, moodScore);
+      }
+
+      // Validate notes if provided
+      if (notes) {
+        const notesValidation = contentSafety.validateReflectionContent(notes);
+        if (!notesValidation.isAllowed) {
+          console.warn(`Invalid notes content blocked: ${notesValidation.reason}`);
+          notes = undefined; // Remove problematic notes
+        }
+      }
+
+      // Create safe AI prompt with guardrails
+      const safePrompt = contentSafety.createSafeAIPrompt(
+        this.buildMoodBasedPrompt(mood, moodScore, notes, userId),
+        'general'
+      );
       
       const response = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
-            role: "system",
-            content: `You are a compassionate spiritual AI assistant that provides personalized biblical content based on user's emotional state. 
-            Analyze the user's mood and provide thoughtful, relevant scripture, prayers, and devotional content that addresses their spiritual needs.
-            Focus on comfort, encouragement, and biblical wisdom appropriate for their emotional state.
-            Always respond with JSON in the specified format.`
-          },
-          {
             role: "user",
-            content: prompt
+            content: safePrompt
           }
         ],
         response_format: { type: "json_object" },
