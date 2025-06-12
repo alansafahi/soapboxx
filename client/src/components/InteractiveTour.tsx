@@ -947,21 +947,16 @@ export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTo
   
   const config = tourConfigs.find(c => c.role === role);
   const overlayRef = useRef<HTMLDivElement>(null);
-  
-  if (!config) return null;
-
-  const currentStepData = config.steps[currentStep];
-  const progress = ((currentStep + 1) / config.steps.length) * 100;
 
   useEffect(() => {
-    if (isOpen && currentStepData) {
+    if (isOpen && config && config.steps[currentStep]) {
       // Navigate to the step's page
-      navigate(currentStepData.page);
+      navigate(config.steps[currentStep].page);
     }
-  }, [currentStep, isOpen, currentStepData, navigate]);
+  }, [currentStep, isOpen, config, navigate]);
 
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && config) {
       const timer = setTimeout(() => {
         if (currentStep < config.steps.length - 1) {
           setCurrentStep(prev => prev + 1);
@@ -972,7 +967,12 @@ export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTo
       
       return () => clearTimeout(timer);
     }
-  }, [isPlaying, currentStep, config.steps.length]);
+  }, [isPlaying, currentStep, config]);
+  
+  if (!config) return null;
+
+  const currentStepData = config.steps[currentStep];
+  const progress = ((currentStep + 1) / config.steps.length) * 100;
 
   const handleNext = () => {
     if (currentStep < config.steps.length - 1) {
