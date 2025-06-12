@@ -1874,6 +1874,76 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Biblical Research API endpoint
+  app.post('/api/biblical-research', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { query, includeCommentary = true, includeCrossReferences = true } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Research query is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ message: "AI service not configured" });
+      }
+
+      const OpenAI = require('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const prompt = `As a biblical scholar and theologian, provide comprehensive research for: "${query}"
+
+Please provide:
+1. Biblical commentary and theological insights
+2. Historical and cultural context
+3. Key themes and spiritual principles
+4. Cross-references to related scripture passages
+5. Practical applications for modern believers
+
+Format your response as JSON with the following structure:
+{
+  "commentary": "detailed biblical commentary",
+  "historicalContext": "historical and cultural background",
+  "keyThemes": ["theme1", "theme2", "theme3"],
+  "crossReferences": ["verse1", "verse2", "verse3"],
+  "practicalApplications": ["application1", "application2", "application3"]
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a biblical scholar with deep theological knowledge. Provide accurate, doctrinally sound research for sermon preparation. Always maintain biblical accuracy and provide practical, applicable insights."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 2000
+      });
+
+      const researchData = JSON.parse(response.choices[0].message.content);
+      
+      res.json({
+        success: true,
+        query,
+        research: researchData,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error("Biblical research error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Unable to generate biblical research. Please try again.",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
+
   // Content Distribution API routes
   app.post('/api/content/distribute', isAuthenticated, async (req: any, res) => {
     try {

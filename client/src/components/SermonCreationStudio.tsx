@@ -54,13 +54,16 @@ export default function SermonCreationStudio() {
   // Biblical Research Mutation
   const researchMutation = useMutation({
     mutationFn: async (data: { scripture: string; topic: string }) => {
-      return apiRequest('/api/sermon/research', {
+      const query = data.scripture || data.topic;
+      return apiRequest('/api/biblical-research', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify({ query })
       });
     },
     onSuccess: (data) => {
-      setCurrentResearch(data);
+      // Extract the research data from the API response
+      const researchData = data.research || data;
+      setCurrentResearch(researchData);
       toast({
         title: "Research Complete",
         description: "Biblical commentary and insights have been generated."
