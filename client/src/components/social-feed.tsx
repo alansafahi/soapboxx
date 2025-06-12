@@ -349,10 +349,10 @@ export default function SocialFeed() {
             <Button 
               onClick={handleCreatePost}
               disabled={!newPost.trim() || createPostMutation.isPending}
-              className="bg-faith-blue hover:bg-faith-blue/90"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2"
             >
               <Send className="w-4 h-4 mr-2" />
-              Share
+              {createPostMutation.isPending ? 'Posting...' : 'Share'}
             </Button>
           </div>
         </CardContent>
