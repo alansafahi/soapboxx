@@ -161,7 +161,7 @@ export default function DailyInspiration() {
 
   const getShareText = () => {
     if (!inspiration) return '';
-    return `${inspiration.title}\n\n${inspiration.content}${inspiration.verse ? `\n\n"${inspiration.verse}" - ${inspiration.verseReference}` : ''}\n\nShared from Soapbox`;
+    return `${inspiration.verseReference || inspiration.title} 🙏 #SoapBoxApp`;
   };
 
   const copyToClipboard = async () => {

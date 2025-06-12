@@ -295,7 +295,7 @@ export default function EventsList() {
   const shareEvent = async (event: Event) => {
     // Create proper event URL
     const eventUrl = `${window.location.origin}/events?event=${event.id}`;
-    const shareText = `${event.title}\n\n${event.description || "Join us for this event!"}\n\nDate: ${format(new Date(event.eventDate), "PPP")}\n${event.location ? `Location: ${event.location}\n` : ""}${eventUrl}`;
+    const shareText = `${event.title} 🙏 #SoapBoxApp`;
     
     if (navigator.share) {
       try {

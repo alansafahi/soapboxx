@@ -408,7 +408,7 @@ export function BibleInADayFeature() {
   }
 
   if (isSessionComplete && !activeSession.isCompleted) {
-    const shareText = `I just completed the Bible In A Day journey on SoapBox! What an incredible experience discovering God's love story from Creation to New Creation. #BibleInADay #SoapBoxApp`;
+    const shareText = `Bible In A Day completed! 🙏 #SoapBoxApp`;
     const shareUrl = window.location.origin;
 
     const handleShare = (platform: string) => {

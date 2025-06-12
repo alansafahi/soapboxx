@@ -337,7 +337,7 @@ export function DailyBibleFeature() {
   const handleShare = (platform: string) => {
     if (!dailyVerse) return;
     
-    const defaultShareText = `"${getVerseText()}" - ${dailyVerse.verseReference} 🙏 #DailyBible #SoapBoxSuperApp`;
+    const defaultShareText = `${dailyVerse.verseReference} 🙏 #SoapBoxApp`;
     const finalShareText = shareText || defaultShareText;
     const shareUrl = window.location.origin + '/bible';
     
