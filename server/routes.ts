@@ -550,5 +550,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin/Pastor Analytics Endpoints
+  app.get('/api/admin/member-checkins', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { period = '30', churchId } = req.query;
+      
+      // Check if user has admin/pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - parseInt(period));
+
+      // Get check-in data for all church members
+      const checkinData = await storage.getChurchMemberCheckIns(churchId || 1, startDate);
+      
+      res.json({
+        period: `${period} days`,
+        totalMembers: checkinData.totalMembers,
+        activeMembers: checkinData.activeMembers,
+        averageCheckins: checkinData.averageCheckins,
+        memberDetails: checkinData.members
+      });
+    } catch (error) {
+      console.error("Error fetching member check-ins:", error);
+      res.status(500).json({ message: "Failed to fetch member check-ins" });
+    }
+  });
+
+  app.get('/api/admin/devotion-analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { period = '30', churchId } = req.query;
+      
+      // Check if user has admin/pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - parseInt(period));
+
+      // Get devotion reading analytics
+      const devotionStats = await storage.getDevotionAnalytics(churchId || 1, startDate);
+      
+      res.json({
+        period: `${period} days`,
+        totalReadings: devotionStats.totalReadings,
+        uniqueReaders: devotionStats.uniqueReaders,
+        averageEngagement: devotionStats.averageEngagement,
+        mostPopularVerses: devotionStats.mostPopularVerses,
+        memberReadingStats: devotionStats.memberStats
+      });
+    } catch (error) {
+      console.error("Error fetching devotion analytics:", error);
+      res.status(500).json({ message: "Failed to fetch devotion analytics" });
+    }
+  });
+
+  app.get('/api/admin/at-risk-members', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { churchId, threshold = '14' } = req.query;
+      
+      // Check if user has admin/pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Find members who haven't engaged in specified days
+      const thresholdDate = new Date();
+      thresholdDate.setDate(thresholdDate.getDate() - parseInt(threshold));
+
+      const atRiskMembers = await storage.getAtRiskMembers(churchId || 1, thresholdDate);
+      
+      res.json({
+        threshold: `${threshold} days`,
+        atRiskCount: atRiskMembers.length,
+        members: atRiskMembers.map(member => ({
+          id: member.id,
+          name: `${member.firstName} ${member.lastName}`,
+          email: member.email,
+          lastCheckIn: member.lastCheckIn,
+          lastBibleReading: member.lastBibleReading,
+          lastEventAttendance: member.lastEventAttendance,
+          daysSinceLastActivity: member.daysSinceLastActivity,
+          riskLevel: member.daysSinceLastActivity > 30 ? 'high' : member.daysSinceLastActivity > 14 ? 'medium' : 'low'
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching at-risk members:", error);
+      res.status(500).json({ message: "Failed to fetch at-risk members" });
+    }
+  });
+
+  app.get('/api/admin/engagement-overview', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { churchId } = req.query;
+      
+      // Check if user has admin/pastor permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Get comprehensive engagement overview
+      const engagement = await storage.getEngagementOverview(churchId || 1);
+      
+      res.json({
+        checkIns: {
+          thisWeek: engagement.checkInsThisWeek,
+          lastWeek: engagement.checkInsLastWeek,
+          trend: engagement.checkInTrend
+        },
+        bibleReading: {
+          thisWeek: engagement.bibleReadingsThisWeek,
+          lastWeek: engagement.bibleReadingsLastWeek,
+          trend: engagement.bibleReadingTrend
+        },
+        events: {
+          thisWeek: engagement.eventAttendanceThisWeek,
+          lastWeek: engagement.eventAttendanceLastWeek,
+          trend: engagement.eventTrend
+        },
+        prayers: {
+          thisWeek: engagement.prayersThisWeek,
+          lastWeek: engagement.prayersLastWeek,
+          trend: engagement.prayerTrend
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching engagement overview:", error);
+      res.status(500).json({ message: "Failed to fetch engagement overview" });
+    }
+  });
+
   return httpServer;
 }
