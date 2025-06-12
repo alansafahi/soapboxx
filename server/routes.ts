@@ -828,13 +828,74 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       const parsedRef = parseReference(reference);
 
-      // Look up verse in database
-      const verse = await storage.lookupBibleVerse(reference);
+      // Look up verse in database first
+      let verse = await storage.lookupBibleVerse(reference);
       
       if (!verse) {
-        return res.status(404).json({ 
-          message: `Verse not found: ${reference}. Please enter the verse text manually.` 
-        });
+        // If not found in database, use ChatGPT to retrieve the verse
+        try {
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+          });
+
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+            messages: [
+              {
+                role: "system",
+                content: "You are a Biblical scholar assistant. When given a Bible verse reference, provide the exact verse text from a reliable translation (preferably NIV or ESV). Respond only with the verse text, no additional commentary. If the reference is invalid or doesn't exist, respond with 'INVALID_REFERENCE'."
+              },
+              {
+                role: "user",
+                content: `Please provide the exact text for ${reference}`
+              }
+            ],
+            max_tokens: 200,
+            temperature: 0.1
+          });
+
+          const verseText = response.choices[0].message.content?.trim();
+          
+          if (!verseText || verseText === 'INVALID_REFERENCE') {
+            return res.status(404).json({ 
+              message: `Verse not found: ${reference}. Please enter the verse text manually.` 
+            });
+          }
+
+          // Create verse object from ChatGPT response
+          verse = {
+            reference: reference,
+            text: verseText
+          };
+
+          // Optionally, save this verse to database for future use
+          try {
+            await storage.saveBibleVerseFromAI({
+              reference: reference,
+              text: verseText,
+              book: parsedRef.book,
+              chapter: parsedRef.chapter,
+              verse: parsedRef.startVerse,
+              category: 'general',
+              topicTags: ['scripture'],
+              aiSummary: `Verse retrieved from AI for reference ${reference}`,
+              popularityScore: 50,
+              isActive: true
+            });
+          } catch (saveError) {
+            // If saving fails, continue - we still have the verse
+            console.log('Note: Could not save AI-retrieved verse to database:', saveError);
+          }
+
+          console.log(`AI-retrieved verse for user ${userId}: ${reference}`);
+          
+        } catch (aiError) {
+          console.error('Error retrieving verse from AI:', aiError);
+          return res.status(404).json({ 
+            message: `Verse not found: ${reference}. Please enter the verse text manually.` 
+          });
+        }
       }
 
       // Log the verse lookup for analytics

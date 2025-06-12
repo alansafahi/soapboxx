@@ -3304,6 +3304,39 @@ export class DatabaseStorage implements IStorage {
     return verse;
   }
 
+  async saveBibleVerseFromAI(verseData: {
+    reference: string;
+    text: string;
+    book: string;
+    chapter: number;
+    verse: number;
+    category: string;
+    topicTags: string[];
+    aiSummary: string;
+    popularityScore: number;
+    isActive: boolean;
+  }): Promise<BibleVerse> {
+    const [savedVerse] = await db
+      .insert(bibleVerses)
+      .values({
+        reference: verseData.reference,
+        text: verseData.text,
+        book: verseData.book,
+        chapter: verseData.chapter,
+        verse: verseData.verse,
+        category: verseData.category,
+        topicTags: verseData.topicTags,
+        aiSummary: verseData.aiSummary,
+        popularityScore: verseData.popularityScore,
+        isActive: verseData.isActive,
+        translation: 'NIV'
+      })
+      .onConflictDoNothing()
+      .returning();
+    
+    return savedVerse;
+  }
+
   async getUserBibleBadges(userId: string): Promise<UserBibleBadge[]> {
     return await db
       .select({
