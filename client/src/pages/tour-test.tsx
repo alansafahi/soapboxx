@@ -31,6 +31,33 @@ export default function TourTestPage() {
     }
   ];
 
+  const memberRoles = [
+    { 
+      id: "member", 
+      name: "Church Member", 
+      description: "Regular church member exploring the platform",
+      color: "bg-indigo-500 text-white"
+    },
+    { 
+      id: "new_member", 
+      name: "New Member", 
+      description: "First-time user just joined the platform",
+      color: "bg-emerald-500 text-white"
+    },
+    { 
+      id: "volunteer", 
+      name: "Volunteer", 
+      description: "Active volunteer in church activities",
+      color: "bg-orange-500 text-white"
+    },
+    { 
+      id: "small_group_leader", 
+      name: "Small Group Leader", 
+      description: "Leads small groups and Bible studies",
+      color: "bg-teal-500 text-white"
+    }
+  ];
+
   const startTourForRole = (roleId: string) => {
     setSelectedRole(roleId);
     setShowTour(true);
@@ -82,30 +109,61 @@ export default function TourTestPage() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">Test Tour for Platform Roles</h3>
-                <p className="text-sm text-gray-600">
-                  Click any role below to experience the contextual welcome tour designed for that platform administrator role.
-                </p>
-                
-                <div className="grid gap-3">
-                  {platformRoles.map((role) => (
-                    <div key={role.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge className={role.color}>{role.name}</Badge>
+              <div className="space-y-6">
+                {/* Platform Administrator Roles */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900">Platform Administrator Tours</h3>
+                  <p className="text-sm text-gray-600">
+                    Experience contextual welcome tours designed for platform administrators.
+                  </p>
+                  
+                  <div className="grid gap-3">
+                    {platformRoles.map((role) => (
+                      <div key={role.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className={role.color}>{role.name}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">{role.description}</p>
                         </div>
-                        <p className="text-sm text-gray-600">{role.description}</p>
+                        <Button 
+                          onClick={() => startTourForRole(role.id)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Start Tour
+                        </Button>
                       </div>
-                      <Button 
-                        onClick={() => startTourForRole(role.id)}
-                        variant="outline"
-                        size="sm"
-                      >
-                        Start Tour
-                      </Button>
-                    </div>
-                  ))}
+                    ))}
+                </div>
+                </div>
+
+                {/* Church Member Roles */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900">Church Member Tours</h3>
+                  <p className="text-sm text-gray-600">
+                    Experience personalized welcome tours designed for different types of church members.
+                  </p>
+                  
+                  <div className="grid gap-3">
+                    {memberRoles.map((role) => (
+                      <div key={role.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className={role.color}>{role.name}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">{role.description}</p>
+                        </div>
+                        <Button
+                          onClick={() => startTourForRole(role.id)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Start Tour
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -125,9 +183,9 @@ export default function TourTestPage() {
 
         {showTour && selectedRole && (
           <InteractiveTour
-            userRole={selectedRole}
-            onComplete={handleTourComplete}
-            onSkip={handleTourComplete}
+            isOpen={showTour}
+            onClose={handleTourComplete}
+            role={selectedRole}
           />
         )}
       </div>
