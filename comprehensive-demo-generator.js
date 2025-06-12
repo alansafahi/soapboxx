@@ -1,4 +1,4 @@
-import { db } from './server/db.js';
+import { db, pool } from './server/db.js';
 import { 
   churches, users, userChurches, ministryRoles, roles,
   discussions, discussionComments, discussionLikes, discussionBookmarks,
@@ -130,94 +130,58 @@ async function cleanupExistingDemoData() {
   console.log('🧹 Cleaning up existing demo data...');
   
   try {
-    // Use a simplified approach - clear all demo data without counting first
-    console.log('  Starting systematic cleanup of demo data...');
-
-    // Clean dependent records first in the correct order
-    const cleanupQueries = [
-      "DELETE FROM discussion_bookmarks WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
-      "DELETE FROM discussion_likes WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')", 
-      "DELETE FROM discussion_comments WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
-      "DELETE FROM discussions WHERE author_id LIKE 'demo-%'",
-      "DELETE FROM prayer_bookmarks WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
-      "DELETE FROM prayer_responses WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
-      "DELETE FROM prayer_requests WHERE user_id LIKE 'demo-%'",
-      "DELETE FROM event_rsvps WHERE user_id LIKE 'demo-%'",
-      "DELETE FROM check_ins WHERE user_id LIKE 'demo-%'",
-      "DELETE FROM user_inspiration_history WHERE user_id LIKE 'demo-%'",
-      "DELETE FROM referrals WHERE referrer_id LIKE 'demo-%' OR referred_id LIKE 'demo-%'",
-      "DELETE FROM user_achievements WHERE user_id LIKE 'demo-%'",
-      "DELETE FROM user_churches WHERE user_id LIKE 'demo-%'",
-      "DELETE FROM events WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')",
-      "DELETE FROM devotionals WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')", 
-      "DELETE FROM achievements WHERE id IN (1, 2, 3, 4, 5)",
-      "DELETE FROM users WHERE id LIKE 'demo-%'",
-      "DELETE FROM churches WHERE name LIKE 'Demo %'"
-    ];
-
-    // Use Drizzle ORM queries for proper cleanup
+    // Use the pool directly for raw SQL execution
+    const client = await pool.connect();
+    
     try {
-      // Clean using Drizzle ORM delete operations
-      await db.delete(discussionBookmarks);
-      console.log(`  ✅ Cleaned discussion_bookmarks`);
+      console.log('  Starting comprehensive database cleanup...');
+
+      // Disable foreign key checks
+      await client.query("SET session_replication_role = replica");
       
-      await db.delete(discussionLikes);
-      console.log(`  ✅ Cleaned discussion_likes`);
-      
-      await db.delete(discussionComments);
-      console.log(`  ✅ Cleaned discussion_comments`);
-      
-      await db.delete(discussions);
-      console.log(`  ✅ Cleaned discussions`);
-      
-      await db.delete(prayerBookmarks);
-      console.log(`  ✅ Cleaned prayer_bookmarks`);
-      
-      await db.delete(prayerResponses);
-      console.log(`  ✅ Cleaned prayer_responses`);
-      
-      await db.delete(prayerRequests);
-      console.log(`  ✅ Cleaned prayer_requests`);
-      
-      await db.delete(eventRsvps);
-      console.log(`  ✅ Cleaned event_rsvps`);
-      
-      await db.delete(checkIns);
-      console.log(`  ✅ Cleaned check_ins`);
-      
-      await db.delete(userInspirationHistory);
-      console.log(`  ✅ Cleaned user_inspiration_history`);
-      
-      await db.delete(referrals);
-      console.log(`  ✅ Cleaned referrals`);
-      
-      await db.delete(userAchievements);
-      console.log(`  ✅ Cleaned user_achievements`);
-      
-      await db.delete(userChurches);
-      console.log(`  ✅ Cleaned user_churches`);
-      
-      await db.delete(events);
-      console.log(`  ✅ Cleaned events`);
-      
-      try {
-        await db.delete(devotionals);
-        console.log(`  ✅ Cleaned devotionals`);
-      } catch (error) {
-        console.log(`  ⚠️ Skipped devotionals (table not found)`);
+      // Clean all tables by truncating in correct order
+      const cleanupCommands = [
+        "TRUNCATE TABLE discussion_bookmarks RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE discussion_likes RESTART IDENTITY CASCADE", 
+        "TRUNCATE TABLE discussion_comments RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE discussions RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE prayer_bookmarks RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE prayer_responses RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE prayer_requests RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE event_rsvps RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE check_ins RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE user_inspiration_history RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE referrals RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE user_achievements RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE user_churches RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE events RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE achievements RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE users RESTART IDENTITY CASCADE",
+        "TRUNCATE TABLE churches RESTART IDENTITY CASCADE"
+      ];
+
+      for (const command of cleanupCommands) {
+        try {
+          await client.query(command);
+          const tableName = command.split(' ')[2];
+          console.log(`  ✅ Truncated ${tableName}`);
+        } catch (error) {
+          const tableName = command.split(' ')[2];
+          if (error.code === '42P01') {
+            console.log(`  ⚠️ Skipped ${tableName} (table not found)`);
+          } else {
+            console.log(`  ⚠️ Error truncating ${tableName}: ${error.message}`);
+          }
+        }
       }
       
-      await db.delete(achievements);
-      console.log(`  ✅ Cleaned achievements`);
+      // Re-enable foreign key checks
+      await client.query("SET session_replication_role = DEFAULT");
       
-      await db.delete(users);
-      console.log(`  ✅ Cleaned users`);
+      console.log('  📊 All tables cleaned successfully');
       
-      await db.delete(churches);
-      console.log(`  ✅ Cleaned churches`);
-      
-    } catch (error) {
-      console.log(`  ⚠️ Error in cleanup: ${error.message}`);
+    } finally {
+      client.release();
     }
     
   } catch (error) {
