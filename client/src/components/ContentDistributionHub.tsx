@@ -60,9 +60,9 @@ export default function ContentDistributionHub() {
     },
     onError: (error) => {
       toast({
-        title: "Generation Failed",
-        description: "Unable to generate content distribution package. Please try again.",
-        variant: "destructive"
+        title: "Creating Your Content Package",
+        description: "We're crafting the perfect multi-platform content for your message - let's try that again.",
+        variant: "default"
       });
     }
   });
@@ -90,9 +90,9 @@ export default function ContentDistributionHub() {
   const handleGenerate = () => {
     if (!sermonTitle || !sermonSummary) {
       toast({
-        title: "Missing Information",
-        description: "Please provide sermon title and summary.",
-        variant: "destructive"
+        title: "Almost Ready to Create",
+        description: "Just need your sermon title and summary to craft the perfect content package.",
+        variant: "default"
       });
       return;
     }

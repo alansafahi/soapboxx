@@ -254,6 +254,7 @@ export interface IStorage {
   updateChurch(id: number, updates: Partial<Church>): Promise<Church>;
   
   // Church team management
+  getUserChurch(userId: string): Promise<UserChurch | undefined>;
   getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]>;
   updateMemberRole(churchId: number, userId: string, role: string, permissions?: string[], title?: string, bio?: string): Promise<UserChurch>;
   removeMember(churchId: number, userId: string): Promise<void>;
@@ -758,6 +759,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(churches.id, id))
       .returning();
     return updatedChurch;
+  }
+
+  async getUserChurch(userId: string): Promise<UserChurch | undefined> {
+    const [userChurch] = await db
+      .select()
+      .from(userChurches)
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.isActive, true)
+      ));
+    return userChurch;
   }
 
   async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
