@@ -266,18 +266,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { smsService } = await import('./smsService');
-      const result = await smsService.sendVerificationSMS('test-user', phoneNumber);
+      const token = smsService.generateVerificationToken();
+      const result = await smsService.sendVerificationSMS({
+        phoneNumber,
+        firstName: 'Test User',
+        token
+      });
       
-      if (result.success) {
+      if (result) {
         res.json({ 
           success: true, 
           message: "SMS verification code sent successfully",
-          verificationId: result.verificationId 
+          verificationId: token 
         });
       } else {
         res.status(400).json({ 
           success: false, 
-          message: result.message 
+          message: "Failed to send SMS verification" 
         });
       }
     } catch (error) {
