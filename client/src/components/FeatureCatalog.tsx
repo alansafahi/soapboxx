@@ -312,6 +312,13 @@ export default function FeatureCatalog() {
               details: ["Social media posts for Facebook, Twitter, Instagram", "Email newsletters and campaigns", "Small group study guides", "Church bulletin inserts"]
             },
             {
+              name: "Engagement Analytics Dashboard",
+              description: "Track sermon effectiveness and congregation response",
+              status: "Active",
+              icon: <BarChart className="w-4 h-4" />,
+              details: ["Real-time engagement metrics", "Feedback sentiment analysis", "AI-generated insights and recommendations", "Performance trends and optimization"]
+            },
+            {
               name: "AI Personalization",
               description: "Intelligent content recommendations",
               status: "Beta",
