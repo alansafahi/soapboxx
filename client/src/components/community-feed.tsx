@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { Discussion } from "@shared/schema";
+import SmartScriptureTextarea from "./SmartScriptureTextarea";
 
 const discussionSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title too long"),
@@ -361,11 +362,13 @@ export default function CommunityFeed() {
               <DialogTitle>Add Comment</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <Textarea 
-                placeholder="Share your thoughts..."
-                className="min-h-[100px]"
+              <SmartScriptureTextarea
                 value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
+                onChange={setCommentText}
+                placeholder="Share your thoughts... (Type 'Matthew 5:16' for auto-population)"
+                minHeight="min-h-[100px]"
+                label="Discussion Comment"
+                helpText="Include scripture references to automatically populate verse text"
               />
               <div className="flex justify-end space-x-2">
                 <Button 
@@ -546,10 +549,13 @@ export default function CommunityFeed() {
                       <FormItem>
                         <FormLabel>Content</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Share your thoughts..." 
-                            className="min-h-[100px]"
-                            {...field} 
+                          <SmartScriptureTextarea
+                            value={field.value || ''}
+                            onChange={field.onChange}
+                            placeholder="Share your thoughts... (Type 'Romans 12:2' for auto-population)"
+                            minHeight="min-h-[100px]"
+                            label="Discussion Content"
+                            helpText="Include scripture references to automatically populate verse text"
                           />
                         </FormControl>
                         <FormMessage />
