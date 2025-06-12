@@ -1937,7 +1937,7 @@ Format your response as JSON with the following structure:
       console.error("Biblical research error:", error);
       res.status(500).json({ 
         success: false,
-        message: "Unable to generate biblical research. Please try again.",
+        message: "Research needs a moment - let's try that again with your input.",
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
