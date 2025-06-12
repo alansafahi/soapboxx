@@ -28,7 +28,7 @@ import { formatDistanceToNow } from "date-fns";
 
 interface FeedPost {
   id: number;
-  type: 'discussion' | 'prayer' | 'event' | 'inspiration' | 'announcement';
+  type: 'discussion' | 'prayer' | 'event' | 'inspiration' | 'announcement' | 'share';
   title?: string;
   content: string;
   author: {
@@ -58,7 +58,7 @@ export default function SocialFeed() {
   
   console.log('SocialFeed component loaded with comment and share handlers');
   const [newPost, setNewPost] = useState("");
-  const [postType, setPostType] = useState<'discussion' | 'prayer' | 'announcement'>('discussion');
+  // AI will automatically determine post type, so we don't need manual selection
   
   // Comment modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false);
@@ -299,9 +299,8 @@ export default function SocialFeed() {
     if (!newPost.trim()) return;
     
     const postData = {
-      type: postType,
-      content: newPost,
-      title: postType === 'announcement' ? 'Community Announcement' : undefined,
+      content: newPost
+      // AI will automatically determine post type and title
     };
     
     createPostMutation.mutate(postData);
@@ -421,33 +420,7 @@ export default function SocialFeed() {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="flex items-center justify-between">
-            <div className="flex space-x-2">
-              <Button
-                variant={postType === 'discussion' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPostType('discussion')}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Discussion
-              </Button>
-              <Button
-                variant={postType === 'prayer' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPostType('prayer')}
-              >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Prayer
-              </Button>
-              <Button
-                variant={postType === 'announcement' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPostType('announcement')}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Announcement
-              </Button>
-            </div>
+          <div className="flex items-center justify-end">
             <Button 
               onClick={handleCreatePost}
               disabled={!newPost.trim() || createPostMutation.isPending}
