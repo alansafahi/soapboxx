@@ -369,28 +369,49 @@ export default function CheckInSystem() {
               </p>
             </div>
           ) : (
-            <div className="text-center py-6">
-              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-              <h3 className="font-medium text-lg mb-2">Already Checked In Today!</h3>
-              <p className="text-muted-foreground mb-4">
-                You checked in {format(new Date(todayCheckIn.createdAt), "h:mm a")}
-              </p>
-              <Badge variant="secondary" className="mb-2">
-                {todayCheckIn.checkInType}
-              </Badge>
-              {todayCheckIn.moodEmoji && (
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <span className="text-2xl">{todayCheckIn.moodEmoji}</span>
-                  <span className="text-sm text-muted-foreground capitalize">
-                    {todayCheckIn.mood}
-                  </span>
-                </div>
-              )}
-              {todayCheckIn.notes && (
-                <p className="text-sm italic mt-2 text-muted-foreground">
-                  "{todayCheckIn.notes}"
+            <div className="space-y-4">
+              <div className="text-center py-6">
+                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                <h3 className="font-medium text-lg mb-2">Already Checked In Today!</h3>
+                <p className="text-muted-foreground mb-4">
+                  You checked in {format(new Date(todayCheckIn.createdAt), "h:mm a")}
                 </p>
-              )}
+                <Badge variant="secondary" className="mb-2">
+                  {todayCheckIn.checkInType}
+                </Badge>
+                {todayCheckIn.moodEmoji && (
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <span className="text-2xl">{todayCheckIn.moodEmoji}</span>
+                    <span className="text-sm text-muted-foreground capitalize">
+                      {todayCheckIn.mood}
+                    </span>
+                  </div>
+                )}
+                {todayCheckIn.notes && (
+                  <p className="text-sm italic mt-2 text-muted-foreground">
+                    "{todayCheckIn.notes}"
+                  </p>
+                )}
+              </div>
+              
+              {/* AI Mood Check-In button always available */}
+              <div className="flex justify-center">
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  className="h-16 border-purple-200 hover:bg-purple-50"
+                  onClick={() => setShowMoodCheckIn(true)}
+                >
+                  <div className="text-center">
+                    <Brain className="w-6 h-6 mx-auto mb-1 text-purple-600" />
+                    <div className="text-purple-700">AI Mood Check-In</div>
+                  </div>
+                </Button>
+              </div>
+              
+              <p className="text-sm text-center text-muted-foreground">
+                AI Mood Check-In is available anytime for personalized spiritual guidance
+              </p>
             </div>
           )}
         </CardContent>
