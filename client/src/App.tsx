@@ -87,8 +87,8 @@ function AppRouter() {
     }
   }, [location]);
 
-  // Check if user needs onboarding (but not for tour testing page)
-  const needsOnboarding = isAuthenticated && user && !(user as any)?.has_completed_onboarding && !forceHideOnboarding && location !== "/tour-testing" && location !== "/tour-test";
+  // Check if user needs onboarding (but not for tour testing page)  
+  const needsOnboarding = isAuthenticated && user && !((user as any)?.has_completed_onboarding) && !forceHideOnboarding && location !== "/tour-testing" && location !== "/tour-test";
 
   // Fetch user's primary role for tour personalization
   const { data: userRoleData } = useQuery({
