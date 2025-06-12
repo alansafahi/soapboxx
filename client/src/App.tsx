@@ -193,6 +193,7 @@ function AppRouter() {
               <Route path="/audio-bible" component={AudioBibleDemo} />
               <Route path="/video-library" component={VideoLibrary} />
               <Route path="/ai-video-generator" component={AIVideoGenerator} />
+              <Route path="/demo" component={DemoPage} />
             </>
           )}
         </Switch>
