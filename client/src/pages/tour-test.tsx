@@ -4,11 +4,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import InteractiveTour from "@/components/InteractiveTour";
 import { useAuth } from "@/hooks/useAuth";
+import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
+import { useQuery } from "@tanstack/react-query";
 
 export default function TourTestPage() {
   const { user, isAuthenticated } = useAuth();
   const [showTour, setShowTour] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
+  
+  // Get current tour status
+  const { shouldShowTour, userRole, isNewUser, hasNewRoleAssignment, completeTour, isLoading } = useRoleBasedTour();
+  
+  // Get user data for display
+  const { data: userData } = useQuery({
+    queryKey: ["/api/auth/user"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
 
   const platformRoles = [
     { 
@@ -104,9 +116,32 @@ export default function TourTestPage() {
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h3 className="font-semibold text-blue-900 mb-2">Current User</h3>
                 <div className="text-sm text-blue-800">
-                  <p><strong>Email:</strong> {(user as any)?.email || 'Not available'}</p>
-                  <p><strong>Name:</strong> {(user as any)?.firstName} {(user as any)?.lastName}</p>
+                  <p><strong>Email:</strong> {(userData as any)?.email || 'Not available'}</p>
+                  <p><strong>Name:</strong> {(userData as any)?.firstName} {(userData as any)?.lastName}</p>
+                  <p><strong>Onboarding Complete:</strong> {(userData as any)?.has_completed_onboarding ? 'Yes' : 'No'}</p>
                 </div>
+              </div>
+
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <h3 className="font-semibold text-purple-900 mb-2">Current Tour Status</h3>
+                <div className="text-sm text-purple-800 space-y-1">
+                  <p><strong>Should Show Tour:</strong> {shouldShowTour ? 'Yes' : 'No'}</p>
+                  <p><strong>Detected Role:</strong> {userRole || 'None'}</p>
+                  <p><strong>Is New User:</strong> {isNewUser ? 'Yes' : 'No'}</p>
+                  <p><strong>Has New Role Assignment:</strong> {hasNewRoleAssignment ? 'Yes' : 'No'}</p>
+                  <p><strong>Loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
+                </div>
+                {shouldShowTour && (
+                  <div className="mt-3">
+                    <Button 
+                      onClick={() => startTourForRole(userRole)}
+                      className="bg-purple-600 hover:bg-purple-700"
+                      size="sm"
+                    >
+                      Start Your {userRole.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Tour
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-6">
