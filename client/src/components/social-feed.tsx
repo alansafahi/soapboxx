@@ -53,6 +53,8 @@ export default function SocialFeed() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  console.log('SocialFeed component loaded with comment and share handlers');
   const [newPost, setNewPost] = useState("");
   const [postType, setPostType] = useState<'discussion' | 'prayer' | 'announcement'>('discussion');
 
