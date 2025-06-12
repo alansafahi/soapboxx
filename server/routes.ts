@@ -853,6 +853,52 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Bible verses by topic search endpoint
+  app.post('/api/bible/search-by-topic', isAuthenticated, async (req: any, res) => {
+    try {
+      const { topics } = req.body;
+      const userId = req.user.claims.sub;
+
+      if (!topics || !Array.isArray(topics) || topics.length === 0) {
+        return res.status(400).json({ message: "Topics array is required" });
+      }
+
+      const verses = await storage.searchBibleVersesByTopic(topics);
+      
+      console.log(`Topic search for user ${userId}: ${topics.join(', ')}`);
+      
+      res.json({
+        topics,
+        verses,
+        count: verses.length
+      });
+    } catch (error) {
+      console.error("Error searching verses by topic:", error);
+      res.status(500).json({ message: "Failed to search verses by topic" });
+    }
+  });
+
+  // Random verse endpoint for inspiration
+  app.get('/api/bible/random-verse', isAuthenticated, async (req: any, res) => {
+    try {
+      const { category } = req.query;
+      const userId = req.user.claims.sub;
+
+      const verse = await storage.getRandomVerseByCategory(category as string);
+      
+      if (!verse) {
+        return res.status(404).json({ message: "No verses found" });
+      }
+
+      console.log(`Random verse for user ${userId}: ${verse.reference}`);
+      
+      res.json(verse);
+    } catch (error) {
+      console.error("Error getting random verse:", error);
+      res.status(500).json({ message: "Failed to get random verse" });
+    }
+  });
+
   // Verse Art Generation endpoint with comprehensive safety checks
   app.post('/api/bible/generate-verse-art', isAuthenticated, async (req: any, res) => {
     try {

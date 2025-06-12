@@ -1,11 +1,10 @@
 // Script to populate the Bible verses database with 1000 categorized verses
-import { Pool } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { bibleVerses } from './shared/schema.js';
 import ws from 'ws';
 
 // WebSocket configuration for Neon
-const neonConfig = {};
 neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
