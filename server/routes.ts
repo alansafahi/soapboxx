@@ -436,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bible API endpoints
   app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
     try {
-      const { journeyType } = req.query;
+      const { journeyType, devotionalPack } = req.query;
       const userId = req.user.claims.sub;
       
       // Simple daily verse data for now
@@ -453,13 +453,214 @@ export async function registerRoutes(app: Express): Promise<Server> {
         reflectionPrompt: "How can God's strength help you face today's challenges?",
         guidedPrayer: "Lord, help me to rely on Your strength in all circumstances. Amen.",
         backgroundImageUrl: null,
-        audioUrl: null
+        audioUrl: null,
+        devotionalPack: devotionalPack || null
       };
       
       res.json(verse);
     } catch (error) {
       console.error("Error fetching daily verse:", error);
       res.status(500).json({ message: "Failed to fetch daily verse" });
+    }
+  });
+
+  // AI-powered reflection prompts
+  app.post('/api/bible/ai-reflection', isAuthenticated, async (req: any, res) => {
+    try {
+      const { verseText, verseReference, userContext, emotionalState } = req.body;
+      const userId = req.user.claims.sub;
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ message: "AI service not configured" });
+      }
+
+      const OpenAI = require('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const prompt = `As a thoughtful spiritual guide, create personalized reflection questions for this Bible verse:
+
+Verse: ${verseReference} - "${verseText}"
+User Context: ${userContext || 'General spiritual growth'}
+Current Mood: ${emotionalState || 'seeking guidance'}
+
+Please provide:
+1. Three deep reflection questions that help the user connect this verse to their life
+2. A practical application suggestion
+3. A brief prayer based on the verse
+
+Respond in JSON format with these keys: reflectionQuestions (array), practicalApplication (string), prayer (string)`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 600
+      });
+
+      const aiReflection = JSON.parse(response.choices[0].message.content);
+      
+      res.json({
+        reflectionQuestions: aiReflection.reflectionQuestions || [],
+        practicalApplication: aiReflection.practicalApplication || "",
+        prayer: aiReflection.prayer || "",
+        generatedAt: new Date()
+      });
+    } catch (error) {
+      console.error("Error generating AI reflection:", error);
+      res.status(500).json({ message: "Failed to generate reflection" });
+    }
+  });
+
+  // Thematic devotional packs
+  app.get('/api/bible/devotional-packs', async (req, res) => {
+    try {
+      const devotionalPacks = [
+        {
+          id: "peace-30",
+          title: "30 Days of Peace",
+          description: "Find God's peace in daily life through Scripture",
+          duration: 30,
+          verses: 30,
+          category: "Spiritual Growth",
+          difficulty: "Beginner",
+          tags: ["peace", "anxiety", "comfort", "rest"],
+          imageUrl: null,
+          isPopular: true
+        },
+        {
+          id: "entrepreneurs",
+          title: "Verses for Entrepreneurs",
+          description: "Biblical wisdom for business leaders and innovators",
+          duration: 21,
+          verses: 21,
+          category: "Career & Purpose",
+          difficulty: "Intermediate", 
+          tags: ["business", "leadership", "stewardship", "purpose"],
+          imageUrl: null,
+          isPopular: false
+        },
+        {
+          id: "grief-healing",
+          title: "Verses for Grief",
+          description: "Comfort and hope during times of loss and sorrow",
+          duration: 14,
+          verses: 14,
+          category: "Healing & Comfort",
+          difficulty: "Beginner",
+          tags: ["grief", "loss", "comfort", "healing", "hope"],
+          imageUrl: null,
+          isPopular: true
+        },
+        {
+          id: "marriage-love",
+          title: "Love & Marriage",
+          description: "Biblical foundations for relationships and marriage",
+          duration: 28,
+          verses: 28,
+          category: "Relationships",
+          difficulty: "Intermediate",
+          tags: ["marriage", "love", "relationships", "commitment"],
+          imageUrl: null,
+          isPopular: false
+        },
+        {
+          id: "financial-wisdom",
+          title: "Financial Wisdom",
+          description: "God's perspective on money, generosity, and stewardship",
+          duration: 21,
+          verses: 21,
+          category: "Stewardship",
+          difficulty: "Intermediate",
+          tags: ["money", "stewardship", "generosity", "wisdom"],
+          imageUrl: null,
+          isPopular: true
+        },
+        {
+          id: "new-beginnings",
+          title: "New Beginnings",
+          description: "Fresh starts and God's plans for your future",
+          duration: 21,
+          verses: 21,
+          category: "Life Changes",
+          difficulty: "Beginner",
+          tags: ["new start", "change", "future", "hope", "plans"],
+          imageUrl: null,
+          isPopular: false
+        }
+      ];
+      
+      res.json(devotionalPacks);
+    } catch (error) {
+      console.error("Error fetching devotional packs:", error);
+      res.status(500).json({ message: "Failed to fetch devotional packs" });
+    }
+  });
+
+  // Get specific devotional pack content
+  app.get('/api/bible/devotional-packs/:packId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { packId } = req.params;
+      const { day } = req.query;
+      const userId = req.user.claims.sub;
+      
+      // Sample content for demonstration
+      const packContent = {
+        "peace-30": {
+          title: "30 Days of Peace",
+          currentDay: parseInt(day) || 1,
+          verse: {
+            reference: "Philippians 4:6-7",
+            text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.",
+            theme: "Peace through Prayer",
+            dayTitle: `Day ${day || 1}: Finding Peace in Prayer`
+          },
+          reflection: {
+            question: "What worries are you carrying today that you can surrender to God in prayer?",
+            application: "Practice the pattern: instead of worrying, pray with thanksgiving.",
+            prayer: "Lord, I bring my anxieties to you. Thank you for your promise of peace that surpasses understanding."
+          }
+        },
+        "entrepreneurs": {
+          title: "Verses for Entrepreneurs", 
+          currentDay: parseInt(day) || 1,
+          verse: {
+            reference: "Proverbs 16:3",
+            text: "Commit to the Lord whatever you do, and he will establish your plans.",
+            theme: "Divine Partnership in Business",
+            dayTitle: `Day ${day || 1}: Partnering with God in Business`
+          },
+          reflection: {
+            question: "How can you more intentionally invite God into your business decisions?",
+            application: "Before making major business decisions, spend time in prayer seeking God's wisdom.",
+            prayer: "Lord, I commit my work and plans to you. Guide my decisions and establish my steps."
+          }
+        },
+        "grief-healing": {
+          title: "Verses for Grief",
+          currentDay: parseInt(day) || 1,
+          verse: {
+            reference: "Psalm 34:18",
+            text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.",
+            theme: "God's Presence in Pain",
+            dayTitle: `Day ${day || 1}: God's Nearness in Sorrow`
+          },
+          reflection: {
+            question: "How have you experienced God's closeness during difficult times?",
+            application: "Allow yourself to feel God's presence even in your pain.",
+            prayer: "Lord, thank you for being close to me in this difficult time. Help me feel your comforting presence."
+          }
+        }
+      };
+
+      const content = packContent[packId];
+      if (!content) {
+        return res.status(404).json({ message: "Devotional pack not found" });
+      }
+
+      res.json(content);
+    } catch (error) {
+      console.error("Error fetching devotional pack content:", error);
+      res.status(500).json({ message: "Failed to fetch devotional content" });
     }
   });
 

@@ -122,6 +122,9 @@ export function DailyBibleFeature() {
   const [savedInsights, setSavedInsights] = useState<string[]>([]);
   const [communityStats, setCommunityStats] = useState({ todayReads: 0, weekReads: 0 });
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
+  const [aiReflectionData, setAiReflectionData] = useState<any>(null);
+  const [showAiReflection, setShowAiReflection] = useState(false);
+  const [userContext, setUserContext] = useState("");
   const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
   const [currentJourneyType, setCurrentJourneyType] = useState("reading");
   const [showJourneySelector, setShowJourneySelector] = useState(false);
@@ -206,6 +209,36 @@ export function DailyBibleFeature() {
       toast({
         title: "Error",
         description: "Failed to share verse. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // AI-powered reflection mutation
+  const aiReflectionMutation = useMutation({
+    mutationFn: async (data: {
+      verseText: string;
+      verseReference: string;
+      userContext?: string;
+      emotionalState?: string;
+    }) => {
+      return await apiRequest("/api/bible/ai-reflection", {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    },
+    onSuccess: (data) => {
+      setAiReflectionData(data);
+      setShowAiReflection(true);
+      toast({
+        title: "AI Reflection Generated",
+        description: "Personalized reflection questions are ready for you.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to generate AI reflection. Please try again.",
         variant: "destructive",
       });
     },
@@ -479,6 +512,17 @@ export function DailyBibleFeature() {
       handleETHOSQuestion(customQuestion);
       setCustomQuestion('');
     }
+  };
+
+  const handleGenerateAiReflection = () => {
+    if (!dailyVerse) return;
+    
+    aiReflectionMutation.mutate({
+      verseText: getVerseText(),
+      verseReference: dailyVerse.verseReference,
+      userContext: userContext || "General spiritual growth",
+      emotionalState: emotionalReaction || "seeking guidance"
+    });
   };
 
   const handleJourneySwitch = async (journeyType: string) => {
@@ -1204,7 +1248,52 @@ export function DailyBibleFeature() {
                   <p className="text-gray-600">{dailyVerse.reflectionPrompt}</p>
                 )}
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {/* AI-Powered Reflection Section */}
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-purple-600" />
+                      <h4 className="font-semibold text-purple-800">AI-Powered Reflection</h4>
+                    </div>
+                    <Button
+                      onClick={handleGenerateAiReflection}
+                      disabled={aiReflectionMutation.isPending}
+                      size="sm"
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      {aiReflectionMutation.isPending ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Brain className="h-4 w-4 mr-2" />
+                          Generate Reflection
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        Current Context (Optional)
+                      </label>
+                      <Input
+                        value={userContext}
+                        onChange={(e) => setUserContext(e.target.value)}
+                        placeholder="e.g., going through a difficult time, starting new job..."
+                        className="text-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      Get personalized reflection questions based on this verse and your current life situation.
+                    </p>
+                  </div>
+                </div>
+
                 <Textarea
                   value={reflection}
                   onChange={(e) => setReflection(e.target.value)}
@@ -1213,6 +1302,89 @@ export function DailyBibleFeature() {
                 />
               </CardContent>
             </Card>
+            
+            {/* AI Reflection Results */}
+            {showAiReflection && aiReflectionData && (
+              <Card className="border-purple-200 bg-purple-50">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-purple-600" />
+                      <CardTitle className="text-purple-800">AI-Generated Reflection</CardTitle>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowAiReflection(false)}
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Reflection Questions */}
+                  <div>
+                    <h4 className="font-semibold text-purple-900 mb-2">Reflection Questions</h4>
+                    <div className="space-y-2">
+                      {aiReflectionData.reflectionQuestions?.map((question: string, index: number) => (
+                        <div key={index} className="bg-white p-3 rounded border border-purple-200">
+                          <p className="text-sm text-gray-700">{question}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Practical Application */}
+                  {aiReflectionData.practicalApplication && (
+                    <div>
+                      <h4 className="font-semibold text-purple-900 mb-2">Practical Application</h4>
+                      <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                        <p className="text-sm text-blue-800">{aiReflectionData.practicalApplication}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* AI-Generated Prayer */}
+                  {aiReflectionData.prayer && (
+                    <div>
+                      <h4 className="font-semibold text-purple-900 mb-2">Suggested Prayer</h4>
+                      <div className="bg-green-50 p-3 rounded border border-green-200">
+                        <p className="text-sm text-green-800 italic">{aiReflectionData.prayer}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center pt-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        if (aiReflectionData.practicalApplication && !savedInsights.includes(aiReflectionData.practicalApplication)) {
+                          setSavedInsights([...savedInsights, aiReflectionData.practicalApplication]);
+                          toast({
+                            title: "Insight Saved",
+                            description: "AI reflection saved to your collection.",
+                          });
+                        }
+                      }}
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      <Bookmark className="h-4 w-4 mr-2" />
+                      Save Reflection
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleGenerateAiReflection}
+                      className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                    >
+                      Generate New Reflection
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
           
           <TabsContent value="prayer" className="space-y-4">
