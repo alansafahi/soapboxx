@@ -1358,5 +1358,146 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Bible audio endpoints
+  app.get('/api/bible/verses/:id', isAuthenticated, async (req, res) => {
+    try {
+      const verseId = parseInt(req.params.id);
+      const verse = await storage.getBibleVerse(verseId);
+      
+      if (!verse) {
+        return res.status(404).json({ error: 'Bible verse not found' });
+      }
+      
+      res.json(verse);
+    } catch (error) {
+      console.error('Error fetching Bible verse:', error);
+      res.status(500).json({ error: 'Failed to fetch Bible verse' });
+    }
+  });
+
+  app.post('/api/audio/bible/generate', isAuthenticated, async (req, res) => {
+    try {
+      const { verseId, voice = 'warm-female', musicBed } = req.body;
+      
+      if (!verseId) {
+        return res.status(400).json({ error: 'Verse ID is required' });
+      }
+
+      const verse = await storage.getBibleVerse(verseId);
+      if (!verse) {
+        return res.status(404).json({ error: 'Bible verse not found' });
+      }
+
+      const verseText = `${verse.reference}. ${verse.text}`;
+      
+      // Generate audio using OpenAI TTS
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const voiceMap: Record<string, any> = {
+        'warm-female': 'nova',
+        'gentle-male': 'onyx', 
+        'peaceful-female': 'shimmer',
+        'authoritative-male': 'echo'
+      };
+
+      const selectedVoice = voiceMap[voice] || 'nova';
+
+      const mp3Response = await openai.audio.speech.create({
+        model: 'tts-1',
+        voice: selectedVoice,
+        input: verseText,
+      });
+
+      const audioBuffer = Buffer.from(await mp3Response.arrayBuffer());
+      
+      // Return audio as data URL for immediate playback
+      const audioDataUrl = `data:audio/mpeg;base64,${audioBuffer.toString('base64')}`;
+
+      res.json({
+        verseId,
+        audioUrl: audioDataUrl,
+        voice,
+        musicBed,
+        duration: Math.ceil(verseText.length / 10), // Rough estimate
+        verse: {
+          id: verse.id,
+          reference: verse.reference,
+          text: verse.text
+        }
+      });
+
+    } catch (error) {
+      console.error('Error generating Bible audio:', error);
+      res.status(500).json({ error: 'Failed to generate Bible audio' });
+    }
+  });
+
+  // Enhanced audio routine with Bible integration
+  app.post('/api/audio/routines/bible-integrated', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user.claims.sub;
+      const { verseIds, routineType = 'custom', voice = 'warm-female', musicBed = 'gentle-piano' } = req.body;
+      
+      if (!verseIds || !Array.isArray(verseIds) || verseIds.length === 0) {
+        return res.status(400).json({ error: 'Verse IDs array is required' });
+      }
+
+      // Get all verses
+      const verses = await Promise.all(
+        verseIds.map((id: number) => storage.getBibleVerse(id))
+      );
+
+      const validVerses = verses.filter(v => v !== null);
+      
+      if (validVerses.length === 0) {
+        return res.status(404).json({ error: 'No valid verses found' });
+      }
+
+      // Create dynamic routine with Bible content
+      const routine = {
+        id: Date.now(), // Generate unique ID
+        name: `Personalized Bible Journey`,
+        description: `Custom audio experience with ${validVerses.length} selected verses`,
+        totalDuration: validVerses.length * 120 + 180, // 2 min per verse + intro
+        category: routineType,
+        autoAdvance: true,
+        steps: [
+          {
+            id: 'intro',
+            type: 'meditation',
+            title: 'Prepare Your Heart',
+            content: 'Take a moment to quiet your mind and open your heart to receive God\'s Word. Let His truth speak to you in this sacred time.',
+            duration: 120,
+            voiceSettings: { voice, speed: 1.0, musicBed }
+          },
+          ...validVerses.map((verse, index) => ({
+            id: `verse-${verse.id}`,
+            type: 'scripture',
+            title: `Scripture Reading: ${verse.reference}`,
+            content: `${verse.reference}. ${verse.text}`,
+            duration: 120,
+            voiceSettings: { voice, speed: 0.9, musicBed }
+          })),
+          {
+            id: 'closing',
+            type: 'reflection',
+            title: 'Quiet Reflection',
+            content: 'Rest in the truth of God\'s Word. Let these verses settle deep into your heart and guide your day.',
+            duration: 60,
+            voiceSettings: { voice, speed: 0.8, musicBed }
+          }
+        ]
+      };
+
+      res.json(routine);
+
+    } catch (error) {
+      console.error('Error creating Bible-integrated routine:', error);
+      res.status(500).json({ error: 'Failed to create Bible routine' });
+    }
+  });
+
   return httpServer;
 }

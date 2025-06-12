@@ -4952,6 +4952,190 @@ export class DatabaseStorage implements IStorage {
             content: "Today's verse: 'Be still, and know that I am God; I will be exalted among the nations, I will be exalted in the earth.' - Psalm 46:10. Let these words wash over you like morning light.",
             duration: 240,
             voiceSettings: { voice: "warm-female", speed: 0.9, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-3",
+            type: "prayer",
+            title: "Morning Intentions",
+            content: "Gracious God, as this new day begins, I offer my heart to you. Guide my steps, guard my words, and help me to be a light for others. May your love flow through me in all I do.",
+            duration: 180,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "worship-instrumental" }
+          },
+          {
+            id: "step-4",
+            type: "reflection",
+            title: "Silent Reflection",
+            content: "In these moments of silence, listen for God's gentle whisper. What is the Spirit calling you to today? Rest in this sacred space.",
+            duration: 300,
+            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "Evening Gratitude",
+        description: "End your day with thanksgiving and peaceful rest",
+        totalDuration: 720,
+        category: "evening",
+        autoAdvance: true,
+        steps: [
+          {
+            id: "step-5",
+            type: "reflection",
+            title: "Day Review",
+            content: "As evening comes, take a moment to reflect on the gifts of this day. What moments of grace did you experience? Where did you see God's hand at work?",
+            duration: 180,
+            voiceSettings: { voice: "warm-female", speed: 0.9, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-6",
+            type: "prayer",
+            title: "Gratitude Prayer",
+            content: "Thank you, loving God, for the blessings of this day - both seen and unseen. For breath in my lungs, love in my heart, and your constant presence by my side.",
+            duration: 240,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-7",
+            type: "scripture",
+            title: "Rest in God's Peace",
+            content: "Let these words bring you peace: 'In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.' - Psalm 4:8",
+            duration: 180,
+            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
+          },
+          {
+            id: "step-8",
+            type: "meditation",
+            title: "Release and Rest",
+            content: "Release the day into God's hands. Let go of what was left undone, forgive what went wrong, and rest in the assurance of God's unfailing love.",
+            duration: 120,
+            voiceSettings: { voice: "peaceful-female", speed: 0.7, musicBed: "gentle-piano" }
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "Midday Reset",
+        description: "A quick spiritual refresh for busy schedules",
+        totalDuration: 360,
+        category: "midday",
+        autoAdvance: true,
+        steps: [
+          {
+            id: "step-9",
+            type: "meditation",
+            title: "Pause and Breathe",
+            content: "Stop for a moment. Take three deep breaths. Remember that God is with you in this very moment, in this very place.",
+            duration: 90,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-10",
+            type: "scripture",
+            title: "Strength for the Journey",
+            content: "Find renewed strength in these words: 'But those who hope in the Lord will renew their strength. They will soar on wings like eagles.' - Isaiah 40:31",
+            duration: 120,
+            voiceSettings: { voice: "authoritative-male", speed: 1.0, musicBed: "worship-instrumental" }
+          },
+          {
+            id: "step-11",
+            type: "prayer",
+            title: "Quick Reset Prayer",
+            content: "Lord, refresh my spirit and renew my energy. Help me to approach the rest of this day with your peace, wisdom, and love. Amen.",
+            duration: 90,
+            voiceSettings: { voice: "warm-female", speed: 1.0, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-12",
+            type: "reflection",
+            title: "Intentional Return",
+            content: "As you return to your activities, carry this peace with you. Let your next actions be infused with the grace you've received in these moments.",
+            duration: 60,
+            voiceSettings: { voice: "peaceful-female", speed: 0.9, musicBed: "nature-sounds" }
+          }
+        ]
+      },
+      {
+        id: 4,
+        name: "Anxiety Relief",
+        description: "Find peace in God's presence during stressful moments",
+        totalDuration: 480,
+        category: "custom",
+        autoAdvance: true,
+        steps: [
+          {
+            id: "step-13",
+            type: "meditation",
+            title: "Calming Breath",
+            content: "Feel your breathing slow and deepen. With each exhale, release your worries to God. With each inhale, receive His peace that surpasses understanding.",
+            duration: 120,
+            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
+          },
+          {
+            id: "step-14",
+            type: "scripture",
+            title: "God's Promise of Peace",
+            content: "Listen to these comforting words: 'Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.' - Philippians 4:6-7",
+            duration: 180,
+            voiceSettings: { voice: "warm-female", speed: 0.9, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-15",
+            type: "prayer",
+            title: "Surrender Prayer",
+            content: "Loving God, I place my anxious thoughts and worried heart before you. You know my struggles better than I do. Help me trust in your perfect plan and rest in your unfailing love.",
+            duration: 120,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-16",
+            type: "reflection",
+            title: "Peaceful Affirmation",
+            content: "Repeat these words: 'I am held by God's love. I am safe in His care. His peace flows through me now.' Let this truth settle deep into your heart.",
+            duration: 60,
+            voiceSettings: { voice: "peaceful-female", speed: 0.9, musicBed: "worship-instrumental" }
+          }
+        ]
+      },
+      {
+        id: 5,
+        name: "Scripture Meditation",
+        description: "Deep dive into God's Word with contemplative reading",
+        totalDuration: 600,
+        category: "custom",
+        autoAdvance: false,
+        steps: [
+          {
+            id: "step-17",
+            type: "meditation",
+            title: "Prepare Your Heart",
+            content: "Quiet your mind and open your heart to receive God's Word. Ask the Holy Spirit to illuminate the scripture and speak to you personally.",
+            duration: 120,
+            voiceSettings: { voice: "peaceful-female", speed: 1.0, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-18",
+            type: "scripture",
+            title: "First Reading",
+            content: "Today's passage: 'The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul.' - Psalm 23:1-3a. Listen with your heart.",
+            duration: 180,
+            voiceSettings: { voice: "authoritative-male", speed: 0.8, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-19",
+            type: "reflection",
+            title: "Contemplative Silence",
+            content: "In silence, let these words wash over you. What word or phrase draws your attention? What is God saying to you through this passage?",
+            duration: 180,
+            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
+          },
+          {
+            id: "step-20",
+            type: "prayer",
+            title: "Response Prayer",
+            content: "Speak to God about what you've heard. Share your thoughts, feelings, and responses to His Word. Listen for His gentle reply in the silence of your heart.",
+            duration: 120,
+            voiceSettings: { voice: "warm-female", speed: 1.0, musicBed: "worship-instrumental" }
           }
         ]
       }

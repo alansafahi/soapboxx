@@ -42,6 +42,7 @@ import TourTesting from "@/pages/TourTesting";
 import TourTestPage from "@/pages/tour-test";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AudioRoutines from "@/pages/AudioRoutines";
+import AudioBibleDemo from "@/pages/AudioBibleDemo";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
