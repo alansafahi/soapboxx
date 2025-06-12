@@ -39,7 +39,12 @@ import {
   Mail,
   Copy,
   Link,
-  Smartphone
+  Smartphone,
+  Headphones,
+  VolumeX,
+  SkipBack,
+  SkipForward,
+  Download
 } from "lucide-react";
 import { 
   FaFacebook, 
@@ -131,6 +136,11 @@ export function DailyBibleFeature() {
   const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
   const [currentJourneyType, setCurrentJourneyType] = useState("reading");
   const [showJourneySelector, setShowJourneySelector] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState("alloy");
+  const [selectedMusicBed, setSelectedMusicBed] = useState("none");
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
+  const [showAudioControls, setShowAudioControls] = useState(false);
   const [availableJourneys] = useState([
     { type: "reading", name: "Scripture Reading", description: "Daily verses with reflection questions", icon: "📖" },
     { type: "audio", name: "Audio Journey", description: "Listen to narrated Bible passages", icon: "🎧" },
@@ -460,6 +470,65 @@ export function DailyBibleFeature() {
       title: "Saved to Favorites",
       description: "This verse has been added to your favorites collection.",
     });
+  };
+
+  const generateAudio = async () => {
+    if (!dailyVerse || isGeneratingAudio) return;
+    
+    setIsGeneratingAudio(true);
+    try {
+      const response = await fetch('/api/audio/generate-verse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          verseText: getVerseText(),
+          verseReference: dailyVerse.verseReference,
+          voice: selectedVoice,
+          musicBed: selectedMusicBed,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate audio');
+      
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      setGeneratedAudioUrl(audioUrl);
+      setShowAudioControls(true);
+      
+      toast({
+        title: "Audio Generated",
+        description: "Your verse audio is ready to play!",
+      });
+    } catch (error) {
+      toast({
+        title: "Audio Generation Failed",
+        description: "Unable to generate audio. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingAudio(false);
+    }
+  };
+
+  const toggleAudioPlayback = () => {
+    if (!audioRef) return;
+    
+    if (isAudioPlaying) {
+      audioRef.pause();
+    } else {
+      audioRef.play();
+    }
+    setIsAudioPlaying(!isAudioPlaying);
+  };
+
+  const getVerseText = () => {
+    if (!dailyVerse) return "";
+    switch (selectedVersion) {
+      case "kjv": return dailyVerse.verseTextKjv || dailyVerse.verseText;
+      case "esv": return dailyVerse.verseTextEsv || dailyVerse.verseText;
+      case "nlt": return dailyVerse.verseTextNlt || dailyVerse.verseText;
+      default: return dailyVerse.verseTextNiv || dailyVerse.verseText;
+    }
   };
 
   const handleAskETHOS = () => {
