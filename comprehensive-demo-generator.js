@@ -129,36 +129,40 @@ function generateFutureDate(daysForward = 30) {
 async function cleanupExistingDemoData() {
   console.log('🧹 Cleaning up existing demo data...');
   
-  // Only clean tables that definitely exist based on current demo stats
-  const coreTables = [
-    { table: discussionBookmarks, name: 'discussion_bookmarks' },
-    { table: discussionLikes, name: 'discussion_likes' },
-    { table: discussionComments, name: 'discussion_comments' },
-    { table: discussions, name: 'discussions' },
-    { table: prayerBookmarks, name: 'prayer_bookmarks' },
-    { table: prayerResponses, name: 'prayer_responses' },
-    { table: prayerRequests, name: 'prayer_requests' },
-    { table: eventRsvps, name: 'event_rsvps' },
-    { table: checkIns, name: 'check_ins' },
-    { table: donations, name: 'donations' },
-    { table: userInspirationHistory, name: 'user_inspiration_history' },
-    { table: referrals, name: 'referrals' },
-    { table: achievements, name: 'achievements' },
-    { table: userChurches, name: 'user_churches' },
-    { table: users, name: 'users' },
-    { table: events, name: 'events' },
-    { table: churches, name: 'churches' }
+  // Clean only demo-specific records to avoid foreign key issues
+  const cleanupQueries = [
+    // Clean dependent data first by targeting demo users and churches
+    "DELETE FROM discussion_bookmarks WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
+    "DELETE FROM discussion_likes WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
+    "DELETE FROM discussion_comments WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
+    "DELETE FROM discussions WHERE author_id LIKE 'demo-%'",
+    "DELETE FROM prayer_bookmarks WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
+    "DELETE FROM prayer_responses WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
+    "DELETE FROM prayer_requests WHERE user_id LIKE 'demo-%'",
+    "DELETE FROM event_rsvps WHERE user_id LIKE 'demo-%'",
+    "DELETE FROM check_ins WHERE user_id LIKE 'demo-%'",
+    "DELETE FROM user_inspiration_history WHERE user_id LIKE 'demo-%'",
+    "DELETE FROM referrals WHERE referrer_id LIKE 'demo-%' OR referred_id LIKE 'demo-%'",
+    "DELETE FROM user_achievements WHERE user_id LIKE 'demo-%'",
+    "DELETE FROM user_churches WHERE user_id LIKE 'demo-%'",
+    "DELETE FROM events WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')",
+    "DELETE FROM devotionals WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')",
+    "DELETE FROM achievements WHERE id IN (1, 2, 3, 4, 5)", // Demo achievements
+    "DELETE FROM users WHERE id LIKE 'demo-%'",
+    "DELETE FROM churches WHERE name LIKE 'Demo %'"
   ];
 
-  for (const { table, name } of coreTables) {
+  for (const query of cleanupQueries) {
     try {
-      await db.delete(table);
-      console.log(`  ✅ Cleaned ${name}`);
+      await db.execute({ sql: query });
+      const tableName = query.split(' FROM ')[1].split(' WHERE')[0];
+      console.log(`  ✅ Cleaned demo data from ${tableName}`);
     } catch (error) {
+      const tableName = query.split(' FROM ')[1].split(' WHERE')[0];
       if (error.code === '42P01') {
-        console.log(`  ⚠️ Skipped ${name} (table not found)`);
+        console.log(`  ⚠️ Skipped ${tableName} (table not found)`);
       } else {
-        console.log(`  ⚠️ Error cleaning ${name}: ${error.message}`);
+        console.log(`  ⚠️ Error cleaning ${tableName}: ${error.message}`);
       }
     }
   }
