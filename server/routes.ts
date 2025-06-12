@@ -753,15 +753,38 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         temperature: 0.7
       });
 
-      const reflectionData = JSON.parse(response.choices[0].message.content || '{}');
+      const responseContent = response.choices[0].message.content;
+      if (!responseContent) {
+        throw new Error("Empty response from AI service");
+      }
+
+      let reflectionData;
+      try {
+        reflectionData = JSON.parse(responseContent);
+      } catch (parseError) {
+        console.error("Failed to parse AI response:", responseContent);
+        throw new Error("Invalid JSON response from AI service");
+      }
+
+      // Ensure required fields exist with fallbacks
+      const safeReflectionData = {
+        reflectionQuestions: reflectionData.reflectionQuestions || [
+          "How does this verse speak to your current situation?",
+          "What does God's strength mean to you personally?",
+          "How can you apply this verse in your daily life?"
+        ],
+        practicalApplication: reflectionData.practicalApplication || "Take time today to reflect on God's strength in your life and trust Him with your challenges.",
+        prayer: reflectionData.prayer || "Lord, help me to remember that I can do all things through Christ who strengthens me. Give me faith to trust in Your power when I feel weak. Amen.",
+        generatedAt: new Date()
+      };
       
       // Log the reflection generation for analytics
       console.log(`AI reflection generated for user ${userId}, verse: ${verseReference}`);
       
-      res.json(reflectionData);
+      res.json(safeReflectionData);
     } catch (error) {
       console.error("Error generating AI reflection:", error);
-      res.status(500).json({ message: "Failed to generate AI reflection" });
+      res.status(500).json({ message: "Failed to generate AI reflection. Please try again." });
     }
   });
 
