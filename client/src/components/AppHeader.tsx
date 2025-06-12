@@ -337,27 +337,76 @@ export default function AppHeader() {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-6 px-4 space-y-2">
+        <nav className="mt-6 px-4 space-y-3 overflow-y-auto">
           {getVisibleGroups().map((group) => {
-            return group.items.map((item) => {
-              const IconComponent = item.icon;
+            if (group.id === "main") {
+              // Render main items without grouping
               return (
-                <Link key={item.href} href={item.href}>
-                  <div
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActiveRoute(item.href)
-                        ? "text-white"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
-                    style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <IconComponent className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </div>
-                </Link>
+                <div key={group.id} className="space-y-1">
+                  {group.items.map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <Link key={item.href} href={item.href}>
+                        <div
+                          className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            isActiveRoute(item.href)
+                              ? "text-white"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          }`}
+                          style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
+                          onClick={() => setSidebarOpen(false)}
+                        >
+                          <IconComponent className="h-5 w-5 flex-shrink-0" />
+                          <span>{item.label}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               );
-            });
+            }
+
+            // Render grouped sections for mobile
+            return (
+              <div key={group.id} className="space-y-1">
+                <Collapsible
+                  open={expandedSections[group.id]}
+                  onOpenChange={() => toggleSection(group.id)}
+                  className="space-y-1"
+                >
+                  <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 cursor-pointer">
+                    <span>{group.label}</span>
+                    {expandedSections[group.id] ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent className="space-y-1 pl-3">
+                    {group.items.map((item) => {
+                      const IconComponent = item.icon;
+                      return (
+                        <Link key={item.href} href={item.href}>
+                          <div
+                            className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              isActiveRoute(item.href)
+                                ? "text-white"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            }`}
+                            style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
+                            onClick={() => setSidebarOpen(false)}
+                          >
+                            <IconComponent className="h-5 w-5 flex-shrink-0" />
+                            <span>{item.label}</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            );
           })}
         </nav>
 
