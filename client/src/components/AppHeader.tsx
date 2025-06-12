@@ -79,7 +79,8 @@ export default function AppHeader() {
         { href: "/bible", label: "Today's Reading", icon: BookOpen },
         { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
         { href: "/audio-routines", label: "Devotional Routines", icon: Headphones },
-        { href: "/video-library", label: "Video Library", icon: PlayCircle }
+        { href: "/video-library", label: "Video Library", icon: PlayCircle },
+        { href: "/sermon-studio", label: "Sermon Studio", icon: Sparkles, roles: ["pastor", "lead_pastor", "church_admin"] }
       ]
     },
     {
