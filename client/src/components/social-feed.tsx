@@ -12,7 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { 
   Heart, 
   MessageCircle, 
-  Share2, 
+  RotateCw, 
   Clock, 
   MapPin, 
   Users,
@@ -562,7 +562,7 @@ export default function SocialFeed() {
                     }}
                     className="text-gray-500 hover:text-green-600 transition-colors"
                   >
-                    <Share2 className="w-4 h-4 mr-2" />
+                    <RotateCw className="w-4 h-4 mr-2" />
                     <span>{post.shareCount}</span>
                   </Button>
                   
