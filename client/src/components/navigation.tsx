@@ -137,7 +137,7 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
             <img 
-              src="/src/assets/SoapBx logo_1749447146620.jpeg" 
+              src="/attached_assets/SoapBox logo_1749686315479.jpeg" 
               alt="SoapBox Super App" 
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl object-cover flex-shrink-0"
             />

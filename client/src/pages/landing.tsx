@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight } from "lucide-react";
-import soapboxLogo from "@assets/SoapBx logo_1749625213720.jpeg";
+import soapboxLogo from "@assets/SoapBox logo_1749686315479.jpeg";
 
 export default function Landing() {
   return (

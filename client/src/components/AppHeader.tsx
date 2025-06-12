@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
-import soapboxLogo from "@assets/SoapBx logo_1749541085059.jpeg";
+import soapboxLogo from "@assets/SoapBox logo_1749686315479.jpeg";
 
 export default function AppHeader() {
   const { user } = useAuth();
