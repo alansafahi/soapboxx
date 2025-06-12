@@ -798,27 +798,26 @@ export const eventBookmarks = pgTable("event_bookmarks", {
   userEventUnique: unique().on(table.userId, table.eventId),
 }));
 
-// Check-ins table for spiritual and event attendance tracking with enhanced mood support
+// Check-ins table for spiritual and event attendance tracking
 export const checkIns = pgTable("check_ins", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   churchId: integer("church_id").references(() => churches.id),
-  eventId: integer("event_id").references(() => events.id), // null for general spiritual check-ins
-  checkInType: varchar("check_in_type", { length: 50 }).notNull(), // "Sunday Service", "Daily Devotional", "Prayer Time", "Spiritual Check-In", "Custom"
-  mood: varchar("mood", { length: 20 }), // "joyful", "peaceful", "grateful", "struggling", "hopeful", etc.
-  moodEmoji: varchar("mood_emoji", { length: 10 }), // emoji representation
-  notes: text("notes"), // personal reflection or prayer intent
-  prayerIntent: text("prayer_intent"), // specific prayer request/intent
-  isPhysicalAttendance: boolean("is_physical_attendance").default(false), // true if QR code check-in
-  qrCodeId: varchar("qr_code_id"), // reference to QR code used for physical check-in
-  location: varchar("location"), // for physical check-ins
-  latitude: decimal("latitude", { precision: 10, scale: 8 }),
-  longitude: decimal("longitude", { precision: 11, scale: 8 }),
-  streakCount: integer("streak_count").default(1), // daily streak counter
-  pointsEarned: integer("points_earned").default(5), // gamification points
-  aiPersonalizationTriggered: boolean("ai_personalization_triggered").default(false), // Track AI content generation
+  eventId: integer("event_id").references(() => events.id),
+  checkInType: varchar("check_in_type", { length: 50 }).notNull(),
+  mood: varchar("mood", { length: 20 }),
+  moodEmoji: varchar("mood_emoji", { length: 10 }),
+  notes: text("notes"),
+  prayerIntent: text("prayer_intent"),
+  isPhysicalAttendance: boolean("is_physical_attendance").default(false),
+  qrCodeId: varchar("qr_code_id"),
+  location: varchar("location"),
+  streakCount: integer("streak_count").default(1),
+  pointsEarned: integer("points_earned").default(5),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
 });
 
 // Detailed mood check-ins with AI personalization triggers
