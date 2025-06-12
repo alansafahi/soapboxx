@@ -2131,7 +2131,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       const comment = await storage.createDiscussionComment({
         discussionId,
-        userId,
+        authorId: userId,
         content: content.trim()
       });
       

@@ -207,15 +207,15 @@ export default function SocialFeed() {
         return old.map((post: any) => 
           post.id === variables.postId ? { 
             ...post, 
-            isLiked: data.liked !== undefined ? data.liked : !post.isLiked,
-            likeCount: data.likeCount !== undefined ? data.likeCount : (data.liked ? post.likeCount + 1 : post.likeCount - 1)
+            isLiked: data.liked,
+            likeCount: data.likeCount
           } : post
         );
       });
       
       toast({
-        title: data.liked !== undefined ? (data.liked ? "Liked" : "Unliked") : (data.message?.includes("favorited") ? "Liked" : "Unliked"),
-        description: data.liked !== undefined ? (data.liked ? "Post liked successfully" : "Post unliked successfully") : data.message,
+        title: data.liked ? "Liked" : "Unliked",
+        description: data.liked ? "Post liked successfully" : "Post unliked successfully",
       });
     },
     onError: (_, __, context) => {

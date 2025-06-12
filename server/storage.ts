@@ -2138,6 +2138,121 @@ export class DatabaseStorage implements IStorage {
       });
   }
 
+  // Discussion interaction operations
+  async toggleDiscussionLike(userId: string, discussionId: number): Promise<{ liked: boolean; likeCount: number }> {
+    // Check if user already liked this discussion
+    const [existingLike] = await db
+      .select()
+      .from(discussionLikes)
+      .where(
+        and(
+          eq(discussionLikes.userId, userId),
+          eq(discussionLikes.discussionId, discussionId)
+        )
+      );
+
+    let liked: boolean;
+    if (existingLike) {
+      // Remove like
+      await db
+        .delete(discussionLikes)
+        .where(
+          and(
+            eq(discussionLikes.userId, userId),
+            eq(discussionLikes.discussionId, discussionId)
+          )
+        );
+      liked = false;
+    } else {
+      // Add like
+      await db
+        .insert(discussionLikes)
+        .values({
+          userId,
+          discussionId,
+        });
+      liked = true;
+    }
+
+    // Get updated like count
+    const likeCountResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(discussionLikes)
+      .where(eq(discussionLikes.discussionId, discussionId));
+    
+    const likeCount = likeCountResult[0]?.count || 0;
+
+    return { liked, likeCount };
+  }
+
+  async toggleDiscussionBookmark(userId: string, discussionId: number): Promise<{ bookmarked: boolean }> {
+    // Check if user already bookmarked this discussion
+    const [existingBookmark] = await db
+      .select()
+      .from(discussionBookmarks)
+      .where(
+        and(
+          eq(discussionBookmarks.userId, userId),
+          eq(discussionBookmarks.discussionId, discussionId)
+        )
+      );
+
+    let bookmarked: boolean;
+    if (existingBookmark) {
+      // Remove bookmark
+      await db
+        .delete(discussionBookmarks)
+        .where(
+          and(
+            eq(discussionBookmarks.userId, userId),
+            eq(discussionBookmarks.discussionId, discussionId)
+          )
+        );
+      bookmarked = false;
+    } else {
+      // Add bookmark
+      await db
+        .insert(discussionBookmarks)
+        .values({
+          userId,
+          discussionId,
+        });
+      bookmarked = true;
+    }
+
+    return { bookmarked };
+  }
+
+  async createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment> {
+    const [newComment] = await db
+      .insert(discussionComments)
+      .values({
+        discussionId: comment.discussionId,
+        authorId: comment.authorId,
+        content: comment.content,
+        parentId: comment.parentId || null,
+      })
+      .returning();
+    return newComment;
+  }
+
+  async getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
+    const comments = await db
+      .select()
+      .from(discussionComments)
+      .where(eq(discussionComments.discussionId, discussionId))
+      .orderBy(asc(discussionComments.createdAt));
+    return comments;
+  }
+
+  async getDiscussion(discussionId: number): Promise<Discussion | undefined> {
+    const [discussion] = await db
+      .select()
+      .from(discussions)
+      .where(eq(discussions.id, discussionId));
+    return discussion;
+  }
+
   async getFeedPosts(userId: string): Promise<any[]> {
     try {
       const feedPosts: any[] = [];
