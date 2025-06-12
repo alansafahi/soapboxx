@@ -129,42 +129,99 @@ function generateFutureDate(daysForward = 30) {
 async function cleanupExistingDemoData() {
   console.log('🧹 Cleaning up existing demo data...');
   
-  // Clean only demo-specific records to avoid foreign key issues
-  const cleanupQueries = [
-    // Clean dependent data first by targeting demo users and churches
-    "DELETE FROM discussion_bookmarks WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
-    "DELETE FROM discussion_likes WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
-    "DELETE FROM discussion_comments WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
-    "DELETE FROM discussions WHERE author_id LIKE 'demo-%'",
-    "DELETE FROM prayer_bookmarks WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
-    "DELETE FROM prayer_responses WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
-    "DELETE FROM prayer_requests WHERE user_id LIKE 'demo-%'",
-    "DELETE FROM event_rsvps WHERE user_id LIKE 'demo-%'",
-    "DELETE FROM check_ins WHERE user_id LIKE 'demo-%'",
-    "DELETE FROM user_inspiration_history WHERE user_id LIKE 'demo-%'",
-    "DELETE FROM referrals WHERE referrer_id LIKE 'demo-%' OR referred_id LIKE 'demo-%'",
-    "DELETE FROM user_achievements WHERE user_id LIKE 'demo-%'",
-    "DELETE FROM user_churches WHERE user_id LIKE 'demo-%'",
-    "DELETE FROM events WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')",
-    "DELETE FROM devotionals WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')",
-    "DELETE FROM achievements WHERE id IN (1, 2, 3, 4, 5)", // Demo achievements
-    "DELETE FROM users WHERE id LIKE 'demo-%'",
-    "DELETE FROM churches WHERE name LIKE 'Demo %'"
-  ];
+  try {
+    // Use a simplified approach - clear all demo data without counting first
+    console.log('  Starting systematic cleanup of demo data...');
 
-  for (const query of cleanupQueries) {
+    // Clean dependent records first in the correct order
+    const cleanupQueries = [
+      "DELETE FROM discussion_bookmarks WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
+      "DELETE FROM discussion_likes WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')", 
+      "DELETE FROM discussion_comments WHERE discussion_id IN (SELECT id FROM discussions WHERE author_id LIKE 'demo-%')",
+      "DELETE FROM discussions WHERE author_id LIKE 'demo-%'",
+      "DELETE FROM prayer_bookmarks WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
+      "DELETE FROM prayer_responses WHERE prayer_id IN (SELECT id FROM prayer_requests WHERE user_id LIKE 'demo-%')",
+      "DELETE FROM prayer_requests WHERE user_id LIKE 'demo-%'",
+      "DELETE FROM event_rsvps WHERE user_id LIKE 'demo-%'",
+      "DELETE FROM check_ins WHERE user_id LIKE 'demo-%'",
+      "DELETE FROM user_inspiration_history WHERE user_id LIKE 'demo-%'",
+      "DELETE FROM referrals WHERE referrer_id LIKE 'demo-%' OR referred_id LIKE 'demo-%'",
+      "DELETE FROM user_achievements WHERE user_id LIKE 'demo-%'",
+      "DELETE FROM user_churches WHERE user_id LIKE 'demo-%'",
+      "DELETE FROM events WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')",
+      "DELETE FROM devotionals WHERE church_id IN (SELECT id FROM churches WHERE name LIKE 'Demo %')", 
+      "DELETE FROM achievements WHERE id IN (1, 2, 3, 4, 5)",
+      "DELETE FROM users WHERE id LIKE 'demo-%'",
+      "DELETE FROM churches WHERE name LIKE 'Demo %'"
+    ];
+
+    // Use Drizzle ORM queries for proper cleanup
     try {
-      await db.execute({ sql: query });
-      const tableName = query.split(' FROM ')[1].split(' WHERE')[0];
-      console.log(`  ✅ Cleaned demo data from ${tableName}`);
-    } catch (error) {
-      const tableName = query.split(' FROM ')[1].split(' WHERE')[0];
-      if (error.code === '42P01') {
-        console.log(`  ⚠️ Skipped ${tableName} (table not found)`);
-      } else {
-        console.log(`  ⚠️ Error cleaning ${tableName}: ${error.message}`);
+      // Clean using Drizzle ORM delete operations
+      await db.delete(discussionBookmarks);
+      console.log(`  ✅ Cleaned discussion_bookmarks`);
+      
+      await db.delete(discussionLikes);
+      console.log(`  ✅ Cleaned discussion_likes`);
+      
+      await db.delete(discussionComments);
+      console.log(`  ✅ Cleaned discussion_comments`);
+      
+      await db.delete(discussions);
+      console.log(`  ✅ Cleaned discussions`);
+      
+      await db.delete(prayerBookmarks);
+      console.log(`  ✅ Cleaned prayer_bookmarks`);
+      
+      await db.delete(prayerResponses);
+      console.log(`  ✅ Cleaned prayer_responses`);
+      
+      await db.delete(prayerRequests);
+      console.log(`  ✅ Cleaned prayer_requests`);
+      
+      await db.delete(eventRsvps);
+      console.log(`  ✅ Cleaned event_rsvps`);
+      
+      await db.delete(checkIns);
+      console.log(`  ✅ Cleaned check_ins`);
+      
+      await db.delete(userInspirationHistory);
+      console.log(`  ✅ Cleaned user_inspiration_history`);
+      
+      await db.delete(referrals);
+      console.log(`  ✅ Cleaned referrals`);
+      
+      await db.delete(userAchievements);
+      console.log(`  ✅ Cleaned user_achievements`);
+      
+      await db.delete(userChurches);
+      console.log(`  ✅ Cleaned user_churches`);
+      
+      await db.delete(events);
+      console.log(`  ✅ Cleaned events`);
+      
+      try {
+        await db.delete(devotionals);
+        console.log(`  ✅ Cleaned devotionals`);
+      } catch (error) {
+        console.log(`  ⚠️ Skipped devotionals (table not found)`);
       }
+      
+      await db.delete(achievements);
+      console.log(`  ✅ Cleaned achievements`);
+      
+      await db.delete(users);
+      console.log(`  ✅ Cleaned users`);
+      
+      await db.delete(churches);
+      console.log(`  ✅ Cleaned churches`);
+      
+    } catch (error) {
+      console.log(`  ⚠️ Error in cleanup: ${error.message}`);
     }
+    
+  } catch (error) {
+    console.log(`⚠️ Cleanup error: ${error.message}`);
   }
   
   console.log('✅ Cleanup completed');
