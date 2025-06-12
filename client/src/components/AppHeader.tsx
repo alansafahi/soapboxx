@@ -89,16 +89,13 @@ export default function AppHeader() {
 
   // Filter navigation items based on user role
   const getVisibleGroups = () => {
-    console.log('User role:', userRole);
-    const visibleGroups = navigationGroups.map(group => ({
+    return navigationGroups.map(group => ({
       ...group,
       items: group.items.filter(item => {
         if (!item.roles) return true;
         return item.roles.includes(userRole?.role);
       })
     })).filter(group => group.items.length > 0);
-    console.log('Visible groups:', visibleGroups);
-    return visibleGroups;
   };
 
   const isActiveRoute = (href: string) => {
@@ -184,51 +181,12 @@ export default function AppHeader() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 mt-6 px-4 space-y-3 overflow-y-auto">
           {getVisibleGroups().map((group) => {
             if (group.id === "main") {
               // Render main items without grouping
-              return group.items.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <div
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isActiveRoute(item.href)
-                          ? "text-white"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      }`}
-                      style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
-                      title={sidebarCollapsed ? item.label : undefined}
-                    >
-                      <IconComponent className="h-5 w-5 flex-shrink-0" />
-                      {!sidebarCollapsed && <span>{item.label}</span>}
-                    </div>
-                  </Link>
-                );
-              });
-            }
-
-            // Render grouped sections
-            return (
-              <Collapsible
-                key={group.id}
-                open={expandedSections[group.id]}
-                onOpenChange={() => toggleSection(group.id)}
-                className="space-y-1"
-              >
-                {!sidebarCollapsed && (
-                  <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
-                    <span>{group.label}</span>
-                    {expandedSections[group.id] ? (
-                      <ChevronDown className="h-3 w-3" />
-                    ) : (
-                      <ChevronRight className="h-3 w-3" />
-                    )}
-                  </CollapsibleTrigger>
-                )}
-                
-                <CollapsibleContent className="space-y-1">
+              return (
+                <div key={group.id} className="space-y-1">
                   {group.items.map((item) => {
                     const IconComponent = item.icon;
                     return (
@@ -248,8 +206,74 @@ export default function AppHeader() {
                       </Link>
                     );
                   })}
-                </CollapsibleContent>
-              </Collapsible>
+                </div>
+              );
+            }
+
+            // Render grouped sections
+            return (
+              <div key={group.id} className="space-y-1">
+                {!sidebarCollapsed && (
+                  <Collapsible
+                    open={expandedSections[group.id]}
+                    onOpenChange={() => toggleSection(group.id)}
+                    className="space-y-1"
+                  >
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 cursor-pointer">
+                      <span>{group.label}</span>
+                      {expandedSections[group.id] ? (
+                        <ChevronDown className="h-3 w-3" />
+                      ) : (
+                        <ChevronRight className="h-3 w-3" />
+                      )}
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent className="space-y-1 pl-3">
+                      {group.items.map((item) => {
+                        const IconComponent = item.icon;
+                        return (
+                          <Link key={item.href} href={item.href}>
+                            <div
+                              className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                isActiveRoute(item.href)
+                                  ? "text-white"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                              }`}
+                              style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
+                            >
+                              <IconComponent className="h-5 w-5 flex-shrink-0" />
+                              <span>{item.label}</span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+                
+                {sidebarCollapsed && (
+                  <div className="space-y-1">
+                    {group.items.map((item) => {
+                      const IconComponent = item.icon;
+                      return (
+                        <Link key={item.href} href={item.href}>
+                          <div
+                            className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              isActiveRoute(item.href)
+                                ? "text-white"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            }`}
+                            style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
+                            title={item.label}
+                          >
+                            <IconComponent className="h-5 w-5" />
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
