@@ -510,27 +510,6 @@ export function DailyBibleFeature() {
     }
   };
 
-  const toggleAudioPlayback = () => {
-    if (!audioRef) return;
-    
-    if (isAudioPlaying) {
-      audioRef.pause();
-    } else {
-      audioRef.play();
-    }
-    setIsAudioPlaying(!isAudioPlaying);
-  };
-
-  const getVerseText = () => {
-    if (!dailyVerse) return "";
-    switch (selectedVersion) {
-      case "kjv": return dailyVerse.verseTextKjv || dailyVerse.verseText;
-      case "esv": return dailyVerse.verseTextEsv || dailyVerse.verseText;
-      case "nlt": return dailyVerse.verseTextNlt || dailyVerse.verseText;
-      default: return dailyVerse.verseTextNiv || dailyVerse.verseText;
-    }
-  };
-
   const handleAskETHOS = () => {
     setShowETHOSDialog(true);
   };
