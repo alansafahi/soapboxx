@@ -44,6 +44,7 @@ import AdminAnalytics from "@/pages/AdminAnalytics";
 import AudioRoutines from "@/pages/AudioRoutines";
 import AudioBibleDemo from "@/pages/AudioBibleDemo";
 import VideoLibrary from "@/pages/VideoLibrary";
+import AIVideoGenerator from "@/pages/AIVideoGenerator";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
@@ -191,6 +192,7 @@ function AppRouter() {
               <Route path="/audio-routines" component={AudioRoutines} />
               <Route path="/audio-bible" component={AudioBibleDemo} />
               <Route path="/video-library" component={VideoLibrary} />
+              <Route path="/ai-video-generator" component={AIVideoGenerator} />
             </>
           )}
         </Switch>

@@ -5192,17 +5192,17 @@ export class DatabaseStorage implements IStorage {
     return await query;
   }
 
-  async getPublicVideos(limit = 20, offset = 0): Promise<VideoContent[]> {
+  async getPublicVideos(limit = 20, offset = 0): Promise<any[]> {
     return await db
       .select()
-      .from(videoContent)
+      .from(videos)
       .where(
         and(
-          eq(videoContent.isPublic, true),
-          eq(videoContent.isActive, true)
+          eq(videos.isPublic, true),
+          eq(videos.isActive, true)
         )
       )
-      .orderBy(desc(videoContent.publishedAt))
+      .orderBy(desc(videos.publishedAt))
       .limit(limit)
       .offset(offset);
   }

@@ -1815,5 +1815,148 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // AI Video Generation Routes - Phase 2
+  app.post('/api/videos/ai-generate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { aiVideoGenerator } = await import('./ai-video-generator');
+      
+      const request = {
+        ...req.body,
+        userId,
+      };
+
+      if (request.generateSeries) {
+        // Generate video series
+        const episodes = await aiVideoGenerator.generateVideoSeries(
+          request.topic,
+          request.seriesCount || 4,
+          request
+        );
+        res.json(episodes);
+      } else {
+        // Generate single video
+        const videoContent = await aiVideoGenerator.generateVideoContent(request);
+        res.json(videoContent);
+      }
+    } catch (error) {
+      console.error('Error generating AI video content:', error);
+      res.status(500).json({ message: 'Failed to generate AI video content' });
+    }
+  });
+
+  app.post('/api/videos/ai-create', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { aiVideoGenerator } = await import('./ai-video-generator');
+      const videoContent = req.body;
+
+      // Generate the actual video file from content
+      const videoUrl = await aiVideoGenerator.generateVideoFromContent(videoContent, {
+        userId,
+        churchId: 1, // Default church for demo
+        type: videoContent.type || 'devotional',
+        topic: videoContent.title,
+        duration: videoContent.estimatedDuration,
+        voicePersona: 'pastor-david',
+        visualStyle: 'modern',
+        targetAudience: 'general',
+      });
+
+      // Generate thumbnail
+      const thumbnailUrl = await aiVideoGenerator.createThumbnail(videoContent, 'modern');
+
+      // Create video record in database
+      const newVideo = await storage.createVideo({
+        title: videoContent.title,
+        description: videoContent.description,
+        videoUrl,
+        thumbnailUrl,
+        duration: videoContent.estimatedDuration,
+        category: videoContent.type || 'devotional',
+        tags: videoContent.tags || [],
+        bibleReferences: videoContent.bibleReferences || [],
+        speaker: 'AI Generated',
+        uploadedBy: userId,
+        churchId: 1,
+        phase: 'phase2',
+        generationType: 'ai_generated',
+        publishedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        viewCount: 0,
+        likeCount: 0,
+        shareCount: 0,
+        isPublic: true,
+        isActive: true,
+      });
+
+      res.status(201).json(newVideo);
+    } catch (error) {
+      console.error('Error creating AI video:', error);
+      res.status(500).json({ message: 'Failed to create AI video' });
+    }
+  });
+
+  // Generate AI thumbnail for existing video
+  app.post('/api/videos/:id/ai-thumbnail', isAuthenticated, async (req: any, res) => {
+    try {
+      const videoId = parseInt(req.params.id);
+      const { visualStyle = 'modern' } = req.body;
+      const { aiVideoGenerator } = await import('./ai-video-generator');
+
+      const video = await storage.getVideoById(videoId);
+      if (!video) {
+        return res.status(404).json({ message: 'Video not found' });
+      }
+
+      const thumbnailUrl = await aiVideoGenerator.createThumbnail({
+        title: video.title,
+        description: video.description,
+      }, visualStyle);
+
+      // Update video with new thumbnail
+      const updatedVideo = await storage.updateVideo(videoId, {
+        thumbnailUrl,
+        updatedAt: new Date(),
+      });
+
+      res.json({ thumbnailUrl, video: updatedVideo });
+    } catch (error) {
+      console.error('Error generating AI thumbnail:', error);
+      res.status(500).json({ message: 'Failed to generate AI thumbnail' });
+    }
+  });
+
+  // Generate AI script for video topic
+  app.post('/api/videos/ai-script', isAuthenticated, async (req: any, res) => {
+    try {
+      const { topic, type = 'devotional', duration = 180, targetAudience = 'general' } = req.body;
+      const { aiVideoGenerator } = await import('./ai-video-generator');
+
+      const request = {
+        type,
+        topic,
+        duration,
+        targetAudience,
+        voicePersona: 'pastor-david',
+        visualStyle: 'modern',
+        userId: req.user.claims.sub,
+        churchId: 1,
+      };
+
+      const videoContent = await aiVideoGenerator.generateVideoContent(request);
+      
+      res.json({
+        script: videoContent.script,
+        visualCues: videoContent.visualCues,
+        estimatedDuration: videoContent.estimatedDuration,
+      });
+    } catch (error) {
+      console.error('Error generating AI script:', error);
+      res.status(500).json({ message: 'Failed to generate AI script' });
+    }
+  });
+
   return httpServer;
 }
