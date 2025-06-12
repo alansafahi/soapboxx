@@ -456,19 +456,21 @@ export async function generateComprehensiveDemoData() {
           ['church_admin', 'super_admin'].includes(u.primaryRole)
         )) || insertedUsers[0];
         
+        const eventStartDate = generateFutureDate(90);
+        const eventEndDate = new Date(eventStartDate.getTime() + (Math.random() * 4 + 1) * 60 * 60 * 1000); // 1-5 hours later
+        
         eventData.push({
           title: eventType,
           description: getRandomElement(descriptions),
-          startTime: generateFutureDate(90),
-          endTime: new Date(Date.now() + (Math.random() * 4 + 1) * 60 * 60 * 1000), // 1-5 hours
+          eventDate: eventStartDate, // Map to correct field name
+          endDate: eventEndDate, // Map to correct field name
           location: `${church.name} - ${getRandomElement(['Main Sanctuary', 'Fellowship Hall', 'Youth Room', 'Conference Room', 'Outdoor Pavilion', 'Community Center'])}`,
           churchId: church.id,
-          organizerId: organizer.id, // Add required organizer_id
+          organizerId: validOrganizer.id,
           maxAttendees: Math.floor(Math.random() * 300) + 25,
           requiresRsvp: Math.random() < 0.6,
           isRecurring: isRecurring || Math.random() < 0.3,
-          createdAt: generateRandomDate(45),
-          attendeeCount: Math.floor(Math.random() * 150) + 10
+          createdAt: generateRandomDate(45)
         });
       }
     });
