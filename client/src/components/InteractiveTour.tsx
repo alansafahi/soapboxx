@@ -1,22 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { 
-  X, 
-  ChevronRight, 
-  ChevronLeft, 
-  ArrowDown,
-  ArrowUp,
-  ArrowLeft,
-  ArrowRight,
-  Play,
-  Pause,
-  SkipForward
-} from "lucide-react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from 'react';
+import { X, ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface TourStep {
   id: string;
@@ -38,671 +24,342 @@ interface InteractiveTourConfig {
   color: string;
 }
 
+interface InteractiveTourProps {
+  isOpen: boolean;
+  onClose: () => void;
+  role: string;
+}
+
 const tourConfigs: InteractiveTourConfig[] = [
-  // Platform Administrator Roles
   {
-    role: "soapbox_owner",
-    displayName: "SoapBox Owner",
-    welcomeMessage: "Welcome to your platform governance center. You have ultimate authority over all policies, security, and platform operations.",
-    color: "bg-purple-100 text-purple-800 border-purple-200",
-    steps: [
-      {
-        id: "platform_overview",
-        title: "Platform Governance Dashboard",
-        description: "Your command center for global platform oversight",
-        page: "/admin/dashboard",
-        position: "center",
-        content: "As SoapBox Owner, you control all platform policies, user roles, security governance, and audits. This dashboard provides real-time insights into platform health, user engagement, and system performance across all churches.",
-        tips: [
-          "Monitor global user growth and church engagement",
-          "Review security audit logs and compliance reports",
-          "Manage feature flags and platform-wide settings",
-          "Override any restrictions across the entire system"
-        ],
-        nextAction: "Let's explore user and role management capabilities"
-      },
-      {
-        id: "user_management",
-        title: "Global User & Role Management",
-        description: "Complete authority over all platform users and roles",
-        page: "/admin/users",
-        position: "center",
-        content: "Control every aspect of user management across all churches. Create custom roles, assign System Admins, manage Support Agents, and oversee all church administrators from this central hub.",
-        tips: [
-          "Grant or revoke System Admin and Support Agent roles",
-          "Create custom platform-wide roles with specific permissions",
-          "View comprehensive user activity and audit trails",
-          "Manage multi-church administrators and regional oversight"
-        ],
-        nextAction: "Next we'll review global analytics and reporting"
-      },
-      {
-        id: "analytics",
-        title: "Global Analytics & Financial Oversight",
-        description: "Platform-wide metrics and financial authority",
-        page: "/admin/analytics",
-        position: "center",
-        content: "Access comprehensive analytics spanning all churches, users, and financial transactions. Export data for business intelligence, monitor revenue streams, and track platform growth metrics.",
-        tips: [
-          "View cross-church analytics and engagement patterns",
-          "Monitor all financial transactions and donation flows",
-          "Export data for offline analysis and reporting",
-          "Track feature usage and subscription tier performance"
-        ],
-        nextAction: "Let's explore security and compliance features"
-      },
-      {
-        id: "security",
-        title: "Security & Compliance Center",
-        description: "Platform security governance and audit controls",
-        page: "/admin/security",
-        position: "center",
-        content: "Enforce security policies, review audit logs, and manage compliance requirements across the entire platform. Configure global security settings and monitor potential threats.",
-        tips: [
-          "Set platform-wide security policies and requirements",
-          "Review comprehensive audit trails for all admin actions",
-          "Manage GDPR/CCPA compliance and data protection",
-          "Configure content moderation and abuse prevention"
-        ],
-        nextAction: "Finally, let's review system configuration options"
-      },
-      {
-        id: "system_config",
-        title: "System Configuration & Infrastructure",
-        description: "Core platform settings and infrastructure management",
-        page: "/admin/system",
-        position: "center",
-        content: "Configure global feature flags, manage API integrations, control system-wide settings, and coordinate with development teams on platform updates and maintenance.",
-        tips: [
-          "Enable/disable features across all churches",
-          "Manage API keys and third-party integrations",
-          "Control mobile app versions and feature rollouts",
-          "Send platform-wide notifications and announcements"
-        ],
-        nextAction: "You now have complete platform governance capabilities"
-      }
-    ]
-  },
-  {
-    role: "system_admin",
-    displayName: "System Admin",
-    welcomeMessage: "Access your comprehensive system administration tools for managing all churches, users, and platform operations.",
+    role: "platform_admin",
+    displayName: "Platform Administrator",
+    welcomeMessage: "Welcome to the complete platform management experience!",
     color: "bg-red-100 text-red-800 border-red-200",
     steps: [
       {
-        id: "admin_dashboard",
-        title: "System Administration Hub",
-        description: "Central control for platform-wide administration",
-        page: "/admin/dashboard",
+        id: "welcome",
+        title: "Platform Administrator Welcome",
+        description: "Complete platform oversight and management",
+        page: "/admin",
         position: "center",
-        content: "Your system administration dashboard provides full oversight of all churches, users, billing, and platform operations. Monitor system health, manage support tickets, and ensure smooth operations across the entire platform.",
+        content: "As a Platform Administrator, you have the highest level of access across the entire SoapBox ecosystem. You can manage all churches, users, billing, and system-wide configurations.",
         tips: [
-          "View all churches and their activity status",
-          "Monitor user engagement and growth metrics",
-          "Access comprehensive billing and subscription data",
-          "Review system health and performance indicators"
+          "Access all church accounts and user data",
+          "Configure global platform settings and features",
+          "Monitor system performance and security",
+          "Manage billing and subscription plans"
         ],
-        nextAction: "Let's explore church and user management tools"
+        nextAction: "Let's explore your comprehensive dashboard"
       },
       {
-        id: "church_management",
-        title: "Church & User Administration",
-        description: "Comprehensive management of all platform entities",
+        id: "multi_church_overview",
+        title: "Multi-Church Management Dashboard",
+        description: "Monitor and manage all churches on the platform",
         page: "/admin/churches",
         position: "center",
-        content: "Manage all churches on the platform including creation, suspension, and deletion. Assign Church Admins, manage user roles, and ensure compliance with platform policies.",
+        content: "View all churches, their subscription status, user counts, and activity levels. Manage church configurations, upgrades, and support requests from this central hub.",
         tips: [
-          "Create, suspend, or archive church instances",
-          "Promote/demote Super Admins and Church Admins",
-          "Verify new churches and denominations",
-          "Impersonate users for support purposes with full audit logging"
+          "See church growth metrics and engagement levels",
+          "Manage subscription plans and billing for all churches",
+          "Quick access to church admin contacts and settings",
+          "Monitor feature usage across all church accounts"
         ],
-        nextAction: "Now let's review moderation and security tools"
+        nextAction: "Now let's look at global user management capabilities"
       },
       {
-        id: "moderation",
-        title: "Content Moderation & Security",
-        description: "Platform-wide content and security oversight",
-        page: "/admin/moderation",
-        position: "center",
-        content: "Monitor and moderate content across all churches. Handle abuse reports, enforce community guidelines, and maintain platform security through comprehensive monitoring tools.",
-        tips: [
-          "Review flagged content and abuse reports",
-          "Configure global content moderation policies",
-          "Access audit logs for all administrative actions",
-          "Manage security settings and user restrictions"
-        ],
-        nextAction: "Let's examine billing and financial oversight capabilities"
-      },
-      {
-        id: "billing",
-        title: "Billing & Financial Management",
-        description: "Platform-wide financial oversight and management",
-        page: "/admin/billing",
-        position: "center",
-        content: "Oversee all financial transactions, manage subscription tiers, handle billing disputes, and monitor revenue across the platform. Full access to Stripe Connect and payment processing.",
-        tips: [
-          "View all transaction flows and payment processing",
-          "Adjust pricing tiers and subscription plans",
-          "Issue refunds, credits, and billing overrides",
-          "Monitor church financial activity and donation flows"
-        ],
-        nextAction: "Finally, let's explore support and ticket management"
-      },
-      {
-        id: "support",
-        title: "Support & Ticket Management",
-        description: "Platform-wide support operations and user assistance",
-        page: "/admin/support",
-        position: "center",
-        content: "Manage support tickets across all churches, assist users with technical issues, and coordinate with Support Agents. Access tools for user impersonation and issue resolution.",
-        tips: [
-          "View and manage all platform support tickets",
-          "Coordinate with Support Agents and escalate issues",
-          "Access user impersonation tools for troubleshooting",
-          "Generate support reports and track resolution metrics"
-        ],
-        nextAction: "You now have full system administration capabilities"
-      }
-    ]
-  },
-  {
-    role: "support_agent",
-    displayName: "Support Agent",
-    welcomeMessage: "Welcome to your support center. Help users resolve issues, manage tickets, and ensure excellent customer service across all churches.",
-    color: "bg-blue-100 text-blue-800 border-blue-200",
-    steps: [
-      {
-        id: "support_dashboard",
-        title: "Support Operations Dashboard",
-        description: "Your central hub for helping users and managing tickets",
-        page: "/support/dashboard",
-        position: "center",
-        content: "Monitor active support tickets, track resolution times, and access tools to help users across all churches. Your role is essential for maintaining high user satisfaction and platform quality.",
-        tips: [
-          "Prioritize tickets by urgency and church size",
-          "Use quick-response templates for common issues",
-          "Escalate complex technical issues to System Admins",
-          "Track your performance metrics and response times"
-        ],
-        nextAction: "Let's explore ticket management and user assistance tools"
-      },
-      {
-        id: "ticket_management",
-        title: "Ticket Management & Resolution",
-        description: "Handle user issues efficiently and effectively",
-        page: "/support/tickets",
-        position: "center",
-        content: "Manage support tickets with priority queuing, automated routing, and comprehensive user context. Access user accounts safely to troubleshoot issues and provide immediate assistance.",
-        tips: [
-          "View complete user history and church context",
-          "Use screen sharing tools for complex issues",
-          "Document solutions for knowledge base updates",
-          "Coordinate with Church Admins for church-specific problems"
-        ],
-        nextAction: "Now let's review user assistance and communication tools"
-      },
-      {
-        id: "user_assistance",
-        title: "User Assistance & Communication",
-        description: "Direct communication tools for helping users",
-        page: "/support/assistance",
-        position: "center",
-        content: "Communicate with users through multiple channels including in-app messaging, email, and phone support. Access guided tutorials and help documentation to resolve issues quickly.",
-        tips: [
-          "Use empathetic communication for frustrated users",
-          "Provide step-by-step guidance with screenshots",
-          "Offer training sessions for church leadership",
-          "Create custom help content for recurring issues"
-        ],
-        nextAction: "Finally, let's explore knowledge base and training resources"
-      },
-      {
-        id: "knowledge_base",
-        title: "Knowledge Base & Training",
-        description: "Resources for continuous learning and issue resolution",
-        page: "/support/knowledge",
-        position: "center",
-        content: "Access comprehensive documentation, training materials, and best practices for resolving user issues. Contribute to the knowledge base by documenting new solutions and common problems.",
-        tips: [
-          "Search solutions by keyword, church size, or issue type",
-          "Update documentation when new features are released",
-          "Share successful resolution strategies with the team",
-          "Participate in regular training sessions and updates"
-        ],
-        nextAction: "You're ready to provide excellent support to all users"
-      }
-    ]
-  },
-  // Church Administrator Roles
-  {
-    role: "platform_admin",
-    displayName: "Platform Admin",
-    welcomeMessage: "Welcome to your platform administration center. Manage church operations, oversee staff, and ensure smooth platform functionality.",
-    color: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    steps: [
-      {
-        id: "admin_overview",
-        title: "Platform Administration Overview",
-        description: "Your central hub for church and platform management",
-        page: "/admin/dashboard",
-        position: "center",
-        content: "As a Platform Admin, you bridge the gap between platform oversight and church operations. Monitor multiple churches, assist with onboarding, and ensure best practices across your assigned churches.",
-        tips: [
-          "Monitor church health and engagement metrics",
-          "Assist new churches with setup and onboarding",
-          "Coordinate between platform updates and church needs",
-          "Provide guidance on best practices and feature usage"
-        ],
-        nextAction: "Let's explore church oversight and management tools"
-      },
-      {
-        id: "church_oversight",
-        title: "Church Oversight & Support",
-        description: "Tools for managing and supporting multiple churches",
-        page: "/admin/churches",
-        position: "center",
-        content: "Oversee church operations, assist with administrative tasks, and ensure churches are maximizing their platform usage. Provide training and support to Church Admins and staff members.",
-        tips: [
-          "Review church activity and identify growth opportunities",
-          "Help churches configure features and optimize settings",
-          "Coordinate training sessions for church staff",
-          "Monitor compliance with platform policies"
-        ],
-        nextAction: "Now let's review user management and role administration"
-      },
-      {
-        id: "user_management_admin",
-        title: "User & Role Management",
-        description: "Administrative tools for managing users across churches",
+        id: "user_management",
+        title: "Global User Management",
+        description: "Oversee all platform users across churches",
         page: "/admin/users",
         position: "center",
-        content: "Manage user roles, permissions, and access levels across your assigned churches. Help resolve user issues and ensure proper role assignments for optimal church operations.",
+        content: "Access comprehensive user data, resolve account issues, manage role assignments, and handle platform-wide user support requests.",
         tips: [
-          "Assign and modify user roles as needed",
-          "Resolve user access and permission issues",
-          "Coordinate with church leadership on role changes",
-          "Monitor user engagement and provide usage guidance"
+          "Search and filter users across all churches",
+          "Resolve account verification and login issues",
+          "Manage user roles and permissions globally",
+          "Handle data privacy requests and account deletions"
         ],
-        nextAction: "Let's explore reporting and analytics capabilities"
+        nextAction: "Let's examine system configuration and security tools"
       },
       {
-        id: "reporting_analytics",
-        title: "Reporting & Analytics",
-        description: "Data insights and performance monitoring tools",
+        id: "system_configuration",
+        title: "Platform Configuration & Security",
+        description: "Configure global settings and security policies",
+        page: "/admin/system",
+        position: "center",
+        content: "Manage platform-wide settings, security policies, feature flags, and integration configurations. Control what features are available to different subscription tiers.",
+        tips: [
+          "Configure feature availability by subscription tier",
+          "Set global security policies and compliance rules",
+          "Manage third-party integrations and API settings",
+          "Monitor system health and performance metrics"
+        ],
+        nextAction: "Finally, let's review billing and analytics capabilities"
+      },
+      {
+        id: "billing_analytics",
+        title: "Revenue Analytics & Platform Insights",
+        description: "Monitor platform performance and revenue",
         page: "/admin/analytics",
         position: "center",
-        content: "Access comprehensive analytics and reporting tools to track church performance, user engagement, and platform usage. Generate reports for stakeholders and identify improvement opportunities.",
+        content: "Access comprehensive analytics on revenue, user growth, feature adoption, and platform performance. Generate reports for stakeholders and investors.",
         tips: [
-          "Generate custom reports for church leadership",
-          "Track engagement trends and feature adoption",
-          "Identify churches needing additional support",
-          "Monitor financial health and donation patterns"
+          "Track monthly recurring revenue and churn rates",
+          "Monitor user engagement and feature adoption",
+          "Generate executive reports and business insights",
+          "Identify growth opportunities and platform improvements"
         ],
-        nextAction: "You now have complete platform administration capabilities"
+        nextAction: "You're ready to manage the entire platform effectively!"
       }
     ]
   },
   {
     role: "church_admin",
-    displayName: "Church Admin",
-    welcomeMessage: "Welcome to your church administration center. Manage your congregation, oversee events, and build a thriving spiritual community.",
-    color: "bg-green-100 text-green-800 border-green-200",
+    displayName: "Church Administrator",
+    welcomeMessage: "Let's get your church community thriving on SoapBox!",
+    color: "bg-blue-100 text-blue-800 border-blue-200",
     steps: [
       {
-        id: "church_dashboard",
-        title: "Church Administration Dashboard",
-        description: "Your command center for church management",
-        page: "/dashboard",
+        id: "welcome",
+        title: "Church Admin Welcome",
+        description: "Your central hub for church management",
+        page: "/admin",
         position: "center",
-        content: "Monitor your church's activity, track member engagement, and oversee all aspects of your congregation's digital life. This dashboard provides real-time insights into member participation, events, and community health.",
+        content: "As a Church Administrator, you're the backbone of your church's digital presence. You'll manage members, coordinate staff, organize events, and ensure your community stays connected.",
         tips: [
-          "Monitor member check-ins and engagement trends",
-          "Track upcoming events and volunteer needs",
-          "Review prayer requests and community interactions",
-          "Oversee financial health and donation patterns"
+          "Full access to church member management",
+          "Coordinate with staff and volunteers",
+          "Organize events and track attendance",
+          "Monitor church engagement and growth"
         ],
-        nextAction: "Let's explore member and volunteer management"
+        nextAction: "Let's explore your member management tools"
       },
       {
         id: "member_management",
-        title: "Member & Volunteer Management",
-        description: "Tools for building and nurturing your congregation",
-        page: "/members",
+        title: "Member Management Hub",
+        description: "Manage your church community effectively",
+        page: "/admin/members",
         position: "center",
-        content: "Manage your church members, assign roles, and coordinate volunteer activities. Create meaningful connections within your congregation and ensure everyone feels welcomed and valued.",
+        content: "Add new members, update contact information, assign roles, and track member engagement. Use powerful filters to segment your congregation for targeted communication.",
         tips: [
-          "Assign Staff and Volunteer roles to members",
-          "Track member participation and engagement",
-          "Organize small groups and ministry teams",
-          "Monitor volunteer hours and recognition programs"
+          "Import members from spreadsheets or other systems",
+          "Assign roles like volunteer, staff, or ministry leader",
+          "Track attendance patterns and engagement metrics",
+          "Send targeted messages to specific member groups"
         ],
-        nextAction: "Now let's review event planning and management"
+        nextAction: "Now let's set up your staff and volunteer coordination"
+      },
+      {
+        id: "staff_coordination",
+        title: "Staff & Volunteer Coordination",
+        description: "Organize your ministry teams effectively",
+        page: "/admin/staff",
+        position: "center",
+        content: "Manage staff schedules, assign volunteer roles, coordinate ministry teams, and track service opportunities. Keep your entire team aligned and informed.",
+        tips: [
+          "Create staff schedules and manage time-off requests",
+          "Assign volunteers to specific ministries and events",
+          "Track volunteer hours and service contributions",
+          "Send team updates and coordination messages"
+        ],
+        nextAction: "Let's explore event planning and management"
       },
       {
         id: "event_management",
         title: "Event Planning & Management",
-        description: "Comprehensive tools for organizing church activities",
-        page: "/events",
+        description: "Create engaging church events and activities",
+        page: "/admin/events",
         position: "center",
-        content: "Plan, promote, and manage all church events from Sunday services to special celebrations. Track attendance, coordinate volunteers, and ensure every event strengthens your community.",
+        content: "Plan worship services, special events, small groups, and community activities. Track RSVPs, manage logistics, and measure event success.",
         tips: [
-          "Create recurring events for services and regular meetings",
-          "Coordinate volunteer assignments for each event",
-          "Send targeted invitations and reminders",
-          "Track attendance and gather feedback after events"
+          "Create recurring events like weekly services",
+          "Track RSVPs and attendance for planning purposes",
+          "Manage event logistics like setup and volunteers",
+          "Send event reminders and follow-up communications"
         ],
-        nextAction: "Let's explore communication and engagement tools"
+        nextAction: "Finally, let's review your church analytics and growth tools"
       },
       {
-        id: "communication",
-        title: "Communication & Engagement",
-        description: "Keep your congregation connected and informed",
-        page: "/communications",
+        id: "church_analytics",
+        title: "Church Growth & Analytics",
+        description: "Track your church's spiritual and numerical growth",
+        page: "/admin/analytics",
         position: "center",
-        content: "Send announcements, manage the prayer wall, and facilitate meaningful connections within your congregation. Use multiple channels to reach members where they are most comfortable.",
+        content: "Monitor attendance trends, engagement levels, giving patterns, and community growth. Use insights to make informed decisions about your ministry.",
         tips: [
-          "Send weekly newsletters with upcoming events",
-          "Moderate prayer requests and celebration posts",
-          "Create discussion groups for Bible studies",
-          "Use push notifications for urgent announcements"
+          "Track weekly attendance and seasonal trends",
+          "Monitor member engagement across different activities",
+          "Analyze giving patterns and financial health",
+          "Identify opportunities for community growth and outreach"
         ],
-        nextAction: "Finally, let's review financial and donation management"
-      },
-      {
-        id: "financial_management",
-        title: "Financial & Donation Management",
-        description: "Oversee church finances and stewardship",
-        page: "/donations",
-        position: "center",
-        content: "Monitor donation patterns, manage tithes and offerings, and ensure transparent financial stewardship. Generate reports for leadership and track progress toward financial goals.",
-        tips: [
-          "Set up recurring donation options for members",
-          "Track progress toward building fund and mission goals",
-          "Generate financial reports for church board meetings",
-          "Send donation receipts and thank you messages"
-        ],
-        nextAction: "You're ready to lead your church community effectively"
+        nextAction: "You're equipped to lead your church community to new heights!"
       }
     ]
   },
-  // Member Roles
   {
     role: "staff",
-    displayName: "Staff Member",
-    welcomeMessage: "Welcome to your ministry tools. Support your church's mission through effective communication, event coordination, and member care.",
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    displayName: "Church Staff Member",
+    welcomeMessage: "Welcome to your ministry management hub!",
+    color: "bg-purple-100 text-purple-800 border-purple-200",
     steps: [
       {
-        id: "staff_dashboard",
-        title: "Ministry Dashboard",
-        description: "Your hub for ministry activities and member care",
-        page: "/dashboard",
+        id: "welcome",
+        title: "Staff Member Welcome",
+        description: "Your tools for effective ministry leadership",
+        page: "/",
         position: "center",
-        content: "Access tools designed specifically for church staff to support ministry activities, communicate with members, and coordinate events. Your role is essential for building community and supporting spiritual growth.",
+        content: "As a staff member, you're a key leader in your church community. You'll coordinate with other staff, manage your ministry areas, and directly support church members in their spiritual journey.",
         tips: [
-          "View your assigned ministry areas and responsibilities",
-          "Monitor member engagement in your programs",
-          "Access member contact information for pastoral care",
-          "Track volunteer schedules and ministry participation"
+          "Coordinate with other staff members and leadership",
+          "Manage your specific ministry areas and responsibilities",
+          "Provide pastoral care and spiritual guidance",
+          "Track member engagement in your ministry"
         ],
-        nextAction: "Let's explore member communication and care tools"
+        nextAction: "Let's explore your ministry management tools"
       },
       {
-        id: "member_care",
-        title: "Member Communication & Care",
-        description: "Tools for pastoral care and member support",
-        page: "/members",
+        id: "ministry_management",
+        title: "Ministry Area Management",
+        description: "Lead your specific ministry effectively",
+        page: "/ministry",
         position: "center",
-        content: "Communicate with congregation members, provide pastoral care, and build meaningful relationships. Access member information securely to offer personalized support and guidance.",
+        content: "Manage your ministry area, coordinate volunteers, plan ministry events, and track participant engagement. Whether it's youth, worship, or community outreach, you have the tools you need.",
         tips: [
-          "Send private messages for pastoral counseling",
-          "Schedule appointments and care visits",
-          "Access member prayer requests for personal follow-up",
-          "Coordinate care teams and support groups"
+          "Organize ministry-specific events and activities",
+          "Recruit and coordinate volunteers for your ministry",
+          "Track participant attendance and engagement",
+          "Communicate with ministry team members and participants"
         ],
-        nextAction: "Now let's review event coordination capabilities"
+        nextAction: "Now let's look at pastoral care and member support tools"
       },
       {
-        id: "event_coordination",
-        title: "Event Coordination & Ministry",
-        description: "Support church events and ministry programs",
-        page: "/events",
+        id: "pastoral_care",
+        title: "Pastoral Care & Member Support",
+        description: "Provide spiritual guidance and support",
+        page: "/care",
         position: "center",
-        content: "Help coordinate church events, manage volunteer teams, and ensure smooth operation of ministry programs. Your hands-on support makes every event successful.",
+        content: "Access prayer requests, schedule pastoral visits, provide counseling support, and track member spiritual growth. Be there for your congregation when they need you most.",
         tips: [
-          "Coordinate volunteers for your ministry events",
-          "Manage event logistics and setup requirements",
-          "Track attendance for programs you oversee",
-          "Send follow-up communications after events"
+          "Respond to prayer requests and spiritual support needs",
+          "Schedule and track pastoral visits and counseling sessions",
+          "Coordinate with other staff for comprehensive member care",
+          "Maintain confidential notes and follow-up reminders"
         ],
-        nextAction: "Let's explore prayer ministry and spiritual support"
+        nextAction: "Let's explore collaboration and communication tools"
       },
       {
-        id: "prayer_ministry",
-        title: "Prayer Ministry & Spiritual Support",
-        description: "Support the spiritual life of your congregation",
-        page: "/prayer-wall",
+        id: "staff_collaboration",
+        title: "Staff Team Collaboration",
+        description: "Work effectively with your ministry team",
+        page: "/team",
         position: "center",
-        content: "Engage with the prayer wall, offer spiritual support, and help facilitate meaningful prayer ministry within your congregation. Your spiritual guidance helps members grow in faith.",
+        content: "Coordinate with other staff members, share ministry updates, collaborate on church-wide initiatives, and stay aligned with leadership vision and goals.",
         tips: [
-          "Respond to prayer requests with encouragement",
-          "Organize prayer groups and prayer chains",
-          "Share spiritual insights and devotional content",
-          "Follow up on answered prayers and celebrations"
+          "Share ministry updates and coordination needs",
+          "Collaborate on church-wide events and initiatives",
+          "Access shared resources and ministry materials",
+          "Participate in staff meetings and planning sessions"
         ],
-        nextAction: "You're equipped to serve your congregation effectively"
+        nextAction: "Finally, let's review your ministry growth and impact tracking"
+      },
+      {
+        id: "ministry_impact",
+        title: "Ministry Impact & Growth Tracking",
+        description: "Measure and improve your ministry effectiveness",
+        page: "/impact",
+        position: "center",
+        content: "Track the impact of your ministry, measure spiritual growth among participants, and identify opportunities for expansion and improvement.",
+        tips: [
+          "Monitor participation and engagement in your ministry",
+          "Track spiritual growth and life transformation stories",
+          "Identify volunteers ready for leadership development",
+          "Plan ministry expansion and new initiative opportunities"
+        ],
+        nextAction: "You're ready to make a lasting impact in your ministry!"
       }
     ]
   },
   {
     role: "volunteer",
-    displayName: "Volunteer",
-    welcomeMessage: "Thank you for your heart to serve! Discover opportunities to make a difference in your church community and grow in your faith journey.",
+    displayName: "Church Volunteer",
+    welcomeMessage: "Thank you for your heart to serve!",
     color: "bg-orange-100 text-orange-800 border-orange-200",
     steps: [
       {
-        id: "volunteer_welcome",
-        title: "Your Volunteer Journey Begins",
-        description: "Discover meaningful ways to serve your church community",
-        page: "/volunteer-opportunities",
+        id: "welcome",
+        title: "Volunteer Welcome",
+        description: "Your gateway to meaningful service",
+        page: "/",
         position: "center",
-        content: "Your willingness to serve is a blessing to your church community. Explore volunteer opportunities that match your interests, skills, and availability. Every contribution makes a difference in building God's kingdom.",
+        content: "As a volunteer, you're the hands and feet of your church community. You'll find service opportunities, coordinate with teams, and make a real difference in people's lives.",
         tips: [
-          "Browse opportunities by ministry area and time commitment",
-          "Sign up for recurring volunteer roles or one-time events",
-          "Track your volunteer hours and impact",
-          "Connect with other volunteers and ministry leaders"
+          "Discover service opportunities that match your gifts",
+          "Coordinate with volunteer teams and ministry leaders",
+          "Track your service hours and impact",
+          "Connect with other volunteers and build relationships"
         ],
-        nextAction: "Let's explore how to find and sign up for opportunities"
+        nextAction: "Let's find the perfect service opportunities for you"
       },
       {
-        id: "opportunity_discovery",
-        title: "Finding Your Perfect Volunteer Match",
-        description: "Discover opportunities that align with your calling",
-        page: "/volunteer-opportunities",
-        selector: "[data-tour='volunteer-opportunities']",
-        position: "right",
-        content: "Browse volunteer opportunities organized by ministry area, skill requirements, and time commitment. From children's ministry to community outreach, find where your unique gifts can make the biggest impact.",
+        id: "service_opportunities",
+        title: "Service Opportunities Hub",
+        description: "Find ways to serve that match your gifts",
+        page: "/volunteer",
+        position: "center",
+        content: "Browse available volunteer opportunities, sign up for regular commitments or one-time events, and discover new ways to use your gifts and talents for God's kingdom.",
         tips: [
           "Filter opportunities by your interests and availability",
-          "Read detailed descriptions to understand requirements",
-          "View upcoming volunteer events and special projects",
-          "Contact ministry leaders with questions before committing"
+          "Sign up for regular weekly or monthly commitments",
+          "Join one-time events and special service projects",
+          "Explore new ministry areas to expand your impact"
         ],
-        nextAction: "Now let's see how to manage your volunteer commitments"
+        nextAction: "Now let's look at team coordination and communication"
       },
       {
-        id: "volunteer_scheduling",
-        title: "Managing Your Service Schedule",
-        description: "Keep track of your volunteer commitments",
-        page: "/my-volunteering",
+        id: "team_coordination",
+        title: "Volunteer Team Coordination",
+        description: "Stay connected with your service teams",
+        page: "/teams",
         position: "center",
-        content: "View your upcoming volunteer commitments, track your service hours, and manage your schedule. Receive reminders about upcoming opportunities and celebrate your contributions to the church community.",
+        content: "Communicate with your volunteer teams, coordinate schedules, share updates, and support each other in your service commitments.",
         tips: [
-          "Set availability preferences for automatic scheduling",
-          "Receive reminders via email or push notifications",
-          "Request substitutes when you can't fulfill commitments",
-          "View your volunteer history and hours contributed"
+          "Coordinate schedules with your volunteer team",
+          "Share updates and prayer requests with team members",
+          "Access training materials and service guidelines",
+          "Request help or find substitutes when needed"
         ],
-        nextAction: "Let's explore community engagement and growth opportunities"
+        nextAction: "Let's explore service tracking and growth opportunities"
       },
       {
-        id: "community_engagement",
-        title: "Building Community Through Service",
-        description: "Connect with others and grow in your faith",
+        id: "service_tracking",
+        title: "Service Impact & Growth",
+        description: "Track your service journey and spiritual growth",
+        page: "/growth",
+        position: "center",
+        content: "See the impact of your service, track hours contributed, celebrate milestones, and discover opportunities for leadership development and increased responsibility.",
+        tips: [
+          "Track your volunteer hours and service contributions",
+          "Celebrate service milestones and achievements",
+          "See stories of lives impacted through your service",
+          "Explore leadership opportunities and skill development"
+        ],
+        nextAction: "Finally, let's connect you with the broader church community"
+      },
+      {
+        id: "community_connection",
+        title: "Community Connection & Fellowship",
+        description: "Build relationships through service",
         page: "/community",
         position: "center",
-        content: "Volunteering is more than just helping—it's about building relationships and growing in faith. Connect with other volunteers, participate in community discussions, and celebrate the impact you're making together.",
+        content: "Connect with other volunteers, participate in fellowship activities, share your service journey, and build lasting friendships through your shared commitment to serving others.",
         tips: [
-          "Join volunteer team group chats and discussions",
-          "Share prayer requests and celebrate answered prayers",
+          "Connect with volunteers in other ministry areas",
           "Participate in volunteer appreciation events",
-          "Mentor new volunteers and share your experience"
+          "Share your service stories and testimonies",
+          "Invite friends and family to join you in serving"
         ],
-        nextAction: "You're ready to make a lasting impact through service"
-      }
-    ]
-  },
-  {
-    role: "member",
-    displayName: "Church Member",
-    welcomeMessage: "Welcome to your church community! Discover ways to connect, grow in faith, and build meaningful relationships with fellow believers.",
-    color: "bg-purple-100 text-purple-800 border-purple-200",
-    steps: [
-      {
-        id: "member_welcome",
-        title: "Welcome to Your Church Community",
-        description: "Start your journey of faith and fellowship",
-        page: "/dashboard",
-        position: "center",
-        content: "Welcome to your digital church home! Here you can stay connected with your congregation, participate in community life, and grow in your faith journey. Your church family is excited to have you here.",
-        tips: [
-          "Check in to services and events to stay connected",
-          "Browse upcoming events and register to attend",
-          "Connect with other members through small groups",
-          "Access daily devotionals and spiritual growth resources"
-        ],
-        nextAction: "Let's explore how to stay connected with your church"
-      },
-      {
-        id: "church_connection",
-        title: "Staying Connected with Your Church",
-        description: "Participate in church life and community",
-        page: "/events",
-        position: "center",
-        content: "Discover upcoming events, services, and activities. From Sunday worship to small group meetings, stay engaged with all aspects of church life and build meaningful relationships with your church family.",
-        tips: [
-          "Register for events and add them to your calendar",
-          "Join small groups that match your interests",
-          "Volunteer for events and ministries you're passionate about",
-          "Invite friends and family to special church events"
-        ],
-        nextAction: "Now let's explore spiritual growth and community support"
-      },
-      {
-        id: "spiritual_growth",
-        title: "Growing in Faith Together",
-        description: "Access resources for spiritual development",
-        page: "/daily-bible",
-        position: "center",
-        content: "Engage with daily Bible readings, devotionals, and spiritual growth resources. Track your progress on faith journeys and connect with others who are growing in their relationship with God.",
-        tips: [
-          "Read daily devotionals and Bible passages",
-          "Join Bible study groups and discussion forums",
-          "Track your spiritual growth milestones",
-          "Share insights and prayers with the community"
-        ],
-        nextAction: "Let's discover how to support and be supported by your community"
-      },
-      {
-        id: "community_support",
-        title: "Prayer, Support, and Fellowship",
-        description: "Give and receive support within your church family",
-        page: "/prayer-wall",
-        position: "center",
-        content: "Participate in your church's prayer life by sharing requests, offering prayers for others, and celebrating God's faithfulness. Your church community is here to support you through all of life's seasons.",
-        tips: [
-          "Share prayer requests and receive support from your church family",
-          "Pray for others and offer encouragement",
-          "Celebrate answered prayers and life milestones",
-          "Connect with pastoral care when you need additional support"
-        ],
-        nextAction: "You're ready to thrive in your church community"
-      }
-    ]
-  }
-        description: "Your central hub for user assistance and issue management",
-        page: "/support/dashboard",
-        position: "center",
-        content: "Monitor support tickets, live chat requests, and user issues across all churches. Prioritize urgent matters and track your response times and resolution metrics.",
-        tips: [
-          "View incoming support tickets and live chat requests",
-          "Categorize issues by type and urgency level",
-          "Track response times and customer satisfaction",
-          "Access user account information securely"
-        ],
-        nextAction: "Let's explore user assistance and troubleshooting tools"
-      },
-      {
-        id: "user_assistance",
-        title: "User Assistance & Account Management",
-        description: "Help users with account issues and platform navigation",
-        page: "/support/users",
-        position: "center",
-        content: "Assist users with password resets, account verification, church affiliation changes, and general platform guidance. Access tools for account management and user support.",
-        tips: [
-          "Securely impersonate users to reproduce issues",
-          "Help with password resets and login problems",
-          "Assist with church affiliation and role changes",
-          "Guide users through onboarding and feature adoption"
-        ],
-        nextAction: "Now let's look at community moderation tools"
-      },
-      {
-        id: "moderation",
-        title: "Community Moderation",
-        description: "Monitor and moderate community content and interactions",
-        page: "/support/moderation",
-        position: "center",
-        content: "Review prayer wall posts, forum discussions, and community interactions. Flag inappropriate content, respond to spiritual support requests, and escalate pastoral care needs.",
-        tips: [
-          "Monitor prayer wall and community posts for guidelines violations",
-          "Provide compassionate responses to spiritual support requests",
-          "Flag and escalate abusive or inappropriate content",
-          "Forward spiritual care needs to appropriate church leaders"
-        ],
-        nextAction: "Let's examine billing and subscription support capabilities"
-      },
-      {
-        id: "billing_support",
-        title: "Billing & Subscription Support",
-        description: "Assist users with payment and subscription issues",
-        page: "/support/billing",
-        position: "center",
-        content: "Help resolve payment failures, subscription changes, and billing inquiries. Apply promotional codes, adjust plans, and coordinate with finance teams for refunds.",
-        tips: [
-          "Resolve credit card failures and payment issues",
-          "Apply promotional codes and upgrade user plans",
-          "Explain subscription benefits and feature access",
-          "Coordinate refunds and charge dispute resolution"
-        ],
-        nextAction: "Finally, let's review knowledge management and feedback collection"
-      },
-      {
-        id: "knowledge",
-        title: "Knowledge Base & Feedback Collection",
-        description: "Maintain help resources and gather user insights",
-        page: "/support/knowledge",
-        position: "center",
-        content: "Update help center articles, document common issues, and collect user feedback for product improvements. Track frequently requested features and pain points.",
-        tips: [
-          "Update help center articles when features change",
-          "Document solutions for recurring technical problems",
-          "Collect and categorize user feedback and feature requests",
-          "Generate reports on support trends and user needs"
-        ],
-        nextAction: "You're ready to provide excellent platform-wide support!"
+        nextAction: "You're ready to serve with purpose and joy!"
       }
     ]
   },
@@ -722,834 +379,59 @@ const tourConfigs: InteractiveTourConfig[] = [
         tips: [
           "Access everything from one central dashboard",
           "Stay connected with your church family",
-          "Track your spiritual growth progress"
-        ]
-      },
-      {
-        id: "find_churches",
-        title: "Discover Churches",
-        description: "Find a spiritual home that fits your beliefs",
-        page: "/churches",
-        selector: ".church-card",
-        position: "right",
-        content: "Browse churches in your area and find one that aligns with your faith tradition. Each church profile shows their denomination, location, and community focus.",
-        tips: [
-          "Filter by denomination and location",
-          "Read about each church's mission",
-          "See upcoming events and services"
+          "Track your spiritual growth and participation",
+          "Discover new ways to get involved"
         ],
-        nextAction: "We'll show you daily Bible reading next"
+        nextAction: "Let's explore your church community connections"
       },
       {
-        id: "daily_bible",
-        title: "Daily Bible Reading",
-        description: "Build consistent scripture habits",
-        page: "/bible",
-        selector: ".reading-plan",
-        position: "left",
-        content: "Start your day with guided Bible reading. Choose from various reading plans, track your progress, and reflect on daily verses.",
-        tips: [
-          "Multiple reading plans available",
-          "Track your reading streaks",
-          "Share insights with your community"
-        ],
-        nextAction: "Let's explore the prayer wall"
-      },
-      {
-        id: "prayer_wall",
-        title: "Community Prayer",
-        description: "Share prayer requests and support others",
-        page: "/prayer",
-        selector: ".prayer-request",
-        position: "top",
-        content: "Join your community in prayer by sharing requests and supporting others. This is where faith becomes fellowship.",
-        tips: [
-          "Share your prayer needs anonymously if preferred",
-          "Pray for others and offer encouragement",
-          "See answered prayers and testimonies"
-        ],
-        nextAction: "Finally, let's check your spiritual progress"
-      },
-      {
-        id: "spiritual_progress",
-        title: "Track Your Growth",
-        description: "See your faith journey milestones",
-        page: "/leaderboard",
-        selector: ".achievement-badge",
-        position: "bottom",
-        content: "Celebrate your spiritual milestones! Earn badges for reading consistency, prayer participation, and community engagement.",
-        tips: [
-          "Earn badges for various spiritual activities",
-          "See your reading streaks and participation",
-          "Connect with other growing believers"
-        ]
-      }
-    ]
-  },
-  {
-    role: "volunteer",
-    displayName: "Volunteer",
-    welcomeMessage: "Discover how to serve and make an impact in your church community!",
-    color: "bg-blue-100 text-blue-800 border-blue-200",
-    steps: [
-      {
-        id: "volunteer_welcome",
-        title: "Volunteer Dashboard",
-        description: "Your service hub",
-        page: "/",
-        position: "center",
-        content: "As a volunteer, you're the heart of church ministry! This dashboard shows your upcoming service opportunities and impact metrics.",
-        tips: [
-          "View your upcoming volunteer commitments",
-          "See the impact of your service",
-          "Connect with other volunteers"
-        ]
-      },
-      {
-        id: "volunteer_events",
-        title: "Service Opportunities",
-        description: "Find ways to serve and help",
-        page: "/events",
-        selector: ".volunteer-opportunity",
-        position: "right",
-        content: "Browse upcoming events where volunteers are needed. From children's ministry to community outreach, find where your gifts can shine.",
-        tips: [
-          "Sign up for events that match your skills",
-          "See time commitments and requirements",
-          "Connect with ministry leaders"
-        ],
-        nextAction: "Let's see how to connect with your team"
-      },
-      {
-        id: "volunteer_messages",
-        title: "Team Communication",
-        description: "Stay connected with ministry teams",
-        page: "/messages",
-        selector: ".ministry-chat",
-        position: "left",
-        content: "Communicate with your ministry teams, get updates about service opportunities, and coordinate with other volunteers.",
-        tips: [
-          "Direct messaging with ministry leaders",
-          "Group chats for team coordination",
-          "Important announcements and updates"
-        ]
-      }
-    ]
-  },
-  {
-    role: "youth_leader",
-    displayName: "Youth Leader",
-    welcomeMessage: "Learn how to engage and mentor the next generation!",
-    color: "bg-purple-100 text-purple-800 border-purple-200",
-    steps: [
-      {
-        id: "youth_dashboard",
-        title: "Youth Ministry Hub",
-        description: "Your central command for youth engagement",
-        page: "/",
-        position: "center",
-        content: "Welcome to your youth ministry dashboard! Here you can track youth engagement, plan events, and connect with families.",
-        tips: [
-          "Monitor youth participation and growth",
-          "Coordinate with parents and volunteers",
-          "Plan age-appropriate activities and events"
-        ]
-      },
-      {
-        id: "youth_events",
-        title: "Youth Events & Activities",
-        description: "Create engaging experiences for young people",
-        page: "/events",
-        selector: ".youth-event",
-        position: "right",
-        content: "Plan and manage youth-specific events from Bible studies to community service projects. Create experiences that build faith and community.",
-        tips: [
-          "Age-appropriate content and activities",
-          "Track attendance and engagement",
-          "Coordinate with parent volunteers"
-        ],
-        nextAction: "Let's see how to communicate with youth and families"
-      },
-      {
-        id: "youth_communication",
-        title: "Family Communication",
-        description: "Stay connected with youth and their families",
-        page: "/messages",
-        selector: ".family-chat",
-        position: "left",
-        content: "Maintain healthy communication with youth participants and their families. Share updates, coordinate activities, and provide pastoral care.",
-        tips: [
-          "Direct messaging with appropriate oversight",
-          "Group communications for events",
-          "Parent notifications and updates"
-        ]
-      }
-    ]
-  },
-  {
-    role: "ministry_leader",
-    displayName: "Ministry Leader",
-    welcomeMessage: "Discover tools to lead and grow your ministry effectively!",
-    color: "bg-orange-100 text-orange-800 border-orange-200",
-    steps: [
-      {
-        id: "ministry_overview",
-        title: "Ministry Dashboard",
-        description: "Comprehensive ministry management",
-        page: "/",
-        position: "center",
-        content: "Your ministry leadership hub provides insights into participation, volunteer coordination, and ministry impact metrics.",
-        tips: [
-          "Track ministry participation and growth",
-          "Coordinate volunteers and resources",
-          "Monitor ministry health and effectiveness"
-        ]
-      },
-      {
-        id: "volunteer_management",
-        title: "Volunteer Coordination",
-        description: "Recruit and manage your ministry team",
-        page: "/events",
-        selector: ".volunteer-section",
-        position: "right",
-        content: "Recruit, train, and schedule volunteers for your ministry. Match people's gifts with service opportunities.",
-        tips: [
-          "Volunteer recruitment and onboarding",
-          "Skill-based ministry matching",
-          "Training and development tracking"
-        ],
-        nextAction: "Now let's explore ministry communication tools"
-      },
-      {
-        id: "ministry_communication",
-        title: "Ministry Communication",
-        description: "Keep your team informed and connected",
-        page: "/messages",
-        selector: ".ministry-updates",
-        position: "left",
-        content: "Communicate effectively with your ministry team, share announcements, and coordinate activities.",
-        tips: [
-          "Team-wide announcements and updates",
-          "Private coordination with leadership",
-          "Resource sharing and planning"
-        ]
-      }
-    ]
-  },
-  {
-    role: "lead_pastor",
-    displayName: "Lead Pastor",
-    welcomeMessage: "Access tools for pastoral care and church leadership!",
-    color: "bg-red-100 text-red-800 border-red-200",
-    steps: [
-      {
-        id: "pastoral_dashboard",
-        title: "Pastoral Leadership Center",
-        description: "Church-wide oversight and care",
-        page: "/",
-        position: "center",
-        content: "Your pastoral dashboard provides a comprehensive view of church health, member care needs, and leadership priorities.",
-        tips: [
-          "Church-wide health and growth metrics",
-          "Member care and pastoral needs",
-          "Leadership coordination and oversight"
-        ]
-      },
-      {
-        id: "member_care",
-        title: "Pastoral Care & Counseling",
-        description: "Provide spiritual guidance and support",
-        page: "/messages",
-        selector: ".pastoral-care",
-        position: "right",
-        content: "Manage pastoral care requests, schedule counseling sessions, and provide spiritual guidance to church members.",
-        tips: [
-          "Confidential pastoral care communications",
-          "Counseling session scheduling",
-          "Crisis intervention and support"
-        ],
-        nextAction: "Let's see the prayer ministry tools"
-      },
-      {
-        id: "prayer_ministry",
-        title: "Prayer Ministry Oversight",
-        description: "Lead the church in prayer and intercession",
-        page: "/prayer",
-        selector: ".pastoral-prayer",
-        position: "left",
-        content: "Oversee the church's prayer ministry, respond to urgent prayer needs, and lead corporate prayer initiatives.",
-        tips: [
-          "Review and respond to prayer requests",
-          "Coordinate prayer teams and initiatives",
-          "Lead corporate prayer events"
-        ]
-      }
-    ]
-  },
-  {
-    role: "social_manager",
-    displayName: "Social Manager",
-    welcomeMessage: "Learn to build community and enhance church communications!",
-    color: "bg-teal-100 text-teal-800 border-teal-200",
-    steps: [
-      {
-        id: "community_dashboard",
-        title: "Community Engagement Hub",
-        description: "Foster connections and communication",
-        page: "/",
-        position: "center",
-        content: "Your social management dashboard helps you build community, moderate discussions, and enhance church communications.",
-        tips: [
-          "Monitor community engagement and health",
-          "Facilitate meaningful connections",
-          "Coordinate social events and activities"
-        ]
-      },
-      {
-        id: "community_building",
-        title: "Community Discussions",
-        description: "Facilitate meaningful conversations",
+        id: "community_engagement",
+        title: "Community Engagement",
+        description: "Connect with your church family",
         page: "/community",
-        selector: ".discussion-thread",
-        position: "right",
-        content: "Moderate and facilitate community discussions, help members connect, and foster a healthy online church environment.",
-        tips: [
-          "Moderate discussions with wisdom",
-          "Facilitate introductions and connections",
-          "Create engaging conversation starters"
-        ],
-        nextAction: "Next, we'll explore communication tools"
-      },
-      {
-        id: "social_communication",
-        title: "Church Communications",
-        description: "Manage announcements and updates",
-        page: "/messages",
-        selector: ".church-announcements",
-        position: "left",
-        content: "Coordinate church-wide communications, manage announcements, and ensure important information reaches the congregation.",
-        tips: [
-          "Church-wide announcements and news",
-          "Event promotion and coordination",
-          "Member directory and connections"
-        ]
-      }
-    ]
-  },
-  {
-    role: "church_admin",
-    displayName: "Church Admin",
-    welcomeMessage: "Master the administrative tools that keep the church running smoothly!",
-    color: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    steps: [
-      {
-        id: "admin_dashboard",
-        title: "Administrative Control Center",
-        description: "Church operations and management",
-        page: "/admin",
         position: "center",
-        content: "Your administrative dashboard provides comprehensive church management tools, member oversight, and operational controls.",
+        content: "Join small groups, participate in church events, connect with other members, and build meaningful relationships within your faith community.",
         tips: [
-          "Complete church membership management",
-          "Role and permission administration",
-          "Church settings and configuration"
-        ]
-      },
-      {
-        id: "member_management",
-        title: "Member Administration",
-        description: "Manage church membership and roles",
-        page: "/admin",
-        selector: ".member-admin",
-        position: "right",
-        content: "Administer church membership, assign roles and permissions, and manage user access throughout the system.",
-        tips: [
-          "Add, edit, and manage member profiles",
-          "Assign roles and permissions",
-          "Track member engagement and participation"
-        ],
-        nextAction: "Let's explore church settings and configuration"
-      },
-      {
-        id: "church_settings",
-        title: "Church Configuration",
-        description: "Configure church settings and preferences",
-        page: "/admin",
-        selector: ".church-settings",
-        position: "left",
-        content: "Configure church-wide settings, manage preferences, and customize the platform for your congregation's needs.",
-        tips: [
-          "Church profile and branding settings",
-          "Communication and notification preferences",
-          "Platform customization and features"
-        ]
-      }
-    ]
-  },
-  {
-    role: "church_owner",
-    displayName: "Church Owner",
-    welcomeMessage: "Welcome to complete church ownership and administration!",
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    steps: [
-      {
-        id: "owner_dashboard",
-        title: "Church Ownership Dashboard",
-        description: "Complete church control and oversight",
-        page: "/admin",
-        position: "center",
-        content: "As church owner, you have complete control over all church operations, staff management, and strategic oversight.",
-        tips: [
-          "Full administrative access and control",
-          "Staff and leadership management",
-          "Strategic oversight and reporting"
-        ]
-      },
-      {
-        id: "staff_management",
-        title: "Staff & Leadership",
-        description: "Manage church staff and leadership team",
-        page: "/admin",
-        selector: ".staff-management",
-        position: "right",
-        content: "Oversee your entire church staff, assign leadership roles, and manage organizational structure.",
-        tips: [
-          "Hire and manage church staff",
-          "Define leadership hierarchy",
-          "Performance oversight and development"
-        ],
-        nextAction: "Finally, let's explore strategic planning tools"
-      },
-      {
-        id: "strategic_oversight",
-        title: "Strategic Planning",
-        description: "Church growth and strategic direction",
-        page: "/admin",
-        selector: ".strategic-planning",
-        position: "left",
-        content: "Access strategic planning tools, church growth analytics, and long-term visioning capabilities.",
-        tips: [
-          "Church growth and analytics",
-          "Strategic planning and visioning",
-          "Multi-campus and expansion planning"
-        ]
-      }
-    ]
-  },
-  {
-    role: "member",
-    displayName: "Church Member",
-    welcomeMessage: "Welcome to your spiritual home! Discover all the ways you can connect, grow, and serve.",
-    color: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    steps: [
-      {
-        id: "member_dashboard",
-        title: "Your Spiritual Dashboard",
-        description: "Your personal church community hub",
-        page: "/",
-        position: "center",
-        content: "Welcome to your personal church dashboard! Here you can see upcoming events, prayer requests, daily devotionals, and connect with your church family.",
-        tips: [
-          "Check in daily for spiritual growth",
-          "View upcoming church events and activities",
-          "Access daily devotionals and Bible reading",
-          "Connect with other church members"
-        ],
-        nextAction: "Let's explore community connections"
-      },
-      {
-        id: "community_connection",
-        title: "Connect with Your Church Family",
-        description: "Build meaningful relationships",
-        page: "/community",
-        selector: ".member-directory",
-        position: "right",
-        content: "Connect with other church members, join small groups, and build meaningful relationships within your church family.",
-        tips: [
-          "Browse member directory and profiles",
-          "Join small groups and Bible studies",
-          "Send encouragement and prayer requests"
+          "Join small groups that match your interests",
+          "RSVP for church events and special activities",
+          "Connect with other members and build friendships",
+          "Participate in community discussions and prayer sharing"
         ],
         nextAction: "Now let's look at spiritual growth tools"
       },
       {
         id: "spiritual_growth",
-        title: "Your Spiritual Growth Journey",
-        description: "Daily devotionals and Bible study",
+        title: "Spiritual Growth & Bible Study",
+        description: "Deepen your relationship with God",
         page: "/bible",
-        selector: ".daily-devotional",
-        position: "left",
-        content: "Access daily devotionals, Bible reading plans, and track your spiritual growth journey with personalized content.",
-        tips: [
-          "Daily Bible reading and devotionals",
-          "Track your spiritual milestones",
-          "Join Bible study groups"
-        ]
-      }
-    ]
-  },
-  {
-    role: "new_member",
-    displayName: "New Member",
-    welcomeMessage: "Welcome to our church family! Let us help you get started on your journey with us.",
-    color: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    steps: [
-      {
-        id: "welcome_tour",
-        title: "Welcome to Your New Church Home!",
-        description: "Getting started in your church community",
-        page: "/",
         position: "center",
-        content: "Welcome! We're so excited you've joined our church family. This tour will help you discover all the ways you can connect, grow, and get involved.",
+        content: "Access daily devotionals, join Bible study groups, track your scripture reading, and engage with spiritual growth challenges and resources.",
         tips: [
-          "Complete your member profile",
-          "Explore upcoming newcomer events",
-          "Connect with our welcome team",
-          "Discover ways to get involved"
+          "Follow daily devotional plans and reading schedules",
+          "Join online Bible study groups and discussions",
+          "Track your scripture reading progress and insights",
+          "Participate in spiritual growth challenges and goals"
         ],
-        nextAction: "Let's set up your profile and preferences"
+        nextAction: "Let's explore prayer and spiritual support features"
       },
       {
-        id: "profile_setup",
-        title: "Create Your Member Profile",
-        description: "Tell us about yourself",
-        page: "/profile",
-        selector: ".profile-setup",
-        position: "right",
-        content: "Complete your member profile to help others get to know you and find the best ways for you to connect and serve.",
-        tips: [
-          "Add your interests and background",
-          "Set your communication preferences",
-          "Upload a profile photo",
-          "Share your skills and talents"
-        ],
-        nextAction: "Now let's explore ways to get involved"
-      },
-      {
-        id: "getting_involved",
-        title: "Find Your Place to Serve",
-        description: "Discover ministry opportunities",
-        page: "/volunteer",
-        selector: ".ministry-opportunities",
-        position: "left",
-        content: "Explore the many ways you can serve and get involved in our church community. Find ministries that match your interests and gifts.",
-        tips: [
-          "Browse ministry opportunities",
-          "Sign up for volunteer roles",
-          "Join newcomer connection groups",
-          "Attend orientation events"
-        ]
-      }
-    ]
-  },
-  {
-    role: "volunteer",
-    displayName: "Volunteer",
-    welcomeMessage: "Thank you for your heart to serve! Discover tools to enhance your volunteer ministry.",
-    color: "bg-orange-100 text-orange-800 border-orange-200",
-    steps: [
-      {
-        id: "volunteer_dashboard",
-        title: "Your Volunteer Command Center",
-        description: "Manage your volunteer commitments",
-        page: "/volunteer",
+        id: "prayer_support",
+        title: "Prayer Wall & Spiritual Support",
+        description: "Share and receive prayer support",
+        page: "/prayer",
         position: "center",
-        content: "Your volunteer dashboard helps you track your service commitments, communicate with ministry leaders, and discover new opportunities to serve.",
+        content: "Share prayer requests, pray for others in your community, celebrate answered prayers, and access pastoral care when you need additional spiritual support.",
         tips: [
-          "View your volunteer schedule",
-          "Track your service hours",
-          "Communicate with ministry teams",
-          "Find additional ways to serve"
+          "Share prayer requests with your church community",
+          "Pray for others and offer encouragement",
+          "Celebrate answered prayers and life milestones",
+          "Connect with pastoral care when you need additional support"
         ],
-        nextAction: "Let's explore your current commitments"
-      },
-      {
-        id: "ministry_coordination",
-        title: "Ministry Team Coordination",
-        description: "Work effectively with your team",
-        page: "/volunteer",
-        selector: ".ministry-team",
-        position: "right",
-        content: "Coordinate with your ministry team, access training resources, and stay updated on ministry activities and needs.",
-        tips: [
-          "Team communication and updates",
-          "Access training materials",
-          "Submit service reports",
-          "Request time off or schedule changes"
-        ],
-        nextAction: "Now let's look at growth and training opportunities"
-      },
-      {
-        id: "volunteer_growth",
-        title: "Volunteer Training & Development",
-        description: "Grow in your service and skills",
-        page: "/volunteer",
-        selector: ".training-resources",
-        position: "left",
-        content: "Access training resources, track your volunteer development, and explore leadership opportunities within your ministry area.",
-        tips: [
-          "Complete required training modules",
-          "Track your volunteer milestones",
-          "Explore leadership development",
-          "Receive feedback and recognition"
-        ]
-      }
-    ]
-  },
-  {
-    role: "small_group_leader",
-    displayName: "Small Group Leader",
-    welcomeMessage: "Lead with wisdom and love! Access tools to nurture your small group community.",
-    color: "bg-teal-100 text-teal-800 border-teal-200",
-    steps: [
-      {
-        id: "group_leadership_center",
-        title: "Small Group Leadership Hub",
-        description: "Shepherd your group effectively",
-        page: "/groups",
-        position: "center",
-        content: "Your leadership center provides tools to manage your small group, track member growth, and access leadership resources.",
-        tips: [
-          "Manage group membership and attendance",
-          "Access Bible study resources",
-          "Track spiritual growth and prayer requests",
-          "Coordinate group activities and events"
-        ],
-        nextAction: "Let's explore member care tools"
-      },
-      {
-        id: "member_care",
-        title: "Caring for Your Group Members",
-        description: "Pastoral care and support",
-        page: "/groups",
-        selector: ".member-care",
-        position: "right",
-        content: "Use pastoral care tools to track member needs, manage prayer requests, and provide spiritual support to your group.",
-        tips: [
-          "Track member spiritual journeys",
-          "Manage confidential prayer requests",
-          "Coordinate care and support",
-          "Access counseling resources"
-        ],
-        nextAction: "Now let's look at Bible study resources"
-      },
-      {
-        id: "study_resources",
-        title: "Bible Study & Teaching Tools",
-        description: "Lead engaging Bible studies",
-        page: "/groups",
-        selector: ".study-materials",
-        position: "left",
-        content: "Access comprehensive Bible study materials, teaching resources, and tools to lead engaging and meaningful group discussions.",
-        tips: [
-          "Access curated study materials",
-          "Prepare interactive discussions",
-          "Track group progress through studies",
-          "Connect with other group leaders"
-        ]
+        nextAction: "You're ready to thrive in your church community"
       }
     ]
   }
 ];
-
-interface InteractiveTourProps {
-  isOpen: boolean;
-  onClose: () => void;
-  role: string;
-}
-
-export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTourProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [location, navigate] = useLocation();
-  
-  const config = tourConfigs.find(c => c.role === role);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isOpen && config && config.steps[currentStep]) {
-      // Navigate to the step's page
-      navigate(config.steps[currentStep].page);
-    }
-  }, [currentStep, isOpen, config, navigate]);
-
-  useEffect(() => {
-    if (isPlaying && config) {
-      const timer = setTimeout(() => {
-        if (currentStep < config.steps.length - 1) {
-          setCurrentStep(prev => prev + 1);
-        } else {
-          setIsPlaying(false);
-        }
-      }, 8000); // 8 seconds per step
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isPlaying, currentStep, config]);
-  
-  if (!config) return null;
-
-  const currentStepData = config.steps[currentStep];
-  const progress = ((currentStep + 1) / config.steps.length) * 100;
-
-  const handleNext = () => {
-    if (currentStep < config.steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    } else {
-      handleComplete();
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
-  };
-
-  const handleComplete = () => {
-    setIsPlaying(false);
-    onClose();
-  };
-
-  const togglePlayback = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50">
-        {/* Overlay */}
-        <div 
-          ref={overlayRef}
-          className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
-        />
-        
-        {/* Highlight area for specific elements */}
-        {currentStepData.selector && (
-          <div className="absolute inset-0 pointer-events-none">
-            {/* This would highlight specific elements */}
-            <div className="absolute border-4 border-purple-400 rounded-lg animate-pulse" />
-          </div>
-        )}
-
-        {/* Tour Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          className={`absolute ${getPositionClasses(currentStepData.position)} max-w-md`}
-        >
-          <Card className="shadow-2xl border-2">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge className={config.color}>
-                    {config.displayName}
-                  </Badge>
-                  <span className="text-sm text-gray-500">
-                    Step {currentStep + 1} of {config.steps.length}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                  className="h-6 w-6 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div>
-                <CardTitle className="text-lg mb-2">
-                  {currentStepData.title}
-                </CardTitle>
-                <p className="text-sm text-gray-600 mb-3">
-                  {currentStepData.description}
-                </p>
-                <p className="text-sm leading-relaxed">
-                  {currentStepData.content}
-                </p>
-              </div>
-
-              {currentStepData.tips && (
-                <div className="bg-purple-50 p-3 rounded-lg">
-                  <h4 className="font-medium text-sm mb-2 text-purple-900">
-                    Key Features:
-                  </h4>
-                  <ul className="text-xs space-y-1 text-purple-800">
-                    {currentStepData.tips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="text-purple-500 mt-0.5">•</span>
-                        {tip}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {currentStepData.nextAction && (
-                <div className="text-xs text-gray-500 italic">
-                  {currentStepData.nextAction}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={togglePlayback}
-                    className="gap-1"
-                  >
-                    {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                    {isPlaying ? "Pause" : "Auto"}
-                  </Button>
-                  {currentStep > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePrevious}
-                      className="gap-1"
-                    >
-                      <ChevronLeft className="h-3 w-3" />
-                      Back
-                    </Button>
-                  )}
-                </div>
-                
-                <Button
-                  onClick={handleNext}
-                  size="sm"
-                  className="bg-purple-600 hover:bg-purple-700 gap-1"
-                >
-                  {currentStep === config.steps.length - 1 ? "Complete" : "Next"}
-                  {currentStep < config.steps.length - 1 && <ChevronRight className="h-3 w-3" />}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Directional Arrow */}
-        {currentStepData.selector && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className={`absolute ${getArrowPosition(currentStepData.position)} text-purple-400`}
-          >
-            {getArrowIcon(currentStepData.position)}
-          </motion.div>
-        )}
-      </div>
-    </AnimatePresence>
-  );
-}
 
 function getPositionClasses(position: string): string {
   switch (position) {
@@ -1570,30 +452,169 @@ function getPositionClasses(position: string): string {
 function getArrowPosition(position: string): string {
   switch (position) {
     case 'top':
-      return 'top-32 left-1/2 transform -translate-x-1/2';
+      return 'bottom-[-8px] left-1/2 transform -translate-x-1/2 border-t-gray-800';
     case 'bottom':
-      return 'bottom-32 left-1/2 transform -translate-x-1/2';
+      return 'top-[-8px] left-1/2 transform -translate-x-1/2 border-b-gray-800';
     case 'left':
-      return 'left-80 top-1/2 transform -translate-y-1/2';
+      return 'right-[-8px] top-1/2 transform -translate-y-1/2 border-l-gray-800';
     case 'right':
-      return 'right-80 top-1/2 transform -translate-y-1/2';
+      return 'left-[-8px] top-1/2 transform -translate-y-1/2 border-r-gray-800';
+    case 'center':
     default:
       return 'hidden';
   }
 }
 
 function getArrowIcon(position: string) {
-  const className = "h-8 w-8 animate-bounce";
   switch (position) {
     case 'top':
-      return <ArrowDown className={className} />;
+      return <ArrowUp className="h-4 w-4" />;
     case 'bottom':
-      return <ArrowUp className={className} />;
+      return <ArrowDown className="h-4 w-4" />;
     case 'left':
-      return <ArrowRight className={className} />;
+      return <ArrowLeft className="h-4 w-4" />;
     case 'right':
-      return <ArrowLeft className={className} />;
+      return <ArrowRight className="h-4 w-4" />;
     default:
       return null;
   }
+}
+
+export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTourProps) {
+  const [currentStep, setCurrentStep] = useState(0);
+  
+  const config = tourConfigs.find(c => c.role === role);
+  
+  if (!isOpen || !config) {
+    return null;
+  }
+
+  const step = config.steps[currentStep];
+  const isLastStep = currentStep === config.steps.length - 1;
+  const isFirstStep = currentStep === 0;
+
+  const handleNext = () => {
+    if (isLastStep) {
+      onClose();
+    } else {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (!isFirstStep) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSkip = () => {
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
+      <Card className={`max-w-2xl w-full max-h-[90vh] overflow-y-auto ${getPositionClasses(step.position)}`}>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Badge className={config.color}>
+                {config.displayName}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                Step {currentStep + 1} of {config.steps.length}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {step.title}
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              {step.description}
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-gray-700 mb-4">
+              {step.content}
+            </p>
+
+            {step.tips && step.tips.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Key Tips:</h4>
+                <ul className="space-y-2">
+                  {step.tips.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
+                      <span className="text-blue-600 mt-1">•</span>
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {step.nextAction && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Next:</strong> {step.nextAction}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSkip}
+              >
+                Skip Tour
+              </Button>
+              {!isFirstStep && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrevious}
+                >
+                  Previous
+                </Button>
+              )}
+            </div>
+
+            <Button
+              onClick={handleNext}
+              className="bg-[#5A2671] hover:bg-[#4A1F5A] text-white"
+            >
+              {isLastStep ? 'Get Started' : 'Next'}
+              {!isLastStep && <ArrowRight className="ml-2 h-4 w-4" />}
+            </Button>
+          </div>
+
+          <div className="mt-4">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-[#5A2671] h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: `${((currentStep + 1) / config.steps.length) * 100}%`
+                }}
+              />
+            </div>
+          </div>
+        </CardContent>
+
+        {/* Arrow pointer for non-center positions */}
+        <div className={`absolute w-0 h-0 border-8 border-transparent ${getArrowPosition(step.position)}`} />
+      </Card>
+    </div>
+  );
 }

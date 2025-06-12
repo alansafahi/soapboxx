@@ -22,51 +22,41 @@ export default function TourTestPage() {
     retry: false,
   });
 
-  const platformRoles = [
+  const allRoles = [
     { 
-      id: "soapbox_owner", 
-      name: "SoapBox Owner", 
-      description: "Ultimate platform authority with full system control",
-      color: "bg-purple-600 text-white"
+      id: "platform_admin", 
+      name: "Platform Administrator", 
+      description: "Complete platform oversight and management",
+      color: "bg-red-500 text-white",
+      category: "Platform"
     },
     { 
-      id: "system_admin", 
-      name: "System Admin", 
-      description: "Platform-wide administrative capabilities",
-      color: "bg-blue-600 text-white"
+      id: "church_admin", 
+      name: "Church Administrator", 
+      description: "Central hub for church management",
+      color: "bg-blue-500 text-white",
+      category: "Church Leadership"
     },
     { 
-      id: "support_agent", 
-      name: "Support Agent", 
-      description: "Customer support and user assistance role",
-      color: "bg-green-600 text-white"
-    }
-  ];
-
-  const memberRoles = [
+      id: "staff", 
+      name: "Church Staff Member", 
+      description: "Ministry leadership and member support",
+      color: "bg-purple-500 text-white",
+      category: "Church Leadership"
+    },
+    { 
+      id: "volunteer", 
+      name: "Church Volunteer", 
+      description: "Active volunteer in church activities",
+      color: "bg-orange-500 text-white",
+      category: "Church Members"
+    },
     { 
       id: "member", 
       name: "Church Member", 
       description: "Regular church member exploring the platform",
-      color: "bg-indigo-500 text-white"
-    },
-    { 
-      id: "new_member", 
-      name: "New Member", 
-      description: "First-time user just joined the platform",
-      color: "bg-emerald-500 text-white"
-    },
-    { 
-      id: "volunteer", 
-      name: "Volunteer", 
-      description: "Active volunteer in church activities",
-      color: "bg-orange-500 text-white"
-    },
-    { 
-      id: "small_group_leader", 
-      name: "Small Group Leader", 
-      description: "Leads small groups and Bible studies",
-      color: "bg-teal-500 text-white"
+      color: "bg-green-500 text-white",
+      category: "Church Members"
     }
   ];
 
