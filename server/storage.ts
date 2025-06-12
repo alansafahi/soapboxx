@@ -368,6 +368,13 @@ export interface IStorage {
   // Feed operations
   getFeedPosts(userId: string): Promise<any[]>;
   
+  // Discussion interaction operations
+  toggleDiscussionLike(userId: string, discussionId: number): Promise<{ liked: boolean; likeCount: number }>;
+  toggleDiscussionBookmark(userId: string, discussionId: number): Promise<{ bookmarked: boolean }>;
+  createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment>;
+  getDiscussionComments(discussionId: number): Promise<DiscussionComment[]>;
+  getDiscussion(discussionId: number): Promise<Discussion | undefined>;
+  
   // Bookmark operations
   bookmarkDiscussion(userId: string, discussionId: number): Promise<void>;
   unbookmarkDiscussion(userId: string, discussionId: number): Promise<void>;

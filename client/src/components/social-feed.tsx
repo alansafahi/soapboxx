@@ -111,8 +111,18 @@ export default function SocialFeed() {
       
       return { previousFeed };
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    onSuccess: (data, variables) => {
+      // Update the cache with the actual server response
+      queryClient.setQueryData(['/api/feed'], (old: any) => {
+        if (!old) return old;
+        return old.map((post: any) => 
+          post.id === variables.postId ? { 
+            ...post, 
+            isBookmarked: data.bookmarked !== undefined ? data.bookmarked : !variables.isBookmarked
+          } : post
+        );
+      });
+      
       toast({
         title: variables.isBookmarked ? "Bookmark removed" : "Bookmarked",
         description: variables.isBookmarked ? "Post removed from bookmarks" : "Post saved to bookmarks",
@@ -190,8 +200,19 @@ export default function SocialFeed() {
       
       return { previousFeed };
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    onSuccess: (data, variables) => {
+      // Update the cache with the actual server response
+      queryClient.setQueryData(['/api/feed'], (old: any) => {
+        if (!old) return old;
+        return old.map((post: any) => 
+          post.id === variables.postId ? { 
+            ...post, 
+            isLiked: data.liked !== undefined ? data.liked : !post.isLiked,
+            likeCount: data.likeCount !== undefined ? data.likeCount : (data.liked ? post.likeCount + 1 : post.likeCount - 1)
+          } : post
+        );
+      });
+      
       toast({
         title: data.liked !== undefined ? (data.liked ? "Liked" : "Unliked") : (data.message?.includes("favorited") ? "Liked" : "Unliked"),
         description: data.liked !== undefined ? (data.liked ? "Post liked successfully" : "Post unliked successfully") : data.message,

@@ -2059,5 +2059,99 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Discussion interaction endpoints
+  app.post("/api/discussions/:id/like", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      const result = await storage.toggleDiscussionLike(userId, discussionId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error toggling discussion like:", error);
+      res.status(500).json({ message: "Failed to toggle like" });
+    }
+  });
+
+  app.post("/api/discussions/:id/bookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      const result = await storage.toggleDiscussionBookmark(userId, discussionId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error toggling discussion bookmark:", error);
+      res.status(500).json({ message: "Failed to toggle bookmark" });
+    }
+  });
+
+  app.post("/api/discussions/:id/share", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      // Get the discussion details
+      const discussion = await storage.getDiscussion(discussionId);
+      if (!discussion) {
+        return res.status(404).json({ message: "Discussion not found" });
+      }
+      
+      // Get author info for the discussion
+      const author = await storage.getUser(discussion.authorId);
+      const authorName = author ? (author.firstName && author.lastName ? `${author.firstName} ${author.lastName}` : author.email || 'Unknown User') : 'Unknown User';
+      
+      // Create a new discussion post sharing the original
+      const shareContent = `📢 **Shared Discussion: ${discussion.title}**\n\n${discussion.content}\n\n*Originally shared by ${authorName}*`;
+      
+      const sharedPost = await storage.createDiscussion({
+        authorId: userId,
+        title: `Shared: ${discussion.title}`,
+        content: shareContent,
+        category: 'shared',
+        churchId: null,
+      });
+      
+      res.json({ message: "Discussion shared", sharedPost });
+    } catch (error) {
+      console.error("Error sharing discussion:", error);
+      res.status(500).json({ message: "Failed to share discussion" });
+    }
+  });
+
+  app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      const { content } = req.body;
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: "Comment content is required" });
+      }
+      
+      const comment = await storage.createDiscussionComment({
+        discussionId,
+        userId,
+        content: content.trim()
+      });
+      
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error("Error creating discussion comment:", error);
+      res.status(500).json({ message: "Failed to create comment" });
+    }
+  });
+
+  app.get("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const discussionId = parseInt(req.params.id);
+      const comments = await storage.getDiscussionComments(discussionId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching discussion comments:", error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+
   return httpServer;
 }
