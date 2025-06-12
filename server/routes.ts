@@ -1849,41 +1849,50 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     try {
       const userId = req.user.claims.sub;
       const { aiVideoGenerator } = await import('./ai-video-generator');
-      const videoContent = req.body;
+      const contentData = req.body;
+
+      // Ensure we have the required fields with fallbacks
+      const title = contentData.title || contentData.topic || 'AI Generated Video';
+      const description = contentData.description || `AI generated ${contentData.type || 'devotional'} content`;
 
       // Generate the actual video file from content
-      const videoUrl = await aiVideoGenerator.generateVideoFromContent(videoContent, {
+      const videoUrl = await aiVideoGenerator.generateVideoFromContent(contentData, {
         userId,
         churchId: 1, // Default church for demo
-        type: videoContent.type || 'devotional',
-        topic: videoContent.title,
-        duration: videoContent.estimatedDuration,
-        voicePersona: 'pastor-david',
-        visualStyle: 'modern',
-        targetAudience: 'general',
+        type: contentData.type || 'devotional',
+        topic: title,
+        duration: contentData.estimatedDuration || contentData.duration || 180,
+        voicePersona: contentData.voicePersona || 'pastor-david',
+        visualStyle: contentData.visualStyle || 'modern',
+        targetAudience: contentData.targetAudience || 'general',
       });
 
       // Generate thumbnail
-      const thumbnailUrl = await aiVideoGenerator.createThumbnail(videoContent, 'modern');
+      const thumbnailUrl = await aiVideoGenerator.createThumbnail({
+        title,
+        description,
+        script: contentData.script,
+      }, contentData.visualStyle || 'modern');
 
       // Create video record in database
       const newVideo = await storage.createVideo({
-        title: videoContent.title,
-        description: videoContent.description,
+        title,
+        description,
         videoUrl,
         thumbnailUrl,
-        duration: videoContent.estimatedDuration,
-        category: videoContent.type || 'devotional',
-        tags: videoContent.tags || [],
-        bibleReferences: videoContent.bibleReferences || [],
+        duration: contentData.estimatedDuration || contentData.duration || 180,
+        category: contentData.type || 'devotional',
+        tags: contentData.tags || [],
+        bibleReferences: contentData.bibleReferences || [],
         speaker: 'AI Generated',
         uploadedBy: userId,
         churchId: 1,
         phase: 'phase2',
         generationType: 'ai_generated',
+        voicePersona: contentData.voicePersona || 'pastor-david',
+        visualStyle: contentData.visualStyle || 'modern',
+        targetAudience: contentData.targetAudience || 'general',
         publishedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
         viewCount: 0,
         likeCount: 0,
         shareCount: 0,
