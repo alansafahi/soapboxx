@@ -45,6 +45,7 @@ import AudioRoutines from "@/pages/AudioRoutines";
 import AudioBibleDemo from "@/pages/AudioBibleDemo";
 import VideoLibrary from "@/pages/VideoLibrary";
 import FeatureCatalogPage from "@/pages/FeatureCatalogPage";
+import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -196,6 +197,7 @@ function AppRouter() {
               <Route path="/audio-bible" component={AudioBibleDemo} />
               <Route path="/video-library" component={VideoLibrary} />
               <Route path="/features" component={FeatureCatalogPage} />
+              <Route path="/role-features" component={RoleSpecificFeaturesPage} />
             </>
           )}
         </Switch>
