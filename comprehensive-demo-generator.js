@@ -210,7 +210,7 @@ export async function generateComprehensiveDemoData() {
         
         userData.push({
           id: uniqueId,
-          email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${userCounter}@demo-soapbox.com`,
+          email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${sessionId}.${userCounter}@demo-soapbox.com`,
           firstName,
           lastName,
           profileImageUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName}${lastName}${userCounter}`,
@@ -474,6 +474,11 @@ export async function generateComprehensiveDemoData() {
         });
       }
     });
+    // Debug: Log the first event data structure
+    if (eventData.length > 0) {
+      console.log('🔍 Sample event data structure:', JSON.stringify(eventData[0], null, 2));
+    }
+    
     const insertedEvents = await db.insert(events).values(eventData).returning();
     console.log(`✅ Created ${insertedEvents.length} events`);
 
@@ -508,7 +513,6 @@ export async function generateComprehensiveDemoData() {
           checkInType: getRandomElement(['Sunday Service', 'Daily Devotional', 'Prayer Time', 'Spiritual Check-In']),
           mood: getRandomElement(['grateful', 'peaceful', 'joyful', 'hopeful', 'content', 'blessed']),
           moodEmoji: getRandomElement(['😇', '😊', '🙏', '✨', '💝', '🌟']),
-          moodScore: Math.floor(Math.random() * 3) + 3, // 3-5 for positive moods
           notes: getRandomElement([
             'Feeling blessed today',
             'Grateful for God\'s provision',
