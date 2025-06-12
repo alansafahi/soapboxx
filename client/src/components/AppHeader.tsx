@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles, ChevronDown, ChevronRight, Shield, UserCog, Star } from "lucide-react";
+import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles, ChevronDown, ChevronRight, Shield, UserCog, Star, Share2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -80,7 +80,8 @@ export default function AppHeader() {
         { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
         { href: "/audio-routines", label: "Devotional Routines", icon: Headphones },
         { href: "/video-library", label: "Video Library", icon: PlayCircle },
-        { href: "/sermon-studio", label: "Sermon Studio", icon: Sparkles, roles: ["pastor", "lead_pastor", "church_admin"] }
+        { href: "/sermon-studio", label: "Sermon Studio", icon: Sparkles, roles: ["pastor", "lead_pastor", "church_admin"] },
+        { href: "/content-distribution", label: "Content Distribution", icon: Share2, roles: ["pastor", "lead_pastor", "church_admin"] }
       ]
     },
     {

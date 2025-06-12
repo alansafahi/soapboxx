@@ -1925,7 +1925,8 @@ Format as JSON with this structure:
 }
       `;
 
-      const socialCompletion = await openai.chat.completions.create({
+      const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const socialCompletion = await openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -1969,7 +1970,7 @@ Format as JSON with this structure:
 }
       `;
 
-      const emailCompletion = await openai.chat.completions.create({
+      const emailCompletion = await openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -2014,7 +2015,7 @@ Format as JSON with this structure:
 }
       `;
 
-      const studyCompletion = await openai.chat.completions.create({
+      const studyCompletion = await openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -2056,7 +2057,7 @@ Format as JSON with this structure:
 }
       `;
 
-      const bulletinCompletion = await openai.chat.completions.create({
+      const bulletinCompletion = await openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
