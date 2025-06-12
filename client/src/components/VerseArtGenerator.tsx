@@ -138,7 +138,19 @@ export default function VerseArtGenerator({ currentVerse }: VerseArtGeneratorPro
     if (!generatedArt?.imageUrl) return;
 
     try {
-      const response = await fetch(generatedArt.imageUrl);
+      // Use proxy endpoint to handle CORS issues
+      const response = await fetch(`/api/bible/download-verse-art`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl: generatedArt.imageUrl })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       
@@ -166,11 +178,11 @@ export default function VerseArtGenerator({ currentVerse }: VerseArtGeneratorPro
   const handleShare = () => {
     if (!generatedArt) return;
 
-    const shareText = `"${generatedArt.verseText}" - ${generatedArt.verseReference} 🙏 Created with SoapBox Super App`;
+    const shareText = `${generatedArt.verseReference} 🙏 #SoapBoxApp`;
     
     if (navigator.share) {
       navigator.share({
-        title: 'Beautiful Bible Verse Art',
+        title: 'Bible Verse Art',
         text: shareText,
         url: generatedArt.imageUrl
       });

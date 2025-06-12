@@ -838,6 +838,31 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Download verse art endpoint (proxy to handle CORS)
+  app.post('/api/bible/download-verse-art', isAuthenticated, async (req: any, res) => {
+    try {
+      const { imageUrl } = req.body;
+      
+      if (!imageUrl) {
+        return res.status(400).json({ message: "Image URL is required" });
+      }
+
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.statusText}`);
+      }
+
+      const buffer = await response.buffer();
+      
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Disposition', 'attachment; filename="verse-art.png"');
+      res.send(buffer);
+    } catch (error) {
+      console.error("Error downloading verse art:", error);
+      res.status(500).json({ message: "Failed to download verse art" });
+    }
+  });
+
   app.get('/api/bible/badges', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
