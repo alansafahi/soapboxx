@@ -717,6 +717,220 @@ const tourConfigs: InteractiveTourConfig[] = [
         ]
       }
     ]
+  },
+  {
+    role: "member",
+    displayName: "Church Member",
+    welcomeMessage: "Welcome to your spiritual home! Discover all the ways you can connect, grow, and serve.",
+    color: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    steps: [
+      {
+        id: "member_dashboard",
+        title: "Your Spiritual Dashboard",
+        description: "Your personal church community hub",
+        page: "/",
+        position: "center",
+        content: "Welcome to your personal church dashboard! Here you can see upcoming events, prayer requests, daily devotionals, and connect with your church family.",
+        tips: [
+          "Check in daily for spiritual growth",
+          "View upcoming church events and activities",
+          "Access daily devotionals and Bible reading",
+          "Connect with other church members"
+        ],
+        nextAction: "Let's explore community connections"
+      },
+      {
+        id: "community_connection",
+        title: "Connect with Your Church Family",
+        description: "Build meaningful relationships",
+        page: "/community",
+        selector: ".member-directory",
+        position: "right",
+        content: "Connect with other church members, join small groups, and build meaningful relationships within your church family.",
+        tips: [
+          "Browse member directory and profiles",
+          "Join small groups and Bible studies",
+          "Send encouragement and prayer requests"
+        ],
+        nextAction: "Now let's look at spiritual growth tools"
+      },
+      {
+        id: "spiritual_growth",
+        title: "Your Spiritual Growth Journey",
+        description: "Daily devotionals and Bible study",
+        page: "/bible",
+        selector: ".daily-devotional",
+        position: "left",
+        content: "Access daily devotionals, Bible reading plans, and track your spiritual growth journey with personalized content.",
+        tips: [
+          "Daily Bible reading and devotionals",
+          "Track your spiritual milestones",
+          "Join Bible study groups"
+        ]
+      }
+    ]
+  },
+  {
+    role: "new_member",
+    displayName: "New Member",
+    welcomeMessage: "Welcome to our church family! Let us help you get started on your journey with us.",
+    color: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    steps: [
+      {
+        id: "welcome_tour",
+        title: "Welcome to Your New Church Home!",
+        description: "Getting started in your church community",
+        page: "/",
+        position: "center",
+        content: "Welcome! We're so excited you've joined our church family. This tour will help you discover all the ways you can connect, grow, and get involved.",
+        tips: [
+          "Complete your member profile",
+          "Explore upcoming newcomer events",
+          "Connect with our welcome team",
+          "Discover ways to get involved"
+        ],
+        nextAction: "Let's set up your profile and preferences"
+      },
+      {
+        id: "profile_setup",
+        title: "Create Your Member Profile",
+        description: "Tell us about yourself",
+        page: "/profile",
+        selector: ".profile-setup",
+        position: "right",
+        content: "Complete your member profile to help others get to know you and find the best ways for you to connect and serve.",
+        tips: [
+          "Add your interests and background",
+          "Set your communication preferences",
+          "Upload a profile photo",
+          "Share your skills and talents"
+        ],
+        nextAction: "Now let's explore ways to get involved"
+      },
+      {
+        id: "getting_involved",
+        title: "Find Your Place to Serve",
+        description: "Discover ministry opportunities",
+        page: "/volunteer",
+        selector: ".ministry-opportunities",
+        position: "left",
+        content: "Explore the many ways you can serve and get involved in our church community. Find ministries that match your interests and gifts.",
+        tips: [
+          "Browse ministry opportunities",
+          "Sign up for volunteer roles",
+          "Join newcomer connection groups",
+          "Attend orientation events"
+        ]
+      }
+    ]
+  },
+  {
+    role: "volunteer",
+    displayName: "Volunteer",
+    welcomeMessage: "Thank you for your heart to serve! Discover tools to enhance your volunteer ministry.",
+    color: "bg-orange-100 text-orange-800 border-orange-200",
+    steps: [
+      {
+        id: "volunteer_dashboard",
+        title: "Your Volunteer Command Center",
+        description: "Manage your volunteer commitments",
+        page: "/volunteer",
+        position: "center",
+        content: "Your volunteer dashboard helps you track your service commitments, communicate with ministry leaders, and discover new opportunities to serve.",
+        tips: [
+          "View your volunteer schedule",
+          "Track your service hours",
+          "Communicate with ministry teams",
+          "Find additional ways to serve"
+        ],
+        nextAction: "Let's explore your current commitments"
+      },
+      {
+        id: "ministry_coordination",
+        title: "Ministry Team Coordination",
+        description: "Work effectively with your team",
+        page: "/volunteer",
+        selector: ".ministry-team",
+        position: "right",
+        content: "Coordinate with your ministry team, access training resources, and stay updated on ministry activities and needs.",
+        tips: [
+          "Team communication and updates",
+          "Access training materials",
+          "Submit service reports",
+          "Request time off or schedule changes"
+        ],
+        nextAction: "Now let's look at growth and training opportunities"
+      },
+      {
+        id: "volunteer_growth",
+        title: "Volunteer Training & Development",
+        description: "Grow in your service and skills",
+        page: "/volunteer",
+        selector: ".training-resources",
+        position: "left",
+        content: "Access training resources, track your volunteer development, and explore leadership opportunities within your ministry area.",
+        tips: [
+          "Complete required training modules",
+          "Track your volunteer milestones",
+          "Explore leadership development",
+          "Receive feedback and recognition"
+        ]
+      }
+    ]
+  },
+  {
+    role: "small_group_leader",
+    displayName: "Small Group Leader",
+    welcomeMessage: "Lead with wisdom and love! Access tools to nurture your small group community.",
+    color: "bg-teal-100 text-teal-800 border-teal-200",
+    steps: [
+      {
+        id: "group_leadership_center",
+        title: "Small Group Leadership Hub",
+        description: "Shepherd your group effectively",
+        page: "/groups",
+        position: "center",
+        content: "Your leadership center provides tools to manage your small group, track member growth, and access leadership resources.",
+        tips: [
+          "Manage group membership and attendance",
+          "Access Bible study resources",
+          "Track spiritual growth and prayer requests",
+          "Coordinate group activities and events"
+        ],
+        nextAction: "Let's explore member care tools"
+      },
+      {
+        id: "member_care",
+        title: "Caring for Your Group Members",
+        description: "Pastoral care and support",
+        page: "/groups",
+        selector: ".member-care",
+        position: "right",
+        content: "Use pastoral care tools to track member needs, manage prayer requests, and provide spiritual support to your group.",
+        tips: [
+          "Track member spiritual journeys",
+          "Manage confidential prayer requests",
+          "Coordinate care and support",
+          "Access counseling resources"
+        ],
+        nextAction: "Now let's look at Bible study resources"
+      },
+      {
+        id: "study_resources",
+        title: "Bible Study & Teaching Tools",
+        description: "Lead engaging Bible studies",
+        page: "/groups",
+        selector: ".study-materials",
+        position: "left",
+        content: "Access comprehensive Bible study materials, teaching resources, and tools to lead engaging and meaningful group discussions.",
+        tips: [
+          "Access curated study materials",
+          "Prepare interactive discussions",
+          "Track group progress through studies",
+          "Connect with other group leaders"
+        ]
+      }
+    ]
   }
 ];
 
