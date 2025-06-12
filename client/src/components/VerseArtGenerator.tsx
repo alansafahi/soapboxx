@@ -74,6 +74,60 @@ export default function VerseArtGenerator({ currentVerse }: VerseArtGeneratorPro
   const [fontStyle, setFontStyle] = useState('elegant');
   const [colorScheme, setColorScheme] = useState('warm');
   const [generatedArt, setGeneratedArt] = useState<VerseArtData | null>(null);
+  const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
+
+  // Function to detect if input is a scripture reference
+  const isScriptureReference = (text: string): boolean => {
+    // Pattern matches: John 3:16, 1 John 3:16, 1st John 3:16, I John 3:16, etc.
+    const scripturePattern = /^(1st?|2nd?|3rd?|I{1,3}|1|2|3)?\s*[A-Za-z]+\s+\d+:\d+(-\d+)?$/;
+    return scripturePattern.test(text.trim());
+  };
+
+  // Verse lookup mutation
+  const verseLookupMutation = useMutation({
+    mutationFn: async (reference: string) => {
+      const response = await fetch("/api/bible/lookup-verse", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reference: reference.trim() })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to lookup verse');
+      }
+      
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      setVerseText(data.text);
+      toast({
+        title: "Verse Found",
+        description: `Auto-populated verse text for ${verseReference}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Verse Not Found",
+        description: error.message || "Could not find this verse. Please enter text manually.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle reference input change with auto-lookup
+  const handleReferenceChange = (value: string) => {
+    setVerseReference(value);
+    
+    // Auto-lookup if it looks like a scripture reference
+    if (isScriptureReference(value) && value !== verseReference) {
+      setIsLookingUpVerse(true);
+      verseLookupMutation.mutate(value);
+      setIsLookingUpVerse(false);
+    }
+  };
 
   // Generate verse art mutation
   const generateArtMutation = useMutation({
@@ -227,12 +281,23 @@ export default function VerseArtGenerator({ currentVerse }: VerseArtGeneratorPro
               <label className="text-sm font-medium text-gray-700 mb-1 block">
                 Bible Verse Reference
               </label>
-              <Input
-                value={verseReference}
-                onChange={(e) => setVerseReference(e.target.value)}
-                placeholder="e.g., John 3:16, Psalm 23:1"
-                className="w-full"
-              />
+              <div className="relative">
+                <Input
+                  value={verseReference}
+                  onChange={(e) => handleReferenceChange(e.target.value)}
+                  placeholder="e.g., John 3:16, Psalm 23:1"
+                  className="w-full"
+                  disabled={verseLookupMutation.isPending}
+                />
+                {verseLookupMutation.isPending && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin h-4 w-4 border-2 border-purple-600 border-t-transparent rounded-full" />
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Enter a scripture reference like "John 13:4" to auto-populate the verse text
+              </p>
             </div>
             
             <div>
