@@ -722,13 +722,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNearbyChurches(lat?: number, lng?: number, limit: number = 10): Promise<Church[]> {
-    // For simplicity, just return churches ordered by rating if no coordinates provided
+    // For simplicity, just return churches ordered by creation date if no coordinates provided
     if (!lat || !lng) {
       return await db
         .select()
         .from(churches)
         .where(eq(churches.isActive, true))
-        .orderBy(desc(churches.rating))
+        .orderBy(desc(churches.createdAt))
         .limit(limit);
     }
     
@@ -737,7 +737,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(churches)
       .where(eq(churches.isActive, true))
-      .orderBy(desc(churches.rating))
+      .orderBy(desc(churches.createdAt))
       .limit(limit);
   }
 
