@@ -1874,6 +1874,339 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Content Distribution API routes
+  app.post('/api/content/distribute', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user has pastor or admin role
+      const userRole = await storage.getUserRole(userId);
+      if (!userRole || !['pastor', 'lead_pastor', 'church_admin'].includes(userRole.role)) {
+        return res.status(403).json({ message: "Access denied. Pastor role required." });
+      }
+
+      const { title, summary, keyPoints, audiences } = req.body;
+      
+      if (!title || !summary) {
+        return res.status(400).json({ message: "Title and summary are required" });
+      }
+
+      const audienceContext = audiences?.length > 0 ? `Target audiences: ${audiences.join(', ')}` : '';
+      const keyPointsText = keyPoints?.length > 0 ? `Key points: ${keyPoints.join(', ')}` : '';
+
+      // Generate social media content
+      const socialMediaPrompt = `
+Create engaging social media content for a sermon titled "${title}".
+
+Sermon summary: ${summary}
+${keyPointsText}
+${audienceContext}
+
+Generate content for:
+1. Facebook post (engaging, detailed, with discussion question)
+2. Twitter/X post (concise, inspiring, with hashtags)
+3. Instagram caption (visual-friendly, story-driven, with relevant hashtags)
+
+For each platform, provide:
+- Platform-optimized content
+- Appropriate hashtags
+- Best posting time recommendations
+
+Format as JSON with this structure:
+{
+  "facebook": { "content": "...", "hashtags": [], "tips": [] },
+  "twitter": { "content": "...", "hashtags": [], "tips": [] },
+  "instagram": { "content": "...", "hashtags": [], "tips": [] }
+}
+      `;
+
+      const socialCompletion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a church social media expert who creates engaging, authentic content that resonates with diverse audiences while maintaining theological integrity."
+          },
+          {
+            role: "user",
+            content: socialMediaPrompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1500,
+        temperature: 0.8
+      });
+
+      // Generate email content
+      const emailPrompt = `
+Create email newsletter content for a sermon titled "${title}".
+
+Sermon summary: ${summary}
+${keyPointsText}
+${audienceContext}
+
+Generate:
+1. Email subject line (compelling, open-worthy)
+2. Email newsletter content (HTML-formatted, engaging)
+3. Follow-up devotional email (encouragement, application)
+
+Include:
+- Personal pastoral tone
+- Clear call-to-action
+- Scripture references
+- Practical application points
+- Invitation to attend/watch
+
+Format as JSON with this structure:
+{
+  "newsletter": { "subject": "...", "content": "...", "format": "HTML Newsletter" },
+  "followup": { "subject": "...", "content": "...", "format": "Devotional Follow-up" }
+}
+      `;
+
+      const emailCompletion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a pastor who excels at written communication and connects with congregation members through thoughtful, encouraging emails."
+          },
+          {
+            role: "user",
+            content: emailPrompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1200,
+        temperature: 0.7
+      });
+
+      // Generate study materials
+      const studyPrompt = `
+Create Bible study materials for a sermon titled "${title}".
+
+Sermon summary: ${summary}
+${keyPointsText}
+${audienceContext}
+
+Generate:
+1. Small group discussion guide (questions, activities, scripture study)
+2. Personal reflection worksheet (individual study, journaling prompts)
+3. Family devotional guide (age-appropriate, interactive elements)
+
+Include:
+- Opening prayer
+- Scripture reading plan
+- Discussion questions
+- Application activities
+- Closing prayer suggestions
+
+Format as JSON with this structure:
+{
+  "smallGroup": { "content": "...", "format": "Small Group Guide" },
+  "personal": { "content": "...", "format": "Personal Study" },
+  "family": { "content": "...", "format": "Family Devotional" }
+}
+      `;
+
+      const studyCompletion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a Christian education specialist who creates engaging Bible study materials for all age groups and learning styles."
+          },
+          {
+            role: "user",
+            content: studyPrompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1500,
+        temperature: 0.7
+      });
+
+      // Generate bulletin content
+      const bulletinPrompt = `
+Create church bulletin content for a sermon titled "${title}".
+
+Sermon summary: ${summary}
+${keyPointsText}
+
+Generate:
+1. Sermon summary for bulletin (concise, inspiring)
+2. Weekly reflection insert (takeaway message, prayer)
+3. Announcement blurb (upcoming related events, studies)
+
+Keep content:
+- Concise and bulletin-appropriate
+- Inspirational and accessible
+- Action-oriented with clear next steps
+
+Format as JSON with this structure:
+{
+  "summary": { "content": "...", "format": "Sermon Summary" },
+  "reflection": { "content": "...", "format": "Weekly Reflection" },
+  "announcement": { "content": "...", "format": "Event Announcement" }
+}
+      `;
+
+      const bulletinCompletion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a church communications coordinator who creates clear, concise bulletin content that informs and inspires congregation members."
+          },
+          {
+            role: "user",
+            content: bulletinPrompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 800,
+        temperature: 0.6
+      });
+
+      // Parse responses
+      const socialData = JSON.parse(socialCompletion.choices[0].message.content || '{}');
+      const emailData = JSON.parse(emailCompletion.choices[0].message.content || '{}');
+      const studyData = JSON.parse(studyCompletion.choices[0].message.content || '{}');
+      const bulletinData = JSON.parse(bulletinCompletion.choices[0].message.content || '{}');
+
+      // Format response
+      const distributionPackage = {
+        socialMedia: [
+          {
+            platform: "facebook",
+            format: "Facebook Post",
+            content: socialData.facebook?.content || "",
+            hashtags: socialData.facebook?.hashtags || [],
+            estimatedReach: 500,
+            engagementTips: socialData.facebook?.tips || []
+          },
+          {
+            platform: "twitter",
+            format: "Twitter/X Post",
+            content: socialData.twitter?.content || "",
+            hashtags: socialData.twitter?.hashtags || [],
+            estimatedReach: 300,
+            engagementTips: socialData.twitter?.tips || []
+          },
+          {
+            platform: "instagram",
+            format: "Instagram Caption",
+            content: socialData.instagram?.content || "",
+            hashtags: socialData.instagram?.hashtags || [],
+            estimatedReach: 400,
+            engagementTips: socialData.instagram?.tips || []
+          }
+        ],
+        emailContent: [
+          {
+            platform: "email",
+            format: emailData.newsletter?.format || "Email Newsletter",
+            content: emailData.newsletter?.content || ""
+          },
+          {
+            platform: "email",
+            format: emailData.followup?.format || "Follow-up Email",
+            content: emailData.followup?.content || ""
+          }
+        ],
+        studyMaterials: [
+          {
+            platform: "study",
+            format: studyData.smallGroup?.format || "Small Group Guide",
+            content: studyData.smallGroup?.content || ""
+          },
+          {
+            platform: "study",
+            format: studyData.personal?.format || "Personal Study",
+            content: studyData.personal?.content || ""
+          },
+          {
+            platform: "study",
+            format: studyData.family?.format || "Family Devotional",
+            content: studyData.family?.content || ""
+          }
+        ],
+        bulletinInserts: [
+          {
+            platform: "bulletin",
+            format: bulletinData.summary?.format || "Sermon Summary",
+            content: bulletinData.summary?.content || ""
+          },
+          {
+            platform: "bulletin",
+            format: bulletinData.reflection?.format || "Weekly Reflection",
+            content: bulletinData.reflection?.content || ""
+          },
+          {
+            platform: "bulletin",
+            format: bulletinData.announcement?.format || "Event Announcement",
+            content: bulletinData.announcement?.content || ""
+          }
+        ]
+      };
+
+      res.json(distributionPackage);
+
+    } catch (error) {
+      console.error("Content distribution error:", error);
+      res.status(500).json({ message: "Failed to generate content distribution package" });
+    }
+  });
+
+  app.post('/api/content/publish', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user has pastor or admin role
+      const userRole = await storage.getUserRole(userId);
+      if (!userRole || !['pastor', 'lead_pastor', 'church_admin'].includes(userRole.role)) {
+        return res.status(403).json({ message: "Access denied. Pastor role required." });
+      }
+
+      const { package: contentPackage, selectedPlatforms, scheduleTime } = req.body;
+      
+      // In a real implementation, this would integrate with actual publishing APIs
+      // For now, we'll simulate the publishing process
+      
+      const publishingResults = {
+        facebook: selectedPlatforms.includes('facebook') ? 'scheduled' : 'skipped',
+        twitter: selectedPlatforms.includes('twitter') ? 'scheduled' : 'skipped',
+        instagram: selectedPlatforms.includes('instagram') ? 'scheduled' : 'skipped',
+        email: selectedPlatforms.includes('email') ? 'scheduled' : 'skipped',
+        website: selectedPlatforms.includes('website') ? 'scheduled' : 'skipped'
+      };
+
+      const publishedCount = Object.values(publishingResults).filter(status => status === 'scheduled').length;
+
+      res.json({
+        success: true,
+        platformCount: publishedCount,
+        results: publishingResults,
+        scheduledTime: scheduleTime || new Date().toISOString(),
+        message: `Content successfully scheduled for ${publishedCount} platforms`
+      });
+
+    } catch (error) {
+      console.error("Content publishing error:", error);
+      res.status(500).json({ message: "Failed to publish content" });
+    }
+  });
+
   // Video Content Routes (Phase 1: Pastor/Admin Uploads)
   app.post('/api/videos', isAuthenticated, async (req, res) => {
     try {

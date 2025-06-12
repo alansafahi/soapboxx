@@ -47,6 +47,7 @@ import VideoLibrary from "@/pages/VideoLibrary";
 import FeatureCatalogPage from "@/pages/FeatureCatalogPage";
 import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
 import SermonStudioPage from "@/pages/SermonStudioPage";
+import ContentDistributionPage from "@/pages/ContentDistributionPage";
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -200,6 +201,7 @@ function AppRouter() {
               <Route path="/features" component={FeatureCatalogPage} />
               <Route path="/role-features" component={RoleSpecificFeaturesPage} />
               <Route path="/sermon-studio" component={SermonStudioPage} />
+              <Route path="/content-distribution" component={ContentDistributionPage} />
             </>
           )}
         </Switch>
