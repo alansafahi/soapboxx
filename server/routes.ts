@@ -6,6 +6,53 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
 import multer from "multer";
 import path from "path";
+import OpenAI from "openai";
+
+// AI-powered post categorization
+async function categorizePost(content: string): Promise<{ type: 'discussion' | 'prayer' | 'announcement' | 'share', title?: string }> {
+  try {
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system", 
+          content: "You are a spiritual community content analyzer. Categorize posts into one of these types based on content: 'prayer' (prayer requests, asking for prayers), 'announcement' (church events, important news), 'discussion' (questions, conversations, Bible study), or 'share' (testimonies, photos, inspiration, general sharing). Also generate an appropriate title if it's an announcement. Respond with JSON."
+        },
+        {
+          role: "user",
+          content: `Categorize this post: "${content}"`
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 150
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      type: result.type || 'share',
+      title: result.title || undefined
+    };
+  } catch (error) {
+    console.error('AI categorization failed:', error);
+    // Fallback to simple keyword detection
+    const lowerContent = content.toLowerCase();
+    
+    if (lowerContent.includes('pray') || lowerContent.includes('prayer') || lowerContent.includes('please') && lowerContent.includes('help')) {
+      return { type: 'prayer' };
+    } else if (lowerContent.includes('announcement') || lowerContent.includes('event') || lowerContent.includes('notice')) {
+      return { type: 'announcement', title: 'Community Announcement' };
+    } else if (lowerContent.includes('what') || lowerContent.includes('how') || lowerContent.includes('why') || lowerContent.includes('discuss')) {
+      return { type: 'discussion' };
+    } else {
+      return { type: 'share' };
+    }
+  }
+}
 
 // Helper function to check for new role assignments
 async function checkForNewRoleAssignment(userId: string, currentRole: string): Promise<boolean> {
@@ -2015,11 +2062,15 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.post("/api/feed/posts", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
-      const { type, content, title } = req.body;
+      const { content } = req.body;
       
       if (!content || !content.trim()) {
         return res.status(400).json({ message: "Post content is required" });
       }
+      
+      // Use AI to categorize the post
+      const categorization = await categorizePost(content.trim());
+      const { type, title } = categorization;
       
       let post;
       if (type === 'discussion') {
@@ -2049,9 +2100,18 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
           category: 'announcement',
           isPublic: true
         });
+      } else { // type === 'share'
+        post = await storage.createDiscussion({
+          title: title || 'Community Share',
+          content: content.trim(),
+          authorId: userId,
+          churchId: null,
+          category: 'share',
+          isPublic: true
+        });
       }
       
-      console.log(`Created ${type} post for user ${userId}:`, post?.id);
+      console.log(`Created AI-categorized ${type} post for user ${userId}:`, post?.id);
       res.json(post);
     } catch (error) {
       console.error("Error creating feed post:", error);
