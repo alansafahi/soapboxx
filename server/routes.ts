@@ -98,15 +98,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has platform roles (SoapBox Owner, System Admin, Support Agent)
       const platformRoles = ['soapbox_owner', 'system_admin', 'support_agent'];
+      const memberRoles = ['member', 'new_member', 'volunteer', 'small_group_leader'];
       
       // Get user's role from user-church relationship
       const userChurches = await storage.getUserChurches(userId);
       
-      // Check if user has platform-wide administrative roles
-      // For demonstration purposes, we'll simulate platform role assignment
+      // Determine user role based on various factors
       let userRole = 'member'; // Default role
       
-      // Temporary demo: Check if user email indicates they should have platform role
+      // Check for platform roles first (for admin users)
       if (user.email && user.email.includes('admin')) {
         userRole = 'system_admin';
       } else if (user.email && user.email.includes('owner')) {
@@ -114,15 +114,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (user.email && user.email.includes('support')) {
         userRole = 'support_agent';
       } else {
-        // For testing, let's simulate a platform role for demonstration
-        userRole = 'system_admin'; // This will trigger the tour for testing
+        // For church members, determine role based on profile or church relationships
+        if (userChurches && userChurches.length > 0) {
+          // Use church role if available
+          const churchRole = userChurches[0].roleId;
+          // Map church role IDs to tour role names (simplified for demo)
+          if (churchRole === 2) userRole = 'volunteer';
+          else if (churchRole === 3) userRole = 'small_group_leader';
+          else userRole = 'member';
+        } else {
+          // For new users, check if they just completed onboarding
+          const isRecentUser = user.createdAt && Date.now() - new Date(user.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
+          userRole = isRecentUser ? 'new_member' : 'member';
+        }
       }
       
       const isPlatformRole = platformRoles.includes(userRole);
+      const isMemberRole = memberRoles.includes(userRole);
       
-      // Check if user needs onboarding tour
+      // Check if user needs tour (only show after onboarding is complete)
+      const hasCompletedOnboarding = user.hasCompletedOnboarding;
       const tourCompletion = await storage.getTourCompletion(userId, userRole);
-      const shouldShowTour = isPlatformRole && (!tourCompletion || !tourCompletion.completedAt);
+      const hasCompletedTour = tourCompletion && tourCompletion.completedAt;
+      
+      // Show tour if user has completed onboarding, hasn't seen the tour, and has a valid role
+      const shouldShowTour = hasCompletedOnboarding && !hasCompletedTour && (isPlatformRole || isMemberRole);
       
       res.json({
         shouldShowTour,

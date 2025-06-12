@@ -104,13 +104,16 @@ function AppRouter() {
     completeTour 
   } = useRoleBasedTour();
 
-  // Show personalized tour when detected by the role-based system
+  // Show personalized tour ONLY after all onboarding is complete
   useEffect(() => {
-    if (isAuthenticated && shouldShowTour && !needsOnboarding && !show2FAOnboarding && !forceHideOnboarding) {
+    const hasCompletedOnboarding = (user as any)?.has_completed_onboarding;
+    const allOnboardingComplete = hasCompletedOnboarding && !show2FAOnboarding && !needsOnboarding;
+    
+    if (isAuthenticated && shouldShowTour && allOnboardingComplete && !forceHideOnboarding) {
       setShowPersonalizedTour(true);
       setUserRole(detectedUserRole);
     }
-  }, [isAuthenticated, shouldShowTour, detectedUserRole, needsOnboarding, show2FAOnboarding, forceHideOnboarding]);
+  }, [isAuthenticated, shouldShowTour, detectedUserRole, needsOnboarding, show2FAOnboarding, forceHideOnboarding, user]);
   
   // Debug logging for onboarding state
   console.log("Onboarding check:", {
@@ -118,7 +121,10 @@ function AppRouter() {
     hasUser: !!user,
     hasCompletedOnboarding: (user as any)?.has_completed_onboarding,
     forceHideOnboarding,
-    needsOnboarding
+    needsOnboarding,
+    show2FAOnboarding,
+    shouldShowTour,
+    showPersonalizedTour
   });
 
   // Show loading spinner during initial auth check
