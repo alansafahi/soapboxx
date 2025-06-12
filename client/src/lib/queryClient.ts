@@ -71,19 +71,22 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes for better caching
-      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      staleTime: 3 * 60 * 1000, // 3 minutes for optimal balance
+      gcTime: 15 * 60 * 1000, // 15 minutes for better memory management
       retry: (failureCount, error: any) => {
         // Don't retry on auth errors or client errors
         if (error?.message?.includes('401') || error?.message?.includes('40')) {
           return false;
         }
-        return failureCount < 2; // Retry only twice for server errors
+        return failureCount < 1; // Single retry for performance
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: (attemptIndex) => Math.min(750 * 2 ** attemptIndex, 3000), // Faster retries
+      networkMode: 'online', // Only fetch when online
     },
     mutations: {
-      retry: false,
+      retry: 1, // Single retry for mutations
+      retryDelay: 1000,
+      networkMode: 'online',
     },
   },
 });
