@@ -2296,29 +2296,29 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Demo Data Generation Routes
-  app.post('/api/demo/generate-data', async (req, res) => {
-    try {
-      console.log('Starting comprehensive demo data generation...');
+  // Demo Data Generation Routes - DISABLED IN PRODUCTION
+  // app.post('/api/demo/generate-data', async (req, res) => {
+  //   try {
+  //     console.log('Starting comprehensive demo data generation...');
       
-      // Import and run the comprehensive demo generator
-      const { generateComprehensiveDemoData } = await import('../comprehensive-demo-generator.js');
-      await generateComprehensiveDemoData();
+  //     // Import and run the comprehensive demo generator
+  //     const { generateComprehensiveDemoData } = await import('../comprehensive-demo-generator.js');
+  //     await generateComprehensiveDemoData();
       
-      res.json({ 
-        success: true, 
-        message: 'Demo data generated successfully',
-        summary: 'Created comprehensive demo environment with churches, users, discussions, prayers, events, and more'
-      });
-    } catch (error: any) {
-      console.error('Demo data generation error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Failed to generate demo data',
-        error: error?.message || 'Unknown error'
-      });
-    }
-  });
+  //     res.json({ 
+  //       success: true, 
+  //       message: 'Demo data generated successfully',
+  //       summary: 'Created comprehensive demo environment with churches, users, discussions, prayers, events, and more'
+  //     });
+  //   } catch (error: any) {
+  //     console.error('Demo data generation error:', error);
+  //     res.status(500).json({ 
+  //       success: false, 
+  //       message: 'Failed to generate demo data',
+  //       error: error?.message || 'Unknown error'
+  //     });
+  //   }
+  // });
 
   // Demo API endpoints for isolated demo environment
   app.get('/api/health', async (req, res) => {
