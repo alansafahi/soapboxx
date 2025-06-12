@@ -95,7 +95,8 @@ export default function AppHeader() {
       label: "Account",
       items: [
         { href: "/donation-demo", label: "Donations", icon: DollarSign },
-        { href: "/profile", label: "Profile", icon: User }
+        { href: "/profile", label: "Profile", icon: User },
+        { href: "/features", label: "Feature Catalog", icon: Star }
       ]
     }
   ];
