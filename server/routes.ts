@@ -348,8 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mood,
         moodScore,
         moodEmoji,
-        notes,
-        shareWithStaff: shareWithStaff || false
+        notes
       });
 
       // Generate personalized content if requested
@@ -367,10 +366,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (personalizedContent) {
             await storage.savePersonalizedContent({
               userId,
-              moodCheckinId: moodCheckin.id,
+              checkInId: moodCheckin.id,
               contentType: 'mood_based',
-              recommendations: personalizedContent.recommendations,
-              generatedAt: new Date()
+              title: 'AI-Generated Spiritual Guidance',
+              content: JSON.stringify(personalizedContent)
             });
           }
         } catch (aiError) {

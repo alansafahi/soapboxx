@@ -148,6 +148,8 @@ import {
   userInspirationPreferences,
   userInspirationHistory,
   userJourneyPreferences,
+  moodCheckins,
+  personalizedContent,
   type DailyInspiration,
   type UserInspirationPreference,
   type InsertUserInspirationPreference,
@@ -411,12 +413,14 @@ export interface IStorage {
   createNotificationDelivery(data: InsertNotificationDelivery): Promise<NotificationDelivery>;
   updateNotificationDelivery(id: number, data: Partial<InsertNotificationDelivery>): Promise<NotificationDelivery>;
 
-  // Check-in system operations
-  createCheckIn(checkIn: InsertCheckIn): Promise<CheckIn>;
-  getUserCheckIns(userId: string, limit?: number): Promise<CheckIn[]>;
-  getUserDailyCheckIn(userId: string, date?: Date): Promise<CheckIn | undefined>;
-  getUserCheckInStreak(userId: string): Promise<number>;
-  getChurchCheckIns(churchId: number, date?: Date): Promise<(CheckIn & { user: User })[]>;
+  // Mood check-in operations
+  createMoodCheckin(moodCheckin: InsertMoodCheckin): Promise<MoodCheckin>;
+  getRecentMoodCheckins(userId: string, limit?: number): Promise<MoodCheckin[]>;
+  getMoodInsights(userId: string, days?: number): Promise<any>;
+  
+  // Personalized content operations
+  savePersonalizedContent(content: InsertPersonalizedContent): Promise<PersonalizedContent>;
+  getPersonalizedContent(contentId: string): Promise<PersonalizedContent | undefined>;
   
   // QR code operations
   createQrCode(qrCode: InsertQrCode): Promise<QrCode>;
@@ -4288,6 +4292,81 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(communityGroups.id, memberData.groupId));
+  }
+
+  // Mood check-in operations
+  async createMoodCheckin(moodCheckin: InsertMoodCheckin): Promise<MoodCheckin> {
+    const [newMoodCheckin] = await db
+      .insert(moodCheckins)
+      .values(moodCheckin)
+      .returning();
+    return newMoodCheckin;
+  }
+
+  async getRecentMoodCheckins(userId: string, limit: number = 10): Promise<MoodCheckin[]> {
+    return await db
+      .select()
+      .from(moodCheckins)
+      .where(eq(moodCheckins.userId, userId))
+      .orderBy(desc(moodCheckins.createdAt))
+      .limit(limit);
+  }
+
+  async getMoodInsights(userId: string, days: number = 30): Promise<any> {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const moodData = await db
+      .select({
+        mood: moodCheckins.mood,
+        moodScore: moodCheckins.moodScore,
+        createdAt: moodCheckins.createdAt,
+      })
+      .from(moodCheckins)
+      .where(
+        and(
+          eq(moodCheckins.userId, userId),
+          gte(moodCheckins.createdAt, startDate)
+        )
+      )
+      .orderBy(desc(moodCheckins.createdAt));
+
+    // Calculate insights
+    const totalCheckins = moodData.length;
+    const averageMood = totalCheckins > 0 
+      ? moodData.reduce((sum, entry) => sum + (entry.moodScore || 3), 0) / totalCheckins 
+      : 3;
+    
+    const moodCounts = moodData.reduce((acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      totalCheckins,
+      averageMood: Math.round(averageMood * 10) / 10,
+      moodCounts,
+      recentMoods: moodData.slice(0, 7),
+      period: `${days} days`
+    };
+  }
+
+  // Personalized content operations
+  async savePersonalizedContent(content: InsertPersonalizedContent): Promise<PersonalizedContent> {
+    const [newContent] = await db
+      .insert(personalizedContent)
+      .values(content)
+      .returning();
+    return newContent;
+  }
+
+  async getPersonalizedContent(contentId: string): Promise<PersonalizedContent | undefined> {
+    const [content] = await db
+      .select()
+      .from(personalizedContent)
+      .where(eq(personalizedContent.id, parseInt(contentId)))
+      .limit(1);
+    return content;
   }
 
   async leaveCommunityGroup(userId: string, groupId: number): Promise<void> {

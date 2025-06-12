@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, BookOpen, Pray, Brain } from "lucide-react";
+import { Heart, BookOpen, Brain } from "lucide-react";
 
 interface MoodCheckInProps {
   onComplete?: () => void;

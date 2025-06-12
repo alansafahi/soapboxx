@@ -44,7 +44,9 @@ import {
   MessageCircle,
   TrendingUp,
   Star,
+  Brain,
 } from "lucide-react";
+import MoodCheckIn from "@/components/MoodCheckIn";
 
 interface CheckIn {
   id: number;
@@ -98,6 +100,7 @@ export default function CheckInSystem() {
 
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
+  const [showMoodCheckIn, setShowMoodCheckIn] = useState(false);
   const [selectedType, setSelectedType] = useState("Spiritual Check-In");
   const [selectedMood, setSelectedMood] = useState("");
   const [notes, setNotes] = useState("");
