@@ -1,10 +1,26 @@
 import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+// Enable response compression for better performance
+app.use(compression({
+  level: 6, // Balanced compression
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    // Don't compress responses with this request header
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Fallback to standard filter function
+    return compression.filter(req, res);
+  }
+}));
+
+app.use(express.json({ limit: '10mb' })); // Reduced from 50mb
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 // Serve static files from attached_assets directory
 app.use('/attached_assets', express.static('attached_assets'));

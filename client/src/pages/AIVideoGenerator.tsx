@@ -66,11 +66,10 @@ export default function AIVideoGenerator() {
       setIsGenerating(true);
       return await apiRequest('/api/videos/ai-generate', {
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           ...requestData,
           churchId: 1, // Default church for demo
-        }),
-        headers: { 'Content-Type': 'application/json' },
+        },
       });
     },
     onSuccess: (data) => {
@@ -98,8 +97,7 @@ export default function AIVideoGenerator() {
     mutationFn: async (content: any) => {
       return await apiRequest('/api/videos/ai-create', {
         method: 'POST',
-        body: JSON.stringify(content),
-        headers: { 'Content-Type': 'application/json' },
+        body: content,
       });
     },
     onSuccess: () => {
