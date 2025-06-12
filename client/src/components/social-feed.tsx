@@ -312,6 +312,8 @@ export default function SocialFeed() {
   };
 
   const handleCommentPost = (post: FeedPost) => {
+    console.log('handleCommentPost called with:', { postId: post.id, postType: post.type });
+    
     if (post.type !== 'discussion') {
       toast({
         title: "Comments not available",
@@ -323,6 +325,7 @@ export default function SocialFeed() {
     
     const content = prompt("Enter your comment:");
     if (content && content.trim()) {
+      console.log('Making comment request:', { postId: post.id, content: content.trim() });
       commentMutation.mutate({
         postId: post.id,
         postType: post.type,
@@ -332,6 +335,7 @@ export default function SocialFeed() {
   };
 
   const handleSharePost = (post: FeedPost) => {
+    console.log('handleSharePost called with:', { postId: post.id, postType: post.type });
     sharePostMutation.mutate({
       postId: post.id,
       postType: post.type
@@ -551,6 +555,11 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleCommentPost(post);
+                    }}
                     className="text-gray-500 hover:text-blue-600 transition-colors"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
@@ -560,6 +569,11 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSharePost(post);
+                    }}
                     className="text-gray-500 hover:text-green-600 transition-colors"
                   >
                     <Share2 className="w-4 h-4 mr-2" />
