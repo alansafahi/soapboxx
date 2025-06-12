@@ -6,6 +6,24 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import multer from "multer";
 import path from "path";
 
+// Helper function to check for new role assignments
+async function checkForNewRoleAssignment(userId: string, currentRole: string): Promise<boolean> {
+  try {
+    // For now, check if user is new (created within last 30 days) or if they haven't seen this role's tour
+    const user = await storage.getUser(userId);
+    const isNewUser = user && user.createdAt && Date.now() - new Date(user.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000;
+    
+    // Check if tour has been completed for this role
+    const tourCompletion = await storage.getTourCompletion(userId, currentRole);
+    const hasNotSeenTour = !tourCompletion || !tourCompletion.completedAt;
+    
+    return Boolean(isNewUser || hasNotSeenTour);
+  } catch (error) {
+    console.error("Error checking role assignments:", error);
+    return true; // Default to showing tour if check fails
+  }
+}
+
 function getFileType(mimetype: string): string {
   if (mimetype.startsWith('image/')) return 'image';
   if (mimetype.startsWith('video/')) return 'video';
@@ -137,14 +155,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tourCompletion = await storage.getTourCompletion(userId, userRole);
       const hasCompletedTour = tourCompletion && tourCompletion.completedAt;
       
-      // Show tour if user has completed onboarding, hasn't seen the tour, and has a valid role
-      const shouldShowTour = hasCompletedOnboarding && !hasCompletedTour && (isPlatformRole || isMemberRole);
+      // Check for new role assignment by looking at role assignment history
+      const hasNewRoleAssignment = await checkForNewRoleAssignment(userId, userRole);
+      
+      // Show tour only if:
+      // 1. User has completed onboarding
+      // 2. Haven't completed tour for this role
+      // 3. Has a valid role
+      // 4. Either has new role assignment OR is a basic member (always eligible)
+      const shouldShowTour = hasCompletedOnboarding && 
+                            !hasCompletedTour && 
+                            (isPlatformRole || isMemberRole) &&
+                            (hasNewRoleAssignment || userRole === 'member' || userRole === 'new_member');
       
       res.json({
         shouldShowTour,
         userRole,
         isNewUser: !user.createdAt || Date.now() - new Date(user.createdAt).getTime() < 24 * 60 * 60 * 1000,
-        hasNewRoleAssignment: shouldShowTour
+        hasNewRoleAssignment
       });
     } catch (error) {
       console.error("Error checking tour status:", error);
