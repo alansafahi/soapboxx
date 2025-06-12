@@ -584,6 +584,54 @@ export default function SocialFeed() {
                   </Button>
                 </div>
               </div>
+
+              {/* Comments Section */}
+              {post.comments && post.comments.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <div className="space-y-3">
+                    {post.comments.slice(0, 3).map((comment: any) => (
+                      <div key={comment.id} className="flex space-x-3">
+                        <Avatar className="h-6 w-6 flex-shrink-0">
+                          <AvatarImage src={comment.author?.profileImage} />
+                          <AvatarFallback className="bg-[#5A2671] text-white text-xs">
+                            {comment.author?.name?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {comment.author?.name || 'Anonymous'}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatDistanceToNow(new Date(comment.createdAt))} ago
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                              {comment.content}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {post.comments.length > 3 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleCommentPost(post);
+                        }}
+                        className="text-[#5A2671] hover:text-[#4A1F5C] text-sm"
+                      >
+                        View all {post.commentCount} comments
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )) : (

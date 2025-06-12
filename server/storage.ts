@@ -2301,11 +2301,53 @@ export class DatabaseStorage implements IStorage {
       const bookmarkedDiscussions = new Set(discussionBookmarksData.map(b => b.discussionId));
       const likedDiscussions = new Set(discussionLikesData.map(l => l.discussionId));
 
+      // Bulk fetch comments for discussions
+      const discussionCommentsData = discussionIds.length > 0 ? await db
+        .select({
+          id: discussionComments.id,
+          discussionId: discussionComments.discussionId,
+          content: discussionComments.content,
+          authorId: discussionComments.authorId,
+          createdAt: discussionComments.createdAt,
+          authorFirstName: users.firstName,
+          authorLastName: users.lastName,
+          authorEmail: users.email,
+          authorProfileImage: users.profileImageUrl,
+        })
+        .from(discussionComments)
+        .leftJoin(users, eq(discussionComments.authorId, users.id))
+        .where(inArray(discussionComments.discussionId, discussionIds))
+        .orderBy(desc(discussionComments.createdAt)) : [];
+
+      // Group comments by discussion ID
+      const commentsByDiscussion = new Map();
+      for (const comment of discussionCommentsData) {
+        if (!commentsByDiscussion.has(comment.discussionId)) {
+          commentsByDiscussion.set(comment.discussionId, []);
+        }
+        const authorName = comment.authorFirstName && comment.authorLastName 
+          ? `${comment.authorFirstName} ${comment.authorLastName}`
+          : comment.authorEmail || 'Anonymous';
+        
+        commentsByDiscussion.get(comment.discussionId).push({
+          id: comment.id,
+          content: comment.content,
+          author: {
+            id: comment.authorId,
+            name: authorName,
+            profileImage: comment.authorProfileImage
+          },
+          createdAt: comment.createdAt
+        });
+      }
+
       // Transform discussions for feed
       for (const d of discussionsData) {
         const authorName = d.authorFirstName && d.authorLastName 
           ? `${d.authorFirstName} ${d.authorLastName}`
           : d.authorEmail || 'Unknown User';
+
+        const comments = commentsByDiscussion.get(d.id) || [];
 
         feedPosts.push({
           id: d.id,
@@ -2320,10 +2362,11 @@ export class DatabaseStorage implements IStorage {
           church: d.churchId ? { id: d.churchId, name: d.churchName } : null,
           createdAt: d.createdAt,
           likeCount: 0,
-          commentCount: 0,
+          commentCount: comments.length,
           shareCount: 0,
           isLiked: likedDiscussions.has(d.id),
-          isBookmarked: bookmarkedDiscussions.has(d.id)
+          isBookmarked: bookmarkedDiscussions.has(d.id),
+          comments: comments
         });
       }
 
