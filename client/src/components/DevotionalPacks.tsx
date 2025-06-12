@@ -316,7 +316,7 @@ export default function DevotionalPacks() {
                 </Button>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span className="font-medium">{packContent?.verse?.dayTitle || `Day ${currentDay}`}</span>
+                  <span className="font-medium">{(packContent && packContent.verse && packContent.verse.dayTitle) ? packContent.verse.dayTitle : `Day ${currentDay}`}</span>
                 </div>
                 <Button
                   variant="outline"
