@@ -2264,7 +2264,7 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(discussions.createdAt))
         .limit(10);
 
-      // Transform discussions for feed without complex joins
+      // Transform discussions for feed with comments
       for (const d of discussionsData) {
         // Get author info separately
         const [author] = await db
@@ -2276,6 +2276,40 @@ export class DatabaseStorage implements IStorage {
         const authorName = author ? 
           (author.firstName && author.lastName ? `${author.firstName} ${author.lastName}` : author.email || 'Unknown User') :
           'Unknown User';
+
+        // Get comments for this discussion
+        const commentsData = await db
+          .select({
+            id: discussionComments.id,
+            content: discussionComments.content,
+            authorId: discussionComments.authorId,
+            createdAt: discussionComments.createdAt,
+            authorFirstName: users.firstName,
+            authorLastName: users.lastName,
+            authorEmail: users.email,
+            authorProfileImage: users.profileImageUrl,
+          })
+          .from(discussionComments)
+          .leftJoin(users, eq(discussionComments.authorId, users.id))
+          .where(eq(discussionComments.discussionId, d.id))
+          .orderBy(desc(discussionComments.createdAt));
+
+        const comments = commentsData.map(comment => {
+          const commentAuthorName = comment.authorFirstName && comment.authorLastName 
+            ? `${comment.authorFirstName} ${comment.authorLastName}`
+            : comment.authorEmail || 'Anonymous';
+          
+          return {
+            id: comment.id,
+            content: comment.content,
+            author: {
+              id: comment.authorId,
+              name: commentAuthorName,
+              profileImage: comment.authorProfileImage
+            },
+            createdAt: comment.createdAt
+          };
+        });
 
         feedPosts.push({
           id: d.id,
@@ -2290,12 +2324,12 @@ export class DatabaseStorage implements IStorage {
           church: null,
           createdAt: d.createdAt,
           likeCount: 0,
-          commentCount: 0,
+          commentCount: comments.length,
           shareCount: 0,
           isLiked: false,
           isBookmarked: false,
           tags: ['discussion'],
-          comments: []
+          comments: comments
         });
       }
 
