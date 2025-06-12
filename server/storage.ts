@@ -3299,6 +3299,11 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(bibleBadges.id));
   }
 
+  async getBibleVerse(id: number): Promise<BibleVerse | undefined> {
+    const [verse] = await db.select().from(bibleVerses).where(eq(bibleVerses.id, id));
+    return verse;
+  }
+
   async getUserBibleBadges(userId: string): Promise<UserBibleBadge[]> {
     return await db
       .select({
