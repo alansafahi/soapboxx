@@ -2256,5 +2256,107 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Demo Data Generation Routes
+  app.post('/api/demo/generate-data', async (req, res) => {
+    try {
+      console.log('Starting comprehensive demo data generation...');
+      
+      // Import and run the comprehensive demo generator
+      const { generateComprehensiveDemoData } = await import('../comprehensive-demo-generator.js');
+      await generateComprehensiveDemoData();
+      
+      res.json({ 
+        success: true, 
+        message: 'Demo data generated successfully',
+        summary: 'Created comprehensive demo environment with churches, users, discussions, prayers, events, and more'
+      });
+    } catch (error: any) {
+      console.error('Demo data generation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to generate demo data',
+        error: error?.message || 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/demo/status', async (req, res) => {
+    try {
+      // Check if demo data exists by counting records
+      const churchCount = await storage.getAllChurches();
+      const userCount = await storage.getAllUsers();
+      const discussionCount = await storage.getAllDiscussions();
+      const prayerCount = await storage.getAllPrayerRequests();
+      const eventCount = await storage.getAllEvents();
+      
+      const demoExists = churchCount.length > 10 && userCount.length > 50;
+      
+      res.json({
+        demoExists,
+        stats: {
+          churches: churchCount.length,
+          users: userCount.length,
+          discussions: discussionCount.length,
+          prayers: prayerCount.length,
+          events: eventCount.length
+        }
+      });
+    } catch (error) {
+      console.error('Demo status check error:', error);
+      res.status(500).json({ message: 'Failed to check demo status' });
+    }
+  });
+
+  app.delete('/api/demo/clear-data', async (req, res) => {
+    try {
+      console.log('Clearing demo data...');
+      
+      // Use storage methods to clear data safely
+      await storage.clearAllDemoData();
+      
+      res.json({ 
+        success: true, 
+        message: 'Demo data cleared successfully' 
+      });
+    } catch (error: any) {
+      console.error('Demo data clearing error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to clear demo data',
+        error: error?.message || 'Unknown error'
+      });
+    }
+  });
+
+  // Demo Authentication Route
+  app.post('/api/demo/auth', async (req, res) => {
+    try {
+      const { userType = 'member' } = req.body;
+      
+      // Get a demo user based on type
+      const demoUser = await storage.getDemoUserByType(userType);
+      
+      if (!demoUser) {
+        return res.status(404).json({ message: 'No demo users available. Generate demo data first.' });
+      }
+      
+      res.json({
+        success: true,
+        user: {
+          id: demoUser.id,
+          email: demoUser.email,
+          firstName: demoUser.firstName,
+          lastName: demoUser.lastName,
+          profileImageUrl: demoUser.profileImageUrl,
+          isDemoUser: true,
+          userType
+        }
+      });
+    } catch (error) {
+      console.error('Demo auth error:', error);
+      res.status(500).json({ message: 'Demo authentication failed' });
+    }
+  });
+
   return httpServer;
 }
