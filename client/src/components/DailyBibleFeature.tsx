@@ -51,6 +51,7 @@ import {
   FaPinterest 
 } from "react-icons/fa";
 import { BibleInADayFeature } from "./BibleInADayFeature";
+import DevotionalPacks from "./DevotionalPacks";
 import { NotificationScheduler } from "./NotificationScheduler";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1164,7 +1165,7 @@ export function DailyBibleFeature() {
         transition={{ delay: 0.4 }}
       >
         <Tabs defaultValue="reflection" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger 
               value="reflection" 
               className="transition-all duration-200 hover:bg-blue-50 hover:shadow-sm"
@@ -1178,11 +1179,18 @@ export function DailyBibleFeature() {
               Guided Prayer
             </TabsTrigger>
             <TabsTrigger 
+              value="devotional-packs" 
+              className="flex items-center space-x-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <BookOpen className="h-4 w-4" />
+              <span className="font-semibold">Devotional Packs</span>
+            </TabsTrigger>
+            <TabsTrigger 
               value="bible-in-a-day" 
-              className="flex items-center space-x-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="flex items-center space-x-1 bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Rocket className="h-4 w-4" />
-              <span className="font-semibold">Launch Bible in a Day</span>
+              <span className="font-semibold">Bible in a Day</span>
             </TabsTrigger>
           </TabsList>
           
@@ -1414,6 +1422,10 @@ export function DailyBibleFeature() {
           
           <TabsContent value="bible-in-a-day" className="space-y-4">
             <BibleInADayFeature />
+          </TabsContent>
+          
+          <TabsContent value="devotional-packs" className="space-y-4">
+            <DevotionalPacks />
           </TabsContent>
         </Tabs>
       </motion.div>

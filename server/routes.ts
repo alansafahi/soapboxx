@@ -686,6 +686,65 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // AI-powered Bible reflection endpoint
+  app.post('/api/bible/ai-reflection', isAuthenticated, async (req: any, res) => {
+    try {
+      const { verseText, verseReference, userContext, emotionalState } = req.body;
+      const userId = req.user.claims.sub;
+
+      if (!verseText || !verseReference) {
+        return res.status(400).json({ message: "Verse text and reference are required" });
+      }
+
+      // Generate AI-powered reflection using OpenAI
+      const openai = new (await import('openai')).default({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const prompt = `
+        Generate a personalized spiritual reflection for this Bible verse:
+        
+        Verse: "${verseText}" - ${verseReference}
+        User Context: ${userContext || "General spiritual growth"}
+        Current Emotional State: ${emotionalState || "seeking guidance"}
+        
+        Please provide:
+        1. 3-4 thoughtful reflection questions that help the user personally engage with this verse
+        2. A practical application suggestion for daily life
+        3. A personalized prayer related to this verse and the user's context
+        
+        Respond in JSON format with keys: reflectionQuestions (array), practicalApplication (string), prayer (string)
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are a wise, compassionate spiritual guide helping people engage deeply with Scripture. Provide thoughtful, personal, and practical insights."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 800,
+        temperature: 0.7
+      });
+
+      const reflectionData = JSON.parse(response.choices[0].message.content || '{}');
+      
+      // Log the reflection generation for analytics
+      console.log(`AI reflection generated for user ${userId}, verse: ${verseReference}`);
+      
+      res.json(reflectionData);
+    } catch (error) {
+      console.error("Error generating AI reflection:", error);
+      res.status(500).json({ message: "Failed to generate AI reflection" });
+    }
+  });
+
   app.get('/api/bible/badges', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
