@@ -220,7 +220,7 @@ import {
   type InsertReferralMilestone,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -2160,7 +2160,7 @@ export class DatabaseStorage implements IStorage {
       const discussionIds = discussionsData.map(d => d.id);
       
       // Bulk fetch bookmarks and likes
-      const discussionBookmarks = discussionIds.length > 0 ? await db
+      const discussionBookmarksData = discussionIds.length > 0 ? await db
         .select()
         .from(discussionBookmarks)
         .where(and(
@@ -2168,7 +2168,7 @@ export class DatabaseStorage implements IStorage {
           inArray(discussionBookmarks.discussionId, discussionIds)
         )) : [];
 
-      const discussionLikes = discussionIds.length > 0 ? await db
+      const discussionLikesData = discussionIds.length > 0 ? await db
         .select()
         .from(discussionLikes)
         .where(and(
@@ -2176,8 +2176,8 @@ export class DatabaseStorage implements IStorage {
           inArray(discussionLikes.discussionId, discussionIds)
         )) : [];
 
-      const bookmarkedDiscussions = new Set(discussionBookmarks.map(b => b.discussionId));
-      const likedDiscussions = new Set(discussionLikes.map(l => l.discussionId));
+      const bookmarkedDiscussions = new Set(discussionBookmarksData.map(b => b.discussionId));
+      const likedDiscussions = new Set(discussionLikesData.map(l => l.discussionId));
 
       // Transform discussions for feed
       for (const d of discussionsData) {
