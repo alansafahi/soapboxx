@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import SmartScriptureTextarea from "./SmartScriptureTextarea";
 import { 
   Video, 
   FileText, 
@@ -950,9 +951,12 @@ export default function ContentManagementSystem() {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Describe the series theme and goals" 
-                            {...field} 
+                          <SmartScriptureTextarea
+                            value={field.value || ''}
+                            onChange={field.onChange}
+                            placeholder="Describe the series theme and goals... (Type 'Ephesians 4:11' for auto-population)"
+                            label="Series Description"
+                            helpText="Include scripture references to automatically populate verse text"
                           />
                         </FormControl>
                         <FormMessage />
