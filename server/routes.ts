@@ -1888,7 +1888,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         return res.status(500).json({ message: "AI service not configured" });
       }
 
-      const OpenAI = require('openai');
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       const prompt = `As a biblical scholar and theologian, provide comprehensive research for: "${query}"

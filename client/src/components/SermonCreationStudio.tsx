@@ -71,9 +71,9 @@ export default function SermonCreationStudio() {
     },
     onError: (error) => {
       toast({
-        title: "Research Failed",
-        description: "Unable to generate biblical research. Please try again.",
-        variant: "destructive"
+        title: "Research Needs a Moment",
+        description: "Let's try that research request again - sometimes the best insights take a second attempt.",
+        variant: "default"
       });
     }
   });
@@ -95,9 +95,9 @@ export default function SermonCreationStudio() {
     },
     onError: (error) => {
       toast({
-        title: "Outline Generation Failed",
-        description: "Unable to create sermon outline. Please try again.",
-        variant: "destructive"
+        title: "Let's Refine That Outline",
+        description: "Your sermon structure is almost ready - let's give it another try with your input.",
+        variant: "default"
       });
     }
   });
@@ -119,9 +119,9 @@ export default function SermonCreationStudio() {
     },
     onError: (error) => {
       toast({
-        title: "Illustrations Failed",
-        description: "Unable to find relevant illustrations. Please try again.",
-        variant: "destructive"
+        title: "Finding Better Stories",
+        description: "We're gathering compelling illustrations for your message - let's try once more.",
+        variant: "default"
       });
     }
   });
