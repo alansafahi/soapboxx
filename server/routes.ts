@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
 import multer from "multer";
 import path from "path";
+import express from "express";
 
 // Helper function to check for new role assignments
 async function checkForNewRoleAssignment(userId: string, currentRole: string): Promise<boolean> {
@@ -37,6 +38,9 @@ function getFileType(mimetype: string): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Static file serving for uploads (including generated videos)
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Initialize AI personalization service
   const aiPersonalizationService = new AIPersonalizationService();

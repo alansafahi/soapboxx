@@ -178,23 +178,36 @@ Keep the content biblically sound, spiritually enriching, and appropriate for ch
 
   async generateVideoFromContent(videoContent: VideoContent, request: VideoGenerationRequest): Promise<string> {
     try {
-      // For Phase 2, we'll create a comprehensive video URL that combines:
-      // 1. AI-generated script
-      // 2. Voice synthesis (using existing audio system)
-      // 3. Visual content generation
+      const fs = await import('fs');
+      const path = await import('path');
       
-      // This would integrate with video generation services
-      // For now, we'll create a placeholder that represents the generated video
+      // Create uploads directory if it doesn't exist
+      const uploadsDir = path.join(process.cwd(), 'uploads', 'videos');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // Generate a simple video file placeholder for now
       const videoId = Date.now();
-      const videoUrl = `https://soapbox-generated-videos.s3.amazonaws.com/ai-generated/${videoId}.mp4`;
+      const fileName = `ai-generated-${videoId}.mp4`;
+      const filePath = path.join(uploadsDir, fileName);
       
-      // In a real implementation, this would:
-      // 1. Generate voice audio using the audio system
-      // 2. Create visual slides/animations
-      // 3. Combine audio and visuals into final video
-      // 4. Upload to cloud storage
+      // Create a minimal MP4 file structure for demonstration
+      // In a real implementation, this would use proper video generation libraries
+      const videoHeader = Buffer.from([
+        0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, // MP4 header
+        0x69, 0x73, 0x6F, 0x6D, 0x00, 0x00, 0x02, 0x00,
+        0x69, 0x73, 0x6F, 0x6D, 0x69, 0x73, 0x6F, 0x32,
+        0x61, 0x76, 0x63, 0x31, 0x6D, 0x70, 0x34, 0x31
+      ]);
       
-      console.log(`Generated AI video: ${videoUrl}`);
+      fs.writeFileSync(filePath, videoHeader);
+      
+      // Return the local URL that can be served by the express server
+      const videoUrl = `/uploads/videos/${fileName}`;
+      
+      console.log(`Generated AI video file: ${filePath}`);
+      console.log(`Video URL: ${videoUrl}`);
       return videoUrl;
       
     } catch (error) {
