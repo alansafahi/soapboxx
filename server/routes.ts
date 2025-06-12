@@ -4,6 +4,7 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
+import { VideoGenerationRequest } from "./ai-video-generator";
 import multer from "multer";
 import path from "path";
 import express from "express";
@@ -1858,17 +1859,33 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       // Debug logging
       console.log('Video creation request data:', JSON.stringify(contentData, null, 2));
 
+      // Check if we received empty object - regenerate content with AI
+      if (!contentData.title && !contentData.script && !contentData.description) {
+        console.log('Empty content data received, regenerating AI content');
+        
+        // Create a basic request to regenerate content
+        const regenerateRequest: VideoGenerationRequest = {
+          topic: 'Spiritual devotional content',
+          type: 'devotional',
+          duration: 180,
+          targetAudience: 'general',
+          voicePersona: 'pastor-david',
+          visualStyle: 'modern',
+          userId,
+          churchId: 1
+        };
+        
+        const regeneratedContent = await aiVideoGenerator.generateVideoContent(regenerateRequest);
+        Object.assign(contentData, regeneratedContent);
+        console.log('Regenerated content:', JSON.stringify(regeneratedContent, null, 2));
+      }
+
       // Ensure we have the required fields with robust fallbacks
-      const title = contentData.title || contentData.topic || `AI Generated ${contentData.type || 'Devotional'}`;
-      const description = contentData.description || contentData.script?.substring(0, 200) + '...' || `AI generated ${contentData.type || 'devotional'} content about ${contentData.topic || 'spiritual growth'}`;
+      const title = contentData.title || `AI Generated Devotional`;
+      const description = contentData.description || contentData.script?.substring(0, 200) + '...' || `AI generated devotional content for spiritual growth`;
       
       console.log('Processed title:', title);
       console.log('Processed description:', description);
-      
-      // Validate required fields before proceeding
-      if (!title || title === 'AI Generated undefined') {
-        throw new Error('Invalid video title generated');
-      }
 
       // Generate the actual video file from content
       const videoUrl = await aiVideoGenerator.generateVideoFromContent(contentData, {
@@ -1900,10 +1917,10 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         title,
         description,
         script: contentData.script || '',
-        visualCues: JSON.stringify(contentData.visualCues || []),
+        visualCues: contentData.visualCues || {},
         audioNarration: contentData.audioNarration || '',
-        bibleReferences: JSON.stringify(contentData.bibleReferences || []),
-        keyMessages: JSON.stringify([]),
+        bibleReferences: contentData.bibleReferences || [],
+        keyMessages: {},
         videoUrl,
         thumbnailUrl,
         duration: contentData.estimatedDuration || contentData.duration || 180,
@@ -1922,7 +1939,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         createdAt: new Date(),
         updatedAt: new Date(),
         uploadedBy: userId,
-        tags: JSON.stringify(contentData.tags || []),
+        tags: contentData.tags || [],
         speaker: 'AI Generated',
         shareCount: 0,
         phase: 'phase2',
