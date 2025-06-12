@@ -26,7 +26,6 @@ export default function AppHeader() {
     { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
     { href: "/audio-routines", label: "Audio Routines", icon: Headphones },
     { href: "/video-library", label: "Video Library", icon: PlayCircle },
-    { href: "/ai-video-generator", label: "AI Video Generator", icon: Sparkles },
     { href: "/prayer", label: "Prayer Wall", icon: Heart },
     { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/donation-demo", label: "Donations", icon: DollarSign },
