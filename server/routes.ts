@@ -4,10 +4,8 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
-
 import multer from "multer";
 import path from "path";
-import express from "express";
 
 // Helper function to check for new role assignments
 async function checkForNewRoleAssignment(userId: string, currentRole: string): Promise<boolean> {
@@ -39,9 +37,6 @@ function getFileType(mimetype: string): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
-
-  // Static file serving for uploads (including generated videos)
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Initialize AI personalization service
   const aiPersonalizationService = new AIPersonalizationService();
@@ -1842,7 +1837,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       } else {
         // Generate single video
         const videoContent = await aiVideoGenerator.generateVideoContent(request);
-        console.log('Generated video content for frontend:', JSON.stringify(videoContent, null, 2));
         res.json(videoContent);
       }
     } catch (error) {
@@ -1855,174 +1849,52 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     try {
       const userId = req.user.claims.sub;
       const { aiVideoGenerator } = await import('./ai-video-generator');
-      const contentData = req.body;
-
-      // Debug logging
-      console.log('Video creation request data:', JSON.stringify(contentData, null, 2));
-
-      // Check if we received empty object - regenerate content with AI
-      if (!contentData.title && !contentData.script && !contentData.description) {
-        console.log('Empty content data received, regenerating AI content');
-        
-        // Create a basic request to regenerate content
-        const regenerateRequest = {
-          topic: 'Spiritual devotional content',
-          type: 'devotional' as const,
-          duration: 180,
-          targetAudience: 'general' as const,
-          voicePersona: 'pastor-david' as const,
-          visualStyle: 'modern' as const,
-          userId,
-          churchId: 1
-        };
-        
-        const regeneratedContent = await aiVideoGenerator.generateVideoContent(regenerateRequest);
-        Object.assign(contentData, regeneratedContent);
-        console.log('Regenerated content:', JSON.stringify(regeneratedContent, null, 2));
-      }
-
-      // Ensure we have the required fields with robust fallbacks
-      const title = contentData.title || `AI Generated Devotional`;
-      const description = contentData.description || contentData.script?.substring(0, 200) + '...' || `AI generated devotional content for spiritual growth`;
-      
-      console.log('Processed title:', title);
-      console.log('Processed description:', description);
+      const videoContent = req.body;
 
       // Generate the actual video file from content
-      const videoUrl = await aiVideoGenerator.generateVideoFromContent(contentData, {
+      const videoUrl = await aiVideoGenerator.generateVideoFromContent(videoContent, {
         userId,
         churchId: 1, // Default church for demo
-        type: contentData.type || 'devotional',
-        topic: title,
-        duration: contentData.estimatedDuration || contentData.duration || 180,
-        voicePersona: contentData.voicePersona || 'pastor-david',
-        visualStyle: contentData.visualStyle || 'modern',
-        targetAudience: contentData.targetAudience || 'general',
+        type: videoContent.type || 'devotional',
+        topic: videoContent.title,
+        duration: videoContent.estimatedDuration,
+        voicePersona: 'pastor-david',
+        visualStyle: 'modern',
+        targetAudience: 'general',
       });
 
-      // Generate thumbnail with proper content structure
-      const thumbnailContent = {
-        title,
-        description,
-        script: contentData.script || '',
-        visualCues: contentData.visualCues || [],
-        audioNarration: contentData.audioNarration || '',
-        bibleReferences: contentData.bibleReferences || [],
-        tags: contentData.tags || [],
-        estimatedDuration: contentData.estimatedDuration || 180
-      };
-      const thumbnailUrl = await aiVideoGenerator.createThumbnail(thumbnailContent, contentData.visualStyle || 'modern');
+      // Generate thumbnail
+      const thumbnailUrl = await aiVideoGenerator.createThumbnail(videoContent, 'modern');
 
-      // Create video record in database with proper data structure
-      const videoData = {
-        title,
-        description,
-        script: contentData.script || '',
-        visualCues: contentData.visualCues || {},
-        audioNarration: contentData.audioNarration || '',
-        bibleReferences: contentData.bibleReferences || [],
-        keyMessages: {},
+      // Create video record in database
+      const newVideo = await storage.createVideo({
+        title: videoContent.title,
+        description: videoContent.description,
         videoUrl,
         thumbnailUrl,
-        duration: contentData.estimatedDuration || contentData.duration || 180,
-        category: contentData.type || 'devotional',
-        targetAudience: contentData.targetAudience || 'general',
-        voicePersona: contentData.voicePersona || 'pastor-david',
-        visualStyle: contentData.visualStyle || 'modern',
-        churchId: 1,
-        userId: null,
-        seriesId: null,
-        episodeNumber: null,
-        isPublic: true,
-        isActive: true,
-        viewCount: 0,
-        likeCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        uploadedBy: userId,
-        tags: contentData.tags || [],
+        duration: videoContent.estimatedDuration,
+        category: videoContent.type || 'devotional',
+        tags: videoContent.tags || [],
+        bibleReferences: videoContent.bibleReferences || [],
         speaker: 'AI Generated',
-        shareCount: 0,
+        uploadedBy: userId,
+        churchId: 1,
         phase: 'phase2',
         generationType: 'ai_generated',
         publishedAt: new Date(),
-      };
-
-      console.log('Video data for database:', JSON.stringify(videoData, null, 2));
-      const newVideo = await storage.createVideo(videoData);
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        viewCount: 0,
+        likeCount: 0,
+        shareCount: 0,
+        isPublic: true,
+        isActive: true,
+      });
 
       res.status(201).json(newVideo);
     } catch (error) {
       console.error('Error creating AI video:', error);
       res.status(500).json({ message: 'Failed to create AI video' });
-    }
-  });
-
-  // Email videos to user
-  app.post('/api/videos/email', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { videoIds, emailAddress } = req.body;
-      
-      if (!emailAddress) {
-        return res.status(400).json({ message: 'Email address is required' });
-      }
-
-      // Get user's videos
-      const userVideos = await storage.getVideosByUserId(userId);
-      let videosToSend = userVideos;
-      
-      if (videoIds && videoIds.length > 0) {
-        videosToSend = userVideos.filter(video => videoIds.includes(video.id));
-      }
-
-      if (videosToSend.length === 0) {
-        return res.status(404).json({ message: 'No videos found to send' });
-      }
-
-      // Send email with video links
-      const { emailService } = await import('./emailService');
-      
-      const videoList = videosToSend.map(video => 
-        `• ${video.title} - ${req.protocol}://${req.get('host')}/uploads/videos/${video.filename}`
-      ).join('\n');
-
-      const emailContent = `
-        <h2>Your SoapBox Generated Videos</h2>
-        <p>Here are your AI-generated spiritual videos:</p>
-        <br/>
-        ${videosToSend.map(video => `
-          <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
-            <h3>${video.title}</h3>
-            <p>${video.description}</p>
-            <p><strong>Duration:</strong> ${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}</p>
-            <p><strong>Type:</strong> ${video.type}</p>
-            <p><a href="${req.protocol}://${req.get('host')}/uploads/videos/${video.filename}" 
-                  style="background: #5A2671; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-                  Download Video
-               </a></p>
-          </div>
-        `).join('')}
-        
-        <p style="margin-top: 30px; color: #666;">
-          These videos were generated using AI technology through your SoapBox Super App account.
-        </p>
-      `;
-
-      await emailService.sendEmail({
-        to: emailAddress,
-        from: 'support@soapboxsuperapp.com',
-        subject: `Your SoapBox AI Generated Videos (${videosToSend.length} videos)`,
-        html: emailContent
-      });
-
-      res.json({ 
-        message: `Successfully sent ${videosToSend.length} videos to ${emailAddress}`,
-        videoCount: videosToSend.length
-      });
-    } catch (error) {
-      console.error('Error emailing videos:', error);
-      res.status(500).json({ message: 'Failed to email videos' });
     }
   });
 

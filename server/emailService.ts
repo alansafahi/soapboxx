@@ -38,28 +38,6 @@ export class EmailService {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
-  async sendEmail(options: {
-    to: string;
-    from: string;
-    subject: string;
-    html: string;
-  }): Promise<boolean> {
-    try {
-      if (this.useSendGrid) {
-        await sgMail.send(options);
-        console.log('Email sent successfully via SendGrid to:', options.to);
-        return true;
-      } else {
-        const result = await this.transporter.sendMail(options);
-        console.log('Email sent successfully via SMTP:', result.messageId);
-        return true;
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-      return false;
-    }
-  }
-
   async sendVerificationEmail(data: EmailVerificationData): Promise<boolean> {
     try {
       const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${data.token}`;

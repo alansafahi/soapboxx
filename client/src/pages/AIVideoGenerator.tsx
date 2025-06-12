@@ -64,9 +64,13 @@ export default function AIVideoGenerator() {
   const generateVideoMutation = useMutation({
     mutationFn: async (requestData: GenerationRequest) => {
       setIsGenerating(true);
-      return await apiRequest('POST', '/api/videos/ai-generate', {
-        ...requestData,
-        churchId: 1, // Default church for demo
+      return await apiRequest('/api/videos/ai-generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...requestData,
+          churchId: 1, // Default church for demo
+        }),
+        headers: { 'Content-Type': 'application/json' },
       });
     },
     onSuccess: (data) => {
@@ -92,7 +96,11 @@ export default function AIVideoGenerator() {
   // Create video from generated content
   const createVideoMutation = useMutation({
     mutationFn: async (content: any) => {
-      return await apiRequest('POST', '/api/videos/ai-create', content);
+      return await apiRequest('/api/videos/ai-create', {
+        method: 'POST',
+        body: JSON.stringify(content),
+        headers: { 'Content-Type': 'application/json' },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/videos'] });

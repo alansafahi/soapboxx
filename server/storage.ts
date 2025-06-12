@@ -218,12 +218,6 @@ import {
   type InsertReferralReward,
   type ReferralMilestone,
   type InsertReferralMilestone,
-  videoContent,
-  videoSeries,
-  type VideoContent,
-  type InsertVideoContent,
-  type VideoSeries,
-  type InsertVideoSeries,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte } from "drizzle-orm";
@@ -458,16 +452,6 @@ export interface IStorage {
   addMediaToCollection(collectionId: number, mediaFileId: number): Promise<MediaCollectionItem>;
   removeMediaFromCollection(collectionId: number, mediaFileId: number): Promise<void>;
   getCollectionMedia(collectionId: number): Promise<MediaFile[]>;
-
-  // Video operations for comprehensive video system
-  createVideo(video: any): Promise<any>;
-  getVideoById(id: number): Promise<any | undefined>;
-  updateVideo(id: number, updates: any): Promise<any>;
-  getVideos(churchId?: number): Promise<any[]>;
-  deleteVideo(id: number): Promise<void>;
-  getVideosByCategory(category: string, churchId?: number): Promise<any[]>;
-  getVideosByUserId(userId: string): Promise<any[]>;
-  getPlaylistVideos(playlistId: number): Promise<any[]>;
 
   // Referral Rewards System
   createReferral(referral: InsertReferral): Promise<Referral>;
@@ -5211,105 +5195,16 @@ export class DatabaseStorage implements IStorage {
   async getPublicVideos(limit = 20, offset = 0): Promise<any[]> {
     return await db
       .select()
-      .from(videoContent)
+      .from(videos)
       .where(
         and(
-          eq(videoContent.isPublic, true),
-          eq(videoContent.isActive, true)
+          eq(videos.isPublic, true),
+          eq(videos.isActive, true)
         )
       )
-      .orderBy(desc(videoContent.createdAt))
+      .orderBy(desc(videos.publishedAt))
       .limit(limit)
       .offset(offset);
-  }
-
-  // Required video methods for AI Video Generator
-  async createVideo(video: any): Promise<any> {
-    const [newVideo] = await db
-      .insert(videoContent)
-      .values({
-        ...video,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
-    return newVideo;
-  }
-
-  async getVideoById(id: number): Promise<any | undefined> {
-    const [video] = await db
-      .select()
-      .from(videoContent)
-      .where(eq(videoContent.id, id));
-    return video;
-  }
-
-  async updateVideo(id: number, updates: any): Promise<any> {
-    const [video] = await db
-      .update(videoContent)
-      .set({
-        ...updates,
-        updatedAt: new Date(),
-      })
-      .where(eq(videoContent.id, id))
-      .returning();
-    return video;
-  }
-
-  async getVideos(churchId?: number): Promise<any[]> {
-    const query = db
-      .select()
-      .from(videoContent)
-      .where(eq(videoContent.isActive, true));
-    
-    if (churchId) {
-      query.where(eq(videoContent.churchId, churchId));
-    }
-    
-    return await query.orderBy(desc(videoContent.createdAt));
-  }
-
-  async getVideosByUserId(userId: string): Promise<any[]> {
-    return await db
-      .select()
-      .from(videoContent)
-      .where(
-        and(
-          eq(videoContent.uploadedBy, userId),
-          eq(videoContent.isActive, true)
-        )
-      )
-      .orderBy(desc(videoContent.createdAt));
-  }
-
-  async deleteVideo(id: number): Promise<void> {
-    await db
-      .update(videoContent)
-      .set({ isActive: false })
-      .where(eq(videoContent.id, id));
-  }
-
-  async getVideosByCategory(category: string, churchId?: number): Promise<any[]> {
-    const conditions = [
-      eq(videoContent.category, category),
-      eq(videoContent.isActive, true),
-      eq(videoContent.isPublic, true)
-    ];
-    
-    if (churchId) {
-      conditions.push(eq(videoContent.churchId, churchId));
-    }
-    
-    return await db
-      .select()
-      .from(videoContent)
-      .where(and(...conditions))
-      .orderBy(desc(videoContent.createdAt));
-  }
-
-  async getPlaylistVideos(playlistId: number): Promise<any[]> {
-    // For now, return empty array - playlist functionality can be implemented later
-    return [];
   }
 
   async updateVideoContent(id: number, updates: Partial<InsertVideoContent>): Promise<VideoContent> {
