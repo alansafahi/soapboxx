@@ -9,6 +9,7 @@ import { Home as HomeIcon, Church, Calendar, BookOpen, Heart, Mail, Settings } f
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import DemoPage from "@/pages/demo";
+import Landing from "@/pages/landing";
 import AdminPortal from "@/pages/admin";
 import EnhancedAdminPortal from "@/pages/admin-enhanced";
 import Profile from "@/pages/profile";
@@ -147,7 +148,7 @@ function AppRouter() {
           {!isAuthenticated ? (
             <>
               <Route path="/demo" component={DemoPage} />
-              <Route path="*" component={DemoPage} />
+              <Route path="*" component={Landing} />
             </>
           ) : (
             <>
