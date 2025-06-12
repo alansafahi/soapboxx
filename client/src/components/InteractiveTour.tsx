@@ -3,6 +3,7 @@ import { X, ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useLocation } from 'wouter';
 
 interface TourStep {
   id: string;
@@ -375,59 +376,74 @@ const tourConfigs: InteractiveTourConfig[] = [
         description: "Your spiritual community hub",
         page: "/",
         position: "center",
-        content: "Welcome! SoapBox connects you with your church community, helps you grow spiritually, and keeps you engaged with what matters most in your faith journey.",
+        content: "Welcome! This is your SoapBox dashboard - your central hub for spiritual growth and community connection. You can see your daily check-ins, upcoming events, and recent activities all in one place.",
         tips: [
-          "Access everything from one central dashboard",
-          "Stay connected with your church family",
-          "Track your spiritual growth and participation",
-          "Discover new ways to get involved"
+          "Check in daily to track your spiritual journey",
+          "View upcoming church events and activities", 
+          "See your weekly faithfulness streak",
+          "Access prayer requests from your community"
         ],
         nextAction: "Let's explore your church community connections"
       },
       {
         id: "community_engagement",
-        title: "Community Engagement",
+        title: "Community & Prayer Wall",
         description: "Connect with your church family",
-        page: "/community",
+        page: "/prayer",
         position: "center",
-        content: "Join small groups, participate in church events, connect with other members, and build meaningful relationships within your faith community.",
+        content: "The Prayer Wall is where your church community comes together in prayer. You can submit prayer requests, pray for others, and see how God is moving in your church family's lives.",
         tips: [
-          "Join small groups that match your interests",
-          "RSVP for church events and special activities",
-          "Connect with other members and build friendships",
-          "Participate in community discussions and prayer sharing"
+          "Submit your own prayer requests for community support",
+          "Pray for others and let them know you're praying",
+          "Share testimonies and praise reports",
+          "Connect with members through shared prayer"
         ],
         nextAction: "Now let's look at spiritual growth tools"
       },
       {
         id: "spiritual_growth",
-        title: "Spiritual Growth & Bible Study",
-        description: "Deepen your relationship with God",
+        title: "Bible Study & Reading",
+        description: "Explore God's Word daily",
         page: "/bible",
         position: "center",
-        content: "Access daily devotionals, join Bible study groups, track your scripture reading, and engage with spiritual growth challenges and resources.",
+        content: "The Bible section provides daily reading plans, verses, and study materials. Track your reading progress and engage with scripture through interactive features.",
         tips: [
-          "Follow daily devotional plans and reading schedules",
-          "Join online Bible study groups and discussions",
-          "Track your scripture reading progress and insights",
-          "Participate in spiritual growth challenges and goals"
+          "Access complete Bible with search functionality",
+          "Follow daily reading plans and devotionals",
+          "Track your reading streaks and progress",
+          "Bookmark favorite verses and passages"
         ],
-        nextAction: "Let's explore prayer and spiritual support features"
+        nextAction: "Let's explore church events and activities"
       },
       {
-        id: "prayer_support",
-        title: "Prayer Wall & Spiritual Support",
-        description: "Share and receive prayer support",
-        page: "/prayer",
+        id: "church_events",
+        title: "Events & Activities",
+        description: "Stay connected with church life",
+        page: "/events",
         position: "center",
-        content: "Share prayer requests, pray for others in your community, celebrate answered prayers, and access pastoral care when you need additional spiritual support.",
+        content: "View all upcoming church events, services, and activities. RSVP for events and stay engaged with your church community's schedule.",
         tips: [
-          "Share prayer requests with your church community",
-          "Pray for others and offer encouragement",
-          "Celebrate answered prayers and life milestones",
-          "Connect with pastoral care when you need additional support"
+          "Browse upcoming church events and services",
+          "RSVP for events you want to attend",
+          "Get event details and location information",
+          "Set reminders for important activities"
         ],
-        nextAction: "You're ready to thrive in your church community"
+        nextAction: "Finally, let's look at community engagement"
+      },
+      {
+        id: "community_leaderboard",
+        title: "Community & Leaderboard",
+        description: "Celebrate spiritual growth together",
+        page: "/leaderboard",
+        position: "center",
+        content: "The Community Leaderboard shows spiritual engagement across your church. See weekly faithfulness rankings and celebrate growth as a church family.",
+        tips: [
+          "View weekly faithfulness and engagement rankings",
+          "See community spiritual activity and participation",
+          "Celebrate achievements and milestones together",
+          "Get encouraged by your church's collective growth"
+        ],
+        nextAction: "You're ready to engage fully in your church community!"
       }
     ]
   }
@@ -482,6 +498,7 @@ function getArrowIcon(position: string) {
 
 export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [location, setLocation] = useLocation();
   
   const config = tourConfigs.find(c => c.role === role);
   
@@ -492,6 +509,13 @@ export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTo
   const step = config.steps[currentStep];
   const isLastStep = currentStep === config.steps.length - 1;
   const isFirstStep = currentStep === 0;
+
+  // Navigate to the page when step changes
+  useEffect(() => {
+    if (step.page && step.page !== location) {
+      setLocation(step.page);
+    }
+  }, [currentStep, step.page, location, setLocation]);
 
   const handleNext = () => {
     if (isLastStep) {
