@@ -7,6 +7,7 @@ import { AIPersonalizationService } from "./ai-personalization";
 import multer from "multer";
 import path from "path";
 import OpenAI from "openai";
+import * as schema from "@shared/schema";
 
 // AI-powered post categorization
 async function categorizePost(content: string): Promise<{ type: 'discussion' | 'prayer' | 'announcement' | 'share', title?: string }> {
@@ -2280,39 +2281,114 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  app.get('/api/demo/status', async (req, res) => {
+  // Demo API endpoints for isolated demo environment
+  app.get('/api/health', async (req, res) => {
+    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+  });
+
+  app.get('/api/demo/stats', async (req, res) => {
     try {
-      // Check if demo data exists by counting records
-      const churchCount = await storage.getAllChurches();
-      const userCount = await storage.getAllUsers();
-      const discussionCount = await storage.getAllDiscussions();
-      const prayerCount = await storage.getAllPrayerRequests();
-      const eventCount = await storage.getAllEvents();
+      // Use demo database for stats
+      const { demoDB, isDemoEnvironment } = await import('./demo-db');
       
-      const demoExists = churchCount.length > 10 && userCount.length > 50;
+      if (!isDemoEnvironment()) {
+        return res.status(400).json({ message: 'Demo environment not available' });
+      }
+
+      const churches = await demoDB.select().from(schema.churches);
+      const users = await demoDB.select().from(schema.users);
+      const discussions = await demoDB.select().from(schema.discussions);
+      const prayers = await demoDB.select().from(schema.prayerRequests);
+      const events = await demoDB.select().from(schema.events);
       
       res.json({
-        demoExists,
-        stats: {
-          churches: churchCount.length,
-          users: userCount.length,
-          discussions: discussionCount.length,
-          prayers: prayerCount.length,
-          events: eventCount.length
-        }
+        churches: churches.length,
+        users: users.length,
+        discussions: discussions.length,
+        prayers: prayers.length,
+        events: events.length
       });
     } catch (error) {
-      console.error('Demo status check error:', error);
-      res.status(500).json({ message: 'Failed to check demo status' });
+      console.error('Demo stats error:', error);
+      res.status(500).json({ message: 'Failed to load demo stats' });
     }
   });
 
-  app.delete('/api/demo/clear-data', async (req, res) => {
+  app.post('/api/demo/generate', async (req, res) => {
+    try {
+      console.log('Starting comprehensive demo data generation...');
+      
+      const { demoDB, isDemoEnvironment } = await import('./demo-db');
+      
+      if (!isDemoEnvironment()) {
+        return res.status(400).json({ message: 'Demo environment not available' });
+      }
+
+      // Import and run the comprehensive demo generator
+      const { generateComprehensiveDemoData } = await import('../comprehensive-demo-generator.js');
+      await generateComprehensiveDemoData();
+      
+      res.json({ 
+        success: true, 
+        message: 'Demo data generated successfully',
+        summary: 'Created comprehensive demo environment with churches, users, discussions, prayers, events, and more'
+      });
+    } catch (error: any) {
+      console.error('Demo data generation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to generate demo data',
+        error: error?.message || 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/demo/users', async (req, res) => {
+    try {
+      const { demoDB, isDemoEnvironment } = await import('./demo-db');
+      
+      if (!isDemoEnvironment()) {
+        return res.status(400).json({ message: 'Demo environment not available' });
+      }
+
+      // Get sample users from demo database for role switching
+      const users = await demoDB.select({
+        id: schema.users.id,
+        firstName: schema.users.firstName,
+        lastName: schema.users.lastName,
+        email: schema.users.email
+      }).from(schema.users).limit(12);
+
+      // Add mock role and church data for demo
+      const demoUsers = users.map((user, index) => ({
+        ...user,
+        role: ['Pastor', 'Member', 'Admin', 'Volunteer'][index % 4],
+        churchName: ['Grace Community Church', 'Faith Baptist Church', 'Hope Presbyterian'][index % 3]
+      }));
+
+      res.json(demoUsers);
+    } catch (error) {
+      console.error('Demo users error:', error);
+      res.status(500).json({ message: 'Failed to load demo users' });
+    }
+  });
+
+  app.post('/api/demo/clear', async (req, res) => {
     try {
       console.log('Clearing demo data...');
       
-      // Use storage methods to clear data safely
-      await storage.clearAllDemoData();
+      const { demoDB, isDemoEnvironment } = await import('./demo-db');
+      
+      if (!isDemoEnvironment()) {
+        return res.status(400).json({ message: 'Demo environment not available' });
+      }
+
+      // Clear all demo data from isolated demo database
+      await demoDB.delete(schema.events);
+      await demoDB.delete(schema.prayerRequests);
+      await demoDB.delete(schema.discussions);
+      await demoDB.delete(schema.users);
+      await demoDB.delete(schema.churches);
       
       res.json({ 
         success: true, 
