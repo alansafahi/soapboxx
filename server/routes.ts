@@ -4,7 +4,7 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
-import { VideoGenerationRequest } from "./ai-video-generator";
+
 import multer from "multer";
 import path from "path";
 import express from "express";
@@ -1842,6 +1842,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       } else {
         // Generate single video
         const videoContent = await aiVideoGenerator.generateVideoContent(request);
+        console.log('Generated video content for frontend:', JSON.stringify(videoContent, null, 2));
         res.json(videoContent);
       }
     } catch (error) {
@@ -1864,13 +1865,13 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         console.log('Empty content data received, regenerating AI content');
         
         // Create a basic request to regenerate content
-        const regenerateRequest: VideoGenerationRequest = {
+        const regenerateRequest = {
           topic: 'Spiritual devotional content',
-          type: 'devotional',
+          type: 'devotional' as const,
           duration: 180,
-          targetAudience: 'general',
-          voicePersona: 'pastor-david',
-          visualStyle: 'modern',
+          targetAudience: 'general' as const,
+          voicePersona: 'pastor-david' as const,
+          visualStyle: 'modern' as const,
           userId,
           churchId: 1
         };
