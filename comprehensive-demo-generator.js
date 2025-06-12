@@ -126,10 +126,53 @@ function generateFutureDate(daysForward = 30) {
   return new Date(now.getTime() + randomDays * 24 * 60 * 60 * 1000);
 }
 
+async function cleanupExistingDemoData() {
+  console.log('🧹 Cleaning up existing demo data...');
+  
+  // Only clean tables that definitely exist based on current demo stats
+  const coreTables = [
+    { table: discussionBookmarks, name: 'discussion_bookmarks' },
+    { table: discussionLikes, name: 'discussion_likes' },
+    { table: discussionComments, name: 'discussion_comments' },
+    { table: discussions, name: 'discussions' },
+    { table: prayerBookmarks, name: 'prayer_bookmarks' },
+    { table: prayerResponses, name: 'prayer_responses' },
+    { table: prayerRequests, name: 'prayer_requests' },
+    { table: eventRsvps, name: 'event_rsvps' },
+    { table: checkIns, name: 'check_ins' },
+    { table: donations, name: 'donations' },
+    { table: userInspirationHistory, name: 'user_inspiration_history' },
+    { table: referrals, name: 'referrals' },
+    { table: achievements, name: 'achievements' },
+    { table: userChurches, name: 'user_churches' },
+    { table: users, name: 'users' },
+    { table: events, name: 'events' },
+    { table: churches, name: 'churches' }
+  ];
+
+  for (const { table, name } of coreTables) {
+    try {
+      await db.delete(table);
+      console.log(`  ✅ Cleaned ${name}`);
+    } catch (error) {
+      if (error.code === '42P01') {
+        console.log(`  ⚠️ Skipped ${name} (table not found)`);
+      } else {
+        console.log(`  ⚠️ Error cleaning ${name}: ${error.message}`);
+      }
+    }
+  }
+  
+  console.log('✅ Cleanup completed');
+}
+
 export async function generateComprehensiveDemoData() {
   console.log('🏗️ Starting comprehensive demo data generation...');
 
   try {
+    // Cleanup existing data first
+    await cleanupExistingDemoData();
+    
     // Generate Churches
     console.log('📍 Generating churches...');
     const churchData = [];
