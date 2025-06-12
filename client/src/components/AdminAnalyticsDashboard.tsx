@@ -87,6 +87,17 @@ export function AdminAnalyticsDashboard() {
     enabled: !!user
   });
 
+  const { data: prayerData, isLoading: prayerLoading } = useQuery({
+    queryKey: ['/api/admin/analytics/prayer-engagement'],
+    enabled: !!user
+  });
+
+  const { data: devotionalData, isLoading: devotionalLoading } = useQuery({
+    queryKey: ['/api/admin/analytics/devotional-completions'],
+    queryFn: () => fetch('/api/admin/analytics/devotional-completions?devotional=Lent').then(res => res.json()),
+    enabled: !!user
+  });
+
   const renderTrendIcon = (trend: string) => {
     const isPositive = trend.startsWith('+');
     return isPositive ? (
@@ -105,7 +116,7 @@ export function AdminAnalyticsDashboard() {
     );
   };
 
-  if (engagementLoading || checkInsLoading || devotionLoading || atRiskLoading) {
+  if (engagementLoading || checkInsLoading || devotionLoading || atRiskLoading || prayerLoading || devotionalLoading) {
     return (
       <div className="p-6 space-y-6">
         <div className="animate-pulse">
@@ -335,6 +346,112 @@ export function AdminAnalyticsDashboard() {
                   ))}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Prayer Engagement Analytics */}
+        {prayerData && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-gray-900 dark:text-white">
+                <Heart className="mr-2 h-5 w-5 text-[#5A2671]" />
+                Prayer Engagement (This Week)
+              </CardTitle>
+              <CardDescription>
+                Members who prayed for others and prayer activity metrics
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <div className="text-2xl font-bold text-[#5A2671]">
+                    {prayerData.activePrayerWarriors || 0}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Prayer Warriors</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {prayerData.supportProvided || 0}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Prayers Offered</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {prayerData.prayerEngagementRate || 0}%
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Engagement Rate</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-orange-600">
+                    {prayerData.totalPrayers || 0}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Prayer Requests</div>
+                </div>
+              </div>
+              
+              {prayerData.membersWhoPrayedForOthers && prayerData.membersWhoPrayedForOthers.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Top Prayer Supporters This Week</h4>
+                  <div className="space-y-2">
+                    {prayerData.membersWhoPrayedForOthers.slice(0, 5).map((member) => (
+                      <div key={member.userId} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">{member.name}</span>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{member.email}</p>
+                        </div>
+                        <Badge variant="secondary" className="bg-[#5A2671] text-white">
+                          {member.prayersOffered} prayers
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Devotional Completions */}
+        {devotionalData && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-gray-900 dark:text-white">
+                <BookOpen className="mr-2 h-5 w-5 text-[#5A2671]" />
+                Devotional Completions
+              </CardTitle>
+              <CardDescription>
+                {devotionalData.message}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-600 mb-2">
+                  {devotionalData.totalCompletions || 0}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Members completed {devotionalData.devotionalName} devotional
+                </div>
+              </div>
+              
+              {devotionalData.completions && devotionalData.completions.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Recent Completions</h4>
+                  <div className="space-y-2">
+                    {devotionalData.completions.slice(0, 5).map((completion) => (
+                      <div key={completion.userId} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-white">{completion.name}</span>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{completion.series}</p>
+                        </div>
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          {completion.progress}% complete
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
