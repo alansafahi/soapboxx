@@ -1958,5 +1958,45 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Church routes
+  app.get('/api/churches', async (req, res) => {
+    try {
+      const churches = await storage.getChurches();
+      res.json(churches);
+    } catch (error) {
+      console.error("Error fetching churches:", error);
+      res.status(500).json({ message: "Failed to fetch churches" });
+    }
+  });
+
+  app.get('/api/churches/nearby', async (req, res) => {
+    try {
+      const { lat, lng, limit } = req.query;
+      const churches = await storage.getNearbyChurches(
+        lat ? parseFloat(lat as string) : undefined,
+        lng ? parseFloat(lng as string) : undefined,
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json(churches);
+    } catch (error) {
+      console.error("Error fetching nearby churches:", error);
+      res.status(500).json({ message: "Failed to fetch nearby churches" });
+    }
+  });
+
+  app.get('/api/churches/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const church = await storage.getChurch(id);
+      if (!church) {
+        return res.status(404).json({ message: "Church not found" });
+      }
+      res.json(church);
+    } catch (error) {
+      console.error("Error fetching church:", error);
+      res.status(500).json({ message: "Failed to fetch church" });
+    }
+  });
+
   return httpServer;
 }

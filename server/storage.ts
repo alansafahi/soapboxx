@@ -706,6 +706,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(churches.name));
   }
 
+  async getChurches(): Promise<Church[]> {
+    return await db
+      .select()
+      .from(churches)
+      .where(eq(churches.isActive, true))
+      .orderBy(desc(churches.rating));
+  }
+
   async getNearbyChurches(lat?: number, lng?: number, limit: number = 10): Promise<Church[]> {
     // For simplicity, just return churches ordered by rating if no coordinates provided
     if (!lat || !lng) {
