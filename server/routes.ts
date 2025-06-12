@@ -2083,13 +2083,14 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
           isPublic: true
         });
       } else if (type === 'prayer') {
-        post = await storage.createPrayerRequest({
-          title: title || 'Prayer Request',
+        // Prayer content gets posted as a share since prayers belong in Prayer Wall
+        post = await storage.createDiscussion({
+          title: title || 'Prayer Share',
           content: content.trim(),
           authorId: userId,
           churchId: null,
-          isAnonymous: false,
-          isUrgent: false
+          category: 'share',
+          isPublic: true
         });
       } else if (type === 'announcement') {
         post = await storage.createDiscussion({

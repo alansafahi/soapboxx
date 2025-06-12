@@ -2257,29 +2257,49 @@ export class DatabaseStorage implements IStorage {
     try {
       const feedPosts: any[] = [];
 
-      // Get discussions with author info and like status
+      // Get discussions - simplified query to avoid field selection issues
       const discussionsData = await db
-        .select({
-          id: discussions.id,
-          title: discussions.title,
-          content: discussions.content,
-          authorId: discussions.authorId,
-          createdAt: discussions.createdAt,
-          authorFirstName: users.firstName,
-          authorLastName: users.lastName,
-          authorEmail: users.email,
-          authorProfileImage: users.profileImageUrl,
-          churchId: discussions.churchId,
-          churchName: churches.name,
-        })
+        .select()
         .from(discussions)
-        .leftJoin(users, eq(discussions.authorId, users.id))
-        .leftJoin(churches, eq(discussions.churchId, churches.id))
         .orderBy(desc(discussions.createdAt))
         .limit(10);
 
-      // Get all discussion IDs for bulk bookmark/like queries
-      const discussionIds = discussionsData.map(d => d.id);
+      // Transform discussions for feed without complex joins
+      for (const d of discussionsData) {
+        // Get author info separately
+        const [author] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, d.authorId))
+          .limit(1);
+
+        const authorName = author ? 
+          (author.firstName && author.lastName ? `${author.firstName} ${author.lastName}` : author.email || 'Unknown User') :
+          'Unknown User';
+
+        feedPosts.push({
+          id: d.id,
+          type: 'discussion',
+          title: d.title,
+          content: d.content,
+          author: {
+            id: d.authorId,
+            name: authorName,
+            profileImage: author?.profileImageUrl || null
+          },
+          church: null,
+          createdAt: d.createdAt,
+          likeCount: 0,
+          commentCount: 0,
+          shareCount: 0,
+          isLiked: false,
+          isBookmarked: false,
+          tags: ['discussion'],
+          comments: []
+        });
+      }
+
+      return feedPosts;
       
       // Bulk fetch bookmarks and likes
       const discussionBookmarksData = discussionIds.length > 0 ? await db
@@ -2370,125 +2390,11 @@ export class DatabaseStorage implements IStorage {
         });
       }
 
-      // Get prayer requests with author info
-      const prayersData = await db
-        .select({
-          id: prayerRequests.id,
-          title: prayerRequests.title,
-          content: prayerRequests.content,
-          authorId: prayerRequests.authorId,
-          createdAt: prayerRequests.createdAt,
-          authorFirstName: users.firstName,
-          authorLastName: users.lastName,
-          authorEmail: users.email,
-          authorProfileImage: users.profileImageUrl,
-          churchId: prayerRequests.churchId,
-          churchName: churches.name,
-        })
-        .from(prayerRequests)
-        .leftJoin(users, eq(prayerRequests.authorId, users.id))
-        .leftJoin(churches, eq(prayerRequests.churchId, churches.id))
-        .orderBy(desc(prayerRequests.createdAt))
-        .limit(10);
-
-      // Get all prayer IDs for bulk comment queries
-      const prayerIds = prayersData.map(p => p.id);
-      
-      // Bulk fetch comments for prayers (using prayerResponses as comments)
-      const prayerCommentsData = prayerIds.length > 0 ? await db
-        .select({
-          id: prayerResponses.id,
-          prayerId: prayerResponses.prayerRequestId,
-          content: prayerResponses.response,
-          authorId: prayerResponses.userId,
-          createdAt: prayerResponses.createdAt,
-          authorFirstName: users.firstName,
-          authorLastName: users.lastName,
-          authorEmail: users.email,
-          authorProfileImage: users.profileImageUrl,
-        })
-        .from(prayerResponses)
-        .leftJoin(users, eq(prayerResponses.userId, users.id))
-        .where(inArray(prayerResponses.prayerRequestId, prayerIds))
-        .orderBy(desc(prayerResponses.createdAt)) : [];
-
-      // Group comments by prayer ID
-      const commentsByPrayer = new Map();
-      for (const comment of prayerCommentsData) {
-        if (!commentsByPrayer.has(comment.prayerId)) {
-          commentsByPrayer.set(comment.prayerId, []);
-        }
-        const authorName = comment.authorFirstName && comment.authorLastName 
-          ? `${comment.authorFirstName} ${comment.authorLastName}`
-          : comment.authorEmail || 'Anonymous';
-        
-        commentsByPrayer.get(comment.prayerId).push({
-          id: comment.id,
-          content: comment.content,
-          author: {
-            id: comment.authorId,
-            name: authorName,
-            profileImage: comment.authorProfileImage
-          },
-          createdAt: comment.createdAt
-        });
-      }
-
-      // Transform prayers for feed
-      for (const p of prayersData) {
-        const authorName = p.authorFirstName && p.authorLastName 
-          ? `${p.authorFirstName} ${p.authorLastName}`
-          : p.authorEmail || 'Unknown User';
-
-        // Check if user bookmarked this prayer
-        const [prayerBookmark] = await db
-          .select()
-          .from(prayerBookmarks)
-          .where(and(
-            eq(prayerBookmarks.userId, userId),
-            eq(prayerBookmarks.prayerId, p.id)
-          ))
-          .limit(1);
-
-        // Check if user has prayed for this request (equivalent to liking)
-        const prayerResponse = await this.getUserPrayerResponse(p.id, userId);
-        const isLiked = !!prayerResponse;
-
-        const comments = commentsByPrayer.get(p.id) || [];
-
-        feedPosts.push({
-          id: p.id,
-          type: 'prayer',
-          title: p.title,
-          content: p.content,
-          author: {
-            id: p.authorId,
-            name: authorName,
-            profileImage: p.authorProfileImage
-          },
-          church: p.churchId ? { id: p.churchId, name: p.churchName } : null,
-          createdAt: p.createdAt,
-          likeCount: 0,
-          commentCount: comments.length,
-          shareCount: 0,
-          isLiked: isLiked,
-          isBookmarked: !!prayerBookmark,
-          tags: ['prayer', 'faith'],
-          comments: comments
-        });
-      }
+      // Note: Prayer requests are handled in the dedicated Prayer Wall section
 
       // Get daily inspirations
       const inspirationsData = await db
-        .select({
-          id: dailyInspirations.id,
-          title: dailyInspirations.title,
-          content: dailyInspirations.content,
-          verse: dailyInspirations.verse,
-          verseReference: dailyInspirations.verseReference,
-          category: dailyInspirations.category,
-          createdAt: dailyInspirations.createdAt,
-        })
+        .select()
         .from(dailyInspirations)
         .orderBy(desc(dailyInspirations.createdAt))
         .limit(5);
