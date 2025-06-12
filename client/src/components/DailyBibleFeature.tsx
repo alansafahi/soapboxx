@@ -52,6 +52,7 @@ import {
 } from "react-icons/fa";
 import { BibleInADayFeature } from "./BibleInADayFeature";
 import DevotionalPacks from "./DevotionalPacks";
+import VerseArtGenerator from "./VerseArtGenerator";
 import { NotificationScheduler } from "./NotificationScheduler";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1165,7 +1166,7 @@ export function DailyBibleFeature() {
         transition={{ delay: 0.4 }}
       >
         <Tabs defaultValue="reflection" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger 
               value="reflection" 
               className="transition-all duration-200 hover:bg-blue-50 hover:shadow-sm"
@@ -1177,6 +1178,12 @@ export function DailyBibleFeature() {
               className="transition-all duration-200 hover:bg-green-50 hover:shadow-sm"
             >
               Guided Prayer
+            </TabsTrigger>
+            <TabsTrigger 
+              value="verse-art" 
+              className="transition-all duration-200 hover:bg-purple-50 hover:shadow-sm"
+            >
+              Verse Art
             </TabsTrigger>
             <TabsTrigger 
               value="devotional-packs" 
@@ -1422,6 +1429,15 @@ export function DailyBibleFeature() {
           
           <TabsContent value="bible-in-a-day" className="space-y-4">
             <BibleInADayFeature />
+          </TabsContent>
+          
+          <TabsContent value="verse-art" className="space-y-4">
+            <VerseArtGenerator 
+              currentVerse={dailyVerse ? {
+                text: getVerseText(),
+                reference: dailyVerse.verseReference
+              } : undefined}
+            />
           </TabsContent>
           
           <TabsContent value="devotional-packs" className="space-y-4">

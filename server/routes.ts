@@ -781,7 +781,10 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       // Comprehensive validation for verse art
       const artValidation = contentSafety.validateVerseArtRequest(verseText, verseReference, backgroundTheme);
       if (!artValidation.isAllowed) {
-        return res.status(400).json({ message: artValidation.reason });
+        return res.status(400).json({ 
+          error: "Content validation failed",
+          message: artValidation.reason || "Content contains inappropriate material for verse art generation" 
+        });
       }
 
       // Generate AI artwork using DALL-E
@@ -810,6 +813,10 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         quality: "standard",
       });
 
+      if (!imageResponse.data || imageResponse.data.length === 0) {
+        throw new Error("Failed to generate image - no data returned from DALL-E");
+      }
+      
       const imageUrl = imageResponse.data[0].url;
       
       const artData = {
