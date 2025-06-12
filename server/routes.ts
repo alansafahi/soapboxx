@@ -1958,6 +1958,74 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Email videos to user
+  app.post('/api/videos/email', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { videoIds, emailAddress } = req.body;
+      
+      if (!emailAddress) {
+        return res.status(400).json({ message: 'Email address is required' });
+      }
+
+      // Get user's videos
+      const userVideos = await storage.getVideosByUserId(userId);
+      let videosToSend = userVideos;
+      
+      if (videoIds && videoIds.length > 0) {
+        videosToSend = userVideos.filter(video => videoIds.includes(video.id));
+      }
+
+      if (videosToSend.length === 0) {
+        return res.status(404).json({ message: 'No videos found to send' });
+      }
+
+      // Send email with video links
+      const { emailService } = await import('./emailService');
+      
+      const videoList = videosToSend.map(video => 
+        `• ${video.title} - ${req.protocol}://${req.get('host')}/uploads/videos/${video.filename}`
+      ).join('\n');
+
+      const emailContent = `
+        <h2>Your SoapBox Generated Videos</h2>
+        <p>Here are your AI-generated spiritual videos:</p>
+        <br/>
+        ${videosToSend.map(video => `
+          <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+            <h3>${video.title}</h3>
+            <p>${video.description}</p>
+            <p><strong>Duration:</strong> ${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}</p>
+            <p><strong>Type:</strong> ${video.type}</p>
+            <p><a href="${req.protocol}://${req.get('host')}/uploads/videos/${video.filename}" 
+                  style="background: #5A2671; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                  Download Video
+               </a></p>
+          </div>
+        `).join('')}
+        
+        <p style="margin-top: 30px; color: #666;">
+          These videos were generated using AI technology through your SoapBox Super App account.
+        </p>
+      `;
+
+      await emailService.sendEmail({
+        to: emailAddress,
+        from: 'support@soapboxsuperapp.com',
+        subject: `Your SoapBox AI Generated Videos (${videosToSend.length} videos)`,
+        html: emailContent
+      });
+
+      res.json({ 
+        message: `Successfully sent ${videosToSend.length} videos to ${emailAddress}`,
+        videoCount: videosToSend.length
+      });
+    } catch (error) {
+      console.error('Error emailing videos:', error);
+      res.status(500).json({ message: 'Failed to email videos' });
+    }
+  });
+
   // Generate AI thumbnail for existing video
   app.post('/api/videos/:id/ai-thumbnail', isAuthenticated, async (req: any, res) => {
     try {

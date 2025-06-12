@@ -466,6 +466,7 @@ export interface IStorage {
   getVideos(churchId?: number): Promise<any[]>;
   deleteVideo(id: number): Promise<void>;
   getVideosByCategory(category: string, churchId?: number): Promise<any[]>;
+  getVideosByUserId(userId: string): Promise<any[]>;
   getPlaylistVideos(playlistId: number): Promise<any[]>;
 
   // Referral Rewards System
@@ -5266,6 +5267,19 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await query.orderBy(desc(videoContent.createdAt));
+  }
+
+  async getVideosByUserId(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(videoContent)
+      .where(
+        and(
+          eq(videoContent.uploadedBy, userId),
+          eq(videoContent.isActive, true)
+        )
+      )
+      .orderBy(desc(videoContent.createdAt));
   }
 
   async deleteVideo(id: number): Promise<void> {
