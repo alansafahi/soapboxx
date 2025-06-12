@@ -2394,23 +2394,23 @@ export class DatabaseStorage implements IStorage {
       // Get all prayer IDs for bulk comment queries
       const prayerIds = prayersData.map(p => p.id);
       
-      // Bulk fetch comments for prayers
+      // Bulk fetch comments for prayers (using prayerResponses as comments)
       const prayerCommentsData = prayerIds.length > 0 ? await db
         .select({
-          id: prayerComments.id,
-          prayerId: prayerComments.prayerId,
-          content: prayerComments.content,
-          authorId: prayerComments.authorId,
-          createdAt: prayerComments.createdAt,
+          id: prayerResponses.id,
+          prayerId: prayerResponses.prayerRequestId,
+          content: prayerResponses.response,
+          authorId: prayerResponses.userId,
+          createdAt: prayerResponses.createdAt,
           authorFirstName: users.firstName,
           authorLastName: users.lastName,
           authorEmail: users.email,
           authorProfileImage: users.profileImageUrl,
         })
-        .from(prayerComments)
-        .leftJoin(users, eq(prayerComments.authorId, users.id))
-        .where(inArray(prayerComments.prayerId, prayerIds))
-        .orderBy(desc(prayerComments.createdAt)) : [];
+        .from(prayerResponses)
+        .leftJoin(users, eq(prayerResponses.userId, users.id))
+        .where(inArray(prayerResponses.prayerRequestId, prayerIds))
+        .orderBy(desc(prayerResponses.createdAt)) : [];
 
       // Group comments by prayer ID
       const commentsByPrayer = new Map();
