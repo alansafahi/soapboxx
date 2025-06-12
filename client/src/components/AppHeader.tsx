@@ -89,13 +89,16 @@ export default function AppHeader() {
 
   // Filter navigation items based on user role
   const getVisibleGroups = () => {
-    return navigationGroups.map(group => ({
+    console.log('User role:', userRole);
+    const visibleGroups = navigationGroups.map(group => ({
       ...group,
       items: group.items.filter(item => {
         if (!item.roles) return true;
         return item.roles.includes(userRole?.role);
       })
     })).filter(group => group.items.length > 0);
+    console.log('Visible groups:', visibleGroups);
+    return visibleGroups;
   };
 
   const isActiveRoute = (href: string) => {
