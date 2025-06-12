@@ -558,6 +558,34 @@ export function DailyBibleFeature() {
     }
   };
 
+  const handleShareInsight = () => {
+    if (!ethosResponse || !dailyVerse) return;
+    
+    const shareText = `🧠 ETHOS Spiritual Insight\n\n${ethosResponse}\n\nBased on: ${dailyVerse.verseReference}\n\nShared from SoapBox Super App`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'ETHOS Spiritual Insight',
+        text: shareText,
+        url: window.location.href
+      }).catch(() => {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(shareText);
+        toast({
+          title: "Copied to Clipboard",
+          description: "Insight copied to clipboard for sharing.",
+        });
+      });
+    } else {
+      // Fallback to clipboard
+      navigator.clipboard.writeText(shareText);
+      toast({
+        title: "Copied to Clipboard",
+        description: "Insight copied to clipboard for sharing.",
+      });
+    }
+  };
+
   const handleCustomQuestion = () => {
     if (customQuestion.trim()) {
       handleETHOSQuestion(customQuestion);
@@ -1293,7 +1321,7 @@ export function DailyBibleFeature() {
                       <Button variant="outline" size="sm" onClick={() => setShowETHOSDialog(true)}>
                         Ask Another Question
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={handleShareInsight}>
                         <Share2 className="h-4 w-4 mr-1" />
                         Share
                       </Button>
