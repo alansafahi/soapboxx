@@ -775,7 +775,7 @@ export const eventBookmarks = pgTable("event_bookmarks", {
   userEventUnique: unique().on(table.userId, table.eventId),
 }));
 
-// Check-ins table for spiritual and event attendance tracking
+// Check-ins table for spiritual and event attendance tracking with enhanced mood support
 export const checkIns = pgTable("check_ins", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -784,6 +784,9 @@ export const checkIns = pgTable("check_ins", {
   checkInType: varchar("check_in_type", { length: 50 }).notNull(), // "Sunday Service", "Daily Devotional", "Prayer Time", "Spiritual Check-In", "Custom"
   mood: varchar("mood", { length: 20 }), // "joyful", "peaceful", "grateful", "struggling", "hopeful", etc.
   moodEmoji: varchar("mood_emoji", { length: 10 }), // emoji representation
+  moodScore: integer("mood_score"), // 1-5 scale (1=😭, 5=😇)
+  moodNotes: text("mood_notes"), // User's reflection on their mood
+  shareMoodWithChurch: boolean("share_mood_with_church").default(false), // Optional mood sharing
   notes: text("notes"), // personal reflection or prayer intent
   prayerIntent: text("prayer_intent"), // specific prayer request/intent
   isPhysicalAttendance: boolean("is_physical_attendance").default(false), // true if QR code check-in
@@ -793,8 +796,52 @@ export const checkIns = pgTable("check_ins", {
   longitude: decimal("longitude", { precision: 11, scale: 8 }),
   streakCount: integer("streak_count").default(1), // daily streak counter
   pointsEarned: integer("points_earned").default(5), // gamification points
+  aiPersonalizationTriggered: boolean("ai_personalization_triggered").default(false), // Track AI content generation
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Detailed mood check-ins with AI personalization triggers
+export const moodCheckins = pgTable("mood_checkins", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  checkInId: integer("check_in_id").references(() => checkIns.id), // Link to daily check-in
+  mood: varchar("mood", { length: 30 }).notNull(), // joyful, peaceful, anxious, lonely, tired, angry, grateful
+  moodEmoji: varchar("mood_emoji", { length: 10 }).notNull(), // 😇 😊 😐 😔 😭
+  moodScore: integer("mood_score").notNull(), // 1-5 scale
+  notes: text("notes"), // User reflection on mood
+  triggers: text("triggers").array(), // What influenced this mood
+  copingStrategies: text("coping_strategies").array(), // What helps them feel better
+  energyLevel: integer("energy_level"), // 1-5 scale
+  socialConnection: integer("social_connection"), // 1-5 how connected they feel
+  spiritualConnection: integer("spiritual_connection"), // 1-5 closeness to God
+  shareable: boolean("shareable").default(false), // Can be shared with church staff
+  churchId: integer("church_id").references(() => churches.id),
+  aiContentGenerated: boolean("ai_content_generated").default(false), // Track if AI content was created
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// AI-Generated Personalized Content Recommendations
+export const personalizedContent = pgTable("personalized_content", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  moodCheckinId: integer("mood_checkin_id").references(() => moodCheckins.id),
+  checkInId: integer("check_in_id").references(() => checkIns.id),
+  contentType: varchar("content_type", { length: 50 }).notNull(), // verse, devotional, prayer, article, meditation
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  reason: text("reason"), // Why this content was recommended
+  confidence: real("confidence").default(0.5), // AI confidence score 0-1
+  priority: integer("priority").default(1), // 1-5 recommendation priority
+  estimatedReadTime: integer("estimated_read_time"), // Minutes
+  difficulty: varchar("difficulty", { length: 20 }).default("intermediate"),
+  topics: text("topics").array(), // Related spiritual topics
+  scriptureReferences: text("scripture_references").array(),
+  actionable: boolean("actionable").default(false), // Includes specific actions/prayers
+  viewed: boolean("viewed").default(false),
+  helpful: boolean("helpful"), // User feedback
+  helpfulFeedback: text("helpful_feedback"), // Why it was/wasn't helpful
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // QR codes for physical check-in locations
@@ -1795,9 +1842,21 @@ export const userInspirationHistoryRelations = relations(userInspirationHistory,
   }),
 }));
 
-// Export types
+// Export types for core tables
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Mood check-in types
+export type MoodCheckin = typeof moodCheckins.$inferSelect;
+export type InsertMoodCheckin = typeof moodCheckins.$inferInsert;
+
+// Personalized content types
+export type PersonalizedContent = typeof personalizedContent.$inferSelect;
+export type InsertPersonalizedContent = typeof personalizedContent.$inferInsert;
+
+// Insert schemas for mood features
+export const insertMoodCheckinSchema = createInsertSchema(moodCheckins).omit({ id: true, createdAt: true });
+export const insertPersonalizedContentSchema = createInsertSchema(personalizedContent).omit({ id: true, createdAt: true });
 
 // Bible in a Day sessions
 export const bibleInADaySessions = pgTable("bible_in_a_day_sessions", {
@@ -2183,18 +2242,8 @@ export type InsertPrayerResponse = typeof prayerResponses.$inferInsert;
 export type PrayerResponse = typeof prayerResponses.$inferSelect;
 
 // Check-in system types
-export type CheckIn = typeof checkIns.$inferSelect;
-export type InsertCheckIn = typeof checkIns.$inferInsert;
 export type QrCode = typeof qrCodes.$inferSelect;
 export type InsertQrCode = typeof qrCodes.$inferInsert;
-
-// Check-in form schemas
-export const insertCheckInSchema = createInsertSchema(checkIns).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertCheckInForm = z.infer<typeof insertCheckInSchema>;
 
 export const insertQrCodeSchema = createInsertSchema(qrCodes).omit({
   createdAt: true,

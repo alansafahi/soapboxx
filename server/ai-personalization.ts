@@ -15,7 +15,7 @@ export interface PersonalizationData {
 }
 
 export interface ContentRecommendation {
-  type: 'verse' | 'devotional' | 'topic' | 'reading_plan';
+  type: 'verse' | 'devotional' | 'prayer' | 'meditation' | 'article';
   title: string;
   content: string;
   reason: string;
@@ -24,6 +24,14 @@ export interface ContentRecommendation {
   estimatedReadTime: number;
   difficulty: string;
   topics: string[];
+  scriptureReferences?: string[];
+  actionable?: boolean;
+}
+
+export interface MoodBasedContent {
+  mood: string;
+  moodScore: number;
+  recommendations: ContentRecommendation[];
 }
 
 export class AIPersonalizationService {
