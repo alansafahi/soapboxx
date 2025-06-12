@@ -218,6 +218,12 @@ import {
   type InsertReferralReward,
   type ReferralMilestone,
   type InsertReferralMilestone,
+  videoContent,
+  videoSeries,
+  type VideoContent,
+  type InsertVideoContent,
+  type VideoSeries,
+  type InsertVideoSeries,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte } from "drizzle-orm";
