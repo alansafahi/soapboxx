@@ -91,14 +91,21 @@ export default function TourTestPage() {
     );
   }
 
+  // Group roles by category
+  const rolesByCategory = allRoles.reduce((acc, role) => {
+    if (!acc[role.category]) acc[role.category] = [];
+    acc[role.category].push(role);
+    return acc;
+  }, {} as Record<string, typeof allRoles>);
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Guided Tour Testing</CardTitle>
+            <CardTitle className="text-2xl">Comprehensive Role-Based Tour System</CardTitle>
             <CardDescription>
-              Test the role-based personalized tour system for platform administrators
+              Test the complete tour system for all platform and member roles
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -121,7 +128,7 @@ export default function TourTestPage() {
                   <p><strong>Has New Role Assignment:</strong> {hasNewRoleAssignment ? 'Yes' : 'No'}</p>
                   <p><strong>Loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
                 </div>
-                {shouldShowTour && (
+                {shouldShowTour && userRole && (
                   <div className="mt-3">
                     <Button 
                       onClick={() => startTourForRole(userRole)}
@@ -135,61 +142,34 @@ export default function TourTestPage() {
               </div>
 
               <div className="space-y-6">
-                {/* Platform Administrator Roles */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900">Platform Administrator Tours</h3>
-                  <p className="text-sm text-gray-600">
-                    Experience contextual welcome tours designed for platform administrators.
-                  </p>
-                  
-                  <div className="grid gap-3">
-                    {platformRoles.map((role) => (
-                      <div key={role.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className={role.color}>{role.name}</Badge>
+                {Object.entries(rolesByCategory).map(([category, roles]) => (
+                  <div key={category} className="space-y-3">
+                    <h3 className="font-semibold text-gray-900">{category} Tours</h3>
+                    <p className="text-sm text-gray-600">
+                      Experience role-specific welcome tours designed for {category.toLowerCase()} users.
+                    </p>
+                    
+                    <div className="grid gap-3">
+                      {roles.map((role) => (
+                        <div key={role.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge className={role.color}>{role.name}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-600">{role.description}</p>
                           </div>
-                          <p className="text-sm text-gray-600">{role.description}</p>
+                          <Button 
+                            onClick={() => startTourForRole(role.id)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Start Tour
+                          </Button>
                         </div>
-                        <Button 
-                          onClick={() => startTourForRole(role.id)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Start Tour
-                        </Button>
-                      </div>
-                    ))}
-                </div>
-                </div>
-
-                {/* Church Member Roles */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900">Church Member Tours</h3>
-                  <p className="text-sm text-gray-600">
-                    Experience personalized welcome tours designed for different types of church members.
-                  </p>
-                  
-                  <div className="grid gap-3">
-                    {memberRoles.map((role) => (
-                      <div key={role.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className={role.color}>{role.name}</Badge>
-                          </div>
-                          <p className="text-sm text-gray-600">{role.description}</p>
-                        </div>
-                        <Button
-                          onClick={() => startTourForRole(role.id)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Start Tour
-                        </Button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
 
               <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
@@ -197,8 +177,9 @@ export default function TourTestPage() {
                 <ul className="text-sm text-yellow-800 space-y-1">
                   <li>• Role-specific welcome messages and guidance</li>
                   <li>• Interactive step-by-step platform navigation</li>
-                  <li>• Contextual tips for administrative responsibilities</li>
+                  <li>• Contextual tips for role-specific responsibilities</li>
                   <li>• Progress tracking and completion persistence</li>
+                  <li>• New role assignment detection and triggering</li>
                   <li>• Responsive design with smooth animations</li>
                 </ul>
               </div>
