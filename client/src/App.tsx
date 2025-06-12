@@ -41,6 +41,7 @@ import PersonalizedTour from "@/components/PersonalizedTour";
 import TourTesting from "@/pages/TourTesting";
 import TourTestPage from "@/pages/tour-test";
 import AdminAnalytics from "@/pages/AdminAnalytics";
+import AudioRoutines from "@/pages/AudioRoutines";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
@@ -185,6 +186,7 @@ function AppRouter() {
               <Route path="/email-verification" component={EmailVerification} />
               <Route path="/tour-testing" component={TourTesting} />
               <Route path="/tour-test" component={TourTestPage} />
+              <Route path="/audio-routines" component={AudioRoutines} />
             </>
           )}
         </Switch>
