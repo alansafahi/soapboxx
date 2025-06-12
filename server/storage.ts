@@ -2391,6 +2391,49 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(prayerRequests.createdAt))
         .limit(10);
 
+      // Get all prayer IDs for bulk comment queries
+      const prayerIds = prayersData.map(p => p.id);
+      
+      // Bulk fetch comments for prayers
+      const prayerCommentsData = prayerIds.length > 0 ? await db
+        .select({
+          id: prayerComments.id,
+          prayerId: prayerComments.prayerId,
+          content: prayerComments.content,
+          authorId: prayerComments.authorId,
+          createdAt: prayerComments.createdAt,
+          authorFirstName: users.firstName,
+          authorLastName: users.lastName,
+          authorEmail: users.email,
+          authorProfileImage: users.profileImageUrl,
+        })
+        .from(prayerComments)
+        .leftJoin(users, eq(prayerComments.authorId, users.id))
+        .where(inArray(prayerComments.prayerId, prayerIds))
+        .orderBy(desc(prayerComments.createdAt)) : [];
+
+      // Group comments by prayer ID
+      const commentsByPrayer = new Map();
+      for (const comment of prayerCommentsData) {
+        if (!commentsByPrayer.has(comment.prayerId)) {
+          commentsByPrayer.set(comment.prayerId, []);
+        }
+        const authorName = comment.authorFirstName && comment.authorLastName 
+          ? `${comment.authorFirstName} ${comment.authorLastName}`
+          : comment.authorEmail || 'Anonymous';
+        
+        commentsByPrayer.get(comment.prayerId).push({
+          id: comment.id,
+          content: comment.content,
+          author: {
+            id: comment.authorId,
+            name: authorName,
+            profileImage: comment.authorProfileImage
+          },
+          createdAt: comment.createdAt
+        });
+      }
+
       // Transform prayers for feed
       for (const p of prayersData) {
         const authorName = p.authorFirstName && p.authorLastName 
@@ -2411,6 +2454,8 @@ export class DatabaseStorage implements IStorage {
         const prayerResponse = await this.getUserPrayerResponse(p.id, userId);
         const isLiked = !!prayerResponse;
 
+        const comments = commentsByPrayer.get(p.id) || [];
+
         feedPosts.push({
           id: p.id,
           type: 'prayer',
@@ -2424,11 +2469,12 @@ export class DatabaseStorage implements IStorage {
           church: p.churchId ? { id: p.churchId, name: p.churchName } : null,
           createdAt: p.createdAt,
           likeCount: 0,
-          commentCount: 0,
+          commentCount: comments.length,
           shareCount: 0,
           isLiked: isLiked,
           isBookmarked: !!prayerBookmark,
-          tags: ['prayer', 'faith']
+          tags: ['prayer', 'faith'],
+          comments: comments
         });
       }
 
