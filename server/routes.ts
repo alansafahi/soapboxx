@@ -1499,5 +1499,321 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Video Content Routes (Phase 1: Pastor/Admin Uploads)
+  app.post('/api/videos', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userRole = await storage.getUserRole(userId);
+      
+      // Check if user has permission to upload videos
+      if (!['admin', 'pastor', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to upload videos' });
+      }
+
+      const videoData = {
+        ...req.body,
+        uploadedBy: userId,
+        phase: 'phase1',
+        generationType: 'uploaded',
+      };
+
+      const video = await storage.createVideoContent(videoData);
+      res.status(201).json(video);
+    } catch (error) {
+      console.error('Error creating video:', error);
+      res.status(500).json({ message: 'Failed to create video' });
+    }
+  });
+
+  app.get('/api/videos', isAuthenticated, async (req, res) => {
+    try {
+      const { churchId, category, limit = 20, offset = 0 } = req.query;
+      
+      let videos;
+      if (churchId) {
+        videos = await storage.getVideosByChurch(
+          parseInt(churchId as string), 
+          category as string
+        );
+      } else {
+        videos = await storage.getPublicVideos(
+          parseInt(limit as string), 
+          parseInt(offset as string)
+        );
+      }
+      
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+      res.status(500).json({ message: 'Failed to fetch videos' });
+    }
+  });
+
+  app.get('/api/videos/:id', isAuthenticated, async (req, res) => {
+    try {
+      const video = await storage.getVideoContent(parseInt(req.params.id));
+      if (!video) {
+        return res.status(404).json({ message: 'Video not found' });
+      }
+      res.json(video);
+    } catch (error) {
+      console.error('Error fetching video:', error);
+      res.status(500).json({ message: 'Failed to fetch video' });
+    }
+  });
+
+  app.put('/api/videos/:id', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const video = await storage.getVideoContent(parseInt(req.params.id));
+      
+      if (!video) {
+        return res.status(404).json({ message: 'Video not found' });
+      }
+
+      // Check if user owns the video or has admin rights
+      const userRole = await storage.getUserRole(userId);
+      if (video.uploadedBy !== userId && !['admin', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to edit this video' });
+      }
+
+      const updatedVideo = await storage.updateVideoContent(parseInt(req.params.id), req.body);
+      res.json(updatedVideo);
+    } catch (error) {
+      console.error('Error updating video:', error);
+      res.status(500).json({ message: 'Failed to update video' });
+    }
+  });
+
+  app.delete('/api/videos/:id', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const video = await storage.getVideoContent(parseInt(req.params.id));
+      
+      if (!video) {
+        return res.status(404).json({ message: 'Video not found' });
+      }
+
+      // Check if user owns the video or has admin rights
+      const userRole = await storage.getUserRole(userId);
+      if (video.uploadedBy !== userId && !['admin', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to delete this video' });
+      }
+
+      await storage.deleteVideoContent(parseInt(req.params.id));
+      res.json({ message: 'Video deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      res.status(500).json({ message: 'Failed to delete video' });
+    }
+  });
+
+  // Video Analytics Routes
+  app.post('/api/videos/:id/view', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const videoId = parseInt(req.params.id);
+      const { watchDuration, completionPercentage, deviceType, quality } = req.body;
+
+      const viewData = {
+        videoId,
+        userId,
+        watchDuration: watchDuration || 0,
+        completionPercentage: completionPercentage || 0,
+        deviceType: deviceType || 'unknown',
+        quality: quality || '720p',
+      };
+
+      const view = await storage.recordVideoView(viewData);
+      res.json(view);
+    } catch (error) {
+      console.error('Error recording video view:', error);
+      res.status(500).json({ message: 'Failed to record video view' });
+    }
+  });
+
+  app.get('/api/videos/:id/analytics', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const video = await storage.getVideoContent(parseInt(req.params.id));
+      
+      if (!video) {
+        return res.status(404).json({ message: 'Video not found' });
+      }
+
+      // Check if user owns the video or has admin rights to view analytics
+      const userRole = await storage.getUserRole(userId);
+      if (video.uploadedBy !== userId && !['admin', 'pastor', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to view analytics' });
+      }
+
+      const analytics = await storage.getVideoAnalytics(parseInt(req.params.id));
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching video analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch video analytics' });
+    }
+  });
+
+  // Video Comments Routes
+  app.post('/api/videos/:id/comments', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const videoId = parseInt(req.params.id);
+      const { content, timestamp, parentId } = req.body;
+
+      const commentData = {
+        videoId,
+        userId,
+        content,
+        timestamp: timestamp || null,
+        parentId: parentId || null,
+      };
+
+      const comment = await storage.createVideoComment(commentData);
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error('Error creating video comment:', error);
+      res.status(500).json({ message: 'Failed to create comment' });
+    }
+  });
+
+  app.get('/api/videos/:id/comments', isAuthenticated, async (req, res) => {
+    try {
+      const comments = await storage.getVideoComments(parseInt(req.params.id));
+      res.json(comments);
+    } catch (error) {
+      console.error('Error fetching video comments:', error);
+      res.status(500).json({ message: 'Failed to fetch comments' });
+    }
+  });
+
+  // Video Likes/Reactions Routes
+  app.post('/api/videos/:id/like', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const videoId = parseInt(req.params.id);
+      const { reactionType = 'like' } = req.body;
+
+      const result = await storage.toggleVideoLike(userId, videoId, reactionType);
+      res.json(result);
+    } catch (error) {
+      console.error('Error toggling video like:', error);
+      res.status(500).json({ message: 'Failed to toggle like' });
+    }
+  });
+
+  // Video Series Routes
+  app.post('/api/video-series', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userRole = await storage.getUserRole(userId);
+      
+      // Check if user has permission to create video series
+      if (!['admin', 'pastor', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to create video series' });
+      }
+
+      const seriesData = {
+        ...req.body,
+        createdBy: userId,
+      };
+
+      const series = await storage.createVideoSeries(seriesData);
+      res.status(201).json(series);
+    } catch (error) {
+      console.error('Error creating video series:', error);
+      res.status(500).json({ message: 'Failed to create video series' });
+    }
+  });
+
+  app.get('/api/video-series', isAuthenticated, async (req, res) => {
+    try {
+      const { churchId } = req.query;
+      
+      if (!churchId) {
+        return res.status(400).json({ message: 'Church ID is required' });
+      }
+
+      const series = await storage.getVideoSeriesByChurch(parseInt(churchId as string));
+      res.json(series);
+    } catch (error) {
+      console.error('Error fetching video series:', error);
+      res.status(500).json({ message: 'Failed to fetch video series' });
+    }
+  });
+
+  app.get('/api/video-series/:id', isAuthenticated, async (req, res) => {
+    try {
+      const series = await storage.getVideoSeries(parseInt(req.params.id));
+      if (!series) {
+        return res.status(404).json({ message: 'Video series not found' });
+      }
+      res.json(series);
+    } catch (error) {
+      console.error('Error fetching video series:', error);
+      res.status(500).json({ message: 'Failed to fetch video series' });
+    }
+  });
+
+  // Video Playlists Routes
+  app.post('/api/video-playlists', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const userRole = await storage.getUserRole(userId);
+      
+      // Check if user has permission to create playlists
+      if (!['admin', 'pastor', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to create playlists' });
+      }
+
+      const playlistData = {
+        ...req.body,
+        createdBy: userId,
+      };
+
+      const playlist = await storage.createVideoPlaylist(playlistData);
+      res.status(201).json(playlist);
+    } catch (error) {
+      console.error('Error creating video playlist:', error);
+      res.status(500).json({ message: 'Failed to create playlist' });
+    }
+  });
+
+  app.post('/api/video-playlists/:id/videos', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const playlistId = parseInt(req.params.id);
+      const { videoId, position } = req.body;
+
+      const playlist = await storage.getVideoPlaylist(playlistId);
+      if (!playlist) {
+        return res.status(404).json({ message: 'Playlist not found' });
+      }
+
+      // Check if user owns the playlist or has admin rights
+      const userRole = await storage.getUserRole(userId);
+      if (playlist.createdBy !== userId && !['admin', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to modify this playlist' });
+      }
+
+      const playlistVideo = await storage.addVideoToPlaylist(playlistId, videoId, position);
+      res.status(201).json(playlistVideo);
+    } catch (error) {
+      console.error('Error adding video to playlist:', error);
+      res.status(500).json({ message: 'Failed to add video to playlist' });
+    }
+  });
+
+  app.get('/api/video-playlists/:id/videos', isAuthenticated, async (req, res) => {
+    try {
+      const videos = await storage.getPlaylistVideos(parseInt(req.params.id));
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching playlist videos:', error);
+      res.status(500).json({ message: 'Failed to fetch playlist videos' });
+    }
+  });
+
   return httpServer;
 }

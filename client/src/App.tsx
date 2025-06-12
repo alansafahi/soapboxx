@@ -43,6 +43,7 @@ import TourTestPage from "@/pages/tour-test";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AudioRoutines from "@/pages/AudioRoutines";
 import AudioBibleDemo from "@/pages/AudioBibleDemo";
+import VideoLibrary from "@/pages/VideoLibrary";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
@@ -189,6 +190,7 @@ function AppRouter() {
               <Route path="/tour-test" component={TourTestPage} />
               <Route path="/audio-routines" component={AudioRoutines} />
               <Route path="/audio-bible" component={AudioBibleDemo} />
+              <Route path="/video-library" component={VideoLibrary} />
             </>
           )}
         </Switch>
