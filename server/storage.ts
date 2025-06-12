@@ -2156,24 +2156,34 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(discussions.createdAt))
         .limit(10);
 
+      // Get all discussion IDs for bulk bookmark/like queries
+      const discussionIds = discussionsData.map(d => d.id);
+      
+      // Bulk fetch bookmarks and likes
+      const discussionBookmarks = discussionIds.length > 0 ? await db
+        .select()
+        .from(discussionBookmarks)
+        .where(and(
+          eq(discussionBookmarks.userId, userId),
+          inArray(discussionBookmarks.discussionId, discussionIds)
+        )) : [];
+
+      const discussionLikes = discussionIds.length > 0 ? await db
+        .select()
+        .from(discussionLikes)
+        .where(and(
+          eq(discussionLikes.userId, userId),
+          inArray(discussionLikes.discussionId, discussionIds)
+        )) : [];
+
+      const bookmarkedDiscussions = new Set(discussionBookmarks.map(b => b.discussionId));
+      const likedDiscussions = new Set(discussionLikes.map(l => l.discussionId));
+
       // Transform discussions for feed
       for (const d of discussionsData) {
         const authorName = d.authorFirstName && d.authorLastName 
           ? `${d.authorFirstName} ${d.authorLastName}`
           : d.authorEmail || 'Unknown User';
-
-        // Check if user bookmarked this discussion
-        const [bookmark] = await db
-          .select()
-          .from(discussionBookmarks)
-          .where(and(
-            eq(discussionBookmarks.userId, userId),
-            eq(discussionBookmarks.discussionId, d.id)
-          ))
-          .limit(1);
-
-        // Check if user liked this discussion
-        const isLiked = await this.getUserDiscussionLike(d.id, userId);
 
         feedPosts.push({
           id: d.id,
@@ -2190,8 +2200,8 @@ export class DatabaseStorage implements IStorage {
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
-          isLiked: isLiked,
-          isBookmarked: !!bookmark
+          isLiked: likedDiscussions.has(d.id),
+          isBookmarked: bookmarkedDiscussions.has(d.id)
         });
       }
 
