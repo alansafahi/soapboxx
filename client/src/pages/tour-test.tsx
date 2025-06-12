@@ -99,8 +99,9 @@ export default function TourTestPage() {
   }, {} as Record<string, typeof allRoles>);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="w-full max-w-7xl mx-auto px-6 py-8">
+        <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Comprehensive Role-Based Tour System</CardTitle>
@@ -194,6 +195,7 @@ export default function TourTestPage() {
             role={selectedRole}
           />
         )}
+        </div>
       </div>
     </div>
   );
