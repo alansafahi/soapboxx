@@ -4925,6 +4925,153 @@ export class DatabaseStorage implements IStorage {
       series: completion.currentSeries
     }));
   }
+
+  // Audio routine methods
+  async getAudioRoutines(category?: string): Promise<any[]> {
+    const sampleRoutines = [
+      {
+        id: 1,
+        name: "Morning Peace",
+        description: "Start your day with guided meditation and scripture reflection",
+        totalDuration: 900, // 15 minutes
+        category: "morning",
+        autoAdvance: true,
+        steps: [
+          {
+            id: "step-1",
+            type: "meditation",
+            title: "Centering Prayer",
+            content: "Take a deep breath and center your heart on God's presence. Let the worries of yesterday and concerns of today fade as you focus on this moment with the Divine.",
+            duration: 180,
+            voiceSettings: { voice: "peaceful-female", speed: 1.0, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-2",
+            type: "scripture",
+            title: "Daily Verse Reflection",
+            content: "Today's verse: 'Be still, and know that I am God; I will be exalted among the nations, I will be exalted in the earth.' - Psalm 46:10. Let these words wash over you like morning light.",
+            duration: 240,
+            voiceSettings: { voice: "warm-female", speed: 0.9, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-3",
+            type: "prayer",
+            title: "Morning Intentions",
+            content: "Gracious God, as this new day begins, I offer my heart to you. Guide my steps, guard my words, and help me to be a light for others. May your love flow through me in all I do.",
+            duration: 180,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "worship-instrumental" }
+          },
+          {
+            id: "step-4",
+            type: "reflection",
+            title: "Silent Reflection",
+            content: "In these moments of silence, listen for God's gentle whisper. What is the Spirit calling you to today? Rest in this sacred space.",
+            duration: 300,
+            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "Evening Gratitude",
+        description: "End your day with thanksgiving and peaceful rest",
+        totalDuration: 720, // 12 minutes
+        category: "evening",
+        autoAdvance: true,
+        steps: [
+          {
+            id: "step-5",
+            type: "reflection",
+            title: "Day Review",
+            content: "As evening comes, take a moment to reflect on the gifts of this day. What moments of grace did you experience? Where did you see God's hand at work?",
+            duration: 180,
+            voiceSettings: { voice: "warm-female", speed: 0.9, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-6",
+            type: "prayer",
+            title: "Gratitude Prayer",
+            content: "Thank you, loving God, for the blessings of this day - both seen and unseen. For breath in my lungs, love in my heart, and your constant presence by my side.",
+            duration: 240,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-7",
+            type: "scripture",
+            title: "Rest in God's Peace",
+            content: "Let these words bring you peace: 'In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.' - Psalm 4:8",
+            duration: 180,
+            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
+          },
+          {
+            id: "step-8",
+            type: "meditation",
+            title: "Release and Rest",
+            content: "Release the day into God's hands. Let go of what was left undone, forgive what went wrong, and rest in the assurance of God's unfailing love.",
+            duration: 120,
+            voiceSettings: { voice: "peaceful-female", speed: 0.7, musicBed: "gentle-piano" }
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "Midday Reset",
+        description: "A quick spiritual refresh for busy schedules",
+        totalDuration: 360, // 6 minutes
+        category: "midday",
+        autoAdvance: true,
+        steps: [
+          {
+            id: "step-9",
+            type: "meditation",
+            title: "Pause and Breathe",
+            content: "Stop for a moment. Take three deep breaths. Remember that God is with you in this very moment, in this very place.",
+            duration: 90,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-10",
+            type: "scripture",
+            title: "Strength for the Journey",
+            content: "Find renewed strength in these words: 'But those who hope in the Lord will renew their strength. They will soar on wings like eagles.' - Isaiah 40:31",
+            duration: 120,
+            voiceSettings: { voice: "authoritative-male", speed: 1.0, musicBed: "worship-instrumental" }
+          },
+          {
+            id: "step-11",
+            type: "prayer",
+            title: "Quick Reset Prayer",
+            content: "Lord, refresh my spirit and renew my energy. Help me to approach the rest of this day with your peace, wisdom, and love. Amen.",
+            duration: 90,
+            voiceSettings: { voice: "warm-female", speed: 1.0, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-12",
+            type: "reflection",
+            title: "Intentional Return",
+            content: "As you return to your activities, carry this peace with you. Let your next actions be infused with the grace you've received in these moments.",
+            duration: 60,
+            voiceSettings: { voice: "peaceful-female", speed: 0.9, musicBed: "nature-sounds" }
+          }
+        ]
+      }
+    ];
+
+    if (category) {
+      return sampleRoutines.filter(routine => routine.category === category);
+    }
+    return sampleRoutines;
+  }
+
+  async getAudioRoutine(id: number): Promise<any | undefined> {
+    const routines = await this.getAudioRoutines();
+    return routines.find(routine => routine.id === id);
+  }
+
+  async updateRoutineProgress(userId: string, routineId: number, progress: any): Promise<void> {
+    // In a full implementation, this would store progress in the database
+    console.log(`Updated routine progress for user ${userId}, routine ${routineId}:`, progress);
+  }
 }
 
 export const storage = new DatabaseStorage();

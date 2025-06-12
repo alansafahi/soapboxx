@@ -1262,5 +1262,101 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Audio generation and routine endpoints
+  app.get('/api/audio/generate', async (req, res) => {
+    try {
+      const { text, voice = 'warm-female', musicBed = 'gentle-piano', speed = '1.0' } = req.query;
+      
+      if (!text) {
+        return res.status(400).json({ error: 'Text parameter is required' });
+      }
+
+      // Generate audio URL based on parameters
+      const audioId = Buffer.from(`${text}-${voice}-${musicBed}-${speed}`).toString('base64url');
+      const audioUrl = `/api/audio/stream/${audioId}`;
+      
+      res.json({
+        audioUrl,
+        duration: Math.ceil((text as string).length / 10), // Estimate duration
+        voice,
+        musicBed,
+        speed: parseFloat(speed as string)
+      });
+    } catch (error) {
+      console.error('Audio generation error:', error);
+      res.status(500).json({ error: 'Failed to generate audio' });
+    }
+  });
+
+  app.get('/api/audio/stream/:audioId', async (req, res) => {
+    try {
+      const { audioId } = req.params;
+      
+      // Decode audio parameters
+      const decodedParams = Buffer.from(audioId, 'base64url').toString();
+      const [text, voice, musicBed, speed] = decodedParams.split('-');
+      
+      // For demo purposes, return a placeholder audio stream
+      // In production, this would integrate with text-to-speech and audio mixing services
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Content-Length', '1024');
+      
+      // Generate a simple audio response for demo
+      const audioBuffer = Buffer.alloc(1024);
+      res.send(audioBuffer);
+    } catch (error) {
+      console.error('Audio streaming error:', error);
+      res.status(500).json({ error: 'Failed to stream audio' });
+    }
+  });
+
+  app.get('/api/audio/routines', isAuthenticated, async (req, res) => {
+    try {
+      const { category } = req.query;
+      const routines = await storage.getAudioRoutines(category as string);
+      res.json(routines);
+    } catch (error) {
+      console.error('Error fetching audio routines:', error);
+      res.status(500).json({ error: 'Failed to fetch routines' });
+    }
+  });
+
+  app.get('/api/audio/routines/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const routine = await storage.getAudioRoutine(parseInt(id));
+      
+      if (!routine) {
+        return res.status(404).json({ error: 'Routine not found' });
+      }
+      
+      res.json(routine);
+    } catch (error) {
+      console.error('Error fetching audio routine:', error);
+      res.status(500).json({ error: 'Failed to fetch routine' });
+    }
+  });
+
+  app.post('/api/audio/routines/:id/progress', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { stepIndex, timeElapsed, completed } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      await storage.updateRoutineProgress(userId, parseInt(id), {
+        stepIndex,
+        timeElapsed,
+        completed,
+        lastAccessed: new Date()
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating routine progress:', error);
+      res.status(500).json({ error: 'Failed to update progress' });
+    }
+  });
+
   return httpServer;
 }
