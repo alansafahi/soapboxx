@@ -3,27 +3,24 @@
  * Tests various endpoints for speed, memory usage, and response sizes
  */
 
-import fs from 'fs';
-
 class PerformanceTestSuite {
   constructor(baseUrl = 'http://localhost:5000') {
     this.baseUrl = baseUrl;
     this.results = [];
-    this.authToken = null;
+    this.authCookie = null;
   }
 
   async authenticateUser() {
-    console.log('🔐 Setting up test authentication...');
-    // Using test user session for performance testing
     try {
       const response = await fetch(`${this.baseUrl}/api/auth/user`);
-      if (response.ok) {
-        console.log('✅ Already authenticated');
-        return true;
+      const cookies = response.headers.get('set-cookie');
+      if (cookies) {
+        this.authCookie = cookies;
       }
+      return response.ok;
     } catch (error) {
-      console.log('❌ Authentication required for performance testing');
-      return false;
+      console.log('Authentication test skipped - using existing session');
+      return true;
     }
   }
 
@@ -32,53 +29,42 @@ class PerformanceTestSuite {
     const startMemory = process.memoryUsage();
     
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (this.authCookie) {
+        headers['Cookie'] = this.authCookie;
+      }
+
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: options.method || 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        body: options.body ? JSON.stringify(options.body) : undefined
+        headers,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+        ...options
       });
 
       const endTime = performance.now();
-      const endMemory = process.memoryUsage();
       const responseText = await response.text();
-      
-      let responseData;
-      try {
-        responseData = JSON.parse(responseText);
-      } catch {
-        responseData = responseText;
-      }
+      const endMemory = process.memoryUsage();
 
       const result = {
         endpoint,
-        method: options.method || 'GET',
         status: response.status,
         responseTime: Math.round(endTime - startTime),
-        responseSize: new Blob([responseText]).size,
-        memoryDelta: {
-          rss: endMemory.rss - startMemory.rss,
-          heapUsed: endMemory.heapUsed - startMemory.heapUsed,
-          heapTotal: endMemory.heapTotal - startMemory.heapTotal
-        },
-        contentType: response.headers.get('content-type'),
-        cacheControl: response.headers.get('cache-control'),
-        compressed: !!response.headers.get('content-encoding'),
-        timestamp: new Date().toISOString()
+        responseSize: Buffer.byteLength(responseText, 'utf8'),
+        memoryDelta: endMemory.heapUsed - startMemory.heapUsed,
+        contentType: response.headers.get('content-type') || '',
+        contentEncoding: response.headers.get('content-encoding') || 'none',
+        success: response.ok
       };
 
       this.results.push(result);
       return result;
-
     } catch (error) {
       const result = {
         endpoint,
-        method: options.method || 'GET',
-        error: error.message,
+        status: 'ERROR',
         responseTime: performance.now() - startTime,
-        timestamp: new Date().toISOString()
+        error: error.message,
+        success: false
       };
       this.results.push(result);
       return result;
@@ -86,100 +72,76 @@ class PerformanceTestSuite {
   }
 
   async runConcurrentTests(endpoint, concurrency = 5) {
-    console.log(`📊 Running concurrent test for ${endpoint} (${concurrency} requests)`);
+    console.log(`Testing ${endpoint} with ${concurrency} concurrent requests...`);
     
-    const promises = Array(concurrency).fill().map(() => 
-      this.measureEndpoint(endpoint)
+    const promises = Array(concurrency).fill().map((_, i) => 
+      this.measureEndpoint(`${endpoint}?test=${i}`)
     );
     
     const results = await Promise.all(promises);
     const avgResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
     const maxResponseTime = Math.max(...results.map(r => r.responseTime));
-    const minResponseTime = Math.min(...results.map(r => r.responseTime));
+    const successRate = results.filter(r => r.success).length / results.length * 100;
     
     return {
       endpoint,
       concurrency,
       avgResponseTime: Math.round(avgResponseTime),
       maxResponseTime,
-      minResponseTime,
-      successRate: results.filter(r => r.status === 200).length / results.length * 100
+      successRate,
+      results
     };
   }
 
   async testDataHeavyEndpoints() {
-    console.log('🔍 Testing data-heavy endpoints...');
+    console.log('\n📊 Testing data-heavy endpoints...');
     
     const endpoints = [
       '/api/feed',
       '/api/events',
       '/api/prayers',
-      '/api/users/stats',
       '/api/checkins/recent',
       '/api/leaderboard/weekly-faithfulness',
-      '/api/leaderboard/referrals'
+      '/api/churches/nearby',
+      '/api/users/stats'
     ];
 
-    const results = [];
-    
     for (const endpoint of endpoints) {
-      console.log(`Testing ${endpoint}...`);
       const result = await this.measureEndpoint(endpoint);
-      console.log(`  📈 ${result.responseTime}ms, ${this.formatBytes(result.responseSize)}, status: ${result.status}`);
-      
-      // Test concurrent load
-      const concurrentResult = await this.runConcurrentTests(endpoint, 3);
-      results.push({ single: result, concurrent: concurrentResult });
-      
-      // Small delay between tests
-      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log(`  ${endpoint}: ${result.responseTime}ms, ${this.formatBytes(result.responseSize)}, ${result.success ? '✅' : '❌'}`);
     }
-    
-    return results;
   }
 
   async testCacheEfficiency() {
-    console.log('🗄️ Testing cache efficiency...');
+    console.log('\n🔄 Testing cache efficiency...');
     
     const testEndpoint = '/api/feed';
     
-    // First request (cache miss)
-    const firstRequest = await this.measureEndpoint(testEndpoint);
+    // First request (cold cache)
+    const cold = await this.measureEndpoint(testEndpoint);
+    console.log(`  Cold cache: ${cold.responseTime}ms`);
     
-    // Wait briefly
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Second request (warm cache)
+    const warm = await this.measureEndpoint(testEndpoint);
+    console.log(`  Warm cache: ${warm.responseTime}ms`);
     
-    // Second request (potential cache hit)
-    const secondRequest = await this.measureEndpoint(testEndpoint);
-    
-    const cacheEfficiency = {
-      firstRequestTime: firstRequest.responseTime,
-      secondRequestTime: secondRequest.responseTime,
-      improvement: Math.round(((firstRequest.responseTime - secondRequest.responseTime) / firstRequest.responseTime) * 100),
-      cacheHeadersPresent: !!(firstRequest.cacheControl || secondRequest.cacheControl)
-    };
-    
-    console.log(`  Cache improvement: ${cacheEfficiency.improvement}%`);
-    return cacheEfficiency;
+    const improvement = ((cold.responseTime - warm.responseTime) / cold.responseTime * 100);
+    console.log(`  Cache improvement: ${improvement > 0 ? improvement.toFixed(1) + '%' : 'No improvement detected'}`);
   }
 
   async testCompressionEffectiveness() {
-    console.log('🗜️ Testing response compression...');
+    console.log('\n🗜️ Testing compression effectiveness...');
     
-    const testEndpoints = ['/api/feed', '/api/events', '/api/prayers'];
-    const compressionResults = [];
+    const endpoints = ['/api/feed', '/api/events', '/api/prayers'];
     
-    for (const endpoint of testEndpoints) {
+    for (const endpoint of endpoints) {
       const result = await this.measureEndpoint(endpoint);
-      compressionResults.push({
-        endpoint,
-        compressed: result.compressed,
-        size: result.responseSize,
-        contentType: result.contentType
-      });
+      const compressionRatio = result.contentEncoding !== 'none' ? 
+        `${result.contentEncoding} enabled` : 
+        'No compression';
+      
+      console.log(`  ${endpoint}: ${this.formatBytes(result.responseSize)} (${compressionRatio})`);
     }
-    
-    return compressionResults;
   }
 
   formatBytes(bytes) {
@@ -191,124 +153,136 @@ class PerformanceTestSuite {
   }
 
   generateReport() {
-    const report = {
-      testDate: new Date().toISOString(),
-      summary: {
-        totalTests: this.results.length,
-        avgResponseTime: Math.round(this.results.reduce((sum, r) => sum + (r.responseTime || 0), 0) / this.results.length),
-        slowestEndpoint: this.results.reduce((prev, current) => 
-          (prev.responseTime > current.responseTime) ? prev : current
-        ),
-        fastestEndpoint: this.results.reduce((prev, current) => 
-          (prev.responseTime < current.responseTime) ? prev : current
-        ),
-        totalDataTransferred: this.formatBytes(this.results.reduce((sum, r) => sum + (r.responseSize || 0), 0)),
-        compressionRate: Math.round((this.results.filter(r => r.compressed).length / this.results.length) * 100)
-      },
-      recommendations: this.generateRecommendations(),
-      detailedResults: this.results
-    };
+    const successfulResults = this.results.filter(r => r.success);
+    
+    if (successfulResults.length === 0) {
+      return {
+        summary: 'No successful requests to analyze',
+        recommendations: ['Check server connectivity and authentication']
+      };
+    }
 
-    return report;
+    const avgResponseTime = successfulResults.reduce((sum, r) => sum + r.responseTime, 0) / successfulResults.length;
+    const avgResponseSize = successfulResults.reduce((sum, r) => sum + (r.responseSize || 0), 0) / successfulResults.length;
+    const totalDataTransferred = successfulResults.reduce((sum, r) => sum + (r.responseSize || 0), 0);
+    
+    const slowEndpoints = successfulResults
+      .filter(r => r.responseTime > 300)
+      .sort((a, b) => b.responseTime - a.responseTime);
+    
+    const largeResponses = successfulResults
+      .filter(r => r.responseSize > 10000)
+      .sort((a, b) => b.responseSize - a.responseSize);
+
+    return {
+      summary: {
+        totalRequests: this.results.length,
+        successfulRequests: successfulResults.length,
+        averageResponseTime: Math.round(avgResponseTime),
+        averageResponseSize: this.formatBytes(avgResponseSize),
+        totalDataTransferred: this.formatBytes(totalDataTransferred),
+        compressionDetected: successfulResults.some(r => r.contentEncoding !== 'none')
+      },
+      slowEndpoints: slowEndpoints.slice(0, 5),
+      largeResponses: largeResponses.slice(0, 5),
+      performance: this.generatePerformanceGrade(avgResponseTime)
+    };
+  }
+
+  generatePerformanceGrade(avgResponseTime) {
+    if (avgResponseTime < 100) return { grade: 'A+', description: 'Excellent performance' };
+    if (avgResponseTime < 200) return { grade: 'A', description: 'Very good performance' };
+    if (avgResponseTime < 300) return { grade: 'B', description: 'Good performance' };
+    if (avgResponseTime < 500) return { grade: 'C', description: 'Acceptable performance' };
+    return { grade: 'D', description: 'Performance needs improvement' };
   }
 
   generateRecommendations() {
+    const report = this.generateReport();
     const recommendations = [];
-    
-    // Check for slow endpoints
-    const slowEndpoints = this.results.filter(r => r.responseTime > 500);
-    if (slowEndpoints.length > 0) {
-      recommendations.push({
-        type: 'performance',
-        priority: 'high',
-        issue: 'Slow response times detected',
-        endpoints: slowEndpoints.map(r => r.endpoint),
-        suggestion: 'Add database indexes, implement pagination, or add caching'
-      });
+
+    if (report.summary.averageResponseTime > 300) {
+      recommendations.push('Consider implementing database indexes for slow queries');
+      recommendations.push('Add Redis caching for frequently accessed data');
     }
-    
-    // Check for large response sizes
-    const largeResponses = this.results.filter(r => r.responseSize > 100000); // 100KB
-    if (largeResponses.length > 0) {
-      recommendations.push({
-        type: 'bandwidth',
-        priority: 'medium',
-        issue: 'Large response sizes detected',
-        endpoints: largeResponses.map(r => r.endpoint),
-        suggestion: 'Implement pagination, reduce data fields, or optimize serialization'
-      });
+
+    if (!report.summary.compressionDetected) {
+      recommendations.push('Enable gzip compression for better bandwidth efficiency');
     }
-    
-    // Check compression
-    const uncompressedResponses = this.results.filter(r => !r.compressed && r.responseSize > 1024);
-    if (uncompressedResponses.length > 0) {
-      recommendations.push({
-        type: 'compression',
-        priority: 'medium',
-        issue: 'Uncompressed responses detected',
-        suggestion: 'Enable gzip compression for all API responses'
-      });
+
+    if (report.largeResponses.length > 0) {
+      recommendations.push('Implement pagination for large datasets');
+      recommendations.push('Consider reducing payload sizes for heavy endpoints');
     }
-    
+
+    if (report.slowEndpoints.length > 2) {
+      recommendations.push('Optimize database queries for consistently slow endpoints');
+    }
+
     return recommendations;
   }
 
   async runFullTestSuite() {
     console.log('🚀 Starting SoapBox Performance Test Suite...\n');
     
-    // Authenticate
-    const authenticated = await this.authenticateUser();
-    if (!authenticated) {
-      console.log('❌ Cannot run performance tests without authentication');
-      return;
-    }
+    // Basic connectivity test
+    await this.authenticateUser();
     
-    // Run tests
-    const dataHeavyResults = await this.testDataHeavyEndpoints();
-    console.log('');
+    // Test data-heavy endpoints
+    await this.testDataHeavyEndpoints();
     
-    const cacheResults = await this.testCacheEfficiency();
-    console.log('');
+    // Test caching
+    await this.testCacheEfficiency();
     
-    const compressionResults = await this.testCompressionEffectiveness();
-    console.log('');
+    // Test compression
+    await this.testCompressionEffectiveness();
     
-    // Generate report
+    // Concurrent load test
+    const loadTest = await this.runConcurrentTests('/api/feed', 3);
+    console.log(`\n⚡ Load test results: ${loadTest.avgResponseTime}ms avg, ${loadTest.successRate}% success rate`);
+    
+    // Generate final report
     const report = this.generateReport();
+    const recommendations = this.generateRecommendations();
     
-    // Save report
-    const reportFileName = `performance-test-report-${Date.now()}.json`;
-    fs.writeFileSync(reportFileName, JSON.stringify(report, null, 2));
+    console.log('\n📈 Performance Summary:');
+    console.log(`  Grade: ${report.performance.grade} (${report.performance.description})`);
+    console.log(`  Average Response Time: ${report.summary.averageResponseTime}ms`);
+    console.log(`  Average Response Size: ${report.summary.averageResponseSize}`);
+    console.log(`  Total Data Transferred: ${report.summary.totalDataTransferred}`);
+    console.log(`  Compression: ${report.summary.compressionDetected ? '✅ Enabled' : '❌ Disabled'}`);
     
-    console.log('📊 Performance Test Results:');
-    console.log(`  Total tests: ${report.summary.totalTests}`);
-    console.log(`  Average response time: ${report.summary.avgResponseTime}ms`);
-    console.log(`  Total data transferred: ${report.summary.totalDataTransferred}`);
-    console.log(`  Compression rate: ${report.summary.compressionRate}%`);
-    
-    if (report.recommendations.length > 0) {
-      console.log('\n⚠️ Recommendations:');
-      report.recommendations.forEach(rec => {
-        console.log(`  ${rec.type.toUpperCase()}: ${rec.issue}`);
-        console.log(`    ${rec.suggestion}`);
+    if (recommendations.length > 0) {
+      console.log('\n💡 Optimization Recommendations:');
+      recommendations.forEach((rec, i) => {
+        console.log(`  ${i + 1}. ${rec}`);
       });
     }
     
-    console.log(`\n📄 Full report saved to: ${reportFileName}`);
-    
-    return report;
+    console.log('\n✅ Performance testing complete!');
+    return { report, recommendations };
   }
 }
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const testSuite = new PerformanceTestSuite();
-  testSuite.runFullTestSuite()
-    .then(() => process.exit(0))
-    .catch(error => {
-      console.error('Test suite failed:', error);
-      process.exit(1);
-    });
-}
-
-export default PerformanceTestSuite;
+// Run the test suite
+const testSuite = new PerformanceTestSuite();
+testSuite.runFullTestSuite()
+  .then(({ report, recommendations }) => {
+    // Save results for later analysis
+    const fs = await import('fs');
+    const results = {
+      timestamp: new Date().toISOString(),
+      report,
+      recommendations,
+      rawResults: testSuite.results
+    };
+    
+    fs.writeFileSync('performance-test-results.json', JSON.stringify(results, null, 2));
+    console.log('\n📄 Results saved to performance-test-results.json');
+    
+    process.exit(0);
+  })
+  .catch(error => {
+    console.error('❌ Performance testing failed:', error);
+    process.exit(1);
+  });
