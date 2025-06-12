@@ -316,16 +316,51 @@ export default function SocialFeed() {
   const handleCommentPost = (post: FeedPost) => {
     console.log('handleCommentPost called with:', { postId: post.id, postType: post.type });
     
-    if (post.type !== 'discussion') {
+    let content: string | null = '';
+    
+    if (post.type === 'prayer') {
+      // For prayers, offer quick supportive responses or custom message
+      const quickResponses = [
+        "🙏 Praying for you",
+        "Amen!",
+        "God bless you",
+        "Lifting you up in prayer",
+        "You're in my prayers",
+        "Hallelujah!",
+        "Custom message..."
+      ];
+      
+      const choice = prompt(
+        `Choose a prayer response:\n\n` +
+        quickResponses.map((resp, i) => `${i + 1}. ${resp}`).join('\n') +
+        `\n\nEnter the number (1-${quickResponses.length}) or type your own message:`
+      );
+      
+      if (!choice) return;
+      
+      const choiceNum = parseInt(choice);
+      if (choiceNum >= 1 && choiceNum <= quickResponses.length) {
+        if (choiceNum === quickResponses.length) {
+          // Custom message option
+          content = prompt("Enter your prayer support message:");
+        } else {
+          content = quickResponses[choiceNum - 1];
+        }
+      } else {
+        // User typed their own message
+        content = choice;
+      }
+    } else if (post.type === 'discussion') {
+      content = prompt("Enter your comment:");
+    } else {
       toast({
         title: "Comments not available",
-        description: "Sorry, commenting on prayers is not allowed to maintain their sacred nature",
+        description: "Comments are not available for this post type",
         variant: "default",
       });
       return;
     }
     
-    const content = prompt("Enter your comment:");
     if (content && content.trim()) {
       console.log('Making comment request:', { postId: post.id, content: content.trim() });
       commentMutation.mutate({
@@ -557,17 +592,13 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    disabled={post.type === 'prayer'}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       handleCommentPost(post);
                     }}
-                    className={post.type === 'prayer' 
-                      ? "text-gray-300 cursor-not-allowed" 
-                      : "text-gray-500 hover:text-blue-600 transition-colors"
-                    }
-                    title={post.type === 'prayer' ? "Comments are not available for prayers" : "Add a comment"}
+                    className="text-gray-500 hover:text-blue-600 transition-colors"
+                    title={post.type === 'prayer' ? "Add prayer support" : "Add a comment"}
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     <span>{post.commentCount}</span>

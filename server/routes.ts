@@ -2159,5 +2159,41 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Prayer response endpoints (supportive comments on prayers)
+  app.post("/api/prayers/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const prayerId = parseInt(req.params.id);
+      const { content } = req.body;
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: "Prayer response content is required" });
+      }
+      
+      const response = await storage.createPrayerResponse({
+        prayerRequestId: prayerId,
+        userId,
+        content: content.trim(),
+        responseType: 'support'
+      });
+      
+      res.status(201).json(response);
+    } catch (error) {
+      console.error("Error creating prayer response:", error);
+      res.status(500).json({ message: "Failed to create prayer response" });
+    }
+  });
+
+  app.get("/api/prayers/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerId = parseInt(req.params.id);
+      const responses = await storage.getPrayerResponses(prayerId);
+      res.json(responses);
+    } catch (error) {
+      console.error("Error fetching prayer responses:", error);
+      res.status(500).json({ message: "Failed to fetch prayer responses" });
+    }
+  });
+
   return httpServer;
 }
