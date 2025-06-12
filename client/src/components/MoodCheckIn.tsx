@@ -34,20 +34,15 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
     mutationFn: async () => {
       if (!selectedMood) throw new Error("Please select a mood");
       
-      return await apiRequest("/api/mood-checkins", {
-        method: "POST",
-        body: JSON.stringify({
-          mood: selectedMood.value,
-          moodScore: selectedMood.score,
-          moodEmoji: selectedMood.emoji,
-          notes: notes.trim() || null,
-          shareWithStaff,
-          generatePersonalizedContent: true
-        }),
-        headers: {
-          "Content-Type": "application/json"
-        }
+      const response = await apiRequest("POST", "/api/mood-checkins", {
+        mood: selectedMood.value,
+        moodScore: selectedMood.score,
+        moodEmoji: selectedMood.emoji,
+        notes: notes.trim() || null,
+        shareWithStaff,
+        generatePersonalizedContent: true
       });
+      return await response.json();
     },
     onSuccess: (data) => {
       setPersonalizedContent(data.personalizedContent);
