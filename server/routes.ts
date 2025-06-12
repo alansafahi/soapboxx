@@ -691,5 +691,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced spiritual health analytics endpoints
+  app.get('/api/admin/analytics/prayer-engagement', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userRole = await storage.getUserRole(userId);
+      if (!userRole || !['admin', 'pastor', 'super_admin'].includes(userRole.role)) {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      }
+
+      const churchId = userRole.churchId;
+      const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+
+      const prayerAnalytics = await storage.getPrayerAnalytics(churchId, startDate);
+
+      res.json({
+        ...prayerAnalytics,
+        timeframe: 'Last 7 days'
+      });
+    } catch (error) {
+      console.error("Error fetching prayer engagement analytics:", error);
+      res.status(500).json({ message: "Failed to fetch prayer engagement data" });
+    }
+  });
+
+  // Devotional completion tracking endpoint
+  app.get('/api/admin/analytics/devotional-completions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userRole = await storage.getUserRole(userId);
+      if (!userRole || !['admin', 'pastor', 'super_admin'].includes(userRole.role)) {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      }
+
+      const { devotional } = req.query;
+      const devotionalName = typeof devotional === 'string' ? devotional : 'Lent';
+      const churchId = userRole.churchId;
+
+      const completions = await storage.getDevotionalCompletions(churchId, devotionalName);
+
+      res.json({
+        devotionalName,
+        completions,
+        totalCompletions: completions.length,
+        message: `${completions.length} members completed the ${devotionalName} devotional`
+      });
+    } catch (error) {
+      console.error("Error fetching devotional completions:", error);
+      res.status(500).json({ message: "Failed to fetch devotional completion data" });
+    }
+  });
+
   return httpServer;
 }
