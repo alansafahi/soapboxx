@@ -1851,14 +1851,20 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const { aiVideoGenerator } = await import('./ai-video-generator');
       const contentData = req.body;
 
+      // Debug logging
       console.log('Video creation request data:', JSON.stringify(contentData, null, 2));
 
-      // Ensure we have the required fields with fallbacks
-      const title = contentData.title || contentData.topic || 'AI Generated Video';
-      const description = contentData.description || `AI generated ${contentData.type || 'devotional'} content`;
+      // Ensure we have the required fields with robust fallbacks
+      const title = contentData.title || contentData.topic || `AI Generated ${contentData.type || 'Devotional'}`;
+      const description = contentData.description || contentData.script?.substring(0, 200) + '...' || `AI generated ${contentData.type || 'devotional'} content about ${contentData.topic || 'spiritual growth'}`;
       
       console.log('Processed title:', title);
       console.log('Processed description:', description);
+      
+      // Validate required fields before proceeding
+      if (!title || title === 'AI Generated undefined') {
+        throw new Error('Invalid video title generated');
+      }
 
       // Generate the actual video file from content
       const videoUrl = await aiVideoGenerator.generateVideoFromContent(contentData, {
@@ -1872,38 +1878,56 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         targetAudience: contentData.targetAudience || 'general',
       });
 
-      // Generate thumbnail
-      const thumbnailUrl = await aiVideoGenerator.createThumbnail({
+      // Generate thumbnail with proper content structure
+      const thumbnailContent = {
         title,
         description,
-        script: contentData.script,
-      }, contentData.visualStyle || 'modern');
+        script: contentData.script || '',
+        visualCues: contentData.visualCues || [],
+        audioNarration: contentData.audioNarration || '',
+        bibleReferences: contentData.bibleReferences || [],
+        tags: contentData.tags || [],
+        estimatedDuration: contentData.estimatedDuration || 180
+      };
+      const thumbnailUrl = await aiVideoGenerator.createThumbnail(thumbnailContent, contentData.visualStyle || 'modern');
 
-      // Create video record in database
-      const newVideo = await storage.createVideo({
+      // Create video record in database with proper data structure
+      const videoData = {
         title,
         description,
+        script: contentData.script || '',
+        visualCues: JSON.stringify(contentData.visualCues || []),
+        audioNarration: contentData.audioNarration || '',
+        bibleReferences: JSON.stringify(contentData.bibleReferences || []),
+        keyMessages: JSON.stringify([]),
         videoUrl,
         thumbnailUrl,
         duration: contentData.estimatedDuration || contentData.duration || 180,
         category: contentData.type || 'devotional',
-        tags: contentData.tags || [],
-        bibleReferences: contentData.bibleReferences || [],
-        speaker: 'AI Generated',
-        uploadedBy: userId,
-        churchId: 1,
-        phase: 'phase2',
-        generationType: 'ai_generated',
+        targetAudience: contentData.targetAudience || 'general',
         voicePersona: contentData.voicePersona || 'pastor-david',
         visualStyle: contentData.visualStyle || 'modern',
-        targetAudience: contentData.targetAudience || 'general',
-        publishedAt: new Date(),
-        viewCount: 0,
-        likeCount: 0,
-        shareCount: 0,
+        churchId: 1,
+        userId: null,
+        seriesId: null,
+        episodeNumber: null,
         isPublic: true,
         isActive: true,
-      });
+        viewCount: 0,
+        likeCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        uploadedBy: userId,
+        tags: JSON.stringify(contentData.tags || []),
+        speaker: 'AI Generated',
+        shareCount: 0,
+        phase: 'phase2',
+        generationType: 'ai_generated',
+        publishedAt: new Date(),
+      };
+
+      console.log('Video data for database:', JSON.stringify(videoData, null, 2));
+      const newVideo = await storage.createVideo(videoData);
 
       res.status(201).json(newVideo);
     } catch (error) {
