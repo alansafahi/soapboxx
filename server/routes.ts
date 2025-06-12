@@ -2257,6 +2257,37 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Prayer Circles endpoints
+  app.post("/api/prayer-circles", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { name, description, isPrivate, maxMembers } = req.body;
+
+      if (!name || !description) {
+        return res.status(400).json({ message: "Name and description are required" });
+      }
+
+      // Create prayer circle (for now, we'll mock this since we don't have a prayer circles table)
+      const prayerCircle = {
+        id: Math.floor(Math.random() * 10000) + 1000,
+        name,
+        description,
+        isPrivate: isPrivate || false,
+        maxMembers: maxMembers || 50,
+        creatorId: userId,
+        memberCount: 1, // Creator is first member
+        activePrayers: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      res.status(201).json(prayerCircle);
+    } catch (error) {
+      console.error("Error creating prayer circle:", error);
+      res.status(500).json({ message: "Failed to create prayer circle" });
+    }
+  });
+
   // Demo Data Generation Routes
   app.post('/api/demo/generate-data', async (req, res) => {
     try {
