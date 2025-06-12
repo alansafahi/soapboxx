@@ -40,6 +40,7 @@ import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
 import PersonalizedTour from "@/components/PersonalizedTour";
 import TourTesting from "@/pages/TourTesting";
 import TourTestPage from "@/pages/tour-test";
+import AdminAnalytics from "@/pages/AdminAnalytics";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
@@ -172,6 +173,7 @@ function AppRouter() {
               <Route path="/messages" component={Messages} />
               <Route path="/chat" component={Chat} />
               <Route path="/admin" component={EnhancedAdminPortal} />
+              <Route path="/admin/analytics" component={AdminAnalytics} />
               <Route path="/member-management" component={EnhancedAdminPortal} />
               <Route path="/role-management" component={RoleManagement} />
               <Route path="/profile" component={Profile} />

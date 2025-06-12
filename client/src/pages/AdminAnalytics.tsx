@@ -1,7 +1,8 @@
 import { AdminAnalyticsDashboard } from "@/components/AdminAnalyticsDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Navigate } from "wouter";
+import { useLocation } from "wouter";
+import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, AlertCircle } from "lucide-react";
 
@@ -21,8 +22,16 @@ export default function AdminAnalytics() {
     );
   }
 
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!user && !authLoading) {
+      setLocation("/");
+    }
+  }, [user, authLoading, setLocation]);
+
   if (!user) {
-    return <Navigate to="/login" />;
+    return null;
   }
 
   // Check if user has admin/pastor permissions
