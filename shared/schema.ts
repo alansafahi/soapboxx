@@ -807,9 +807,6 @@ export const checkIns = pgTable("check_ins", {
   checkInType: varchar("check_in_type", { length: 50 }).notNull(), // "Sunday Service", "Daily Devotional", "Prayer Time", "Spiritual Check-In", "Custom"
   mood: varchar("mood", { length: 20 }), // "joyful", "peaceful", "grateful", "struggling", "hopeful", etc.
   moodEmoji: varchar("mood_emoji", { length: 10 }), // emoji representation
-  moodScore: integer("mood_score"), // 1-5 scale (1=😭, 5=😇)
-  moodNotes: text("mood_notes"), // User's reflection on their mood
-  shareMoodWithChurch: boolean("share_mood_with_church").default(false), // Optional mood sharing
   notes: text("notes"), // personal reflection or prayer intent
   prayerIntent: text("prayer_intent"), // specific prayer request/intent
   isPhysicalAttendance: boolean("is_physical_attendance").default(false), // true if QR code check-in

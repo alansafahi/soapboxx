@@ -525,6 +525,11 @@ export async function generateComprehensiveDemoData() {
         });
       }
     });
+    // Debug: Log first check-in data structure
+    if (checkinData.length > 0) {
+      console.log('🔍 Sample check-in data structure:', JSON.stringify(checkinData[0], null, 2));
+    }
+    
     await db.insert(checkIns).values(checkinData);
     console.log(`✅ Created ${checkinData.length} check-ins`);
 
