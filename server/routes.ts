@@ -1851,9 +1851,14 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const { aiVideoGenerator } = await import('./ai-video-generator');
       const contentData = req.body;
 
+      console.log('Video creation request data:', JSON.stringify(contentData, null, 2));
+
       // Ensure we have the required fields with fallbacks
       const title = contentData.title || contentData.topic || 'AI Generated Video';
       const description = contentData.description || `AI generated ${contentData.type || 'devotional'} content`;
+      
+      console.log('Processed title:', title);
+      console.log('Processed description:', description);
 
       // Generate the actual video file from content
       const videoUrl = await aiVideoGenerator.generateVideoFromContent(contentData, {
