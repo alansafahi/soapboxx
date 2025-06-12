@@ -1,7 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles } from "lucide-react";
+import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles, ChevronDown, ChevronRight, Shield, UserCog } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import soapboxLogo from "@assets/SoapBox logo_1749686315479.jpeg";
 
@@ -17,22 +19,84 @@ export default function AppHeader() {
   const { user } = useAuth();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    community: true,
+    spiritual: true,
+    admin: false,
+    account: false
+  });
 
-  const navigationItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/churches", label: "Churches", icon: Church },
-    { href: "/events", label: "Events", icon: Calendar },
-    { href: "/bible", label: "Daily Bible", icon: BookOpen },
-    { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
-    { href: "/audio-routines", label: "Audio Routines", icon: Headphones },
-    { href: "/video-library", label: "Video Library", icon: PlayCircle },
-    { href: "/prayer", label: "Prayer Wall", icon: Heart },
-    { href: "/messages", label: "Messages", icon: MessageSquare },
-    { href: "/donation-demo", label: "Donations", icon: DollarSign },
+  // Get user role for conditional navigation
+  const { data: userRole } = useQuery({
+    queryKey: ["/api/auth/user-role"],
+    retry: false,
+  });
 
-    { href: "/admin", label: "Admin Portal", icon: Settings },
-    { href: "/role-management", label: "Role Management", icon: Users },
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Grouped navigation structure with role-based visibility
+  const navigationGroups = [
+    {
+      id: "main",
+      label: "Main",
+      items: [
+        { href: "/", label: "Home", icon: Home }
+      ]
+    },
+    {
+      id: "community",
+      label: "Community",
+      items: [
+        { href: "/churches", label: "Churches", icon: Church },
+        { href: "/events", label: "Events", icon: Calendar },
+        { href: "/messages", label: "Messages", icon: MessageSquare },
+        { href: "/prayer", label: "Prayer Wall", icon: Heart }
+      ]
+    },
+    {
+      id: "spiritual",
+      label: "Spiritual Tools",
+      items: [
+        { href: "/bible", label: "Today's Reading", icon: BookOpen },
+        { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
+        { href: "/audio-routines", label: "Devotional Routines", icon: Headphones },
+        { href: "/video-library", label: "Video Library", icon: PlayCircle }
+      ]
+    },
+    {
+      id: "admin",
+      label: "Admin",
+      items: [
+        { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["church_admin", "system_admin", "super_admin"] },
+        { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
+      ]
+    },
+    {
+      id: "account",
+      label: "Account",
+      items: [
+        { href: "/donation-demo", label: "Donations", icon: DollarSign },
+        { href: "/profile", label: "Profile", icon: User }
+      ]
+    }
   ];
+
+  // Filter navigation items based on user role
+  const getVisibleGroups = () => {
+    return navigationGroups.map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        if (!item.roles) return true;
+        return item.roles.includes(userRole?.role);
+      })
+    })).filter(group => group.items.length > 0);
+  };
 
   const isActiveRoute = (href: string) => {
     if (href === "/") return location === "/";
@@ -95,7 +159,7 @@ export default function AppHeader() {
       </header>
 
       {/* Desktop Sidebar - Always Visible */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:flex lg:flex-col bg-white border-r border-gray-200 shadow-lg">
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:flex-col bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
         {/* Sidebar Header */}
         <div className="flex items-center h-16 px-6 border-b border-gray-200" style={{background: 'linear-gradient(to right, #5A2671, #7A3691)'}}>
           <img 
@@ -103,27 +167,86 @@ export default function AppHeader() {
             alt="SoapBox Logo" 
             className="h-8 w-8 rounded-full object-cover"
           />
-          <span className="ml-3 font-bold text-lg text-white">SoapBox Super App</span>
+          {!sidebarCollapsed && (
+            <span className="ml-3 font-bold text-lg text-white">SoapBox Super App</span>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="ml-auto text-white hover:bg-white/20"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Navigation */}
-        <nav className="mt-6 px-4 space-y-2">
-          {navigationItems.map((item) => {
-            const IconComponent = item.icon;
+        <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+          {getVisibleGroups().map((group) => {
+            if (group.id === "main") {
+              // Render main items without grouping
+              return group.items.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <div
+                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isActiveRoute(item.href)
+                          ? "text-white"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                      style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
+                      title={sidebarCollapsed ? item.label : undefined}
+                    >
+                      <IconComponent className="h-5 w-5 flex-shrink-0" />
+                      {!sidebarCollapsed && <span>{item.label}</span>}
+                    </div>
+                  </Link>
+                );
+              });
+            }
+
+            // Render grouped sections
             return (
-              <Link key={item.href} href={item.href}>
-                <div
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActiveRoute(item.href)
-                      ? "text-white"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                  style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
-                >
-                  <IconComponent className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </div>
-              </Link>
+              <Collapsible
+                key={group.id}
+                open={expandedSections[group.id]}
+                onOpenChange={() => toggleSection(group.id)}
+                className="space-y-1"
+              >
+                {!sidebarCollapsed && (
+                  <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                    <span>{group.label}</span>
+                    {expandedSections[group.id] ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                  </CollapsibleTrigger>
+                )}
+                
+                <CollapsibleContent className="space-y-1">
+                  {group.items.map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <Link key={item.href} href={item.href}>
+                        <div
+                          className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            isActiveRoute(item.href)
+                              ? "text-white"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          }`}
+                          style={isActiveRoute(item.href) ? {backgroundColor: '#5A2671'} : {}}
+                          title={sidebarCollapsed ? item.label : undefined}
+                        >
+                          <IconComponent className="h-5 w-5 flex-shrink-0" />
+                          {!sidebarCollapsed && <span>{item.label}</span>}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </CollapsibleContent>
+              </Collapsible>
             );
           })}
         </nav>

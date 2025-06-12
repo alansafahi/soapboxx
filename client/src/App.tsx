@@ -148,7 +148,7 @@ function AppRouter() {
   return (
     <>
       {isAuthenticated && <AppHeader />}
-      <main className={isAuthenticated ? "min-h-screen bg-gray-50 lg:ml-64" : ""}>
+      <main className={isAuthenticated ? "min-h-screen bg-gray-50 lg:ml-64 transition-all duration-300" : ""}>
         <Switch>
           {/* Demo route is always accessible */}
           <Route path="/demo" component={DemoPage} />
