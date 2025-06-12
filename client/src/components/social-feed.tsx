@@ -319,8 +319,8 @@ export default function SocialFeed() {
     if (post.type !== 'discussion') {
       toast({
         title: "Comments not available",
-        description: "Comments are only available for discussions",
-        variant: "destructive",
+        description: "Sorry, commenting on prayers is not allowed to maintain their sacred nature",
+        variant: "default",
       });
       return;
     }
@@ -557,12 +557,17 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    disabled={post.type === 'prayer'}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       handleCommentPost(post);
                     }}
-                    className="text-gray-500 hover:text-blue-600 transition-colors"
+                    className={post.type === 'prayer' 
+                      ? "text-gray-300 cursor-not-allowed" 
+                      : "text-gray-500 hover:text-blue-600 transition-colors"
+                    }
+                    title={post.type === 'prayer' ? "Comments are not available for prayers" : "Add a comment"}
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     <span>{post.commentCount}</span>
