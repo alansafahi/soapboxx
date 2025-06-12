@@ -106,6 +106,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User role endpoint for navigation
+  app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userChurch = await storage.getUserChurch(userId);
+      
+      if (!userChurch) {
+        return res.json({ role: 'new_member', churchId: null });
+      }
+      
+      res.json({ 
+        role: userChurch.role || 'member',
+        churchId: userChurch.churchId 
+      });
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      res.json({ role: 'member', churchId: null });
+    }
+  });
+
   // Tour completion routes
   app.get('/api/tours/:userId/completion/:tourType', async (req, res) => {
     try {
