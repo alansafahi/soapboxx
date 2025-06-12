@@ -2936,11 +2936,180 @@ export const mediaCollectionItems = pgTable("media_collection_items", {
   collectionMediaUnique: unique().on(table.collectionId, table.mediaFileId),
 }));
 
+// Video content table for comprehensive video system
+export const videoContent = pgTable("video_content", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
+  title: varchar("title", { length: 300 }).notNull(),
+  description: text("description"),
+  videoUrl: varchar("video_url", { length: 500 }).notNull(),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  duration: integer("duration"), // Duration in seconds
+  category: varchar("category", { length: 100 }).notNull(), // devotional, sermon, testimony, study, prayer, worship
+  tags: text("tags").array(),
+  bibleReferences: text("bible_references").array(), // Associated scripture references
+  speaker: varchar("speaker", { length: 200 }), // Pastor/speaker name
+  seriesId: integer("series_id"), // Reference to video series
+  episodeNumber: integer("episode_number"), // For series content
+  isPublic: boolean("is_public").default(true),
+  isActive: boolean("is_active").default(true),
+  viewCount: integer("view_count").default(0),
+  likeCount: integer("like_count").default(0),
+  shareCount: integer("share_count").default(0),
+  phase: varchar("phase", { length: 20 }).default("phase1"), // phase1, phase2, phase3, phase4
+  generationType: varchar("generation_type", { length: 50 }), // uploaded, ai_generated, hybrid
+  voicePersona: varchar("voice_persona", { length: 50 }), // For AI-generated content
+  visualStyle: varchar("visual_style", { length: 50 }), // For AI-generated visuals
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("video_content_church_idx").on(table.churchId),
+  index("video_content_category_idx").on(table.category),
+  index("video_content_speaker_idx").on(table.speaker),
+  index("video_content_phase_idx").on(table.phase),
+]);
+
+// Video series table for organizing related videos
+export const videoSeries = pgTable("video_series", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  title: varchar("title", { length: 300 }).notNull(),
+  description: text("description"),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  category: varchar("category", { length: 100 }).notNull(),
+  totalVideos: integer("total_videos").default(0),
+  totalDuration: integer("total_duration").default(0), // Total duration in seconds
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Video watch history and analytics
+export const videoViews = pgTable("video_views", {
+  id: serial("id").primaryKey(),
+  videoId: integer("video_id").notNull().references(() => videoContent.id),
+  userId: varchar("user_id").references(() => users.id),
+  watchDuration: integer("watch_duration").default(0), // Seconds watched
+  completionPercentage: real("completion_percentage").default(0),
+  deviceType: varchar("device_type", { length: 50 }), // mobile, desktop, tablet
+  quality: varchar("quality", { length: 20 }), // 720p, 1080p, etc.
+  watchedAt: timestamp("watched_at").defaultNow(),
+}, (table) => [
+  index("video_views_video_idx").on(table.videoId),
+  index("video_views_user_idx").on(table.userId),
+]);
+
+// Video comments and engagement
+export const videoComments = pgTable("video_comments", {
+  id: serial("id").primaryKey(),
+  videoId: integer("video_id").notNull().references(() => videoContent.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  parentId: integer("parent_id"), // For replies
+  isApproved: boolean("is_approved").default(true),
+  likeCount: integer("like_count").default(0),
+  timestamp: real("timestamp"), // Video timestamp in seconds (for timestamped comments)
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("video_comments_video_idx").on(table.videoId),
+  index("video_comments_user_idx").on(table.userId),
+]);
+
+// Video likes and reactions
+export const videoLikes = pgTable("video_likes", {
+  id: serial("id").primaryKey(),
+  videoId: integer("video_id").notNull().references(() => videoContent.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  reactionType: varchar("reaction_type", { length: 20 }).default("like"), // like, heart, pray, amen
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_user_video_like").on(table.videoId, table.userId),
+  index("video_likes_video_idx").on(table.videoId),
+]);
+
+// Video playlists for curated content
+export const videoPlaylists = pgTable("video_playlists", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  title: varchar("title", { length: 300 }).notNull(),
+  description: text("description"),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  isPublic: boolean("is_public").default(true),
+  videoCount: integer("video_count").default(0),
+  totalDuration: integer("total_duration").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Junction table for playlist videos
+export const playlistVideos = pgTable("playlist_videos", {
+  id: serial("id").primaryKey(),
+  playlistId: integer("playlist_id").notNull().references(() => videoPlaylists.id),
+  videoId: integer("video_id").notNull().references(() => videoContent.id),
+  position: integer("position").notNull(),
+  addedAt: timestamp("added_at").defaultNow(),
+}, (table) => [
+  unique("unique_playlist_video").on(table.playlistId, table.videoId),
+  index("playlist_videos_playlist_idx").on(table.playlistId),
+]);
+
+// Video upload sessions for tracking large file uploads
+export const videoUploadSessions = pgTable("video_upload_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  uploadedSize: integer("uploaded_size").default(0),
+  chunkSize: integer("chunk_size").default(1048576), // 1MB chunks
+  status: varchar("status", { length: 20 }).default("pending"), // pending, uploading, processing, completed, failed
+  videoId: integer("video_id").references(() => videoContent.id),
+  uploadUrl: varchar("upload_url", { length: 500 }),
+  processingProgress: real("processing_progress").default(0),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("video_upload_sessions_user_idx").on(table.userId),
+  index("video_upload_sessions_status_idx").on(table.status),
+]);
+
 // Media management type definitions
 export type MediaFile = typeof mediaFiles.$inferSelect;
 export type InsertMediaFile = typeof mediaFiles.$inferInsert;
 export type MediaCollection = typeof mediaCollections.$inferSelect;
 export type InsertMediaCollection = typeof mediaCollections.$inferInsert;
+
+// Video system type definitions
+export type VideoContent = typeof videoContent.$inferSelect;
+export type InsertVideoContent = typeof videoContent.$inferInsert;
+
+export type VideoSeries = typeof videoSeries.$inferSelect;
+export type InsertVideoSeries = typeof videoSeries.$inferInsert;
+
+export type VideoView = typeof videoViews.$inferSelect;
+export type InsertVideoView = typeof videoViews.$inferInsert;
+
+export type VideoComment = typeof videoComments.$inferSelect;
+export type InsertVideoComment = typeof videoComments.$inferInsert;
+
+export type VideoLike = typeof videoLikes.$inferSelect;
+export type InsertVideoLike = typeof videoLikes.$inferInsert;
+
+export type VideoPlaylist = typeof videoPlaylists.$inferSelect;
+export type InsertVideoPlaylist = typeof videoPlaylists.$inferInsert;
+
+export type PlaylistVideo = typeof playlistVideos.$inferSelect;
+export type InsertPlaylistVideo = typeof playlistVideos.$inferInsert;
+
+export type VideoUploadSession = typeof videoUploadSessions.$inferSelect;
+export type InsertVideoUploadSession = typeof videoUploadSessions.$inferInsert;
 
 // Role and Permission type definitions
 export type Role = typeof roles.$inferSelect;
