@@ -47,7 +47,7 @@ export default function ContentDistributionHub() {
     }) => {
       return apiRequest('/api/content/distribute', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
     },
     onSuccess: (data) => {

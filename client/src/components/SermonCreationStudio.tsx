@@ -57,7 +57,7 @@ export default function SermonCreationStudio() {
       const query = data.scripture || data.topic;
       return apiRequest('/api/biblical-research', {
         method: 'POST',
-        body: JSON.stringify({ query })
+        body: { query }
       });
     },
     onSuccess: (data) => {
@@ -83,7 +83,7 @@ export default function SermonCreationStudio() {
     mutationFn: async (data: { scripture: string; topic: string; audience: string; length: string }) => {
       return apiRequest('/api/sermon/outline', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
     },
     onSuccess: (data) => {
@@ -107,7 +107,7 @@ export default function SermonCreationStudio() {
     mutationFn: async (data: { topic: string; mainPoints: string[]; audience: string }) => {
       return apiRequest('/api/sermon/illustrations', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
     },
     onSuccess: (data) => {
@@ -131,7 +131,7 @@ export default function SermonCreationStudio() {
     mutationFn: async (data: { outline: SermonOutline; research: BiblicalResearch }) => {
       return apiRequest('/api/sermon/enhance', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
     },
     onSuccess: (data) => {
