@@ -20,7 +20,7 @@ export default function AppHeader() {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     community: true,
     spiritual: true,
     admin: false,
@@ -41,7 +41,20 @@ export default function AppHeader() {
   };
 
   // Grouped navigation structure with role-based visibility
-  const navigationGroups = [
+  type NavigationItem = {
+    href: string;
+    label: string;
+    icon: any;
+    roles?: string[];
+  };
+
+  type NavigationGroup = {
+    id: string;
+    label: string;
+    items: NavigationItem[];
+  };
+
+  const navigationGroups: NavigationGroup[] = [
     {
       id: "main",
       label: "Main",
@@ -93,7 +106,7 @@ export default function AppHeader() {
       ...group,
       items: group.items.filter(item => {
         if (!item.roles) return true;
-        return item.roles.includes(userRole?.role);
+        return item.roles.includes(userRole?.role || '');
       })
     })).filter(group => group.items.length > 0);
   };

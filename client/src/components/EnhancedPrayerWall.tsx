@@ -36,7 +36,7 @@ const prayerCircleSchema = z.object({
   name: z.string().min(1, "Circle name is required"),
   description: z.string().min(1, "Description is required"),
   isPrivate: z.boolean().default(false),
-  maxMembers: z.number().min(2).max(100).optional(),
+  maxMembers: z.number().min(2).max(10000).optional(),
 });
 
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
@@ -730,8 +730,8 @@ export default function EnhancedPrayerWall() {
                               <Input 
                                 type="number" 
                                 min="2" 
-                                max="100" 
-                                placeholder="25"
+                                max="10000" 
+                                placeholder="250"
                                 {...field}
                                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                               />
