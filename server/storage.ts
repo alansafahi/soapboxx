@@ -48,6 +48,7 @@ import {
   volunteers,
   volunteerRoles,
   volunteerOpportunities,
+  bibleVerses,
   volunteerRegistrations,
   volunteerHours,
   volunteerAwards,
@@ -239,6 +240,11 @@ export interface IStorage {
   getTourCompletion(userId: string, tourType: string): Promise<any>;
   saveTourCompletion(data: any): Promise<any>;
   updateTourCompletion(userId: string, tourType: string, data: any): Promise<any>;
+  
+  // Bible verse lookup operations
+  lookupBibleVerse(reference: string): Promise<{ reference: string; text: string } | null>;
+  searchBibleVersesByTopic(topics: string[]): Promise<any[]>;
+  getRandomVerseByCategory(category?: string): Promise<any | null>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -3983,6 +3989,77 @@ export class DatabaseStorage implements IStorage {
       .from(referrals)
       .where(eq(referrals.refereeId, userId));
     return referral;
+  }
+
+  // Bible verse lookup implementation
+  async lookupBibleVerse(reference: string): Promise<{ reference: string; text: string } | null> {
+    const [verse] = await db
+      .select()
+      .from(bibleVerses)
+      .where(and(
+        eq(bibleVerses.reference, reference),
+        eq(bibleVerses.isActive, true)
+      ))
+      .limit(1);
+
+    if (verse) {
+      return {
+        reference: verse.reference,
+        text: verse.text
+      };
+    }
+
+    return null;
+  }
+
+  async searchBibleVersesByTopic(topics: string[]): Promise<any[]> {
+    if (topics.length === 0) return [];
+
+    const verses = await db
+      .select()
+      .from(bibleVerses)
+      .where(and(
+        eq(bibleVerses.isActive, true),
+        sql`${bibleVerses.topicTags} && ${topics}`
+      ))
+      .orderBy(desc(bibleVerses.popularityScore))
+      .limit(10);
+
+    return verses.map(verse => ({
+      reference: verse.reference,
+      text: verse.text,
+      topics: verse.topicTags,
+      category: verse.category,
+      aiSummary: verse.aiSummary
+    }));
+  }
+
+  async getRandomVerseByCategory(category?: string): Promise<any | null> {
+    let query = db
+      .select()
+      .from(bibleVerses)
+      .where(eq(bibleVerses.isActive, true));
+
+    if (category) {
+      query = query.where(eq(bibleVerses.category, category));
+    }
+
+    const verses = await query
+      .orderBy(sql`RANDOM()`)
+      .limit(1);
+
+    if (verses.length > 0) {
+      const verse = verses[0];
+      return {
+        reference: verse.reference,
+        text: verse.text,
+        topics: verse.topicTags,
+        category: verse.category,
+        aiSummary: verse.aiSummary
+      };
+    }
+
+    return null;
   }
 
   async getReferralLeaderboard(): Promise<Array<{

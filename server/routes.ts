@@ -828,84 +828,10 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       const parsedRef = parseReference(reference);
 
-      // Use a comprehensive Bible verses database for lookup
-      const bibleVerses = {
-        // John
-        "John 3:16": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
-        "John 13:4": "So he got up from the meal, took off his outer clothing, and wrapped a towel around his waist.",
-        "John 14:6": "Jesus answered, 'I am the way and the truth and the life. No one comes to the Father except through me.'",
-        "John 1:1": "In the beginning was the Word, and the Word was with God, and the Word was God.",
-        
-        // Philippians
-        "Philippians 4:13": "I can do all this through him who gives me strength.",
-        "Philippians 4:6": "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.",
-        "Philippians 4:7": "And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.",
-        "Philippians 4:19": "And my God will meet all your needs according to the riches of his glory in Christ Jesus.",
-        
-        // Psalms
-        "Psalm 23:1": "The Lord is my shepherd, I lack nothing.",
-        "Psalm 23:4": "Even though I walk through the darkest valley, I will fear no evil, for you are with me; your rod and your staff, they comfort me.",
-        "Psalm 119:105": "Your word is a lamp for my feet, a light on my path.",
-        "Psalm 46:10": "Be still, and know that I am God; I will be exalted among the nations, I will be exalted in the earth.",
-        "Psalm 139:14": "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well.",
-        
-        // Romans
-        "Romans 8:28": "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.",
-        "Romans 12:2": "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God's will is—his good, pleasing and perfect will.",
-        
-        // Matthew
-        "Matthew 28:19": "Therefore go and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit.",
-        "Matthew 5:16": "In the same way, let your light shine before others, that they may see your good deeds and glorify your Father in heaven.",
-        "Matthew 11:28": "Come to me, all you who are weary and burdened, and I will give you rest.",
-        
-        // Jeremiah
-        "Jeremiah 29:11": "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future.",
-        
-        // Proverbs
-        "Proverbs 3:5": "Trust in the Lord with all your heart and lean not on your own understanding.",
-        "Proverbs 3:6": "In all your ways submit to him, and he will make your paths straight.",
-        
-        // Isaiah
-        "Isaiah 40:31": "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint.",
-        "Isaiah 41:10": "So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand.",
-        
-        // 1 Corinthians
-        "1 Corinthians 13:4": "Love is patient, love is kind. It does not envy, it does not boast, it is not proud.",
-        "1 Corinthians 10:13": "No temptation has overtaken you except what is common to mankind. And God is faithful; he will not let you be tempted beyond what you can bear. But when you are tempted, he will also provide a way out so that you can endure it.",
-        
-        // Ephesians
-        "Ephesians 2:8": "For it is by grace you have been saved, through faith—and this is not from yourselves, it is the gift of God.",
-        "Ephesians 6:11": "Put on the full armor of God, so that you can take your stand against the devil's schemes.",
-        
-        // 2 Timothy
-        "2 Timothy 1:7": "For God has not given us a spirit of fear, but of power, love and sound judgment.",
-        
-        // Hebrews
-        "Hebrews 11:1": "Now faith is confidence in what we hope for and assurance about what we do not see.",
-        "Hebrews 13:8": "Jesus Christ is the same yesterday and today and forever.",
-        
-        // James
-        "James 1:2": "Consider it pure joy, my brothers and sisters, whenever you face trials of many kinds.",
-        "James 4:7": "Submit yourselves, then, to God. Resist the devil, and he will flee from you.",
-        
-        // 1 Peter
-        "1 Peter 5:7": "Cast all your anxiety on him because he cares for you.",
-        
-        // 1 John
-        "1 John 4:19": "We love because he first loved us.",
-        "1 John 1:9": "If we confess our sins, he is faithful and just and will forgive us our sins and purify us from all unrighteousness.",
-        
-        // Galatians
-        "Galatians 5:22": "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness.",
-        
-        // Joshua
-        "Joshua 1:9": "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go."
-      };
-
-      // Look up the verse text
-      const verseText = bibleVerses[reference];
+      // Look up verse in database
+      const verse = await storage.lookupBibleVerse(reference);
       
-      if (!verseText) {
+      if (!verse) {
         return res.status(404).json({ 
           message: `Verse not found: ${reference}. Please enter the verse text manually.` 
         });
@@ -915,8 +841,8 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       console.log(`Verse lookup for user ${userId}: ${reference}`);
       
       res.json({
-        reference,
-        text: verseText,
+        reference: verse.reference,
+        text: verse.text,
         book: parsedRef.book,
         chapter: parsedRef.chapter,
         verse: parsedRef.startVerse
