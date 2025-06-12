@@ -97,6 +97,20 @@ export default function SocialFeed() {
         method: 'POST'
       });
     },
+    onMutate: async ({ postId, isBookmarked }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/feed'] });
+      const previousFeed = queryClient.getQueryData(['/api/feed']);
+      
+      queryClient.setQueryData(['/api/feed'], (old: any) => {
+        if (!old) return old;
+        return old.map((post: any) => 
+          post.id === postId ? { ...post, isBookmarked: !isBookmarked } : post
+        );
+      });
+      
+      return { previousFeed };
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
@@ -104,6 +118,11 @@ export default function SocialFeed() {
         description: variables.isBookmarked ? "Post removed from bookmarks" : "Post saved to bookmarks",
       });
     },
+    onError: (_, __, context) => {
+      if (context?.previousFeed) {
+        queryClient.setQueryData(['/api/feed'], context.previousFeed);
+      }
+    }
   });
 
   // Share post mutation
@@ -113,6 +132,23 @@ export default function SocialFeed() {
         method: 'POST'
       });
     },
+    onMutate: async ({ postId }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/feed'] });
+      const previousFeed = queryClient.getQueryData(['/api/feed']);
+      
+      queryClient.setQueryData(['/api/feed'], (old: any) => {
+        if (!old) return old;
+        return old.map((post: any) => 
+          post.id === postId ? { 
+            ...post, 
+            shareCount: post.shareCount + 1
+          } : post
+        );
+      });
+      
+      return { previousFeed };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
@@ -120,6 +156,11 @@ export default function SocialFeed() {
         description: "Post has been shared to your feed",
       });
     },
+    onError: (_, __, context) => {
+      if (context?.previousFeed) {
+        queryClient.setQueryData(['/api/feed'], context.previousFeed);
+      }
+    }
   });
 
   // Like post mutation
@@ -131,6 +172,24 @@ export default function SocialFeed() {
         method: 'POST'
       });
     },
+    onMutate: async ({ postId }) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/feed'] });
+      const previousFeed = queryClient.getQueryData(['/api/feed']);
+      
+      queryClient.setQueryData(['/api/feed'], (old: any) => {
+        if (!old) return old;
+        return old.map((post: any) => 
+          post.id === postId ? { 
+            ...post, 
+            isLiked: !post.isLiked,
+            likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1
+          } : post
+        );
+      });
+      
+      return { previousFeed };
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
@@ -138,6 +197,11 @@ export default function SocialFeed() {
         description: data.liked !== undefined ? (data.liked ? "Post liked successfully" : "Post unliked successfully") : data.message,
       });
     },
+    onError: (_, __, context) => {
+      if (context?.previousFeed) {
+        queryClient.setQueryData(['/api/feed'], context.previousFeed);
+      }
+    }
   });
 
   // Prayer-specific like mutation
@@ -148,6 +212,24 @@ export default function SocialFeed() {
         method: 'POST'
       });
     },
+    onMutate: async (prayerId) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/feed'] });
+      const previousFeed = queryClient.getQueryData(['/api/feed']);
+      
+      queryClient.setQueryData(['/api/feed'], (old: any) => {
+        if (!old) return old;
+        return old.map((post: any) => 
+          post.id === prayerId ? { 
+            ...post, 
+            isLiked: !post.isLiked,
+            likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1
+          } : post
+        );
+      });
+      
+      return { previousFeed };
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
@@ -155,6 +237,11 @@ export default function SocialFeed() {
         description: data.liked ? "Prayer request liked" : "Prayer request unliked",
       });
     },
+    onError: (_, __, context) => {
+      if (context?.previousFeed) {
+        queryClient.setQueryData(['/api/feed'], context.previousFeed);
+      }
+    }
   });
 
   // Comment mutation
