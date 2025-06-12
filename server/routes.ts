@@ -2000,5 +2000,64 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Feed routes
+  app.get("/api/feed", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const feedPosts = await storage.getFeedPosts(userId);
+      res.json(feedPosts);
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+      res.status(500).json({ message: "Failed to fetch feed" });
+    }
+  });
+
+  app.post("/api/feed/posts", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { type, content, title } = req.body;
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: "Post content is required" });
+      }
+      
+      let post;
+      if (type === 'discussion') {
+        post = await storage.createDiscussion({
+          title: title || 'Community Discussion',
+          content: content.trim(),
+          authorId: userId,
+          churchId: null,
+          category: 'general',
+          isPublic: true
+        });
+      } else if (type === 'prayer') {
+        post = await storage.createPrayerRequest({
+          title: title || 'Prayer Request',
+          content: content.trim(),
+          authorId: userId,
+          churchId: null,
+          isAnonymous: false,
+          isUrgent: false
+        });
+      } else if (type === 'announcement') {
+        post = await storage.createDiscussion({
+          title: title || 'Community Announcement',
+          content: content.trim(),
+          authorId: userId,
+          churchId: null,
+          category: 'announcement',
+          isPublic: true
+        });
+      }
+      
+      console.log(`Created ${type} post for user ${userId}:`, post?.id);
+      res.json(post);
+    } catch (error) {
+      console.error("Error creating feed post:", error);
+      res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+
   return httpServer;
 }
