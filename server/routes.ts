@@ -433,5 +433,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bible API endpoints
+  app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
+    try {
+      const { journeyType } = req.query;
+      const userId = req.user.claims.sub;
+      
+      // Simple daily verse data for now
+      const verse = {
+        id: 1,
+        date: new Date(),
+        verseReference: "Philippians 4:13",
+        verseText: "I can do all this through him who gives me strength.",
+        verseTextNiv: "I can do all this through him who gives me strength.",
+        verseTextKjv: "I can do all things through Christ which strengtheneth me.",
+        verseTextEsv: "I can do all things through him who strengthens me.",
+        verseTextNlt: "For I can do everything through Christ, who gives me strength.",
+        theme: "Strength and Perseverance",
+        reflectionPrompt: "How can God's strength help you face today's challenges?",
+        guidedPrayer: "Lord, help me to rely on Your strength in all circumstances. Amen.",
+        backgroundImageUrl: null,
+        audioUrl: null
+      };
+      
+      res.json(verse);
+    } catch (error) {
+      console.error("Error fetching daily verse:", error);
+      res.status(500).json({ message: "Failed to fetch daily verse" });
+    }
+  });
+
+  app.get('/api/bible/streak', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      const streak = {
+        id: 1,
+        userId,
+        currentStreak: 3,
+        longestStreak: 7,
+        lastReadDate: new Date(),
+        totalDaysRead: 15,
+        versesMemorized: 5,
+        graceDaysUsed: 1
+      };
+      
+      res.json(streak);
+    } catch (error) {
+      console.error("Error fetching bible streak:", error);
+      res.status(500).json({ message: "Failed to fetch bible streak" });
+    }
+  });
+
+  app.get('/api/bible/badges', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      const badges = [
+        {
+          id: 1,
+          name: "First Steps",
+          description: "Completed your first Bible reading",
+          iconUrl: null,
+          earnedAt: new Date(),
+          badge: {
+            id: 1,
+            name: "First Steps",
+            description: "Completed your first Bible reading",
+            iconUrl: null,
+            requirement: { type: "readings", count: 1 }
+          }
+        }
+      ];
+      
+      res.json(badges);
+    } catch (error) {
+      console.error("Error fetching bible badges:", error);
+      res.status(500).json({ message: "Failed to fetch bible badges" });
+    }
+  });
+
+  app.get('/api/bible/community-stats', async (req, res) => {
+    try {
+      const stats = {
+        todayReads: 127,
+        weekReads: 892
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching community stats:", error);
+      res.status(500).json({ message: "Failed to fetch community stats" });
+    }
+  });
+
+  app.post('/api/bible/reading', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { dailyVerseId, reflectionText, emotionalReaction, audioListened } = req.body;
+      
+      // Record the reading (simplified for now)
+      const reading = {
+        id: Date.now(),
+        userId,
+        dailyVerseId,
+        reflectionText,
+        emotionalReaction,
+        audioListened,
+        createdAt: new Date()
+      };
+      
+      res.json(reading);
+    } catch (error) {
+      console.error("Error recording bible reading:", error);
+      res.status(500).json({ message: "Failed to record bible reading" });
+    }
+  });
+
   return httpServer;
 }
