@@ -65,15 +65,7 @@ export default function SocialFeed() {
   // Create new post mutation
   const createPostMutation = useMutation({
     mutationFn: async (postData: any) => {
-      const response = await fetch('/api/feed/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(postData),
-      });
-      if (!response.ok) throw new Error('Failed to create post');
-      return response.json();
+      return await apiRequest('POST', '/api/feed/posts', postData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
