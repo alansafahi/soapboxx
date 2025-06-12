@@ -1,0 +1,131 @@
+To **integrate Mood Check-ins + Personalized Content into SoapBox (on Replit)**, you can follow a clear modular implementation approach using modern frontend + backend architecture. Below is a **step-by-step integration plan** broken down into UI/UX, backend, database schema, and personalized content logic:
+
+---
+
+## 🔧 STEP-BY-STEP INTEGRATION PLAN
+
+---
+
+### 🧑‍🎨 1. **Frontend UI (React or React Native via Expo)**
+
+**Location**: After user logs in or at start of Daily Devotion page.
+
+**Component**: `MoodCheckin.tsx`
+
+* Show a prompt like: *"How are you feeling today?"*
+* Present emotion choices via emojis or icons (😇 😊 😐 😔 😭)
+* Optional text input for a short reflection
+* Submit button → triggers API call
+
+**UX Tip**: Make it a 10-second interaction max. Keep it joyful, not clinical.
+
+---
+
+### 🧠 2. **Backend API (Node.js + Express or Supabase Functions)**
+
+**Route**: `POST /api/mood-checkin`
+
+**Payload Example**:
+
+```json
+{
+  "user_id": "uuid-1234",
+  "mood": "anxious",
+  "notes": "Struggling with school today",
+  "timestamp": "2025-06-11T15:00:00Z"
+}
+```
+
+* Store the mood entry
+* Optionally trigger personalization logic (see Step 4)
+
+---
+
+### 🧱 3. **Database Schema (Supabase or PostgreSQL)**
+
+Table: `mood_checkins`
+
+```sql
+CREATE TABLE mood_checkins (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  mood TEXT CHECK (mood IN ('joyful', 'peaceful', 'anxious', 'lonely', 'tired', 'angry', 'grateful')),
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT now()
+);
+```
+
+---
+
+### 📚 4. **Personalized Content Engine**
+
+On check-in, fetch 1–3 pieces of content based on mood:
+
+```ts
+const contentForMood = {
+  anxious: ['Peaceful Devotional', 'Anxiety-Calming Prayer', 'Psalm 46'],
+  joyful: ['Gratitude Playlist', 'Rejoice Devotion', 'Celebrate with Others'],
+  tired: ['Rest Scriptures', 'Evening Reflection', 'Sleep Meditation'],
+};
+```
+
+* Use this to populate home feed or modal after check-in.
+* Can also surface suggested prayers, sermons, or AI-guided chat.
+
+---
+
+### 🔁 5. **Daily Reminder (Optional)**
+
+* Use push notifications or emails to remind users to check in daily.
+* Message example: *"🕊️ Check in with God today. How are you feeling?"*
+
+---
+
+### 🔐 6. **Admin Dashboard (Optional Future Phase)**
+
+Allow pastors (Church Super Admin) to see anonymized, aggregated emotional trends:
+
+* “Top 3 moods this week”
+* “Mood trend line over 30 days”
+* Flag severe mood spikes for possible intervention
+
+---
+
+### 🔍 7. **Privacy & Consent**
+
+* Ensure mood data is **user-private by default**
+* Offer opt-in toggle for sharing with church leadership or for spiritual care
+* Use this language: *“Help us tailor encouragements for you. Only shared if you choose.”*
+
+---
+
+## 🧪 Bonus: Suggested Tools for Replit Dev Flow
+
+| Feature                   | Tool or Library                |
+| ------------------------- | ------------------------------ |
+| Frontend UI               | React + Tailwind/Expo          |
+| State Management          | Zustand or React Context       |
+| API Backend               | Node.js or Supabase Functions  |
+| Auth                      | Supabase Auth or Clerk         |
+| DB                        | Supabase/PostgreSQL            |
+| Push Notifications        | OneSignal / Expo Notifications |
+| Admin Analytics Dashboard | Recharts + Supabase SQL Views  |
+
+---
+
+## 📦 Deployment Plan on Replit
+
+1. Use **Replit Teams for Education** or **Replit Bounties** for scoped tasks
+2. Host backend API as Express server or Supabase Edge Function
+3. Store mood data in Supabase and retrieve with protected endpoints
+4. Roll out gradually with a toggle in System Admin panel
+
+---
+
+Let me know if you'd like:
+
+* A mockup of the check-in UI
+* API route boilerplate code
+* Personalized feed algorithm using AI or static rules
+
+Ready to build or scale it!

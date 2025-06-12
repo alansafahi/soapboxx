@@ -502,6 +502,16 @@ export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTo
   
   const config = tourConfigs.find(c => c.role === role);
   
+  // Navigate to the page when step changes
+  useEffect(() => {
+    if (isOpen && config && config.steps[currentStep]) {
+      const step = config.steps[currentStep];
+      if (step.page && step.page !== location) {
+        setLocation(step.page);
+      }
+    }
+  }, [currentStep, isOpen, config, location, setLocation]);
+  
   if (!isOpen || !config) {
     return null;
   }
@@ -509,13 +519,6 @@ export default function InteractiveTour({ isOpen, onClose, role }: InteractiveTo
   const step = config.steps[currentStep];
   const isLastStep = currentStep === config.steps.length - 1;
   const isFirstStep = currentStep === 0;
-
-  // Navigate to the page when step changes
-  useEffect(() => {
-    if (step.page && step.page !== location) {
-      setLocation(step.page);
-    }
-  }, [currentStep, step.page, location, setLocation]);
 
   const handleNext = () => {
     if (isLastStep) {
