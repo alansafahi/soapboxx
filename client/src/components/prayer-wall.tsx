@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { formatDistanceToNow } from "date-fns";
 import type { PrayerRequest } from "@shared/schema";
+import SmartScriptureTextarea from "./SmartScriptureTextarea";
 
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
@@ -393,12 +394,15 @@ export default function PrayerWall() {
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prayer Request</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Please pray for..." 
-                        className="min-h-[100px]"
-                        {...field} 
+                      <SmartScriptureTextarea
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Please pray for... (Include scripture references like 'Psalm 23:1' for auto-population)"
+                        label="Prayer Request"
+                        minHeight="min-h-[100px]"
+                        maxLength={1000}
+                        helpText="Share your prayer request with our community. Scripture references will be automatically expanded."
                       />
                     </FormControl>
                     <FormMessage />
@@ -639,15 +643,17 @@ export default function PrayerWall() {
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
-                                <Textarea 
-                                  placeholder="Share an encouraging message or Bible verse..."
-                                  className="min-h-[80px] resize-none border-gray-200 dark:border-gray-700"
+                                <SmartScriptureTextarea
                                   value={supportComments.get(prayer.id) || ''}
-                                  onChange={(e) => {
+                                  onChange={(value) => {
                                     const newMap = new Map(supportComments);
-                                    newMap.set(prayer.id, e.target.value);
+                                    newMap.set(prayer.id, value);
                                     setSupportComments(newMap);
                                   }}
+                                  placeholder="Share an encouraging message or Bible verse... (Type 'Romans 8:28' for auto-population)"
+                                  className="border-gray-200 dark:border-gray-700"
+                                  minHeight="min-h-[80px]"
+                                  maxLength={500}
                                 />
                                 <div className="flex justify-between items-center mt-3">
                                   <span className="text-xs text-gray-500">Your words can bring hope and comfort</span>
