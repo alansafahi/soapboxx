@@ -4280,5 +4280,206 @@ Return JSON with this exact structure:
     }
   });
 
+  // S.O.A.P. Entry Routes
+  app.post('/api/soap', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const soapData = schema.insertSoapEntrySchema.parse({
+        ...req.body,
+        userId,
+      });
+
+      const newEntry = await storage.createSoapEntry(soapData);
+      res.status(201).json(newEntry);
+    } catch (error) {
+      console.error('Error creating S.O.A.P. entry:', error);
+      res.status(500).json({ message: 'Failed to create S.O.A.P. entry' });
+    }
+  });
+
+  app.get('/api/soap', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
+
+      const options = {
+        churchId: churchId ? parseInt(churchId) : undefined,
+        isPublic: isPublic === 'true',
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+      };
+
+      const entries = await storage.getSoapEntries(userId, options);
+      res.json(entries);
+    } catch (error) {
+      console.error('Error fetching S.O.A.P. entries:', error);
+      res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries' });
+    }
+  });
+
+  app.get('/api/soap/public', async (req, res) => {
+    try {
+      const { churchId, limit = 20, offset = 0 } = req.query;
+
+      const entries = await storage.getPublicSoapEntries(
+        churchId ? parseInt(churchId as string) : undefined,
+        parseInt(limit as string),
+        parseInt(offset as string)
+      );
+      res.json(entries);
+    } catch (error) {
+      console.error('Error fetching public S.O.A.P. entries:', error);
+      res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries' });
+    }
+  });
+
+  app.get('/api/soap/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      const entry = await storage.getSoapEntry(entryId);
+
+      if (!entry) {
+        return res.status(404).json({ message: 'S.O.A.P. entry not found' });
+      }
+
+      res.json(entry);
+    } catch (error) {
+      console.error('Error fetching S.O.A.P. entry:', error);
+      res.status(500).json({ message: 'Failed to fetch S.O.A.P. entry' });
+    }
+  });
+
+  app.put('/api/soap/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Check if entry exists and belongs to user
+      const existingEntry = await storage.getSoapEntry(entryId);
+      if (!existingEntry || existingEntry.userId !== userId) {
+        return res.status(403).json({ message: 'Unauthorized to update this entry' });
+      }
+
+      const updatedEntry = await storage.updateSoapEntry(entryId, req.body);
+      res.json(updatedEntry);
+    } catch (error) {
+      console.error('Error updating S.O.A.P. entry:', error);
+      res.status(500).json({ message: 'Failed to update S.O.A.P. entry' });
+    }
+  });
+
+  app.delete('/api/soap/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Check if entry exists and belongs to user
+      const existingEntry = await storage.getSoapEntry(entryId);
+      if (!existingEntry || existingEntry.userId !== userId) {
+        return res.status(403).json({ message: 'Unauthorized to delete this entry' });
+      }
+
+      await storage.deleteSoapEntry(entryId);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting S.O.A.P. entry:', error);
+      res.status(500).json({ message: 'Failed to delete S.O.A.P. entry' });
+    }
+  });
+
+  app.get('/api/soap/streak/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      const streak = await storage.getUserSoapStreak(userId);
+      res.json({ streak });
+    } catch (error) {
+      console.error('Error fetching S.O.A.P. streak:', error);
+      res.status(500).json({ message: 'Failed to fetch S.O.A.P. streak' });
+    }
+  });
+
+  app.post('/api/soap/:id/feature', isAuthenticated, async (req: any, res) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Check if user has admin permissions
+      const userRole = await storage.getUserRole(userId);
+      const canFeature = ['pastor', 'lead_pastor', 'admin', 'super_admin', 'soapbox_owner'].includes(userRole);
+
+      if (!canFeature) {
+        return res.status(403).json({ message: 'Unauthorized to feature entries' });
+      }
+
+      const featuredEntry = await storage.featureSoapEntry(entryId, userId);
+      res.json(featuredEntry);
+    } catch (error) {
+      console.error('Error featuring S.O.A.P. entry:', error);
+      res.status(500).json({ message: 'Failed to feature S.O.A.P. entry' });
+    }
+  });
+
+  app.delete('/api/soap/:id/feature', isAuthenticated, async (req: any, res) => {
+    try {
+      const entryId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Check if user has admin permissions
+      const userRole = await storage.getUserRole(userId);
+      const canFeature = ['pastor', 'lead_pastor', 'admin', 'super_admin', 'soapbox_owner'].includes(userRole);
+
+      if (!canFeature) {
+        return res.status(403).json({ message: 'Unauthorized to unfeature entries' });
+      }
+
+      const unfeaturedEntry = await storage.unfeatureSoapEntry(entryId);
+      res.json(unfeaturedEntry);
+    } catch (error) {
+      console.error('Error unfeaturing S.O.A.P. entry:', error);
+      res.status(500).json({ message: 'Failed to unfeature S.O.A.P. entry' });
+    }
+  });
+
+  // AI-assisted S.O.A.P. generation
+  app.post('/api/soap/ai-assist', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, scriptureReference, currentObservation, currentApplication, currentPrayer } = req.body;
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are a spiritual mentor helping with S.O.A.P. (Scripture, Observation, Application, Prayer) Bible study. Provide thoughtful, biblically sound suggestions for the incomplete sections. Keep responses personal, practical, and spiritually enriching. Respond with JSON containing suggestions for the missing fields."
+          },
+          {
+            role: "user",
+            content: `Help me complete this S.O.A.P. study:
+            
+Scripture: ${scripture}
+Reference: ${scriptureReference}
+Current Observation: ${currentObservation || 'Not written yet'}
+Current Application: ${currentApplication || 'Not written yet'}
+Current Prayer: ${currentPrayer || 'Not written yet'}
+
+Please provide suggestions for the missing or incomplete sections.`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 800
+      });
+
+      const suggestions = JSON.parse(response.choices[0].message.content || '{}');
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Error generating AI S.O.A.P. suggestions:', error);
+      res.status(500).json({ message: 'Failed to generate S.O.A.P. suggestions' });
+    }
+  });
+
   return httpServer;
 }

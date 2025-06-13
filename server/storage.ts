@@ -545,6 +545,17 @@ export interface IStorage {
   createCommunityReflection(reflectionData: any): Promise<any>;
   getCommunityReflections(filters: any): Promise<any[]>;
 
+  // S.O.A.P. Entry Management
+  createSoapEntry(entry: InsertSoapEntry): Promise<SoapEntry>;
+  getSoapEntries(userId: string, options?: { churchId?: number; isPublic?: boolean; limit?: number; offset?: number }): Promise<SoapEntry[]>;
+  getSoapEntry(id: number): Promise<SoapEntry | undefined>;
+  updateSoapEntry(id: number, updates: Partial<SoapEntry>): Promise<SoapEntry>;
+  deleteSoapEntry(id: number): Promise<void>;
+  getUserSoapStreak(userId: string): Promise<number>;
+  getPublicSoapEntries(churchId?: number, limit?: number, offset?: number): Promise<SoapEntry[]>;
+  featureSoapEntry(id: number, featuredBy: string): Promise<SoapEntry>;
+  unfeatureSoapEntry(id: number): Promise<SoapEntry>;
+
   // Admin Analytics Methods
   getUserRole(userId: string): Promise<string>;
   getChurchMemberCheckIns(churchId: number, startDate: Date): Promise<any>;
@@ -5986,6 +5997,135 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(socialMediaPosts)
       .where(eq(socialMediaPosts.id, postId));
+  }
+
+  // S.O.A.P. Entry Management Implementation
+  async createSoapEntry(entry: InsertSoapEntry): Promise<SoapEntry> {
+    const [newEntry] = await db
+      .insert(soapEntries)
+      .values(entry)
+      .returning();
+    return newEntry;
+  }
+
+  async getSoapEntries(userId: string, options?: { churchId?: number; isPublic?: boolean; limit?: number; offset?: number }): Promise<SoapEntry[]> {
+    let query = db.select().from(soapEntries).where(eq(soapEntries.userId, userId));
+
+    if (options?.churchId) {
+      query = query.where(eq(soapEntries.churchId, options.churchId));
+    }
+
+    if (options?.isPublic !== undefined) {
+      query = query.where(eq(soapEntries.isPublic, options.isPublic));
+    }
+
+    query = query.orderBy(desc(soapEntries.devotionalDate));
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+
+    return await query;
+  }
+
+  async getSoapEntry(id: number): Promise<SoapEntry | undefined> {
+    const [entry] = await db
+      .select()
+      .from(soapEntries)
+      .where(eq(soapEntries.id, id));
+    return entry;
+  }
+
+  async updateSoapEntry(id: number, updates: Partial<SoapEntry>): Promise<SoapEntry> {
+    const [updatedEntry] = await db
+      .update(soapEntries)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(soapEntries.id, id))
+      .returning();
+    return updatedEntry;
+  }
+
+  async deleteSoapEntry(id: number): Promise<void> {
+    await db.delete(soapEntries).where(eq(soapEntries.id, id));
+  }
+
+  async getUserSoapStreak(userId: string): Promise<number> {
+    const entries = await db
+      .select({ devotionalDate: soapEntries.devotionalDate })
+      .from(soapEntries)
+      .where(eq(soapEntries.userId, userId))
+      .orderBy(desc(soapEntries.devotionalDate));
+
+    if (entries.length === 0) return 0;
+
+    let streak = 1;
+    let currentDate = new Date(entries[0].devotionalDate!);
+    
+    for (let i = 1; i < entries.length; i++) {
+      const entryDate = new Date(entries[i].devotionalDate!);
+      const daysDiff = Math.floor((currentDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff === 1) {
+        streak++;
+        currentDate = entryDate;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  async getPublicSoapEntries(churchId?: number, limit?: number, offset?: number): Promise<SoapEntry[]> {
+    let query = db.select().from(soapEntries).where(eq(soapEntries.isPublic, true));
+
+    if (churchId) {
+      query = query.where(eq(soapEntries.churchId, churchId));
+    }
+
+    query = query.orderBy(desc(soapEntries.createdAt));
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    if (offset) {
+      query = query.offset(offset);
+    }
+
+    return await query;
+  }
+
+  async featureSoapEntry(id: number, featuredBy: string): Promise<SoapEntry> {
+    const [featuredEntry] = await db
+      .update(soapEntries)
+      .set({
+        isFeatured: true,
+        featuredBy,
+        featuredAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(soapEntries.id, id))
+      .returning();
+    return featuredEntry;
+  }
+
+  async unfeatureSoapEntry(id: number): Promise<SoapEntry> {
+    const [unfeaturedEntry] = await db
+      .update(soapEntries)
+      .set({
+        isFeatured: false,
+        featuredBy: null,
+        featuredAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(soapEntries.id, id))
+      .returning();
+    return unfeaturedEntry;
   }
 }
 
