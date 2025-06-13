@@ -211,52 +211,7 @@ export default function ContentDistributionHub() {
     }
   });
 
-  // Save social media credentials
-  const saveCredentialsMutation = useMutation({
-    mutationFn: async (data: any) => {
-      return apiRequest('/api/social-credentials', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
-    },
-    onSuccess: () => {
-      setShowCredentialsDialog(false);
-      toast({
-        title: "Credentials saved",
-        description: "Social media credentials have been securely stored.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to save credentials",
-        description: error.message || "Could not save social media credentials.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  // Direct publish to social media
-  const directPublishMutation = useMutation({
-    mutationFn: async (data: any) => {
-      return apiRequest('/api/social-media/publish', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Published successfully!",
-        description: `Content published to ${data.platform}`,
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Publishing failed",
-        description: error.message || "Failed to publish content.",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleGenerate = () => {
     if (!sermonTitle || !sermonSummary) {
@@ -794,6 +749,132 @@ export default function ContentDistributionHub() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Social Media Credentials Dialog */}
+      <Dialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect Social Media Accounts</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Connect your social media accounts to enable direct publishing from the Content Distribution Hub.
+            </p>
+            
+            <div className="space-y-3">
+              <SocialMediaConnectionForm 
+                platform="facebook" 
+                icon={<Facebook className="w-5 h-5 text-blue-600" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.facebook_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="twitter" 
+                icon={<Twitter className="w-5 h-5 text-blue-400" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.twitter_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="instagram" 
+                icon={<Instagram className="w-5 h-5 text-pink-600" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.instagram_credentials}
+              />
+            </div>
+            
+            <div className="pt-3 border-t">
+              <p className="text-xs text-gray-500">
+                <Shield className="w-3 h-3 inline mr-1" />
+                Your credentials are encrypted and stored securely
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// Social Media Connection Form Component
+function SocialMediaConnectionForm({ platform, icon, onSave, isConnected }: {
+  platform: string;
+  icon: React.ReactNode;
+  onSave: (platform: string, credentials: any) => void;
+  isConnected: boolean;
+}) {
+  const [accessToken, setAccessToken] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [showForm, setShowForm] = useState(false);
+
+  const handleConnect = () => {
+    if (accessToken) {
+      onSave(platform, {
+        accessToken,
+        accountName: accountName || `${platform}_account`,
+      });
+      setAccessToken("");
+      setAccountName("");
+      setShowForm(false);
+    }
+  };
+
+  return (
+    <div className="p-3 border rounded-lg">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {icon}
+          <span className="capitalize">{platform}</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          {isConnected && (
+            <Badge variant="secondary" className="text-xs">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Connected
+            </Badge>
+          )}
+          <Button 
+            size="sm" 
+            variant={isConnected ? "outline" : "default"}
+            onClick={() => setShowForm(!showForm)}
+          >
+            {isConnected ? "Reconnect" : "Connect"}
+          </Button>
+        </div>
+      </div>
+      
+      {showForm && (
+        <div className="mt-3 space-y-2">
+          <div>
+            <Label htmlFor={`${platform}-token`} className="text-xs">Access Token</Label>
+            <Input
+              id={`${platform}-token`}
+              type="password"
+              placeholder="Enter your access token"
+              value={accessToken}
+              onChange={(e) => setAccessToken(e.target.value)}
+              className="text-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor={`${platform}-account`} className="text-xs">Account Name (Optional)</Label>
+            <Input
+              id={`${platform}-account`}
+              placeholder="Account display name"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+              className="text-sm"
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleConnect} disabled={!accessToken}>
+              Save
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
