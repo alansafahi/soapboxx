@@ -2697,10 +2697,28 @@ Format your response as JSON with the following structure:
         return res.status(400).json({ message: 'Scripture reference is required' });
       }
 
-      // Normalize the reference for better matching
+      console.log(`Verse lookup for user ${req.user.id}: ${reference}`);
+
+      // Import the Bible API service
+      const { lookupBibleVerse } = await import('./bible-api');
+      
+      // First try the external Bible API for complete coverage
+      const apiResult = await lookupBibleVerse(reference, version);
+      if (apiResult) {
+        return res.json({
+          success: true,
+          verse: {
+            reference: apiResult.reference,
+            text: apiResult.text,
+            version: apiResult.version
+          }
+        });
+      }
+
+      // Fallback to local database with smart matching
       const normalizedRef = reference.toLowerCase().replace(/\s+/g, ' ').trim();
       
-      // First try exact match
+      // Try exact match in local database
       const exactVerse = await storage.lookupBibleVerse(reference);
       if (exactVerse) {
         return res.json({
@@ -2713,35 +2731,19 @@ Format your response as JSON with the following structure:
         });
       }
 
-      // If no exact match, try broader search with multiple strategies
+      // Try broader search in local database
       const verses = await storage.getBibleVerses();
       
-      // Strategy 1: Find verses that start with the reference (for partial matches like "Matthew 11:28" matching "Matthew 11:28-30")
       let matchingVerse = verses.find(v => {
         const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
         return verseRef.startsWith(normalizedRef) || normalizedRef.startsWith(verseRef);
       });
       
-      // Strategy 2: Find verses that contain the reference
       if (!matchingVerse) {
         matchingVerse = verses.find(v => {
           const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
           return verseRef.includes(normalizedRef) || normalizedRef.includes(verseRef);
         });
-      }
-      
-      // Strategy 3: Parse book and chapter for broader matching
-      if (!matchingVerse) {
-        const refMatch = normalizedRef.match(/^(.+?)\s+(\d+):(\d+)/);
-        if (refMatch) {
-          const [, book, chapter, verse] = refMatch;
-          matchingVerse = verses.find(v => {
-            const verseRef = v.reference.toLowerCase();
-            return verseRef.includes(book.toLowerCase()) && 
-                   verseRef.includes(`${chapter}:`) &&
-                   (verseRef.includes(`:${verse}`) || verseRef.includes(`${verse}-`));
-          });
-        }
       }
 
       if (matchingVerse) {
@@ -2754,26 +2756,10 @@ Format your response as JSON with the following structure:
           }
         });
       } else {
-        // Find similar verses in the same book/chapter for helpful suggestions
-        const refMatch = normalizedRef.match(/^(.+?)\s+(\d+)/);
-        let suggestions = [];
-        
-        if (refMatch) {
-          const [, book, chapter] = refMatch;
-          suggestions = verses
-            .filter(v => {
-              const vRef = v.reference.toLowerCase();
-              return vRef.includes(book.toLowerCase()) && vRef.includes(`${chapter}:`);
-            })
-            .slice(0, 3)
-            .map(v => v.reference);
-        }
-        
-        const message = suggestions.length > 0 
-          ? `Scripture reference "${reference}" not found. Similar verses available: ${suggestions.join(', ')}. Try one of these or enter the verse text manually.`
-          : `Scripture reference "${reference}" not found in our database. Try formats like "John 3:16" or "Psalm 23:1", or enter the verse text manually.`;
-        
-        res.status(404).json({ message });
+        // Provide helpful error message
+        res.status(404).json({ 
+          message: `Scripture reference "${reference}" not found. Please check the format (e.g., "John 3:16") or enter the verse text manually.`
+        });
       }
     } catch (error) {
       console.error('Bible lookup error:', error);
