@@ -4080,9 +4080,9 @@ Return JSON with this exact structure:
   });
 
   // Demo Screenshots API endpoint
-  app.get('/api/demo/screenshots/:filename', (req, res) => {
+  app.get('/api/demo/screenshots/:filename(*)', (req, res) => {
     try {
-      const filename = req.params.filename;
+      const filename = decodeURIComponent(req.params.filename);
       const imagePath = path.join(process.cwd(), 'attached_assets', filename);
       
       // Check if file exists
