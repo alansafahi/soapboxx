@@ -288,7 +288,7 @@ export default function SermonCreationStudio() {
           </TabsTrigger>
           <TabsTrigger value="illustrations" className="flex items-center">
             <MessageSquare className="w-4 h-4 mr-2" />
-            Visual Aids
+            Stories
           </TabsTrigger>
           <TabsTrigger value="enhance" className="flex items-center">
             <Star className="w-4 h-4 mr-2" />
