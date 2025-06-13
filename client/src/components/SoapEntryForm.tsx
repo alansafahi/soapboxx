@@ -461,6 +461,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 />
 
                 <FormItem>
+                  <FormLabel>Look Up With</FormLabel>
                   <Select value={selectedVersion} onValueChange={(value) => {
                     setSelectedVersion(value);
                     // Auto-lookup when version is changed if there's a reference
@@ -470,7 +471,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     }
                   }}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Look Up With..." />
+                      <SelectValue placeholder="Select Bible version..." />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="NIV">NIV - New International Version</SelectItem>
