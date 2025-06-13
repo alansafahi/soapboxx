@@ -2757,6 +2757,7 @@ Format your response as JSON with the following structure:
         });
       } else {
         // Provide helpful error message
+        console.log(`[Bible Lookup] No verse found in any source for: "${reference}"`);
         res.status(404).json({ 
           message: `Scripture reference "${reference}" not found. Please check the format (e.g., "John 3:16") or enter the verse text manually.`
         });
