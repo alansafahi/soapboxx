@@ -5,6 +5,7 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
+import { generateSoapSuggestions, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -4416,6 +4417,55 @@ Return JSON with this exact structure:
     } catch (error) {
       console.error('Error featuring S.O.A.P. entry:', error);
       res.status(500).json({ message: 'Failed to feature S.O.A.P. entry' });
+    }
+  });
+
+  // AI-powered S.O.A.P. assistance endpoints
+  app.post('/api/soap/ai/suggestions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, scriptureReference, userContext } = req.body;
+
+      if (!scripture || !scriptureReference) {
+        return res.status(400).json({ message: 'Scripture and reference are required' });
+      }
+
+      const suggestions = await generateSoapSuggestions(scripture, scriptureReference, userContext);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Error generating S.O.A.P. suggestions:', error);
+      res.status(500).json({ message: error.message || 'Failed to generate AI suggestions' });
+    }
+  });
+
+  app.post('/api/soap/ai/enhance', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, scriptureReference, observation, application, prayer } = req.body;
+
+      if (!scripture || !scriptureReference || !observation || !application || !prayer) {
+        return res.status(400).json({ message: 'All S.O.A.P. components are required for enhancement' });
+      }
+
+      const enhanced = await enhanceSoapEntry(scripture, scriptureReference, observation, application, prayer);
+      res.json(enhanced);
+    } catch (error) {
+      console.error('Error enhancing S.O.A.P. entry:', error);
+      res.status(500).json({ message: error.message || 'Failed to enhance reflection' });
+    }
+  });
+
+  app.post('/api/soap/ai/questions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, scriptureReference } = req.body;
+
+      if (!scripture || !scriptureReference) {
+        return res.status(400).json({ message: 'Scripture and reference are required' });
+      }
+
+      const questions = await generateScriptureQuestions(scripture, scriptureReference);
+      res.json({ questions });
+    } catch (error) {
+      console.error('Error generating Scripture questions:', error);
+      res.status(500).json({ message: error.message || 'Failed to generate questions' });
     }
   });
 
