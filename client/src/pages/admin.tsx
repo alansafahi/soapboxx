@@ -2815,22 +2815,22 @@ export default function AdminPortal() {
                   </Button>
                 </div>
               
-              {/* Engagement Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reach</p>
-                        <p className="text-2xl font-bold">847.2K</p>
-                        <p className="text-xs text-green-600">+15% this week</p>
+                {/* Engagement Overview Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reach</p>
+                          <p className="text-2xl font-bold">847.2K</p>
+                          <p className="text-xs text-green-600">+15% this week</p>
+                        </div>
+                        <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                          <Eye className="h-4 w-4 text-blue-600" />
+                        </div>
                       </div>
-                      <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                        <Eye className="h-4 w-4 text-blue-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 
                 <Card>
                   <CardContent className="p-6">
