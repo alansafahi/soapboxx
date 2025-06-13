@@ -68,7 +68,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'bottom',
         icon: 'BookOpen',
         duration: 3000,
-        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.00.53%20AM_1749801661635.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.00.53%20AM_1749801661635.png'
       },
       {
         id: 'sermon-creation',
