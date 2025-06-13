@@ -2636,47 +2636,10 @@ Format your response as JSON with the following structure:
       console.log(`[Bible Lookup] Reference: "${reference}"`);
       console.log(`[Bible Lookup] Version: "${version}"`);
 
-      // First check if this is a common verse we can provide immediately
-      const commonVerses: Record<string, { reference: string; text: string; version: string }> = {
-        'proverbs 13:1': {
-          reference: 'Proverbs 13:1',
-          text: 'A wise son listens to his father\'s instruction, but a scoffer doesn\'t listen to rebuke.',
-          version: 'World English Bible'
-        },
-        'john 3:16': {
-          reference: 'John 3:16',
-          text: 'For God so loved the world, that he gave his one and only Son, that whoever believes in him should not perish, but have eternal life.',
-          version: 'World English Bible'
-        },
-        'psalm 23:1': {
-          reference: 'Psalm 23:1',
-          text: 'The Lord is my shepherd; I shall not want.',
-          version: 'World English Bible'
-        },
-        'matthew 11:28': {
-          reference: 'Matthew 11:28',
-          text: 'Come to me, all you who labor and are heavily burdened, and I will give you rest.',
-          version: 'World English Bible'
-        },
-        'philippians 4:13': {
-          reference: 'Philippians 4:13',
-          text: 'I can do all things through Christ, who strengthens me.',
-          version: 'World English Bible'
-        }
-      };
-
       const normalizedReference = reference.toLowerCase().replace(/\s+/g, ' ').trim();
       console.log(`[Bible Lookup] Checking normalized reference: "${normalizedReference}"`);
       
-      if (commonVerses[normalizedReference]) {
-        console.log(`[Bible Lookup] Found common verse: ${normalizedReference}`);
-        return res.json({
-          success: true,
-          verse: commonVerses[normalizedReference]
-        });
-      }
-
-      // Try local database with smart matching
+      // STEP 1: Check saved verses in database first
       const verses = await storage.getBibleVerses();
       
       let matchingVerse = verses.find(v => {
@@ -2699,18 +2662,56 @@ Format your response as JSON with the following structure:
       }
 
       if (matchingVerse) {
-        console.log(`[Bible Lookup] Found local verse: ${matchingVerse.reference}`);
+        console.log(`[Bible Lookup] Found saved verse: ${matchingVerse.reference}`);
         return res.json({
           success: true,
           verse: {
             reference: matchingVerse.reference,
             text: matchingVerse.text,
-            version: version
+            version: matchingVerse.translation || version
           }
         });
       }
 
-      // Provide helpful error message
+      // STEP 2: If not in database, try external Bible API
+      console.log(`[Bible Lookup] Not in database, trying external API...`);
+      const { lookupBibleVerse } = await import('./bible-api');
+      
+      const apiResult = await lookupBibleVerse(reference, version);
+      if (apiResult) {
+        console.log(`[Bible Lookup] Found via API: ${apiResult.reference}`);
+        
+        // STEP 3: Save new verse to database for future lookups
+        try {
+          const newVerse = {
+            reference: apiResult.reference,
+            book: apiResult.reference.split(' ')[0],
+            chapter: parseInt(apiResult.reference.split(' ')[1]?.split(':')[0] || '1'),
+            verse: apiResult.reference.split(':')[1] || '1',
+            text: apiResult.text,
+            translation: apiResult.version,
+            topicTags: ['user-requested'],
+            category: 'user-lookup',
+            popularityScore: 5
+          };
+          
+          await storage.createBibleVerse(newVerse);
+          console.log(`[Bible Lookup] Saved new verse to database: ${apiResult.reference}`);
+        } catch (saveError) {
+          console.log(`[Bible Lookup] Could not save verse (may already exist): ${saveError}`);
+        }
+        
+        return res.json({
+          success: true,
+          verse: {
+            reference: apiResult.reference,
+            text: apiResult.text,
+            version: apiResult.version
+          }
+        });
+      }
+
+      // STEP 4: Provide helpful error message if not found anywhere
       console.log(`[Bible Lookup] No verse found for: "${reference}"`);
       res.status(404).json({ 
         message: `Verse not found: ${reference}. Please enter the verse text manually in the field below.`,
