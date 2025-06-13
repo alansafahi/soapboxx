@@ -5669,13 +5669,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSermonDraft(draftData: any): Promise<any> {
-    // Simplified sermon draft storage
-    const draft = {
-      id: Date.now().toString(),
-      ...draftData,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    const [draft] = await this.db.insert(schema.sermonDrafts).values({
+      title: draftData.title,
+      content: draftData.content,
+      userId: draftData.userId,
+      churchId: draftData.churchId || null,
+      isPublished: draftData.isPublished || false,
+      tags: draftData.tags || [],
+      scriptureReferences: draftData.scriptureReferences || [],
+      targetAudience: draftData.targetAudience || null,
+      estimatedDuration: draftData.estimatedDuration || null,
+      notes: draftData.notes || null
+    }).returning();
     
     return draft;
   }

@@ -1199,6 +1199,34 @@ export const userEngagementMetrics = pgTable("user_engagement_metrics", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Sermon drafts storage
+export const sermonDrafts = pgTable("sermon_drafts", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: jsonb("content").notNull(), // Stores outline, research, illustrations, enhancement
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  isPublished: boolean("is_published").default(false),
+  publishedAt: timestamp("published_at"),
+  tags: text("tags").array(),
+  sermonDate: timestamp("sermon_date"),
+  scriptureReferences: text("scripture_references").array(),
+  targetAudience: varchar("target_audience", { length: 50 }),
+  estimatedDuration: integer("estimated_duration"), // minutes
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("sermon_drafts_user_idx").on(table.userId),
+  index("sermon_drafts_church_idx").on(table.churchId),
+  index("sermon_drafts_published_idx").on(table.isPublished),
+]);
+
+// Insert schemas
+export const insertSermonDraftSchema = createInsertSchema(sermonDrafts);
+export type InsertSermonDraft = z.infer<typeof insertSermonDraftSchema>;
+export type SelectSermonDraft = typeof sermonDrafts.$inferSelect;
+
 // A/B Testing for notifications
 export const notificationAbTests = pgTable("notification_ab_tests", {
   id: serial("id").primaryKey(),
