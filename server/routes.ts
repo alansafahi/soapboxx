@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import OpenAI from "openai";
 import * as schema from "@shared/schema";
 
@@ -4075,6 +4076,42 @@ Return JSON with this exact structure:
         message: 'Failed to clear demo data',
         error: error?.message || 'Unknown error'
       });
+    }
+  });
+
+  // Demo Screenshots API endpoint
+  app.get('/api/demo/screenshots/:filename', (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const imagePath = path.join(process.cwd(), 'attached_assets', filename);
+      
+      // Check if file exists
+      if (!fs.existsSync(imagePath)) {
+        return res.status(404).json({ message: 'Screenshot not found' });
+      }
+      
+      // Set proper content type based on file extension
+      const ext = path.extname(filename).toLowerCase();
+      let contentType = 'image/png';
+      
+      if (ext === '.jpg' || ext === '.jpeg') {
+        contentType = 'image/jpeg';
+      } else if (ext === '.gif') {
+        contentType = 'image/gif';
+      } else if (ext === '.webp') {
+        contentType = 'image/webp';
+      }
+      
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+      
+      // Stream the file
+      const fileStream = fs.createReadStream(imagePath);
+      fileStream.pipe(res);
+      
+    } catch (error) {
+      console.error('Error serving demo screenshot:', error);
+      res.status(500).json({ message: 'Failed to serve screenshot' });
     }
   });
 

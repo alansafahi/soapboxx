@@ -68,7 +68,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'bottom',
         icon: 'BookOpen',
         duration: 3000,
-        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.00.53%20AM_1749801661635.png'
+        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.00.53%20AM_1749801661635.png'
       },
       {
         id: 'sermon-creation',
@@ -78,7 +78,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'right',
         action: 'click',
         icon: 'BookOpen',
-        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.06.25%20AM_1749801989165.png'
+        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.06.25%20AM_1749801989165.png'
       },
       {
         id: 'content-library',
@@ -88,7 +88,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'bottom',
         action: 'hover',
         icon: 'Archive',
-        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.08.32%20AM_1749802115963.png'
+        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.08.32%20AM_1749802115963.png'
       },
       {
         id: 'social-publishing',
