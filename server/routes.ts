@@ -1906,72 +1906,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Verse lookup endpoint for auto-population
-  app.post('/api/bible/lookup-verse', isAuthenticated, async (req: any, res) => {
-    try {
-      const { reference } = req.body;
-      const userId = req.user.claims.sub;
 
-      if (!reference) {
-        return res.status(400).json({ message: "Verse reference is required" });
-      }
-
-      // Import content safety service
-      const { contentSafety } = await import('./contentSafety');
-
-      // Validate verse reference format
-      const refValidation = contentSafety.validateVerseReference(reference);
-      if (!refValidation.isAllowed) {
-        return res.status(400).json({ message: refValidation.reason });
-      }
-
-      // Parse the verse reference to extract book, chapter, and verse
-      const parseReference = (ref: string) => {
-        // Handle references like "John 3:16", "1 John 3:16", "Psalm 23:1"
-        const cleanRef = ref.trim();
-        const match = cleanRef.match(/^((?:1st?|2nd?|3rd?|I{1,3}|1|2|3)?\s*[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$/);
-        
-        if (!match) {
-          throw new Error("Invalid verse reference format");
-        }
-
-        const [, book, chapter, startVerse, endVerse] = match;
-        return {
-          book: book.trim(),
-          chapter: parseInt(chapter),
-          startVerse: parseInt(startVerse),
-          endVerse: endVerse ? parseInt(endVerse) : parseInt(startVerse)
-        };
-      };
-
-      const parsedRef = parseReference(reference);
-
-      // Look up verse in database first
-      let verse = await storage.lookupBibleVerse(reference);
-      
-      if (!verse) {
-        // Fallback: Create a helpful message encouraging manual entry
-        return res.status(404).json({ 
-          message: `Verse not found: ${reference}. Please enter the verse text manually in the field below.`,
-          suggestion: "You can copy and paste the verse text from your preferred Bible translation."
-        });
-      }
-
-      // Log the verse lookup for analytics
-      console.log(`Verse lookup for user ${userId}: ${reference}`);
-      
-      res.json({
-        reference: verse.reference,
-        text: verse.text,
-        book: parsedRef.book,
-        chapter: parsedRef.chapter,
-        verse: parsedRef.startVerse
-      });
-    } catch (error) {
-      console.error("Error looking up verse:", error);
-      res.status(500).json({ message: "Failed to lookup verse. Please enter the verse text manually." });
-    }
-  });
 
   // Bible verses by topic search endpoint
   app.post('/api/bible/search-by-topic', isAuthenticated, async (req: any, res) => {
