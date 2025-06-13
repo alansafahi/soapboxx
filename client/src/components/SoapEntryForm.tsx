@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, BookOpen, Eye, Users, Lightbulb, Save, Sparkles, Calendar, Brain, Wand2, Globe, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { insertSoapEntrySchema, type SoapEntry } from "@shared/schema";
 import { z } from "zod";
 
@@ -133,6 +133,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       }
     },
     onSuccess: () => {
+      // Invalidate relevant caches to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      
+      toast({
+        title: "S.O.A.P. Entry Saved",
+        description: "Your spiritual reflection has been saved and shared with the community.",
+      });
+      
       onSuccess();
     },
     onError: (error) => {
@@ -579,34 +589,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               <CardTitle>Settings & Sharing</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="moodTag"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Current Mood</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="How are you feeling today?" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {moodOptions.map((mood) => (
-                          <SelectItem key={mood.value} value={mood.value}>
-                            <div className="flex items-center gap-2">
-                              <Badge className={mood.color} variant="secondary">
-                                {mood.label}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Show detected mood from check-ins */}
+              {form.getValues('moodTag') && (
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm text-muted-foreground">Detected Mood:</Label>
+                  <Badge className={moodOptions.find(m => m.value === form.getValues('moodTag'))?.color || "bg-gray-100 text-gray-800"} variant="secondary">
+                    {moodOptions.find(m => m.value === form.getValues('moodTag'))?.label || form.getValues('moodTag')}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">(from recent check-in)</span>
+                </div>
+              )}
 
               <FormField
                 control={form.control}
