@@ -4424,11 +4424,7 @@ Return JSON with this exact structure:
   // AI-powered S.O.A.P. assistance endpoints
   app.post('/api/soap/ai/suggestions', isAuthenticated, async (req: any, res) => {
     try {
-      const { scripture, scriptureReference, userMood, currentEvents, personalContext } = req.body;
-
-      if (!scripture || !scriptureReference) {
-        return res.status(400).json({ message: 'Scripture and reference are required' });
-      }
+      const { scripture, scriptureReference, userMood, currentEvents, personalContext, generateComplete } = req.body;
 
       const contextualInfo = {
         userMood,
@@ -4436,7 +4432,15 @@ Return JSON with this exact structure:
         personalContext
       };
 
-      const suggestions = await generateSoapSuggestions(scripture, scriptureReference, contextualInfo);
+      let suggestions;
+      
+      // If no scripture provided or generateComplete flag is true, generate complete S.O.A.P.
+      if (generateComplete || !scripture || !scriptureReference) {
+        suggestions = await generateCompleteSoapEntry(contextualInfo);
+      } else {
+        suggestions = await generateSoapSuggestions(scripture, scriptureReference, contextualInfo);
+      }
+
       res.json(suggestions);
     } catch (error) {
       console.error('Error generating S.O.A.P. suggestions:', error);

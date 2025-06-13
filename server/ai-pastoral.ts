@@ -8,6 +8,8 @@ export interface SoapSuggestion {
   observation: string;
   application: string;
   prayer: string;
+  scripture?: string;
+  scriptureReference?: string;
 }
 
 export interface ContextualInfo {
@@ -99,6 +101,93 @@ Respond with JSON in this format:
   } catch (error) {
     console.error('Error generating SOAP suggestions:', error);
     throw new Error('Failed to generate AI suggestions. Please try again.');
+  }
+}
+
+export async function generateCompleteSoapEntry(
+  contextualInfo?: ContextualInfo
+): Promise<SoapSuggestion> {
+  try {
+    // Build contextual awareness
+    const currentDate = new Date();
+    const liturgicalContext = getLiturgicalContext(currentDate);
+    const seasonalContext = getSeasonalContext(currentDate);
+    
+    let contextPrompt = '';
+    
+    if (contextualInfo?.userMood) {
+      contextPrompt += `User's current mood: ${contextualInfo.userMood}\n`;
+    }
+    
+    if (liturgicalContext.season) {
+      contextPrompt += `Liturgical season: ${liturgicalContext.season}\n`;
+    }
+    
+    if (liturgicalContext.upcomingHolidays.length > 0) {
+      contextPrompt += `Upcoming Christian holidays: ${liturgicalContext.upcomingHolidays.join(', ')}\n`;
+    }
+    
+    if (seasonalContext) {
+      contextPrompt += `Seasonal context: ${seasonalContext}\n`;
+    }
+    
+    if (contextualInfo?.currentEvents && contextualInfo.currentEvents.length > 0) {
+      contextPrompt += `Current world context: ${contextualInfo.currentEvents.join(', ')}\n`;
+    }
+    
+    if (contextualInfo?.personalContext) {
+      contextPrompt += `Personal context: ${contextualInfo.personalContext}\n`;
+    }
+
+    const prompt = `As a pastoral AI assistant, generate a complete S.O.A.P. (Scripture, Observation, Application, Prayer) entry that is perfectly suited to the current context and user's spiritual needs.
+
+Current Context:
+${contextPrompt}
+
+Please select an appropriate Scripture passage that speaks directly to this context and provide a complete S.O.A.P. reflection. Choose a verse that:
+- Addresses the user's current emotional state
+- Is relevant to the liturgical season 
+- Speaks to current world events or circumstances
+- Provides spiritual guidance and comfort
+
+Respond with JSON in this format:
+{
+  "scripture": "The complete Bible verse text here",
+  "scriptureReference": "Book Chapter:Verse format (e.g., John 3:16)",
+  "observation": "Your contextually-aware observation of what this Scripture says",
+  "application": "Your contextually-relevant application for daily life", 
+  "prayer": "Your contextually-sensitive prayer based on this Scripture"
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are a wise, caring pastoral assistant who helps people connect deeply with Scripture. Select appropriate Bible passages and provide thoughtful, biblically sound, and personally meaningful spiritual guidance that is sensitive to current circumstances, liturgical seasons, and world events. Tailor your responses to the user's emotional state and the broader context of their life and world."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1200,
+      temperature: 0.7
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      scripture: result.scripture || '',
+      scriptureReference: result.scriptureReference || '',
+      observation: result.observation || '',
+      application: result.application || '',
+      prayer: result.prayer || ''
+    };
+  } catch (error) {
+    console.error('Error generating complete SOAP entry:', error);
+    throw new Error('Failed to generate complete SOAP entry');
   }
 }
 

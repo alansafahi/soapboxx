@@ -133,15 +133,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   // AI assistance functions
   const generateSuggestions = async () => {
     const currentData = form.getValues();
-    if (!currentData.scripture || !currentData.scriptureReference) {
-      toast({
-        title: "Scripture Required",
-        description: "Please enter a Scripture passage and reference first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    
     setIsLoadingAI(true);
     try {
       // Build contextual information for AI
@@ -150,13 +142,14 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       ) || [];
 
       const requestBody = {
-        scripture: currentData.scripture,
-        scriptureReference: currentData.scriptureReference,
+        scripture: currentData.scripture || '',
+        scriptureReference: currentData.scriptureReference || '',
         userMood: currentData.moodTag,
         currentEvents: contextualEvents,
         personalContext: contextualInfo ? 
           `Liturgical season: ${contextualInfo.liturgicalSeason}. ${contextualInfo.seasonalFocus}. Current spiritual themes: ${contextualInfo.spiritualThemes?.join(', ')}` 
-          : undefined
+          : undefined,
+        generateComplete: !currentData.scripture || !currentData.scriptureReference // Generate complete S.O.A.P. if no scripture provided
       };
 
       const suggestions = await apiRequest('/api/soap/ai/suggestions', {
@@ -165,10 +158,19 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       });
       
       setAiSuggestions(suggestions);
+      
+      // If complete S.O.A.P. was generated, populate the scripture fields too
+      if (suggestions.scripture && suggestions.scriptureReference) {
+        form.setValue('scripture', suggestions.scripture);
+        form.setValue('scriptureReference', suggestions.scriptureReference);
+      }
+      
       form.setValue('aiAssisted', true);
       toast({
-        title: "Contextual AI Suggestions Generated",
-        description: "Suggestions include your mood, current events, and liturgical season.",
+        title: "Complete AI S.O.A.P. Generated",
+        description: suggestions.scripture ? 
+          "Generated complete Scripture passage and reflections based on your context." :
+          "Enhanced your existing Scripture with contextual insights.",
       });
     } catch (error) {
       toast({
