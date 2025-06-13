@@ -2754,9 +2754,26 @@ Format your response as JSON with the following structure:
           }
         });
       } else {
-        res.status(404).json({ 
-          message: `Scripture reference "${reference}" not found in our database. Try formats like "John 3:16" or "Psalm 23:1", or enter the verse text manually.`
-        });
+        // Find similar verses in the same book/chapter for helpful suggestions
+        const refMatch = normalizedRef.match(/^(.+?)\s+(\d+)/);
+        let suggestions = [];
+        
+        if (refMatch) {
+          const [, book, chapter] = refMatch;
+          suggestions = verses
+            .filter(v => {
+              const vRef = v.reference.toLowerCase();
+              return vRef.includes(book.toLowerCase()) && vRef.includes(`${chapter}:`);
+            })
+            .slice(0, 3)
+            .map(v => v.reference);
+        }
+        
+        const message = suggestions.length > 0 
+          ? `Scripture reference "${reference}" not found. Similar verses available: ${suggestions.join(', ')}. Try one of these or enter the verse text manually.`
+          : `Scripture reference "${reference}" not found in our database. Try formats like "John 3:16" or "Psalm 23:1", or enter the verse text manually.`;
+        
+        res.status(404).json({ message });
       }
     } catch (error) {
       console.error('Bible lookup error:', error);
