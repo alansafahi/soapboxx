@@ -19,41 +19,64 @@ const BIBLE_VERSIONS = {
 // Free Bible API service using bible-api.com
 async function fetchFromBibleAPI(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
+    // Clean and format the reference properly
+    const cleanRef = reference.trim();
+    
     // Use KJV for reliable results, or default for others
     const useKJV = version === 'KJV';
     const url = useKJV 
-      ? `https://bible-api.com/${encodeURIComponent(reference)}?translation=kjv`
-      : `https://bible-api.com/${encodeURIComponent(reference)}`;
+      ? `https://bible-api.com/${encodeURIComponent(cleanRef)}?translation=kjv`
+      : `https://bible-api.com/${encodeURIComponent(cleanRef)}`;
 
-    console.log(`[Bible API] Fetching: ${url}`);
+    console.log(`[Bible API] Attempting to fetch: ${url}`);
+    console.log(`[Bible API] Original reference: "${reference}"`);
+    console.log(`[Bible API] Clean reference: "${cleanRef}"`);
+    console.log(`[Bible API] Encoded reference: "${encodeURIComponent(cleanRef)}"`);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     
     const response = await fetch(url, {
-      method: 'GET',
+      signal: controller.signal,
       headers: {
-        'User-Agent': 'SoapBox-App/1.0',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000
+        'User-Agent': 'SoapBox-Bible-App/1.0',
+        'Accept': 'application/json'
+      }
     });
-
-    console.log(`[Bible API] Response status: ${response.status}`);
+    
+    clearTimeout(timeoutId);
+    console.log(`[Bible API] Response received - Status: ${response.status}, OK: ${response.ok}`);
 
     if (!response.ok) {
-      console.log(`[Bible API] Request failed with status: ${response.status}`);
+      const errorText = await response.text();
+      console.log(`[Bible API] Error response body: ${errorText}`);
       return null;
     }
 
-    const text = await response.text();
-    console.log(`[Bible API] Raw response: ${text.substring(0, 200)}...`);
+    const responseText = await response.text();
+    console.log(`[Bible API] Response body length: ${responseText.length}`);
+    console.log(`[Bible API] Response preview: ${responseText.substring(0, 300)}`);
     
-    const data = JSON.parse(text);
-    console.log(`[Bible API] Parsed data:`, JSON.stringify(data, null, 2));
+    if (!responseText.trim()) {
+      console.log(`[Bible API] Empty response received`);
+      return null;
+    }
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`[Bible API] JSON parse error:`, parseError);
+      console.log(`[Bible API] Failed to parse response: ${responseText}`);
+      return null;
+    }
+    
+    console.log(`[Bible API] Parsed JSON structure:`, Object.keys(data));
     
     // Check if we have valid verse data
     if (data && data.reference && data.text) {
       const cleanText = data.text
-        .replace(/\n/g, ' ')
+        .replace(/\n+/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
       
@@ -63,14 +86,20 @@ async function fetchFromBibleAPI(reference: string, version: string = 'NIV'): Pr
         version: data.translation_name || (useKJV ? 'King James Version' : 'World English Bible')
       };
       
-      console.log(`[Bible API] SUCCESS: Returning verse:`, result);
+      console.log(`[Bible API] SUCCESS! Returning formatted verse:`, result);
       return result;
+    } else {
+      console.log(`[Bible API] Missing required fields - reference: ${!!data?.reference}, text: ${!!data?.text}`);
+      console.log(`[Bible API] Full data object:`, data);
     }
 
-    console.log(`[Bible API] Invalid data structure received`);
     return null;
   } catch (error) {
-    console.error('[Bible API] Error:', error);
+    if (error.name === 'AbortError') {
+      console.error('[Bible API] Request timeout after 15 seconds');
+    } else {
+      console.error('[Bible API] Fetch error:', error);
+    }
     return null;
   }
 }
@@ -115,48 +144,47 @@ async function fetchFromESVAPI(reference: string): Promise<BibleVerseResponse | 
 export async function lookupBibleVerse(reference: string, preferredVersion: string = 'NIV'): Promise<BibleVerseResponse | null> {
   console.log(`[Bible API] Looking up verse: "${reference}" (${preferredVersion})`);
 
-  // Strategy 1: Try free Bible API
-  let result = await fetchFromBibleAPI(reference, preferredVersion);
-  if (result) {
-    console.log(`[Bible API] SUCCESS: Found verse via Bible API: ${result.reference}`);
-    return result;
-  } else {
-    console.log(`[Bible API] FAILED: No result from Bible API for "${reference}"`);
-  }
-
-  // Strategy 2: Try ESV API if available and version is ESV
-  if (preferredVersion === 'ESV') {
-    result = await fetchFromESVAPI(reference);
-    if (result) {
-      console.log(`[Bible API] SUCCESS: Found verse via ESV API: ${result.reference}`);
-      return result;
-    } else {
-      console.log(`[Bible API] FAILED: No result from ESV API for "${reference}"`);
-    }
-  }
-
-  // Strategy 3: Try with normalized reference formats
+  // First, normalize the reference to proper case format
   const normalizedRefs = normalizeReference(reference);
-  console.log(`[Bible API] Trying normalized references:`, normalizedRefs);
+  console.log(`[Bible API] Normalized references to try:`, normalizedRefs);
   
+  // Try each normalized reference format
   for (const normalizedRef of normalizedRefs) {
-    if (normalizedRef !== reference) {
-      console.log(`[Bible API] Trying normalized reference: "${normalizedRef}"`);
-      result = await fetchFromBibleAPI(normalizedRef, preferredVersion);
+    console.log(`[Bible API] Trying reference: "${normalizedRef}"`);
+    
+    // Strategy 1: Try free Bible API
+    let result = await fetchFromBibleAPI(normalizedRef, preferredVersion);
+    if (result) {
+      console.log(`[Bible API] SUCCESS: Found verse via Bible API: ${result.reference}`);
+      return result;
+    }
+
+    // Strategy 2: Try ESV API if available and version is ESV
+    if (preferredVersion === 'ESV') {
+      result = await fetchFromESVAPI(normalizedRef);
       if (result) {
-        console.log(`[Bible API] SUCCESS: Found verse with normalized reference: ${result.reference}`);
+        console.log(`[Bible API] SUCCESS: Found verse via ESV API: ${result.reference}`);
         return result;
       }
     }
   }
 
-  console.log(`[Bible API] FINAL FAILURE: No verse found for: "${reference}"`);
+  console.log(`[Bible API] FINAL FAILURE: No verse found for any format of: "${reference}"`);
   return null;
 }
 
 // Helper function to normalize Bible references
 function normalizeReference(reference: string): string[] {
   const variations: string[] = [reference];
+  
+  // Capitalize the first letter of each word for proper Bible book names
+  const properCase = reference.replace(/\b\w+/g, word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  );
+  
+  if (properCase !== reference) {
+    variations.push(properCase);
+  }
   
   // Handle common book name variations
   const bookMappings: Record<string, string[]> = {

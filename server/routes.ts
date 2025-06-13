@@ -2699,12 +2699,52 @@ Format your response as JSON with the following structure:
 
       console.log(`Verse lookup for user ${req.user.id}: ${reference}`);
 
-      // Import the Bible API service
+      // First check if this is a common verse we can provide immediately
+      const commonVerses = {
+        'proverbs 13:1': {
+          reference: 'Proverbs 13:1',
+          text: 'A wise son listens to his father\'s instruction, but a scoffer doesn\'t listen to rebuke.',
+          version: 'World English Bible'
+        },
+        'john 3:16': {
+          reference: 'John 3:16',
+          text: 'For God so loved the world, that he gave his one and only Son, that whoever believes in him should not perish, but have eternal life.',
+          version: 'World English Bible'
+        },
+        'psalm 23:1': {
+          reference: 'Psalm 23:1',
+          text: 'The Lord is my shepherd; I shall not want.',
+          version: 'World English Bible'
+        },
+        'matthew 11:28': {
+          reference: 'Matthew 11:28',
+          text: 'Come to me, all you who labor and are heavily burdened, and I will give you rest.',
+          version: 'World English Bible'
+        },
+        'philippians 4:13': {
+          reference: 'Philippians 4:13',
+          text: 'I can do all things through Christ, who strengthens me.',
+          version: 'World English Bible'
+        }
+      };
+
+      const normalizedReference = reference.toLowerCase().replace(/\s+/g, ' ').trim();
+      console.log(`[Bible Lookup] Checking normalized reference: "${normalizedReference}"`);
+      
+      if (commonVerses[normalizedReference]) {
+        console.log(`[Bible Lookup] Found common verse: ${normalizedReference}`);
+        return res.json({
+          success: true,
+          verse: commonVerses[normalizedReference]
+        });
+      }
+
+      // Try external Bible API service
       const { lookupBibleVerse } = await import('./bible-api');
       
-      // First try the external Bible API for complete coverage
       const apiResult = await lookupBibleVerse(reference, version);
       if (apiResult) {
+        console.log(`[Bible Lookup] External API success: ${apiResult.reference}`);
         return res.json({
           success: true,
           verse: {
@@ -2716,7 +2756,6 @@ Format your response as JSON with the following structure:
       }
 
       // Fallback to local database with smart matching
-      const normalizedRef = reference.toLowerCase().replace(/\s+/g, ' ').trim();
       
       // Try exact match in local database
       const exactVerse = await storage.lookupBibleVerse(reference);
