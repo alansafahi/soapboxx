@@ -183,10 +183,6 @@ export default function AppHeader() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <div className="p-2">
-                  <RoleSwitcher />
-                </div>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>

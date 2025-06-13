@@ -1,0 +1,28 @@
+AppHeader.tsx:133 Item: Admin Portal, Roles: admin,church_admin,system_admin,super_admin,pastor,lead_pastor,soapbox_owner, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Role Management, Roles: system_admin,super_admin, Current: new_member, Access: false
+AppHeader.tsx:138 Filtered Groups: 
+(4) [{…}, {…}, {…}, {…}]
+RoleSwitcher.tsx:89 RoleSwitcher Debug: 
+{isDemoSite: true, hostname: '2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev', roleData: undefined, isLoading: true, canSwitch: undefined, …}
+AppHeader.tsx:121 Navigation Debug: 
+{currentRole: 'new_member', roleData: 'new_member', userRole: 'new_member', navigationGroups: Array(5)}
+AppHeader.tsx:133 Item: Sermon Studio, Roles: pastor,lead_pastor,church_admin, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Content Distribution, Roles: pastor,lead_pastor,church_admin, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Engagement Analytics, Roles: pastor,lead_pastor,church_admin, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Admin Portal, Roles: admin,church_admin,system_admin,super_admin,pastor,lead_pastor,soapbox_owner, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Role Management, Roles: system_admin,super_admin, Current: new_member, Access: false
+AppHeader.tsx:138 Filtered Groups: 
+(4) [{…}, {…}, {…}, {…}]
+AppHeader.tsx:121 Navigation Debug: 
+{currentRole: 'new_member', roleData: 'new_member', userRole: 'new_member', navigationGroups: Array(5)}
+AppHeader.tsx:133 Item: Sermon Studio, Roles: pastor,lead_pastor,church_admin, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Content Distribution, Roles: pastor,lead_pastor,church_admin, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Engagement Analytics, Roles: pastor,lead_pastor,church_admin, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Admin Portal, Roles: admin,church_admin,system_admin,super_admin,pastor,lead_pastor,soapbox_owner, Current: new_member, Access: false
+AppHeader.tsx:133 Item: Role Management, Roles: system_admin,super_admin, Current: new_member, Access: false
+AppHeader.tsx:138 Filtered Groups: 
+(4) [{…}, {…}, {…}, {…}]
+RoleSwitcher.tsx:89 RoleSwitcher Debug: 
+{isDemoSite: true, hostname: '2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev', roleData: {…}, isLoading: false, canSwitch: false, …}
+﻿
+
