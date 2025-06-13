@@ -80,6 +80,13 @@ export default function RoleSwitcher() {
                      window.location.hostname.includes('127.0.0.1') ||
                      window.location.hostname.includes('replit.dev');
 
+  console.log('RoleSwitcher Debug:', { 
+    isDemoSite, 
+    hostname: window.location.hostname,
+    roleData,
+    isLoading 
+  });
+
   const { data: roleData, isLoading } = useQuery<RoleData>({
     queryKey: ["/api/auth/available-roles"],
     refetchOnWindowFocus: false,
