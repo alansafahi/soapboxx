@@ -549,7 +549,7 @@ export default function SermonCreationStudio() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="research" className="flex items-center">
             <Search className="w-4 h-4 mr-2" />
             Research
@@ -566,11 +566,15 @@ export default function SermonCreationStudio() {
             <Star className="w-4 h-4 mr-2" />
             Enhance
           </TabsTrigger>
+          <TabsTrigger value="enhanced" className="flex items-center">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Enhanced
+          </TabsTrigger>
           <TabsTrigger value="saved" className="flex items-center">
             <Edit3 className="w-4 h-4 mr-2" />
             Drafts
           </TabsTrigger>
-          <TabsTrigger value="enhanced" className="flex items-center">
+          <TabsTrigger value="completed" className="flex items-center">
             <Archive className="w-4 h-4 mr-2" />
             Completed
           </TabsTrigger>
@@ -1260,7 +1264,7 @@ export default function SermonCreationStudio() {
                                   });
                                 }}
                               >
-                                <Eye className="w-4 h-4 mr-1" />
+                                <CheckCircle className="w-4 h-4 mr-1" />
                                 View
                               </Button>
                               <DropdownMenu>
