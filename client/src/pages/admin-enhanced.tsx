@@ -46,7 +46,7 @@ export default function EnhancedAdminPortal() {
   const [isDevotionalDialogOpen, setIsDevotionalDialogOpen] = useState(false);
 
   const { data: churches = [], isLoading: churchesLoading } = useQuery({
-    queryKey: ["/api/churches"],
+    queryKey: ["/api/churches/created"],
   });
 
   const { data: events = [], isLoading: eventsLoading } = useQuery({

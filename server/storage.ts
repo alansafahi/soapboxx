@@ -22,6 +22,7 @@ import {
   userAchievements,
   userActivities,
   userChurches,
+  roles,
   friendships,
   conversations,
   conversationParticipants,
