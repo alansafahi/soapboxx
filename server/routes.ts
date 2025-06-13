@@ -1066,6 +1066,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     })
                   ),
                 ] : []),
+                
+                ...(outline.closingPrayer ? [
+                  new Paragraph({
+                    text: "Closing Prayer",
+                    heading: HeadingLevel.HEADING_1,
+                  }),
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: outline.closingPrayer,
+                        italics: true,
+                      }),
+                    ],
+                    spacing: { after: 200 },
+                  }),
+                ] : []),
               ] : []),
               
               ...(research ? [
