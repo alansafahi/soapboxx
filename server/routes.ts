@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
@@ -4079,47 +4080,23 @@ Return JSON with this exact structure:
     }
   });
 
-  // Demo Screenshots API endpoint
-  app.get('/api/demo/screenshots/:filename(*)', (req, res) => {
-    try {
-      const filename = decodeURIComponent(req.params.filename);
-      const imagePath = path.resolve('attached_assets', filename);
-      
-      // Check if file exists
-      if (!fs.existsSync(imagePath)) {
-        console.log('Screenshot not found:', { filename, imagePath, cwd: process.cwd() });
-        return res.status(404).json({ 
-          message: 'Screenshot not found', 
-          filename,
-          requestedPath: imagePath,
-          cwd: process.cwd()
-        });
-      }
-      
+  // Serve demo screenshots using Express static middleware
+  app.use('/api/demo/screenshots', express.static(path.resolve('attached_assets'), {
+    setHeaders: (res, filePath) => {
       // Set proper content type based on file extension
-      const ext = path.extname(filename).toLowerCase();
-      let contentType = 'image/png';
-      
-      if (ext === '.jpg' || ext === '.jpeg') {
-        contentType = 'image/jpeg';
+      const ext = path.extname(filePath).toLowerCase();
+      if (ext === '.png') {
+        res.setHeader('Content-Type', 'image/png');
+      } else if (ext === '.jpg' || ext === '.jpeg') {
+        res.setHeader('Content-Type', 'image/jpeg');
       } else if (ext === '.gif') {
-        contentType = 'image/gif';
+        res.setHeader('Content-Type', 'image/gif');
       } else if (ext === '.webp') {
-        contentType = 'image/webp';
+        res.setHeader('Content-Type', 'image/webp');
       }
-      
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
-      
-      // Stream the file
-      const fileStream = fs.createReadStream(imagePath);
-      fileStream.pipe(res);
-      
-    } catch (error) {
-      console.error('Error serving demo screenshot:', error);
-      res.status(500).json({ message: 'Failed to serve screenshot' });
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
     }
-  });
+  }));
 
   // Demo Authentication Route
   app.post('/api/demo/auth', async (req, res) => {
