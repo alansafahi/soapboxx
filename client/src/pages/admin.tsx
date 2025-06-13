@@ -2929,8 +2929,7 @@ export default function AdminPortal() {
                 </CardContent>
               </Card>
               </div>
-            )}
-          </TabsContent>
+            </TabsContent>
 
             <TabsContent value="dashboard" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
