@@ -2801,7 +2801,8 @@ export default function AdminPortal() {
             </div>
 
             {/* Engagement Analytics Section - Show for authorized roles */}
-            <div className="space-y-6">
+            {hasAnalyticsAccess() && (
+              <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
                 <Button
@@ -2918,6 +2919,7 @@ export default function AdminPortal() {
                 </CardContent>
               </Card>
             </div>
+            )}
           </div>
         )}
 
