@@ -4728,32 +4728,34 @@ export class DatabaseStorage implements IStorage {
 
   async getAvailableRoles(userId: string): Promise<string[]> {
     try {
-      // Check if user is SoapBox Owner
-      const ownerCheck = await db.execute(
-        sql`SELECT role FROM user_roles WHERE user_id = ${userId} AND role = 'soapbox_owner' AND is_active = true`
+      const currentRole = await this.getUserRole(userId);
+      
+      // Define role hierarchy (higher number = higher permission level)
+      const roleHierarchy: { [key: string]: number } = {
+        'new_member': 1,
+        'member': 2,
+        'elder': 3,
+        'deacon': 4,
+        'worship_leader': 5,
+        'youth_pastor': 6,
+        'associate_pastor': 7,
+        'minister': 8,
+        'church_admin': 9,
+        'pastor': 10,
+        'lead_pastor': 11,
+        'admin': 12,
+        'super_admin': 13,
+        'soapbox_owner': 14
+      };
+
+      const currentLevel = roleHierarchy[currentRole] || 1;
+      
+      // User can switch to their current role and any role below them
+      const availableRoles = Object.keys(roleHierarchy).filter(role => 
+        roleHierarchy[role] <= currentLevel
       );
 
-      if (ownerCheck.rows.length > 0) {
-        return [
-          'soapbox_owner',
-          'super_admin', 
-          'admin',
-          'pastor',
-          'lead_pastor',
-          'church_admin',
-          'minister',
-          'associate_pastor',
-          'youth_pastor',
-          'worship_leader',
-          'deacon',
-          'elder',
-          'member',
-          'new_member'
-        ];
-      }
-
-      // Regular users can only switch between their assigned roles
-      return ['new_member', 'member'];
+      return availableRoles.sort((a, b) => roleHierarchy[b] - roleHierarchy[a]); // Sort highest to lowest
     } catch (error) {
       console.error('Error getting available roles:', error);
       return ['new_member'];
@@ -4762,10 +4764,32 @@ export class DatabaseStorage implements IStorage {
 
   async switchUserRole(userId: string, newRole: string): Promise<boolean> {
     try {
-      // Verify the user can switch to this role
-      const availableRoles = await this.getAvailableRoles(userId);
+      // Get user's current role and validate hierarchy
+      const currentRole = await this.getUserRole(userId);
       
-      if (!availableRoles.includes(newRole)) {
+      const roleHierarchy: { [key: string]: number } = {
+        'new_member': 1,
+        'member': 2,
+        'elder': 3,
+        'deacon': 4,
+        'worship_leader': 5,
+        'youth_pastor': 6,
+        'associate_pastor': 7,
+        'minister': 8,
+        'church_admin': 9,
+        'pastor': 10,
+        'lead_pastor': 11,
+        'admin': 12,
+        'super_admin': 13,
+        'soapbox_owner': 14
+      };
+
+      const currentLevel = roleHierarchy[currentRole] || 1;
+      const targetLevel = roleHierarchy[newRole] || 1;
+      
+      // Users can only switch to roles at their level or below
+      if (targetLevel > currentLevel) {
+        console.log(`Role switch denied: User ${userId} with ${currentRole} (level ${currentLevel}) cannot switch to ${newRole} (level ${targetLevel})`);
         return false;
       }
 
@@ -4787,6 +4811,7 @@ export class DatabaseStorage implements IStorage {
         );
       }
 
+      console.log(`Role switch approved: User ${userId} switched from ${currentRole} to ${newRole}`);
       return true;
     } catch (error) {
       console.error('Error switching user role:', error);
