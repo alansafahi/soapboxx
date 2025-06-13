@@ -468,12 +468,12 @@ export default function SermonCreationStudio() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+    <div className="max-w-6xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">
           AI-Powered Sermon Creation Studio
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-base sm:text-lg text-gray-600 px-2">
           Transform your sermon preparation with intelligent research, outline generation, and content enhancement
         </p>
       </div>
@@ -487,7 +487,7 @@ export default function SermonCreationStudio() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Scripture Reference (Optional)
@@ -512,7 +512,7 @@ export default function SermonCreationStudio() {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Target Audience
@@ -549,30 +549,30 @@ export default function SermonCreationStudio() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="research" className="flex items-center">
-            <Search className="w-4 h-4 mr-2" />
-            Research
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1">
+          <TabsTrigger value="research" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
+            <Search className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Research</span>
           </TabsTrigger>
-          <TabsTrigger value="outline" className="flex items-center">
-            <Lightbulb className="w-4 h-4 mr-2" />
-            Outline
+          <TabsTrigger value="outline" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
+            <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Outline</span>
           </TabsTrigger>
-          <TabsTrigger value="illustrations" className="flex items-center">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Stories
+          <TabsTrigger value="illustrations" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
+            <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Stories</span>
           </TabsTrigger>
-          <TabsTrigger value="enhance" className="flex items-center">
-            <Star className="w-4 h-4 mr-2" />
-            Enhance
+          <TabsTrigger value="enhance" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
+            <Star className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Enhance</span>
           </TabsTrigger>
-          <TabsTrigger value="saved" className="flex items-center">
-            <Edit3 className="w-4 h-4 mr-2" />
-            Drafts
+          <TabsTrigger value="saved" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
+            <Edit3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Drafts</span>
           </TabsTrigger>
-          <TabsTrigger value="completed" className="flex items-center">
-            <Archive className="w-4 h-4 mr-2" />
-            Completed
+          <TabsTrigger value="completed" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
+            <Archive className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Completed</span>
           </TabsTrigger>
         </TabsList>
 
@@ -761,7 +761,7 @@ export default function SermonCreationStudio() {
                 ) : (
                   <MessageSquare className="w-4 h-4 mr-2" />
                 )}
-                {illustrationsMutation.isPending ? 'Generating Stories...' : 'Generate Stories'}
+                {illustrationsMutation.isPending ? 'Generating Sermon...' : 'Generate Sermon'}
               </Button>
             </CardHeader>
             <CardContent>
