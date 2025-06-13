@@ -460,10 +460,6 @@ export default function AppHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              <div className="p-2">
-                <RoleSwitcher />
-              </div>
-              <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Link href="/profile">Profile</Link>
               </DropdownMenuItem>

@@ -1714,6 +1714,7 @@ export default function AdminPortal() {
       'soapbox_owner', 'super_admin', 'admin', 'lead_pastor', 'pastor', 
       'church_admin', 'minister', 'associate_pastor', 'youth_pastor'
     ];
+    console.log('Analytics Access Check:', { currentRole, availableRoles, userRoleData, hasAccess: authorizedRoles.includes(currentRole) });
     return authorizedRoles.includes(currentRole);
   };
   
