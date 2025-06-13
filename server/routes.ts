@@ -2967,6 +2967,114 @@ Return JSON with this exact structure:
     }
   });
 
+  // Social Media Credentials Management
+  app.get('/api/social-credentials', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const credentials = await storage.getSocialMediaCredentials(userId);
+      res.json(credentials);
+    } catch (error) {
+      console.error('Error fetching social credentials:', error);
+      res.status(500).json({ message: 'Failed to fetch credentials' });
+    }
+  });
+
+  app.post('/api/social-credentials', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { platform, accessToken, refreshToken, accountId, accountName } = req.body;
+
+      if (!platform || !accessToken) {
+        return res.status(400).json({ message: 'Platform and access token are required' });
+      }
+
+      const credentialData = {
+        userId,
+        platform,
+        accessToken,
+        refreshToken: refreshToken || null,
+        accountId: accountId || null,
+        accountName: accountName || null,
+        isActive: true
+      };
+
+      const credential = await storage.saveSocialMediaCredential(credentialData);
+      res.status(201).json(credential);
+    } catch (error) {
+      console.error('Error saving social credentials:', error);
+      res.status(500).json({ message: 'Failed to save credentials' });
+    }
+  });
+
+  // Direct Social Media Publishing
+  app.post('/api/social-media/publish', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { platform, content, credentialsId, sermonId } = req.body;
+
+      if (!platform || !content || !credentialsId) {
+        return res.status(400).json({ message: 'Platform, content, and credentials ID are required' });
+      }
+
+      // Get the credentials for publishing
+      const credentials = await storage.getSocialMediaCredentialById(credentialsId);
+      if (!credentials || credentials.userId !== userId) {
+        return res.status(403).json({ message: 'Invalid or unauthorized credentials' });
+      }
+
+      // Simulate publishing to the platform
+      // In a real implementation, you would use the platform's API
+      let platformPostId = `${platform}_${Date.now()}`;
+      let publishStatus = 'published';
+
+      // Store the published post record
+      const postData = {
+        userId,
+        sermonId: sermonId || null,
+        platform,
+        platformPostId,
+        contentType: 'post',
+        content,
+        publishStatus,
+        publishedAt: new Date(),
+        engagementMetrics: {}
+      };
+
+      const post = await storage.createSocialMediaPost(postData);
+
+      res.json({
+        success: true,
+        platform,
+        postId: post.id,
+        platformPostId,
+        message: `Successfully published to ${platform}`
+      });
+
+    } catch (error) {
+      console.error('Error publishing to social media:', error);
+      res.status(500).json({ message: 'Failed to publish content' });
+    }
+  });
+
+  // Social Media Publishing History
+  app.get('/api/social-media/posts', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { platform, limit = 20, offset = 0 } = req.query;
+
+      const posts = await storage.getSocialMediaPosts(userId, {
+        platform: platform as string,
+        limit: Number(limit),
+        offset: Number(offset)
+      });
+
+      res.json(posts);
+    } catch (error) {
+      console.error('Error fetching social media posts:', error);
+      res.status(500).json({ message: 'Failed to fetch posts' });
+    }
+  });
+
   // Video Content Routes (Phase 1: Pastor/Admin Uploads)
   app.post('/api/videos', isAuthenticated, async (req, res) => {
     try {

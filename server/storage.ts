@@ -447,6 +447,19 @@ export interface IStorage {
   deleteQrCode(id: string): Promise<void>;
   validateQrCode(id: string): Promise<{ valid: boolean; qrCode?: QrCode }>;
   
+  // Social media credentials operations
+  getSocialMediaCredentials(userId: string): Promise<any[]>;
+  getSocialMediaCredentialById(credentialId: string): Promise<any | null>;
+  saveSocialMediaCredential(credentialData: any): Promise<any>;
+  updateSocialMediaCredential(credentialId: string, updates: any): Promise<any>;
+  deleteSocialMediaCredential(credentialId: string): Promise<void>;
+  
+  // Social media posts operations
+  createSocialMediaPost(postData: any): Promise<any>;
+  getSocialMediaPosts(userId: string, options?: { platform?: string; limit?: number; offset?: number }): Promise<any[]>;
+  updateSocialMediaPost(postId: string, updates: any): Promise<any>;
+  deleteSocialMediaPost(postId: string): Promise<void>;
+  
   // Media management operations
   createMediaFile(mediaFile: InsertMediaFile): Promise<MediaFile>;
   getMediaFiles(churchId?: number): Promise<MediaFile[]>;
@@ -5795,6 +5808,114 @@ export class DatabaseStorage implements IStorage {
         eq(sermonDrafts.id, draftId),
         eq(sermonDrafts.userId, userId)
       ));
+  }
+
+  // Social media credentials operations
+  async getSocialMediaCredentials(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(socialMediaCredentials)
+      .where(and(
+        eq(socialMediaCredentials.userId, userId),
+        eq(socialMediaCredentials.isActive, true)
+      ))
+      .orderBy(desc(socialMediaCredentials.createdAt));
+  }
+
+  async getSocialMediaCredentialById(credentialId: string): Promise<any | null> {
+    const [credential] = await db
+      .select()
+      .from(socialMediaCredentials)
+      .where(eq(socialMediaCredentials.id, credentialId));
+    return credential || null;
+  }
+
+  async saveSocialMediaCredential(credentialData: any): Promise<any> {
+    const [credential] = await db
+      .insert(socialMediaCredentials)
+      .values({
+        id: credentialData.id || crypto.randomUUID(),
+        userId: credentialData.userId,
+        platform: credentialData.platform,
+        accessToken: credentialData.accessToken,
+        refreshToken: credentialData.refreshToken,
+        accountId: credentialData.accountId,
+        accountName: credentialData.accountName,
+        isActive: credentialData.isActive ?? true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return credential;
+  }
+
+  async updateSocialMediaCredential(credentialId: string, updates: any): Promise<any> {
+    const [credential] = await db
+      .update(socialMediaCredentials)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(socialMediaCredentials.id, credentialId))
+      .returning();
+    return credential;
+  }
+
+  async deleteSocialMediaCredential(credentialId: string): Promise<void> {
+    await db
+      .update(socialMediaCredentials)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(socialMediaCredentials.id, credentialId));
+  }
+
+  // Social media posts operations
+  async createSocialMediaPost(postData: any): Promise<any> {
+    const [post] = await db
+      .insert(socialMediaPosts)
+      .values({
+        id: postData.id || crypto.randomUUID(),
+        userId: postData.userId,
+        sermonId: postData.sermonId,
+        platform: postData.platform,
+        platformPostId: postData.platformPostId,
+        contentType: postData.contentType,
+        content: postData.content,
+        publishStatus: postData.publishStatus,
+        publishedAt: postData.publishedAt,
+        engagementMetrics: postData.engagementMetrics || {},
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return post;
+  }
+
+  async getSocialMediaPosts(userId: string, options?: { platform?: string; limit?: number; offset?: number }): Promise<any[]> {
+    let query = db
+      .select()
+      .from(socialMediaPosts)
+      .where(eq(socialMediaPosts.userId, userId));
+
+    if (options?.platform) {
+      query = query.where(eq(socialMediaPosts.platform, options.platform));
+    }
+
+    return await query
+      .orderBy(desc(socialMediaPosts.publishedAt))
+      .limit(options?.limit || 20)
+      .offset(options?.offset || 0);
+  }
+
+  async updateSocialMediaPost(postId: string, updates: any): Promise<any> {
+    const [post] = await db
+      .update(socialMediaPosts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(socialMediaPosts.id, postId))
+      .returning();
+    return post;
+  }
+
+  async deleteSocialMediaPost(postId: string): Promise<void> {
+    await db
+      .delete(socialMediaPosts)
+      .where(eq(socialMediaPosts.id, postId));
   }
 }
 

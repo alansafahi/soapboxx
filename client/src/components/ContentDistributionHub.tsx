@@ -149,6 +149,68 @@ export default function ContentDistributionHub() {
     }
   });
 
+  // Direct publish mutation for social media
+  const directPublishMutation = useMutation({
+    mutationFn: async (data: {
+      platform: string;
+      content: string;
+      credentialsId: string;
+      sermonId?: string;
+    }) => {
+      return apiRequest('/api/social-media/publish', {
+        method: 'POST',
+        body: data
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Published Successfully",
+        description: `Content published to ${data.platform} successfully.`
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Publishing Failed",
+        description: error?.response?.data?.message || "Failed to publish content.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Save credentials mutation
+  const saveCredentialsMutation = useMutation({
+    mutationFn: async (data: {
+      platform: string;
+      accessToken: string;
+      refreshToken?: string;
+      accountId?: string;
+      accountName?: string;
+    }) => {
+      return apiRequest('/api/social-credentials', {
+        method: 'POST',
+        body: data
+      });
+    },
+    onSuccess: (data) => {
+      setSocialCredentials(prev => ({
+        ...prev,
+        [`${data.platform}_credentials`]: data
+      }));
+      setShowCredentialsDialog(false);
+      toast({
+        title: "Credentials Saved",
+        description: `${data.platform} account connected successfully.`
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Connection Failed",
+        description: error?.response?.data?.message || "Failed to save credentials.",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Save social media credentials
   const saveCredentialsMutation = useMutation({
     mutationFn: async (data: any) => {
