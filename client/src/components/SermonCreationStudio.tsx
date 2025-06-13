@@ -355,6 +355,56 @@ export default function SermonCreationStudio() {
     });
   };
 
+  const handleShare = async () => {
+    if (!currentOutline && !enhancedOutline) {
+      toast({
+        title: "Nothing to share",
+        description: "Please create a sermon outline first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const outline = enhancedOutline || currentOutline;
+    if (!outline) return;
+    
+    const shareText = `Check out this sermon: "${outline.title}"\n\nTheme: ${outline.theme || 'No theme specified'}\n\nMain Points:\n${outline.mainPoints?.map((point: any, index: number) => `${index + 1}. ${point.point || point}`).join('\n') || 'No main points available'}\n\nCreated with SoapBox Super App`;
+    
+    if (navigator.share && typeof navigator.canShare === 'function') {
+      try {
+        await navigator.share({
+          title: outline.title,
+          text: shareText,
+          url: window.location.href
+        });
+        toast({
+          title: "Shared successfully",
+          description: "Sermon content has been shared."
+        });
+      } catch (error) {
+        handleCopyToClipboard(shareText);
+      }
+    } else {
+      handleCopyToClipboard(shareText);
+    }
+  };
+
+  const handleCopyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied to clipboard",
+        description: "Sermon content has been copied to your clipboard."
+      });
+    } catch (error) {
+      toast({
+        title: "Share failed",
+        description: "Unable to share or copy content.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="text-center mb-8">
@@ -1105,7 +1155,7 @@ export default function SermonCreationStudio() {
                       ) : (
                         <Download className="w-4 h-4 mr-2" />
                       )}
-                      Export
+                      Download to Computer
                       <ChevronDown className="w-3 h-3 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -1128,7 +1178,7 @@ export default function SermonCreationStudio() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="w-4 h-4 mr-2" />
                   Share
                 </Button>
