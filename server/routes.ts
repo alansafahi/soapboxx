@@ -3398,6 +3398,68 @@ Return JSON with this exact structure:
     }
   });
 
+  // Interactive Demo Tracking Routes
+  app.post('/api/demo/track', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { action, tourId, stepId, timestamp } = req.body;
+
+      const trackingData = {
+        userId,
+        action, // tour_started, tour_completed, step_viewed, step_completed
+        tourId,
+        stepId: stepId || null,
+        timestamp: timestamp || new Date().toISOString(),
+        metadata: req.body.metadata || {}
+      };
+
+      // Store tracking data (using simple storage for demo)
+      await storage.trackDemoProgress(trackingData);
+      
+      res.json({ success: true, message: 'Demo progress tracked' });
+    } catch (error) {
+      console.error('Error tracking demo progress:', error);
+      res.status(500).json({ message: 'Failed to track demo progress' });
+    }
+  });
+
+  app.get('/api/demo/progress/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      const requestingUserId = req.user.claims.sub;
+
+      // Users can only view their own progress unless they're admin
+      const userRole = await storage.getUserRole(requestingUserId);
+      if (userId !== requestingUserId && !['admin', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+
+      const progress = await storage.getDemoProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      console.error('Error fetching demo progress:', error);
+      res.status(500).json({ message: 'Failed to fetch demo progress' });
+    }
+  });
+
+  app.get('/api/demo/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userRole = await storage.getUserRole(userId);
+
+      // Only admins can view overall demo analytics
+      if (!['admin', 'super_admin'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+
+      const analytics = await storage.getDemoAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching demo analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch demo analytics' });
+    }
+  });
+
   // AI Video Generation Routes - Phase 2
   app.post('/api/videos/ai-generate', isAuthenticated, async (req: any, res) => {
     try {

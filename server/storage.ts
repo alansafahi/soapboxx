@@ -5694,6 +5694,59 @@ export class DatabaseStorage implements IStorage {
     return session;
   }
 
+  // Interactive Demo Tracking
+  private demoProgressData: Map<string, any[]> = new Map();
+  
+  async trackDemoProgress(trackingData: {
+    userId: string;
+    action: string;
+    tourId: string;
+    stepId?: string;
+    timestamp: string;
+    metadata?: any;
+  }): Promise<void> {
+    const userId = trackingData.userId;
+    const userProgress = this.demoProgressData.get(userId) || [];
+    
+    userProgress.push({
+      ...trackingData,
+      id: `${userId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    });
+    
+    this.demoProgressData.set(userId, userProgress);
+  }
+
+  async getDemoProgress(userId: string): Promise<any[]> {
+    return this.demoProgressData.get(userId) || [];
+  }
+
+  async getDemoAnalytics(): Promise<any> {
+    const allProgress = Array.from(this.demoProgressData.values()).flat();
+    
+    const totalUsers = this.demoProgressData.size;
+    const toursStarted = allProgress.filter(p => p.action === 'tour_started').length;
+    const toursCompleted = allProgress.filter(p => p.action === 'tour_completed').length;
+    const completionRate = toursStarted > 0 ? (toursCompleted / toursStarted) * 100 : 0;
+    
+    const tourStats = allProgress
+      .filter(p => p.action === 'tour_started')
+      .reduce((acc, p) => {
+        acc[p.tourId] = (acc[p.tourId] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+    return {
+      totalUsers,
+      toursStarted,
+      toursCompleted,
+      completionRate: Math.round(completionRate * 100) / 100,
+      popularTours: Object.entries(tourStats)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5)
+        .map(([tourId, count]) => ({ tourId, startCount: count }))
+    };
+  }
+
   // Video Playlists (Phase 1 Basic Support)
   async createVideoPlaylist(playlistData: InsertVideoPlaylist): Promise<VideoPlaylist> {
     const [playlist] = await db

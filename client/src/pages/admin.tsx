@@ -3108,9 +3108,9 @@ export default function AdminPortal() {
               </div>
             </TabsContent>
 
-            <TabsContent value="dashboard" className="space-y-6">
+            <TabsContent value="dashboard" className="space-y-6" data-demo-target="dashboard-overview">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/events'}>
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/events'} data-demo-target="events-card">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -3124,7 +3124,7 @@ export default function AdminPortal() {
                   </CardContent>
                 </Card>
                 
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/prayers'}>
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/prayers'} data-demo-target="prayers-card">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -3138,7 +3138,7 @@ export default function AdminPortal() {
                   </CardContent>
                 </Card>
                 
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow" data-demo-target="members-card">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -3152,7 +3152,7 @@ export default function AdminPortal() {
                   </CardContent>
                 </Card>
                 
-                <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow" data-demo-target="devotionals-card">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
