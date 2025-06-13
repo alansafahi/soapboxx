@@ -170,9 +170,10 @@ export default function ContentDistributionHub() {
       });
     },
     onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || "Unable to publish your content right now. Please check your connection and try again.";
       toast({
-        title: "Publishing Failed",
-        description: error?.response?.data?.message || "Failed to publish content.",
+        title: "Publishing Issue",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -204,9 +205,10 @@ export default function ContentDistributionHub() {
       });
     },
     onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || "Unable to save your account connection. Please check your credentials and try again.";
       toast({
         title: "Connection Failed",
-        description: error?.response?.data?.message || "Failed to save credentials.",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -279,19 +281,31 @@ export default function ContentDistributionHub() {
     facebook: <Facebook className="w-4 h-4" />,
     twitter: <Twitter className="w-4 h-4" />,
     instagram: <Instagram className="w-4 h-4" />,
+    linkedin: <Linkedin className="w-4 h-4" />,
+    youtube: <Youtube className="w-4 h-4" />,
+    'youtube-shorts': <Video className="w-4 h-4" />,
+    tiktok: <Video className="w-4 h-4" />,
+    discord: <MessageCircle className="w-4 h-4" />,
+    whatsapp: <Phone className="w-4 h-4" />,
+    telegram: <Send className="w-4 h-4" />,
+    reddit: <Globe className="w-4 h-4" />,
     email: <Mail className="w-4 h-4" />,
     bulletin: <FileText className="w-4 h-4" />,
     study: <BookOpen className="w-4 h-4" />
   };
 
-  // Handle direct publishing to social media
+  // Handle direct publishing to social media with automatic credential prompt
   const handleDirectPublish = (platform: string, content: string, hashtags?: string[]) => {
     const credentialsKey = `${platform}_credentials`;
+    const platformName = platform.charAt(0).toUpperCase() + platform.slice(1).replace('-', ' ');
+    
     if (!socialCredentials[credentialsKey]) {
+      // Store the publishing request for after credentials are saved
+      window.pendingPublish = { platform, content, hashtags };
+      
       toast({
-        title: "Setup Required",
-        description: `Please configure your ${platform} credentials first.`,
-        variant: "destructive"
+        title: "Connect Your Account",
+        description: `Connect your ${platformName} account to publish content directly.`
       });
       setShowCredentialsDialog(true);
       return;
@@ -306,12 +320,21 @@ export default function ContentDistributionHub() {
     });
   };
 
-  // Handle credentials management
+  // Handle credentials management with automatic publishing
   const handleSaveCredentials = (platform: string, credentials: any) => {
     saveCredentialsMutation.mutate({
       platform,
       ...credentials
     });
+    
+    // After saving credentials, automatically publish if there's a pending publish request
+    setTimeout(() => {
+      if (window.pendingPublish && window.pendingPublish.platform === platform) {
+        const { content, hashtags } = window.pendingPublish;
+        handleDirectPublish(platform, content, hashtags);
+        window.pendingPublish = null;
+      }
+    }, 1000);
   };
 
 
@@ -763,7 +786,7 @@ export default function ContentDistributionHub() {
               Connect your social media accounts to enable direct publishing from the Content Distribution Hub.
             </p>
             
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-96 overflow-y-auto">
               <SocialMediaConnectionForm 
                 platform="facebook" 
                 icon={<Facebook className="w-5 h-5 text-blue-600" />}
@@ -781,6 +804,54 @@ export default function ContentDistributionHub() {
                 icon={<Instagram className="w-5 h-5 text-pink-600" />}
                 onSave={handleSaveCredentials}
                 isConnected={!!socialCredentials.instagram_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="linkedin" 
+                icon={<Linkedin className="w-5 h-5 text-blue-700" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.linkedin_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="youtube" 
+                icon={<Youtube className="w-5 h-5 text-red-600" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.youtube_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="youtube-shorts" 
+                icon={<Video className="w-5 h-5 text-red-500" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials['youtube-shorts_credentials']}
+              />
+              <SocialMediaConnectionForm 
+                platform="tiktok" 
+                icon={<Video className="w-5 h-5 text-black" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.tiktok_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="discord" 
+                icon={<MessageCircle className="w-5 h-5 text-indigo-600" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.discord_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="whatsapp" 
+                icon={<Phone className="w-5 h-5 text-green-600" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.whatsapp_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="telegram" 
+                icon={<Send className="w-5 h-5 text-blue-500" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.telegram_credentials}
+              />
+              <SocialMediaConnectionForm 
+                platform="reddit" 
+                icon={<Globe className="w-5 h-5 text-orange-600" />}
+                onSave={handleSaveCredentials}
+                isConnected={!!socialCredentials.reddit_credentials}
               />
             </div>
             
