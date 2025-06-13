@@ -55,14 +55,27 @@ export default function SermonCreationStudio() {
   const [selectedStories, setSelectedStories] = useState<Set<number>>(new Set());
   const [enhancedOutline, setEnhancedOutline] = useState<SermonOutline | null>(null);
   const [enhancementRecommendations, setEnhancementRecommendations] = useState<string[]>([]);
+  const [currentDraftId, setCurrentDraftId] = useState<number | null>(null);
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Fetch saved sermon drafts
+  const { data: savedDrafts, isLoading: draftsLoading, refetch: refetchDrafts } = useQuery({
+    queryKey: ['/api/sermon/drafts'],
+    queryFn: () => apiRequest('/api/sermon/drafts'),
+  });
 
   // Save Draft mutation
   const saveDraftMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("POST", "/api/sermon/save-draft", data);
+      return await apiRequest('/api/sermon/save-draft', {
+        method: 'POST',
+        body: data
+      });
     },
     onSuccess: (data) => {
+      setCurrentDraftId(data.draftId);
+      refetchDrafts();
       toast({
         title: "Draft Saved",
         description: "Your sermon draft has been saved successfully."
@@ -76,6 +89,41 @@ export default function SermonCreationStudio() {
       });
     }
   });
+
+  // Auto-save function
+  const autoSave = () => {
+    if (currentOutline || currentResearch || illustrations.length > 0) {
+      const draftData = {
+        title: sermonTopic || 'Untitled Sermon',
+        outline: currentOutline,
+        research: currentResearch,
+        illustrations: illustrations,
+        enhancement: enhancedOutline
+      };
+      saveDraftMutation.mutate(draftData);
+    }
+  };
+
+  // Auto-save effect
+  useEffect(() => {
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer);
+    }
+    
+    if (currentOutline || currentResearch || illustrations.length > 0) {
+      const timer = setTimeout(() => {
+        autoSave();
+      }, 30000); // Auto-save every 30 seconds
+      
+      setAutoSaveTimer(timer);
+    }
+
+    return () => {
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+      }
+    };
+  }, [currentOutline, currentResearch, illustrations, enhancedOutline]);
 
   // Export mutation  
   const exportMutation = useMutation({
@@ -389,7 +437,7 @@ export default function SermonCreationStudio() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="research" className="flex items-center">
             <Search className="w-4 h-4 mr-2" />
             Research
@@ -409,6 +457,10 @@ export default function SermonCreationStudio() {
           <TabsTrigger value="enhanced" className="flex items-center">
             <CheckCircle className="w-4 h-4 mr-2" />
             Completed
+          </TabsTrigger>
+          <TabsTrigger value="saved" className="flex items-center">
+            <Save className="w-4 h-4 mr-2" />
+            Saved Sermons
           </TabsTrigger>
         </TabsList>
 
@@ -983,6 +1035,110 @@ export default function SermonCreationStudio() {
           </CardContent>
         </Card>
       )}
+
+        {/* Saved Sermons Tab */}
+        <TabsContent value="saved" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Save className="w-5 h-5 mr-2" />
+                Saved Sermon Drafts
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {draftsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                  Loading saved sermons...
+                </div>
+              ) : savedDrafts && savedDrafts.length > 0 ? (
+                <div className="space-y-4">
+                  {savedDrafts.map((draft: any) => {
+                    const parsedContent = typeof draft.content === 'string' ? JSON.parse(draft.content) : draft.content;
+                    return (
+                      <Card key={draft.id} className="border border-gray-200 hover:border-blue-300 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-2">{draft.title}</h3>
+                              <p className="text-sm text-gray-600 mb-2">
+                                Created: {new Date(draft.createdAt).toLocaleDateString()}
+                              </p>
+                              {parsedContent.outline && (
+                                <p className="text-sm text-gray-700 mb-2">
+                                  <strong>Theme:</strong> {parsedContent.outline.theme || 'Not specified'}
+                                </p>
+                              )}
+                              {parsedContent.outline && parsedContent.outline.mainPoints && (
+                                <p className="text-sm text-gray-700">
+                                  <strong>Main Points:</strong> {parsedContent.outline.mainPoints.length} sections
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  // Load the draft into the current sermon
+                                  if (parsedContent.outline) setCurrentOutline(parsedContent.outline);
+                                  if (parsedContent.research) setCurrentResearch(parsedContent.research);
+                                  if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
+                                  if (parsedContent.enhancement) setEnhancedOutline(parsedContent.enhancement);
+                                  setSermonTopic(draft.title);
+                                  setCurrentDraftId(draft.id);
+                                  setActiveTab('outline');
+                                  toast({
+                                    title: "Draft Loaded",
+                                    description: "Sermon draft has been loaded for editing."
+                                  });
+                                }}
+                              >
+                                <FileText className="w-4 h-4 mr-1" />
+                                Load
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={async () => {
+                                  try {
+                                    await apiRequest(`/api/sermon/drafts/${draft.id}`, {
+                                      method: 'DELETE'
+                                    });
+                                    refetchDrafts();
+                                    toast({
+                                      title: "Draft Deleted",
+                                      description: "Sermon draft has been deleted."
+                                    });
+                                  } catch (error) {
+                                    toast({
+                                      title: "Delete Failed",
+                                      description: "Failed to delete draft.",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Save className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>No saved sermon drafts yet</p>
+                  <p className="text-sm">Create a sermon outline or research to automatically save drafts</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
