@@ -2765,43 +2765,50 @@ export default function AdminPortal() {
           </Card>
         </div>
 
-        {/* Analytics Tab */}
-        {activeTab === "analytics" && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Advanced Analytics</h2>
-            
-            {/* Growth Metrics Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Growth Metrics</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Member Growth</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gradient-to-r from-green-500 to-green-300 rounded-full"></div>
-                      <span className="text-green-600 font-medium">+12%</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Event Attendance</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gradient-to-r from-blue-500 to-blue-300 rounded-full"></div>
-                      <span className="text-blue-600 font-medium">+5%</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Prayer Engagement</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gradient-to-r from-purple-500 to-purple-300 rounded-full"></div>
-                      <span className="text-purple-600 font-medium">+8%</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
+        {selectedChurch && (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
 
-            {/* Engagement Analytics Section - Show for authorized roles */}
-            {hasAnalyticsAccess() && (
+            <TabsContent value="analytics" className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Advanced Analytics</h2>
+              
+              {/* Growth Metrics Section */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Growth Metrics</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 dark:text-gray-400">Member Growth</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gradient-to-r from-green-500 to-green-300 rounded-full"></div>
+                        <span className="text-green-600 font-medium">+12%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 dark:text-gray-400">Event Attendance</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gradient-to-r from-blue-500 to-blue-300 rounded-full"></div>
+                        <span className="text-blue-600 font-medium">+5%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 dark:text-gray-400">Prayer Engagement</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-2 bg-gradient-to-r from-purple-500 to-purple-300 rounded-full"></div>
+                        <span className="text-purple-600 font-medium">+8%</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Engagement Analytics Section - Show for authorized roles */}
+              {hasAnalyticsAccess() && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
@@ -3003,8 +3010,18 @@ export default function AdminPortal() {
               <ChurchProfileManager />
             </div>
           )}
+        </div>
 
-              <TabsContent value="dashboard" className="space-y-6">
+        {selectedChurch && (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="dashboard" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/events'}>
                     <CardContent className="p-6">
@@ -3650,20 +3667,20 @@ export default function AdminPortal() {
               </TabsContent>
 
 
-            </Tabs>
-          ) : (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Building className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                  Select a Church
-                </h3>
-                <p className="text-gray-500">
-                  Choose a church from the sidebar to manage its content and settings.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          </Tabs>
+        ) : (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Building className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                Select a Church
+              </h3>
+              <p className="text-gray-500">
+                Choose a church from the sidebar to manage its content and settings.
+              </p>
+            </CardContent>
+          </Card>
+        )}
         </div>
       </main>
     </div>
