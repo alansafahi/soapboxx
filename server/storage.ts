@@ -4836,21 +4836,27 @@ export class DatabaseStorage implements IStorage {
         return false;
       }
 
-      // If switching to owner/admin roles, update user_roles table
-      if (['soapbox_owner', 'super_admin', 'admin'].includes(newRole)) {
+      // Update all roles for this user to inactive
+      await db.execute(
+        sql`UPDATE user_roles SET is_active = false WHERE user_id = ${userId}`
+      );
+      
+      // Set the new role as active (or create it if it doesn't exist)
+      const existingRole = await db.execute(
+        sql`SELECT id FROM user_roles WHERE user_id = ${userId} AND role = ${newRole}`
+      );
+      
+      if (existingRole.rows.length > 0) {
+        // Role exists, just activate it
         await db.execute(
-          sql`INSERT INTO user_roles (user_id, role) VALUES (${userId}, ${newRole}) 
-              ON CONFLICT (user_id) DO UPDATE SET role = ${newRole}, updated_at = NOW()`
+          sql`UPDATE user_roles SET is_active = true, updated_at = NOW() 
+              WHERE user_id = ${userId} AND role = ${newRole}`
         );
       } else {
-        // For church roles, update user_churches table
+        // Role doesn't exist, create it as active
         await db.execute(
-          sql`UPDATE user_churches SET role = ${newRole} WHERE user_id = ${userId}`
-        );
-        
-        // Remove from admin roles if switching to church role
-        await db.execute(
-          sql`UPDATE user_roles SET is_active = false WHERE user_id = ${userId}`
+          sql`INSERT INTO user_roles (user_id, role, is_active) 
+              VALUES (${userId}, ${newRole}, true)`
         );
       }
 
