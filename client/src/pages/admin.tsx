@@ -2925,106 +2925,90 @@ export default function AdminPortal() {
                   </div>
                 </CardContent>
               </Card>
-              </div>
-            )}
-          </div>
-        )}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
 
-          {/* People Tab - Enhanced Member Management */}
-          {activeTab === "people" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Member Directory</h2>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add Member
-                </Button>
-              </div>
-              <MemberManagementSystem selectedChurch={selectedChurch || 0} />
-            </div>
-          )}
-
-          {/* Ministry Tab - Sessions & Counseling */}
-          {activeTab === "ministry" && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Ministry Management</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="p-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      Sessions Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <SessionsManagement />
+            <TabsContent value="dashboard" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/events'}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Events</p>
+                        <p className="text-2xl font-bold">12</p>
+                      </div>
+                      <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
-                <Card className="p-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <HeartHandshake className="h-5 w-5" />
-                      Prayer Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <PrayerManagementSystem />
+                
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/prayers'}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Prayer Requests</p>
+                        <p className="text-2xl font-bold">8</p>
+                      </div>
+                      <div className="h-8 w-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                        <Heart className="h-4 w-4 text-purple-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Members</p>
+                        <p className="text-2xl font-bold">234</p>
+                      </div>
+                      <div className="h-8 w-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                        <Users className="h-4 w-4 text-green-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Devotionals</p>
+                        <p className="text-2xl font-bold">15</p>
+                      </div>
+                      <div className="h-8 w-8 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+                        <BookOpen className="h-4 w-4 text-orange-600" />
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
-            </div>
-          )}
+            </TabsContent>
 
-          {/* Prayers Tab */}
-          {activeTab === "prayers" && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Prayer Requests</h2>
-              <PrayerManagementSystem />
-            </div>
-          )}
-
-          {/* Content Tab */}
-          {activeTab === "content" && (
-            <div className="space-y-6">
+            <TabsContent value="content" className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Content Management</h2>
               <div className="space-y-8">
                 <PublishedDevotionals />
                 <PublishedSeries />
                 <PublishedSermonMedia />
               </div>
-            </div>
-          )}
+            </TabsContent>
 
-          {/* Media Tab */}
-          {activeTab === "media" && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Media Library</h2>
-              <MediaLibraryStats />
-            </div>
-          )}
-
-          {/* Settings Tab */}
-          {activeTab === "settings" && (
-            <div className="space-y-6">
+            <TabsContent value="settings" className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Church Settings</h2>
-              <ChurchProfileManager />
-            </div>
-          )}
-        </div>
-
-        {selectedChurch && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="dashboard" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = '/events'}>
-                    <CardContent className="p-6">
+              <ChurchProfileManager churchId={selectedChurch} />
+            </TabsContent>
+          </Tabs>
+        )}
+      </main>
+    </div>
+  );
+}
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Events</p>
