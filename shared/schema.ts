@@ -245,6 +245,54 @@ export const userPersonalization = pgTable("user_personalization", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Social Media Credentials for Direct Publishing
+export const socialMediaCredentials = pgTable("social_media_credentials", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  platform: varchar("platform", { length: 20 }).notNull(), // facebook, twitter, instagram, linkedin
+  credentialType: varchar("credential_type", { length: 30 }).notNull(), // oauth_token, api_key, app_password
+  accessToken: text("access_token"), // Encrypted OAuth access token
+  refreshToken: text("refresh_token"), // Encrypted OAuth refresh token
+  tokenExpiresAt: timestamp("token_expires_at"),
+  platformUserId: varchar("platform_user_id"), // User/Page ID on the platform
+  platformUsername: varchar("platform_username"), // @username or page name
+  scope: text("scope").array(), // Permissions granted
+  isActive: boolean("is_active").default(true),
+  lastUsedAt: timestamp("last_used_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_user_platform").on(table.userId, table.platform),
+  index("social_credentials_user_idx").on(table.userId),
+  index("social_credentials_church_idx").on(table.churchId),
+]);
+
+// Social Media Publishing History
+export const socialMediaPosts = pgTable("social_media_posts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  sermonId: integer("sermon_id").references(() => sermonDrafts.id),
+  platform: varchar("platform", { length: 20 }).notNull(),
+  platformPostId: varchar("platform_post_id"), // ID from the social media platform
+  contentType: varchar("content_type", { length: 20 }).notNull(), // post, story, video, image
+  content: text("content").notNull(),
+  hashtags: text("hashtags").array(),
+  scheduledFor: timestamp("scheduled_for"),
+  publishedAt: timestamp("published_at"),
+  status: varchar("status", { length: 20 }).default("draft"), // draft, scheduled, published, failed
+  errorMessage: text("error_message"),
+  engagement: jsonb("engagement"), // likes, shares, comments counts
+  lastEngagementUpdate: timestamp("last_engagement_update"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("social_posts_user_idx").on(table.userId),
+  index("social_posts_sermon_idx").on(table.sermonId),
+  index("social_posts_platform_idx").on(table.platform),
+  index("social_posts_status_idx").on(table.status),
+]);
+
 // Content Translations for Multilingual Support
 export const contentTranslations = pgTable("content_translations", {
   id: serial("id").primaryKey(),
@@ -2795,6 +2843,24 @@ export type BibleVerse = typeof bibleVerses.$inferSelect;
 export type InsertBibleVerse = typeof bibleVerses.$inferInsert;
 
 export const insertBibleVerseSchema = createInsertSchema(bibleVerses).omit({ id: true, createdAt: true, updatedAt: true });
+
+// Social Media Credentials and Posts schemas
+export const insertSocialMediaCredentialSchema = createInsertSchema(socialMediaCredentials).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+
+export const insertSocialMediaPostSchema = createInsertSchema(socialMediaPosts).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+
+export type SocialMediaCredential = typeof socialMediaCredentials.$inferSelect;
+export type InsertSocialMediaCredential = typeof socialMediaCredentials.$inferInsert;
+export type SocialMediaPost = typeof socialMediaPosts.$inferSelect;
+export type InsertSocialMediaPost = typeof socialMediaPosts.$inferInsert;
 
 // Insert schemas for validation
 export const insertChurchSchema = createInsertSchema(churches).omit({
