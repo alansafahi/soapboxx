@@ -493,6 +493,11 @@ export default function AppHeader() {
               </Button>
             </div>
 
+            {/* Role Switcher and User Profile */}
+            <div className="flex items-center space-x-4">
+              <RoleSwitcher />
+            </div>
+
             {/* User Profile */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
