@@ -287,6 +287,8 @@ export default function SermonCreationStudio() {
         title: "Sermon Completed",
         description: "Your completed sermon has been saved to your profile."
       });
+      // Refresh completed sermons list
+      refetchCompleted();
       // Clear current draft after completing
       setCurrentDraftId(null);
       setCurrentOutline(null);
@@ -296,7 +298,7 @@ export default function SermonCreationStudio() {
       setEnhancementRecommendations([]);
       setSermonTopic('');
       setScriptureText('');
-      setActiveTab('research');
+      setActiveTab('completed');
     },
     onError: () => {
       toast({
@@ -579,7 +581,7 @@ export default function SermonCreationStudio() {
         {/* Research Tab */}
         <TabsContent value="research" className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
               <CardTitle className="flex items-center">
                 <BookOpen className="w-5 h-5 mr-2" />
                 Biblical Research Assistant
@@ -610,7 +612,7 @@ export default function SermonCreationStudio() {
                     <p className="text-blue-800 text-sm leading-relaxed">{currentResearch.historicalContext}</p>
                   </div>
                   
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-purple-900 mb-2">Key Themes</h4>
                       <div className="space-y-1">
