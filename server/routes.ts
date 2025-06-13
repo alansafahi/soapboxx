@@ -530,7 +530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       - Contemporary applications
       - Metaphors and analogies
       
-      Each illustration should be relevant, engaging, and appropriate for the audience.
+      Each illustration should include both textual content and visual presentation elements.
       
       Format as JSON:
       {
@@ -540,7 +540,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             "story": "detailed story or example",
             "application": "how it connects to the sermon point",
             "source": "source or type of illustration",
-            "relevanceScore": 0.85
+            "relevanceScore": 0.85,
+            "visualElements": {
+              "slideTitle": "compelling slide title",
+              "keyImage": "description of a powerful visual that represents this illustration",
+              "bulletPoints": ["key point 1", "key point 2", "key point 3"],
+              "scriptureConnection": "relevant Bible verse to display with the visual",
+              "backgroundSuggestion": "description of appropriate background color/style"
+            },
+            "presentationTips": {
+              "timing": "when to show this during the sermon",
+              "delivery": "how to present this illustration effectively",
+              "interaction": "suggested audience engagement element"
+            }
           }
         ]
       }`;
@@ -562,7 +574,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
-      const illustrations = result.illustrations || [];
+      let illustrations = result.illustrations || [];
+      
+      // Generate actual slide images for each illustration
+      for (let i = 0; i < illustrations.length; i++) {
+        const illustration = illustrations[i];
+        
+        if (illustration.visualElements && illustration.visualElements.keyImage) {
+          try {
+            // Create a prompt for DALL-E that's suitable for church presentations
+            const imagePrompt = `Professional church presentation slide background: ${illustration.visualElements.keyImage}. Clean, inspiring, appropriate for worship service. High quality, suitable for projection. No text overlay.`;
+            
+            const imageResponse = await openai.images.generate({
+              model: "dall-e-3",
+              prompt: imagePrompt,
+              n: 1,
+              size: "1024x1024",
+              quality: "standard",
+            });
+            
+            // Add the generated image URL to the illustration
+            illustrations[i].visualElements.generatedImageUrl = imageResponse.data[0].url;
+            illustrations[i].visualElements.imagePrompt = imagePrompt;
+            
+          } catch (imageError) {
+            console.error('Error generating image for illustration:', imageError);
+            // Continue without the image if generation fails
+          }
+        }
+      }
       
       res.json(illustrations);
 
