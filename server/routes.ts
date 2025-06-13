@@ -2812,11 +2812,11 @@ Format as JSON with this structure:
         messages: [
           {
             role: "system",
-            content: "You are a church communications coordinator who creates clear, concise bulletin content that informs and inspires congregation members."
+            content: "You are a church communications specialist who creates clear bulletin content."
           },
           {
             role: "user",
-            content: bulletinPrompt
+            content: `Create bulletin content for sermon "${title}". Summary: ${summary}. Format as JSON: {"summary": {"content": "...", "format": "Sermon Summary"}, "reflection": {"content": "...", "format": "Weekly Reflection"}, "announcement": {"content": "...", "format": "Event Announcement"}}`
           }
         ],
         response_format: { type: "json_object" },
