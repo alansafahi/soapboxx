@@ -106,6 +106,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Role Management Routes
+  app.get('/api/auth/available-roles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const availableRoles = await storage.getAvailableRoles(userId);
+      const currentRole = await storage.getUserRole(userId);
+      
+      res.json({
+        currentRole,
+        availableRoles,
+        canSwitch: availableRoles.length > 1
+      });
+    } catch (error) {
+      console.error("Error fetching available roles:", error);
+      res.status(500).json({ message: "Failed to fetch available roles" });
+    }
+  });
+
+  app.post('/api/auth/switch-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { newRole } = req.body;
+
+      if (!newRole) {
+        return res.status(400).json({ message: "Role is required" });
+      }
+
+      const success = await storage.switchUserRole(userId, newRole);
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: `Successfully switched to ${newRole}`,
+          newRole 
+        });
+      } else {
+        res.status(403).json({ 
+          success: false, 
+          message: "You don't have permission to switch to this role" 
+        });
+      }
+    } catch (error) {
+      console.error("Error switching role:", error);
+      res.status(500).json({ message: "Failed to switch role" });
+    }
+  });
+
   // User role endpoint for navigation
   app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
     try {

@@ -4702,13 +4702,96 @@ export class DatabaseStorage implements IStorage {
 
   // Admin Analytics Methods
   async getUserRole(userId: string): Promise<string> {
-    const [userChurch] = await db
-      .select()
-      .from(userChurches)
-      .where(eq(userChurches.userId, userId))
-      .limit(1);
-    
-    return userChurch?.role || 'member';
+    try {
+      // Check for admin/owner roles first
+      const adminRoleResult = await db.execute(
+        sql`SELECT role FROM user_roles WHERE user_id = ${userId} AND is_active = true LIMIT 1`
+      );
+
+      if (adminRoleResult.rows.length > 0) {
+        return adminRoleResult.rows[0].role as string;
+      }
+
+      // Try to get role from user_churches table
+      const [userChurch] = await db
+        .select()
+        .from(userChurches)
+        .where(eq(userChurches.userId, userId))
+        .limit(1);
+      
+      return userChurch?.role || 'new_member';
+    } catch (error) {
+      console.error('Error getting user role:', error);
+      return 'new_member';
+    }
+  }
+
+  async getAvailableRoles(userId: string): Promise<string[]> {
+    try {
+      // Check if user is SoapBox Owner
+      const ownerCheck = await db.execute(
+        sql`SELECT role FROM user_roles WHERE user_id = ${userId} AND role = 'soapbox_owner' AND is_active = true`
+      );
+
+      if (ownerCheck.rows.length > 0) {
+        return [
+          'soapbox_owner',
+          'super_admin', 
+          'admin',
+          'pastor',
+          'lead_pastor',
+          'church_admin',
+          'minister',
+          'associate_pastor',
+          'youth_pastor',
+          'worship_leader',
+          'deacon',
+          'elder',
+          'member',
+          'new_member'
+        ];
+      }
+
+      // Regular users can only switch between their assigned roles
+      return ['new_member', 'member'];
+    } catch (error) {
+      console.error('Error getting available roles:', error);
+      return ['new_member'];
+    }
+  }
+
+  async switchUserRole(userId: string, newRole: string): Promise<boolean> {
+    try {
+      // Verify the user can switch to this role
+      const availableRoles = await this.getAvailableRoles(userId);
+      
+      if (!availableRoles.includes(newRole)) {
+        return false;
+      }
+
+      // If switching to owner/admin roles, update user_roles table
+      if (['soapbox_owner', 'super_admin', 'admin'].includes(newRole)) {
+        await db.execute(
+          sql`INSERT INTO user_roles (user_id, role) VALUES (${userId}, ${newRole}) 
+              ON CONFLICT (user_id) DO UPDATE SET role = ${newRole}, updated_at = NOW()`
+        );
+      } else {
+        // For church roles, update user_churches table
+        await db.execute(
+          sql`UPDATE user_churches SET role = ${newRole} WHERE user_id = ${userId}`
+        );
+        
+        // Remove from admin roles if switching to church role
+        await db.execute(
+          sql`UPDATE user_roles SET is_active = false WHERE user_id = ${userId}`
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error switching user role:', error);
+      return false;
+    }
   }
 
   async getChurchMemberCheckIns(churchId: number, startDate: Date): Promise<any> {
