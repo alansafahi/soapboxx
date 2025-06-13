@@ -532,7 +532,9 @@ export default function SermonCreationStudio() {
                           <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-0.5">
                             {idx + 1}
                           </span>
-                          <p className="text-green-800 text-sm leading-relaxed">{point}</p>
+                          <p className="text-green-800 text-sm leading-relaxed">
+                            {typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point)}
+                          </p>
                         </div>
                       ))}
                     </div>
