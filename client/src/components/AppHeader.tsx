@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import soapboxLogo from "@assets/SoapBox logo_1749686315479.jpeg";
-import RoleSwitcher from "@/components/RoleSwitcher";
+
 
 export default function AppHeader() {
   const { user } = useAuth();
@@ -501,10 +501,7 @@ export default function AppHeader() {
               </Button>
             </div>
 
-            {/* Role Switcher and User Profile */}
-            <div className="flex items-center space-x-4">
-              <RoleSwitcher />
-            </div>
+
 
             {/* User Profile */}
             <DropdownMenu>
