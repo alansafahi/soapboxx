@@ -2811,9 +2811,7 @@ export default function AdminPortal() {
                 </Card>
               </div>
 
-              {/* Engagement Analytics Section - Show for authorized roles */}
-              {console.log("Analytics access check:", hasAnalyticsAccess(), "Selected church:", selectedChurch)}
-              {hasAnalyticsAccess() && (
+              {/* Social Media & Content Engagement Section */}
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
