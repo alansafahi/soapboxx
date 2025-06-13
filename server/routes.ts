@@ -2755,7 +2755,7 @@ Format your response as JSON with the following structure:
         });
       } else {
         res.status(404).json({ 
-          message: `Verse not found: ${reference}. Please enter the verse text manually.`
+          message: `Scripture reference "${reference}" not found in our database. Try formats like "John 3:16" or "Psalm 23:1", or enter the verse text manually.`
         });
       }
     } catch (error) {

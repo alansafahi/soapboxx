@@ -378,11 +378,11 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         });
       }
     } catch (error) {
-      // Show helpful error message
+      // Show helpful error message with suggestions
       toast({
-        title: "Verse Not Found",
-        description: `Could not find "${reference}" in our database. Please enter the verse text manually.`,
-        variant: "destructive",
+        title: "Scripture Lookup",
+        description: `"${reference}" not found in our database. Try a different format (e.g., "John 3:16") or enter the verse text manually below.`,
+        variant: "default",
       });
       console.log('Verse lookup failed:', error);
     } finally {
