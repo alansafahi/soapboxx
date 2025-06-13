@@ -5690,10 +5690,26 @@ export class DatabaseStorage implements IStorage {
     const drafts = await db
       .select()
       .from(sermonDrafts)
-      .where(eq(sermonDrafts.userId, userId))
+      .where(and(
+        eq(sermonDrafts.userId, userId),
+        eq(sermonDrafts.isPublished, false)
+      ))
       .orderBy(desc(sermonDrafts.updatedAt));
     
     return drafts;
+  }
+
+  async getUserCompletedSermons(userId: string): Promise<any[]> {
+    const completedSermons = await db
+      .select()
+      .from(sermonDrafts)
+      .where(and(
+        eq(sermonDrafts.userId, userId),
+        eq(sermonDrafts.isPublished, true)
+      ))
+      .orderBy(desc(sermonDrafts.publishedAt));
+    
+    return completedSermons;
   }
 
   async getSermonDraft(draftId: number, userId: string): Promise<any> {

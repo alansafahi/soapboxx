@@ -66,6 +66,12 @@ export default function SermonCreationStudio() {
     queryFn: () => apiRequest('/api/sermon/drafts'),
   });
 
+  // Fetch completed sermons
+  const { data: completedSermons, isLoading: completedLoading, refetch: refetchCompleted } = useQuery({
+    queryKey: ['/api/sermon/completed'],
+    queryFn: () => apiRequest('/api/sermon/completed'),
+  });
+
   // Save Draft mutation
   const saveDraftMutation = useMutation({
     mutationFn: async (data: any) => {
