@@ -46,6 +46,74 @@ export default function SermonCreationStudio() {
   const [illustrations, setIllustrations] = useState<SermonIllustration[]>([]);
   const { toast } = useToast();
 
+  // Save Draft mutation
+  const saveDraftMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/sermon/save-draft", data);
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Draft Saved",
+        description: "Your sermon draft has been saved successfully."
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save draft. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Export mutation  
+  const exportMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/sermon/export", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to export sermon");
+      }
+      
+      // Get filename from headers
+      const contentDisposition = response.headers.get("content-disposition");
+      const filename = contentDisposition?.match(/filename="(.+)"/)?.[1] || "sermon.txt";
+      
+      // Create download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast({
+        title: "Export Complete",
+        description: "Your sermon has been exported successfully."
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Export Failed", 
+        description: "Failed to export sermon. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Biblical Research Mutation
   const researchMutation = useMutation({
     mutationFn: async (data: { scripture: string; topic: string }) => {
@@ -193,6 +261,29 @@ export default function SermonCreationStudio() {
       return;
     }
     enhanceMutation.mutate({ outline: currentOutline, research: currentResearch });
+  };
+
+  const handleSaveDraft = () => {
+    const title = currentOutline?.title || sermonTopic || "Untitled Sermon";
+    saveDraftMutation.mutate({
+      title,
+      outline: currentOutline,
+      research: currentResearch,
+      illustrations,
+      enhancement: null
+    });
+  };
+
+  const handleExport = () => {
+    const title = currentOutline?.title || sermonTopic || "Untitled Sermon";
+    exportMutation.mutate({
+      title,
+      outline: currentOutline,
+      research: currentResearch,
+      illustrations,
+      enhancement: null,
+      format: 'txt'
+    });
   };
 
   return (
@@ -668,12 +759,30 @@ export default function SermonCreationStudio() {
                 </Badge>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  <Save className="w-4 h-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSaveDraft}
+                  disabled={saveDraftMutation.isPending}
+                >
+                  {saveDraftMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
                   Save Draft
                 </Button>
-                <Button variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleExport}
+                  disabled={exportMutation.isPending}
+                >
+                  {exportMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
                   Export
                 </Button>
                 <Button variant="outline" size="sm">
