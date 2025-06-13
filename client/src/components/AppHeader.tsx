@@ -97,7 +97,6 @@ export default function AppHeader() {
       label: "Admin",
       items: [
         { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
-        { href: "/engagement-analytics", label: "Engagement Analytics", icon: BarChart3, roles: ["pastor", "lead_pastor", "church_admin", "admin", "system_admin", "super_admin"] },
         { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
       ]
     },
