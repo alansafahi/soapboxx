@@ -134,6 +134,14 @@ export default function RoleSwitcher() {
     );
   }
 
+  // Debug: Check conditions
+  console.log('RoleSwitcher render conditions:', {
+    isDemoSite,
+    currentRole: roleData.currentRole,
+    canSwitch: roleData.canSwitch,
+    shouldHideOnProduction: !isDemoSite && roleData.currentRole !== 'soapbox_owner'
+  });
+
   // On production sites, only show role switcher to SoapBox Owner
   if (!isDemoSite && roleData.currentRole !== 'soapbox_owner') {
     return null;
