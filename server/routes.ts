@@ -2694,7 +2694,7 @@ Format your response as JSON with the following structure:
 
       // Check if user has pastor or admin role
       const userRole = await storage.getUserRole(userId);
-      if (!userRole || !['pastor', 'lead_pastor', 'church_admin'].includes(userRole.role)) {
+      if (!userRole || !['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole.role)) {
         return res.status(403).json({ message: "Access denied. Pastor role required." });
       }
 
@@ -2983,7 +2983,7 @@ Format as JSON with this structure:
 
       // Check if user has pastor or admin role
       const userRole = await storage.getUserRole(userId);
-      if (!userRole || !['pastor', 'lead_pastor', 'church_admin'].includes(userRole.role)) {
+      if (!userRole || !['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole.role)) {
         return res.status(403).json({ message: "Access denied. Pastor role required." });
       }
 
