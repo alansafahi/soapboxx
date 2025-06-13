@@ -725,35 +725,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Save sermon draft endpoint
   app.post('/api/sermon/save-draft', isAuthenticated, async (req: any, res) => {
     try {
-      const { title, outline, research, illustrations, enhancement } = req.body;
+      const { title, outline, research, illustrations, enhancement, draftId } = req.body;
       const userId = req.user.claims.sub;
       
-      const draftData = {
-        title: title || 'Untitled Sermon',
-        content: JSON.stringify({
-          outline,
-          research,
-          illustrations,
-          enhancement
-        }),
-        userId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isPublished: false
+      const contentData = {
+        outline,
+        research,
+        illustrations,
+        enhancement
       };
 
-      // Store in database - using simplified storage for now
-      const draft = await storage.createSermonDraft(draftData);
+      let draft;
+      
+      if (draftId) {
+        // Update existing draft (replace)
+        const updates = {
+          title: title || 'Untitled Sermon',
+          content: JSON.stringify(contentData),
+          updatedAt: new Date()
+        };
+        
+        draft = await storage.updateSermonDraft(draftId, userId, updates);
+        
+        if (!draft) {
+          return res.status(404).json({ message: "Draft not found" });
+        }
+      } else {
+        // Create new draft
+        const draftData = {
+          title: title || 'Untitled Sermon',
+          content: JSON.stringify(contentData),
+          userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          isPublished: false
+        };
+
+        draft = await storage.createSermonDraft(draftData);
+      }
       
       res.json({
         success: true,
         draftId: draft.id,
-        message: 'Sermon draft saved successfully'
+        message: draftId ? 'Sermon draft updated successfully' : 'Sermon draft saved successfully'
       });
 
     } catch (error) {
       console.error("Error saving sermon draft:", error);
       res.status(500).json({ message: "Failed to save sermon draft" });
+    }
+  });
+
+  // Save completed sermon endpoint
+  app.post('/api/sermon/save-completed', isAuthenticated, async (req: any, res) => {
+    try {
+      const { title, outline, research, illustrations, enhancement, completedAt } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const completedSermonData = {
+        title: title || 'Untitled Sermon',
+        content: JSON.stringify({
+          outline,
+          research,
+          illustrations,
+          enhancement,
+          completedAt: completedAt || new Date().toISOString()
+        }),
+        userId,
+        isPublished: true,
+        publishedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const completedSermon = await storage.createSermonDraft(completedSermonData);
+      
+      res.json({
+        success: true,
+        sermonId: completedSermon.id,
+        message: 'Sermon completed and saved successfully'
+      });
+
+    } catch (error) {
+      console.error("Error saving completed sermon:", error);
+      res.status(500).json({ message: "Failed to save completed sermon" });
+    }
+  });
+
+  // Get user's completed sermons
+  app.get('/api/sermon/completed', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const completedSermons = await storage.getUserCompletedSermons(userId);
+      
+      res.json(completedSermons);
+    } catch (error) {
+      console.error("Error fetching completed sermons:", error);
+      res.status(500).json({ message: "Failed to fetch completed sermons" });
     }
   });
 

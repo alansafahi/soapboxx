@@ -71,7 +71,7 @@ export default function SermonCreationStudio() {
     mutationFn: async (data: any) => {
       return await apiRequest('/api/sermon/save-draft', {
         method: 'POST',
-        body: data
+        body: { ...data, draftId: currentDraftId }
       });
     },
     onSuccess: (data) => {
@@ -267,6 +267,61 @@ export default function SermonCreationStudio() {
       });
     }
   });
+
+  // Save Completed Sermon mutation
+  const saveCompletedMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('/api/sermon/save-completed', {
+        method: 'POST',
+        body: data
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sermon Completed",
+        description: "Your completed sermon has been saved to your profile."
+      });
+      // Clear current draft after completing
+      setCurrentDraftId(null);
+      setCurrentOutline(null);
+      setCurrentResearch(null);
+      setIllustrations([]);
+      setEnhancedOutline(null);
+      setEnhancementRecommendations([]);
+      setSermonTopic('');
+      setScriptureText('');
+      setActiveTab('research');
+    },
+    onError: () => {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save completed sermon. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleCompleteSermon = () => {
+    if (!enhancedOutline && !currentOutline) {
+      toast({
+        title: "Sermon Required",
+        description: "Please create a sermon outline first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const completedSermon = {
+      title: sermonTopic || 'Untitled Sermon',
+      outline: enhancedOutline || currentOutline,
+      research: currentResearch,
+      illustrations: illustrations,
+      enhancement: enhancedOutline ? { enhancedOutline, recommendations: enhancementRecommendations } : null,
+      completedAt: new Date().toISOString()
+    };
+
+    saveCompletedMutation.mutate(completedSermon);
+  };
 
   const handleResearch = () => {
     if (!scriptureText && !sermonTopic) {
@@ -998,6 +1053,21 @@ export default function SermonCreationStudio() {
                       </ul>
                     </div>
                   )}
+                  
+                  <div className="flex justify-center pt-4">
+                    <Button
+                      onClick={handleCompleteSermon}
+                      disabled={saveCompletedMutation.isPending}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2"
+                    >
+                      {saveCompletedMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Archive className="w-4 h-4 mr-2" />
+                      )}
+                      Complete & Save Sermon
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
