@@ -253,6 +253,7 @@ export interface IStorage {
   getChurch(id: number): Promise<Church | undefined>;
   createChurch(church: InsertChurch): Promise<Church>;
   updateChurch(id: number, updates: Partial<Church>): Promise<Church>;
+  getUserCreatedChurches(userId: string): Promise<Church[]>;
   
   // Church team management
   getUserChurch(userId: string): Promise<UserChurch | undefined>;
@@ -1718,6 +1719,46 @@ export class DatabaseStorage implements IStorage {
         eq(userChurches.userId, userId),
         eq(userChurches.isActive, true)
       ));
+  }
+
+  async getUserCreatedChurches(userId: string): Promise<Church[]> {
+    // Get churches where user has admin roles (church_admin, pastor, lead_pastor, etc.)
+    return await db
+      .select({
+        id: churches.id,
+        name: churches.name,
+        denomination: churches.denomination,
+        description: churches.description,
+        address: churches.address,
+        city: churches.city,
+        state: churches.state,
+        zipCode: churches.zipCode,
+        phone: churches.phone,
+        email: churches.email,
+        website: churches.website,
+        logoUrl: churches.logoUrl,
+        bio: churches.bio,
+        socialLinks: churches.socialLinks,
+        communityTags: churches.communityTags,
+        latitude: churches.latitude,
+        longitude: churches.longitude,
+        rating: churches.rating,
+        memberCount: churches.memberCount,
+        isActive: churches.isActive,
+        createdAt: churches.createdAt,
+        updatedAt: churches.updatedAt,
+      })
+      .from(churches)
+      .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
+      .innerJoin(roles, eq(userChurches.roleId, roles.id))
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.isActive, true),
+        eq(churches.isActive, true),
+        // Only admin-level roles
+        sql`${roles.name} IN ('church_admin', 'pastor', 'lead_pastor', 'super_admin', 'soapbox_owner')`
+      ))
+      .orderBy(desc(churches.createdAt));
   }
 
   async joinChurch(userId: string, churchId: number): Promise<void> {

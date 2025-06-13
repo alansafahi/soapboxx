@@ -3486,6 +3486,18 @@ Format as JSON with this structure:
     }
   });
 
+  // Get churches created by the current user (for admin portal)
+  app.get('/api/churches/created', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const churches = await storage.getUserCreatedChurches(userId);
+      res.json(churches);
+    } catch (error) {
+      console.error("Error fetching user created churches:", error);
+      res.status(500).json({ message: "Failed to fetch user created churches" });
+    }
+  });
+
   app.get('/api/churches/nearby', async (req, res) => {
     try {
       const { lat, lng, limit } = req.query;
