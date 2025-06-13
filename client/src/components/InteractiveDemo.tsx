@@ -157,7 +157,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'bottom',
         action: 'hover',
         icon: 'Heart',
-        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.22.13 AM_1749802937236.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.22.13%20AM_1749802937236.png'
       }
     ]
   },
