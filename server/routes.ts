@@ -2748,7 +2748,11 @@ Format as JSON with this structure:
       `;
 
       const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const socialCompletion = await openaiClient.chat.completions.create({
+      
+      // Generate all content concurrently for faster response
+      const [socialCompletion, emailCompletion, studyCompletion] = await Promise.all([
+        // Social media content
+        openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -2761,124 +2765,48 @@ Format as JSON with this structure:
           }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 1500,
+        max_tokens: 800,
         temperature: 0.8
-      });
+      }),
 
-      // Generate email content
-      const emailPrompt = `
-Create email newsletter content for a sermon titled "${title}".
-
-Sermon summary: ${summary}
-${keyPointsText}
-${audienceContext}
-
-Generate:
-1. Email subject line (compelling, open-worthy)
-2. Email newsletter content (HTML-formatted, engaging)
-3. Follow-up devotional email (encouragement, application)
-
-Include:
-- Personal pastoral tone
-- Clear call-to-action
-- Scripture references
-- Practical application points
-- Invitation to attend/watch
-
-Format as JSON with this structure:
-{
-  "newsletter": { "subject": "...", "content": "...", "format": "HTML Newsletter" },
-  "followup": { "subject": "...", "content": "...", "format": "Devotional Follow-up" }
-}
-      `;
-
-      const emailCompletion = await openaiClient.chat.completions.create({
+      // Email content
+      openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: "You are a pastor who excels at written communication and connects with congregation members through thoughtful, encouraging emails."
+            content: "You are a pastor who creates thoughtful email communications."
           },
           {
             role: "user",
-            content: emailPrompt
+            content: `Create email content for sermon "${title}". Summary: ${summary}. Key points: ${keyPointsText}. Format as JSON: {"newsletter": {"subject": "...", "content": "...", "format": "HTML Newsletter"}, "followup": {"subject": "...", "content": "...", "format": "Devotional Follow-up"}}`
           }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 1200,
+        max_tokens: 600,
         temperature: 0.7
-      });
+      }),
 
-      // Generate study materials
-      const studyPrompt = `
-Create Bible study materials for a sermon titled "${title}".
-
-Sermon summary: ${summary}
-${keyPointsText}
-${audienceContext}
-
-Generate:
-1. Small group discussion guide (questions, activities, scripture study)
-2. Personal reflection worksheet (individual study, journaling prompts)
-3. Family devotional guide (age-appropriate, interactive elements)
-
-Include:
-- Opening prayer
-- Scripture reading plan
-- Discussion questions
-- Application activities
-- Closing prayer suggestions
-
-Format as JSON with this structure:
-{
-  "smallGroup": { "content": "...", "format": "Small Group Guide" },
-  "personal": { "content": "...", "format": "Personal Study" },
-  "family": { "content": "...", "format": "Family Devotional" }
-}
-      `;
-
-      const studyCompletion = await openaiClient.chat.completions.create({
+      // Study materials
+      openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: "You are a Christian education specialist who creates engaging Bible study materials for all age groups and learning styles."
+            content: "You are a Christian education specialist who creates engaging Bible study materials."
           },
           {
             role: "user",
-            content: studyPrompt
+            content: `Create study materials for sermon "${title}". Summary: ${summary}. Key points: ${keyPointsText}. Format as JSON: {"smallGroup": {"content": "...", "format": "Small Group Guide"}, "personal": {"content": "...", "format": "Personal Study"}, "family": {"content": "...", "format": "Family Devotional"}}`
           }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 1500,
+        max_tokens: 600,
         temperature: 0.7
-      });
+      })
+    ]);
 
-      // Generate bulletin content
-      const bulletinPrompt = `
-Create church bulletin content for a sermon titled "${title}".
-
-Sermon summary: ${summary}
-${keyPointsText}
-
-Generate:
-1. Sermon summary for bulletin (concise, inspiring)
-2. Weekly reflection insert (takeaway message, prayer)
-3. Announcement blurb (upcoming related events, studies)
-
-Keep content:
-- Concise and bulletin-appropriate
-- Inspirational and accessible
-- Action-oriented with clear next steps
-
-Format as JSON with this structure:
-{
-  "summary": { "content": "...", "format": "Sermon Summary" },
-  "reflection": { "content": "...", "format": "Weekly Reflection" },
-  "announcement": { "content": "...", "format": "Event Announcement" }
-}
-      `;
-
+      // Generate bulletin content concurrently
       const bulletinCompletion = await openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [

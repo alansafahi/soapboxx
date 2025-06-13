@@ -56,12 +56,8 @@ export default function ContentDistributionHub() {
           description: `"${parsedData.title}" is ready for content distribution.`
         });
         
-        // Auto-generate content if we have enough data
-        if (parsedData.title && parsedData.mainPoints?.length > 0) {
-          setTimeout(() => {
-            handleGenerate();
-          }, 1000);
-        }
+        // Don't auto-generate to avoid timeout issues
+        // User can manually click generate when ready
       } catch (error) {
         console.error("Error loading sermon data:", error);
       }
