@@ -4087,7 +4087,13 @@ Return JSON with this exact structure:
       
       // Check if file exists
       if (!fs.existsSync(imagePath)) {
-        return res.status(404).json({ message: 'Screenshot not found' });
+        console.log('Screenshot not found:', { filename, imagePath, cwd: process.cwd() });
+        return res.status(404).json({ 
+          message: 'Screenshot not found', 
+          filename,
+          requestedPath: imagePath,
+          cwd: process.cwd()
+        });
       }
       
       // Set proper content type based on file extension
