@@ -98,9 +98,10 @@ export default function SermonCreationStudio() {
     }
   });
 
-  // Illustrations Mutation
+  // Illustrations Mutation with enhanced image generation
   const illustrationsMutation = useMutation({
     mutationFn: async (data: { topic: string; mainPoints: string[]; audience: string }) => {
+      setIsGeneratingImages(true);
       return apiRequest('/api/sermon/illustrations', {
         method: 'POST',
         body: data
@@ -108,12 +109,15 @@ export default function SermonCreationStudio() {
     },
     onSuccess: (data) => {
       setIllustrations(data);
+      setIsGeneratingImages(false);
+      const imagesGenerated = data.filter((ill: any) => ill.visualElements?.generatedImageUrl).length;
       toast({
-        title: "Illustrations Found",
-        description: `${data.length} relevant illustrations have been suggested.`
+        title: "Illustrations Ready",
+        description: `${data.length} relevant illustrations found with ${imagesGenerated} HD presentation images generated for ${targetAudience} audience.`
       });
     },
     onError: (error) => {
+      setIsGeneratingImages(false);
       toast({
         title: "Finding Better Stories",
         description: "We're gathering compelling illustrations for your message - let's try once more.",
@@ -462,15 +466,15 @@ export default function SermonCreationStudio() {
               </CardTitle>
               <Button 
                 onClick={handleFindIllustrations}
-                disabled={illustrationsMutation.isPending || !currentOutline}
+                disabled={illustrationsMutation.isPending || isGeneratingImages || !currentOutline}
                 className="bg-purple-600 hover:bg-purple-700"
               >
-                {illustrationsMutation.isPending ? (
+                {illustrationsMutation.isPending || isGeneratingImages ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <MessageSquare className="w-4 h-4 mr-2" />
                 )}
-                Find Illustrations
+                {isGeneratingImages ? 'Creating HD Images...' : illustrationsMutation.isPending ? 'Finding Stories...' : 'Find Illustrations'}
               </Button>
             </CardHeader>
             <CardContent>
