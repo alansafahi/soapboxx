@@ -34,6 +34,12 @@ export default function AppHeader() {
     retry: false,
   });
 
+  // Get current active role from role switcher system
+  const { data: roleData } = useQuery({
+    queryKey: ["/api/auth/available-roles"],
+    retry: false,
+  });
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -91,7 +97,7 @@ export default function AppHeader() {
       id: "admin",
       label: "Admin",
       items: [
-        { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
+        { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
         { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
       ]
     },
@@ -107,13 +113,16 @@ export default function AppHeader() {
     }
   ];
 
-  // Filter navigation items based on user role
+  // Filter navigation items based on current active role
   const getVisibleGroups = () => {
+    // Use current active role from role switcher, fallback to base user role
+    const currentRole = roleData?.currentRole || userRole?.role || '';
+    
     return navigationGroups.map(group => ({
       ...group,
       items: group.items.filter(item => {
         if (!item.roles) return true;
-        return item.roles.includes(userRole?.role || '');
+        return item.roles.includes(currentRole);
       })
     })).filter(group => group.items.length > 0);
   };
