@@ -2594,10 +2594,13 @@ export default function AdminPortal() {
                 </Card>
               </div>
 
-              {/* Social Media Analytics Section */}
+              {/* Personal Social Media Analytics Section */}
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Your Content Performance</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Personal social media analytics for your published content</p>
+                  </div>
                   <Button
                     onClick={() => window.location.href = '/engagement-analytics'}
                     variant="outline"
@@ -2608,15 +2611,15 @@ export default function AdminPortal() {
                   </Button>
                 </div>
               
-                {/* Engagement Overview Cards */}
+                {/* Personal Engagement Overview Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reach</p>
-                          <p className="text-2xl font-bold">847.2K</p>
-                          <p className="text-xs text-green-600">+15% this week</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Your Total Reach</p>
+                          <p className="text-2xl font-bold">42.8K</p>
+                          <p className="text-xs text-green-600">+18% this week</p>
                         </div>
                         <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                           <Eye className="h-4 w-4 text-blue-600" />
@@ -2629,9 +2632,9 @@ export default function AdminPortal() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Engagement</p>
-                          <p className="text-2xl font-bold">23.4%</p>
-                          <p className="text-xs text-green-600">+8% this week</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Your Engagement</p>
+                          <p className="text-2xl font-bold">31.2%</p>
+                          <p className="text-xs text-green-600">+12% this week</p>
                         </div>
                         <div className="h-8 w-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
                           <Heart className="h-4 w-4 text-purple-600" />
@@ -2644,9 +2647,9 @@ export default function AdminPortal() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Shares</p>
-                          <p className="text-2xl font-bold">1,234</p>
-                          <p className="text-xs text-green-600">+22% this week</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Your Shares</p>
+                          <p className="text-2xl font-bold">187</p>
+                          <p className="text-xs text-green-600">+28% this week</p>
                         </div>
                         <div className="h-8 w-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                           <Share2 className="h-4 w-4 text-green-600" />
@@ -2659,9 +2662,9 @@ export default function AdminPortal() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Comments</p>
-                          <p className="text-2xl font-bold">892</p>
-                          <p className="text-xs text-green-600">+12% this week</p>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Your Comments</p>
+                          <p className="text-2xl font-bold">94</p>
+                          <p className="text-xs text-green-600">+15% this week</p>
                         </div>
                         <div className="h-8 w-8 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
                           <MessageSquare className="h-4 w-4 text-orange-600" />
@@ -2671,42 +2674,96 @@ export default function AdminPortal() {
                   </Card>
                 </div>
 
-                {/* Platform Performance Overview */}
+                {/* Personal Platform Performance */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <BarChart3 className="h-5 w-5" />
-                      Platform Performance Overview
+                      Your Platform Performance
                     </CardTitle>
+                    <CardDescription>Performance metrics for content you've created and published</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="text-center p-4 border rounded-lg">
                         <div className="text-lg font-semibold text-blue-600">Facebook</div>
-                        <div className="text-2xl font-bold">9.2%</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Engagement</div>
-                        <div className="text-xs text-green-600">+15% growth</div>
+                        <div className="text-2xl font-bold">12.4%</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Your Avg. Engagement</div>
+                        <div className="text-xs text-green-600">+20% growth</div>
+                        <div className="text-xs text-gray-500 mt-1">8 posts this month</div>
                       </div>
                       
                       <div className="text-center p-4 border rounded-lg">
                         <div className="text-lg font-semibold text-pink-600">Instagram</div>
-                        <div className="text-2xl font-bold">7.8%</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Engagement</div>
-                        <div className="text-xs text-green-600">+22% growth</div>
+                        <div className="text-2xl font-bold">18.3%</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Your Avg. Engagement</div>
+                        <div className="text-xs text-green-600">+35% growth</div>
+                        <div className="text-xs text-gray-500 mt-1">12 posts this month</div>
                       </div>
                       
                       <div className="text-center p-4 border rounded-lg">
                         <div className="text-lg font-semibold text-blue-400">Twitter</div>
-                        <div className="text-2xl font-bold">5.4%</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Engagement</div>
-                        <div className="text-xs text-red-600">-3% decline</div>
+                        <div className="text-2xl font-bold">8.7%</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Your Avg. Engagement</div>
+                        <div className="text-xs text-green-600">+5% growth</div>
+                        <div className="text-xs text-gray-500 mt-1">15 tweets this month</div>
                       </div>
                       
                       <div className="text-center p-4 border rounded-lg">
                         <div className="text-lg font-semibold text-blue-700">LinkedIn</div>
-                        <div className="text-2xl font-bold">6.1%</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Avg. Engagement</div>
-                        <div className="text-xs text-green-600">+8% growth</div>
+                        <div className="text-2xl font-bold">14.8%</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Your Avg. Engagement</div>
+                        <div className="text-xs text-green-600">+25% growth</div>
+                        <div className="text-xs text-gray-500 mt-1">6 posts this month</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Content Performance */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Your Recent Content Performance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">Sunday Morning Sermon: Finding Hope</h4>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Published 2 days ago</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-blue-600">2.1K views</span>
+                          <span className="text-green-600">156 likes</span>
+                          <span className="text-purple-600">23 shares</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">Daily Devotional: Psalm 23 Reflection</h4>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Published 5 days ago</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-blue-600">1.8K views</span>
+                          <span className="text-green-600">142 likes</span>
+                          <span className="text-purple-600">18 shares</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">Community Prayer Request Update</h4>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Published 1 week ago</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-blue-600">987 views</span>
+                          <span className="text-green-600">89 likes</span>
+                          <span className="text-purple-600">12 shares</span>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
