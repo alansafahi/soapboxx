@@ -44,6 +44,7 @@ export default function SermonCreationStudio() {
   const [currentOutline, setCurrentOutline] = useState<SermonOutline | null>(null);
   const [currentResearch, setCurrentResearch] = useState<BiblicalResearch | null>(null);
   const [illustrations, setIllustrations] = useState<SermonIllustration[]>([]);
+  const [selectedStories, setSelectedStories] = useState<Set<number>>(new Set());
   const [enhancedOutline, setEnhancedOutline] = useState<SermonOutline | null>(null);
   const [enhancementRecommendations, setEnhancementRecommendations] = useState<string[]>([]);
   const { toast } = useToast();
@@ -193,7 +194,7 @@ export default function SermonCreationStudio() {
 
   // Enhancement Mutation
   const enhanceMutation = useMutation({
-    mutationFn: async (data: { outline: SermonOutline; research: BiblicalResearch }) => {
+    mutationFn: async (data: { outline: SermonOutline; research: BiblicalResearch; selectedStories?: SermonIllustration[] }) => {
       return apiRequest('/api/sermon/enhance', {
         method: 'POST',
         body: data
@@ -264,7 +265,15 @@ export default function SermonCreationStudio() {
       });
       return;
     }
-    enhanceMutation.mutate({ outline: currentOutline, research: currentResearch });
+    
+    // Get selected stories based on checkboxes
+    const selectedStoriesArray = Array.from(selectedStories).map(index => illustrations[index]).filter(Boolean);
+    
+    enhanceMutation.mutate({ 
+      outline: currentOutline, 
+      research: currentResearch,
+      selectedStories: selectedStoriesArray.length > 0 ? selectedStoriesArray : undefined
+    });
   };
 
   const handleSaveDraft = () => {
@@ -574,11 +583,58 @@ export default function SermonCreationStudio() {
             <CardContent>
               {illustrations.length > 0 ? (
                 <div className="space-y-4">
+                  {/* Selection Controls */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedStories.size === illustrations.length && illustrations.length > 0}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedStories(new Set(Array.from({length: illustrations.length}, (_, i) => i)));
+                            } else {
+                              setSelectedStories(new Set());
+                            }
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Select All Stories</span>
+                      </label>
+                      <span className="text-sm text-gray-500">
+                        {selectedStories.size} of {illustrations.length} selected
+                      </span>
+                    </div>
+                    {selectedStories.size > 0 && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        These stories will be included in enhancement
+                      </span>
+                    )}
+                  </div>
                   {illustrations.map((illustration, idx) => (
                     <Card key={idx} className="border border-gray-200">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-semibold text-gray-900">{illustration.title}</h4>
+                          <div className="flex items-start space-x-3">
+                            <input
+                              type="checkbox"
+                              id={`story-${idx}`}
+                              checked={selectedStories.has(idx)}
+                              onChange={(e) => {
+                                const newSelection = new Set(selectedStories);
+                                if (e.target.checked) {
+                                  newSelection.add(idx);
+                                } else {
+                                  newSelection.delete(idx);
+                                }
+                                setSelectedStories(newSelection);
+                              }}
+                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{illustration.title}</h4>
+                            </div>
+                          </div>
                           <Badge 
                             variant={illustration.relevanceScore > 0.8 ? "default" : "outline"}
                             className="ml-2"
