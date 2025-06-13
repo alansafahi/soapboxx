@@ -2749,86 +2749,83 @@ Format as JSON with this structure:
 
       const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       
-      // Generate all content concurrently for faster response
-      const [socialCompletion, emailCompletion, studyCompletion] = await Promise.all([
-        // Social media content
-        openaiClient.chat.completions.create({
-        model: "gpt-4o",
+      // Single optimized API call for all content
+      const allContentCompletion = await openaiClient.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
-            content: "You are a church social media expert who creates engaging, authentic content that resonates with diverse audiences while maintaining theological integrity."
+            content: "You are a church communications expert. Create comprehensive multi-platform content efficiently."
           },
           {
             role: "user",
-            content: socialMediaPrompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 800,
-        temperature: 0.8
-      }),
+            content: `Create ALL content for sermon "${title}". Summary: ${summary}. Key points: ${keyPointsText}.
 
-      // Email content
-      openaiClient.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a pastor who creates thoughtful email communications."
-          },
-          {
-            role: "user",
-            content: `Create email content for sermon "${title}". Summary: ${summary}. Key points: ${keyPointsText}. Format as JSON: {"newsletter": {"subject": "...", "content": "...", "format": "HTML Newsletter"}, "followup": {"subject": "...", "content": "...", "format": "Devotional Follow-up"}}`
+Return JSON with this exact structure:
+{
+  "social": {
+    "facebook": {"content": "Post text", "hashtags": ["#faith"], "tips": ["engagement tip"], "format": "Facebook Post"},
+    "instagram": {"content": "Post text", "hashtags": ["#blessed"], "tips": ["visual tip"], "format": "Instagram Post"},
+    "twitter": {"content": "Tweet text", "hashtags": ["#sermon"], "tips": ["timing tip"], "format": "Twitter Post"}
+  },
+  "email": {
+    "newsletter": {"subject": "Subject", "content": "Email body", "format": "HTML Newsletter"},
+    "followup": {"subject": "Follow-up subject", "content": "Follow-up body", "format": "Devotional Follow-up"}
+  },
+  "study": {
+    "smallGroup": {"content": "Discussion guide", "format": "Small Group Guide"},
+    "personal": {"content": "Personal study", "format": "Personal Study"},
+    "family": {"content": "Family devotional", "format": "Family Devotional"}
+  },
+  "bulletin": {
+    "summary": {"content": "Brief summary", "format": "Sermon Summary"},
+    "reflection": {"content": "Reflection text", "format": "Weekly Reflection"},
+    "announcement": {"content": "Event info", "format": "Event Announcement"}
+  }
+}`
           }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 600,
+        max_tokens: 1200,
         temperature: 0.7
-      }),
-
-      // Study materials
-      openaiClient.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a Christian education specialist who creates engaging Bible study materials."
-          },
-          {
-            role: "user",
-            content: `Create study materials for sermon "${title}". Summary: ${summary}. Key points: ${keyPointsText}. Format as JSON: {"smallGroup": {"content": "...", "format": "Small Group Guide"}, "personal": {"content": "...", "format": "Personal Study"}, "family": {"content": "...", "format": "Family Devotional"}}`
-          }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 600,
-        temperature: 0.7
-      })
-    ]);
-
-      // Generate bulletin content concurrently
-      const bulletinCompletion = await openaiClient.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a church communications specialist who creates clear bulletin content."
-          },
-          {
-            role: "user",
-            content: `Create bulletin content for sermon "${title}". Summary: ${summary}. Format as JSON: {"summary": {"content": "...", "format": "Sermon Summary"}, "reflection": {"content": "...", "format": "Weekly Reflection"}, "announcement": {"content": "...", "format": "Event Announcement"}}`
-          }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 800,
-        temperature: 0.6
       });
 
-      // Parse responses
-      const socialData = JSON.parse(socialCompletion.choices[0].message.content || '{}');
-      const emailData = JSON.parse(emailCompletion.choices[0].message.content || '{}');
-      const studyData = JSON.parse(studyCompletion.choices[0].message.content || '{}');
-      const bulletinData = JSON.parse(bulletinCompletion.choices[0].message.content || '{}');
+      // Parse single response with comprehensive error handling
+      let allContentData;
+      try {
+        const contentText = allContentCompletion.choices[0].message.content || '{}';
+        allContentData = JSON.parse(contentText);
+      } catch (error) {
+        console.error('Error parsing content:', error);
+        // Provide fallback structure
+        allContentData = {
+          social: { 
+            facebook: { content: `Reflecting on "${title}" - ${summary}`, hashtags: ["#faith", "#sermon"], tips: ["Post during peak hours"], format: "Facebook Post" },
+            instagram: { content: `${title} 🙏`, hashtags: ["#blessed", "#faith"], tips: ["Use engaging visuals"], format: "Instagram Post" },
+            twitter: { content: `New sermon: ${title}`, hashtags: ["#sermon"], tips: ["Keep it concise"], format: "Twitter Post" }
+          },
+          email: { 
+            newsletter: { subject: `Weekly Message: ${title}`, content: `Dear Church Family,\n\n${summary}`, format: "HTML Newsletter" },
+            followup: { subject: `Reflection on ${title}`, content: `Continue reflecting on today's message...`, format: "Devotional Follow-up" }
+          },
+          study: { 
+            smallGroup: { content: `Discussion questions for ${title}...`, format: "Small Group Guide" },
+            personal: { content: `Personal study on ${title}...`, format: "Personal Study" },
+            family: { content: `Family devotional based on ${title}...`, format: "Family Devotional" }
+          },
+          bulletin: { 
+            summary: { content: `Brief summary of ${title}`, format: "Sermon Summary" },
+            reflection: { content: `Weekly reflection on ${title}`, format: "Weekly Reflection" },
+            announcement: { content: "Join us for upcoming events", format: "Event Announcement" }
+          }
+        };
+      }
+
+      // Extract data from single response
+      const socialData = allContentData.social || {};
+      const emailData = allContentData.email || {};
+      const studyData = allContentData.study || {};
+      const bulletinData = allContentData.bulletin || {};
 
       // Format response
       const distributionPackage = {
