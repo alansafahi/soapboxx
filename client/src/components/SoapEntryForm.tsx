@@ -47,6 +47,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [aiSuggestions, setAiSuggestions] = useState<any>(null);
   const [reflectionQuestions, setReflectionQuestions] = useState<string[]>([]);
   const [contextualInfo, setContextualInfo] = useState<any>(null);
+  const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
 
   const { toast } = useToast();
 
@@ -342,10 +343,36 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     }
   };
 
+  const lookupVerse = async (reference: string) => {
+    if (!reference.trim()) return;
+    
+    // Simple regex to detect verse references like "John 3:16" or "1 John 3:16"
+    const versePattern = /^((?:1st?|2nd?|3rd?|I{1,3}|1|2|3)?\s*[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$/;
+    if (!versePattern.test(reference.trim())) return;
+
+    setIsLookingUpVerse(true);
+    try {
+      const verseData = await apiRequest('/api/bible/lookup-verse', {
+        method: 'POST',
+        body: { reference: reference.trim() },
+      });
+      
+      if (verseData.text) {
+        form.setValue('scripture', verseData.text);
+        toast({
+          title: "Scripture Found",
+          description: `Automatically populated ${verseData.reference}`,
+        });
+      }
+    } catch (error) {
+      // Silently fail - don't show error toast for verse lookup failures
+      console.log('Verse lookup failed:', error);
+    } finally {
+      setIsLookingUpVerse(false);
+    }
+  };
+
   const handleSubmit = (data: FormData) => {
-    console.log('Form submitted with data:', data);
-    console.log('Form validation state:', form.formState);
-    console.log('Form errors:', form.formState.errors);
     saveMutation.mutate(data);
   };
 
@@ -388,13 +415,36 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Scripture Reference</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        value={field.value || ''}
-                        placeholder="e.g., John 3:16, Psalm 23:1-3" 
-                      />
-                    </FormControl>
+                    <div className="flex gap-2">
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          value={field.value || ''}
+                          placeholder="e.g., John 3:16, Psalm 23:1-3" 
+                          onBlur={(e) => {
+                            field.onBlur();
+                            lookupVerse(e.target.value);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              lookupVerse(field.value || '');
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => lookupVerse(field.value || '')}
+                        disabled={isLookingUpVerse || !field.value?.trim()}
+                        className="flex items-center gap-1 px-3"
+                      >
+                        <BookOpen className="h-4 w-4" />
+                        {isLookingUpVerse ? 'Looking up...' : 'Lookup'}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -410,10 +460,14 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       <Textarea 
                         {...field}
                         value={field.value || ''}
-                        placeholder="Enter the Scripture passage you're reflecting on..."
+                        placeholder={isLookingUpVerse ? "Looking up verse..." : "Enter the Scripture passage you're reflecting on..."}
                         rows={4}
+                        disabled={isLookingUpVerse}
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Enter a reference above (like "John 3:16") and click Lookup to auto-populate the verse text
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
