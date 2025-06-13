@@ -1695,6 +1695,27 @@ export default function AdminPortal() {
   const { toast } = useToast();
   const [selectedChurch, setSelectedChurch] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  // Get user role data for role-based access control
+  const { data: userRoleData } = useQuery({
+    queryKey: ["/api/auth/user-role"],
+    retry: false,
+  });
+
+  const { data: availableRoles } = useQuery({
+    queryKey: ["/api/auth/available-roles"],
+    retry: false,
+  });
+
+  // Helper function to check role permissions
+  const hasAnalyticsAccess = () => {
+    const currentRole = availableRoles?.currentRole || userRoleData?.role;
+    const authorizedRoles = [
+      'soapbox_owner', 'super_admin', 'admin', 'lead_pastor', 'pastor', 
+      'church_admin', 'minister', 'associate_pastor', 'youth_pastor'
+    ];
+    return authorizedRoles.includes(currentRole);
+  };
   
   // Dialog state management
   const [isChurchDialogOpen, setIsChurchDialogOpen] = useState(false);
@@ -2776,8 +2797,9 @@ export default function AdminPortal() {
                 </Card>
               </div>
 
-              {/* Engagement Analytics Section */}
-              <div className="space-y-6">
+              {/* Engagement Analytics Section - Show for authorized roles */}
+              {hasAnalyticsAccess() && (
+                <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
                   <Button
@@ -2929,6 +2951,8 @@ export default function AdminPortal() {
                   </CardContent>
                 </Card>
               </div>
+                </div>
+              )}
             </div>
           )}
 
