@@ -339,6 +339,72 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 )}
               />
 
+              {/* Contextual Awareness Panel */}
+              {contextualInfo && (
+                <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-blue-600" />
+                        Contextual AI Guidance
+                      </CardTitle>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowContextualAwareness(!showContextualAwareness)}
+                        className="text-blue-600 hover:text-blue-700 h-6 w-6 p-0"
+                      >
+                        {showContextualAwareness ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  
+                  {showContextualAwareness && (
+                    <CardContent className="pt-0 space-y-2 text-sm text-blue-800 dark:text-blue-200">
+                      <div className="flex items-start gap-2">
+                        <Calendar className="w-3 h-3 mt-0.5 text-blue-500" />
+                        <div>
+                          <span className="font-medium">Liturgical Season:</span> {contextualInfo.liturgicalSeason}
+                          {contextualInfo.seasonalFocus && (
+                            <div className="text-xs mt-1 text-blue-600 dark:text-blue-300">
+                              {contextualInfo.seasonalFocus}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {contextualInfo.spiritualThemes?.length > 0 && (
+                        <div className="flex items-start gap-2">
+                          <Lightbulb className="w-3 h-3 mt-0.5 text-blue-500" />
+                          <div>
+                            <span className="font-medium">Current Themes:</span> {contextualInfo.spiritualThemes.join(', ')}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {contextualInfo.worldEvents?.length > 0 && (
+                        <div className="flex items-start gap-2">
+                          <Globe className="w-3 h-3 mt-0.5 text-blue-500" />
+                          <div>
+                            <span className="font-medium">World Context:</span> {contextualInfo.worldEvents.length} spiritually relevant events considered
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+                        <Info className="w-3 h-3" />
+                        AI suggestions incorporate your mood, current events, and liturgical context
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              )}
+
               {/* AI Assistance Buttons */}
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -350,7 +416,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   className="flex items-center gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {isLoadingAI ? 'Generating...' : 'Get AI Suggestions'}
+                  {isLoadingAI ? 'Generating...' : contextualInfo ? 'Get Contextual AI Suggestions' : 'Get AI Suggestions'}
                 </Button>
                 <Button
                   type="button"
