@@ -2812,6 +2812,7 @@ export default function AdminPortal() {
               </div>
 
               {/* Engagement Analytics Section - Show for authorized roles */}
+              {console.log("Analytics access check:", hasAnalyticsAccess(), "Selected church:", selectedChurch)}
               {hasAnalyticsAccess() && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
