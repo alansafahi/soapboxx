@@ -89,7 +89,6 @@ export default function AppHeader() {
         { href: "/video-library", label: "Video Library", icon: PlayCircle },
         { href: "/sermon-studio", label: "Sermon Studio", icon: Sparkles, roles: ["pastor", "lead_pastor", "church_admin"] },
         { href: "/content-distribution", label: "Content Distribution", icon: Share2, roles: ["pastor", "lead_pastor", "church_admin"] },
-        { href: "/engagement-analytics", label: "Engagement Analytics", icon: Settings, roles: ["pastor", "lead_pastor", "church_admin"] },
         { href: "/pastoral-demo", label: "AI Content Demo", icon: Star }
       ]
     },
@@ -98,6 +97,7 @@ export default function AppHeader() {
       label: "Admin",
       items: [
         { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
+        { href: "/engagement-analytics", label: "Engagement Analytics", icon: BarChart3, roles: ["pastor", "lead_pastor", "church_admin", "admin", "system_admin", "super_admin"] },
         { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
       ]
     },
