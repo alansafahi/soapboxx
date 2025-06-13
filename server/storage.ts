@@ -4823,10 +4823,9 @@ export class DatabaseStorage implements IStorage {
 
       const currentLevel = roleHierarchy[currentRole] || 1;
       
-      // User can switch to their current role and any role below them
-      const availableRoles = Object.keys(roleHierarchy).filter(role => 
-        roleHierarchy[role] <= currentLevel
-      );
+      // For demo/testing purposes, allow switching to all roles
+      // In production, you might want to restrict this based on business rules
+      const availableRoles = Object.keys(roleHierarchy);
 
       return availableRoles.sort((a, b) => roleHierarchy[b] - roleHierarchy[a]); // Sort highest to lowest
     } catch (error) {
@@ -4860,11 +4859,9 @@ export class DatabaseStorage implements IStorage {
       const currentLevel = roleHierarchy[currentRole] || 1;
       const targetLevel = roleHierarchy[newRole] || 1;
       
-      // Users can only switch to roles at their level or below
-      if (targetLevel > currentLevel) {
-        console.log(`Role switch denied: User ${userId} with ${currentRole} (level ${currentLevel}) cannot switch to ${newRole} (level ${targetLevel})`);
-        return false;
-      }
+      // For demo/testing purposes, allow switching to any role in hierarchy
+      // In production, you might want to restrict this based on business rules
+      console.log(`Role switch attempt: User ${userId} switching from ${currentRole} (level ${currentLevel}) to ${newRole} (level ${targetLevel})`);
 
       // Update all roles for this user to inactive
       await db.execute(

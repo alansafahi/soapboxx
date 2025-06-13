@@ -2804,16 +2804,16 @@ export default function AdminPortal() {
             {hasAnalyticsAccess() && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
-                <Button
-                  onClick={() => window.location.href = '/engagement-analytics'}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <TrendingUp className="h-4 w-4" />
-                  View Full Analytics
-                </Button>
-              </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
+                  <Button
+                    onClick={() => window.location.href = '/engagement-analytics'}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                    View Full Analytics
+                  </Button>
+                </div>
               
               {/* Engagement Overview Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
