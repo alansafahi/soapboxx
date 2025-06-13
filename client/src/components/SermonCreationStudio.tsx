@@ -108,8 +108,8 @@ export default function SermonCreationStudio() {
     onSuccess: (data) => {
       setIllustrations(data);
       toast({
-        title: "Illustrations Ready",
-        description: `${data.length} compelling stories with presentation slides generated for ${targetAudience} audience.`
+        title: "Stories Ready",
+        description: `${data.length} compelling stories and visual aids generated for ${targetAudience} audience.`
       });
     },
     onError: (error) => {
@@ -288,7 +288,7 @@ export default function SermonCreationStudio() {
           </TabsTrigger>
           <TabsTrigger value="illustrations" className="flex items-center">
             <MessageSquare className="w-4 h-4 mr-2" />
-            Illustrations
+            Visual Aids
           </TabsTrigger>
           <TabsTrigger value="enhance" className="flex items-center">
             <Star className="w-4 h-4 mr-2" />
@@ -457,7 +457,7 @@ export default function SermonCreationStudio() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center">
                 <MessageSquare className="w-5 h-5 mr-2" />
-                Sermon Illustrations Library
+                Story & Content Library
               </CardTitle>
               <Button 
                 onClick={handleFindIllustrations}
@@ -469,7 +469,7 @@ export default function SermonCreationStudio() {
                 ) : (
                   <MessageSquare className="w-4 h-4 mr-2" />
                 )}
-                {illustrationsMutation.isPending ? 'Generating Stories & Slides...' : 'Generate Stories & Presentation Slides'}
+                {illustrationsMutation.isPending ? 'Generating Stories...' : 'Generate Stories'}
               </Button>
             </CardHeader>
             <CardContent>
