@@ -400,7 +400,7 @@ export default function SermonCreationStudio() {
           </TabsTrigger>
           <TabsTrigger value="enhanced" className="flex items-center">
             <CheckCircle className="w-4 h-4 mr-2" />
-            Enhanced
+            Completed
           </TabsTrigger>
         </TabsList>
 

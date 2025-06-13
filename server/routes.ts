@@ -633,7 +633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/sermon/enhance', isAuthenticated, async (req: any, res) => {
     try {
-      const { outline, research } = req.body;
+      const { outline, research, selectedStories } = req.body;
       const userId = req.user.claims.sub;
       
       // Allow all authenticated users to access sermon enhancement tools
@@ -641,6 +641,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
+
+      // Include selected stories in the enhancement prompt if provided
+      let storiesSection = '';
+      if (selectedStories && selectedStories.length > 0) {
+        storiesSection = `
+      
+      SELECTED STORIES TO INCORPORATE:
+      ${selectedStories.map((story, index) => `
+      Story ${index + 1}: ${story.title}
+      Content: ${story.story}
+      Application: ${story.application}
+      `).join('')}`;
+      }
 
       const prompt = `Review and enhance this sermon outline based on the research provided. 
       
@@ -654,14 +667,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       RESEARCH:
       Commentary: ${research.commentary}
-      Key Themes: ${research.keyThemes.join(', ')}
+      Key Themes: ${research.keyThemes.join(', ')}${storiesSection}
       
       Provide specific recommendations for:
       1. Clarity and flow improvements
       2. Engagement optimization
       3. Theological accuracy verification
       4. Transition enhancements
-      5. Call-to-action strengthening
+      5. Call-to-action strengthening${selectedStories && selectedStories.length > 0 ? '\n      6. Integration of selected stories into sermon flow' : ''}
       
       Please return your response as a JSON object with enhanced outline and recommendations:
       {
