@@ -48,6 +48,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [reflectionQuestions, setReflectionQuestions] = useState<string[]>([]);
   const [contextualInfo, setContextualInfo] = useState<any>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
+  const [selectedVersion, setSelectedVersion] = useState('NIV');
 
   const { toast } = useToast();
 
@@ -343,29 +344,46 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     }
   };
 
-  const lookupVerse = async (reference: string) => {
+  const lookupVerse = async (reference: string, forceOverwrite = false) => {
     if (!reference.trim()) return;
     
     // Simple regex to detect verse references like "John 3:16" or "1 John 3:16"
     const versePattern = /^((?:1st?|2nd?|3rd?|I{1,3}|1|2|3)?\s*[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$/;
     if (!versePattern.test(reference.trim())) return;
 
+    // Check if there's existing text and user hasn't explicitly requested overwrite
+    const currentScripture = form.getValues('scripture');
+    if (currentScripture && !forceOverwrite) {
+      const shouldOverwrite = window.confirm(
+        `There's already text in the Scripture field. Do you want to replace it with the looked up verse?`
+      );
+      if (!shouldOverwrite) return;
+    }
+
     setIsLookingUpVerse(true);
     try {
       const verseData = await apiRequest('/api/bible/lookup-verse', {
         method: 'POST',
-        body: { reference: reference.trim() },
+        body: { 
+          reference: reference.trim(),
+          version: selectedVersion 
+        },
       });
       
       if (verseData.text) {
         form.setValue('scripture', verseData.text);
         toast({
           title: "Scripture Found",
-          description: `Automatically populated ${verseData.reference}`,
+          description: `Populated ${verseData.reference} (${selectedVersion})`,
         });
       }
     } catch (error) {
-      // Silently fail - don't show error toast for verse lookup failures
+      // Show helpful error message
+      toast({
+        title: "Verse Not Found",
+        description: `Could not find "${reference}" in our database. Please enter the verse text manually.`,
+        variant: "destructive",
+      });
       console.log('Verse lookup failed:', error);
     } finally {
       setIsLookingUpVerse(false);
@@ -373,6 +391,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   };
 
   const handleSubmit = (data: FormData) => {
+    console.log('Form submission triggered with data:', data);
+    console.log('Form validation errors:', form.formState.errors);
     saveMutation.mutate(data);
   };
 
@@ -409,46 +429,67 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="scriptureReference"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Scripture Reference</FormLabel>
-                    <div className="flex gap-2">
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          value={field.value || ''}
-                          placeholder="e.g., John 3:16, Psalm 23:1-3" 
-                          onBlur={(e) => {
-                            field.onBlur();
-                            lookupVerse(e.target.value);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              lookupVerse(field.value || '');
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => lookupVerse(field.value || '')}
-                        disabled={isLookingUpVerse || !field.value?.trim()}
-                        className="flex items-center gap-1 px-3"
-                      >
-                        <BookOpen className="h-4 w-4" />
-                        {isLookingUpVerse ? 'Looking up...' : 'Lookup'}
-                      </Button>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="scriptureReference"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Scripture Reference</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            value={field.value || ''}
+                            placeholder="e.g., John 3:16, Psalm 23:1-3" 
+                            onBlur={(e) => {
+                              field.onBlur();
+                              if (e.target.value.trim()) {
+                                lookupVerse(e.target.value);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                lookupVerse(field.value || '', true);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => lookupVerse(field.value || '', true)}
+                          disabled={isLookingUpVerse || !field.value?.trim()}
+                          className="flex items-center gap-1 px-3"
+                        >
+                          <BookOpen className="h-4 w-4" />
+                          {isLookingUpVerse ? 'Looking up...' : 'Lookup'}
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormItem>
+                  <FormLabel>Bible Version</FormLabel>
+                  <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select version" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="NIV">NIV - New International Version</SelectItem>
+                      <SelectItem value="ESV">ESV - English Standard Version</SelectItem>
+                      <SelectItem value="KJV">KJV - King James Version</SelectItem>
+                      <SelectItem value="NLT">NLT - New Living Translation</SelectItem>
+                      <SelectItem value="NASB">NASB - New American Standard</SelectItem>
+                      <SelectItem value="CSB">CSB - Christian Standard Bible</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              </div>
 
               <FormField
                 control={form.control}
