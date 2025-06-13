@@ -39,7 +39,21 @@ export default function ContentDistributionHub() {
   const [targetAudiences, setTargetAudiences] = useState<string[]>([]);
   const [distributionPackage, setDistributionPackage] = useState<DistributionPackage | null>(null);
   const [activeTab, setActiveTab] = useState("generate");
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
+  const [socialCredentials, setSocialCredentials] = useState<Record<string, any>>({});
   const { toast } = useToast();
+
+  // Fetch existing social media credentials
+  const { data: credentials } = useQuery({
+    queryKey: ['/api/social-credentials'],
+    enabled: true,
+  });
+
+  useEffect(() => {
+    if (credentials) {
+      setSocialCredentials(credentials);
+    }
+  }, [credentials]);
 
   // Check for sermon data from completed sermons
   useEffect(() => {
@@ -135,6 +149,53 @@ export default function ContentDistributionHub() {
     }
   });
 
+  // Save social media credentials
+  const saveCredentialsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('/api/social-credentials', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      setShowCredentialsDialog(false);
+      toast({
+        title: "Credentials saved",
+        description: "Social media credentials have been securely stored.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to save credentials",
+        description: error.message || "Could not save social media credentials.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Direct publish to social media
+  const directPublishMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('/api/social-media/publish', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Published successfully!",
+        description: `Content published to ${data.platform}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Publishing failed",
+        description: error.message || "Failed to publish content.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleGenerate = () => {
     if (!sermonTitle || !sermonSummary) {
       toast({
@@ -153,12 +214,20 @@ export default function ContentDistributionHub() {
     });
   };
 
-  const copyToClipboard = (content: string) => {
-    navigator.clipboard.writeText(content);
-    toast({
-      title: "Copied",
-      description: "Content copied to clipboard."
-    });
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied to clipboard",
+        description: "Content has been copied and is ready to paste."
+      });
+    } catch (err) {
+      toast({
+        title: "Copy failed",
+        description: "Unable to copy content to clipboard.",
+        variant: "destructive"
+      });
+    }
   };
 
   const addKeyPoint = () => {
@@ -196,6 +265,38 @@ export default function ContentDistributionHub() {
     bulletin: <FileText className="w-4 h-4" />,
     study: <BookOpen className="w-4 h-4" />
   };
+
+  // Handle direct publishing to social media
+  const handleDirectPublish = (platform: string, content: string, hashtags?: string[]) => {
+    const credentialsKey = `${platform}_credentials`;
+    if (!socialCredentials[credentialsKey]) {
+      toast({
+        title: "Setup Required",
+        description: `Please configure your ${platform} credentials first.`,
+        variant: "destructive"
+      });
+      setShowCredentialsDialog(true);
+      return;
+    }
+
+    const fullContent = hashtags ? `${content}\n\n${hashtags.join(' ')}` : content;
+    
+    directPublishMutation.mutate({
+      platform,
+      content: fullContent,
+      credentialsId: socialCredentials[credentialsKey].id
+    });
+  };
+
+  // Handle credentials management
+  const handleSaveCredentials = (platform: string, credentials: any) => {
+    saveCredentialsMutation.mutate({
+      platform,
+      ...credentials
+    });
+  };
+
+
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -354,6 +455,20 @@ export default function ContentDistributionHub() {
                             >
                               <Copy className="w-4 h-4 mr-1" />
                               Copy
+                            </Button>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => handleDirectPublish(content.platform, content.content, content.hashtags)}
+                              disabled={directPublishMutation.isPending}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              {directPublishMutation.isPending ? (
+                                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                              ) : (
+                                <Send className="w-4 h-4 mr-1" />
+                              )}
+                              Publish to {content.platform.charAt(0).toUpperCase() + content.platform.slice(1)}
                             </Button>
                           </div>
                         </div>
