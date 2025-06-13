@@ -109,8 +109,31 @@ export default function RoleSwitcher() {
     }
   });
 
-  if (isLoading || !roleData || !roleData.canSwitch) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 p-2 text-sm">
+        <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
+        Loading roles...
+      </div>
+    );
+  }
+
+  if (!roleData) {
+    return (
+      <div className="flex items-center gap-2 p-2 text-sm text-gray-500">
+        <Settings className="h-4 w-4" />
+        Role switching unavailable
+      </div>
+    );
+  }
+
+  if (!roleData.canSwitch) {
+    return (
+      <div className="flex items-center gap-2 p-2 text-sm text-gray-500">
+        <Shield className="h-4 w-4" />
+        Current: {roleDisplayNames[roleData.currentRole] || roleData.currentRole}
+      </div>
+    );
   }
 
   const currentRoleDisplay = roleDisplayNames[roleData.currentRole] || roleData.currentRole;
