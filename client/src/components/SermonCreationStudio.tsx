@@ -18,7 +18,8 @@ import { SermonIllustration } from "@shared/schema";
 import { 
   Search, Lightbulb, BookOpen, MessageSquare, Star, 
   Clock, Target, RefreshCw, Save, Download, Share2,
-  ChevronRight, CheckCircle, AlertCircle, Loader2
+  ChevronRight, CheckCircle, AlertCircle, Loader2,
+  ChevronDown, FileText, FileImage, FileDown, Code
 } from "lucide-react";
 
 interface SermonOutline {
@@ -951,7 +952,7 @@ export default function SermonCreationStudio() {
                       PDF Document (.pdf)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleExport('txt')}>
-                      <File className="w-4 h-4 mr-2" />
+                      <FileDown className="w-4 h-4 mr-2" />
                       Text File (.txt)
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleExport('json')}>
