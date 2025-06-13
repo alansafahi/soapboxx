@@ -358,7 +358,7 @@ export default function SermonCreationStudio() {
                       {currentResearch.practicalApplications.map((app, idx) => (
                         <li key={idx} className="text-sm text-gray-700 flex items-start">
                           <ChevronRight className="w-4 h-4 mr-1 mt-0.5 text-gray-500" />
-                          {app}
+                          {typeof app === 'string' ? app : app.title || app.details || JSON.stringify(app)}
                         </li>
                       ))}
                     </ul>
