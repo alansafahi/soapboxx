@@ -2697,10 +2697,12 @@ Format your response as JSON with the following structure:
         return res.status(400).json({ message: 'Scripture reference is required' });
       }
 
-      console.log(`Verse lookup for user ${req.user.id}: ${reference}`);
+      console.log(`[Bible Lookup] Starting lookup for user ${req.user.id}`);
+      console.log(`[Bible Lookup] Reference: "${reference}"`);
+      console.log(`[Bible Lookup] Version: "${version}"`);
 
       // First check if this is a common verse we can provide immediately
-      const commonVerses = {
+      const commonVerses: Record<string, { reference: string; text: string; version: string }> = {
         'proverbs 13:1': {
           reference: 'Proverbs 13:1',
           text: 'A wise son listens to his father\'s instruction, but a scoffer doesn\'t listen to rebuke.',
@@ -2739,54 +2741,31 @@ Format your response as JSON with the following structure:
         });
       }
 
-      // Try external Bible API service
-      const { lookupBibleVerse } = await import('./bible-api');
-      
-      const apiResult = await lookupBibleVerse(reference, version);
-      if (apiResult) {
-        console.log(`[Bible Lookup] External API success: ${apiResult.reference}`);
-        return res.json({
-          success: true,
-          verse: {
-            reference: apiResult.reference,
-            text: apiResult.text,
-            version: apiResult.version
-          }
-        });
-      }
-
-      // Fallback to local database with smart matching
-      
-      // Try exact match in local database
-      const exactVerse = await storage.lookupBibleVerse(reference);
-      if (exactVerse) {
-        return res.json({
-          success: true,
-          verse: {
-            reference: exactVerse.reference,
-            text: exactVerse.text,
-            version: version
-          }
-        });
-      }
-
-      // Try broader search in local database
+      // Try local database with smart matching
       const verses = await storage.getBibleVerses();
       
       let matchingVerse = verses.find(v => {
         const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
-        return verseRef.startsWith(normalizedRef) || normalizedRef.startsWith(verseRef);
+        return verseRef === normalizedReference;
       });
+
+      if (!matchingVerse) {
+        matchingVerse = verses.find(v => {
+          const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
+          return verseRef.startsWith(normalizedReference) || normalizedReference.startsWith(verseRef);
+        });
+      }
       
       if (!matchingVerse) {
         matchingVerse = verses.find(v => {
           const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
-          return verseRef.includes(normalizedRef) || normalizedRef.includes(verseRef);
+          return verseRef.includes(normalizedReference) || normalizedReference.includes(verseRef);
         });
       }
 
       if (matchingVerse) {
-        res.json({
+        console.log(`[Bible Lookup] Found local verse: ${matchingVerse.reference}`);
+        return res.json({
           success: true,
           verse: {
             reference: matchingVerse.reference,
@@ -2794,13 +2773,14 @@ Format your response as JSON with the following structure:
             version: version
           }
         });
-      } else {
-        // Provide helpful error message
-        console.log(`[Bible Lookup] No verse found in any source for: "${reference}"`);
-        res.status(404).json({ 
-          message: `Scripture reference "${reference}" not found. Please check the format (e.g., "John 3:16") or enter the verse text manually.`
-        });
       }
+
+      // Provide helpful error message
+      console.log(`[Bible Lookup] No verse found for: "${reference}"`);
+      res.status(404).json({ 
+        message: `Verse not found: ${reference}. Please enter the verse text manually in the field below.`,
+        suggestion: "You can copy and paste the verse text from your preferred Bible translation."
+      });
     } catch (error) {
       console.error('Bible lookup error:', error);
       res.status(500).json({ 
