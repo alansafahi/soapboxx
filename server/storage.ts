@@ -4759,9 +4759,26 @@ export class DatabaseStorage implements IStorage {
   // Admin Analytics Methods
   async getUserRole(userId: string): Promise<string> {
     try {
-      // Check for admin/owner roles first
+      // Check for admin/owner roles first in user_roles table
       const adminRoleResult = await db.execute(
-        sql`SELECT role FROM user_roles WHERE user_id = ${userId} AND is_active = true LIMIT 1`
+        sql`SELECT role FROM user_roles WHERE user_id = ${userId} AND is_active = true ORDER BY 
+            CASE role 
+              WHEN 'soapbox_owner' THEN 14
+              WHEN 'super_admin' THEN 13
+              WHEN 'admin' THEN 12
+              WHEN 'lead_pastor' THEN 11
+              WHEN 'pastor' THEN 10
+              WHEN 'church_admin' THEN 9
+              WHEN 'minister' THEN 8
+              WHEN 'associate_pastor' THEN 7
+              WHEN 'youth_pastor' THEN 6
+              WHEN 'worship_leader' THEN 5
+              WHEN 'deacon' THEN 4
+              WHEN 'elder' THEN 3
+              WHEN 'member' THEN 2
+              WHEN 'new_member' THEN 1
+              ELSE 0
+            END DESC LIMIT 1`
       );
 
       if (adminRoleResult.rows.length > 0) {

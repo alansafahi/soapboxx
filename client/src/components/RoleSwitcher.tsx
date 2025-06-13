@@ -134,8 +134,8 @@ export default function RoleSwitcher() {
     );
   }
 
-  // On production sites, only show role switcher to SoapBox Owner
-  if (!isDemoSite && roleData.currentRole !== 'soapbox_owner') {
+  // Allow role switching for SoapBox Owner and admin roles on all sites
+  if (!isDemoSite && !['soapbox_owner', 'super_admin', 'admin'].includes(roleData.currentRole)) {
     return null;
   }
 
