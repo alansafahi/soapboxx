@@ -461,10 +461,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 />
 
                 <FormItem>
-                  <FormLabel>Look Up With</FormLabel>
-                  <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+                  <Select value={selectedVersion} onValueChange={(value) => {
+                    setSelectedVersion(value);
+                    // Auto-lookup when version is changed if there's a reference
+                    const reference = form.getValues('scriptureReference');
+                    if (reference?.trim()) {
+                      lookupVerse(reference, true);
+                    }
+                  }}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select version" />
+                      <SelectValue placeholder="Look Up With..." />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="NIV">NIV - New International Version</SelectItem>
@@ -494,7 +500,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       />
                     </FormControl>
                     <p className="text-xs text-muted-foreground">
-                      Enter a reference above (like "John 3:16") and click Lookup to auto-populate the verse text
+                      Enter a reference above (like "John 3:16") and select a Bible version to auto-populate the verse text
                     </p>
                     <FormMessage />
                   </FormItem>
