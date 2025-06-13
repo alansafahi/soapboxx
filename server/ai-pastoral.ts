@@ -10,29 +10,66 @@ export interface SoapSuggestion {
   prayer: string;
 }
 
+export interface ContextualInfo {
+  userMood?: string;
+  liturgicalSeason?: string;
+  upcomingHolidays?: string[];
+  currentEvents?: string[];
+  personalContext?: string;
+}
+
 export async function generateSoapSuggestions(
   scripture: string,
   scriptureReference: string,
-  userContext?: string
+  contextualInfo?: ContextualInfo
 ): Promise<SoapSuggestion> {
   try {
-    const prompt = `As a pastoral AI assistant, help create meaningful spiritual reflections for this Scripture passage:
+    // Build contextual awareness
+    const currentDate = new Date();
+    const liturgicalContext = getLiturgicalContext(currentDate);
+    const seasonalContext = getSeasonalContext(currentDate);
+    
+    let contextPrompt = '';
+    
+    if (contextualInfo?.userMood) {
+      contextPrompt += `User's current mood: ${contextualInfo.userMood}\n`;
+    }
+    
+    if (liturgicalContext.season) {
+      contextPrompt += `Liturgical season: ${liturgicalContext.season}\n`;
+    }
+    
+    if (liturgicalContext.upcomingHolidays.length > 0) {
+      contextPrompt += `Upcoming Christian holidays: ${liturgicalContext.upcomingHolidays.join(', ')}\n`;
+    }
+    
+    if (seasonalContext) {
+      contextPrompt += `Seasonal context: ${seasonalContext}\n`;
+    }
+    
+    if (contextualInfo?.currentEvents && contextualInfo.currentEvents.length > 0) {
+      contextPrompt += `Current world context: ${contextualInfo.currentEvents.join(', ')}\n`;
+    }
+    
+    if (contextualInfo?.personalContext) {
+      contextPrompt += `Personal context: ${contextualInfo.personalContext}\n`;
+    }
+
+    const prompt = `As a pastoral AI assistant, help create meaningful spiritual reflections for this Scripture passage, taking into account the current context:
 
 Scripture: ${scripture}
 Reference: ${scriptureReference}
-${userContext ? `User Context: ${userContext}` : ''}
 
-Please provide thoughtful suggestions for each S.O.A.P. component in JSON format:
+Current Context:
+${contextPrompt}
 
-1. Observation: What does this passage say? Key themes, context, and meaning.
-2. Application: How can this apply to daily life? Practical, personal applications.
-3. Prayer: A heartfelt prayer response to this Scripture.
+Please provide thoughtful suggestions for each S.O.A.P. component that are sensitive to the user's current situation and the broader context. Consider how this Scripture speaks to their mood, the liturgical season, and current events.
 
 Respond with JSON in this format:
 {
-  "observation": "Your observation here",
-  "application": "Your application here", 
-  "prayer": "Your prayer here"
+  "observation": "Your contextually-aware observation here",
+  "application": "Your contextually-relevant application here", 
+  "prayer": "Your contextually-sensitive prayer here"
 }`;
 
     const response = await openai.chat.completions.create({
@@ -40,7 +77,7 @@ Respond with JSON in this format:
       messages: [
         {
           role: "system",
-          content: "You are a wise, caring pastoral assistant who helps people connect deeply with Scripture. Provide thoughtful, biblically sound, and personally meaningful spiritual guidance."
+          content: "You are a wise, caring pastoral assistant who helps people connect deeply with Scripture. Provide thoughtful, biblically sound, and personally meaningful spiritual guidance that is sensitive to current circumstances, liturgical seasons, and world events. Tailor your responses to the user's emotional state and the broader context of their life and world."
         },
         {
           role: "user",
@@ -48,7 +85,7 @@ Respond with JSON in this format:
         }
       ],
       response_format: { type: "json_object" },
-      max_tokens: 800,
+      max_tokens: 1000,
       temperature: 0.7
     });
 
@@ -62,6 +99,95 @@ Respond with JSON in this format:
   } catch (error) {
     console.error('Error generating SOAP suggestions:', error);
     throw new Error('Failed to generate AI suggestions. Please try again.');
+  }
+}
+
+// Helper function to determine liturgical season and upcoming holidays
+function getLiturgicalContext(date: Date) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // JavaScript months are 0-indexed
+  const day = date.getDate();
+  
+  // Calculate Easter date (simplified algorithm)
+  const easter = calculateEaster(year);
+  const ashWednesday = new Date(easter.getTime() - 46 * 24 * 60 * 60 * 1000);
+  const palmSunday = new Date(easter.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const pentecost = new Date(easter.getTime() + 49 * 24 * 60 * 60 * 1000);
+  
+  const currentDate = new Date(year, month - 1, day);
+  const advent = new Date(year, 11, 25); // Christmas
+  const adventStart = new Date(advent.getTime() - (advent.getDay() + 21) * 24 * 60 * 60 * 1000);
+  
+  let season = '';
+  const upcomingHolidays: string[] = [];
+  
+  // Determine current liturgical season
+  if (currentDate >= adventStart && currentDate < new Date(year, 11, 25)) {
+    season = 'Advent';
+  } else if (currentDate >= new Date(year, 11, 25) && currentDate <= new Date(year + 1, 0, 6)) {
+    season = 'Christmas';
+  } else if (currentDate >= ashWednesday && currentDate < easter) {
+    season = 'Lent';
+  } else if (currentDate >= easter && currentDate < pentecost) {
+    season = 'Easter';
+  } else {
+    season = 'Ordinary Time';
+  }
+  
+  // Check for upcoming holidays within the next 30 days
+  const thirtyDaysOut = new Date(currentDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+  
+  const holidays = [
+    { date: ashWednesday, name: 'Ash Wednesday' },
+    { date: palmSunday, name: 'Palm Sunday' },
+    { date: easter, name: 'Easter' },
+    { date: pentecost, name: 'Pentecost' },
+    { date: new Date(year, 11, 25), name: 'Christmas' },
+    { date: new Date(year, 0, 1), name: 'New Year' },
+    { date: new Date(year, 9, 31), name: 'All Saints Day' },
+  ];
+  
+  holidays.forEach(holiday => {
+    if (holiday.date >= currentDate && holiday.date <= thirtyDaysOut) {
+      upcomingHolidays.push(holiday.name);
+    }
+  });
+  
+  return { season, upcomingHolidays };
+}
+
+// Simplified Easter calculation
+function calculateEaster(year: number): Date {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  
+  return new Date(year, month - 1, day);
+}
+
+// Helper function to get seasonal context
+function getSeasonalContext(date: Date): string {
+  const month = date.getMonth() + 1;
+  
+  if (month >= 3 && month <= 5) {
+    return 'Spring - season of new life and growth';
+  } else if (month >= 6 && month <= 8) {
+    return 'Summer - season of abundance and rest';
+  } else if (month >= 9 && month <= 11) {
+    return 'Fall - season of harvest and gratitude';
+  } else {
+    return 'Winter - season of reflection and preparation';
   }
 }
 

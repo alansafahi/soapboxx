@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, BookOpen, Eye, Users, Lightbulb, Save, Sparkles, Calendar, Brain, Wand2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Eye, Users, Lightbulb, Save, Sparkles, Calendar, Brain, Wand2, Globe, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertSoapEntrySchema, type SoapEntry } from "@shared/schema";
@@ -46,6 +46,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<any>(null);
   const [reflectionQuestions, setReflectionQuestions] = useState<string[]>([]);
+  const [contextualInfo, setContextualInfo] = useState<any>(null);
+  const [showContextualAwareness, setShowContextualAwareness] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -70,6 +72,30 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
   });
+
+  // Fetch contextual information for AI enhancement
+  const { data: worldEvents } = useQuery({
+    queryKey: ['/api/context/world-events'],
+    staleTime: 6 * 60 * 60 * 1000, // 6 hours
+  });
+
+  const { data: liturgicalContext } = useQuery({
+    queryKey: ['/api/context/liturgical'],
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+  });
+
+  // Load contextual information on mount
+  useEffect(() => {
+    if (worldEvents && liturgicalContext) {
+      setContextualInfo({
+        worldEvents: worldEvents.events || [],
+        spiritualThemes: worldEvents.spiritualThemes || [],
+        liturgicalSeason: liturgicalContext.currentSeason,
+        upcomingHolidays: liturgicalContext.upcomingHolidays || [],
+        seasonalFocus: liturgicalContext.seasonalFocus
+      });
+    }
+  }, [worldEvents, liturgicalContext]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -118,19 +144,31 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsLoadingAI(true);
     try {
+      // Build contextual information for AI
+      const contextualEvents = contextualInfo?.worldEvents?.map((event: any) => 
+        `${event.title}: ${event.description}`
+      ) || [];
+
+      const requestBody = {
+        scripture: currentData.scripture,
+        scriptureReference: currentData.scriptureReference,
+        userMood: currentData.moodTag,
+        currentEvents: contextualEvents,
+        personalContext: contextualInfo ? 
+          `Liturgical season: ${contextualInfo.liturgicalSeason}. ${contextualInfo.seasonalFocus}. Current spiritual themes: ${contextualInfo.spiritualThemes?.join(', ')}` 
+          : undefined
+      };
+
       const suggestions = await apiRequest('/api/soap/ai/suggestions', {
         method: 'POST',
-        body: {
-          scripture: currentData.scripture,
-          scriptureReference: currentData.scriptureReference,
-        },
+        body: requestBody,
       });
       
       setAiSuggestions(suggestions);
       form.setValue('aiAssisted', true);
       toast({
-        title: "AI Suggestions Generated",
-        description: "Review the suggestions below and apply what resonates with you.",
+        title: "Contextual AI Suggestions Generated",
+        description: "Suggestions include your mood, current events, and liturgical season.",
       });
     } catch (error) {
       toast({

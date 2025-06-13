@@ -6,6 +6,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
+import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -4423,13 +4424,19 @@ Return JSON with this exact structure:
   // AI-powered S.O.A.P. assistance endpoints
   app.post('/api/soap/ai/suggestions', isAuthenticated, async (req: any, res) => {
     try {
-      const { scripture, scriptureReference, userContext } = req.body;
+      const { scripture, scriptureReference, userMood, currentEvents, personalContext } = req.body;
 
       if (!scripture || !scriptureReference) {
         return res.status(400).json({ message: 'Scripture and reference are required' });
       }
 
-      const suggestions = await generateSoapSuggestions(scripture, scriptureReference, userContext);
+      const contextualInfo = {
+        userMood,
+        currentEvents: currentEvents || [],
+        personalContext
+      };
+
+      const suggestions = await generateSoapSuggestions(scripture, scriptureReference, contextualInfo);
       res.json(suggestions);
     } catch (error) {
       console.error('Error generating S.O.A.P. suggestions:', error);
@@ -4468,6 +4475,113 @@ Return JSON with this exact structure:
       res.status(500).json({ message: error.message || 'Failed to generate questions' });
     }
   });
+
+  // World events context endpoints
+  app.get('/api/context/world-events', isAuthenticated, async (req: any, res) => {
+    try {
+      const events = await getCachedWorldEvents();
+      const spiritualThemes = await getSpiritualResponseToEvents(events);
+      
+      res.json({
+        events: events.slice(0, 5), // Return top 5 most relevant events
+        spiritualThemes,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error fetching world events context:', error);
+      res.status(500).json({ message: 'Failed to fetch current events context' });
+    }
+  });
+
+  app.get('/api/context/liturgical', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const day = currentDate.getDate();
+      
+      // Simple liturgical calendar calculation
+      const easter = calculateEaster(year);
+      const ashWednesday = new Date(easter.getTime() - 46 * 24 * 60 * 60 * 1000);
+      const palmSunday = new Date(easter.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const pentecost = new Date(easter.getTime() + 49 * 24 * 60 * 60 * 1000);
+      
+      const current = new Date(year, month - 1, day);
+      const advent = new Date(year, 11, 25);
+      const adventStart = new Date(advent.getTime() - (advent.getDay() + 21) * 24 * 60 * 60 * 1000);
+      
+      let season = '';
+      const upcomingHolidays: string[] = [];
+      
+      if (current >= adventStart && current < new Date(year, 11, 25)) {
+        season = 'Advent';
+      } else if (current >= new Date(year, 11, 25) && current <= new Date(year + 1, 0, 6)) {
+        season = 'Christmas';
+      } else if (current >= ashWednesday && current < easter) {
+        season = 'Lent';
+      } else if (current >= easter && current < pentecost) {
+        season = 'Easter';
+      } else {
+        season = 'Ordinary Time';
+      }
+      
+      // Check for upcoming holidays within 30 days
+      const thirtyDaysOut = new Date(current.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const holidays = [
+        { date: ashWednesday, name: 'Ash Wednesday' },
+        { date: palmSunday, name: 'Palm Sunday' },
+        { date: easter, name: 'Easter' },
+        { date: pentecost, name: 'Pentecost' },
+        { date: new Date(year, 11, 25), name: 'Christmas' },
+        { date: new Date(year + 1, 0, 1), name: 'New Year' },
+      ];
+      
+      holidays.forEach(holiday => {
+        if (holiday.date >= current && holiday.date <= thirtyDaysOut) {
+          upcomingHolidays.push(holiday.name);
+        }
+      });
+      
+      res.json({
+        currentSeason: season,
+        upcomingHolidays,
+        seasonalFocus: getSeasonalFocus(season)
+      });
+    } catch (error) {
+      console.error('Error fetching liturgical context:', error);
+      res.status(500).json({ message: 'Failed to fetch liturgical context' });
+    }
+  });
+
+  // Helper function for Easter calculation
+  function calculateEaster(year: number): Date {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    
+    return new Date(year, month - 1, day);
+  }
+
+  function getSeasonalFocus(season: string): string {
+    switch (season) {
+      case 'Advent': return 'Preparation, anticipation, and hope';
+      case 'Christmas': return 'Incarnation, peace, and joy';
+      case 'Lent': return 'Repentance, fasting, and spiritual discipline';
+      case 'Easter': return 'Resurrection, new life, and victory';
+      default: return 'Growth in faith and Christian living';
+    }
+  }
 
   app.delete('/api/soap/:id/feature', isAuthenticated, async (req: any, res) => {
     try {
