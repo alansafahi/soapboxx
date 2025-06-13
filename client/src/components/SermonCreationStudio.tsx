@@ -960,81 +960,6 @@ export default function SermonCreationStudio() {
             </Card>
           )}
         </TabsContent>
-      </Tabs>
-
-      {/* Action Buttons */}
-      {(currentOutline || currentResearch) && (
-        <Card className="bg-gray-50">
-          <CardContent className="p-4">
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-2">
-                <Badge variant="outline" className="bg-white">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Time Saved: ~6 hours
-                </Badge>
-                <Badge variant="outline" className="bg-white">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  AI-Powered Research
-                </Badge>
-              </div>
-              <div className="flex space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleSaveDraft}
-                  disabled={saveDraftMutation.isPending}
-                >
-                  {saveDraftMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
-                  Save Draft
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      disabled={exportMutation.isPending}
-                    >
-                      {exportMutation.isPending ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Download className="w-4 h-4 mr-2" />
-                      )}
-                      Export
-                      <ChevronDown className="w-3 h-3 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleExport('docx')}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      Word Document (.docx)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('pdf')}>
-                      <FileImage className="w-4 h-4 mr-2" />
-                      PDF Document (.pdf)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('txt')}>
-                      <FileDown className="w-4 h-4 mr-2" />
-                      Text File (.txt)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('json')}>
-                      <Code className="w-4 h-4 mr-2" />
-                      JSON Data (.json)
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button variant="outline" size="sm">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
         {/* Saved Sermons Tab */}
         <TabsContent value="saved" className="space-y-4">
@@ -1138,6 +1063,80 @@ export default function SermonCreationStudio() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Action Buttons */}
+      {(currentOutline || currentResearch) && (
+        <Card className="bg-gray-50">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div className="flex space-x-2">
+                <Badge variant="outline" className="bg-white">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Time Saved: ~6 hours
+                </Badge>
+                <Badge variant="outline" className="bg-white">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  AI-Powered Research
+                </Badge>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSaveDraft}
+                  disabled={saveDraftMutation.isPending}
+                >
+                  {saveDraftMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Save Draft
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={exportMutation.isPending}
+                    >
+                      {exportMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
+                      Export
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleExport('docx')}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Word Document (.docx)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                      <FileImage className="w-4 h-4 mr-2" />
+                      PDF Document (.pdf)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('txt')}>
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Text File (.txt)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('json')}>
+                      <Code className="w-4 h-4 mr-2" />
+                      JSON Data (.json)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button variant="outline" size="sm">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
