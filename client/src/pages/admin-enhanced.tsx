@@ -17,11 +17,13 @@ import {
   Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, 
   BookOpen, Video, Music, FileText, Edit, Trash2, Eye, Book, AlertTriangle, UserCheck, Tag, Flag, CheckCircle, XCircle, 
   Filter, Search, Send, UserPlus, Calendar as CalendarIcon, UserCheck2, ClipboardList, Archive, Headphones, PlayCircle, 
-  User, Home, MapPinIcon, UserCog, HeartHandshake, Star, TrendingUp, PanelLeftClose, PanelLeftOpen, HelpCircle, Bell 
+  User, Home, MapPinIcon, UserCog, HeartHandshake, Star, TrendingUp, PanelLeftClose, PanelLeftOpen, HelpCircle, Bell,
+  Edit3, Mic, Share2, Download
 } from "lucide-react";
 import { insertChurchSchema, insertEventSchema, insertDevotionalSchema } from "@shared/schema";
 import { SimpleMemberDirectory } from "@/components/SimpleMemberDirectory";
 import { SessionsManagement } from "@/components/SessionsManagement";
+import SermonCreationStudio from "@/components/SermonCreationStudio";
 
 const churchFormSchema = insertChurchSchema;
 const eventFormSchema = insertEventSchema;
@@ -485,10 +487,29 @@ export default function EnhancedAdminPortal() {
             </div>
           )}
 
-          {/* Ministry Tab - Sessions & Counseling */}
+          {/* Ministry Tab - Comprehensive Ministry Management */}
           {activeTab === "ministry" && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Ministry Management</h2>
+              
+              {/* Sermon Management System - Featured Section */}
+              <Card className="border-2 border-blue-200 bg-blue-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <Mic className="h-6 w-6" />
+                    AI-Powered Sermon Creation Studio
+                    <Badge variant="outline" className="ml-2 bg-blue-100 text-blue-700">Pastor Tools</Badge>
+                  </CardTitle>
+                  <p className="text-blue-700 text-sm">
+                    Complete sermon preparation with AI research, outline generation, story suggestions, and content enhancement
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <SermonCreationStudio />
+                </CardContent>
+              </Card>
+
+              {/* Other Ministry Tools */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="p-6">
                   <CardHeader>

@@ -20,7 +20,7 @@ import {
   Clock, Target, RefreshCw, Save, Download, Share2,
   ChevronRight, CheckCircle, AlertCircle, Loader2,
   ChevronDown, FileText, FileImage, FileDown, Code,
-  Archive, Edit3
+  Archive, Edit3, Eye
 } from "lucide-react";
 
 interface SermonOutline {
@@ -1184,6 +1184,135 @@ export default function SermonCreationStudio() {
                   <Edit3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <p>No sermon drafts yet</p>
                   <p className="text-sm">Create a sermon outline or research to automatically save drafts</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Completed Sermons Tab */}
+        <TabsContent value="completed" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2" />
+                Completed Sermons
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {completedLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                  Loading completed sermons...
+                </div>
+              ) : completedSermons && completedSermons.length > 0 ? (
+                <div className="space-y-4">
+                  {completedSermons.map((sermon: any) => {
+                    const parsedContent = typeof sermon.content === 'string' ? JSON.parse(sermon.content) : sermon.content;
+                    return (
+                      <Card key={sermon.id} className="border border-green-200 bg-green-50/50 hover:border-green-300 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-semibold text-lg">{sermon.title}</h3>
+                                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Completed
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-2">
+                                Completed: {new Date(sermon.publishedAt).toLocaleDateString()}
+                              </p>
+                              {parsedContent.outline && (
+                                <p className="text-sm text-gray-700 mb-2">
+                                  <strong>Theme:</strong> {parsedContent.outline.theme || 'Not specified'}
+                                </p>
+                              )}
+                              {parsedContent.outline && parsedContent.outline.mainPoints && (
+                                <p className="text-sm text-gray-700 mb-2">
+                                  <strong>Main Points:</strong> {parsedContent.outline.mainPoints.length} sections
+                                </p>
+                              )}
+                              {parsedContent.outline && parsedContent.outline.scriptureReferences && (
+                                <p className="text-sm text-gray-700">
+                                  <strong>Scripture:</strong> {parsedContent.outline.scriptureReferences.join(', ')}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  if (parsedContent.outline) setCurrentOutline(parsedContent.outline);
+                                  if (parsedContent.research) setCurrentResearch(parsedContent.research);
+                                  if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
+                                  if (parsedContent.enhancement) {
+                                    setEnhancedOutline(parsedContent.enhancement.enhancedOutline);
+                                    setEnhancementRecommendations(parsedContent.enhancement.recommendations || []);
+                                  }
+                                  setSermonTopic(sermon.title);
+                                  setActiveTab('enhanced');
+                                  toast({
+                                    title: "Sermon Loaded",
+                                    description: "Completed sermon has been loaded for viewing."
+                                  });
+                                }}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                  >
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Export
+                                    <ChevronDown className="w-3 h-3 ml-1" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => {
+                                    // Load sermon and export as DOCX
+                                    if (parsedContent.outline) setCurrentOutline(parsedContent.outline);
+                                    if (parsedContent.research) setCurrentResearch(parsedContent.research);
+                                    if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
+                                    if (parsedContent.enhancement) setEnhancedOutline(parsedContent.enhancement.enhancedOutline);
+                                    setSermonTopic(sermon.title);
+                                    handleExport('docx');
+                                  }}>
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Word Document
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    // Load sermon and export as PDF
+                                    if (parsedContent.outline) setCurrentOutline(parsedContent.outline);
+                                    if (parsedContent.research) setCurrentResearch(parsedContent.research);
+                                    if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
+                                    if (parsedContent.enhancement) setEnhancedOutline(parsedContent.enhancement.enhancedOutline);
+                                    setSermonTopic(sermon.title);
+                                    handleExport('pdf');
+                                  }}>
+                                    <FileImage className="w-4 h-4 mr-2" />
+                                    PDF Document
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>No completed sermons yet</p>
+                  <p className="text-sm">Complete a sermon using the "Complete & Save Sermon" button to see it here</p>
                 </div>
               )}
             </CardContent>
