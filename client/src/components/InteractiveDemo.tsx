@@ -78,7 +78,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'right',
         action: 'click',
         icon: 'BookOpen',
-        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.06.25%20AM_1749801989165.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.06.25%20AM_1749801989165.png'
       },
       {
         id: 'content-library',
@@ -88,7 +88,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'bottom',
         action: 'hover',
         icon: 'Archive',
-        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.08.32%20AM_1749802115963.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.08.32%20AM_1749802115963.png'
       },
       {
         id: 'social-publishing',
@@ -98,7 +98,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'left',
         action: 'click',
         icon: 'Share2',
-        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.10.10%20AM_1749802216228.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.10.10%20AM_1749802216228.png'
       },
       {
         id: 'analytics-dashboard',
@@ -108,7 +108,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'bottom',
         action: 'click',
         icon: 'BarChart3',
-        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.14.33%20AM_1749802476383.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.14.33%20AM_1749802476383.png'
       }
     ]
   },
@@ -127,7 +127,7 @@ const DEMO_TOURS: DemoTour[] = [
         target: '.admin-dashboard',
         position: 'bottom',
         icon: 'Settings',
-        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.19.02%20AM_1749802745815.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.19.02%20AM_1749802745815.png'
       },
       {
         id: 'member-management',
@@ -137,7 +137,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'right',
         action: 'click',
         icon: 'Users',
-        screenshot: '/api/demo/screenshots/Screenshot%202025-06-13%20at%201.19.39%20AM_1749802784634.png'
+        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.19.39%20AM_1749802784634.png'
       },
       {
         id: 'event-coordination',

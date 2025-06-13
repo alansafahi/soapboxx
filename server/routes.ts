@@ -85,23 +85,7 @@ function getFileType(mimetype: string): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve demo screenshots using Express static middleware (must be early to avoid conflicts)
-  app.use('/api/demo/screenshots', express.static(path.resolve('attached_assets'), {
-    setHeaders: (res, filePath) => {
-      // Set proper content type based on file extension
-      const ext = path.extname(filePath).toLowerCase();
-      if (ext === '.png') {
-        res.setHeader('Content-Type', 'image/png');
-      } else if (ext === '.jpg' || ext === '.jpeg') {
-        res.setHeader('Content-Type', 'image/jpeg');
-      } else if (ext === '.gif') {
-        res.setHeader('Content-Type', 'image/gif');
-      } else if (ext === '.webp') {
-        res.setHeader('Content-Type', 'image/webp');
-      }
-      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
-    }
-  }));
+
 
   // Auth middleware
   await setupAuth(app);
