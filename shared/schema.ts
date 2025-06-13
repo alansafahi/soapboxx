@@ -2700,6 +2700,48 @@ export type InsertCampus = typeof campuses.$inferInsert;
 export type CampusAssignment = typeof campusAssignments.$inferSelect;
 export type InsertCampusAssignment = typeof campusAssignments.$inferInsert;
 
+// Sermon Illustration Types
+export interface SermonIllustration {
+  title: string;
+  story: string;
+  application: string;
+  source: string;
+  relevanceScore: number;
+  visualElements: {
+    slideTitle: string;
+    keyImage: string;
+    bulletPoints: string[];
+    scriptureConnection: string;
+    backgroundSuggestion: string;
+  };
+  presentationTips: {
+    timing: string;
+    delivery: string;
+    interaction: string;
+  };
+}
+
+// Video Content Types for AI Video Generator
+export interface VideoContent {
+  script: string;
+  visualCues: string[];
+  audioNarration: string;
+  bibleReferences: string[];
+  duration: number;
+  tone: string;
+}
+
+export interface VideoGenerationRequest {
+  type: string;
+  topic: string;
+  duration: number;
+  targetAudience: string;
+  voicePersona: 'pastor-david' | 'sister-maria' | 'teacher-john' | 'evangelist-sarah';
+  visualStyle: string;
+  userId: string;
+  churchId: number;
+}
+
 // Zod schemas for validation
 export const insertMemberEngagementMetricSchema = createInsertSchema(memberEngagementMetrics).omit({ id: true, createdAt: true });
 export const insertSpiritualGrowthTrackingSchema = createInsertSchema(spiritualGrowthTracking).omit({ id: true, createdAt: true });

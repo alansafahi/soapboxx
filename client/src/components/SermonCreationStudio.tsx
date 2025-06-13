@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { SermonIllustration } from "@shared/schema";
 import { 
   Search, Lightbulb, BookOpen, MessageSquare, Star, 
   Clock, Target, RefreshCw, Save, Download, Share2,
@@ -32,13 +33,7 @@ interface BiblicalResearch {
   practicalApplications: string[];
 }
 
-interface SermonIllustration {
-  title: string;
-  story: string;
-  application: string;
-  source: string;
-  relevanceScore: number;
-}
+
 
 export default function SermonCreationStudio() {
   const [activeTab, setActiveTab] = useState("research");
