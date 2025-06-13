@@ -40,6 +40,7 @@ import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
 import PersonalizedTour from "@/components/PersonalizedTour";
 import TourTesting from "@/pages/TourTesting";
 import TourTestPage from "@/pages/tour-test";
+import { DemoTrigger } from "@/components/DemoTrigger";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AudioRoutines from "@/pages/AudioRoutines";
 import AudioBibleDemo from "@/pages/AudioBibleDemo";
@@ -259,6 +260,9 @@ function AppRouter() {
         }}
         userRole={userRole}
       />
+
+      {/* Interactive Demo Trigger - Always available for authenticated users */}
+      {isAuthenticated && <DemoTrigger variant="floating" />}
     </>
   );
 }
