@@ -266,7 +266,7 @@ export default function SermonCreationStudio() {
     onSuccess: (data) => {
       setEnhancedOutline(data.enhancedOutline);
       setEnhancementRecommendations(data.recommendations || []);
-      setActiveTab("enhanced");
+      // Stay on enhance tab to show enhanced content
       toast({
         title: "Sermon Enhanced",
         description: "Your sermon has been improved for clarity and engagement."
@@ -549,7 +549,7 @@ export default function SermonCreationStudio() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="research" className="flex items-center">
             <Search className="w-4 h-4 mr-2" />
             Research
@@ -565,10 +565,6 @@ export default function SermonCreationStudio() {
           <TabsTrigger value="enhance" className="flex items-center">
             <Star className="w-4 h-4 mr-2" />
             Enhance
-          </TabsTrigger>
-          <TabsTrigger value="enhanced" className="flex items-center">
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Enhanced
           </TabsTrigger>
           <TabsTrigger value="saved" className="flex items-center">
             <Edit3 className="w-4 h-4 mr-2" />
@@ -981,6 +977,135 @@ export default function SermonCreationStudio() {
                     <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Complete both research and outline generation to enhance your sermon</p>
                   </div>
+                ) : enhancedOutline ? (
+                  <div className="space-y-6">
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <h4 className="font-semibold text-green-900 mb-2 flex items-center">
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                        Enhanced Sermon Complete
+                      </h4>
+                      <p className="text-green-700 text-sm">
+                        Your sermon has been enhanced with AI recommendations and is ready for delivery or further customization.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-lg border space-y-6">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">{enhancedOutline.title}</h3>
+                        
+                        <div className="grid md:grid-cols-2 gap-6 mb-6">
+                          <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 mb-2">Theme</h4>
+                            <p className="text-blue-800">{enhancedOutline.theme}</p>
+                          </div>
+                          
+                          <div className="bg-purple-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-purple-900 mb-2">Scripture References</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {enhancedOutline.scriptureReferences?.map((ref, idx) => (
+                                <span key={idx} className="bg-purple-200 text-purple-800 px-2 py-1 rounded text-sm">
+                                  {ref}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 mb-3">Introduction</h4>
+                            <p className="text-gray-700 leading-relaxed">{enhancedOutline.introduction}</p>
+                          </div>
+
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 mb-3">Main Points</h4>
+                            <div className="space-y-3">
+                              {enhancedOutline.mainPoints?.map((point: any, index: number) => (
+                                <div key={index} className="border-l-4 border-blue-400 pl-4">
+                                  <h5 className="font-medium text-gray-900">{index + 1}. {point}</h5>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 mb-3">Conclusion</h4>
+                            <p className="text-gray-700 leading-relaxed">{enhancedOutline.conclusion}</p>
+                          </div>
+
+                          <div className="bg-yellow-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-yellow-900 mb-3">Call to Action</h4>
+                            <p className="text-yellow-800 leading-relaxed">{enhancedOutline.callToAction}</p>
+                          </div>
+
+                          {enhancedOutline.closingPrayer && (
+                            <div className="bg-green-50 p-4 rounded-lg">
+                              <h4 className="font-semibold text-green-900 mb-3">Closing Prayer</h4>
+                              <p className="text-green-800 leading-relaxed italic">{enhancedOutline.closingPrayer}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Display Illustrations/Stories if available */}
+                    {illustrations && illustrations.length > 0 && (
+                      <div className="bg-white p-6 rounded-lg border">
+                        <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                          <BookOpen className="w-5 h-5 mr-2" />
+                          Sermon Illustrations & Stories
+                        </h4>
+                        <div className="grid gap-4">
+                          {illustrations.map((illustration, index) => (
+                            <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex justify-between items-start mb-2">
+                                <h5 className="font-medium text-gray-900">{illustration.title}</h5>
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  {illustration.type}
+                                </span>
+                              </div>
+                              <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                {illustration.content}
+                              </p>
+                              <div className="flex justify-between items-center text-xs text-gray-500">
+                                <span>Impact: {illustration.impact}/10</span>
+                                <span>Duration: {illustration.duration}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {enhancementRecommendations && enhancementRecommendations.length > 0 && (
+                      <div className="bg-white p-4 rounded-lg border">
+                        <h4 className="font-semibold text-gray-900 mb-3">AI Enhancement Recommendations</h4>
+                        <ul className="space-y-2">
+                          {enhancementRecommendations.map((rec, idx) => (
+                            <li key={idx} className="flex items-start">
+                              <Star className="w-4 h-4 mr-2 mt-0.5 text-yellow-500" />
+                              <span className="text-gray-700">{rec}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-center pt-4">
+                      <Button
+                        onClick={handleCompleteSermon}
+                        disabled={saveCompletedMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2"
+                      >
+                        {saveCompletedMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Archive className="w-4 h-4 mr-2" />
+                        )}
+                        Complete & Save Sermon
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="bg-yellow-50 p-4 rounded-lg">
                     <p className="text-yellow-800 text-sm">
@@ -994,103 +1119,7 @@ export default function SermonCreationStudio() {
           </Card>
         </TabsContent>
 
-        {/* Enhanced Tab */}
-        <TabsContent value="enhanced" className="space-y-4">
-          {enhancedOutline ? (
-            <div className="space-y-6">
-              <Card className="border-2 border-green-200 bg-green-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-green-900">
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Enhanced Sermon Outline
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="bg-white p-4 rounded-lg">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{enhancedOutline.title}</h3>
-                    <p className="text-lg text-blue-600 font-medium mb-4">Theme: {enhancedOutline.theme}</p>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-2">Enhanced Introduction</h4>
-                        <p className="text-gray-700 leading-relaxed">{enhancedOutline.introduction}</p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-2">Main Points</h4>
-                        <ol className="list-decimal list-inside space-y-2">
-                          {enhancedOutline.mainPoints.map((point, idx) => (
-                            <li key={idx} className="text-gray-700">{point}</li>
-                          ))}
-                        </ol>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-2">Enhanced Conclusion</h4>
-                        <p className="text-gray-700 leading-relaxed">{enhancedOutline.conclusion}</p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-2">Call to Action</h4>
-                        <p className="text-gray-700 leading-relaxed font-medium">{enhancedOutline.callToAction}</p>
-                      </div>
-                      
-                      {enhancedOutline.scriptureReferences && enhancedOutline.scriptureReferences.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-2">Scripture References</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {enhancedOutline.scriptureReferences.map((ref, idx) => (
-                              <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700">
-                                {ref}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {enhancementRecommendations.length > 0 && (
-                    <div className="bg-white p-4 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-3">AI Enhancement Recommendations</h4>
-                      <ul className="space-y-2">
-                        {enhancementRecommendations.map((rec, idx) => (
-                          <li key={idx} className="flex items-start">
-                            <Star className="w-4 h-4 mr-2 mt-0.5 text-yellow-500" />
-                            <span className="text-gray-700">{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-center pt-4">
-                    <Button
-                      onClick={handleCompleteSermon}
-                      disabled={saveCompletedMutation.isPending}
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2"
-                    >
-                      {saveCompletedMutation.isPending ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Archive className="w-4 h-4 mr-2" />
-                      )}
-                      Complete & Save Sermon
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="text-center py-8">
-                <Star className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-gray-500">Enhanced sermon content will appear here after enhancement</p>
-                <p className="text-sm text-gray-400 mt-2">Generate research and outline first, then use the Enhance tab</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+
 
         {/* Drafts Tab */}
         <TabsContent value="saved" className="space-y-4">
@@ -1257,7 +1286,7 @@ export default function SermonCreationStudio() {
                                     setEnhancementRecommendations(parsedContent.enhancement.recommendations || []);
                                   }
                                   setSermonTopic(sermon.title);
-                                  setActiveTab('enhanced');
+                                  setActiveTab('enhance');
                                   toast({
                                     title: "Sermon Loaded",
                                     description: "Completed sermon has been loaded for viewing."
