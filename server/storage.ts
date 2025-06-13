@@ -54,6 +54,7 @@ import {
   volunteerAwards,
   volunteerCertifications,
   userTourCompletions,
+  sermonDrafts,
   type User,
   type UpsertUser,
   type DailyVerse,
