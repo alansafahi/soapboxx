@@ -2971,11 +2971,18 @@ Return JSON with this exact structure:
   app.get('/api/social-credentials', isAuthenticated, async (req, res) => {
     try {
       const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const credentials = await storage.getSocialMediaCredentials(userId);
-      res.json(credentials);
+      res.json(credentials || {});
     } catch (error) {
       console.error('Error fetching social credentials:', error);
-      res.status(500).json({ message: 'Failed to fetch credentials' });
+      res.status(500).json({ 
+        message: 'Unable to load social media connections. Please try again.',
+        details: 'Connection retrieval failed'
+      });
     }
   });
 

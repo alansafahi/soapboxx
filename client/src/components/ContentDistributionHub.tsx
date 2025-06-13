@@ -13,7 +13,8 @@ import {
   Share2, Download, Copy, Facebook, Twitter, Instagram, 
   Mail, FileText, BookOpen, Clock, CheckCircle, 
   Loader2, Eye, Edit3, Send, Zap, Globe, Settings, 
-  Link, Shield, AlertCircle, ExternalLink
+  Link, Shield, AlertCircle, ExternalLink, Linkedin,
+  Youtube, Video, MessageCircle, Phone, Music
 } from "lucide-react";
 
 interface ContentVariation {
