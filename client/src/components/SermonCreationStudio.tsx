@@ -372,7 +372,7 @@ export default function SermonCreationStudio() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="research" className="flex items-center">
             <Search className="w-4 h-4 mr-2" />
             Research
@@ -388,6 +388,10 @@ export default function SermonCreationStudio() {
           <TabsTrigger value="enhance" className="flex items-center">
             <Star className="w-4 h-4 mr-2" />
             Enhance
+          </TabsTrigger>
+          <TabsTrigger value="enhanced" className="flex items-center">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Enhanced
           </TabsTrigger>
         </TabsList>
 
@@ -744,6 +748,89 @@ export default function SermonCreationStudio() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Enhanced Tab */}
+        <TabsContent value="enhanced" className="space-y-4">
+          {enhancedOutline ? (
+            <div className="space-y-6">
+              <Card className="border-2 border-green-200 bg-green-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-green-900">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Enhanced Sermon Outline
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-white p-4 rounded-lg">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{enhancedOutline.title}</h3>
+                    <p className="text-lg text-blue-600 font-medium mb-4">Theme: {enhancedOutline.theme}</p>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">Enhanced Introduction</h4>
+                        <p className="text-gray-700 leading-relaxed">{enhancedOutline.introduction}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">Main Points</h4>
+                        <ol className="list-decimal list-inside space-y-2">
+                          {enhancedOutline.mainPoints.map((point, idx) => (
+                            <li key={idx} className="text-gray-700">{point}</li>
+                          ))}
+                        </ol>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">Enhanced Conclusion</h4>
+                        <p className="text-gray-700 leading-relaxed">{enhancedOutline.conclusion}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">Call to Action</h4>
+                        <p className="text-gray-700 leading-relaxed font-medium">{enhancedOutline.callToAction}</p>
+                      </div>
+                      
+                      {enhancedOutline.scriptureReferences && enhancedOutline.scriptureReferences.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-2">Scripture References</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {enhancedOutline.scriptureReferences.map((ref, idx) => (
+                              <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700">
+                                {ref}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {enhancementRecommendations.length > 0 && (
+                    <div className="bg-white p-4 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-3">AI Enhancement Recommendations</h4>
+                      <ul className="space-y-2">
+                        {enhancementRecommendations.map((rec, idx) => (
+                          <li key={idx} className="flex items-start">
+                            <Star className="w-4 h-4 mr-2 mt-0.5 text-yellow-500" />
+                            <span className="text-gray-700">{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Star className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-gray-500">Enhanced sermon content will appear here after enhancement</p>
+                <p className="text-sm text-gray-400 mt-2">Generate research and outline first, then use the Enhance tab</p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
 
