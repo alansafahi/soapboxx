@@ -80,16 +80,19 @@ export default function RoleSwitcher() {
                      window.location.hostname.includes('127.0.0.1') ||
                      window.location.hostname.includes('replit.dev');
 
+  const { data: roleData, isLoading } = useQuery<RoleData>({
+    queryKey: ["/api/auth/available-roles"],
+    refetchOnWindowFocus: false,
+  });
+
+  // Debug logging
   console.log('RoleSwitcher Debug:', { 
     isDemoSite, 
     hostname: window.location.hostname,
     roleData,
-    isLoading 
-  });
-
-  const { data: roleData, isLoading } = useQuery<RoleData>({
-    queryKey: ["/api/auth/available-roles"],
-    refetchOnWindowFocus: false,
+    isLoading,
+    canSwitch: roleData?.canSwitch,
+    currentRole: roleData?.currentRole
   });
 
   const switchRoleMutation = useMutation({
