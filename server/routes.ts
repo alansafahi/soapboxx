@@ -2694,6 +2694,8 @@ Format your response as JSON with the following structure:
 
       // Check if user has pastor or admin role
       const userRole = await storage.getUserRole(userId);
+      console.log(`Content distribution - User ${userId} has role: ${userRole}`);
+      
       if (!userRole) {
         return res.status(403).json({ 
           message: "Unable to verify your role. Please contact your church administrator.",
@@ -2701,10 +2703,10 @@ Format your response as JSON with the following structure:
         });
       }
       
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole.role)) {
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole)) {
         return res.status(403).json({ 
-          message: `Content distribution requires Pastor or Admin access. Your current role is "${userRole.role}". Please contact your church administrator to request elevated permissions.`,
-          currentRole: userRole.role,
+          message: `Content distribution requires Pastor or Admin access. Your current role is "${userRole}". Please contact your church administrator to request elevated permissions.`,
+          currentRole: userRole,
           requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin'],
           action: "upgrade_role"
         });
@@ -3002,10 +3004,10 @@ Format as JSON with this structure:
         });
       }
       
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole.role)) {
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole)) {
         return res.status(403).json({ 
-          message: `Content publishing requires Pastor or Admin access. Your current role is "${userRole.role}". Please contact your church administrator to request elevated permissions.`,
-          currentRole: userRole.role,
+          message: `Content publishing requires Pastor or Admin access. Your current role is "${userRole}". Please contact your church administrator to request elevated permissions.`,
+          currentRole: userRole,
           requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin'],
           action: "upgrade_role"
         });
