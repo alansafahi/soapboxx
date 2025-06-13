@@ -21,7 +21,7 @@ async function fetchFromBibleAPI(reference: string, version: string = 'NIV'): Pr
   try {
     // bible-api.com uses different version codes
     const versionMap: Record<string, string> = {
-      'NIV': '',  // Default
+      'NIV': '',  // Default is World English Bible (public domain)
       'KJV': 'kjv',
       'ESV': '',  // Not available, fallback to default
       'NLT': '',  // Not available, fallback to default
@@ -49,16 +49,23 @@ async function fetchFromBibleAPI(reference: string, version: string = 'NIV'): Pr
     }
 
     const data = await response.json() as any;
-    console.log('Bible API response:', JSON.stringify(data, null, 2));
+    console.log('Bible API response data:', data);
     
-    if (data && data.text && data.reference) {
+    // Check if we have the expected structure
+    if (data && data.reference && data.text) {
+      const cleanText = data.text
+        .replace(/\n/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
       return {
         reference: data.reference,
-        text: data.text.replace(/\s+/g, ' ').trim().replace(/\n/g, ' '),
-        version: data.translation_name || version
+        text: cleanText,
+        version: data.translation_name || 'World English Bible'
       };
     }
 
+    console.log('Bible API: No valid data structure found');
     return null;
   } catch (error) {
     console.error('Bible API error:', error);

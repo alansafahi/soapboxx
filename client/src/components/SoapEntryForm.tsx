@@ -362,7 +362,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsLookingUpVerse(true);
     try {
-      const verseData = await apiRequest('/api/bible/lookup-verse', {
+      const response = await apiRequest('/api/bible/lookup-verse', {
         method: 'POST',
         body: { 
           reference: reference.trim(),
@@ -370,18 +370,28 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         },
       });
       
-      if (verseData.text) {
-        form.setValue('scripture', verseData.text);
+      // Handle the correct response structure
+      const verseText = response.verse?.text || response.text;
+      const verseRef = response.verse?.reference || response.reference || reference;
+      
+      if (verseText) {
+        form.setValue('scripture', verseText);
         toast({
           title: "Scripture Found",
-          description: `Populated ${verseData.reference} (${selectedVersion})`,
+          description: `Populated ${verseRef} (${selectedVersion})`,
+        });
+      } else {
+        toast({
+          title: "Scripture Lookup",
+          description: `"${reference}" not found. Please enter the verse text manually below.`,
+          variant: "default",
         });
       }
     } catch (error) {
       // Show helpful error message with suggestions
       toast({
         title: "Scripture Lookup",
-        description: `"${reference}" not found in our database. Try a different format (e.g., "John 3:16") or enter the verse text manually below.`,
+        description: `"${reference}" not found. Please enter the verse text manually below.`,
         variant: "default",
       });
       console.log('Verse lookup failed:', error);
