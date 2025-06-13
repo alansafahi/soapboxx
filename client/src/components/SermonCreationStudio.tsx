@@ -1080,7 +1080,6 @@ export default function SermonCreationStudio() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  // Load the draft into the current sermon
                                   if (parsedContent.outline) setCurrentOutline(parsedContent.outline);
                                   if (parsedContent.research) setCurrentResearch(parsedContent.research);
                                   if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
