@@ -49,7 +49,7 @@ import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
 import SermonStudioPage from "@/pages/SermonStudioPage";
 import ContentDistributionPage from "@/pages/ContentDistributionPage";
 import PastoralContentDemoPage from "@/pages/PastoralContentDemoPage";
-import EngagementAnalyticsPage from "@/pages/EngagementAnalyticsPage";
+import EngagementAnalytics from "@/pages/EngagementAnalytics";
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -205,7 +205,7 @@ function AppRouter() {
               <Route path="/sermon-studio" component={SermonStudioPage} />
               <Route path="/content-distribution" component={ContentDistributionPage} />
               <Route path="/pastoral-demo" component={PastoralContentDemoPage} />
-              <Route path="/engagement-analytics" component={EngagementAnalyticsPage} />
+              <Route path="/engagement-analytics" component={EngagementAnalytics} />
             </>
           )}
         </Switch>
