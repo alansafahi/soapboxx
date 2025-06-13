@@ -418,7 +418,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   className="flex items-center gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {isLoadingAI ? 'Generating...' : contextualInfo ? 'Get Contextual AI Suggestions' : 'Get AI Suggestions'}
+                  {isLoadingAI ? 'Generating...' : 'Generate Complete S.O.A.P.'}
                 </Button>
                 <Button
                   type="button"

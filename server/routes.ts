@@ -5,7 +5,7 @@ import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { AIPersonalizationService } from "./ai-personalization";
-import { generateSoapSuggestions, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
+import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import multer from "multer";
 import path from "path";
