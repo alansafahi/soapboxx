@@ -19,7 +19,8 @@ import {
   Search, Lightbulb, BookOpen, MessageSquare, Star, 
   Clock, Target, RefreshCw, Save, Download, Share2,
   ChevronRight, CheckCircle, AlertCircle, Loader2,
-  ChevronDown, FileText, FileImage, FileDown, Code
+  ChevronDown, FileText, FileImage, FileDown, Code,
+  Archive, Edit3
 } from "lucide-react";
 
 interface SermonOutline {
@@ -504,13 +505,13 @@ export default function SermonCreationStudio() {
             <Star className="w-4 h-4 mr-2" />
             Enhance
           </TabsTrigger>
-          <TabsTrigger value="enhanced" className="flex items-center">
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Completed
-          </TabsTrigger>
           <TabsTrigger value="saved" className="flex items-center">
-            <Save className="w-4 h-4 mr-2" />
-            Saved Sermons
+            <Edit3 className="w-4 h-4 mr-2" />
+            Drafts
+          </TabsTrigger>
+          <TabsTrigger value="enhanced" className="flex items-center">
+            <Archive className="w-4 h-4 mr-2" />
+            Completed
           </TabsTrigger>
         </TabsList>
 
@@ -1011,20 +1012,20 @@ export default function SermonCreationStudio() {
           )}
         </TabsContent>
 
-        {/* Saved Sermons Tab */}
+        {/* Drafts Tab */}
         <TabsContent value="saved" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Save className="w-5 h-5 mr-2" />
-                Saved Sermon Drafts
+                <Edit3 className="w-5 h-5 mr-2" />
+                Sermon Drafts
               </CardTitle>
             </CardHeader>
             <CardContent>
               {draftsLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                  Loading saved sermons...
+                  Loading drafts...
                 </div>
               ) : savedDrafts && savedDrafts.length > 0 ? (
                 <div className="space-y-4">
@@ -1104,8 +1105,8 @@ export default function SermonCreationStudio() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <Save className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No saved sermon drafts yet</p>
+                  <Edit3 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>No sermon drafts yet</p>
                   <p className="text-sm">Create a sermon outline or research to automatically save drafts</p>
                 </div>
               )}
