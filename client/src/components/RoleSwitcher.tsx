@@ -75,6 +75,11 @@ export default function RoleSwitcher() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Check if this is demo environment (localhost/dev domains)
+  const isDemoSite = window.location.hostname.includes('localhost') || 
+                     window.location.hostname.includes('127.0.0.1') ||
+                     window.location.hostname.includes('replit.dev');
+
   const { data: roleData, isLoading } = useQuery<RoleData>({
     queryKey: ["/api/auth/available-roles"],
     refetchOnWindowFocus: false,
@@ -125,6 +130,11 @@ export default function RoleSwitcher() {
         Role switching unavailable
       </div>
     );
+  }
+
+  // On production sites, only show role switcher to SoapBox Owner
+  if (!isDemoSite && roleData.currentRole !== 'soapbox_owner') {
+    return null;
   }
 
   if (!roleData.canSwitch) {
