@@ -250,7 +250,7 @@ export interface IStorage {
   lookupBibleVerse(reference: string): Promise<{ reference: string; text: string } | null>;
   searchBibleVersesByTopic(topics: string[]): Promise<any[]>;
   getRandomVerseByCategory(category?: string): Promise<any | null>;
-  getBibleVerses(): Promise<BibleVerse[]>;
+  getBibleVerses(): Promise<any[]>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -3470,7 +3470,7 @@ export class DatabaseStorage implements IStorage {
     return verse;
   }
 
-  async getBibleVerses(): Promise<BibleVerse[]> {
+  async getBibleVerses(): Promise<any[]> {
     return await db
       .select()
       .from(bibleVerses)
