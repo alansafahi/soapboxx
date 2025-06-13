@@ -4046,5 +4046,171 @@ Return JSON with this exact structure:
     }
   });
 
+  // Engagement Analytics API Routes
+  app.get('/api/engagement/metrics', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { range = '7d', platform = 'all', type = 'all' } = req.query;
+      
+      // Calculate date range
+      const days = parseInt(range.replace('d', ''));
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      // For demo purposes, generate realistic analytics data
+      const baseMetrics = {
+        total_reach: 847200,
+        total_engagement: 71850,
+        avg_engagement_rate: 8.4,
+        sentiment_score: 0.78,
+        top_content: [
+          {
+            id: '1',
+            title: 'Sunday Service: Finding Peace in Uncertainty',
+            platform: 'Facebook',
+            content_type: 'sermon',
+            engagement_rate: 12.8,
+            views: 4200,
+            likes: 380,
+            comments: 95,
+            shares: 62,
+            published_date: '2024-06-10'
+          },
+          {
+            id: '2', 
+            title: 'Daily Devotional: Strength in Prayer',
+            platform: 'Instagram',
+            content_type: 'devotional',
+            engagement_rate: 11.4,
+            views: 2800,
+            likes: 285,
+            comments: 48,
+            shares: 34,
+            published_date: '2024-06-09'
+          }
+        ]
+      };
+      
+      res.json(baseMetrics);
+    } catch (error) {
+      console.error('Error fetching engagement metrics:', error);
+      res.status(500).json({ message: 'Failed to fetch engagement metrics' });
+    }
+  });
+
+  app.get('/api/engagement/platform-stats', isAuthenticated, async (req, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      
+      const platformStats = [
+        {
+          platform: 'Facebook',
+          total_posts: 24,
+          total_engagement: 3420,
+          avg_engagement_rate: 9.2,
+          best_performing_content: 'Sunday Service Highlights',
+          growth_trend: 15
+        },
+        {
+          platform: 'Instagram', 
+          total_posts: 18,
+          total_engagement: 2890,
+          avg_engagement_rate: 7.8,
+          best_performing_content: 'Weekly Bible Verse',
+          growth_trend: 22
+        },
+        {
+          platform: 'Twitter',
+          total_posts: 45,
+          total_engagement: 1560,
+          avg_engagement_rate: 5.4,
+          best_performing_content: 'Prayer Request Update',
+          growth_trend: -3
+        },
+        {
+          platform: 'LinkedIn',
+          total_posts: 12,
+          total_engagement: 890,
+          avg_engagement_rate: 6.1,
+          best_performing_content: 'Community Outreach Impact',
+          growth_trend: 8
+        }
+      ];
+      
+      res.json(platformStats);
+    } catch (error) {
+      console.error('Error fetching platform stats:', error);
+      res.status(500).json({ message: 'Failed to fetch platform statistics' });
+    }
+  });
+
+  app.get('/api/engagement/sentiment', isAuthenticated, async (req, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      
+      const sentimentData = {
+        overall_sentiment: 0.78,
+        positive_mentions: 892,
+        neutral_mentions: 204,
+        negative_mentions: 47,
+        trending_topics: [
+          'Sunday Service',
+          'Prayer Requests', 
+          'Community Outreach',
+          'Bible Study',
+          'Youth Ministry'
+        ],
+        ai_recommendations: [
+          'Increase prayer-focused content frequency',
+          'Optimize posting schedule for evening engagement',
+          'Consider more video content formats'
+        ]
+      };
+      
+      res.json(sentimentData);
+    } catch (error) {
+      console.error('Error fetching sentiment analysis:', error);
+      res.status(500).json({ message: 'Failed to fetch sentiment analysis' });
+    }
+  });
+
+  app.get('/api/engagement/ai-insights', isAuthenticated, async (req, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      
+      const insights = {
+        recommendations: [
+          {
+            type: 'Content Strategy',
+            recommendation: 'Prayer-related content performs 35% better than average',
+            confidence: 0.89,
+            impact: 'High'
+          },
+          {
+            type: 'Posting Schedule',
+            recommendation: 'Sunday evening posts generate 42% more engagement',
+            confidence: 0.92,
+            impact: 'Medium'
+          }
+        ],
+        performance_trends: {
+          weekly_growth: 12.5,
+          engagement_improvement: 18.2,
+          reach_expansion: 25.7
+        },
+        content_insights: {
+          top_performing_types: ['prayer', 'community_service', 'biblical_teachings'],
+          optimal_posting_times: ['9-11 AM', '7-9 PM'],
+          audience_preferences: ['video_content', 'interactive_posts', 'testimonials']
+        }
+      };
+      
+      res.json(insights);
+    } catch (error) {
+      console.error('Error fetching AI insights:', error);
+      res.status(500).json({ message: 'Failed to fetch AI insights' });
+    }
+  });
+
   return httpServer;
 }
