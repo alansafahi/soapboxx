@@ -44,6 +44,8 @@ export default function SermonCreationStudio() {
   const [currentOutline, setCurrentOutline] = useState<SermonOutline | null>(null);
   const [currentResearch, setCurrentResearch] = useState<BiblicalResearch | null>(null);
   const [illustrations, setIllustrations] = useState<SermonIllustration[]>([]);
+  const [enhancedOutline, setEnhancedOutline] = useState<SermonOutline | null>(null);
+  const [enhancementRecommendations, setEnhancementRecommendations] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Save Draft mutation
@@ -198,7 +200,9 @@ export default function SermonCreationStudio() {
       });
     },
     onSuccess: (data) => {
-      setCurrentOutline(data.enhancedOutline);
+      setEnhancedOutline(data.enhancedOutline);
+      setEnhancementRecommendations(data.recommendations || []);
+      setActiveTab("enhanced");
       toast({
         title: "Sermon Enhanced",
         description: "Your sermon has been improved for clarity and engagement."

@@ -663,7 +663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       4. Transition enhancements
       5. Call-to-action strengthening
       
-      Return enhanced outline in same format with improvements:
+      Please return your response as a JSON object with enhanced outline and recommendations:
       {
         "enhancedOutline": {
           "title": "improved title",
