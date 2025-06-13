@@ -1735,6 +1735,7 @@ export default function AdminPortal() {
 
   const { data: churches = [], isLoading: churchesLoading } = useQuery({
     queryKey: ["/api/churches"],
+    select: (data) => Array.isArray(data) ? data : [],
   });
 
   const { data: events = [], isLoading: eventsLoading } = useQuery({
