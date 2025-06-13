@@ -250,6 +250,7 @@ export interface IStorage {
   lookupBibleVerse(reference: string): Promise<{ reference: string; text: string } | null>;
   searchBibleVersesByTopic(topics: string[]): Promise<any[]>;
   getRandomVerseByCategory(category?: string): Promise<any | null>;
+  getBibleVerses(): Promise<BibleVerse[]>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -3467,6 +3468,14 @@ export class DatabaseStorage implements IStorage {
   async getBibleVerse(id: number): Promise<BibleVerse | undefined> {
     const [verse] = await db.select().from(bibleVerses).where(eq(bibleVerses.id, id));
     return verse;
+  }
+
+  async getBibleVerses(): Promise<BibleVerse[]> {
+    return await db
+      .select()
+      .from(bibleVerses)
+      .where(eq(bibleVerses.isActive, true))
+      .orderBy(asc(bibleVerses.reference));
   }
 
   async saveBibleVerseFromAI(verseData: {

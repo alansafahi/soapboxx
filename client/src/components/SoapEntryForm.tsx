@@ -436,45 +436,32 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
                       <FormLabel>Scripture Reference</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            value={field.value || ''}
-                            placeholder="e.g., John 3:16, Psalm 23:1-3" 
-                            onBlur={(e) => {
-                              field.onBlur();
-                              if (e.target.value.trim()) {
-                                lookupVerse(e.target.value);
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                lookupVerse(field.value || '', true);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => lookupVerse(field.value || '', true)}
-                          disabled={isLookingUpVerse || !field.value?.trim()}
-                          className="flex items-center gap-1 px-3"
-                        >
-                          <BookOpen className="h-4 w-4" />
-                          {isLookingUpVerse ? 'Looking up...' : 'Lookup'}
-                        </Button>
-                      </div>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          value={field.value || ''}
+                          placeholder="e.g., John 3:16, Psalm 23:1-3" 
+                          onBlur={(e) => {
+                            field.onBlur();
+                            if (e.target.value.trim()) {
+                              lookupVerse(e.target.value);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              lookupVerse(field.value || '', true);
+                            }
+                          }}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
                 <FormItem>
-                  <FormLabel>Bible Version</FormLabel>
+                  <FormLabel>Look Up With</FormLabel>
                   <Select value={selectedVersion} onValueChange={setSelectedVersion}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select version" />

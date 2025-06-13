@@ -2688,6 +2688,60 @@ Format your response as JSON with the following structure:
     }
   });
 
+  // Bible verse lookup endpoint
+  app.post('/api/bible/lookup-verse', isAuthenticated, async (req: any, res) => {
+    try {
+      const { reference, version = 'NIV' } = req.body;
+      
+      if (!reference) {
+        return res.status(400).json({ message: 'Scripture reference is required' });
+      }
+
+      // Use the existing lookupBibleVerse method for better performance
+      const verse = await storage.lookupBibleVerse(reference);
+
+      if (verse) {
+        res.json({
+          success: true,
+          verse: {
+            reference: verse.reference,
+            text: verse.text,
+            version: version
+          }
+        });
+      } else {
+        // Try a broader search in the full database
+        const verses = await storage.getBibleVerses();
+        const normalizedRef = reference.toLowerCase().replace(/\s+/g, ' ').trim();
+        
+        const matchingVerse = verses.find(v => {
+          const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
+          return verseRef.includes(normalizedRef) || normalizedRef.includes(verseRef);
+        });
+
+        if (matchingVerse) {
+          res.json({
+            success: true,
+            verse: {
+              reference: matchingVerse.reference,
+              text: matchingVerse.text,
+              version: version
+            }
+          });
+        } else {
+          res.status(404).json({ 
+            message: `Verse not found: ${reference}. Please enter the verse text manually.`
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Bible lookup error:', error);
+      res.status(500).json({ 
+        message: 'Error looking up verse. Please enter the verse text manually.'
+      });
+    }
+  });
+
   // Content Distribution API routes
   app.post('/api/content/distribute', isAuthenticated, async (req: any, res) => {
     try {
