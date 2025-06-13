@@ -89,12 +89,29 @@ export default function ContentDistributionHub() {
         description: "Multi-platform content package has been created successfully."
       });
     },
-    onError: (error) => {
-      toast({
-        title: "Creating Your Content Package",
-        description: "We're crafting the perfect multi-platform content for your message - let's try that again.",
-        variant: "default"
-      });
+    onError: (error: any) => {
+      console.error("Content generation error:", error);
+      
+      // Handle specific role-based error messages
+      if (error?.response?.data?.action === "upgrade_role") {
+        toast({
+          title: "Permission Required",
+          description: error.response.data.message,
+          variant: "destructive"
+        });
+      } else if (error?.response?.data?.action === "contact_admin") {
+        toast({
+          title: "Role Verification Issue",
+          description: error.response.data.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Content Generation Failed",
+          description: error?.response?.data?.message || "Unable to generate content. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   });
 
