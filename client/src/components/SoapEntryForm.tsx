@@ -343,6 +343,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   };
 
   const handleSubmit = (data: FormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form validation state:', form.formState);
+    console.log('Form errors:', form.formState.errors);
     saveMutation.mutate(data);
   };
 
