@@ -98,7 +98,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'left',
         action: 'click',
         icon: 'Share2',
-        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.10.10%20AM_1749802216228.png'
+        screenshot: undefined
       },
       {
         id: 'analytics-dashboard',
@@ -108,7 +108,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'bottom',
         action: 'click',
         icon: 'BarChart3',
-        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.14.33%20AM_1749802476383.png'
+        screenshot: undefined
       }
     ]
   },
@@ -127,7 +127,7 @@ const DEMO_TOURS: DemoTour[] = [
         target: '.admin-dashboard',
         position: 'bottom',
         icon: 'Settings',
-        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.19.02%20AM_1749802745815.png'
+        screenshot: undefined
       },
       {
         id: 'member-management',
@@ -137,7 +137,7 @@ const DEMO_TOURS: DemoTour[] = [
         position: 'right',
         action: 'click',
         icon: 'Users',
-        screenshot: '/attached_assets/Screenshot%202025-06-13%20at%201.19.39%20AM_1749802784634.png'
+        screenshot: undefined
       },
       {
         id: 'event-coordination',

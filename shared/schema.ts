@@ -937,6 +937,38 @@ export const inspirationBookmarks = pgTable("inspiration_bookmarks", {
   userInspirationBookmarkUnique: unique().on(table.userId, table.inspirationId),
 }));
 
+// S.O.A.P. (Scripture, Observation, Application, Prayer) Management System
+export const soapEntries = pgTable("soap_entries", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  churchId: integer("church_id").references(() => churches.id),
+  scripture: text("scripture").notNull(), // The Bible verse or passage
+  scriptureReference: varchar("scripture_reference", { length: 100 }), // e.g., "John 3:16"
+  observation: text("observation").notNull(), // What does the passage say?
+  application: text("application").notNull(), // How does this apply to my life?
+  prayer: text("prayer").notNull(), // Personal prayer based on the scripture
+  moodTag: varchar("mood_tag", { length: 20 }), // peaceful, struggling, inspired, grateful, etc.
+  isPublic: boolean("is_public").default(false), // Share with prayer wall/feed
+  isSharedWithGroup: boolean("is_shared_with_group").default(false),
+  isSharedWithPastor: boolean("is_shared_with_pastor").default(false),
+  aiAssisted: boolean("ai_assisted").default(false), // Was AI used to help create this?
+  aiSuggestions: jsonb("ai_suggestions"), // Store AI suggestions used
+  tags: text("tags").array(), // Additional topic tags
+  devotionalDate: timestamp("devotional_date").defaultNow(), // When this devotion was for
+  streakDay: integer("streak_day").default(1), // Day in consecutive S.O.A.P. streak
+  estimatedReadTime: integer("estimated_read_time"), // Minutes spent on this entry
+  isFeatured: boolean("is_featured").default(false), // Pastor can feature entries
+  featuredBy: varchar("featured_by").references(() => users.id),
+  featuredAt: timestamp("featured_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("soap_entries_user_idx").on(table.userId),
+  index("soap_entries_church_idx").on(table.churchId),
+  index("soap_entries_date_idx").on(table.devotionalDate),
+  index("soap_entries_public_idx").on(table.isPublic),
+]);
+
 // Enhanced friend relationships are defined above
 
 // Chat conversations
@@ -2014,6 +2046,17 @@ export type UserBibleBadge = typeof userBibleBadges.$inferSelect;
 export type InsertUserBibleBadge = typeof userBibleBadges.$inferInsert;
 export type BibleVerseShare = typeof bibleVerseShares.$inferSelect;
 export type InsertBibleVerseShare = typeof bibleVerseShares.$inferInsert;
+
+// S.O.A.P. Entry Types
+export type SoapEntry = typeof soapEntries.$inferSelect;
+export type InsertSoapEntry = typeof soapEntries.$inferInsert;
+
+// S.O.A.P. Zod Schema
+export const insertSoapEntrySchema = createInsertSchema(soapEntries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 // Daily Bible Zod Schemas
 export const insertDailyVerseSchema = createInsertSchema(dailyVerses);
