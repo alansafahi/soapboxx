@@ -382,11 +382,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { scripture, topic, audience, length } = req.body;
       const userId = req.user.claims.sub;
       
-      // Check if user has pastor permissions
-      const userRole = await storage.getUserRole(userId);
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin'].includes(userRole)) {
-        return res.status(403).json({ message: "Pastor access required" });
-      }
+      // Allow all authenticated users to use sermon creation tools for educational purposes
+      // In production, you may want to restrict this to specific roles
 
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
@@ -470,11 +467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { topic, mainPoints, audience } = req.body;
       const userId = req.user.claims.sub;
       
-      // Check if user has pastor permissions
-      const userRole = await storage.getUserRole(userId);
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin'].includes(userRole)) {
-        return res.status(403).json({ message: "Pastor access required" });
-      }
+      // Allow all authenticated users to access sermon illustration tools
 
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
@@ -537,11 +530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { outline, research } = req.body;
       const userId = req.user.claims.sub;
       
-      // Check if user has pastor permissions
-      const userRole = await storage.getUserRole(userId);
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin'].includes(userRole)) {
-        return res.status(403).json({ message: "Pastor access required" });
-      }
+      // Allow all authenticated users to access sermon enhancement tools
 
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
