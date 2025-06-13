@@ -24,6 +24,7 @@ import { insertChurchSchema, insertEventSchema, insertDevotionalSchema } from "@
 import { SimpleMemberDirectory } from "@/components/SimpleMemberDirectory";
 import { SessionsManagement } from "@/components/SessionsManagement";
 import SermonCreationStudio from "@/components/SermonCreationStudio";
+import RoleSwitcher from "@/components/RoleSwitcher";
 
 const churchFormSchema = insertChurchSchema;
 const eventFormSchema = insertEventSchema;
@@ -171,6 +172,7 @@ export default function EnhancedAdminPortal() {
           </div>
           
           <div className="flex items-center gap-3">
+            <RoleSwitcher />
             <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 relative">
               <HelpCircle className="h-5 w-5" />
             </button>
