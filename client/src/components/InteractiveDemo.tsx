@@ -226,6 +226,7 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
   const [completed, setCompleted] = useState<string[]>([]);
   const [showHotspot, setShowHotspot] = useState(false);
   const [hotspotPosition, setHotspotPosition] = useState({ x: 0, y: 0 });
+  const [showScreenshotModal, setShowScreenshotModal] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const intervalRef = useRef<NodeJS.Timeout>();
@@ -473,18 +474,18 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
                       
                       {/* Screenshot Display */}
                       {currentTour.steps[currentStep].screenshot && (
-                        <div className="mb-4 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors">
+                        <div className="mb-4 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors relative group">
                           <img
                             src={currentTour.steps[currentStep].screenshot}
                             alt={`Screenshot for ${currentTour.steps[currentStep].title}`}
-                            className="w-full h-48 object-cover object-top hover:scale-105 transition-transform"
+                            className="w-full h-48 object-cover object-top group-hover:scale-105 transition-transform"
                             onClick={() => setShowScreenshotModal(true)}
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                             }}
                           />
-                          <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all flex items-center justify-center">
-                            <div className="bg-white bg-opacity-90 px-2 py-1 rounded text-sm font-medium opacity-0 hover:opacity-100 transition-opacity">
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all flex items-center justify-center">
+                            <div className="bg-white bg-opacity-90 px-2 py-1 rounded text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                               Click to enlarge
                             </div>
                           </div>
@@ -561,6 +562,32 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
                   Click to {currentTour.steps[currentStep].action}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Screenshot Modal */}
+      {showScreenshotModal && currentTour && currentTour.steps[currentStep].screenshot && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999]" onClick={() => setShowScreenshotModal(false)}>
+          <div className="relative max-w-6xl max-h-[90vh] p-4">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="absolute top-2 right-2 z-10"
+              onClick={() => setShowScreenshotModal(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <img
+              src={currentTour.steps[currentStep].screenshot}
+              alt={`Full screenshot for ${currentTour.steps[currentStep].title}`}
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <div className="absolute bottom-4 left-4 bg-white bg-opacity-90 rounded-lg p-3">
+              <h4 className="font-semibold text-sm">{currentTour.steps[currentStep].title}</h4>
+              <p className="text-xs text-gray-600 mt-1">{currentTour.steps[currentStep].description}</p>
             </div>
           </div>
         </div>
