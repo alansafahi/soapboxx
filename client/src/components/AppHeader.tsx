@@ -91,7 +91,7 @@ export default function AppHeader() {
       id: "admin",
       label: "Admin",
       items: [
-        { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["church_admin", "system_admin", "super_admin"] },
+        { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
         { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
       ]
     },
@@ -162,6 +162,10 @@ export default function AppHeader() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <div className="p-2">
+                  <RoleSwitcher />
+                </div>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
