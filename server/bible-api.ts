@@ -49,12 +49,13 @@ async function fetchFromBibleAPI(reference: string, version: string = 'NIV'): Pr
     }
 
     const data = await response.json() as any;
+    console.log('Bible API response:', JSON.stringify(data, null, 2));
     
     if (data && data.text && data.reference) {
       return {
         reference: data.reference,
-        text: data.text.replace(/\s+/g, ' ').trim(),
-        version: version
+        text: data.text.replace(/\s+/g, ' ').trim().replace(/\n/g, ' '),
+        version: data.translation_name || version
       };
     }
 
