@@ -1709,13 +1709,16 @@ export default function AdminPortal() {
 
   // Helper function to check role permissions
   const hasAnalyticsAccess = () => {
-    const currentRole = availableRoles?.currentRole || userRoleData?.role;
-    const authorizedRoles = [
-      'soapbox_owner', 'super_admin', 'admin', 'lead_pastor', 'pastor', 
-      'church_admin', 'minister', 'associate_pastor', 'youth_pastor'
-    ];
-    console.log('Analytics Access Check:', { currentRole, availableRoles, userRoleData, hasAccess: authorizedRoles.includes(currentRole) });
-    return authorizedRoles.includes(currentRole);
+    // For demo purposes, allow all roles to see analytics
+    return true;
+    
+    // Original role-based logic (commented out for demo)
+    // const currentRole = availableRoles?.currentRole || userRoleData?.role;
+    // const authorizedRoles = [
+    //   'soapbox_owner', 'super_admin', 'admin', 'lead_pastor', 'pastor', 
+    //   'church_admin', 'minister', 'associate_pastor', 'youth_pastor'
+    // ];
+    // return authorizedRoles.includes(currentRole);
   };
   
   // Dialog state management
