@@ -291,6 +291,57 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     });
   };
 
+  const enhanceSingleSection = async (section: 'observation' | 'application' | 'prayer') => {
+    const currentData = form.getValues();
+    if (!currentData.scripture || !currentData[section]) {
+      toast({
+        title: "Content Required",
+        description: `Please enter both Scripture and ${section} content first.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      const enhanced = await apiRequest('/api/soap/ai/enhance', {
+        method: 'POST',
+        body: {
+          scripture: currentData.scripture,
+          scriptureReference: currentData.scriptureReference,
+          observation: section === 'observation' ? currentData.observation : '',
+          application: section === 'application' ? currentData.application : '',
+          prayer: section === 'prayer' ? currentData.prayer : '',
+          enhanceOnly: section, // Tell backend to only enhance this section
+        },
+      });
+      
+      // Apply enhanced version to specific section
+      if (section === 'observation' && enhanced.enhancedObservation) {
+        form.setValue('observation', enhanced.enhancedObservation);
+      } else if (section === 'application' && enhanced.enhancedApplication) {
+        form.setValue('application', enhanced.enhancedApplication);
+      } else if (section === 'prayer' && enhanced.enhancedPrayer) {
+        form.setValue('prayer', enhanced.enhancedPrayer);
+      }
+      
+      form.setValue('aiAssisted', true);
+      
+      toast({
+        title: `${section.charAt(0).toUpperCase() + section.slice(1)} Enhanced`,
+        description: `Your ${section} has been enhanced with AI assistance.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to enhance ${section}. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
   const handleSubmit = (data: FormData) => {
     saveMutation.mutate(data);
   };
@@ -425,7 +476,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     <Eye className="h-5 w-5" />
                     Observation
                   </span>
-                  {aiSuggestions?.observation && (
+                  {aiSuggestions?.observation ? (
                     <Button
                       type="button"
                       variant="ghost"
@@ -435,6 +486,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     >
                       <Brain className="h-4 w-4 mr-1" />
                       Apply AI Suggestion
+                    </Button>
+                  ) : form.getValues('observation') && !form.getValues('aiAssisted') && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => enhanceSingleSection('observation')}
+                      className="text-green-600 hover:text-green-800"
+                    >
+                      <Wand2 className="h-4 w-4 mr-1" />
+                      Enhance with AI
                     </Button>
                   )}
                 </CardTitle>
@@ -480,7 +542,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     <Users className="h-5 w-5" />
                     Application
                   </span>
-                  {aiSuggestions?.application && (
+                  {aiSuggestions?.application ? (
                     <Button
                       type="button"
                       variant="ghost"
@@ -490,6 +552,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     >
                       <Brain className="h-4 w-4 mr-1" />
                       Apply AI Suggestion
+                    </Button>
+                  ) : form.getValues('application') && !form.getValues('aiAssisted') && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => enhanceSingleSection('application')}
+                      className="text-green-600 hover:text-green-800"
+                    >
+                      <Wand2 className="h-4 w-4 mr-1" />
+                      Enhance with AI
                     </Button>
                   )}
                 </CardTitle>
@@ -535,7 +608,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     <Sparkles className="h-5 w-5" />
                     Prayer
                   </span>
-                  {aiSuggestions?.prayer && (
+                  {aiSuggestions?.prayer ? (
                     <Button
                       type="button"
                       variant="ghost"
@@ -545,6 +618,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     >
                       <Brain className="h-4 w-4 mr-1" />
                       Apply AI Suggestion
+                    </Button>
+                  ) : form.getValues('prayer') && !form.getValues('aiAssisted') && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => enhanceSingleSection('prayer')}
+                      className="text-green-600 hover:text-green-800"
+                    >
+                      <Wand2 className="h-4 w-4 mr-1" />
+                      Enhance with AI
                     </Button>
                   )}
                 </CardTitle>
@@ -658,26 +742,30 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 />
               </div>
 
-              {/* AI Enhancement Button */}
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium">Enhance with AI</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Deepen your reflection with spiritual insights
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={enhanceReflection}
-                  disabled={isEnhancing}
-                  className="flex items-center gap-2"
-                >
-                  <Wand2 className="h-4 w-4" />
-                  {isEnhancing ? 'Enhancing...' : 'Enhance Reflection'}
-                </Button>
-              </div>
+              {/* AI Enhancement Button - Only show if content was manually entered */}
+              {!form.getValues('aiAssisted') && form.getValues('observation') && form.getValues('application') && form.getValues('prayer') && (
+                <>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-medium">Enhance with AI</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Deepen your manually written reflection with spiritual insights
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={enhanceReflection}
+                      disabled={isEnhancing}
+                      className="flex items-center gap-2"
+                    >
+                      <Wand2 className="h-4 w-4" />
+                      {isEnhancing ? 'Enhancing...' : 'Enhance Reflection'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
