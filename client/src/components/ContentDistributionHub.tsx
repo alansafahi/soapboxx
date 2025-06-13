@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +36,37 @@ export default function ContentDistributionHub() {
   const [distributionPackage, setDistributionPackage] = useState<DistributionPackage | null>(null);
   const [activeTab, setActiveTab] = useState("generate");
   const { toast } = useToast();
+
+  // Check for sermon data from completed sermons
+  useEffect(() => {
+    const sermonData = sessionStorage.getItem('sermonForDistribution');
+    if (sermonData) {
+      try {
+        const parsedData = JSON.parse(sermonData);
+        setSermonTitle(parsedData.title || "");
+        setSermonSummary(parsedData.outline?.theme || "");
+        setKeyPoints(parsedData.mainPoints || []);
+        
+        // Clear the session storage after loading
+        sessionStorage.removeItem('sermonForDistribution');
+        
+        // Show notification
+        toast({
+          title: "Sermon Loaded",
+          description: `"${parsedData.title}" is ready for content distribution.`
+        });
+        
+        // Auto-generate content if we have enough data
+        if (parsedData.title && parsedData.mainPoints?.length > 0) {
+          setTimeout(() => {
+            handleGenerate();
+          }, 1000);
+        }
+      } catch (error) {
+        console.error("Error loading sermon data:", error);
+      }
+    }
+  }, []);
 
   // Content generation mutation
   const generateMutation = useMutation({

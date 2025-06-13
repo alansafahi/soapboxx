@@ -1298,6 +1298,31 @@ export default function SermonCreationStudio() {
                                 <CheckCircle className="w-4 h-4 mr-1" />
                                 View
                               </Button>
+                              <Button 
+                                variant="default" 
+                                size="sm"
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                onClick={() => {
+                                  // Navigate to content distribution with sermon data
+                                  const sermonData = {
+                                    title: sermon.title,
+                                    content: parsedContent,
+                                    outline: parsedContent.outline,
+                                    theme: parsedContent.outline?.theme,
+                                    mainPoints: parsedContent.outline?.mainPoints || [],
+                                    scriptureRefs: parsedContent.outline?.scriptureReferences || []
+                                  };
+                                  
+                                  // Store sermon data in sessionStorage for content distribution
+                                  sessionStorage.setItem('sermonForDistribution', JSON.stringify(sermonData));
+                                  
+                                  // Navigate to content distribution page
+                                  window.location.href = '/content-distribution';
+                                }}
+                              >
+                                <Share2 className="w-4 h-4 mr-2" />
+                                Distribute
+                              </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button 
