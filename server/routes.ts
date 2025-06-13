@@ -758,23 +758,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sermon/export', isAuthenticated, async (req: any, res) => {
     try {
       const { title, outline, research, illustrations, enhancement, format = 'docx' } = req.body;
+      const sermonTitle = title || 'Untitled Sermon';
+      const sanitizedTitle = sermonTitle.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
       
-      if (format === 'json') {
-        const exportData = {
-          title: title || 'Untitled Sermon',
-          outline,
-          research,
-          illustrations,
-          enhancement,
-          exportedAt: new Date().toISOString()
-        };
-        
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Disposition', `attachment; filename="${title || 'sermon'}.json"`);
-        res.json(exportData);
-      } else {
-        // Generate formatted text export
-        let content = `SERMON: ${title || 'Untitled Sermon'}\n`;
+      // Generate formatted content
+      const generateContent = () => {
+        let content = `SERMON: ${sermonTitle}\n`;
         content += `Generated on: ${new Date().toLocaleDateString()}\n\n`;
         
         if (outline) {
@@ -783,7 +772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (outline.mainPoints && outline.mainPoints.length > 0) {
             content += `MAIN POINTS:\n`;
-            outline.mainPoints.forEach((point, index) => {
+            outline.mainPoints.forEach((point: any, index: any) => {
               content += `${index + 1}. ${point}\n`;
             });
             content += '\n';
@@ -794,7 +783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (outline.scriptureReferences && outline.scriptureReferences.length > 0) {
             content += `SCRIPTURE REFERENCES:\n`;
-            outline.scriptureReferences.forEach(ref => {
+            outline.scriptureReferences.forEach((ref: any) => {
               content += `- ${ref}\n`;
             });
             content += '\n';
@@ -808,7 +797,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (research.keyThemes && research.keyThemes.length > 0) {
             content += `Key Themes:\n`;
-            research.keyThemes.forEach(theme => {
+            research.keyThemes.forEach((theme: any) => {
               content += `- ${theme}\n`;
             });
             content += '\n';
@@ -817,15 +806,359 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (illustrations && illustrations.length > 0) {
           content += `STORIES & ILLUSTRATIONS:\n`;
-          illustrations.forEach((ill, index) => {
+          illustrations.forEach((ill: any, index: any) => {
             content += `${index + 1}. ${ill.title}\n`;
             content += `   ${ill.story}\n`;
             content += `   Application: ${ill.application}\n\n`;
           });
         }
         
+        if (enhancement) {
+          content += `ENHANCEMENT RECOMMENDATIONS:\n`;
+          if (enhancement.recommendations && enhancement.recommendations.length > 0) {
+            enhancement.recommendations.forEach((rec: any) => {
+              content += `- ${rec}\n`;
+            });
+          }
+        }
+        
+        return content;
+      };
+
+      if (format === 'json') {
+        const exportData = {
+          title: sermonTitle,
+          outline,
+          research,
+          illustrations,
+          enhancement,
+          exportedAt: new Date().toISOString()
+        };
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.json"`);
+        res.json(exportData);
+        
+      } else if (format === 'pdf') {
+        const pdf = require('html-pdf-node');
+        
+        const htmlContent = `
+          <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                h1 { color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 10px; }
+                h2 { color: #4a6fa5; margin-top: 30px; }
+                h3 { color: #666; }
+                .section { margin-bottom: 25px; }
+                .main-points { margin-left: 20px; }
+                .scripture-refs { background: #f8f9fa; padding: 15px; border-left: 4px solid #2c5aa0; }
+                .illustrations { background: #fff9e6; padding: 15px; border-radius: 5px; margin: 10px 0; }
+                .footer { margin-top: 50px; text-align: center; color: #888; border-top: 1px solid #ddd; padding-top: 20px; }
+              </style>
+            </head>
+            <body>
+              <h1>${sermonTitle}</h1>
+              <p><strong>Generated on:</strong> ${new Date().toLocaleDateString()}</p>
+              
+              ${outline ? `
+                <div class="section">
+                  <h2>Theme</h2>
+                  <p>${outline.theme || 'N/A'}</p>
+                </div>
+                
+                <div class="section">
+                  <h2>Introduction</h2>
+                  <p>${outline.introduction || 'N/A'}</p>
+                </div>
+                
+                ${outline.mainPoints && outline.mainPoints.length > 0 ? `
+                  <div class="section">
+                    <h2>Main Points</h2>
+                    <div class="main-points">
+                      ${outline.mainPoints.map((point: any, index: any) => 
+                        `<p><strong>${index + 1}.</strong> ${point}</p>`
+                      ).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+                
+                <div class="section">
+                  <h2>Conclusion</h2>
+                  <p>${outline.conclusion || 'N/A'}</p>
+                </div>
+                
+                <div class="section">
+                  <h2>Call to Action</h2>
+                  <p>${outline.callToAction || 'N/A'}</p>
+                </div>
+                
+                ${outline.scriptureReferences && outline.scriptureReferences.length > 0 ? `
+                  <div class="section scripture-refs">
+                    <h2>Scripture References</h2>
+                    ${outline.scriptureReferences.map((ref: any) => `<p>• ${ref}</p>`).join('')}
+                  </div>
+                ` : ''}
+              ` : ''}
+              
+              ${research ? `
+                <div class="section">
+                  <h2>Biblical Research</h2>
+                  <h3>Commentary</h3>
+                  <p>${research.commentary || 'N/A'}</p>
+                  
+                  <h3>Historical Context</h3>
+                  <p>${research.historicalContext || 'N/A'}</p>
+                  
+                  ${research.keyThemes && research.keyThemes.length > 0 ? `
+                    <h3>Key Themes</h3>
+                    ${research.keyThemes.map((theme: any) => `<p>• ${theme}</p>`).join('')}
+                  ` : ''}
+                </div>
+              ` : ''}
+              
+              ${illustrations && illustrations.length > 0 ? `
+                <div class="section">
+                  <h2>Stories & Illustrations</h2>
+                  ${illustrations.map((ill: any, index: any) => `
+                    <div class="illustrations">
+                      <h3>${index + 1}. ${ill.title}</h3>
+                      <p>${ill.story}</p>
+                      <p><strong>Application:</strong> ${ill.application}</p>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+              
+              ${enhancement && enhancement.recommendations && enhancement.recommendations.length > 0 ? `
+                <div class="section">
+                  <h2>Enhancement Recommendations</h2>
+                  ${enhancement.recommendations.map((rec: any) => `<p>• ${rec}</p>`).join('')}
+                </div>
+              ` : ''}
+              
+              <div class="footer">
+                <p>Generated by SoapBox Sermon Creation Studio</p>
+              </div>
+            </body>
+          </html>
+        `;
+        
+        const options = { 
+          format: 'A4',
+          margin: { top: '1in', right: '1in', bottom: '1in', left: '1in' }
+        };
+        
+        const file = { content: htmlContent };
+        const pdfBuffer = await pdf.generatePdf(file, options);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.pdf"`);
+        res.send(pdfBuffer);
+        
+      } else if (format === 'docx') {
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = require('docx');
+        
+        const doc = new Document({
+          sections: [{
+            properties: {},
+            children: [
+              new Paragraph({
+                text: sermonTitle,
+                heading: HeadingLevel.TITLE,
+                alignment: AlignmentType.CENTER,
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Generated on: ${new Date().toLocaleDateString()}`,
+                    italics: true,
+                  }),
+                ],
+                spacing: { after: 400 },
+              }),
+              
+              ...(outline ? [
+                new Paragraph({
+                  text: "Theme",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                new Paragraph({
+                  text: outline.theme || 'N/A',
+                  spacing: { after: 200 },
+                }),
+                
+                new Paragraph({
+                  text: "Introduction",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                new Paragraph({
+                  text: outline.introduction || 'N/A',
+                  spacing: { after: 200 },
+                }),
+                
+                ...(outline.mainPoints && outline.mainPoints.length > 0 ? [
+                  new Paragraph({
+                    text: "Main Points",
+                    heading: HeadingLevel.HEADING_1,
+                  }),
+                  ...outline.mainPoints.map((point: any, index: any) => 
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: `${index + 1}. `,
+                          bold: true,
+                        }),
+                        new TextRun({
+                          text: point,
+                        }),
+                      ],
+                      spacing: { after: 100 },
+                    })
+                  ),
+                ] : []),
+                
+                new Paragraph({
+                  text: "Conclusion",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                new Paragraph({
+                  text: outline.conclusion || 'N/A',
+                  spacing: { after: 200 },
+                }),
+                
+                new Paragraph({
+                  text: "Call to Action",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                new Paragraph({
+                  text: outline.callToAction || 'N/A',
+                  spacing: { after: 200 },
+                }),
+                
+                ...(outline.scriptureReferences && outline.scriptureReferences.length > 0 ? [
+                  new Paragraph({
+                    text: "Scripture References",
+                    heading: HeadingLevel.HEADING_1,
+                  }),
+                  ...outline.scriptureReferences.map((ref: any) => 
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: `• ${ref}`,
+                        }),
+                      ],
+                      spacing: { after: 100 },
+                    })
+                  ),
+                ] : []),
+              ] : []),
+              
+              ...(research ? [
+                new Paragraph({
+                  text: "Biblical Research",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                new Paragraph({
+                  text: "Commentary",
+                  heading: HeadingLevel.HEADING_2,
+                }),
+                new Paragraph({
+                  text: research.commentary || 'N/A',
+                  spacing: { after: 200 },
+                }),
+                new Paragraph({
+                  text: "Historical Context",
+                  heading: HeadingLevel.HEADING_2,
+                }),
+                new Paragraph({
+                  text: research.historicalContext || 'N/A',
+                  spacing: { after: 200 },
+                }),
+                ...(research.keyThemes && research.keyThemes.length > 0 ? [
+                  new Paragraph({
+                    text: "Key Themes",
+                    heading: HeadingLevel.HEADING_2,
+                  }),
+                  ...research.keyThemes.map((theme: any) => 
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: `• ${theme}`,
+                        }),
+                      ],
+                      spacing: { after: 100 },
+                    })
+                  ),
+                ] : []),
+              ] : []),
+              
+              ...(illustrations && illustrations.length > 0 ? [
+                new Paragraph({
+                  text: "Stories & Illustrations",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                ...illustrations.flatMap((ill: any, index: any) => [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `${index + 1}. ${ill.title}`,
+                        bold: true,
+                      }),
+                    ],
+                    spacing: { after: 100 },
+                  }),
+                  new Paragraph({
+                    text: ill.story,
+                    spacing: { after: 100 },
+                  }),
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: "Application: ",
+                        bold: true,
+                      }),
+                      new TextRun({
+                        text: ill.application,
+                      }),
+                    ],
+                    spacing: { after: 200 },
+                  }),
+                ]),
+              ] : []),
+              
+              ...(enhancement && enhancement.recommendations && enhancement.recommendations.length > 0 ? [
+                new Paragraph({
+                  text: "Enhancement Recommendations",
+                  heading: HeadingLevel.HEADING_1,
+                }),
+                ...enhancement.recommendations.map((rec: any) => 
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `• ${rec}`,
+                      }),
+                    ],
+                    spacing: { after: 100 },
+                  })
+                ),
+              ] : []),
+            ],
+          }],
+        });
+
+        const buffer = await Packer.toBuffer(doc);
+        
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.docx"`);
+        res.send(buffer);
+        
+      } else {
+        // Default to text format
+        const content = generateContent();
+        
         res.setHeader('Content-Type', 'text/plain');
-        res.setHeader('Content-Disposition', `attachment; filename="${title || 'sermon'}.txt"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.txt"`);
         res.send(content);
       }
 

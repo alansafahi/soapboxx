@@ -5,6 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -287,15 +293,15 @@ export default function SermonCreationStudio() {
     });
   };
 
-  const handleExport = () => {
+  const handleExport = (format: 'txt' | 'pdf' | 'docx' | 'json' = 'docx') => {
     const title = currentOutline?.title || sermonTopic || "Untitled Sermon";
     exportMutation.mutate({
       title,
       outline: currentOutline,
       research: currentResearch,
       illustrations,
-      enhancement: null,
-      format: 'txt'
+      enhancement: enhancedOutline ? { enhancedOutline, recommendations: enhancementRecommendations } : null,
+      format
     });
   };
 
@@ -919,19 +925,41 @@ export default function SermonCreationStudio() {
                   )}
                   Save Draft
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleExport}
-                  disabled={exportMutation.isPending}
-                >
-                  {exportMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4 mr-2" />
-                  )}
-                  Export
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={exportMutation.isPending}
+                    >
+                      {exportMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
+                      Export
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleExport('docx')}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Word Document (.docx)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                      <FileImage className="w-4 h-4 mr-2" />
+                      PDF Document (.pdf)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('txt')}>
+                      <File className="w-4 h-4 mr-2" />
+                      Text File (.txt)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('json')}>
+                      <Code className="w-4 h-4 mr-2" />
+                      JSON Data (.json)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button variant="outline" size="sm">
                   <Share2 className="w-4 h-4 mr-2" />
                   Share
