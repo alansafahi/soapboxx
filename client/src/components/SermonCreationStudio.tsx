@@ -44,6 +44,7 @@ export default function SermonCreationStudio() {
   const [currentOutline, setCurrentOutline] = useState<SermonOutline | null>(null);
   const [currentResearch, setCurrentResearch] = useState<BiblicalResearch | null>(null);
   const [illustrations, setIllustrations] = useState<SermonIllustration[]>([]);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const { toast } = useToast();
 
   // Biblical Research Mutation
@@ -507,24 +508,37 @@ export default function SermonCreationStudio() {
                                 <span className="ml-2 text-gray-700">{illustration.visualElements.slideTitle}</span>
                               </div>
                               
-                              {/* Generated Image Display */}
+                              {/* Enhanced Generated Image Display */}
                               {illustration.visualElements.generatedImageUrl && (
-                                <div className="space-y-2">
-                                  <span className="font-medium text-purple-800">Generated Slide Image:</span>
-                                  <div className="relative">
+                                <div className="space-y-3">
+                                  <span className="font-medium text-purple-800">AI-Generated Presentation Slide:</span>
+                                  <div className="relative group">
                                     <img 
                                       src={illustration.visualElements.generatedImageUrl} 
                                       alt={illustration.visualElements.slideTitle}
-                                      className="w-full h-32 object-cover rounded-lg border border-purple-200"
+                                      className="w-full h-40 object-cover rounded-lg border-2 border-purple-200 shadow-md hover:shadow-lg transition-shadow duration-200"
                                     />
+                                    {/* Image Quality & Style Badges */}
+                                    <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                                      <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                        HD Quality
+                                      </span>
+                                      {illustration.visualElements.audienceStyle && (
+                                        <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                          {targetAudience || 'Custom'} Style
+                                        </span>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Download Button */}
                                     <button
                                       onClick={() => {
                                         const link = document.createElement('a');
-                                        link.href = illustration.visualElements.generatedImageUrl;
+                                        link.href = illustration.visualElements.generatedImageUrl || '';
                                         link.download = `${illustration.title.replace(/\s+/g, '-')}-slide.png`;
                                         link.click();
                                       }}
-                                      className="absolute top-2 right-2 bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs flex items-center"
+                                      className="absolute top-2 right-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                     >
                                       <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -532,6 +546,27 @@ export default function SermonCreationStudio() {
                                       Download
                                     </button>
                                   </div>
+                                  
+                                  {/* Image Generation Details */}
+                                  {(illustration.visualElements.audienceStyle || illustration.visualElements.themeStyle) && (
+                                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                      <h6 className="text-xs font-semibold text-purple-700 mb-2">Image Customization:</h6>
+                                      <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
+                                        {illustration.visualElements.audienceStyle && (
+                                          <div>
+                                            <span className="font-medium text-purple-600">Audience Style:</span>
+                                            <span className="ml-1 capitalize">{illustration.visualElements.audienceStyle}</span>
+                                          </div>
+                                        )}
+                                        {illustration.visualElements.themeStyle && (
+                                          <div>
+                                            <span className="font-medium text-purple-600">Theme Elements:</span>
+                                            <span className="ml-1">{illustration.visualElements.themeStyle}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                               

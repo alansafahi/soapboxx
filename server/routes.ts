@@ -576,26 +576,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = JSON.parse(response.choices[0].message.content || '{}');
       let illustrations = result.illustrations || [];
       
-      // Generate actual slide images for each illustration
+      // Generate contextually appropriate slide images for each illustration
       for (let i = 0; i < illustrations.length; i++) {
         const illustration = illustrations[i];
         
         if (illustration.visualElements && illustration.visualElements.keyImage) {
           try {
-            // Create a prompt for DALL-E that's suitable for church presentations
-            const imagePrompt = `Professional church presentation slide background: ${illustration.visualElements.keyImage}. Clean, inspiring, appropriate for worship service. High quality, suitable for projection. No text overlay.`;
+            // Create audience-specific and topic-relevant image prompts
+            const audienceStyles = {
+              'youth': 'vibrant, modern, energetic colors, contemporary style',
+              'children': 'bright, colorful, friendly, animated style, welcoming',
+              'families': 'warm, inclusive, multi-generational, heartwarming',
+              'seniors': 'classic, dignified, elegant, timeless composition',
+              'general': 'professional, broadly appealing, balanced composition'
+            };
+
+            const topicThemes = {
+              'hope': 'sunrise, dawn, light breaking through darkness, uplifting',
+              'faith': 'mountains, strong foundations, steady anchor, trust',
+              'love': 'warm light, embrace, heart imagery, connection',
+              'peace': 'calm waters, gentle landscapes, serene atmosphere',
+              'forgiveness': 'open hands, bridges, reconciliation imagery',
+              'prayer': 'clasped hands, quiet sanctuary, heavenly light',
+              'worship': 'raised hands, celebration, joyful gathering',
+              'service': 'helping hands, community action, outreach',
+              'salvation': 'cross, redemption imagery, transformation',
+              'guidance': 'lighthouse, path, shepherd imagery, direction'
+            };
+
+            // Determine dominant theme from topic and main points
+            const topicLower = topic.toLowerCase();
+            const mainPointsText = mainPoints.join(' ').toLowerCase();
+            let themeStyle = 'inspirational, spiritual, meaningful';
+            
+            for (const [theme, style] of Object.entries(topicThemes)) {
+              if (topicLower.includes(theme) || mainPointsText.includes(theme)) {
+                themeStyle = style;
+                break;
+              }
+            }
+
+            const audienceStyle = audienceStyles[audience] || audienceStyles['general'];
+            
+            // Enhanced image prompt with contextual details
+            const imagePrompt = `Professional church presentation slide: ${illustration.visualElements.keyImage}. 
+            Style: ${audienceStyle}, ${themeStyle}. 
+            Theme: ${topic} sermon illustration. 
+            Mood: Inspiring, reverent, appropriate for worship service. 
+            Composition: Clean, high-quality, suitable for large screen projection. 
+            Lighting: Soft, warm, spiritual atmosphere. 
+            No text, no people's faces clearly visible, focus on symbolic and metaphorical imagery.
+            Photography style: Professional, cinematic quality, 16:9 aspect ratio suitable.`;
             
             const imageResponse = await openai.images.generate({
               model: "dall-e-3",
               prompt: imagePrompt,
               n: 1,
-              size: "1024x1024",
-              quality: "standard",
+              size: "1792x1024", // 16:9 aspect ratio for presentation slides
+              quality: "hd",
+              style: "natural"
             });
             
-            // Add the generated image URL to the illustration
-            illustrations[i].visualElements.generatedImageUrl = imageResponse.data[0].url;
+            // Add the generated image URL and metadata to the illustration
+            illustrations[i].visualElements.generatedImageUrl = imageResponse.data?.[0]?.url;
             illustrations[i].visualElements.imagePrompt = imagePrompt;
+            illustrations[i].visualElements.audienceStyle = audienceStyle;
+            illustrations[i].visualElements.themeStyle = themeStyle;
             
           } catch (imageError) {
             console.error('Error generating image for illustration:', imageError);

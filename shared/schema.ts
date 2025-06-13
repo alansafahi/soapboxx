@@ -2713,6 +2713,10 @@ export interface SermonIllustration {
     bulletPoints: string[];
     scriptureConnection: string;
     backgroundSuggestion: string;
+    generatedImageUrl?: string;
+    imagePrompt?: string;
+    audienceStyle?: string;
+    themeStyle?: string;
   };
   presentationTips: {
     timing: string;
