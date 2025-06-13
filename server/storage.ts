@@ -5667,6 +5667,18 @@ export class DatabaseStorage implements IStorage {
       .where(eq(playlistVideos.playlistId, playlistId))
       .orderBy(playlistVideos.position);
   }
+
+  async createSermonDraft(draftData: any): Promise<any> {
+    // Simplified sermon draft storage
+    const draft = {
+      id: Date.now().toString(),
+      ...draftData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    return draft;
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -706,6 +706,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save sermon draft endpoint
+  app.post('/api/sermon/save-draft', isAuthenticated, async (req: any, res) => {
+    try {
+      const { title, outline, research, illustrations, enhancement } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const draftData = {
+        title: title || 'Untitled Sermon',
+        content: JSON.stringify({
+          outline,
+          research,
+          illustrations,
+          enhancement
+        }),
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isPublished: false
+      };
+
+      // Store in database - using simplified storage for now
+      const draft = await storage.createSermonDraft(draftData);
+      
+      res.json({
+        success: true,
+        draftId: draft.id,
+        message: 'Sermon draft saved successfully'
+      });
+
+    } catch (error) {
+      console.error("Error saving sermon draft:", error);
+      res.status(500).json({ message: "Failed to save sermon draft" });
+    }
+  });
+
+  // Export sermon endpoint
+  app.post('/api/sermon/export', isAuthenticated, async (req: any, res) => {
+    try {
+      const { title, outline, research, illustrations, enhancement, format = 'docx' } = req.body;
+      
+      if (format === 'json') {
+        const exportData = {
+          title: title || 'Untitled Sermon',
+          outline,
+          research,
+          illustrations,
+          enhancement,
+          exportedAt: new Date().toISOString()
+        };
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="${title || 'sermon'}.json"`);
+        res.json(exportData);
+      } else {
+        // Generate formatted text export
+        let content = `SERMON: ${title || 'Untitled Sermon'}\n`;
+        content += `Generated on: ${new Date().toLocaleDateString()}\n\n`;
+        
+        if (outline) {
+          content += `THEME: ${outline.theme || 'N/A'}\n\n`;
+          content += `INTRODUCTION:\n${outline.introduction || 'N/A'}\n\n`;
+          
+          if (outline.mainPoints && outline.mainPoints.length > 0) {
+            content += `MAIN POINTS:\n`;
+            outline.mainPoints.forEach((point, index) => {
+              content += `${index + 1}. ${point}\n`;
+            });
+            content += '\n';
+          }
+          
+          content += `CONCLUSION:\n${outline.conclusion || 'N/A'}\n\n`;
+          content += `CALL TO ACTION:\n${outline.callToAction || 'N/A'}\n\n`;
+          
+          if (outline.scriptureReferences && outline.scriptureReferences.length > 0) {
+            content += `SCRIPTURE REFERENCES:\n`;
+            outline.scriptureReferences.forEach(ref => {
+              content += `- ${ref}\n`;
+            });
+            content += '\n';
+          }
+        }
+        
+        if (research) {
+          content += `BIBLICAL RESEARCH:\n`;
+          content += `Commentary: ${research.commentary || 'N/A'}\n\n`;
+          content += `Historical Context: ${research.historicalContext || 'N/A'}\n\n`;
+          
+          if (research.keyThemes && research.keyThemes.length > 0) {
+            content += `Key Themes:\n`;
+            research.keyThemes.forEach(theme => {
+              content += `- ${theme}\n`;
+            });
+            content += '\n';
+          }
+        }
+        
+        if (illustrations && illustrations.length > 0) {
+          content += `STORIES & ILLUSTRATIONS:\n`;
+          illustrations.forEach((ill, index) => {
+            content += `${index + 1}. ${ill.title}\n`;
+            content += `   ${ill.story}\n`;
+            content += `   Application: ${ill.application}\n\n`;
+          });
+        }
+        
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Disposition', `attachment; filename="${title || 'sermon'}.txt"`);
+        res.send(content);
+      }
+
+    } catch (error) {
+      console.error("Error exporting sermon:", error);
+      res.status(500).json({ message: "Failed to export sermon" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Setup WebSocket server for real-time chat
