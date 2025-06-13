@@ -37,6 +37,8 @@ interface DemoStep {
   content?: string;
   icon?: string;
   duration?: number;
+  screenshot?: string;
+  videoUrl?: string;
 }
 
 interface DemoTour {
@@ -65,7 +67,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '.dashboard-header',
         position: 'bottom',
         icon: 'BookOpen',
-        duration: 3000
+        duration: 3000,
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.00.53 AM_1749801661635.png'
       },
       {
         id: 'sermon-creation',
@@ -74,7 +77,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="sermon-creation"]',
         position: 'right',
         action: 'click',
-        icon: 'BookOpen'
+        icon: 'BookOpen',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.06.25 AM_1749801989165.png'
       },
       {
         id: 'content-library',
@@ -83,7 +87,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="content-tab"]',
         position: 'bottom',
         action: 'hover',
-        icon: 'Archive'
+        icon: 'Archive',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.08.32 AM_1749802115963.png'
       },
       {
         id: 'social-publishing',
@@ -92,7 +97,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="social-publish"]',
         position: 'left',
         action: 'click',
-        icon: 'Share2'
+        icon: 'Share2',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.10.10 AM_1749802216228.png'
       },
       {
         id: 'analytics-dashboard',
@@ -101,7 +107,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="analytics-tab"]',
         position: 'bottom',
         action: 'click',
-        icon: 'BarChart3'
+        icon: 'BarChart3',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.14.33 AM_1749802476383.png'
       }
     ]
   },
@@ -119,7 +126,8 @@ const DEMO_TOURS: DemoTour[] = [
         description: 'Your central hub for church management and member oversight',
         target: '.admin-dashboard',
         position: 'bottom',
-        icon: 'Settings'
+        icon: 'Settings',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.19.02 AM_1749802745815.png'
       },
       {
         id: 'member-management',
@@ -128,7 +136,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="member-management"]',
         position: 'right',
         action: 'click',
-        icon: 'Users'
+        icon: 'Users',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.19.39 AM_1749802784634.png'
       },
       {
         id: 'event-coordination',
@@ -137,7 +146,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="event-management"]',
         position: 'left',
         action: 'click',
-        icon: 'Calendar'
+        icon: 'Calendar',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.21.56 AM_1749802921679.png'
       },
       {
         id: 'prayer-wall',
@@ -146,7 +156,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="prayer-wall"]',
         position: 'bottom',
         action: 'hover',
-        icon: 'Heart'
+        icon: 'Heart',
+        screenshot: '/attached_assets/Screenshot 2025-06-13 at 1.22.13 AM_1749802937236.png'
       }
     ]
   },
@@ -164,7 +175,8 @@ const DEMO_TOURS: DemoTour[] = [
         description: 'Stay connected with your church community through shared prayers and updates',
         target: '[data-tour="community-feed"]',
         position: 'right',
-        icon: 'MessageSquare'
+        icon: 'MessageSquare',
+        screenshot: '/attached_assets/Screenshot 2025-06-09 at 10.06.11 PM_1749531976072.png'
       },
       {
         id: 'daily-devotionals',
@@ -173,7 +185,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="devotionals"]',
         position: 'bottom',
         action: 'click',
-        icon: 'BookOpen'
+        icon: 'BookOpen',
+        screenshot: '/attached_assets/Screenshot 2025-06-09 at 10.09.31 PM_1749532176078.png'
       },
       {
         id: 'prayer-requests',
@@ -182,7 +195,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="prayer-submit"]',
         position: 'left',
         action: 'click',
-        icon: 'Heart'
+        icon: 'Heart',
+        screenshot: '/attached_assets/Screenshot 2025-06-09 at 10.14.40 PM_1749532485669.png'
       },
       {
         id: 'events-participation',
@@ -191,7 +205,8 @@ const DEMO_TOURS: DemoTour[] = [
         target: '[data-tour="events-list"]',
         position: 'top',
         action: 'hover',
-        icon: 'Calendar'
+        icon: 'Calendar',
+        screenshot: '/attached_assets/Screenshot 2025-06-09 at 10.18.42 PM_1749532726639.png'
       }
     ]
   }
@@ -455,6 +470,26 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
                     <div className="flex-1">
                       <h4 className="font-semibold mb-2">{currentTour.steps[currentStep].title}</h4>
                       <p className="text-gray-600 mb-4">{currentTour.steps[currentStep].description}</p>
+                      
+                      {/* Screenshot Display */}
+                      {currentTour.steps[currentStep].screenshot && (
+                        <div className="mb-4 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors">
+                          <img
+                            src={currentTour.steps[currentStep].screenshot}
+                            alt={`Screenshot for ${currentTour.steps[currentStep].title}`}
+                            className="w-full h-48 object-cover object-top hover:scale-105 transition-transform"
+                            onClick={() => setShowScreenshotModal(true)}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all flex items-center justify-center">
+                            <div className="bg-white bg-opacity-90 px-2 py-1 rounded text-sm font-medium opacity-0 hover:opacity-100 transition-opacity">
+                              Click to enlarge
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       
                       {currentTour.steps[currentStep].action && (
                         <div className="flex items-center gap-2 text-sm text-blue-600">
