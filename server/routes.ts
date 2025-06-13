@@ -463,6 +463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       5. Powerful conclusion
       6. Clear call to action
       7. Supporting scripture references
+      8. Closing prayer or reflection moment
 
       Format as JSON:
       {
@@ -472,7 +473,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "mainPoints": ["point 1", "point 2", "point 3"],
         "conclusion": "powerful closing message",
         "callToAction": "specific action for congregation",
-        "scriptureReferences": ["primary verse", "supporting verse 1", "supporting verse 2"]
+        "scriptureReferences": ["primary verse", "supporting verse 1", "supporting verse 2"],
+        "closingPrayer": "meaningful prayer or reflection to end the service"
       }`;
 
       const response = await openai.chat.completions.create({
@@ -500,7 +502,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mainPoints: outline.mainPoints || [],
         conclusion: outline.conclusion || "",
         callToAction: outline.callToAction || "",
-        scriptureReferences: outline.scriptureReferences || []
+        scriptureReferences: outline.scriptureReferences || [],
+        closingPrayer: outline.closingPrayer || ""
       });
 
     } catch (error) {
@@ -822,6 +825,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
+        if (outline && outline.closingPrayer) {
+          content += `\nCLOSING PRAYER:\n${outline.closingPrayer}\n`;
+        }
+        
         return content;
       };
 
@@ -897,6 +904,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   <div class="section scripture-refs">
                     <h2>Scripture References</h2>
                     ${outline.scriptureReferences.map((ref: any) => `<p>• ${ref}</p>`).join('')}
+                  </div>
+                ` : ''}
+                
+                ${outline.closingPrayer ? `
+                  <div class="section" style="background: #f0f4ff; padding: 20px; border-left: 4px solid #4a6fa5; border-radius: 5px;">
+                    <h2 style="color: #4a6fa5;">Closing Prayer</h2>
+                    <p style="font-style: italic; color: #2c3e50;">${outline.closingPrayer}</p>
                   </div>
                 ` : ''}
               ` : ''}

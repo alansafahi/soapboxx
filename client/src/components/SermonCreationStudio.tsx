@@ -30,6 +30,7 @@ interface SermonOutline {
   conclusion: string;
   callToAction: string;
   scriptureReferences: string[];
+  closingPrayer?: string;
 }
 
 interface BiblicalResearch {
@@ -555,6 +556,16 @@ export default function SermonCreationStudio() {
                       ))}
                     </div>
                   </div>
+                  
+                  {currentOutline.closingPrayer && (
+                    <div className="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-400">
+                      <h4 className="font-semibold text-indigo-900 mb-2 flex items-center">
+                        <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
+                        Closing Prayer
+                      </h4>
+                      <p className="text-indigo-800 text-sm leading-relaxed italic">{currentOutline.closingPrayer}</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
