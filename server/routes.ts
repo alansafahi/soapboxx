@@ -4083,7 +4083,7 @@ Return JSON with this exact structure:
   app.get('/api/demo/screenshots/:filename(*)', (req, res) => {
     try {
       const filename = decodeURIComponent(req.params.filename);
-      const imagePath = path.join(process.cwd(), 'attached_assets', filename);
+      const imagePath = path.resolve('attached_assets', filename);
       
       // Check if file exists
       if (!fs.existsSync(imagePath)) {
