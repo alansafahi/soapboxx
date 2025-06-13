@@ -2803,7 +2803,7 @@ export default function AdminPortal() {
             {/* Engagement Analytics Section - Show for authorized roles */}
             {hasAnalyticsAccess() && (
               <div className="space-y-6">
-              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Social Media & Content Engagement</h3>
                 <Button
                   onClick={() => window.location.href = '/engagement-analytics'}
@@ -2918,7 +2918,7 @@ export default function AdminPortal() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
+              </div>
             )}
           </div>
         )}
