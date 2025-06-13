@@ -2697,42 +2697,66 @@ Format your response as JSON with the following structure:
         return res.status(400).json({ message: 'Scripture reference is required' });
       }
 
-      // Use the existing lookupBibleVerse method for better performance
-      const verse = await storage.lookupBibleVerse(reference);
+      // Normalize the reference for better matching
+      const normalizedRef = reference.toLowerCase().replace(/\s+/g, ' ').trim();
+      
+      // First try exact match
+      const exactVerse = await storage.lookupBibleVerse(reference);
+      if (exactVerse) {
+        return res.json({
+          success: true,
+          verse: {
+            reference: exactVerse.reference,
+            text: exactVerse.text,
+            version: version
+          }
+        });
+      }
 
-      if (verse) {
+      // If no exact match, try broader search with multiple strategies
+      const verses = await storage.getBibleVerses();
+      
+      // Strategy 1: Find verses that start with the reference (for partial matches like "Matthew 11:28" matching "Matthew 11:28-30")
+      let matchingVerse = verses.find(v => {
+        const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
+        return verseRef.startsWith(normalizedRef) || normalizedRef.startsWith(verseRef);
+      });
+      
+      // Strategy 2: Find verses that contain the reference
+      if (!matchingVerse) {
+        matchingVerse = verses.find(v => {
+          const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
+          return verseRef.includes(normalizedRef) || normalizedRef.includes(verseRef);
+        });
+      }
+      
+      // Strategy 3: Parse book and chapter for broader matching
+      if (!matchingVerse) {
+        const refMatch = normalizedRef.match(/^(.+?)\s+(\d+):(\d+)/);
+        if (refMatch) {
+          const [, book, chapter, verse] = refMatch;
+          matchingVerse = verses.find(v => {
+            const verseRef = v.reference.toLowerCase();
+            return verseRef.includes(book.toLowerCase()) && 
+                   verseRef.includes(`${chapter}:`) &&
+                   (verseRef.includes(`:${verse}`) || verseRef.includes(`${verse}-`));
+          });
+        }
+      }
+
+      if (matchingVerse) {
         res.json({
           success: true,
           verse: {
-            reference: verse.reference,
-            text: verse.text,
+            reference: matchingVerse.reference,
+            text: matchingVerse.text,
             version: version
           }
         });
       } else {
-        // Try a broader search in the full database
-        const verses = await storage.getBibleVerses();
-        const normalizedRef = reference.toLowerCase().replace(/\s+/g, ' ').trim();
-        
-        const matchingVerse = verses.find(v => {
-          const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
-          return verseRef.includes(normalizedRef) || normalizedRef.includes(verseRef);
+        res.status(404).json({ 
+          message: `Verse not found: ${reference}. Please enter the verse text manually.`
         });
-
-        if (matchingVerse) {
-          res.json({
-            success: true,
-            verse: {
-              reference: matchingVerse.reference,
-              text: matchingVerse.text,
-              version: version
-            }
-          });
-        } else {
-          res.status(404).json({ 
-            message: `Verse not found: ${reference}. Please enter the verse text manually.`
-          });
-        }
       }
     } catch (error) {
       console.error('Bible lookup error:', error);
