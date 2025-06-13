@@ -85,15 +85,7 @@ export default function RoleSwitcher() {
     refetchOnWindowFocus: false,
   });
 
-  // Debug logging
-  console.log('RoleSwitcher Debug:', { 
-    isDemoSite, 
-    hostname: window.location.hostname,
-    roleData,
-    isLoading,
-    canSwitch: roleData?.canSwitch,
-    currentRole: roleData?.currentRole
-  });
+
 
   const switchRoleMutation = useMutation({
     mutationFn: async (newRole: string) => {

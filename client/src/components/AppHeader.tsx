@@ -118,25 +118,13 @@ export default function AppHeader() {
     // Use current active role from role switcher, fallback to base user role
     const currentRole = roleData?.currentRole || userRole?.role || '';
     
-    console.log('Navigation Debug:', {
-      currentRole,
-      roleData: roleData?.currentRole,
-      userRole: userRole?.role,
-      navigationGroups
-    });
-    
-    const filteredGroups = navigationGroups.map(group => ({
+    return navigationGroups.map(group => ({
       ...group,
       items: group.items.filter(item => {
         if (!item.roles) return true;
-        const hasAccess = item.roles.includes(currentRole);
-        console.log(`Item: ${item.label}, Roles: ${item.roles}, Current: ${currentRole}, Access: ${hasAccess}`);
-        return hasAccess;
+        return item.roles.includes(currentRole);
       })
     })).filter(group => group.items.length > 0);
-    
-    console.log('Filtered Groups:', filteredGroups);
-    return filteredGroups;
   };
 
   const isActiveRoute = (href: string) => {
@@ -473,6 +461,10 @@ export default function AppHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
+              <div className="p-2">
+                <RoleSwitcher />
+              </div>
+              <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Link href="/profile">Profile</Link>
               </DropdownMenuItem>
