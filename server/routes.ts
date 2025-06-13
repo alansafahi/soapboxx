@@ -757,6 +757,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's sermon drafts
+  app.get('/api/sermon/drafts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const drafts = await storage.getUserSermonDrafts(userId);
+      
+      res.json(drafts);
+    } catch (error) {
+      console.error("Error fetching sermon drafts:", error);
+      res.status(500).json({ message: "Failed to fetch sermon drafts" });
+    }
+  });
+
+  // Get specific sermon draft
+  app.get('/api/sermon/drafts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const draftId = parseInt(req.params.id);
+      
+      const draft = await storage.getSermonDraft(draftId, userId);
+      
+      if (!draft) {
+        return res.status(404).json({ message: "Sermon draft not found" });
+      }
+      
+      res.json(draft);
+    } catch (error) {
+      console.error("Error fetching sermon draft:", error);
+      res.status(500).json({ message: "Failed to fetch sermon draft" });
+    }
+  });
+
+  // Update sermon draft
+  app.put('/api/sermon/drafts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const draftId = parseInt(req.params.id);
+      const { title, outline, research, illustrations, enhancement } = req.body;
+      
+      const updates = {
+        title: title || 'Untitled Sermon',
+        content: JSON.stringify({
+          outline,
+          research,
+          illustrations,
+          enhancement
+        }),
+      };
+      
+      const draft = await storage.updateSermonDraft(draftId, userId, updates);
+      
+      if (!draft) {
+        return res.status(404).json({ message: "Sermon draft not found" });
+      }
+      
+      res.json({
+        success: true,
+        draft,
+        message: 'Sermon draft updated successfully'
+      });
+    } catch (error) {
+      console.error("Error updating sermon draft:", error);
+      res.status(500).json({ message: "Failed to update sermon draft" });
+    }
+  });
+
+  // Delete sermon draft
+  app.delete('/api/sermon/drafts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const draftId = parseInt(req.params.id);
+      
+      await storage.deleteSermonDraft(draftId, userId);
+      
+      res.json({
+        success: true,
+        message: 'Sermon draft deleted successfully'
+      });
+    } catch (error) {
+      console.error("Error deleting sermon draft:", error);
+      res.status(500).json({ message: "Failed to delete sermon draft" });
+    }
+  });
+
   // Export sermon endpoint
   app.post('/api/sermon/export', isAuthenticated, async (req: any, res) => {
     try {

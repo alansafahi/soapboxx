@@ -5669,7 +5669,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSermonDraft(draftData: any): Promise<any> {
-    const [draft] = await this.db.insert(schema.sermonDrafts).values({
+    const [draft] = await db.insert(sermonDrafts).values({
       title: draftData.title,
       content: draftData.content,
       userId: draftData.userId,
@@ -5683,6 +5683,53 @@ export class DatabaseStorage implements IStorage {
     }).returning();
     
     return draft;
+  }
+
+  async getUserSermonDrafts(userId: string): Promise<any[]> {
+    const drafts = await db
+      .select()
+      .from(sermonDrafts)
+      .where(eq(sermonDrafts.userId, userId))
+      .orderBy(desc(sermonDrafts.updatedAt));
+    
+    return drafts;
+  }
+
+  async getSermonDraft(draftId: number, userId: string): Promise<any> {
+    const [draft] = await db
+      .select()
+      .from(sermonDrafts)
+      .where(and(
+        eq(sermonDrafts.id, draftId),
+        eq(sermonDrafts.userId, userId)
+      ));
+    
+    return draft;
+  }
+
+  async updateSermonDraft(draftId: number, userId: string, updates: any): Promise<any> {
+    const [draft] = await db
+      .update(sermonDrafts)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(sermonDrafts.id, draftId),
+        eq(sermonDrafts.userId, userId)
+      ))
+      .returning();
+    
+    return draft;
+  }
+
+  async deleteSermonDraft(draftId: number, userId: string): Promise<void> {
+    await db
+      .delete(sermonDrafts)
+      .where(and(
+        eq(sermonDrafts.id, draftId),
+        eq(sermonDrafts.userId, userId)
+      ));
   }
 }
 
