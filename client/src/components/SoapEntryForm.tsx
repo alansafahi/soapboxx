@@ -168,22 +168,32 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       onSuccess();
     },
     onError: (error) => {
+      console.log('=== SAVE MUTATION ERROR HANDLER ===');
       console.error('S.O.A.P. save error:', error);
       console.log('Error details:', JSON.stringify(error, null, 2));
       console.log('User context:', user);
+      console.log('Error type:', typeof error);
+      console.log('Error constructor:', error?.constructor?.name);
       
       let errorMessage = "Failed to save S.O.A.P. entry. Please try again.";
       
       if (error && typeof error === 'object' && 'message' in error) {
-        if (error.message === 'Unauthorized') {
-          errorMessage = "Please refresh the page and log in again.";
+        const errorMsg = error.message as string;
+        console.log('Parsed error message:', errorMsg);
+        
+        if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        } else if (errorMsg.includes('400')) {
+          errorMessage = "Invalid data. Please check all required fields are filled.";
+        } else if (errorMsg.includes('500')) {
+          errorMessage = "Server error. Please try again in a moment.";
         } else {
-          errorMessage = error.message as string;
+          errorMessage = errorMsg;
         }
       }
       
       toast({
-        title: "Error",
+        title: "Save Failed",
         description: errorMessage,
         variant: "destructive",
       });

@@ -4420,14 +4420,21 @@ Return JSON with this exact structure:
       const userId = req.user?.claims?.sub || req.user?.id;
       const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
 
+      console.log('Fetching S.O.A.P. entries for user:', userId);
+      console.log('Query parameters:', { churchId, isPublic, limit, offset });
+
       const options = {
         churchId: churchId ? parseInt(churchId) : undefined,
-        isPublic: isPublic === 'true',
+        // Only filter by isPublic if explicitly provided in query
+        isPublic: isPublic !== undefined ? isPublic === 'true' : undefined,
         limit: parseInt(limit),
         offset: parseInt(offset),
       };
 
+      console.log('Storage options:', options);
+
       const entries = await storage.getSoapEntries(userId, options);
+      console.log('Found entries:', entries.length);
       res.json(entries);
     } catch (error) {
       console.error('Error fetching S.O.A.P. entries:', error);
