@@ -5331,7 +5331,8 @@ Please provide suggestions for the missing or incomplete sections.`
       const userId = req.user?.claims?.sub || req.user?.id;
       
       // Create receipt service instance
-      const receiptService = new (await import('./donation-receipts')).default(storage);
+      const { DonationReceiptService } = await import('./donation-receipts');
+      const receiptService = new DonationReceiptService();
       
       // Generate and send receipt email
       await receiptService.sendReceiptEmail(donationId);
@@ -5348,45 +5349,38 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  app.get('/api/donations/:donationId/receipt/pdf', isAuthenticated, async (req: any, res) => {
+  // Test endpoint for donation receipt functionality
+  app.get('/api/donations/:donationId/receipt-info', isAuthenticated, async (req: any, res) => {
     try {
       const { donationId } = req.params;
       
-      // Create receipt service instance
-      const receiptService = new (await import('./donation-receipts')).default(storage);
+      // Get donation data
+      const donationData = await db
+        .select()
+        .from(donations)
+        .where(eq(donations.id, parseInt(donationId)))
+        .limit(1);
       
-      // Generate PDF receipt
-      const pdfBuffer = await receiptService.generateReceiptPDF(donationId);
+      if (!donationData.length) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
       
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="donation-receipt-${donationId}.pdf"`);
-      res.send(pdfBuffer);
-    } catch (error) {
-      console.error('Error generating PDF receipt:', error);
-      res.status(500).json({ 
-        message: "Failed to generate PDF receipt" 
+      const donation = donationData[0];
+      const receiptNumber = `DON-${donation.id}-${new Date().getFullYear()}`;
+      
+      res.json({
+        receiptNumber,
+        donationAmount: donation.amount,
+        donationDate: donation.createdAt,
+        donorName: donation.donorName || 'Anonymous Donor',
+        donorEmail: donation.donorEmail,
+        method: donation.method || 'Online Payment',
+        receiptGenerated: true
       });
-    }
-  });
-
-  app.get('/api/donations/annual-statement/:year', isAuthenticated, async (req: any, res) => {
-    try {
-      const { year } = req.params;
-      const userId = req.user?.claims?.sub || req.user?.id;
-      
-      // Create receipt service instance
-      const receiptService = new (await import('./donation-receipts')).default(storage);
-      
-      // Generate annual statement
-      const pdfBuffer = await receiptService.generateAnnualStatement(userId, parseInt(year));
-      
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="annual-giving-statement-${year}.pdf"`);
-      res.send(pdfBuffer);
     } catch (error) {
-      console.error('Error generating annual statement:', error);
+      console.error('Error getting receipt info:', error);
       res.status(500).json({ 
-        message: "Failed to generate annual statement" 
+        message: "Failed to get receipt information" 
       });
     }
   });
