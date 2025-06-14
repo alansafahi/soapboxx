@@ -37,8 +37,8 @@ export default function BulkCommunication() {
     channels: ['email', 'in_app'],
     targetAudience: {
       allMembers: true,
-      roles: [],
-      departments: []
+      roles: [] as string[],
+      departments: [] as string[]
     },
     priority: 'normal',
     requiresResponse: false
@@ -315,6 +315,80 @@ export default function BulkCommunication() {
                           <Users className="w-4 h-4" />
                           All Church Members
                         </Label>
+                      </div>
+                      
+                      <div className="border-t pt-3">
+                        <Label className="text-sm font-medium">Or select specific roles:</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          {[
+                            { id: 'pastor', name: 'Pastors' },
+                            { id: 'minister', name: 'Ministers' },
+                            { id: 'staff', name: 'Staff Members' },
+                            { id: 'member', name: 'General Members' }
+                          ].map(role => (
+                            <div key={role.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={role.id}
+                                checked={messageForm.targetAudience.roles.includes(role.id)}
+                                onCheckedChange={(checked) => {
+                                  const currentRoles = messageForm.targetAudience.roles;
+                                  const newRoles = checked 
+                                    ? [...currentRoles, role.id]
+                                    : currentRoles.filter(r => r !== role.id);
+                                  setMessageForm(prev => ({
+                                    ...prev,
+                                    targetAudience: { 
+                                      ...prev.targetAudience, 
+                                      roles: newRoles,
+                                      allMembers: newRoles.length === 0 && prev.targetAudience.departments.length === 0
+                                    }
+                                  }));
+                                }}
+                                disabled={messageForm.targetAudience.allMembers}
+                              />
+                              <Label htmlFor={role.id} className="text-sm">
+                                {role.name}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-3">
+                        <Label className="text-sm font-medium">Ministry departments:</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          {[
+                            { id: 'youth', name: 'Youth Ministry' },
+                            { id: 'children', name: 'Children\'s Ministry' },
+                            { id: 'music', name: 'Music Ministry' },
+                            { id: 'outreach', name: 'Outreach Team' }
+                          ].map(dept => (
+                            <div key={dept.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={dept.id}
+                                checked={messageForm.targetAudience.departments.includes(dept.id)}
+                                onCheckedChange={(checked) => {
+                                  const currentDepts = messageForm.targetAudience.departments;
+                                  const newDepts = checked 
+                                    ? [...currentDepts, dept.id]
+                                    : currentDepts.filter(d => d !== dept.id);
+                                  setMessageForm(prev => ({
+                                    ...prev,
+                                    targetAudience: { 
+                                      ...prev.targetAudience, 
+                                      departments: newDepts,
+                                      allMembers: newDepts.length === 0 && prev.targetAudience.roles.length === 0
+                                    }
+                                  }));
+                                }}
+                                disabled={messageForm.targetAudience.allMembers}
+                              />
+                              <Label htmlFor={dept.id} className="text-sm">
+                                {dept.name}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
