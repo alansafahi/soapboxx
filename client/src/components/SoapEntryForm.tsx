@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, BookOpen, Eye, Users, Lightbulb, Save, Sparkles, Calendar, Brain, Wand2, Globe, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +48,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [aiSuggestions, setAiSuggestions] = useState<any>(null);
   const [reflectionQuestions, setReflectionQuestions] = useState<string[]>([]);
   const [contextualInfo, setContextualInfo] = useState<any>(null);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState('NIV');
 
@@ -398,10 +401,36 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     // Check if there's existing text and user hasn't explicitly requested overwrite
     const currentScripture = form.getValues('scripture');
     if (currentScripture && !forceOverwrite) {
-      const shouldOverwrite = window.confirm(
-        `There's already text in the Scripture field. Do you want to replace it with the looked up verse?`
-      );
-      if (!shouldOverwrite) return;
+      // Look up the verse first to show it in the dialog
+      setIsLookingUpVerse(true);
+      try {
+        const response = await apiRequest('/api/bible/lookup-verse', {
+          method: 'POST',
+          body: { 
+            reference: reference.trim(),
+            version: selectedVersion 
+          },
+        });
+        
+        const verseText = response.verse?.text || response.text;
+        const verseRef = response.verse?.reference || response.reference || reference;
+        const verseVersion = response.verse?.version || response.version || selectedVersion;
+        
+        if (verseText) {
+          setPendingVerse({ reference: verseRef, text: verseText, version: verseVersion });
+          setShowReplaceDialog(true);
+          setIsLookingUpVerse(false);
+          return;
+        }
+      } catch (error) {
+        setIsLookingUpVerse(false);
+        toast({
+          title: "Scripture Lookup",
+          description: `"${reference}" not found. Please enter the verse text manually.`,
+          variant: "default",
+        });
+        return;
+      }
     }
 
     setIsLookingUpVerse(true);
