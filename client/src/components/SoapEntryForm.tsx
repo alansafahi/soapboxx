@@ -148,9 +148,23 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       onSuccess();
     },
     onError: (error) => {
+      console.error('S.O.A.P. save error:', error);
+      console.log('Error details:', JSON.stringify(error, null, 2));
+      console.log('User context:', user);
+      
+      let errorMessage = "Failed to save S.O.A.P. entry. Please try again.";
+      
+      if (error && typeof error === 'object' && 'message' in error) {
+        if (error.message === 'Unauthorized') {
+          errorMessage = "Please refresh the page and log in again.";
+        } else {
+          errorMessage = error.message as string;
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to save S.O.A.P. entry. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
