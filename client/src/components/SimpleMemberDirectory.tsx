@@ -192,13 +192,36 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="interests">Interests & Ministries</Label>
-                  <Textarea
-                    id="interests"
-                    value={newMember.interests}
-                    onChange={(e) => setNewMember({ ...newMember, interests: e.target.value })}
-                    placeholder="Enter interests, ministries, or areas of service"
-                    rows={3}
-                  />
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {[
+                        "Youth Ministry", "Children's Ministry", "Worship Team", "Prayer Ministry",
+                        "Missions", "Community Outreach", "Bible Study", "Teaching",
+                        "Music & Arts", "Administrative", "Hospitality", "Small Groups",
+                        "Discipleship", "Evangelism", "Counseling", "Media & Technology"
+                      ].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => {
+                            const current = newMember.interests;
+                            const newValue = current ? `${current}, ${suggestion}` : suggestion;
+                            setNewMember({ ...newMember, interests: newValue });
+                          }}
+                          className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
+                        >
+                          + {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                    <Textarea
+                      id="interests"
+                      value={newMember.interests}
+                      onChange={(e) => setNewMember({ ...newMember, interests: e.target.value })}
+                      placeholder="Select from suggestions above or enter custom interests, ministries, or areas of service"
+                      rows={3}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="flex justify-end gap-3">
