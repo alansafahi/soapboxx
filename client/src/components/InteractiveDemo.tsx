@@ -286,6 +286,8 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
       });
       // Invalidate tour status to refresh the badge visibility
       queryClient.invalidateQueries({ queryKey: ['/api/tour/status'] });
+      // Force refetch to ensure immediate update
+      queryClient.refetchQueries({ queryKey: ['/api/tour/status'] });
     } catch (error) {
       console.error('Failed to mark tour as completed:', error);
     }
