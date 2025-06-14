@@ -15,6 +15,7 @@ import * as schema from "@shared/schema";
 import { userChurches } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
+import DonationReceiptService from './donation-receipts';
 
 // AI-powered post categorization
 async function categorizePost(content: string): Promise<{ type: 'discussion' | 'prayer' | 'announcement' | 'share', title?: string }> {
@@ -5320,6 +5321,73 @@ Please provide suggestions for the missing or incomplete sections.`
     } catch (error) {
       console.error('Error removing member:', error);
       res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
+  // Donation Receipt API Endpoints
+  app.post('/api/donations/:donationId/receipt', isAuthenticated, async (req: any, res) => {
+    try {
+      const { donationId } = req.params;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      // Create receipt service instance
+      const receiptService = new (await import('./donation-receipts')).default(storage);
+      
+      // Generate and send receipt email
+      await receiptService.sendReceiptEmail(donationId);
+      
+      res.json({ 
+        success: true, 
+        message: "Receipt sent successfully" 
+      });
+    } catch (error) {
+      console.error('Error sending receipt:', error);
+      res.status(500).json({ 
+        message: "Failed to send receipt" 
+      });
+    }
+  });
+
+  app.get('/api/donations/:donationId/receipt/pdf', isAuthenticated, async (req: any, res) => {
+    try {
+      const { donationId } = req.params;
+      
+      // Create receipt service instance
+      const receiptService = new (await import('./donation-receipts')).default(storage);
+      
+      // Generate PDF receipt
+      const pdfBuffer = await receiptService.generateReceiptPDF(donationId);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="donation-receipt-${donationId}.pdf"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating PDF receipt:', error);
+      res.status(500).json({ 
+        message: "Failed to generate PDF receipt" 
+      });
+    }
+  });
+
+  app.get('/api/donations/annual-statement/:year', isAuthenticated, async (req: any, res) => {
+    try {
+      const { year } = req.params;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      // Create receipt service instance
+      const receiptService = new (await import('./donation-receipts')).default(storage);
+      
+      // Generate annual statement
+      const pdfBuffer = await receiptService.generateAnnualStatement(userId, parseInt(year));
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="annual-giving-statement-${year}.pdf"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating annual statement:', error);
+      res.status(500).json({ 
+        message: "Failed to generate annual statement" 
+      });
     }
   });
 
