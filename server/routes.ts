@@ -5081,8 +5081,25 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Get user's church to verify permissions
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
-        return res.status(403).json({ message: "Admin access required to add members" });
+      if (!userChurch) {
+        return res.status(403).json({ message: "Must be affiliated with a church to add members" });
+      }
+      
+      // Check if user has proper role permissions using session role system
+      const sessionRoles = req.session?.currentRole;
+      const userRole = sessionRoles || await storage.getUserRole(userId);
+      
+      // Allow church leadership roles to add members
+      const allowedRoles = ['soapbox_owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor', 'admin'];
+      if (!userRole || !allowedRoles.includes(userRole)) {
+        // Also check user_roles table for admin permissions
+        const adminRoleResult = await db.execute(
+          sql`SELECT role FROM user_roles WHERE user_id = ${userId} AND is_active = true AND role IN ('lead_pastor', 'pastor', 'church_admin', 'admin', 'super_admin', 'soapbox_owner')`
+        );
+        
+        if (adminRoleResult.rows.length === 0) {
+          return res.status(403).json({ message: "Church leadership access required to add members" });
+        }
       }
 
       // Validate required fields
