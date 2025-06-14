@@ -277,9 +277,11 @@ export default function AudioBibleDemo() {
                             >
                               {verse.reference}
                             </label>
-                            <Badge className={getThemeColor(verse.theme)}>
-                              {verse.theme}
-                            </Badge>
+                            {verse.category && (
+                              <Badge variant="secondary" className="text-xs">
+                                {verse.category.charAt(0).toUpperCase() + verse.category.slice(1)}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             {verse.text}
