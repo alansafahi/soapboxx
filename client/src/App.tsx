@@ -48,6 +48,7 @@ import VideoLibrary from "@/pages/VideoLibrary";
 import FeatureCatalogPage from "@/pages/FeatureCatalogPage";
 import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
 import SermonStudioPage from "@/pages/SermonStudioPage";
+import BulkCommunication from "@/pages/BulkCommunication";
 import ContentDistributionPage from "@/pages/ContentDistributionPage";
 import PastoralContentDemoPage from "@/pages/PastoralContentDemoPage";
 import EngagementAnalytics from "@/pages/EngagementAnalytics";
@@ -208,6 +209,7 @@ function AppRouter() {
               <Route path="/content-distribution" component={ContentDistributionPage} />
               <Route path="/pastoral-demo" component={PastoralContentDemoPage} />
               <Route path="/engagement-analytics" component={EngagementAnalytics} />
+              <Route path="/communications" component={BulkCommunication} />
               <Route path="/soap" component={SoapPage} />
             </>
           )}

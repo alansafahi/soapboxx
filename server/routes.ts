@@ -4772,5 +4772,134 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // ====== BULK COMMUNICATION ENDPOINTS ======
+  
+  // Get bulk messages for church leadership
+  app.get('/api/communications/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const userChurch = await storage.getUserWithChurch(userId);
+      
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Leadership access required" });
+      }
+
+      const messages = await storage.getBulkMessages(userChurch.churchId);
+      res.json(messages || []);
+    } catch (error) {
+      console.error("Error fetching bulk messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  // Create bulk message/announcement
+  app.post('/api/communications/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const { bulkCommunicationService } = await import('./bulk-communication');
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const userChurch = await storage.getUserWithChurch(userId);
+      
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Leadership access required" });
+      }
+
+      const messageData = {
+        ...req.body,
+        senderId: userId,
+        churchId: userChurch.churchId
+      };
+
+      const message = await bulkCommunicationService.createBulkMessage(messageData);
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error creating bulk message:", error);
+      res.status(500).json({ message: error.message || "Failed to create message" });
+    }
+  });
+
+  // Emergency broadcast endpoint
+  app.post('/api/communications/emergency-broadcast', isAuthenticated, async (req: any, res) => {
+    try {
+      const { bulkCommunicationService } = await import('./bulk-communication');
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const userChurch = await storage.getUserWithChurch(userId);
+      
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Senior leadership access required for emergency broadcasts" });
+      }
+
+      const emergencyMessage = {
+        title: `URGENT: ${req.body.title}`,
+        content: req.body.content,
+        type: 'urgent',
+        channels: ['email', 'push', 'in_app'],
+        targetAudience: { allMembers: true },
+        senderId: userId,
+        churchId: userChurch.churchId,
+        priority: 'urgent',
+        requiresResponse: req.body.requiresResponse || false
+      };
+
+      const message = await bulkCommunicationService.createBulkMessage(emergencyMessage);
+      res.status(201).json({ 
+        message: "Emergency broadcast sent", 
+        messageId: message.id,
+        estimatedRecipients: await storage.getChurchMemberCount?.(userChurch.churchId) || 0
+      });
+    } catch (error) {
+      console.error("Error sending emergency broadcast:", error);
+      res.status(500).json({ message: error.message || "Failed to send emergency broadcast" });
+    }
+  });
+
+  // Get message templates
+  app.get('/api/communications/templates', isAuthenticated, async (req: any, res) => {
+    try {
+      const templates = {
+        announcements: [
+          {
+            id: 'service_update',
+            name: 'Service Update',
+            subject: 'Important Service Information',
+            content: 'We have an important update regarding our upcoming service...'
+          },
+          {
+            id: 'event_reminder',
+            name: 'Event Reminder',
+            subject: 'Reminder: Upcoming Church Event',
+            content: 'This is a friendly reminder about our upcoming event...'
+          }
+        ],
+        emergencies: [
+          {
+            id: 'weather_closure',
+            name: 'Weather Closure',
+            subject: 'URGENT: Service Cancelled Due to Weather',
+            content: 'Due to severe weather conditions, all services and activities are cancelled...'
+          },
+          {
+            id: 'safety_alert',
+            name: 'Safety Alert',
+            subject: 'URGENT: Safety Information',
+            content: 'We want to inform you of an important safety matter...'
+          }
+        ],
+        prayers: [
+          {
+            id: 'prayer_request',
+            name: 'Prayer Request',
+            subject: 'Prayer Request from Church Leadership',
+            content: 'We are asking for your prayers regarding...'
+          }
+        ]
+      };
+
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+      res.status(500).json({ message: "Failed to fetch templates" });
+    }
+  });
+
   return httpServer;
 }
