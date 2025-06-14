@@ -131,25 +131,63 @@ export default function EnhancedAudioPlayer({
                   await audioContext.resume();
                 }
                 
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                // Create multiple oscillators for a richer ambient sound
+                const baseOscillator = audioContext.createOscillator();
+                const harmonicOscillator = audioContext.createOscillator();
+                const subOscillator = audioContext.createOscillator();
                 
-                // Create a gentle ambient tone
-                oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
-                oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Very low volume
+                const baseGain = audioContext.createGain();
+                const harmonicGain = audioContext.createGain();
+                const subGain = audioContext.createGain();
+                const masterGain = audioContext.createGain();
                 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                // Create a peaceful chord progression (C major triad)
+                baseOscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C4
+                harmonicOscillator.frequency.setValueAtTime(329.63, audioContext.currentTime); // E4
+                subOscillator.frequency.setValueAtTime(196.00, audioContext.currentTime); // G3
+                
+                // Use soft wave types
+                baseOscillator.type = 'sine';
+                harmonicOscillator.type = 'triangle';
+                subOscillator.type = 'sine';
+                
+                // Set individual volumes for a balanced mix
+                baseGain.gain.setValueAtTime(0.015, audioContext.currentTime);
+                harmonicGain.gain.setValueAtTime(0.008, audioContext.currentTime);
+                subGain.gain.setValueAtTime(0.010, audioContext.currentTime);
+                masterGain.gain.setValueAtTime(audioSettings.musicVolume * 0.3, audioContext.currentTime);
+                
+                // Connect the audio graph
+                baseOscillator.connect(baseGain);
+                harmonicOscillator.connect(harmonicGain);
+                subOscillator.connect(subGain);
+                
+                baseGain.connect(masterGain);
+                harmonicGain.connect(masterGain);
+                subGain.connect(masterGain);
+                masterGain.connect(audioContext.destination);
+                
+                // Add gentle frequency modulation for organic feel
+                const lfo = audioContext.createOscillator();
+                const lfoGain = audioContext.createGain();
+                lfo.frequency.setValueAtTime(0.1, audioContext.currentTime); // Very slow LFO
+                lfoGain.gain.setValueAtTime(2, audioContext.currentTime); // Subtle modulation
+                lfo.connect(lfoGain);
+                lfoGain.connect(baseOscillator.frequency);
                 
                 if (backgroundAudioRef.current) {
-                  backgroundAudioRef.current.oscillator = oscillator;
-                  backgroundAudioRef.current.gainNode = gainNode;
+                  backgroundAudioRef.current.oscillators = [baseOscillator, harmonicOscillator, subOscillator, lfo];
+                  backgroundAudioRef.current.gainNode = masterGain;
                   backgroundAudioRef.current.isPlaying = true;
                 }
                 
-                oscillator.start();
-                console.log('Background music started');
+                // Start all oscillators
+                baseOscillator.start();
+                harmonicOscillator.start();
+                subOscillator.start();
+                lfo.start();
+                
+                console.log('Enhanced background music started');
               } catch (e) {
                 console.log('Background music unavailable:', e);
               }
@@ -157,11 +195,18 @@ export default function EnhancedAudioPlayer({
             
             pause: () => {
               try {
-                if (backgroundAudioRef.current?.oscillator && backgroundAudioRef.current?.isPlaying) {
-                  backgroundAudioRef.current.oscillator.stop();
-                  backgroundAudioRef.current.oscillator = null;
+                if (backgroundAudioRef.current?.oscillators && backgroundAudioRef.current?.isPlaying) {
+                  // Stop all oscillators
+                  backgroundAudioRef.current.oscillators.forEach(osc => {
+                    try {
+                      osc.stop();
+                    } catch (e) {
+                      // Oscillator might already be stopped
+                    }
+                  });
+                  backgroundAudioRef.current.oscillators = null;
                   backgroundAudioRef.current.isPlaying = false;
-                  console.log('Background music stopped');
+                  console.log('Enhanced background music stopped');
                 }
               } catch (e) {
                 console.log('Background music stop error:', e);
@@ -211,42 +256,72 @@ export default function EnhancedAudioPlayer({
       voice.lang.startsWith('en')
     );
     
-    // 2. Try to find gender-appropriate voice by name patterns
+    // 2. Premium voice preferences for natural, high-quality speech
     if (!selectedVoice) {
-      if (voiceType === 'male') {
-        // Look for male voices in order of preference
+      const premiumVoicePreferences = {
+        'female': [
+          // Microsoft Neural voices (Windows 10/11) - highest quality
+          'Microsoft Zira Desktop - English (United States)', 'Microsoft Hazel Desktop', 'Microsoft Eva Desktop',
+          // Google Cloud voices - very natural
+          'Google US English Female', 'Google en-US-Standard-F', 'Google en-US-Wavenet-F',
+          // macOS premium voices - high quality
+          'Allison', 'Ava', 'Susan', 'Victoria', 'Kathy', 'Princess',
+          // Enhanced system voices
+          'Microsoft Zira', 'Enhanced Female Voice',
+          // Standard quality fallbacks
+          'Alice', 'Catherine', 'Anna', 'Samantha'
+        ],
+        'male': [
+          // Microsoft Neural voices - highest quality
+          'Microsoft David Desktop - English (United States)', 'Microsoft Mark Desktop', 'Microsoft Richard Desktop',
+          // Google Cloud voices - very natural
+          'Google US English Male', 'Google en-US-Standard-D', 'Google en-US-Wavenet-D',
+          // macOS premium voices - high quality
+          'Alex', 'Daniel', 'Tom', 'Oliver', 'Diego',
+          // Enhanced system voices
+          'Microsoft David', 'Enhanced Male Voice',
+          // Standard quality fallbacks
+          'Aaron', 'Albert', 'Arthur', 'Fred'
+        ]
+      };
+      
+      const preferredVoices = premiumVoicePreferences[voiceType] || premiumVoicePreferences['female'];
+      
+      // Try exact matches for premium voices first
+      for (const voiceName of preferredVoices) {
         selectedVoice = voices.find(voice => 
-          voice.lang.startsWith('en') && 
-          (voice.name.toLowerCase().includes('aaron') || 
-           voice.name.toLowerCase().includes('albert') || 
-           voice.name.toLowerCase().includes('daniel') || 
-           voice.name.toLowerCase().includes('arthur') ||
-           voice.name.toLowerCase().includes('alex'))
+          voice.name === voiceName && voice.lang.startsWith('en')
         );
-      } else {
-        // Look for female voices, but NOT Samantha as default
-        selectedVoice = voices.find(voice => 
-          voice.lang.startsWith('en') && 
-          (voice.name.toLowerCase().includes('alice') || 
-           voice.name.toLowerCase().includes('victoria') || 
-           voice.name.toLowerCase().includes('anna') ||
-           voice.name.toLowerCase().includes('catherine'))
-        );
+        if (selectedVoice) {
+          console.log('Selected premium voice (exact):', selectedVoice.name);
+          break;
+        }
+      }
+      
+      // Try partial matches for premium voices
+      if (!selectedVoice) {
+        for (const voiceName of preferredVoices) {
+          selectedVoice = voices.find(voice => 
+            voice.name.toLowerCase().includes(voiceName.toLowerCase()) && 
+            voice.lang.startsWith('en')
+          );
+          if (selectedVoice) {
+            console.log('Selected premium voice (partial):', selectedVoice.name);
+            break;
+          }
+        }
       }
     }
     
-    // 3. Fallback to any English voice that's not the opposite gender
+    // 3. Look for enhanced/neural indicators in voice names
     if (!selectedVoice) {
-      const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
-      if (voiceType === 'male') {
-        // Prefer Aaron or Albert for male
-        selectedVoice = englishVoices.find(v => v.name.includes('Aaron')) || 
-                      englishVoices.find(v => v.name.includes('Albert')) ||
-                      englishVoices[1] || englishVoices[0];
-      } else {
-        // Prefer any voice that's not Samantha as first choice
-        selectedVoice = englishVoices.find(v => !v.name.includes('Samantha')) || 
-                      englishVoices[0];
+      const enhancedKeywords = ['enhanced', 'premium', 'neural', 'natural', 'pro', 'hd', 'desktop'];
+      selectedVoice = voices.find(voice => 
+        voice.lang.startsWith('en') && 
+        enhancedKeywords.some(keyword => voice.name.toLowerCase().includes(keyword))
+      );
+      if (selectedVoice) {
+        console.log('Selected enhanced voice:', selectedVoice.name);
       }
     }
     
@@ -284,10 +359,18 @@ export default function EnhancedAudioPlayer({
         }
       }
       
-      // Apply voice settings with proper fallbacks
-      utterance.rate = stepVoiceSettings?.speed || routine.audioConfig?.voice?.preferredRate || audioSettings.rate || 0.9;
+      // Apply enhanced voice settings with quality optimizations
+      utterance.rate = stepVoiceSettings?.speed || routine.audioConfig?.voice?.preferredRate || audioSettings.rate || 0.85;
       utterance.pitch = audioSettings.pitch || 1.0;
       utterance.volume = audioSettings.volume || 0.9;
+      
+      // Optimize speech quality for premium voices
+      if (voice && (voice.name.includes('Desktop') || voice.name.includes('Premium') || voice.name.includes('Enhanced'))) {
+        // Slightly slower rate for premium voices to showcase quality
+        utterance.rate *= 0.95;
+        // Enhanced volume control for clearer audio
+        utterance.volume = Math.min(utterance.volume * 1.1, 1.0);
+      }
       
       console.log('Voice settings applied - Rate:', utterance.rate, 'Pitch:', utterance.pitch, 'Volume:', utterance.volume);
       
