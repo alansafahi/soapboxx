@@ -88,45 +88,67 @@ export default function WebSpeechAudioPlayer({
     utterance.pitch = voiceSettings.pitch;
     utterance.volume = voiceSettings.volume;
 
-    // Get available voices and set a preferred one
-    const voices = window.speechSynthesis.getVoices();
-    const femaleVoice = voices.find(voice => 
-      voice.name.toLowerCase().includes('female') || 
-      voice.name.toLowerCase().includes('woman') ||
-      voice.name.toLowerCase().includes('samantha') ||
-      voice.name.toLowerCase().includes('karen')
-    );
-    if (femaleVoice) {
-      utterance.voice = femaleVoice;
-    }
-
-    utterance.onstart = () => {
-      setIsPlaying(true);
-      startTimeRef.current = Date.now();
-      startProgressTracking();
-    };
-
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setStepProgress(100);
-      stopProgressTracking();
-      
-      if (routine.autoAdvance && currentStepIndex < totalSteps - 1) {
-        setTimeout(() => {
-          goToNextStep();
-        }, 1000);
-      } else if (currentStepIndex >= totalSteps - 1) {
-        onComplete?.();
+    // Wait for voices to load if needed
+    const setVoiceAndSpeak = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        // Prefer female voices for nurturing spiritual content
+        const femaleVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('female') || 
+          voice.name.toLowerCase().includes('woman') ||
+          voice.name.toLowerCase().includes('samantha') ||
+          voice.name.toLowerCase().includes('karen') ||
+          voice.name.toLowerCase().includes('susan') ||
+          voice.lang.includes('en')
+        );
+        if (femaleVoice) {
+          utterance.voice = femaleVoice;
+        } else if (voices.length > 0) {
+          // Fallback to first available voice
+          utterance.voice = voices[0];
+        }
       }
+
+      utterance.onstart = () => {
+        setIsPlaying(true);
+        startTimeRef.current = Date.now();
+        startProgressTracking();
+      };
+
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setStepProgress(100);
+        stopProgressTracking();
+        
+        if (routine.autoAdvance && currentStepIndex < totalSteps - 1) {
+          setTimeout(() => {
+            goToNextStep();
+          }, 1000);
+        } else if (currentStepIndex >= totalSteps - 1) {
+          onComplete?.();
+        }
+      };
+
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        setIsPlaying(false);
+        stopProgressTracking();
+      };
+
+      speechSynthRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
     };
 
-    utterance.onerror = () => {
-      setIsPlaying(false);
-      stopProgressTracking();
-    };
-
-    speechSynthRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    // Check if voices are loaded
+    if (window.speechSynthesis.getVoices().length === 0) {
+      // Wait for voices to load
+      window.speechSynthesis.onvoiceschanged = () => {
+        setVoiceAndSpeak();
+        window.speechSynthesis.onvoiceschanged = null;
+      };
+    } else {
+      setVoiceAndSpeak();
+    }
   };
 
   const handlePause = () => {

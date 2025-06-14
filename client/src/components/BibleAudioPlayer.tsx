@@ -41,8 +41,7 @@ export default function BibleAudioPlayer({
     mutationFn: async ({ text, voice, musicBed }: { text: string; voice: string; musicBed?: string }) => {
       return await apiRequest(`/api/audio/generate`, {
         method: "POST",
-        body: JSON.stringify({ text, voice, musicBed }),
-        headers: { "Content-Type": "application/json" }
+        body: { text, voice, musicBed }
       });
     },
   });

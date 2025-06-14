@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart, Search, Filter } from "lucide-react";
 import BibleAudioPlayer from "@/components/BibleAudioPlayer";
 import WebSpeechAudioPlayer from "@/components/WebSpeechAudioPlayer";
+import SimpleAudioTest from "@/components/SimpleAudioTest";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function AudioBibleDemo() {
@@ -192,10 +193,16 @@ export default function AudioBibleDemo() {
                 </div>
 
                 {currentVerseId && (
-                  <BibleAudioPlayer 
-                    verseId={currentVerseId}
-                    showControls={true}
-                  />
+                  <div className="space-y-4">
+                    <BibleAudioPlayer 
+                      verseId={currentVerseId}
+                      showControls={true}
+                    />
+                    <div className="border-t pt-4">
+                      <h4 className="text-sm font-medium mb-2">Browser-Based Audio Test</h4>
+                      <SimpleAudioTest />
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
