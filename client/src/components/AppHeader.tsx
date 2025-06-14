@@ -103,10 +103,18 @@ export default function AppHeader() {
       ]
     },
     {
+      id: "giving",
+      label: "Giving & Donations",
+      items: [
+        { href: "/donation-demo", label: "Give Now", icon: DollarSign },
+        { href: "/sms-giving", label: "SMS Giving", icon: Smartphone, roles: ["pastor", "church_admin", "lead_pastor", "admin", "system_admin", "super_admin", "soapbox_owner"] },
+        { href: "/donation-analytics", label: "Giving Analytics", icon: TrendingUp, roles: ["pastor", "church_admin", "lead_pastor", "admin", "system_admin", "super_admin", "soapbox_owner"] }
+      ]
+    },
+    {
       id: "account",
       label: "Account",
       items: [
-        { href: "/donation-demo", label: "Donations", icon: DollarSign },
         { href: "/profile", label: "Profile", icon: User },
         { href: "/features", label: "Feature Catalog", icon: Sparkles },
         { href: "/role-features", label: "Role Enhancement Plan", icon: UserCog }

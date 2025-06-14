@@ -12,7 +12,7 @@ import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
 import * as schema from "@shared/schema";
-import { userChurches } from "@shared/schema";
+import { userChurches, donations } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
 import DonationReceiptService from './donation-receipts';
