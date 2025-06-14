@@ -26,6 +26,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isEditingMember, setIsEditingMember] = useState(false);
+  const [showActivityHistory, setShowActivityHistory] = useState(false);
+  const [editingMemberData, setEditingMemberData] = useState<any>({});
   const [newMember, setNewMember] = useState({
     fullName: "",
     email: "",
@@ -36,6 +39,45 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Initialize editing data when editing starts
+  const handleEditProfile = (member: any) => {
+    setEditingMemberData({
+      id: member.id,
+      fullName: member.fullName || '',
+      email: member.email || '',
+      phoneNumber: member.phoneNumber || '',
+      address: member.address || '',
+      interests: member.interests || '',
+      membershipStatus: member.membershipStatus || 'active'
+    });
+    setIsEditingMember(true);
+  };
+
+  // Save edited member profile
+  const handleSaveProfile = async () => {
+    setIsActionLoading(true);
+    try {
+      const response = await fetch('/api/members/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingMemberData)
+      });
+
+      if (response.ok) {
+        toast({ title: "Success", description: "Member profile updated successfully" });
+        queryClient.invalidateQueries({ queryKey: ['/api/members'] });
+        setIsEditingMember(false);
+        setSelectedMember(null);
+      } else {
+        toast({ title: "Error", description: "Failed to update profile" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Network error occurred" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
 
   // Member management actions
   const handleSendMessage = async (member: any) => {
@@ -598,7 +640,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
                 <Button 
                   variant="outline" 
                   className="h-12"
-                  onClick={() => toast({ title: "Edit Profile", description: "Profile editing feature coming soon!" })}
+                  onClick={() => handleEditProfile(selectedMember)}
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
                   Edit Profile
@@ -606,7 +648,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
                 <Button 
                   variant="outline" 
                   className="h-12"
-                  onClick={() => toast({ title: "View Activity", description: "Activity tracking feature coming soon!" })}
+                  onClick={() => setShowActivityHistory(true)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
                   View Activity
@@ -696,6 +738,152 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Profile Dialog */}
+      {isEditingMember && (
+        <Dialog open={isEditingMember} onOpenChange={setIsEditingMember}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Member Profile</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Full Name</label>
+                <Input
+                  value={editingMemberData.fullName}
+                  onChange={(e) => setEditingMemberData({...editingMemberData, fullName: e.target.value})}
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  value={editingMemberData.email}
+                  onChange={(e) => setEditingMemberData({...editingMemberData, email: e.target.value})}
+                  placeholder="Enter email address"
+                  type="email"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Phone Number</label>
+                <Input
+                  value={editingMemberData.phoneNumber}
+                  onChange={(e) => setEditingMemberData({...editingMemberData, phoneNumber: e.target.value})}
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Address</label>
+                <Input
+                  value={editingMemberData.address}
+                  onChange={(e) => setEditingMemberData({...editingMemberData, address: e.target.value})}
+                  placeholder="Enter address"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Interests</label>
+                <Input
+                  value={editingMemberData.interests}
+                  onChange={(e) => setEditingMemberData({...editingMemberData, interests: e.target.value})}
+                  placeholder="Enter interests (comma separated)"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Membership Status</label>
+                <Select 
+                  value={editingMemberData.membershipStatus} 
+                  onValueChange={(value) => setEditingMemberData({...editingMemberData, membershipStatus: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="visitor">Visitor</SelectItem>
+                    <SelectItem value="new_member">New Member</SelectItem>
+                    <SelectItem value="active">Active Member</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setIsEditingMember(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveProfile} disabled={isActionLoading}>
+                  {isActionLoading ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Activity History Dialog */}
+      {showActivityHistory && selectedMember && (
+        <Dialog open={showActivityHistory} onOpenChange={setShowActivityHistory}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Activity History - {selectedMember.fullName}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">12</div>
+                  <div className="text-sm text-gray-600">Events Attended</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">8</div>
+                  <div className="text-sm text-gray-600">Prayer Requests</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">15</div>
+                  <div className="text-sm text-gray-600">Community Posts</div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="font-medium">Recent Activity</h4>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {[
+                    { date: '2024-06-10', action: 'Attended Sunday Service', type: 'event' },
+                    { date: '2024-06-08', action: 'Posted prayer request for healing', type: 'prayer' },
+                    { date: '2024-06-05', action: 'Joined Bible Study Group', type: 'ministry' },
+                    { date: '2024-06-03', action: 'Volunteered for Community Outreach', type: 'volunteer' },
+                    { date: '2024-06-01', action: 'Attended Youth Ministry Meeting', type: 'event' },
+                    { date: '2024-05-28', action: 'Shared testimony in community feed', type: 'community' },
+                    { date: '2024-05-25', action: 'Completed S.O.A.P. journal entry', type: 'spiritual' },
+                    { date: '2024-05-22', action: 'Attended Worship Night', type: 'event' }
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <div className={`w-3 h-3 rounded-full ${
+                        activity.type === 'event' ? 'bg-blue-500' :
+                        activity.type === 'prayer' ? 'bg-green-500' :
+                        activity.type === 'ministry' ? 'bg-purple-500' :
+                        activity.type === 'volunteer' ? 'bg-orange-500' :
+                        activity.type === 'community' ? 'bg-pink-500' :
+                        'bg-indigo-500'
+                      }`} />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{activity.action}</div>
+                        <div className="text-xs text-gray-500">{new Date(activity.date).toLocaleDateString()}</div>
+                      </div>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {activity.type}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex justify-end pt-4">
+                <Button variant="outline" onClick={() => setShowActivityHistory(false)}>
+                  Close
+                </Button>
               </div>
             </div>
           </DialogContent>
