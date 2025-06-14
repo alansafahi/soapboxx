@@ -151,11 +151,8 @@ export default function AudioBibleDemo() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-purple-600" />
-                  Custom Audio Routine Builder
+                  Audio Bible Experience
                 </CardTitle>
-                <CardDescription>
-                  Create a personalized meditation experience with multiple verses
-                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Search and Filter Interface */}
