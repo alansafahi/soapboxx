@@ -5167,48 +5167,57 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // Update member information
-  app.put('/api/members/:id', isAuthenticated, async (req: any, res) => {
+  // Update member profile
+  app.post('/api/members/update-profile', isAuthenticated, async (req: any, res) => {
     try {
-      const { id } = req.params;
       const updates = req.body;
       const userId = req.user?.claims?.sub || req.user?.id;
       
       // Get user's church to verify permissions
       const userChurch = await storage.getUserChurch(userId);
       if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
-        return res.status(403).json({ message: "Admin access required to update members" });
+        return res.status(403).json({ message: "Permission Required" });
       }
 
-      // Transform updates back to user model format
+      if (!updates.id) {
+        return res.status(400).json({ message: "Member ID is required" });
+      }
+
+      // Transform updates to user model format
       const userUpdates: any = {};
       if (updates.fullName) {
         const nameParts = updates.fullName.split(' ');
         userUpdates.firstName = nameParts[0];
-        userUpdates.lastName = nameParts.slice(1).join(' ');
+        userUpdates.lastName = nameParts.slice(1).join(' ') || '';
       }
       if (updates.email) userUpdates.email = updates.email;
       if (updates.phoneNumber) userUpdates.mobileNumber = updates.phoneNumber;
       if (updates.address) userUpdates.address = updates.address;
-      if (updates.interests) userUpdates.interests = [updates.interests];
+      if (updates.interests) userUpdates.bio = updates.interests;
 
-      // Update the user (simplified - would need proper updateUser method)
-      // For now, return the updated data structure
-      const transformedMember = {
-        id,
-        fullName: updates.fullName || `${userUpdates.firstName} ${userUpdates.lastName}`,
-        email: updates.email,
-        phoneNumber: updates.phoneNumber,
-        address: updates.address,
-        membershipStatus: 'active',
-        interests: updates.interests || '',
-        profileImageUrl: ''
-      };
+      // Update user using upsertUser
+      const updatedUser = await storage.upsertUser({
+        id: updates.id,
+        ...userUpdates
+      });
 
-      res.json(transformedMember);
+      // Return success response
+      res.json({ 
+        success: true, 
+        message: "Member profile updated successfully",
+        member: {
+          id: updates.id,
+          fullName: updates.fullName,
+          email: updates.email,
+          phoneNumber: updates.phoneNumber,
+          address: updates.address,
+          membershipStatus: updates.membershipStatus || 'active',
+          interests: updates.interests || ''
+        }
+      });
     } catch (error) {
-      console.error("Error updating member:", error);
-      res.status(500).json({ message: "Failed to update member" });
+      console.error("Error updating member profile:", error);
+      res.status(500).json({ message: "Failed to update member profile" });
     }
   });
 

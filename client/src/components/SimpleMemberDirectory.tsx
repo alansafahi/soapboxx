@@ -651,7 +651,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
                   onClick={() => setShowActivityHistory(true)}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  View Activity
+                  Member Dashboard
                 </Button>
               </div>
 
@@ -823,66 +823,181 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
         </Dialog>
       )}
 
-      {/* Activity History Dialog */}
+      {/* Member Dashboard Dialog */}
       {showActivityHistory && selectedMember && (
         <Dialog open={showActivityHistory} onOpenChange={setShowActivityHistory}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Activity History - {selectedMember.fullName}</DialogTitle>
+              <DialogTitle>Member Dashboard - {selectedMember.fullName}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">12</div>
-                  <div className="text-sm text-gray-600">Events Attended</div>
+            <div className="space-y-6">
+              
+              {/* Key Statistics Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
+                  <div className="text-3xl font-bold text-blue-600">24</div>
+                  <div className="text-sm text-blue-700">Events Attended</div>
+                  <div className="text-xs text-blue-500 mt-1">8 this month</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">8</div>
-                  <div className="text-sm text-gray-600">Prayer Requests</div>
+                <div className="bg-green-50 p-4 rounded-lg text-center border border-green-200">
+                  <div className="text-3xl font-bold text-green-600">12</div>
+                  <div className="text-sm text-green-700">Prayer Requests</div>
+                  <div className="text-xs text-green-500 mt-1">3 this month</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">15</div>
-                  <div className="text-sm text-gray-600">Community Posts</div>
+                <div className="bg-purple-50 p-4 rounded-lg text-center border border-purple-200">
+                  <div className="text-3xl font-bold text-purple-600">6</div>
+                  <div className="text-sm text-purple-700">Ministry Roles</div>
+                  <div className="text-xs text-purple-500 mt-1">Active</div>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg text-center border border-orange-200">
+                  <div className="text-3xl font-bold text-orange-600">18</div>
+                  <div className="text-sm text-orange-700">Volunteer Hours</div>
+                  <div className="text-xs text-orange-500 mt-1">This month</div>
                 </div>
               </div>
-              
-              <div className="space-y-3">
-                <h4 className="font-medium">Recent Activity</h4>
-                <div className="space-y-2 max-h-80 overflow-y-auto">
+
+              {/* Check-in Statistics */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-3 text-gray-800">Check-in Statistics</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-indigo-600">16</div>
+                    <div className="text-sm text-gray-600">This Month</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-indigo-600">48</div>
+                    <div className="text-sm text-gray-600">Year to Date</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-indigo-600">156</div>
+                    <div className="text-sm text-gray-600">All Time</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-emerald-600">June 9, 2024</div>
+                    <div className="text-sm text-gray-600">Last Check-in</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ministry Involvement */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white border rounded-lg p-4">
+                  <h4 className="font-semibold mb-3 text-gray-800">Current Ministries</h4>
+                  <div className="space-y-2">
+                    {[
+                      { name: 'Youth Ministry', role: 'Team Leader', since: '2023-01' },
+                      { name: 'Worship Team', role: 'Vocalist', since: '2022-08' },
+                      { name: 'Community Outreach', role: 'Volunteer', since: '2024-03' },
+                      { name: 'Bible Study', role: 'Small Group Leader', since: '2023-06' },
+                      { name: 'Prayer Ministry', role: 'Prayer Partner', since: '2022-12' },
+                      { name: 'Children\'s Ministry', role: 'Assistant', since: '2024-01' }
+                    ].map((ministry, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div>
+                          <div className="font-medium text-sm">{ministry.name}</div>
+                          <div className="text-xs text-gray-600">{ministry.role}</div>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Since {new Date(ministry.since).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white border rounded-lg p-4">
+                  <h4 className="font-semibold mb-3 text-gray-800">Recent Events</h4>
+                  <div className="space-y-2">
+                    {[
+                      { event: 'Sunday Service', date: '2024-06-09', attended: true },
+                      { event: 'Bible Study Group', date: '2024-06-07', attended: true },
+                      { event: 'Community Potluck', date: '2024-06-05', attended: true },
+                      { event: 'Youth Ministry Meeting', date: '2024-06-04', attended: false },
+                      { event: 'Prayer Meeting', date: '2024-06-02', attended: true },
+                      { event: 'Worship Night', date: '2024-05-30', attended: true },
+                      { event: 'Sunday Service', date: '2024-05-26', attended: true },
+                      { event: 'Volunteer Training', date: '2024-05-25', attended: false }
+                    ].map((event, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div>
+                          <div className="font-medium text-sm">{event.event}</div>
+                          <div className="text-xs text-gray-600">{new Date(event.date).toLocaleDateString()}</div>
+                        </div>
+                        <Badge variant={event.attended ? 'default' : 'secondary'} className="text-xs">
+                          {event.attended ? 'Attended' : 'Absent'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Activity Timeline */}
+              <div className="bg-white border rounded-lg p-4">
+                <h4 className="font-semibold mb-3 text-gray-800">Activity Timeline</h4>
+                <div className="space-y-3 max-h-60 overflow-y-auto">
                   {[
-                    { date: '2024-06-10', action: 'Attended Sunday Service', type: 'event' },
-                    { date: '2024-06-08', action: 'Posted prayer request for healing', type: 'prayer' },
-                    { date: '2024-06-05', action: 'Joined Bible Study Group', type: 'ministry' },
-                    { date: '2024-06-03', action: 'Volunteered for Community Outreach', type: 'volunteer' },
-                    { date: '2024-06-01', action: 'Attended Youth Ministry Meeting', type: 'event' },
-                    { date: '2024-05-28', action: 'Shared testimony in community feed', type: 'community' },
-                    { date: '2024-05-25', action: 'Completed S.O.A.P. journal entry', type: 'spiritual' },
-                    { date: '2024-05-22', action: 'Attended Worship Night', type: 'event' }
+                    { date: '2024-06-09', action: 'Checked in to Sunday Service', type: 'checkin', time: '10:30 AM' },
+                    { date: '2024-06-07', action: 'Led Bible Study discussion on Romans 8', type: 'ministry', time: '7:00 PM' },
+                    { date: '2024-06-05', action: 'Volunteered at Community Food Drive', type: 'volunteer', time: '2:00 PM' },
+                    { date: '2024-06-04', action: 'Posted prayer request for family member', type: 'prayer', time: '11:15 AM' },
+                    { date: '2024-06-02', action: 'Attended Prayer Meeting', type: 'event', time: '6:30 PM' },
+                    { date: '2024-05-30', action: 'Participated in Worship Team practice', type: 'ministry', time: '7:30 PM' },
+                    { date: '2024-05-28', action: 'Shared testimony in community feed', type: 'community', time: '3:45 PM' },
+                    { date: '2024-05-26', action: 'Checked in to Sunday Service', type: 'checkin', time: '10:30 AM' },
+                    { date: '2024-05-25', action: 'Completed S.O.A.P. journal entry', type: 'spiritual', time: '8:00 AM' },
+                    { date: '2024-05-23', action: 'Helped organize Youth Ministry event', type: 'ministry', time: '6:00 PM' }
                   ].map((activity, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
-                      <div className={`w-3 h-3 rounded-full ${
-                        activity.type === 'event' ? 'bg-blue-500' :
-                        activity.type === 'prayer' ? 'bg-green-500' :
+                    <div key={index} className="flex items-center gap-3 p-3 border-l-4 border-l-blue-200 bg-gray-50 rounded-r">
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                        activity.type === 'checkin' ? 'bg-blue-500' :
                         activity.type === 'ministry' ? 'bg-purple-500' :
                         activity.type === 'volunteer' ? 'bg-orange-500' :
+                        activity.type === 'prayer' ? 'bg-green-500' :
+                        activity.type === 'event' ? 'bg-indigo-500' :
                         activity.type === 'community' ? 'bg-pink-500' :
-                        'bg-indigo-500'
+                        'bg-gray-500'
                       }`} />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium">{activity.action}</div>
-                        <div className="text-xs text-gray-500">{new Date(activity.date).toLocaleDateString()}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900">{activity.action}</div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(activity.date).toLocaleDateString()} at {activity.time}
+                        </div>
                       </div>
-                      <Badge variant="outline" className="text-xs capitalize">
+                      <Badge variant="outline" className="text-xs capitalize flex-shrink-0">
                         {activity.type}
                       </Badge>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* Giving & Financial Overview */}
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg p-4">
+                <h4 className="font-semibold mb-3 text-emerald-800">Giving Overview</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-emerald-600">$450</div>
+                    <div className="text-sm text-emerald-700">This Month</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-emerald-600">$1,350</div>
+                    <div className="text-sm text-emerald-700">Last 3 Months</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-emerald-600">$4,200</div>
+                    <div className="text-sm text-emerald-700">Year to Date</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-emerald-600">June 2, 2024</div>
+                    <div className="text-sm text-emerald-700">Last Gift</div>
+                  </div>
+                </div>
+              </div>
               
               <div className="flex justify-end pt-4">
                 <Button variant="outline" onClick={() => setShowActivityHistory(false)}>
-                  Close
+                  Close Dashboard
                 </Button>
               </div>
             </div>
