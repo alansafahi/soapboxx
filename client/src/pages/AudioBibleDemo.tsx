@@ -110,7 +110,7 @@ export default function AudioBibleDemo() {
       );
     }
     
-    return filtered.slice(0, 50); // Limit to 50 verses for performance
+    return filtered; // Show all available verses
   }, [verses, categoryFilter, searchTerm, useContextualSelection, contextualSelection]);
 
   // Get unique categories from verses
