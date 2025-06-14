@@ -31,7 +31,7 @@ export function DemoTrigger({ variant = "floating", className = "" }: DemoTrigge
   if (variant === "floating") {
     return (
       <>
-        <div className={`fixed bottom-6 right-6 z-40 ${className}`}>
+        <div className={`fixed bottom-20 right-6 z-30 ${className}`}>
           <Button
             onClick={() => setShowDemo(true)}
             className="rounded-full h-12 w-12 shadow-lg hover:shadow-xl transition-all"

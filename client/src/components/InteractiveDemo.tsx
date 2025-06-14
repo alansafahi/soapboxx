@@ -270,13 +270,25 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
     }
   };
 
-  const completeTour = () => {
+  const completeTour = async () => {
     if (!currentTour) return;
     
     setCompleted(prev => [...prev, currentTour.id]);
     setIsPlaying(false);
     setShowHotspot(false);
     trackDemoProgress('tour_completed', currentTour.id);
+    
+    // Mark tour as completed on server to dismiss "New" badge
+    try {
+      await apiRequest('/api/tour/complete', {
+        method: 'POST',
+        body: { tourId: currentTour.id, userRole }
+      });
+      // Invalidate tour status to refresh the badge visibility
+      queryClient.invalidateQueries({ queryKey: ['/api/tour/status'] });
+    } catch (error) {
+      console.error('Failed to mark tour as completed:', error);
+    }
     
     toast({
       title: "Tour Completed!",
