@@ -81,67 +81,135 @@ export default function EnhancedAudioPlayer({
   });
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const backgroundAudioRef = useRef<HTMLAudioElement | null>(null);
+  const backgroundAudioRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
 
   const currentStep = routine.steps[currentStepIndex];
+
+  // Initialize voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        setVoicesLoaded(true);
+        console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
+      }
+    };
+
+    loadVoices();
+    speechSynthesis.addEventListener('voiceschanged', loadVoices);
+
+    return () => {
+      speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+    };
+  }, []);
 
   // Initialize background music
   useEffect(() => {
     if (routine.audioConfig?.musicBed?.baseTrack) {
-      const audio = new Audio();
-      // For demo purposes, we'll use a data URL or placeholder
-      // In production, you would load actual audio files
-      audio.loop = routine.audioConfig.musicBed.loop;
-      audio.volume = audioSettings.musicVolume;
-      backgroundAudioRef.current = audio;
+      console.log('Initializing background music with volume:', audioSettings.musicVolume);
+      // Create a simple ambient tone for background music
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      let oscillator: OscillatorNode | null = null;
+      let gainNode: GainNode | null = null;
+      
+      backgroundAudioRef.current = {
+        play: async () => {
+          try {
+            if (audioContext.state === 'suspended') {
+              await audioContext.resume();
+            }
+            
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+            
+            oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(audioSettings.musicVolume * 0.05, audioContext.currentTime);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            
+            console.log('Background music started');
+          } catch (e) {
+            console.log('Background music not available:', e);
+          }
+        },
+        pause: () => {
+          try {
+            if (oscillator) {
+              oscillator.stop();
+              oscillator = null;
+            }
+          } catch (e) {
+            console.log('Background music stop error:', e);
+          }
+        },
+        volume: audioSettings.musicVolume * 0.05
+      };
     }
 
     return () => {
       if (backgroundAudioRef.current) {
-        backgroundAudioRef.current.pause();
+        try {
+          backgroundAudioRef.current.pause();
+        } catch (e) {
+          // Audio cleanup
+        }
         backgroundAudioRef.current = null;
       }
     };
   }, [routine, audioSettings.musicVolume]);
 
-  // Enhanced voice selection with better filtering
+  // Enhanced voice selection with proper loading
   const getOptimalVoice = () => {
+    if (!voicesLoaded) {
+      return null;
+    }
+
     const voices = speechSynthesis.getVoices();
     const voiceType = routine.audioConfig?.voice?.type || 'female';
     const voiceName = routine.audioConfig?.voice?.name || 'Sarah';
     
+    console.log('Voice selection - Type:', voiceType, 'Name:', voiceName);
     console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
     
     // Priority order for voice selection
     let selectedVoice = null;
     
-    // 1. Try to find exact name match
+    // 1. Try to find exact name match first
     selectedVoice = voices.find(voice => 
-      voice.name.toLowerCase().includes(voiceName.toLowerCase())
+      voice.name.toLowerCase().includes(voiceName.toLowerCase()) && 
+      voice.lang.startsWith('en')
     );
     
-    // 2. Try to find gender-appropriate voice with English
+    // 2. Try to find gender-appropriate voice
     if (!selectedVoice) {
-      const genderKeywords = voiceType === 'male' ? 
-        ['male', 'man', 'david', 'alex', 'daniel', 'tom', 'john'] : 
-        ['female', 'woman', 'sarah', 'samantha', 'alice', 'victoria', 'kate'];
+      const maleKeywords = ['male', 'man', 'david', 'alex', 'daniel', 'tom', 'john', 'fred', 'aaron', 'albert', 'robert', 'james'];
+      const femaleKeywords = ['female', 'woman', 'sarah', 'samantha', 'alice', 'victoria', 'kate', 'anna', 'emma', 'zoe', 'susan', 'mary'];
+      
+      const keywords = voiceType === 'male' ? maleKeywords : femaleKeywords;
       
       selectedVoice = voices.find(voice => 
         voice.lang.startsWith('en') && 
-        genderKeywords.some(keyword => 
+        keywords.some(keyword => 
           voice.name.toLowerCase().includes(keyword)
         )
       );
     }
     
-    // 3. Fallback to any English voice of the right gender
+    // 3. Gender-based selection by index (odd/even pattern)
     if (!selectedVoice) {
-      selectedVoice = voices.find(voice => 
-        voice.lang.startsWith('en') && 
-        (voiceType === 'male' ? !voice.name.toLowerCase().includes('female') : voice.name.toLowerCase().includes('female'))
-      );
+      const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+      if (englishVoices.length > 1) {
+        // Use different voices based on type
+        selectedVoice = voiceType === 'male' ? 
+          englishVoices[1] || englishVoices[0] : 
+          englishVoices[0];
+      }
     }
     
     // 4. Final fallback to first English voice
@@ -149,7 +217,7 @@ export default function EnhancedAudioPlayer({
       selectedVoice = voices.find(voice => voice.lang.startsWith('en'));
     }
     
-    console.log('Selected voice:', selectedVoice?.name, 'for', voiceType, voiceName);
+    console.log('Selected voice:', selectedVoice?.name, 'for requested:', voiceType, voiceName);
     return selectedVoice;
   };
 
@@ -182,23 +250,9 @@ export default function EnhancedAudioPlayer({
         startTimeRef.current = Date.now();
         startProgressTracking();
         
-        // Start background music with fade in
+        // Start background music
         if (backgroundAudioRef.current) {
-          backgroundAudioRef.current.volume = 0;
-          backgroundAudioRef.current.play().catch(e => console.log('Background audio not available'));
-          
-          // Fade in music
-          const fadeInInterval = setInterval(() => {
-            if (backgroundAudioRef.current) {
-              const currentVol = backgroundAudioRef.current.volume;
-              const targetVol = stepVoiceSettings?.musicVolume || audioSettings.musicVolume;
-              if (currentVol < targetVol) {
-                backgroundAudioRef.current.volume = Math.min(currentVol + 0.05, targetVol);
-              } else {
-                clearInterval(fadeInInterval);
-              }
-            }
-          }, 100);
+          backgroundAudioRef.current.play().catch((e: any) => console.log('Background audio not available:', e));
         }
       };
       
