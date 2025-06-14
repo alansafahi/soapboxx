@@ -115,7 +115,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   const saveMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      // Add detailed logging for debugging
+      console.log('=== SAVE MUTATION START ===');
       console.log('Save mutation triggered with data:', data);
       console.log('User context:', user);
       console.log('Church ID from user:', user?.churchId);
@@ -128,17 +128,30 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       };
 
       console.log('Final payload being sent:', payload);
+      console.log('Entry mode:', entry ? 'UPDATE' : 'CREATE');
 
-      if (entry) {
-        return apiRequest(`/api/soap/${entry.id}`, {
-          method: 'PUT',
-          body: payload,
-        });
-      } else {
-        return apiRequest('/api/soap', {
-          method: 'POST',
-          body: payload,
-        });
+      try {
+        let result;
+        if (entry) {
+          console.log('Making PUT request to:', `/api/soap/${entry.id}`);
+          result = await apiRequest(`/api/soap/${entry.id}`, {
+            method: 'PUT',
+            body: payload,
+          });
+        } else {
+          console.log('Making POST request to: /api/soap');
+          result = await apiRequest('/api/soap', {
+            method: 'POST',
+            body: payload,
+          });
+        }
+        console.log('=== SAVE MUTATION SUCCESS ===');
+        console.log('Server response:', result);
+        return result;
+      } catch (error) {
+        console.log('=== SAVE MUTATION ERROR ===');
+        console.error('Save mutation error:', error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -422,8 +435,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   };
 
   const handleSubmit = (data: FormData) => {
+    console.log('=== FORM SUBMISSION DEBUG ===');
     console.log('Form submission triggered with data:', data);
     console.log('Form validation errors:', form.formState.errors);
+    console.log('Save mutation status:', {
+      isPending: saveMutation.isPending,
+      isError: saveMutation.isError,
+      isSuccess: saveMutation.isSuccess
+    });
+    console.log('User context in submit:', user);
+    console.log('About to call saveMutation.mutate...');
+    
     saveMutation.mutate(data);
   };
 
