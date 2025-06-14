@@ -25,8 +25,9 @@ export function DemoTrigger({ variant = "floating", className = "" }: DemoTrigge
     enabled: !!user
   });
 
-  const shouldShowTour = tourStatus?.shouldShowTour;
-  const detectedRole = tourStatus?.userRole || userRole?.role;
+  const shouldShowTour = tourStatus && typeof tourStatus === 'object' && 'shouldShowTour' in tourStatus ? tourStatus.shouldShowTour : false;
+  const detectedRole = (tourStatus && typeof tourStatus === 'object' && 'userRole' in tourStatus ? tourStatus.userRole : null) || 
+                      (userRole && typeof userRole === 'object' && 'role' in userRole ? userRole.role : null);
 
   // Only show floating tour button if user needs to take the tour
   if (variant === "floating" && !shouldShowTour) {

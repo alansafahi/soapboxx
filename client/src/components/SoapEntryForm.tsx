@@ -115,12 +115,19 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   const saveMutation = useMutation({
     mutationFn: async (data: FormData) => {
+      // Add detailed logging for debugging
+      console.log('Save mutation triggered with data:', data);
+      console.log('User context:', user);
+      console.log('Church ID from user:', user?.churchId);
+      
       const payload = {
         ...data,
         churchId: user?.churchId || 1,
         devotionalDate: new Date(data.devotionalDate),
         tags: data.tags || [],
       };
+
+      console.log('Final payload being sent:', payload);
 
       if (entry) {
         return apiRequest(`/api/soap/${entry.id}`, {
