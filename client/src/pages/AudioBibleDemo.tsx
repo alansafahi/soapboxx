@@ -88,7 +88,7 @@ export default function AudioBibleDemo() {
   const categories = useMemo(() => {
     if (!Array.isArray(verses)) return [];
     const cats = verses.map((verse: any) => verse.category).filter(Boolean);
-    return [...new Set(cats)];
+    return Array.from(new Set(cats));
   }, [verses]);
 
   const handleVerseSelection = (verseId: number, checked: boolean) => {
@@ -165,7 +165,7 @@ export default function AudioBibleDemo() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {popularVerses.map((verse) => (
+                  {filteredVerses.slice(0, 12).map((verse: any) => (
                     <Card 
                       key={verse.id} 
                       className={`cursor-pointer transition-all hover:shadow-md ${
@@ -176,9 +176,11 @@ export default function AudioBibleDemo() {
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-sm">{verse.reference}</CardTitle>
-                          <Badge className={getThemeColor(verse.theme)}>
-                            {verse.theme}
-                          </Badge>
+                          {verse.category && (
+                            <Badge variant="secondary" className="text-xs">
+                              {verse.category.charAt(0).toUpperCase() + verse.category.slice(1)}
+                            </Badge>
+                          )}
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">
@@ -265,7 +267,7 @@ export default function AudioBibleDemo() {
                           id={`verse-${verse.id}`}
                           checked={selectedVerses.includes(verse.id)}
                           onCheckedChange={(checked) => handleVerseSelection(verse.id, !!checked)}
-                          disabled={!selectedVerses.includes(verse.id) && selectedVerses.length >= 5}
+                          disabled={!selectedVerses.includes(verse.id) && selectedVerses.length >= 10}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -425,14 +427,33 @@ export default function AudioBibleDemo() {
 
         {/* Audio Routine Player Modal */}
         {showPlayer && generatedRoutine && (
-          <AudioRoutinePlayer
-            routine={generatedRoutine}
-            isOpen={showPlayer}
-            onClose={() => {
-              setShowPlayer(false);
-              setGeneratedRoutine(null);
-            }}
-          />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Custom Audio Experience</h2>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setShowPlayer(false);
+                      setGeneratedRoutine(null);
+                    }}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <AudioRoutinePlayer 
+                  routine={generatedRoutine}
+                  autoStart={true}
+                  onComplete={() => {
+                    setShowPlayer(false);
+                    setGeneratedRoutine(null);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
