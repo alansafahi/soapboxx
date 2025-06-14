@@ -573,38 +573,44 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
             {/* Observation */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
-                    Observation
-                  </span>
-                  {aiSuggestions?.observation ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => applySuggestion('observation', aiSuggestions.observation)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Brain className="h-4 w-4 mr-1" />
-                      Apply AI Suggestion
-                    </Button>
-                  ) : form.getValues('observation') && !form.getValues('aiAssisted') && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => enhanceSingleSection('observation')}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      <Wand2 className="h-4 w-4 mr-1" />
-                      Enhance with AI
-                    </Button>
-                  )}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  What does this passage say? What are the key themes and context?
-                </p>
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Eye className="h-5 w-5" />
+                      Observation
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    What does this passage say? What are the key themes and context?
+                  </p>
+                  
+                  {/* Mobile-friendly AI buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {aiSuggestions?.observation ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => applySuggestion('observation', aiSuggestions.observation)}
+                        className="text-blue-600 hover:text-blue-800 border-blue-200"
+                      >
+                        <Brain className="h-4 w-4 mr-1" />
+                        Apply AI Suggestion
+                      </Button>
+                    ) : form.getValues('observation') && form.getValues('observation').length > 10 && !form.getValues('aiAssisted') && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => enhanceSingleSection('observation')}
+                        className="text-green-600 hover:text-green-800 border-green-200"
+                      >
+                        <Wand2 className="h-4 w-4 mr-1" />
+                        Enhance with AI
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <FormField
@@ -639,38 +645,44 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
             {/* Application */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Application
-                  </span>
-                  {aiSuggestions?.application ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => applySuggestion('application', aiSuggestions.application)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Brain className="h-4 w-4 mr-1" />
-                      Apply AI Suggestion
-                    </Button>
-                  ) : form.getValues('application') && !form.getValues('aiAssisted') && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => enhanceSingleSection('application')}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      <Wand2 className="h-4 w-4 mr-1" />
-                      Enhance with AI
-                    </Button>
-                  )}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  How can you apply this to your daily life? What changes will you make?
-                </p>
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Application
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    How can you apply this to your daily life? What changes will you make?
+                  </p>
+                  
+                  {/* Mobile-friendly AI buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {aiSuggestions?.application ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => applySuggestion('application', aiSuggestions.application)}
+                        className="text-blue-600 hover:text-blue-800 border-blue-200"
+                      >
+                        <Brain className="h-4 w-4 mr-1" />
+                        Apply AI Suggestion
+                      </Button>
+                    ) : form.getValues('application') && form.getValues('application').length > 10 && !form.getValues('aiAssisted') && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => enhanceSingleSection('application')}
+                        className="text-green-600 hover:text-green-800 border-green-200"
+                      >
+                        <Wand2 className="h-4 w-4 mr-1" />
+                        Enhance with AI
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <FormField
@@ -705,38 +717,44 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
             {/* Prayer */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    Prayer
-                  </span>
-                  {aiSuggestions?.prayer ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => applySuggestion('prayer', aiSuggestions.prayer)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Brain className="h-4 w-4 mr-1" />
-                      Apply AI Suggestion
-                    </Button>
-                  ) : form.getValues('prayer') && !form.getValues('aiAssisted') && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => enhanceSingleSection('prayer')}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      <Wand2 className="h-4 w-4 mr-1" />
-                      Enhance with AI
-                    </Button>
-                  )}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Your prayer response to this Scripture. Talk to God about what you've learned.
-                </p>
+                <div className="flex flex-col space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      Prayer
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Your prayer response to this Scripture. Talk to God about what you've learned.
+                  </p>
+                  
+                  {/* Mobile-friendly AI buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {aiSuggestions?.prayer ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => applySuggestion('prayer', aiSuggestions.prayer)}
+                        className="text-blue-600 hover:text-blue-800 border-blue-200"
+                      >
+                        <Brain className="h-4 w-4 mr-1" />
+                        Apply AI Suggestion
+                      </Button>
+                    ) : form.getValues('prayer') && form.getValues('prayer').length > 10 && !form.getValues('aiAssisted') && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => enhanceSingleSection('prayer')}
+                        className="text-green-600 hover:text-green-800 border-green-200"
+                      >
+                        <Wand2 className="h-4 w-4 mr-1" />
+                        Enhance with AI
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <FormField
