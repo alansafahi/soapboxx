@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart, Search, Filter, X } from "lucide-react";
 import BibleAudioPlayer from "@/components/BibleAudioPlayer";
-import WebSpeechAudioPlayer from "@/components/WebSpeechAudioPlayer";
+import EnhancedAudioPlayer from "@/components/EnhancedAudioPlayer";
 import SimpleAudioTest from "@/components/SimpleAudioTest";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -131,12 +131,31 @@ export default function AudioBibleDemo() {
   const generateCustomRoutine = async () => {
     if (selectedVerses.length === 0) return;
 
+    // Debug logging for selected verses
+    console.log('Frontend - Selected verse IDs:', selectedVerses);
+    
+    // Get verse details for debugging
+    const selectedVerseDetails = filteredVerses.filter((verse: any) => 
+      selectedVerses.includes(verse.id)
+    );
+    console.log('Frontend - Selected verse details:', selectedVerseDetails.map((v: any) => ({
+      id: v.id,
+      reference: v.reference,
+      text: v.text?.substring(0, 50) + '...'
+    })));
+
     try {
       const routine = await generateRoutineMutation.mutateAsync({
         verseIds: selectedVerses,
         voice: selectedVoice,
         musicBed: selectedMusicBed
       });
+      
+      console.log('Frontend - Generated routine steps:', routine.steps?.map((step: any) => ({
+        id: step.id,
+        title: step.title,
+        content: step.content?.substring(0, 50) + '...'
+      })));
       
       setGeneratedRoutine(routine);
       setShowPlayer(true);
@@ -506,7 +525,7 @@ export default function AudioBibleDemo() {
                     ✕
                   </Button>
                 </div>
-                <WebSpeechAudioPlayer 
+                <EnhancedAudioPlayer 
                   routine={generatedRoutine}
                   autoStart={true}
                   onComplete={() => {

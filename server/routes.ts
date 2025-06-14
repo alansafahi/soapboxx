@@ -2672,12 +2672,25 @@ ${availableVerses.slice(0, 100).map(v => `${v.id}: ${v.reference} - ${v.text.sub
         return res.status(400).json({ error: 'Verse IDs array is required' });
       }
 
-      // Get all verses
+      // Get all verses with detailed logging
+      console.log('Requested verse IDs:', verseIds);
+      
       const verses = await Promise.all(
-        verseIds.map((id: number) => storage.getBibleVerse(id))
+        verseIds.map(async (id: number) => {
+          const verse = await storage.getBibleVerse(id);
+          console.log(`Verse ${id}:`, verse ? `${verse.reference} - ${verse.text.substring(0, 50)}...` : 'NOT FOUND');
+          return verse;
+        })
       );
 
       const validVerses = verses.filter(v => v !== null);
+      
+      console.log('Valid verses found:', validVerses.length);
+      console.log('First verse details:', validVerses[0] ? {
+        id: validVerses[0].id,
+        reference: validVerses[0].reference,
+        text: validVerses[0].text.substring(0, 100) + '...'
+      } : 'None');
       
       if (validVerses.length === 0) {
         return res.status(404).json({ error: 'No valid verses found' });
