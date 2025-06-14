@@ -365,6 +365,29 @@ export default function AudioBibleDemo() {
                   </div>
                 </div>
 
+                {/* Manual Selection Submit Button */}
+                {!useContextualSelection && selectedVerses.length > 0 && (
+                  <div className="flex justify-center py-4">
+                    <Button
+                      onClick={generateCustomRoutine}
+                      disabled={selectedVerses.length === 0 || generateRoutineMutation.isPending}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+                    >
+                      {generateRoutineMutation.isPending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Creating Routine...
+                        </>
+                      ) : (
+                        <>
+                          <BookOpen className="w-5 h-5 mr-2" />
+                          Create Audio Routine ({selectedVerses.length} verses)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
                 {/* Voice and Music Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
