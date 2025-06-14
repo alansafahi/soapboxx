@@ -85,11 +85,17 @@ export default function AppHeader() {
       items: [
         { href: "/bible", label: "Today's Reading", icon: BookOpen },
         { href: "/soap", label: "S.O.A.P. Journal", icon: Heart },
-        { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
         { href: "/audio-routines", label: "Devotional Routines", icon: Headphones },
-        { href: "/video-library", label: "Video Library", icon: PlayCircle },
         { href: "/sermon-studio", label: "Sermon Studio", icon: Sparkles, roles: ["pastor", "lead_pastor", "church_admin"] },
         { href: "/content-distribution", label: "Content Distribution", icon: Share2, roles: ["pastor", "lead_pastor", "church_admin"] }
+      ]
+    },
+    {
+      id: "media",
+      label: "Media Contents",
+      items: [
+        { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
+        { href: "/video-library", label: "Video Library", icon: PlayCircle }
       ]
     },
     {
