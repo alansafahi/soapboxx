@@ -141,6 +141,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 14, 2025: Enhanced Member Directory user experience and interaction
+  - Made entire member cards clickable instead of just names for better usability
+  - Added enhanced hover effects with shadow and border highlights
+  - Improved visual feedback for interactive elements
+  - Completed Edit Profile functionality with backend API integration
+  - Member Dashboard now shows comprehensive activity tracking and statistics
 - June 14, 2025: Reorganized AI Content Showcase navigation and completed Member Directory functionality
   - Moved "AI Content Demo" to Admin Portal and renamed to "AI Content Showcase" for better organization
   - Fixed Member Directory API to properly map database fields and display existing members

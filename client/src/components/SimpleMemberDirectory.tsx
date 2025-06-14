@@ -513,10 +513,10 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
       {/* Member Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredMembers.map((member: any) => (
-          <Card key={member.id} className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card key={member.id} className="hover:shadow-lg hover:border-blue-200 transition-all cursor-pointer group" onClick={() => setSelectedMember(member)}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3" onClick={() => setSelectedMember(member)}>
+                <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                     <User className="h-5 w-5 text-blue-600" />
                   </div>
