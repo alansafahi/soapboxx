@@ -24,6 +24,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
   const [statusFilter, setStatusFilter] = useState("all");
   const [churchFilter, setChurchFilter] = useState("all");
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
   const [newMember, setNewMember] = useState({
     fullName: "",
     email: "",
@@ -305,10 +306,10 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
       {/* Member Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredMembers.map((member: any) => (
-          <Card key={member.id} className="hover:shadow-md transition-shadow">
+          <Card key={member.id} className="hover:shadow-md transition-shadow cursor-pointer">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3" onClick={() => setSelectedMember(member)}>
                   <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                     <User className="h-5 w-5 text-blue-600" />
                   </div>
@@ -317,17 +318,19 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
                     <p className="text-sm text-muted-foreground">{member.email}</p>
                   </div>
                 </div>
-                <Badge 
-                  variant={member.membershipStatus === 'active' ? 'default' : 'secondary'}
-                  className={
-                    member.membershipStatus === 'active' ? 'bg-green-100 text-green-800' :
+                <div className="flex items-center gap-2">
+                  <Badge 
+                    variant={member.membershipStatus === 'active' ? 'default' : 'secondary'}
+                    className={
+                      member.membershipStatus === 'active' ? 'bg-green-100 text-green-800' :
                     member.membershipStatus === 'new_member' ? 'bg-blue-100 text-blue-800' :
                     member.membershipStatus === 'visitor' ? 'bg-purple-100 text-purple-800' :
                     'bg-gray-100 text-gray-800'
                   }
-                >
-                  {member.membershipStatus}
-                </Badge>
+                  >
+                    {member.membershipStatus}
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -376,6 +379,115 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
           </Card>
         ))}
       </div>
+
+      {/* Member Management Modal */}
+      {selectedMember && (
+        <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Manage Member: {selectedMember.fullName}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Member Info Summary */}
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
+                  <User className="h-8 w-8 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">{selectedMember.fullName}</h3>
+                  <p className="text-gray-600">{selectedMember.email}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge 
+                      variant={selectedMember.membershipStatus === 'active' ? 'default' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {selectedMember.membershipStatus}
+                    </Badge>
+                    <span className="text-sm text-gray-500">
+                      Joined {selectedMember.joinedDate ? new Date(selectedMember.joinedDate).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" className="h-12">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Message
+                </Button>
+                <Button variant="outline" className="h-12">
+                  <Phone className="h-4 w-4 mr-2" />
+                  Call Member
+                </Button>
+                <Button variant="outline" className="h-12">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+                <Button variant="outline" className="h-12">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  View Activity
+                </Button>
+              </div>
+
+              {/* Administrative Actions */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-sm text-gray-700 mb-3">Administrative Actions</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  <Button variant="outline" size="sm" className="justify-start">
+                    Change Status to Active
+                  </Button>
+                  <Button variant="outline" size="sm" className="justify-start">
+                    Change Status to Inactive
+                  </Button>
+                  <Button variant="outline" size="sm" className="justify-start">
+                    Transfer to Different Church
+                  </Button>
+                  <Button variant="outline" size="sm" className="justify-start text-yellow-700 hover:text-yellow-800">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Suspend Member
+                  </Button>
+                  <Button variant="outline" size="sm" className="justify-start text-red-700 hover:text-red-800">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Remove Member
+                  </Button>
+                </div>
+              </div>
+
+              {/* Member Details */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-sm text-gray-700 mb-3">Member Details</h4>
+                <div className="space-y-2 text-sm">
+                  {selectedMember.phoneNumber && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Phone:</span>
+                      <span>{selectedMember.phoneNumber}</span>
+                    </div>
+                  )}
+                  {selectedMember.address && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Address:</span>
+                      <span className="text-right max-w-xs">{selectedMember.address}</span>
+                    </div>
+                  )}
+                  {selectedMember.interests && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Interests:</span>
+                      <span className="text-right max-w-xs">{selectedMember.interests}</span>
+                    </div>
+                  )}
+                  {selectedMember.churchAffiliation && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Church:</span>
+                      <span>{selectedMember.churchAffiliation}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
