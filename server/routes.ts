@@ -4372,21 +4372,46 @@ Return JSON with this exact structure:
   // S.O.A.P. Entry Routes
   app.post('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('S.O.A.P. POST request received');
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      console.log('User object:', req.user);
+      
       const userId = req.user?.claims?.sub || req.user?.id;
+      console.log('Extracted userId:', userId);
+      
       if (!userId) {
+        console.log('No userId found, returning 401');
         return res.status(401).json({ message: 'User authentication required' });
       }
       
-      const soapData = schema.insertSoapEntrySchema.parse({
+      const soapData = {
         ...req.body,
         userId,
-      });
+      };
+      
+      console.log('Data to validate:', JSON.stringify(soapData, null, 2));
+      
+      // Validate with the schema
+      const validatedData = schema.insertSoapEntrySchema.parse(soapData);
+      console.log('Schema validation passed');
 
-      const newEntry = await storage.createSoapEntry(soapData);
+      const newEntry = await storage.createSoapEntry(validatedData);
+      console.log('S.O.A.P. entry created successfully:', newEntry.id);
       res.status(201).json(newEntry);
     } catch (error) {
       console.error('Error creating S.O.A.P. entry:', error);
-      res.status(500).json({ message: 'Failed to create S.O.A.P. entry' });
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
+      // Send more detailed error information
+      res.status(500).json({ 
+        message: 'Failed to create S.O.A.P. entry',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: error
+      });
     }
   });
 
