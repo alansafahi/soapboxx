@@ -12,6 +12,9 @@ import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
 import * as schema from "@shared/schema";
+import { userChurches } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
 
 // AI-powered post categorization
 async function categorizePost(content: string): Promise<{ type: 'discussion' | 'prayer' | 'announcement' | 'share', title?: string }> {
@@ -5115,21 +5118,28 @@ Please provide suggestions for the missing or incomplete sections.`
       // Generate unique user ID
       const newUserId = `member_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      // Create user record
-      const newUser = await storage.createUser({
+      // Create user record using upsertUser
+      const newUser = await storage.upsertUser({
         id: newUserId,
         email,
         firstName,
         lastName,
         mobileNumber: phoneNumber || '',
         address: address || '',
-        interests: interests ? [interests] : [],
         hasCompletedOnboarding: true,
         isEmailVerified: false
       });
 
-      // Add user to church
-      await storage.addUserToChurch(newUserId, churchId || userChurch.churchId, 1); // Default role_id = 1 (member)
+      // Add user to church using direct database insert
+      await db
+        .insert(userChurches)
+        .values({
+          userId: newUserId,
+          churchId: churchId || userChurch.churchId,
+          roleId: 1, // Default member role
+          isActive: true,
+        })
+        .onConflictDoNothing();
 
       // Return transformed member response
       const transformedMember = {

@@ -478,13 +478,6 @@ export default function EnhancedAdminPortal() {
           {/* People Tab - Enhanced Member Management */}
           {activeTab === "people" && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Member Directory</h2>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add Member
-                </Button>
-              </div>
               <SimpleMemberDirectory selectedChurch={selectedChurch} />
             </div>
           )}
