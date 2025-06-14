@@ -2683,14 +2683,93 @@ ${availableVerses.slice(0, 100).map(v => `${v.id}: ${v.reference} - ${v.text.sub
         return res.status(404).json({ error: 'No valid verses found' });
       }
 
-      // Create dynamic routine with Bible content
+      // Enhanced voice mapping for more natural audio
+      const voiceProfiles = {
+        'warm-female': {
+          name: 'Sarah',
+          type: 'female',
+          characteristics: 'warm, nurturing, maternal',
+          preferredRate: 0.85,
+          pitch: 'medium-high',
+          style: 'conversational'
+        },
+        'gentle-male': {
+          name: 'David',
+          type: 'male', 
+          characteristics: 'calm, reassuring, pastoral',
+          preferredRate: 0.8,
+          pitch: 'medium-low',
+          style: 'ministerial'
+        },
+        'peaceful-female': {
+          name: 'Grace',
+          type: 'female',
+          characteristics: 'meditative, serene, contemplative',
+          preferredRate: 0.75,
+          pitch: 'medium',
+          style: 'meditative'
+        },
+        'authoritative-male': {
+          name: 'Samuel',
+          type: 'male',
+          characteristics: 'strong, confident, teaching',
+          preferredRate: 0.9,
+          pitch: 'low',
+          style: 'teaching'
+        }
+      };
+
+      // Music bed configurations with layered audio
+      const musicBeds = {
+        'gentle-piano': {
+          baseTrack: 'soft-piano-meditation.mp3',
+          volume: 0.3,
+          fadeIn: 2000,
+          fadeOut: 3000,
+          loop: true
+        },
+        'nature-sounds': {
+          baseTrack: 'peaceful-nature-ambience.mp3',
+          volume: 0.25,
+          fadeIn: 3000,
+          fadeOut: 2000,
+          loop: true
+        },
+        'orchestral-ambient': {
+          baseTrack: 'soft-orchestral-strings.mp3',
+          volume: 0.35,
+          fadeIn: 4000,
+          fadeOut: 4000,
+          loop: true
+        },
+        'worship-instrumental': {
+          baseTrack: 'contemporary-worship-background.mp3',
+          volume: 0.4,
+          fadeIn: 2000,
+          fadeOut: 3000,
+          loop: true
+        }
+      };
+
+      const selectedVoice = voiceProfiles[voice] || voiceProfiles['warm-female'];
+      const selectedMusic = musicBeds[musicBed] || musicBeds['gentle-piano'];
+
+      // Create dynamic routine with enhanced audio settings
       const routine = {
-        id: Date.now(), // Generate unique ID
+        id: Date.now(),
         name: `Personalized Bible Journey`,
         description: `Custom audio experience with ${validVerses.length} selected verses`,
-        totalDuration: validVerses.length * 120 + 180, // 2 min per verse + intro
+        totalDuration: validVerses.length * 120 + 180,
         category: routineType,
         autoAdvance: true,
+        audioConfig: {
+          voice: selectedVoice,
+          musicBed: selectedMusic,
+          masterVolume: 0.8,
+          voiceVolume: 0.9,
+          musicVolume: selectedMusic.volume,
+          crossfadeDuration: 1500
+        },
         steps: [
           {
             id: 'intro',
@@ -2698,7 +2777,15 @@ ${availableVerses.slice(0, 100).map(v => `${v.id}: ${v.reference} - ${v.text.sub
             title: 'Prepare Your Heart',
             content: 'Take a moment to quiet your mind and open your heart to receive God\'s Word. Let His truth speak to you in this sacred time.',
             duration: 120,
-            voiceSettings: { voice, speed: 1.0, musicBed }
+            voiceSettings: { 
+              voice: selectedVoice.name,
+              voiceType: selectedVoice.type,
+              speed: selectedVoice.preferredRate,
+              pitch: selectedVoice.pitch,
+              style: selectedVoice.style,
+              musicBed: selectedMusic.baseTrack,
+              musicVolume: selectedMusic.volume
+            }
           },
           ...validVerses.map((verse, index) => ({
             id: `verse-${verse.id}`,
@@ -2706,7 +2793,15 @@ ${availableVerses.slice(0, 100).map(v => `${v.id}: ${v.reference} - ${v.text.sub
             title: `Scripture Reading: ${verse.reference}`,
             content: `${verse.reference}. ${verse.text}`,
             duration: 120,
-            voiceSettings: { voice, speed: 0.9, musicBed }
+            voiceSettings: { 
+              voice: selectedVoice.name,
+              voiceType: selectedVoice.type,
+              speed: selectedVoice.preferredRate * 0.95, // Slightly slower for scripture
+              pitch: selectedVoice.pitch,
+              style: 'reverent',
+              musicBed: selectedMusic.baseTrack,
+              musicVolume: selectedMusic.volume * 0.8 // Lower music during scripture
+            }
           })),
           {
             id: 'closing',
@@ -2714,7 +2809,15 @@ ${availableVerses.slice(0, 100).map(v => `${v.id}: ${v.reference} - ${v.text.sub
             title: 'Quiet Reflection',
             content: 'Rest in the truth of God\'s Word. Let these verses settle deep into your heart and guide your day.',
             duration: 60,
-            voiceSettings: { voice, speed: 0.8, musicBed }
+            voiceSettings: { 
+              voice: selectedVoice.name,
+              voiceType: selectedVoice.type,
+              speed: selectedVoice.preferredRate * 0.85, // Slowest for reflection
+              pitch: selectedVoice.pitch,
+              style: 'contemplative',
+              musicBed: selectedMusic.baseTrack,
+              musicVolume: selectedMusic.volume * 1.2 // Higher music for reflection
+            }
           }
         ]
       };
