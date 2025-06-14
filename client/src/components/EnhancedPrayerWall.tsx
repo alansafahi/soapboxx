@@ -106,7 +106,7 @@ export default function EnhancedPrayerWall() {
   // Create prayer request mutation
   const createPrayerMutation = useMutation({
     mutationFn: async (data: PrayerRequestFormData) => {
-      return await apiRequest("/api/prayers", { method: "POST", body: JSON.stringify(data) });
+      return await apiRequest("/api/prayers", { method: "POST", body: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
@@ -129,7 +129,7 @@ export default function EnhancedPrayerWall() {
   // Create prayer circle mutation
   const createCircleMutation = useMutation({
     mutationFn: async (data: PrayerCircleFormData) => {
-      return await apiRequest("/api/prayer-circles", { method: "POST", body: JSON.stringify(data) });
+      return await apiRequest("/api/prayer-circles", { method: "POST", body: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayer-circles"] });
