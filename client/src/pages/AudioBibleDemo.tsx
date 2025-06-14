@@ -261,15 +261,7 @@ export default function AudioBibleDemo() {
                     </div>
                   </div>
 
-                  {contextualSelection && (
-                    <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border">
-                      <div className="text-sm space-y-1">
-                        <p><strong>Liturgical Season:</strong> {contextualSelection.context.liturgicalSeason}</p>
-                        <p><strong>Spiritual Theme:</strong> {contextualSelection.context.spiritualTheme}</p>
-                        <p><strong>Selection Reason:</strong> {contextualSelection.context.selectionReason}</p>
-                      </div>
-                    </div>
-                  )}
+
                 </div>
 
                 {/* Search and Filter Interface */}
