@@ -231,12 +231,17 @@ export default function EnhancedAudioPlayer({
       
       if (voice) {
         utterance.voice = voice;
+        console.log('Voice applied:', voice.name, 'for step:', currentStep?.title);
+      } else {
+        console.log('No voice selected, using browser default');
       }
       
-      // Apply voice settings
-      utterance.rate = stepVoiceSettings?.speed || audioSettings.rate;
-      utterance.pitch = audioSettings.pitch;
-      utterance.volume = audioSettings.volume;
+      // Apply voice settings with proper fallbacks
+      utterance.rate = stepVoiceSettings?.speed || routine.audioConfig?.voice?.preferredRate || audioSettings.rate || 0.9;
+      utterance.pitch = audioSettings.pitch || 1.0;
+      utterance.volume = audioSettings.volume || 0.9;
+      
+      console.log('Voice settings applied - Rate:', utterance.rate, 'Pitch:', utterance.pitch, 'Volume:', utterance.volume);
       
       // Style-based adjustments
       const style = stepVoiceSettings?.style || routine.audioConfig?.voice?.style;
