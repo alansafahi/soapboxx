@@ -5212,5 +5212,106 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Send message to member
+  app.post('/api/members/send-message', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { memberId, message } = req.body;
+      
+      // Verify user has admin access
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // In a real implementation, this would integrate with email/SMS service
+      console.log(`Message sent to member ${memberId}: ${message}`);
+      
+      res.json({ success: true, message: "Message sent successfully" });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Update member status
+  app.patch('/api/members/:id/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      // Verify user has admin access
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Update member status in database
+      const { db: database } = await import("./db");
+      await database
+        .update(userChurches)
+        .set({ isActive: status === 'active' })
+        .where(eq(userChurches.userId, id));
+      
+      res.json({ success: true, message: "Member status updated successfully" });
+    } catch (error) {
+      console.error('Error updating member status:', error);
+      res.status(500).json({ message: "Failed to update member status" });
+    }
+  });
+
+  // Suspend member
+  app.patch('/api/members/:id/suspend', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { id } = req.params;
+      const { suspended } = req.body;
+      
+      // Verify user has admin access
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Suspend member by setting isActive to false
+      const { db: database } = await import("./db");
+      await database
+        .update(userChurches)
+        .set({ isActive: false })
+        .where(eq(userChurches.userId, id));
+      
+      res.json({ success: true, message: "Member suspended successfully" });
+    } catch (error) {
+      console.error('Error suspending member:', error);
+      res.status(500).json({ message: "Failed to suspend member" });
+    }
+  });
+
+  // Remove member
+  app.delete('/api/members/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { id } = req.params;
+      
+      // Verify user has admin access
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Remove member from church (delete user_churches record)
+      const { db: database } = await import("./db");
+      await database
+        .delete(userChurches)
+        .where(eq(userChurches.userId, id));
+      
+      res.json({ success: true, message: "Member removed successfully" });
+    } catch (error) {
+      console.error('Error removing member:', error);
+      res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
   return httpServer;
 }

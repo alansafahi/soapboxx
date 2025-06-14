@@ -25,6 +25,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
   const [churchFilter, setChurchFilter] = useState("all");
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [isActionLoading, setIsActionLoading] = useState(false);
   const [newMember, setNewMember] = useState({
     fullName: "",
     email: "",
@@ -35,6 +36,134 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Member management actions
+  const handleSendMessage = async (member: any) => {
+    setIsActionLoading(true);
+    try {
+      const response = await fetch('/api/members/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          memberId: member.id,
+          message: `Hello ${member.fullName}, this is a message from church leadership.`
+        })
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Message Sent",
+          description: `Message sent to ${member.fullName}`,
+        });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (member: any, newStatus: string) => {
+    setIsActionLoading(true);
+    try {
+      const response = await fetch(`/api/members/${member.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/members'] });
+        setSelectedMember({ ...member, membershipStatus: newStatus });
+        toast({
+          title: "Status Updated",
+          description: `${member.fullName}'s status changed to ${newStatus}`,
+        });
+      } else {
+        throw new Error('Failed to update status');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update member status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleSuspendMember = async (member: any) => {
+    if (!confirm(`Are you sure you want to suspend ${member.fullName}? This action can be reversed later.`)) {
+      return;
+    }
+    
+    setIsActionLoading(true);
+    try {
+      const response = await fetch(`/api/members/${member.id}/suspend`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suspended: true })
+      });
+      
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/members'] });
+        setSelectedMember(null);
+        toast({
+          title: "Member Suspended",
+          description: `${member.fullName} has been suspended`,
+        });
+      } else {
+        throw new Error('Failed to suspend member');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to suspend member. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleRemoveMember = async (member: any) => {
+    if (!confirm(`Are you sure you want to remove ${member.fullName} from the church? This action cannot be undone.`)) {
+      return;
+    }
+    
+    setIsActionLoading(true);
+    try {
+      const response = await fetch(`/api/members/${member.id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/members'] });
+        setSelectedMember(null);
+        toast({
+          title: "Member Removed",
+          description: `${member.fullName} has been removed from the church`,
+        });
+      } else {
+        throw new Error('Failed to remove member');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove member. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
 
   // Add member mutation
   const addMemberMutation = useMutation({
@@ -412,19 +541,37 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="h-12">
+                <Button 
+                  variant="outline" 
+                  className="h-12" 
+                  onClick={() => handleSendMessage(selectedMember)}
+                  disabled={isActionLoading}
+                >
                   <Mail className="h-4 w-4 mr-2" />
                   Send Message
                 </Button>
-                <Button variant="outline" className="h-12">
+                <Button 
+                  variant="outline" 
+                  className="h-12"
+                  onClick={() => window.open(`tel:${selectedMember.phoneNumber}`, '_self')}
+                  disabled={!selectedMember.phoneNumber}
+                >
                   <Phone className="h-4 w-4 mr-2" />
                   Call Member
                 </Button>
-                <Button variant="outline" className="h-12">
+                <Button 
+                  variant="outline" 
+                  className="h-12"
+                  onClick={() => toast({ title: "Edit Profile", description: "Profile editing feature coming soon!" })}
+                >
                   <UserPlus className="h-4 w-4 mr-2" />
                   Edit Profile
                 </Button>
-                <Button variant="outline" className="h-12">
+                <Button 
+                  variant="outline" 
+                  className="h-12"
+                  onClick={() => toast({ title: "View Activity", description: "Activity tracking feature coming soon!" })}
+                >
                   <Calendar className="h-4 w-4 mr-2" />
                   View Activity
                 </Button>
@@ -434,20 +581,50 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
               <div className="border-t pt-4">
                 <h4 className="font-medium text-sm text-gray-700 mb-3">Administrative Actions</h4>
                 <div className="grid grid-cols-1 gap-2">
-                  <Button variant="outline" size="sm" className="justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start"
+                    onClick={() => handleStatusChange(selectedMember, 'active')}
+                    disabled={isActionLoading || selectedMember.membershipStatus === 'active'}
+                  >
                     Change Status to Active
                   </Button>
-                  <Button variant="outline" size="sm" className="justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start"
+                    onClick={() => handleStatusChange(selectedMember, 'inactive')}
+                    disabled={isActionLoading || selectedMember.membershipStatus === 'inactive'}
+                  >
                     Change Status to Inactive
                   </Button>
-                  <Button variant="outline" size="sm" className="justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start"
+                    onClick={() => toast({ title: "Transfer Church", description: "Church transfer feature coming soon!" })}
+                    disabled={isActionLoading}
+                  >
                     Transfer to Different Church
                   </Button>
-                  <Button variant="outline" size="sm" className="justify-start text-yellow-700 hover:text-yellow-800">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-yellow-700 hover:text-yellow-800"
+                    onClick={() => handleSuspendMember(selectedMember)}
+                    disabled={isActionLoading}
+                  >
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Suspend Member
                   </Button>
-                  <Button variant="outline" size="sm" className="justify-start text-red-700 hover:text-red-800">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-red-700 hover:text-red-800"
+                    onClick={() => handleRemoveMember(selectedMember)}
+                    disabled={isActionLoading}
+                  >
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Remove Member
                   </Button>
