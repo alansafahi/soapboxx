@@ -8,9 +8,7 @@ import AppHeader from "@/components/AppHeader";
 import { Home as HomeIcon, Church, Calendar, BookOpen, Heart, Mail, Settings } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-import DemoPage from "@/pages/demo";
 import Landing from "@/pages/landing";
-import AdminPortal from "@/pages/admin";
 import EnhancedAdminPortal from "@/pages/admin-enhanced";
 import Profile from "@/pages/profile";
 import Chat from "@/pages/chat";
@@ -22,24 +20,15 @@ import Messages from "@/pages/messages";
 import Leaderboard from "@/pages/leaderboard";
 import BiblePage from "@/pages/bible";
 import BibleReader from "@/pages/BibleReader";
-import FeatureTestPage from "@/pages/feature-test";
 import SettingsPage from "@/pages/settings";
 
-import PrayerWallPreview from "@/pages/PrayerWallPreview";
-import ChurchManagementDemo from "@/pages/ChurchManagementDemo";
-import EnhancedChurchesDemo from "@/pages/EnhancedChurchesDemo";
-import ChurchesEnhanced from "@/pages/ChurchesEnhanced";
 import RoleManagement from "@/pages/RoleManagement";
 import DonationDemo from "@/pages/DonationDemo";
-import RoleUpgradeDemo from "@/pages/RoleUpgradeDemo";
 import PhoneVerification from "@/pages/PhoneVerification";
 import EmailVerification from "@/pages/EmailVerification";
 import WelcomeWizard from "@/components/welcome-wizard";
-import { ReferralWelcome } from "@/components/ReferralWelcome";
 import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
 import PersonalizedTour from "@/components/PersonalizedTour";
-import TourTesting from "@/pages/TourTesting";
-import TourTestPage from "@/pages/tour-test";
 import { DemoTrigger } from "@/components/DemoTrigger";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AudioRoutines from "@/pages/AudioRoutines";
@@ -159,9 +148,6 @@ function AppRouter() {
       {isAuthenticated && <AppHeader />}
       <main className={isAuthenticated ? "min-h-screen bg-gray-50 lg:ml-64 transition-all duration-300" : ""}>
         <Switch>
-          {/* Demo route is always accessible */}
-          <Route path="/demo" component={DemoPage} />
-          
           {!isAuthenticated ? (
             <>
               <Route path="*" component={Landing} />
@@ -173,33 +159,19 @@ function AppRouter() {
               <Route path="/bible" component={BiblePage} />
               <Route path="/community" component={Community} />
               <Route path="/churches" component={Churches} />
-              <Route path="/churches-enhanced" component={ChurchesEnhanced} />
-              <Route path="/enhanced-churches-demo" component={EnhancedChurchesDemo} />
-              <Route path="/church-management-demo" component={ChurchManagementDemo} />
               <Route path="/events" component={Events} />
               <Route path="/prayer" component={Prayer} />
-              <Route path="/prayers" component={Prayer} />
-              <Route path="/prayer-wall-preview" component={PrayerWallPreview} />
-              <Route path="/discussions" component={Community} />
-              <Route path="/devotionals" component={Community} />
-              <Route path="/members" component={Community} />
-              <Route path="/gamification" component={Leaderboard} />
-              <Route path="/leaderboard" component={Leaderboard} />
               <Route path="/messages" component={Messages} />
               <Route path="/chat" component={Chat} />
+              <Route path="/leaderboard" component={Leaderboard} />
               <Route path="/admin" component={EnhancedAdminPortal} />
               <Route path="/admin/analytics" component={AdminAnalytics} />
-              <Route path="/member-management" component={EnhancedAdminPortal} />
               <Route path="/role-management" component={RoleManagement} />
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
-              <Route path="/test-features" component={FeatureTestPage} />
               <Route path="/donation-demo" component={DonationDemo} />
-              <Route path="/role-upgrade-demo" component={RoleUpgradeDemo} />
               <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="/email-verification" component={EmailVerification} />
-              <Route path="/tour-testing" component={TourTesting} />
-              <Route path="/tour-test" component={TourTestPage} />
               <Route path="/audio-routines" component={AudioRoutines} />
               <Route path="/audio-bible" component={AudioBibleDemo} />
               <Route path="/video-library" component={VideoLibrary} />
