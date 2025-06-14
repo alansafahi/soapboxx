@@ -444,7 +444,7 @@ export default function AudioBibleDemo() {
                     ✕
                   </Button>
                 </div>
-                <AudioRoutinePlayer 
+                <WebSpeechAudioPlayer 
                   routine={generatedRoutine}
                   autoStart={true}
                   onComplete={() => {
