@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart, Search, Filter } from "lucide-react";
 import BibleAudioPlayer from "@/components/BibleAudioPlayer";
 import AudioRoutinePlayer from "@/components/AudioRoutinePlayer";
 import { apiRequest } from "@/lib/queryClient";
@@ -18,9 +19,11 @@ export default function AudioBibleDemo() {
   const [currentVerseId, setCurrentVerseId] = useState<number | null>(null);
   const [generatedRoutine, setGeneratedRoutine] = useState<any>(null);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   // Get Bible verses for selection
-  const { data: verses } = useQuery({
+  const { data: verses = [] } = useQuery({
     queryKey: ["/api/bible/verses"],
   });
 
@@ -54,13 +57,39 @@ export default function AudioBibleDemo() {
     { value: "worship-instrumental", label: "Worship Instrumental", description: "Contemporary worship background", icon: "🎵" }
   ];
 
-  const popularVerses = [
-    { id: 1, reference: "John 3:16", text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.", theme: "love" },
-    { id: 2, reference: "Philippians 4:13", text: "I can do all this through him who gives me strength.", theme: "strength" },
-    { id: 3, reference: "Psalm 23:1", text: "The Lord is my shepherd, I lack nothing.", theme: "comfort" },
-    { id: 4, reference: "Romans 8:28", text: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.", theme: "purpose" },
-    { id: 5, reference: "Jeremiah 29:11", text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.", theme: "hope" }
-  ];
+  // Filter and search verses
+  const filteredVerses = useMemo(() => {
+    if (!Array.isArray(verses)) return [];
+    
+    let filtered = verses;
+    
+    // Apply category filter
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((verse: any) => 
+        verse.category?.toLowerCase() === categoryFilter.toLowerCase() ||
+        verse.tags?.includes(categoryFilter)
+      );
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter((verse: any) => 
+        verse.reference?.toLowerCase().includes(search) ||
+        verse.text?.toLowerCase().includes(search) ||
+        verse.category?.toLowerCase().includes(search)
+      );
+    }
+    
+    return filtered.slice(0, 50); // Limit to 50 verses for performance
+  }, [verses, categoryFilter, searchTerm]);
+
+  // Get unique categories from verses
+  const categories = useMemo(() => {
+    if (!Array.isArray(verses)) return [];
+    const cats = verses.map((verse: any) => verse.category).filter(Boolean);
+    return [...new Set(cats)];
+  }, [verses]);
 
   const handleVerseSelection = (verseId: number, checked: boolean) => {
     if (checked) {
@@ -184,13 +213,50 @@ export default function AudioBibleDemo() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Search and Filter Interface */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input
+                          placeholder="Search by reference, text, or theme..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:w-48">
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger>
+                          <Filter className="w-4 h-4 mr-2" />
+                          <SelectValue placeholder="Filter by theme" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Themes</SelectItem>
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category.charAt(0).toUpperCase() + category.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Found {filteredVerses.length} verses • {selectedVerses.length}/10 selected
+                  </div>
+                </div>
+
                 {/* Verse Selection */}
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                    Select Verses ({selectedVerses.length}/5)
+                    Choose Your Scripture ({selectedVerses.length}/10)
                   </h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {popularVerses.map((verse) => (
+                  <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
+                    {filteredVerses.map((verse: any) => (
                       <div 
                         key={verse.id}
                         className="flex items-start space-x-3 p-4 bg-white dark:bg-gray-800 rounded-lg border"
