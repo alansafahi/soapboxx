@@ -71,10 +71,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
    - ROI tracking for pastoral time investment
 
 ### Enhanced Bible Verse System
-- **Database**: 1000+ categorized Bible verses across 12 spiritual themes
+- **Database**: 42,561+ verses covering complete Bible (all 66 books)
 - **Smart Detection**: Auto-population of scripture references in text areas
-- **Categories**: Anxiety, Core, Faith, Forgiveness, Gratitude, Hope, Joy, Love, Peace, Purpose, Strength, Wisdom
-- **API**: Fast lookup and topic-based search capabilities
+- **Categories**: Faith, Hope, Love, Peace, Strength, Wisdom, Comfort, Forgiveness, Joy, Purpose, Grace, Worship, Core
+- **API**: Fast lookup and topic-based search capabilities across entire Bible
+- **Coverage**: Genesis through Revelation with comprehensive verse access
 
 ## Data Flow
 
