@@ -101,7 +101,9 @@ export default function EnhancedPrayerWall() {
   // Filter prayers by category
   const filteredPrayers = selectedCategory === 'all' 
     ? prayerRequests 
-    : prayerRequests.filter(prayer => (prayer.category || 'general') === selectedCategory);
+    : selectedCategory === 'urgent'
+      ? prayerRequests.filter(prayer => prayer.isUrgent)
+      : prayerRequests.filter(prayer => (prayer.category || 'general') === selectedCategory);
 
   // Create prayer request mutation
   const createPrayerMutation = useMutation({
