@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Users, User, Building, BookOpen, Heart, Calendar, Search, 
   UserPlus, AlertCircle, Phone, Mail, MapPin 
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface SimpleMemberDirectoryProps {
   selectedChurch?: number | null;
@@ -18,6 +23,62 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [churchFilter, setChurchFilter] = useState("all");
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [newMember, setNewMember] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    interests: ""
+  });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Add member mutation
+  const addMemberMutation = useMutation({
+    mutationFn: async (memberData: typeof newMember) => {
+      return await apiRequest("/api/members", {
+        method: "POST",
+        body: JSON.stringify(memberData),
+        headers: { "Content-Type": "application/json" }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
+      setIsAddMemberOpen(false);
+      setNewMember({
+        fullName: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        interests: ""
+      });
+      toast({
+        title: "Member Added",
+        description: "New member has been successfully added to the directory."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add member. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleAddMember = () => {
+    if (!newMember.fullName || !newMember.email) {
+      toast({
+        title: "Validation Error",
+        description: "Full name and email are required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+    addMemberMutation.mutate(newMember);
+  };
 
   // Fetch churches
   const { data: churches = [] } = useQuery({
@@ -79,7 +140,86 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
           <Users className="h-5 w-5" />
           <h3 className="text-lg font-semibold">Member Directory</h3>
         </div>
-        <Badge variant="outline">{filteredMembers.length} members</Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline">{filteredMembers.length} members</Badge>
+          <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <UserPlus className="h-4 w-4" />
+                Add Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Add New Member</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Input
+                    id="fullName"
+                    value={newMember.fullName}
+                    onChange={(e) => setNewMember({ ...newMember, fullName: e.target.value })}
+                    placeholder="Enter full name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newMember.email}
+                    onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input
+                    id="phoneNumber"
+                    value={newMember.phoneNumber}
+                    onChange={(e) => setNewMember({ ...newMember, phoneNumber: e.target.value })}
+                    placeholder="Enter phone number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={newMember.address}
+                    onChange={(e) => setNewMember({ ...newMember, address: e.target.value })}
+                    placeholder="Enter address"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="interests">Interests & Ministries</Label>
+                  <Textarea
+                    id="interests"
+                    value={newMember.interests}
+                    onChange={(e) => setNewMember({ ...newMember, interests: e.target.value })}
+                    placeholder="Enter interests, ministries, or areas of service"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsAddMemberOpen(false)}
+                  disabled={addMemberMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleAddMember}
+                  disabled={addMemberMutation.isPending}
+                >
+                  {addMemberMutation.isPending ? "Adding..." : "Add Member"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Search and Filter Controls */}
