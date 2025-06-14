@@ -499,14 +499,31 @@ export default function EnhancedAudioPlayer({
           }, 50);
         }
         
+        // Mark step as complete
+        setStepProgress(100);
+        
+        // Auto-advance to next step if enabled and not at the end
         if (routine.autoAdvance && currentStepIndex < routine.steps.length - 1) {
           setTimeout(() => {
-            nextStep();
+            const nextIndex = currentStepIndex + 1;
+            setCurrentStepIndex(nextIndex);
+            setStepProgress(0);
+            
+            // Continue playing if still in playing state
+            if (isPlaying) {
+              setTimeout(async () => {
+                const nextStepData = routine.steps[nextIndex];
+                await speakText(nextStepData.content, nextStepData.voiceSettings);
+              }, 500);
+            }
           }, 1000);
         } else if (currentStepIndex >= routine.steps.length - 1) {
+          // Reached the end of the routine
           setIsPlaying(false);
+          console.log('Audio routine completed');
           onComplete?.();
         } else {
+          // Not auto-advancing, just stop
           setIsPlaying(false);
         }
       };
@@ -524,6 +541,8 @@ export default function EnhancedAudioPlayer({
           }
         });
         
+        stopProgressTracking();
+        
         // Stop background music
         if (backgroundAudioRef.current) {
           try {
@@ -533,13 +552,32 @@ export default function EnhancedAudioPlayer({
           }
         }
         
-        setIsPlaying(false);
+        // Handle different error types
+        if (event.error === 'interrupted') {
+          // Speech was interrupted, don't auto-advance
+          console.log('Speech interrupted - pausing routine');
+          setIsPlaying(false);
+          return;
+        }
         
-        // Try to continue to next step after error
+        // For other errors, try to continue gracefully
         if (routine.autoAdvance && currentStepIndex < routine.steps.length - 1) {
+          console.log('Advancing to next step after error');
           setTimeout(() => {
-            nextStep();
-          }, 2000);
+            const nextIndex = currentStepIndex + 1;
+            setCurrentStepIndex(nextIndex);
+            setStepProgress(0);
+            
+            // Only continue if still in playing state
+            if (isPlaying) {
+              setTimeout(async () => {
+                const nextStepData = routine.steps[nextIndex];
+                await speakText(nextStepData.content, nextStepData.voiceSettings);
+              }, 1000);
+            }
+          }, 1500);
+        } else {
+          setIsPlaying(false);
         }
       };
       
