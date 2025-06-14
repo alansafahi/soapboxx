@@ -1,15 +1,11 @@
-import { DatabaseStorage } from './storage';
-import * as htmlPdf from 'html-pdf-node';
-import { sendEmail } from './email-service';
 import { db } from './db';
-import { donations, churches, users } from '@shared/schema';
-import { eq, and, gte, lte } from 'drizzle-orm';
+import { donations } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import { sendEmail } from './email-service';
 
 export class DonationReceiptService {
-  constructor(private storage: DatabaseStorage) {}
-
-  async generateReceiptPDF(donationId: string): Promise<Buffer> {
-    // Get donation data directly from database
+  async sendReceiptEmail(donationId: string): Promise<void> {
+    // Get donation data
     const donationData = await db
       .select()
       .from(donations)
@@ -21,12 +17,20 @@ export class DonationReceiptService {
     }
     
     const donation = donationData[0];
+    const receiptHTML = this.buildReceiptHTML(donation);
     
-    // Get church and user data
-    const church = await this.storage.getChurch(donation.churchId);
-    const donor = await this.storage.getUser(donation.userId);
+    // Send email receipt
+    const recipientEmail = donation.donorEmail || 'donor@example.com';
+    const receiptNumber = `DON-${donation.id}-${new Date().getFullYear()}`;
+    
+    await sendEmail({
+      to: recipientEmail,
+      subject: `Donation Receipt - ${receiptNumber}`,
+      html: receiptHTML
+    });
+  }
 
-    const receiptHTML = this.generateReceiptHTML(donation, church, donor);
+  private buildReceiptHTML(donation: any): string {
     
     const options = {
       format: 'A4',
@@ -175,7 +179,7 @@ export class DonationReceiptService {
 
       <div class="amount-section">
         <div class="amount-label">Total Tax-Deductible Donation</div>
-        <div class="amount-value">$${donation.amount.toFixed(2)}</div>
+        <div class="amount-value">$${parseFloat(donation.amount).toFixed(2)}</div>
         ${donation.isRecurring ? '<div style="margin-top: 10px; color: #3b82f6; font-weight: bold;">Recurring Monthly Gift</div>' : ''}
       </div>
 
@@ -269,7 +273,7 @@ export class DonationReceiptService {
     const pdfBuffer = await this.generateReceiptPDF(donationId);
     
     const receiptNumber = `DON-${donation.id}-${new Date().getFullYear()}`;
-    const donationDate = new Date(donation.createdAt).toLocaleDateString();
+    const donationDate = donation.donationDate ? new Date(donation.donationDate).toLocaleDateString() : new Date().toLocaleDateString();
 
     const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
