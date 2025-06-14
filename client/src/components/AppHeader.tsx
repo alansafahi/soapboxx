@@ -93,22 +93,23 @@ export default function AppHeader() {
       ]
     },
     {
-      id: "admin",
-      label: "Admin",
-      items: [
-        { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
-        { href: "/communications", label: "Bulk Communications", icon: Megaphone, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
-        { href: "/pastoral-demo", label: "AI Content Showcase", icon: Star, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
-        { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
-      ]
-    },
-    {
       id: "giving",
       label: "Giving & Donations",
       items: [
-        { href: "/donation-demo", label: "Give Now", icon: DollarSign },
+        { href: "/donation-demo", label: "Give Now", icon: DollarSign }
+      ]
+    },
+    {
+      id: "admin",
+      label: "Admin Portal",
+      items: [
+        { href: "/admin", label: "Admin Dashboard", icon: Settings, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
+        { href: "/communications", label: "Bulk Communications", icon: Megaphone, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
         { href: "/sms-giving", label: "SMS Giving", icon: Smartphone, roles: ["pastor", "church_admin", "lead_pastor", "admin", "system_admin", "super_admin", "soapbox_owner"] },
-        { href: "/donation-analytics", label: "Giving Analytics", icon: TrendingUp, roles: ["pastor", "church_admin", "lead_pastor", "admin", "system_admin", "super_admin", "soapbox_owner"] }
+        { href: "/donation-analytics", label: "Giving Analytics", icon: TrendingUp, roles: ["pastor", "church_admin", "lead_pastor", "admin", "system_admin", "super_admin", "soapbox_owner"] },
+        { href: "/content-distribution", label: "Content Distribution Hub", icon: Share2, roles: ["pastor", "church_admin", "lead_pastor", "admin", "system_admin", "super_admin", "soapbox_owner"] },
+        { href: "/pastoral-demo", label: "AI Content Showcase", icon: Star, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
+        { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
       ]
     },
     {
