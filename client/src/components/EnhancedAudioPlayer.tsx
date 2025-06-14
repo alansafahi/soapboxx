@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Settings } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Settings, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -394,9 +394,9 @@ export default function EnhancedAudioPlayer({
     }
   };
 
-  const play = () => {
+  const play = async () => {
     setIsPlaying(true);
-    speakText(currentStep.content, currentStep.voiceSettings);
+    await speakText(currentStep.content, currentStep.voiceSettings);
   };
 
   const pause = () => {
@@ -431,9 +431,9 @@ export default function EnhancedAudioPlayer({
       if (isPlaying) {
         speechSynthesis.cancel();
         stopProgressTracking();
-        setTimeout(() => {
+        setTimeout(async () => {
           const prevStepData = routine.steps[currentStepIndex - 1];
-          speakText(prevStepData.content, prevStepData.voiceSettings);
+          await speakText(prevStepData.content, prevStepData.voiceSettings);
         }, 500);
       }
     }
@@ -447,6 +447,28 @@ export default function EnhancedAudioPlayer({
       case 'reflection': return '💭';
       case 'worship': return '🎵';
       default: return '✨';
+    }
+  };
+
+  // Voice preview for testing
+  const previewVoice = async () => {
+    const voice = getOptimalVoice();
+    const sampleText = "This is a voice preview for your audio Bible experience. Thank you for using SoapBox.";
+    
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(sampleText);
+      if (voice) {
+        utterance.voice = voice;
+        console.log('Voice preview using:', voice.name);
+      }
+      
+      utterance.rate = audioSettings.rate || 0.9;
+      utterance.pitch = audioSettings.pitch || 1.0;
+      utterance.volume = audioSettings.volume || 0.8;
+      
+      speechSynthesis.speak(utterance);
     }
   };
 
@@ -573,6 +595,35 @@ export default function EnhancedAudioPlayer({
                   className="mt-1"
                 />
                 <span className="text-xs text-gray-500">{Math.round(audioSettings.musicVolume * 100)}%</span>
+              </div>
+              
+              {/* Voice Preview */}
+              <div className="flex items-center justify-between pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={previewVoice}
+                  className="flex items-center gap-2"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  Test Voice
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (backgroundAudioRef.current?.isPlaying) {
+                      backgroundAudioRef.current.pause();
+                    } else {
+                      backgroundAudioRef.current?.play();
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Music className="w-4 h-4" />
+                  Test Music
+                </Button>
               </div>
             </div>
           </div>
