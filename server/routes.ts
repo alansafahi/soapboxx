@@ -1937,6 +1937,17 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Get all Bible verses endpoint for Audio Bible
+  app.get('/api/bible/verses', isAuthenticated, async (req: any, res) => {
+    try {
+      const verses = await storage.getBibleVerses();
+      res.json(verses);
+    } catch (error) {
+      console.error("Error fetching Bible verses:", error);
+      res.status(500).json({ message: "Failed to fetch Bible verses" });
+    }
+  });
+
   // Random verse endpoint for inspiration
   app.get('/api/bible/random-verse', isAuthenticated, async (req: any, res) => {
     try {
