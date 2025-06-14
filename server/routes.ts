@@ -5021,5 +5021,102 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // ====== MEMBER DIRECTORY ENDPOINTS ======
+
+  // Get members with optional church filtering
+  app.get('/api/members', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { churchId } = req.query;
+      
+      let members;
+      if (churchId && churchId !== 'all') {
+        // Get members for specific church
+        members = await storage.getChurchMembers(parseInt(churchId));
+      } else {
+        // Get all members from user's church by default
+        const userChurch = await storage.getUserChurch(userId);
+        if (userChurch?.churchId) {
+          members = await storage.getChurchMembers(userChurch.churchId);
+        } else {
+          members = [];
+        }
+      }
+
+      // Transform members to include required display fields
+      const transformedMembers = members.map((member: any) => ({
+        id: member.userId,
+        fullName: member.firstName && member.lastName 
+          ? `${member.firstName} ${member.lastName}` 
+          : member.firstName || member.lastName || 'Anonymous',
+        email: member.email,
+        phoneNumber: member.mobileNumber,
+        address: member.address,
+        membershipStatus: member.role === 'member' ? 'active' : 'visitor',
+        joinedDate: member.createdAt,
+        churchId: member.churchId?.toString(),
+        churchAffiliation: member.churchName || '',
+        denomination: '',
+        interests: member.bio || '',
+        profileImageUrl: member.profileImageUrl,
+        notes: ''
+      }));
+
+      res.json(transformedMembers);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+      res.status(500).json({ message: "Failed to fetch members" });
+    }
+  });
+
+  // Update member information
+  app.put('/api/members/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      // Get user's church to verify permissions
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required to update members" });
+      }
+
+      // Transform updates back to user model format
+      const userUpdates: any = {};
+      if (updates.fullName) {
+        const nameParts = updates.fullName.split(' ');
+        userUpdates.firstName = nameParts[0];
+        userUpdates.lastName = nameParts.slice(1).join(' ');
+      }
+      if (updates.email) userUpdates.email = updates.email;
+      if (updates.phoneNumber) userUpdates.mobileNumber = updates.phoneNumber;
+      if (updates.address) userUpdates.address = updates.address;
+      if (updates.interests) userUpdates.bio = updates.interests;
+
+      // Update the user
+      const updatedUser = await storage.updateUser(id, userUpdates);
+      
+      // Return transformed response
+      const transformedMember = {
+        id: updatedUser.id,
+        fullName: updatedUser.firstName && updatedUser.lastName 
+          ? `${updatedUser.firstName} ${updatedUser.lastName}` 
+          : updatedUser.firstName || updatedUser.lastName || 'Anonymous',
+        email: updatedUser.email,
+        phoneNumber: updatedUser.mobileNumber,
+        address: updatedUser.address,
+        membershipStatus: 'active',
+        interests: updatedUser.bio || '',
+        profileImageUrl: updatedUser.profileImageUrl
+      };
+
+      res.json(transformedMember);
+    } catch (error) {
+      console.error("Error updating member:", error);
+      res.status(500).json({ message: "Failed to update member" });
+    }
+  });
+
   return httpServer;
 }
