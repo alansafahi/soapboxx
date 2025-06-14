@@ -28,7 +28,7 @@ export default function Navigation() {
         return JSON.parse(stored);
       }
     } catch (error) {
-      console.error('Failed to load notifications from localStorage:', error);
+      // Silently handle localStorage access issues
     }
     
     // Default notifications
@@ -70,7 +70,7 @@ export default function Navigation() {
     try {
       localStorage.setItem('soapbox-notifications', JSON.stringify(notifications));
     } catch (error) {
-      console.error('Failed to save notifications to localStorage:', error);
+      // Silently handle localStorage access issues
     }
   }, [notifications]);
 

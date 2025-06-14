@@ -185,20 +185,20 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         console.log('Parsed error message:', errorMsg);
         
         if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
-          errorMessage = "Session expired. Please refresh the page and log in again.";
+          errorMessage = "Your session has expired. Please refresh the page to continue.";
         } else if (errorMsg.includes('400')) {
-          errorMessage = "Invalid data. Please check all required fields are filled.";
+          errorMessage = "Please make sure all required fields are filled out correctly.";
         } else if (errorMsg.includes('500')) {
-          errorMessage = "Server error. Please try again in a moment.";
+          errorMessage = "Something went wrong on our end. Please try again in a moment.";
         } else {
-          errorMessage = errorMsg;
+          errorMessage = "Something went wrong. Please try again.";
         }
       }
       
       toast({
-        title: "Save Failed",
+        title: "Not Saved",
         description: errorMessage,
-        variant: "destructive",
+        variant: "default",
       });
     },
   });

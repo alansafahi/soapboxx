@@ -101,9 +101,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
         const errorData = await response.json();
         if (response.status === 403) {
           toast({
-            title: "Permission Required",
-            description: "You need church leadership permissions to send messages to members.",
-            variant: "destructive",
+            title: "Just Need Permission",
+            description: "Only church leaders can send messages to members. Contact your pastor if you need this access.",
+            variant: "default",
           });
         } else {
           throw new Error(errorData.message || 'Failed to send message');
@@ -111,9 +111,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
       }
     } catch (error) {
       toast({
-        title: "Unable to Send Message",
-        description: "Please check your permissions or try again later.",
-        variant: "destructive",
+        title: "Message Not Sent",
+        description: "Something went wrong. Please try again in a moment.",
+        variant: "default",
       });
     } finally {
       setIsActionLoading(false);
@@ -140,9 +140,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
         const errorData = await response.json();
         if (response.status === 403) {
           toast({
-            title: "Permission Required",
-            description: "You need church leadership permissions to change member status.",
-            variant: "destructive",
+            title: "Leadership Access Needed",
+            description: "This feature is available for pastors and church leaders. Contact your pastor for assistance.",
+            variant: "default",
           });
         } else {
           throw new Error(errorData.message || 'Failed to update status');
@@ -150,9 +150,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
       }
     } catch (error) {
       toast({
-        title: "Unable to Update Status",
-        description: "Please check your permissions or try again later.",
-        variant: "destructive",
+        title: "Status Not Updated",
+        description: "Something went wrong. Please try again in a moment.",
+        variant: "default",
       });
     } finally {
       setIsActionLoading(false);
@@ -183,9 +183,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
         const errorData = await response.json();
         if (response.status === 403) {
           toast({
-            title: "Permission Required",
-            description: "You need church leadership permissions to suspend members.",
-            variant: "destructive",
+            title: "Leadership Access Required",
+            description: "This action is restricted to pastors and church leaders for member safety.",
+            variant: "default",
           });
         } else {
           throw new Error(errorData.message || 'Failed to suspend member');
@@ -193,9 +193,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
       }
     } catch (error) {
       toast({
-        title: "Unable to Suspend Member",
-        description: "Please check your permissions or try again later.",
-        variant: "destructive",
+        title: "Action Not Completed",
+        description: "Something went wrong. Please try again in a moment.",
+        variant: "default",
       });
     } finally {
       setIsActionLoading(false);

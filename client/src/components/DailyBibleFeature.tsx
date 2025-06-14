@@ -745,15 +745,15 @@ export function DailyBibleFeature() {
       <div className="max-w-2xl mx-auto p-6">
         <Card className="border-red-200 bg-red-50">
           <CardContent className="p-6 text-center">
-            <div className="text-red-600 mb-4">
+            <div className="text-blue-600 mb-4">
               <BookOpen className="h-12 w-12 mx-auto mb-2" />
-              <h2 className="text-lg font-semibold">Authentication Required</h2>
+              <h2 className="text-lg font-semibold">Welcome to Daily Bible</h2>
             </div>
-            <p className="text-red-700 mb-4">
-              Please log in to access your Daily Bible reading experience.
+            <p className="text-gray-700 mb-4">
+              Sign in to access your personalized Daily Bible reading experience.
             </p>
-            <Button onClick={() => window.location.href = '/api/login'} className="bg-red-600 hover:bg-red-700">
-              Log In
+            <Button onClick={() => window.location.href = '/api/login'} className="bg-blue-600 hover:bg-blue-700">
+              Sign In
             </Button>
           </CardContent>
         </Card>
