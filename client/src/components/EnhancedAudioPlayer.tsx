@@ -131,61 +131,138 @@ export default function EnhancedAudioPlayer({
                   await audioContext.resume();
                 }
                 
-                // Create multiple oscillators for a richer ambient sound
-                const baseOscillator = audioContext.createOscillator();
-                const harmonicOscillator = audioContext.createOscillator();
-                const subOscillator = audioContext.createOscillator();
+                // Create professional orchestral-quality ambient soundscape
+                const fundamentalOsc = audioContext.createOscillator(); // Root note
+                const thirdOsc = audioContext.createOscillator(); // Major third
+                const fifthOsc = audioContext.createOscillator(); // Perfect fifth
+                const seventhOsc = audioContext.createOscillator(); // Major seventh for sophistication
+                const octaveOsc = audioContext.createOscillator(); // Octave for depth
+                const subBassOsc = audioContext.createOscillator(); // Sub-bass foundation
                 
-                const baseGain = audioContext.createGain();
-                const harmonicGain = audioContext.createGain();
-                const subGain = audioContext.createGain();
+                // Individual gain controls for professional mixing
+                const fundamentalGain = audioContext.createGain();
+                const thirdGain = audioContext.createGain();
+                const fifthGain = audioContext.createGain();
+                const seventhGain = audioContext.createGain();
+                const octaveGain = audioContext.createGain();
+                const subBassGain = audioContext.createGain();
+                
+                // Professional EQ simulation with filters
+                const lowFilter = audioContext.createBiquadFilter();
+                const midFilter = audioContext.createBiquadFilter();
+                const highFilter = audioContext.createBiquadFilter();
+                
+                // Configure professional-grade filters
+                lowFilter.type = 'lowpass';
+                lowFilter.frequency.setValueAtTime(800, audioContext.currentTime);
+                lowFilter.Q.setValueAtTime(0.7, audioContext.currentTime);
+                
+                midFilter.type = 'peaking';
+                midFilter.frequency.setValueAtTime(440, audioContext.currentTime);
+                midFilter.Q.setValueAtTime(1.2, audioContext.currentTime);
+                midFilter.gain.setValueAtTime(2, audioContext.currentTime);
+                
+                highFilter.type = 'highpass';
+                highFilter.frequency.setValueAtTime(60, audioContext.currentTime);
+                highFilter.Q.setValueAtTime(0.5, audioContext.currentTime);
+                
+                // Master mixing console
                 const masterGain = audioContext.createGain();
+                const compressor = audioContext.createDynamicsCompressor();
                 
-                // Create a peaceful chord progression (C major triad)
-                baseOscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C4
-                harmonicOscillator.frequency.setValueAtTime(329.63, audioContext.currentTime); // E4
-                subOscillator.frequency.setValueAtTime(196.00, audioContext.currentTime); // G3
+                // Professional compressor settings for broadcast quality
+                compressor.threshold.setValueAtTime(-18, audioContext.currentTime);
+                compressor.knee.setValueAtTime(6, audioContext.currentTime);
+                compressor.ratio.setValueAtTime(3, audioContext.currentTime);
+                compressor.attack.setValueAtTime(0.003, audioContext.currentTime);
+                compressor.release.setValueAtTime(0.1, audioContext.currentTime);
                 
-                // Use soft wave types
-                baseOscillator.type = 'sine';
-                harmonicOscillator.type = 'triangle';
-                subOscillator.type = 'sine';
+                // Create sophisticated chord progression (Cmaj7 with extensions)
+                fundamentalOsc.frequency.setValueAtTime(130.81, audioContext.currentTime); // C3 - fundamental
+                thirdOsc.frequency.setValueAtTime(164.81, audioContext.currentTime); // E3 - major third
+                fifthOsc.frequency.setValueAtTime(196.00, audioContext.currentTime); // G3 - perfect fifth
+                seventhOsc.frequency.setValueAtTime(246.94, audioContext.currentTime); // B3 - major seventh
+                octaveOsc.frequency.setValueAtTime(261.63, audioContext.currentTime); // C4 - octave
+                subBassOsc.frequency.setValueAtTime(65.41, audioContext.currentTime); // C2 - sub-bass
                 
-                // Set individual volumes for a balanced mix
-                baseGain.gain.setValueAtTime(0.015, audioContext.currentTime);
-                harmonicGain.gain.setValueAtTime(0.008, audioContext.currentTime);
-                subGain.gain.setValueAtTime(0.010, audioContext.currentTime);
-                masterGain.gain.setValueAtTime(audioSettings.musicVolume * 0.3, audioContext.currentTime);
+                // Use sophisticated waveforms for orchestral texture
+                fundamentalOsc.type = 'sine'; // Pure foundation
+                thirdOsc.type = 'triangle'; // Warm harmonics
+                fifthOsc.type = 'sine'; // Clean support
+                seventhOsc.type = 'triangle'; // Color tone
+                octaveOsc.type = 'sine'; // Brightness
+                subBassOsc.type = 'sine'; // Deep foundation
                 
-                // Connect the audio graph
-                baseOscillator.connect(baseGain);
-                harmonicOscillator.connect(harmonicGain);
-                subOscillator.connect(subGain);
+                // Professional mixing levels for broadcast quality
+                fundamentalGain.gain.setValueAtTime(0.08, audioContext.currentTime); // Strong foundation
+                thirdGain.gain.setValueAtTime(0.05, audioContext.currentTime); // Warm presence
+                fifthGain.gain.setValueAtTime(0.06, audioContext.currentTime); // Harmonic support
+                seventhGain.gain.setValueAtTime(0.03, audioContext.currentTime); // Subtle sophistication
+                octaveGain.gain.setValueAtTime(0.04, audioContext.currentTime); // Brightness
+                subBassGain.gain.setValueAtTime(0.03, audioContext.currentTime); // Deep foundation
                 
-                baseGain.connect(masterGain);
-                harmonicGain.connect(masterGain);
-                subGain.connect(masterGain);
+                // Master volume with dynamic range
+                masterGain.gain.setValueAtTime(audioSettings.musicVolume * 0.4, audioContext.currentTime);
+                
+                // Connect professional audio chain
+                fundamentalOsc.connect(fundamentalGain);
+                thirdOsc.connect(thirdGain);
+                fifthOsc.connect(fifthGain);
+                seventhOsc.connect(seventhGain);
+                octaveOsc.connect(octaveGain);
+                subBassOsc.connect(subBassGain);
+                
+                // Route through professional EQ chain
+                fundamentalGain.connect(lowFilter);
+                thirdGain.connect(midFilter);
+                fifthGain.connect(midFilter);
+                seventhGain.connect(highFilter);
+                octaveGain.connect(highFilter);
+                subBassGain.connect(lowFilter);
+                
+                // Master bus processing
+                lowFilter.connect(compressor);
+                midFilter.connect(compressor);
+                highFilter.connect(compressor);
+                compressor.connect(masterGain);
                 masterGain.connect(audioContext.destination);
                 
-                // Add gentle frequency modulation for organic feel
-                const lfo = audioContext.createOscillator();
+                // Add professional modulation for organic movement
+                const mainLFO = audioContext.createOscillator();
                 const lfoGain = audioContext.createGain();
-                lfo.frequency.setValueAtTime(0.1, audioContext.currentTime); // Very slow LFO
-                lfoGain.gain.setValueAtTime(2, audioContext.currentTime); // Subtle modulation
-                lfo.connect(lfoGain);
-                lfoGain.connect(baseOscillator.frequency);
+                const tremoloLFO = audioContext.createOscillator();
+                const tremoloGain = audioContext.createGain();
+                
+                // Slow, organic pitch modulation
+                mainLFO.frequency.setValueAtTime(0.08, audioContext.currentTime);
+                lfoGain.gain.setValueAtTime(1.5, audioContext.currentTime);
+                mainLFO.connect(lfoGain);
+                lfoGain.connect(fundamentalOsc.frequency);
+                
+                // Gentle amplitude modulation for breathing effect
+                tremoloLFO.frequency.setValueAtTime(0.12, audioContext.currentTime);
+                tremoloGain.gain.setValueAtTime(0.02, audioContext.currentTime);
+                tremoloLFO.connect(tremoloGain);
+                tremoloGain.connect(masterGain.gain);
                 
                 if (backgroundAudioRef.current) {
-                  backgroundAudioRef.current.oscillators = [baseOscillator, harmonicOscillator, subOscillator, lfo];
+                  backgroundAudioRef.current.oscillators = [
+                    fundamentalOsc, thirdOsc, fifthOsc, seventhOsc, octaveOsc, subBassOsc, 
+                    mainLFO, tremoloLFO
+                  ];
                   backgroundAudioRef.current.gainNode = masterGain;
                   backgroundAudioRef.current.isPlaying = true;
                 }
                 
-                // Start all oscillators
-                baseOscillator.start();
-                harmonicOscillator.start();
-                subOscillator.start();
-                lfo.start();
+                // Start all oscillators for professional orchestral sound
+                fundamentalOsc.start();
+                thirdOsc.start();
+                fifthOsc.start();
+                seventhOsc.start();
+                octaveOsc.start();
+                subBassOsc.start();
+                mainLFO.start();
+                tremoloLFO.start();
                 
                 console.log('Enhanced background music started');
               } catch (e) {
@@ -260,28 +337,40 @@ export default function EnhancedAudioPlayer({
     if (!selectedVoice) {
       const premiumVoicePreferences = {
         'female': [
-          // Microsoft Neural voices (Windows 10/11) - highest quality
+          // Microsoft Neural voices (Windows 11/Server) - studio quality
+          'Microsoft Aria Online (Natural) - English (United States)', 'Microsoft Jenny Online (Natural) - English (United States)',
           'Microsoft Zira Desktop - English (United States)', 'Microsoft Hazel Desktop', 'Microsoft Eva Desktop',
-          // Google Cloud voices - very natural
-          'Google US English Female', 'Google en-US-Standard-F', 'Google en-US-Wavenet-F',
+          // Google Cloud Text-to-Speech Neural voices - broadcast quality
+          'Google en-US-Neural2-F', 'Google en-US-Neural2-G', 'Google en-US-Neural2-H',
+          'Google en-US-Wavenet-F', 'Google en-US-Wavenet-G', 'Google en-US-Wavenet-H',
+          'Google US English Female', 'Google en-US-Standard-F',
+          // Amazon Polly Neural voices - professional quality
+          'Amazon Polly Joanna (Neural)', 'Amazon Polly Kendra (Neural)', 'Amazon Polly Salli (Neural)',
+          'Amazon Polly Ivy (Neural)', 'Amazon Polly Kimberly (Neural)',
           // macOS premium voices - high quality
-          'Allison', 'Ava', 'Susan', 'Victoria', 'Kathy', 'Princess',
+          'Allison (Premium)', 'Ava (Enhanced)', 'Susan (Premium)', 'Victoria', 'Kathy', 'Princess',
           // Enhanced system voices
           'Microsoft Zira', 'Enhanced Female Voice',
-          // Standard quality fallbacks
-          'Alice', 'Catherine', 'Anna', 'Samantha'
+          // Quality fallbacks
+          'Allison', 'Ava', 'Susan', 'Alice', 'Catherine', 'Anna'
         ],
         'male': [
-          // Microsoft Neural voices - highest quality
+          // Microsoft Neural voices - studio quality
+          'Microsoft Guy Online (Natural) - English (United States)', 'Microsoft Davis Online (Natural) - English (United States)',
           'Microsoft David Desktop - English (United States)', 'Microsoft Mark Desktop', 'Microsoft Richard Desktop',
-          // Google Cloud voices - very natural
-          'Google US English Male', 'Google en-US-Standard-D', 'Google en-US-Wavenet-D',
+          // Google Cloud Text-to-Speech Neural voices - broadcast quality
+          'Google en-US-Neural2-D', 'Google en-US-Neural2-A', 'Google en-US-Neural2-J',
+          'Google en-US-Wavenet-D', 'Google en-US-Wavenet-A', 'Google en-US-Wavenet-B',
+          'Google US English Male', 'Google en-US-Standard-D',
+          // Amazon Polly Neural voices - professional quality
+          'Amazon Polly Matthew (Neural)', 'Amazon Polly Justin (Neural)', 'Amazon Polly Joey (Neural)',
+          'Amazon Polly Brian (Neural)', 'Amazon Polly Kevin (Neural)',
           // macOS premium voices - high quality
-          'Alex', 'Daniel', 'Tom', 'Oliver', 'Diego',
+          'Alex (Premium)', 'Daniel (Enhanced)', 'Tom (Premium)', 'Oliver', 'Diego',
           // Enhanced system voices
           'Microsoft David', 'Enhanced Male Voice',
-          // Standard quality fallbacks
-          'Aaron', 'Albert', 'Arthur', 'Fred'
+          // Quality fallbacks
+          'Alex', 'Daniel', 'Tom', 'Aaron', 'Albert'
         ]
       };
       

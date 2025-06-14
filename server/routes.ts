@@ -6044,5 +6044,39 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Premium AI Voice Synthesis endpoint - World-class audio quality
+  app.post('/api/ai-voice-synthesis', async (req, res) => {
+    try {
+      const { text, voice = 'nova', speed = 1.0 } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ error: 'Text is required' });
+      }
+
+      // Use OpenAI's premium text-to-speech API for broadcast-quality audio
+      const mp3 = await openai.audio.speech.create({
+        model: "tts-1-hd", // High-definition model for world-class quality
+        voice: voice, // nova (female), echo (male), alloy, fable, onyx, shimmer
+        input: text.substring(0, 4096), // OpenAI limit
+        speed: Math.max(0.25, Math.min(4.0, speed)), // Valid range
+        response_format: "mp3"
+      });
+
+      const buffer = Buffer.from(await mp3.arrayBuffer());
+      
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': buffer.length.toString(),
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*'
+      });
+      
+      res.send(buffer);
+    } catch (error) {
+      console.error('AI voice synthesis error:', error);
+      res.status(500).json({ error: 'Voice synthesis failed' });
+    }
+  });
+
   return httpServer;
 }
