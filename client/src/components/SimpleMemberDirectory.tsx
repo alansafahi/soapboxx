@@ -56,12 +56,21 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
           description: `Message sent to ${member.fullName}`,
         });
       } else {
-        throw new Error('Failed to send message');
+        const errorData = await response.json();
+        if (response.status === 403) {
+          toast({
+            title: "Permission Required",
+            description: "You need church leadership permissions to send messages to members.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to send message');
+        }
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: "Unable to Send Message",
+        description: "Please check your permissions or try again later.",
         variant: "destructive",
       });
     } finally {
@@ -86,12 +95,21 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
           description: `${member.fullName}'s status changed to ${newStatus}`,
         });
       } else {
-        throw new Error('Failed to update status');
+        const errorData = await response.json();
+        if (response.status === 403) {
+          toast({
+            title: "Permission Required",
+            description: "You need church leadership permissions to change member status.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to update status');
+        }
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update member status. Please try again.",
+        title: "Unable to Update Status",
+        description: "Please check your permissions or try again later.",
         variant: "destructive",
       });
     } finally {
@@ -120,12 +138,21 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
           description: `${member.fullName} has been suspended`,
         });
       } else {
-        throw new Error('Failed to suspend member');
+        const errorData = await response.json();
+        if (response.status === 403) {
+          toast({
+            title: "Permission Required",
+            description: "You need church leadership permissions to suspend members.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to suspend member');
+        }
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to suspend member. Please try again.",
+        title: "Unable to Suspend Member",
+        description: "Please check your permissions or try again later.",
         variant: "destructive",
       });
     } finally {
@@ -152,12 +179,21 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
           description: `${member.fullName} has been removed from the church`,
         });
       } else {
-        throw new Error('Failed to remove member');
+        const errorData = await response.json();
+        if (response.status === 403) {
+          toast({
+            title: "Permission Required",
+            description: "You need church leadership permissions to remove members.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to remove member');
+        }
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to remove member. Please try again.",
+        title: "Unable to Remove Member",
+        description: "Please check your permissions or try again later.",
         variant: "destructive",
       });
     } finally {

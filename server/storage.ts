@@ -792,15 +792,30 @@ export class DatabaseStorage implements IStorage {
     return updatedChurch;
   }
 
-  async getUserChurch(userId: string): Promise<UserChurch | undefined> {
-    const [userChurch] = await db
-      .select()
+  async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {
+    const [result] = await db
+      .select({
+        id: userChurches.id,
+        userId: userChurches.userId,
+        churchId: userChurches.churchId,
+        roleId: userChurches.roleId,
+        title: userChurches.title,
+        bio: userChurches.bio,
+        department: userChurches.department,
+        additionalPermissions: userChurches.additionalPermissions,
+        isActive: userChurches.isActive,
+        joinedAt: userChurches.joinedAt,
+        expiresAt: userChurches.expiresAt,
+        lastActiveAt: userChurches.lastActiveAt,
+        role: roles.name
+      })
       .from(userChurches)
+      .leftJoin(roles, eq(userChurches.roleId, roles.id))
       .where(and(
         eq(userChurches.userId, userId),
         eq(userChurches.isActive, true)
       ));
-    return userChurch;
+    return result as (UserChurch & { role: string }) | undefined;
   }
 
   async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
