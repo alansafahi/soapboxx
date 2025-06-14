@@ -146,7 +146,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Emergency broadcast system with immediate delivery to all church members
   - Professional message templates for announcements, emergencies, and prayer requests
   - Role-based access control limited to pastors and church leadership
-  - Complete communication interface accessible at /communications route
+  - Integrated into Admin Portal navigation for better organization and discoverability
+  - Fixed JSON parsing errors and added multiple target audience options (roles/departments)
 - June 14, 2025: Fixed Prayer Wall functionality and filtering
   - Added sample prayer requests to populate empty Prayer Wall
   - Fixed urgent prayer filtering to properly show prayers marked as urgent

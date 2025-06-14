@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles, ChevronDown, ChevronRight, Shield, UserCog, Star, Share2, BarChart3 } from "lucide-react";
+import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles, ChevronDown, ChevronRight, Shield, UserCog, Star, Share2, BarChart3, Megaphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -98,6 +98,7 @@ export default function AppHeader() {
       label: "Admin",
       items: [
         { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
+        { href: "/communications", label: "Bulk Communications", icon: Megaphone, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
         { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
       ]
     },
