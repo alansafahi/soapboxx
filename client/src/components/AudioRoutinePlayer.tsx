@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipForward, Clock, Volume2, Settings } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Pause, SkipForward, Volume2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import AudioPlayer from './AudioPlayer';
 
 interface RoutineStep {
   id: string;
@@ -48,10 +45,15 @@ export default function AudioRoutinePlayer({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [stepProgress, setStepProgress] = useState(0);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [totalElapsed, setTotalElapsed] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [userSettings, setUserSettings] = useState({
-    voice: 'warm-female',
+    voiceRate: 0.9,
+    voicePitch: 1.0,
+    volume: 0.8,
     musicBed: 'gentle-piano',
     autoAdvance: true,
     pauseBetweenSteps: true,

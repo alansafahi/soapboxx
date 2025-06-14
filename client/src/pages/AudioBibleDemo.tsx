@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart, Search, Filter } from "lucide-react";
 import BibleAudioPlayer from "@/components/BibleAudioPlayer";
-import AudioRoutinePlayer from "@/components/AudioRoutinePlayer";
+import WebSpeechAudioPlayer from "@/components/WebSpeechAudioPlayer";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function AudioBibleDemo() {
@@ -32,13 +32,12 @@ export default function AudioBibleDemo() {
     mutationFn: async ({ verseIds, voice, musicBed }: { verseIds: number[]; voice: string; musicBed: string }) => {
       return await apiRequest("/api/audio/routines/bible-integrated", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           verseIds,
           routineType: "custom",
           voice,
           musicBed
-        }),
-        headers: { "Content-Type": "application/json" }
+        }
       });
     },
   });
