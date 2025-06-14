@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart, Search, Filter } from "lucide-react";
+import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart, Search, Filter, X } from "lucide-react";
 import BibleAudioPlayer from "@/components/BibleAudioPlayer";
 import WebSpeechAudioPlayer from "@/components/WebSpeechAudioPlayer";
 import SimpleAudioTest from "@/components/SimpleAudioTest";
@@ -85,6 +85,11 @@ export default function AudioBibleDemo() {
   const filteredVerses = useMemo(() => {
     if (!Array.isArray(verses)) return [];
     
+    // If we have contextual selection and user wants to use it, use those verses
+    if (useContextualSelection && contextualSelection?.verses) {
+      return contextualSelection.verses;
+    }
+    
     let filtered = verses;
     
     // Apply category filter
@@ -106,7 +111,7 @@ export default function AudioBibleDemo() {
     }
     
     return filtered.slice(0, 50); // Limit to 50 verses for performance
-  }, [verses, categoryFilter, searchTerm]);
+  }, [verses, categoryFilter, searchTerm, useContextualSelection, contextualSelection]);
 
   // Get unique categories from verses
   const categories = useMemo(() => {
@@ -280,8 +285,32 @@ export default function AudioBibleDemo() {
                     </div>
                   </div>
 
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Found {filteredVerses.length} verses • {selectedVerses.length}/10 selected
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {useContextualSelection ? (
+                        <span className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-purple-600" />
+                          AI-selected {filteredVerses.length} verses for your mood • {selectedVerses.length}/10 selected
+                        </span>
+                      ) : (
+                        <span>Found {filteredVerses.length} verses • {selectedVerses.length}/10 selected</span>
+                      )}
+                    </div>
+                    {useContextualSelection && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setUseContextualSelection(false);
+                          setContextualSelection(null);
+                          setSelectedVerses([]);
+                        }}
+                        className="text-xs"
+                      >
+                        <Filter className="w-3 h-3 mr-1" />
+                        Clear AI Selection
+                      </Button>
+                    )}
                   </div>
                 </div>
 
