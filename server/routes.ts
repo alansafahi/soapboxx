@@ -2504,6 +2504,164 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Dynamic contextual scripture selection
+  app.get('/api/bible/contextual-selection', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { mood, count = 10, categories } = req.query;
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ error: "AI service not configured" });
+      }
+
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Get current liturgical season and world events context
+      const currentDate = new Date();
+      const liturgicalContext = getLiturgicalSeason(currentDate);
+      
+      // Get all available verses for filtering
+      const allVerses = await storage.getBibleVerses();
+      
+      // Filter by categories if specified
+      let availableVerses = allVerses;
+      if (categories && categories.length > 0) {
+        const categoryList = Array.isArray(categories) ? categories : [categories];
+        availableVerses = allVerses.filter(verse => 
+          verse.category && categoryList.includes(verse.category)
+        );
+      }
+
+      // Create contextual AI prompt for verse selection
+      const contextPrompt = `You are a pastoral AI assistant helping select appropriate Bible verses for a personalized audio devotional experience.
+
+Current Context:
+- User mood: ${mood || 'seeking spiritual guidance'}
+- Liturgical season: ${liturgicalContext.season}
+- Seasonal focus: ${liturgicalContext.focus}
+- Date: ${currentDate.toLocaleDateString()}
+- Available verses: ${availableVerses.length} total
+
+Select ${count} Bible verses that are most appropriate for this context. Consider:
+1. User's current emotional/spiritual state
+2. Liturgical appropriateness for the season
+3. Contemporary relevance and life application
+4. Spiritual progression and flow for audio meditation
+5. Balance between comfort, challenge, and growth
+
+From the available verses, provide verse IDs in order of importance. Respond with JSON:
+{
+  "selectedVerseIds": [list of verse IDs as numbers],
+  "contextualReason": "brief explanation of why these verses were chosen",
+  "spiritualTheme": "overarching theme of the selection",
+  "liturgicalAlignment": "how selection aligns with current season"
+}
+
+Available verses (ID: Reference - Text excerpt):
+${availableVerses.slice(0, 100).map(v => `${v.id}: ${v.reference} - ${v.text.substring(0, 100)}...`).join('\n')}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are a wise pastoral counselor with deep knowledge of Scripture, liturgical traditions, and contextual spiritual care. Select verses that will genuinely minister to the user's current spiritual needs."
+          },
+          {
+            role: "user",
+            content: contextPrompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7
+      });
+
+      const aiSelection = JSON.parse(response.choices[0].message.content);
+      
+      // Validate and get the selected verses
+      const selectedVerses = aiSelection.selectedVerseIds
+        .map((id: number) => availableVerses.find(v => v.id === id))
+        .filter(Boolean)
+        .slice(0, parseInt(count.toString()));
+
+      // If AI didn't provide enough verses, supplement with category-appropriate ones
+      if (selectedVerses.length < parseInt(count.toString())) {
+        const remainingCount = parseInt(count.toString()) - selectedVerses.length;
+        const usedIds = selectedVerses.map(v => v.id);
+        const supplementaryVerses = availableVerses
+          .filter(v => !usedIds.includes(v.id))
+          .slice(0, remainingCount);
+        selectedVerses.push(...supplementaryVerses);
+      }
+
+      res.json({
+        verses: selectedVerses,
+        context: {
+          mood: mood || 'seeking guidance',
+          liturgicalSeason: liturgicalContext.season,
+          seasonalFocus: liturgicalContext.focus,
+          selectionReason: aiSelection.contextualReason,
+          spiritualTheme: aiSelection.spiritualTheme,
+          liturgicalAlignment: aiSelection.liturgicalAlignment
+        },
+        metadata: {
+          totalAvailable: availableVerses.length,
+          selectedCount: selectedVerses.length,
+          generatedAt: currentDate.toISOString()
+        }
+      });
+
+    } catch (error) {
+      console.error('Error generating contextual scripture selection:', error);
+      
+      // Fallback to basic category-based selection
+      try {
+        const allVerses = await storage.getBibleVerses();
+        const fallbackVerses = allVerses.slice(0, parseInt((req.query.count || 10).toString()));
+        
+        res.json({
+          verses: fallbackVerses,
+          context: {
+            mood: req.query.mood || 'seeking guidance',
+            liturgicalSeason: 'Ordinary Time',
+            seasonalFocus: 'spiritual growth',
+            selectionReason: 'Basic selection due to service limitations',
+            spiritualTheme: 'general encouragement',
+            liturgicalAlignment: 'universally appropriate'
+          },
+          metadata: {
+            totalAvailable: allVerses.length,
+            selectedCount: fallbackVerses.length,
+            generatedAt: new Date().toISOString(),
+            fallbackMode: true
+          }
+        });
+      } catch (fallbackError) {
+        res.status(500).json({ error: 'Failed to generate scripture selection' });
+      }
+    }
+  });
+
+  // Helper function for liturgical seasons
+  function getLiturgicalSeason(date: Date) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // JavaScript months are 0-indexed
+    const day = date.getDate();
+
+    // Simplified liturgical calendar (can be enhanced with exact calculations)
+    if ((month === 12 && day >= 1) || (month === 1 && day <= 6)) {
+      return { season: 'Advent/Christmas', focus: 'hope, preparation, incarnation' };
+    } else if ((month === 1 && day >= 7) || (month === 2) || (month === 3 && day <= 15)) {
+      return { season: 'Ordinary Time (Winter)', focus: 'discipleship, spiritual growth' };
+    } else if ((month === 3 && day >= 16) || (month === 4) || (month === 5 && day <= 15)) {
+      return { season: 'Lent/Easter', focus: 'repentance, resurrection, new life' };
+    } else if (month >= 6 && month <= 11) {
+      return { season: 'Ordinary Time (Summer/Fall)', focus: 'mission, service, gratitude' };
+    } else {
+      return { season: 'Ordinary Time', focus: 'spiritual formation, daily faithfulness' };
+    }
+  }
+
   // Enhanced audio routine with Bible integration
   app.post('/api/audio/routines/bible-integrated', isAuthenticated, async (req, res) => {
     try {

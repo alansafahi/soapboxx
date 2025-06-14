@@ -22,6 +22,9 @@ export default function AudioBibleDemo() {
   const [showPlayer, setShowPlayer] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [selectedMood, setSelectedMood] = useState<string>("");
+  const [contextualSelection, setContextualSelection] = useState<any>(null);
+  const [useContextualSelection, setUseContextualSelection] = useState(false);
 
   // Get Bible verses for selection
   const { data: verses = [] } = useQuery({
@@ -40,6 +43,27 @@ export default function AudioBibleDemo() {
           musicBed
         }
       });
+    },
+  });
+
+  // Contextual scripture selection mutation
+  const contextualSelectionMutation = useMutation({
+    mutationFn: async ({ mood, count, categories }: { mood: string; count?: number; categories?: string[] }) => {
+      const params = new URLSearchParams();
+      if (mood) params.append('mood', mood);
+      if (count) params.append('count', count.toString());
+      if (categories && categories.length > 0) {
+        categories.forEach(cat => params.append('categories', cat));
+      }
+      
+      return await apiRequest(`/api/bible/contextual-selection?${params.toString()}`);
+    },
+    onSuccess: (data) => {
+      setContextualSelection(data);
+      if (data.verses && data.verses.length > 0) {
+        setSelectedVerses(data.verses.map((v: any) => v.id));
+        setUseContextualSelection(true);
+      }
     },
   });
 
@@ -155,6 +179,75 @@ export default function AudioBibleDemo() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Contextual Scripture Selection */}
+                <div className="space-y-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <h4 className="font-medium text-gray-900 dark:text-white">AI-Powered Scripture Selection</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                        Current Mood/Need
+                      </label>
+                      <Select value={selectedMood} onValueChange={setSelectedMood}>
+                        <SelectTrigger>
+                          <Heart className="w-4 h-4 mr-2" />
+                          <SelectValue placeholder="How are you feeling today?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="anxious">Feeling anxious or worried</SelectItem>
+                          <SelectItem value="grateful">Thankful and grateful</SelectItem>
+                          <SelectItem value="seeking-peace">Seeking peace and calm</SelectItem>
+                          <SelectItem value="needing-strength">Needing strength and courage</SelectItem>
+                          <SelectItem value="joyful">Celebrating and joyful</SelectItem>
+                          <SelectItem value="struggling">Going through difficulties</SelectItem>
+                          <SelectItem value="seeking-guidance">Seeking direction and wisdom</SelectItem>
+                          <SelectItem value="hopeful">Looking forward with hope</SelectItem>
+                          <SelectItem value="reflective">In a contemplative mood</SelectItem>
+                          <SelectItem value="seeking-purpose">Searching for purpose</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex items-end">
+                      <Button
+                        onClick={() => {
+                          if (selectedMood) {
+                            contextualSelectionMutation.mutate({
+                              mood: selectedMood,
+                              count: 10,
+                              categories: categoryFilter !== 'all' ? [categoryFilter] : undefined
+                            });
+                          }
+                        }}
+                        disabled={!selectedMood || contextualSelectionMutation.isPending}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        {contextualSelectionMutation.isPending ? (
+                          <>Selecting Verses...</>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Get Personalized Verses
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {contextualSelection && (
+                    <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border">
+                      <div className="text-sm space-y-1">
+                        <p><strong>Liturgical Season:</strong> {contextualSelection.context.liturgicalSeason}</p>
+                        <p><strong>Spiritual Theme:</strong> {contextualSelection.context.spiritualTheme}</p>
+                        <p><strong>Selection Reason:</strong> {contextualSelection.context.selectionReason}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Search and Filter Interface */}
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row gap-4">
