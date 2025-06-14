@@ -1,5 +1,4 @@
 import { storage } from './storage';
-import { sendEmailNotification } from './email-service';
 
 export interface BulkMessage {
   id?: number;

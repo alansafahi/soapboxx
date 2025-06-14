@@ -4778,14 +4778,14 @@ Please provide suggestions for the missing or incomplete sections.`
   app.get('/api/communications/messages', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
-      const userChurch = await storage.getUserWithChurch(userId);
+      const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
         return res.status(403).json({ message: "Leadership access required" });
       }
 
-      const messages = await storage.getBulkMessages(userChurch.churchId);
-      res.json(messages || []);
+      // Return empty array for now - can implement message history later
+      res.json([]);
     } catch (error) {
       console.error("Error fetching bulk messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
@@ -4795,22 +4795,41 @@ Please provide suggestions for the missing or incomplete sections.`
   // Create bulk message/announcement
   app.post('/api/communications/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const { bulkCommunicationService } = await import('./bulk-communication');
       const userId = req.user?.claims?.sub || req.user?.id;
-      const userChurch = await storage.getUserWithChurch(userId);
+      const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
         return res.status(403).json({ message: "Leadership access required" });
       }
 
-      const messageData = {
-        ...req.body,
-        senderId: userId,
-        churchId: userChurch.churchId
-      };
+      const { title, content, type, channels, targetAudience, priority, requiresResponse } = req.body;
 
-      const message = await bulkCommunicationService.createBulkMessage(messageData);
-      res.status(201).json(message);
+      // Create in-app notifications for all church members
+      const churchMembers = await storage.getChurchMembers(userChurch.churchId);
+      const sender = await storage.getUser(userId);
+      
+      // Send to each member
+      for (const member of churchMembers) {
+        await storage.createEventNotification({
+          userId: member.userId,
+          type: type || 'announcement',
+          title: title,
+          message: content,
+          priority: priority || 'normal',
+          isRead: false,
+          actionUrl: '/communications',
+          data: JSON.stringify({ 
+            senderId: userId, 
+            senderName: sender?.name || 'Church Leadership',
+            requiresResponse: requiresResponse || false 
+          })
+        });
+      }
+
+      res.status(201).json({ 
+        message: "Announcement sent successfully", 
+        recipientCount: churchMembers.length
+      });
     } catch (error) {
       console.error("Error creating bulk message:", error);
       res.status(500).json({ message: error.message || "Failed to create message" });
@@ -4820,31 +4839,45 @@ Please provide suggestions for the missing or incomplete sections.`
   // Emergency broadcast endpoint
   app.post('/api/communications/emergency-broadcast', isAuthenticated, async (req: any, res) => {
     try {
-      const { bulkCommunicationService } = await import('./bulk-communication');
       const userId = req.user?.claims?.sub || req.user?.id;
-      const userChurch = await storage.getUserWithChurch(userId);
+      const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor'].includes(userChurch.role)) {
         return res.status(403).json({ message: "Senior leadership access required for emergency broadcasts" });
       }
 
-      const emergencyMessage = {
-        title: `URGENT: ${req.body.title}`,
-        content: req.body.content,
-        type: 'urgent',
-        channels: ['email', 'push', 'in_app'],
-        targetAudience: { allMembers: true },
-        senderId: userId,
-        churchId: userChurch.churchId,
-        priority: 'urgent',
-        requiresResponse: req.body.requiresResponse || false
-      };
+      const { title, content, requiresResponse } = req.body;
 
-      const message = await bulkCommunicationService.createBulkMessage(emergencyMessage);
+      // Get all church members
+      const churchMembers = await storage.getChurchMembers(userChurch.churchId);
+      const sender = await storage.getUser(userId);
+      const church = await storage.getChurch(userChurch.churchId);
+      
+      // Create urgent in-app notifications for all members
+      for (const member of churchMembers) {
+        await storage.createEventNotification({
+          userId: member.userId,
+          type: 'urgent',
+          title: `URGENT: ${title}`,
+          message: content,
+          priority: 'urgent',
+          isRead: false,
+          actionUrl: '/communications',
+          data: JSON.stringify({ 
+            senderId: userId,
+            senderName: sender?.name || 'Church Leadership',
+            churchName: church?.name || 'Church',
+            requiresResponse: requiresResponse || false,
+            isEmergency: true
+          })
+        });
+      }
+
       res.status(201).json({ 
-        message: "Emergency broadcast sent", 
-        messageId: message.id,
-        estimatedRecipients: await storage.getChurchMemberCount?.(userChurch.churchId) || 0
+        message: "Emergency broadcast sent successfully", 
+        recipientCount: churchMembers.length,
+        channels: ['in_app', 'notification'],
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       console.error("Error sending emergency broadcast:", error);
@@ -4861,13 +4894,19 @@ Please provide suggestions for the missing or incomplete sections.`
             id: 'service_update',
             name: 'Service Update',
             subject: 'Important Service Information',
-            content: 'We have an important update regarding our upcoming service...'
+            content: 'We have an important update regarding our upcoming service. Please check your email for details or contact the church office if you have questions.'
           },
           {
             id: 'event_reminder',
             name: 'Event Reminder',
             subject: 'Reminder: Upcoming Church Event',
-            content: 'This is a friendly reminder about our upcoming event...'
+            content: 'This is a friendly reminder about our upcoming event. We look forward to seeing you there and sharing this special time together.'
+          },
+          {
+            id: 'weekly_announcement',
+            name: 'Weekly Announcement',
+            subject: 'Weekly Church News',
+            content: 'Here are this week\'s important announcements and upcoming events. Please review and mark your calendars accordingly.'
           }
         ],
         emergencies: [
@@ -4875,13 +4914,19 @@ Please provide suggestions for the missing or incomplete sections.`
             id: 'weather_closure',
             name: 'Weather Closure',
             subject: 'URGENT: Service Cancelled Due to Weather',
-            content: 'Due to severe weather conditions, all services and activities are cancelled...'
+            content: 'Due to severe weather conditions, all services and activities scheduled for today are cancelled for the safety of our congregation. Please stay safe and warm.'
           },
           {
             id: 'safety_alert',
             name: 'Safety Alert',
             subject: 'URGENT: Safety Information',
-            content: 'We want to inform you of an important safety matter...'
+            content: 'We want to inform you of an important safety matter affecting our church community. Please read this message carefully and follow the provided guidance.'
+          },
+          {
+            id: 'facility_closure',
+            name: 'Facility Closure',
+            subject: 'URGENT: Temporary Facility Closure',
+            content: 'Our church facility will be temporarily closed due to unexpected circumstances. All scheduled activities are postponed until further notice.'
           }
         ],
         prayers: [
@@ -4889,7 +4934,13 @@ Please provide suggestions for the missing or incomplete sections.`
             id: 'prayer_request',
             name: 'Prayer Request',
             subject: 'Prayer Request from Church Leadership',
-            content: 'We are asking for your prayers regarding...'
+            content: 'We are asking for your prayers regarding an important matter affecting our church family. Please join us in prayer and continue to lift this situation up to the Lord.'
+          },
+          {
+            id: 'community_prayer',
+            name: 'Community Prayer',
+            subject: 'Call to Prayer for Our Community',
+            content: 'Our community is facing challenges that require our collective prayers. Please join us in praying for wisdom, healing, and God\'s guidance during this time.'
           }
         ]
       };
