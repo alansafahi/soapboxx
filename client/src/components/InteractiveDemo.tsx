@@ -282,7 +282,7 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
     try {
       await apiRequest('/api/tour/complete', {
         method: 'POST',
-        body: { tourId: currentTour.id, userRole }
+        body: { role: userRole }
       });
       // Invalidate tour status to refresh the badge visibility
       queryClient.invalidateQueries({ queryKey: ['/api/tour/status'] });
