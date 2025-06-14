@@ -5044,23 +5044,27 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Transform members to include required display fields
-      const transformedMembers = members.map((member: any) => ({
-        id: member.userId,
-        fullName: member.firstName && member.lastName 
-          ? `${member.firstName} ${member.lastName}` 
-          : member.firstName || member.lastName || 'Anonymous',
-        email: member.email,
-        phoneNumber: member.mobileNumber,
-        address: member.address,
-        membershipStatus: member.role === 'member' ? 'active' : 'visitor',
-        joinedDate: member.createdAt,
-        churchId: member.churchId?.toString(),
-        churchAffiliation: member.churchName || '',
-        denomination: '',
-        interests: member.bio || '',
-        profileImageUrl: member.profileImageUrl,
-        notes: ''
-      }));
+      const transformedMembers = members.map((member: any) => {
+        // Handle the nested user object structure
+        const user = member.user || member;
+        return {
+          id: member.userId || user.id,
+          fullName: user.firstName && user.lastName 
+            ? `${user.firstName} ${user.lastName}` 
+            : user.firstName || user.lastName || 'Anonymous Member',
+          email: user.email || '',
+          phoneNumber: user.mobileNumber || '',
+          address: user.address || '',
+          membershipStatus: 'active', // Default to active for church members
+          joinedDate: member.joinedAt || user.createdAt,
+          churchId: member.churchId?.toString(),
+          churchAffiliation: '', // Will be populated from church name lookup
+          denomination: user.denomination || '',
+          interests: user.interests || user.bio || '',
+          profileImageUrl: user.profileImageUrl || '',
+          notes: ''
+        };
+      });
 
       res.json(transformedMembers);
     } catch (error) {
