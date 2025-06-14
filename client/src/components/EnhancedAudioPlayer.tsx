@@ -106,50 +106,75 @@ export default function EnhancedAudioPlayer({
     };
   }, []);
 
-  // Initialize background music
+  // Initialize background music with simpler approach
   useEffect(() => {
     if (routine.audioConfig?.musicBed?.baseTrack) {
-      console.log('Initializing background music with volume:', audioSettings.musicVolume);
-      // Create a simple ambient tone for background music
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      let oscillator: OscillatorNode | null = null;
-      let gainNode: GainNode | null = null;
+      console.log('Initializing background music system');
       
-      backgroundAudioRef.current = {
-        play: async () => {
-          try {
-            if (audioContext.state === 'suspended') {
-              await audioContext.resume();
+      // Create a simple audio element approach for background music
+      const createBackgroundAudio = () => {
+        try {
+          // Use Web Audio API for a simple background tone
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          
+          backgroundAudioRef.current = {
+            context: audioContext,
+            oscillator: null,
+            gainNode: null,
+            isPlaying: false,
+            
+            play: async () => {
+              try {
+                if (backgroundAudioRef.current?.isPlaying) return;
+                
+                if (audioContext.state === 'suspended') {
+                  await audioContext.resume();
+                }
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                // Create a gentle ambient tone
+                oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Very low volume
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                if (backgroundAudioRef.current) {
+                  backgroundAudioRef.current.oscillator = oscillator;
+                  backgroundAudioRef.current.gainNode = gainNode;
+                  backgroundAudioRef.current.isPlaying = true;
+                }
+                
+                oscillator.start();
+                console.log('Background music started');
+              } catch (e) {
+                console.log('Background music unavailable:', e);
+              }
+            },
+            
+            pause: () => {
+              try {
+                if (backgroundAudioRef.current?.oscillator && backgroundAudioRef.current?.isPlaying) {
+                  backgroundAudioRef.current.oscillator.stop();
+                  backgroundAudioRef.current.oscillator = null;
+                  backgroundAudioRef.current.isPlaying = false;
+                  console.log('Background music stopped');
+                }
+              } catch (e) {
+                console.log('Background music stop error:', e);
+              }
             }
-            
-            oscillator = audioContext.createOscillator();
-            gainNode = audioContext.createGain();
-            
-            oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(audioSettings.musicVolume * 0.05, audioContext.currentTime);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.start();
-            
-            console.log('Background music started');
-          } catch (e) {
-            console.log('Background music not available:', e);
-          }
-        },
-        pause: () => {
-          try {
-            if (oscillator) {
-              oscillator.stop();
-              oscillator = null;
-            }
-          } catch (e) {
-            console.log('Background music stop error:', e);
-          }
-        },
-        volume: audioSettings.musicVolume * 0.05
+          };
+        } catch (e) {
+          console.log('Web Audio API not supported:', e);
+          backgroundAudioRef.current = null;
+        }
       };
+      
+      createBackgroundAudio();
     }
 
     return () => {
@@ -157,12 +182,12 @@ export default function EnhancedAudioPlayer({
         try {
           backgroundAudioRef.current.pause();
         } catch (e) {
-          // Audio cleanup
+          // Cleanup
         }
         backgroundAudioRef.current = null;
       }
     };
-  }, [routine, audioSettings.musicVolume]);
+  }, [routine]);
 
   // Enhanced voice selection with proper loading
   const getOptimalVoice = () => {
@@ -186,29 +211,42 @@ export default function EnhancedAudioPlayer({
       voice.lang.startsWith('en')
     );
     
-    // 2. Try to find gender-appropriate voice
+    // 2. Try to find gender-appropriate voice by name patterns
     if (!selectedVoice) {
-      const maleKeywords = ['male', 'man', 'david', 'alex', 'daniel', 'tom', 'john', 'fred', 'aaron', 'albert', 'robert', 'james'];
-      const femaleKeywords = ['female', 'woman', 'sarah', 'samantha', 'alice', 'victoria', 'kate', 'anna', 'emma', 'zoe', 'susan', 'mary'];
-      
-      const keywords = voiceType === 'male' ? maleKeywords : femaleKeywords;
-      
-      selectedVoice = voices.find(voice => 
-        voice.lang.startsWith('en') && 
-        keywords.some(keyword => 
-          voice.name.toLowerCase().includes(keyword)
-        )
-      );
+      if (voiceType === 'male') {
+        // Look for male voices in order of preference
+        selectedVoice = voices.find(voice => 
+          voice.lang.startsWith('en') && 
+          (voice.name.toLowerCase().includes('aaron') || 
+           voice.name.toLowerCase().includes('albert') || 
+           voice.name.toLowerCase().includes('daniel') || 
+           voice.name.toLowerCase().includes('arthur') ||
+           voice.name.toLowerCase().includes('alex'))
+        );
+      } else {
+        // Look for female voices, but NOT Samantha as default
+        selectedVoice = voices.find(voice => 
+          voice.lang.startsWith('en') && 
+          (voice.name.toLowerCase().includes('alice') || 
+           voice.name.toLowerCase().includes('victoria') || 
+           voice.name.toLowerCase().includes('anna') ||
+           voice.name.toLowerCase().includes('catherine'))
+        );
+      }
     }
     
-    // 3. Gender-based selection by index (odd/even pattern)
+    // 3. Fallback to any English voice that's not the opposite gender
     if (!selectedVoice) {
       const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
-      if (englishVoices.length > 1) {
-        // Use different voices based on type
-        selectedVoice = voiceType === 'male' ? 
-          englishVoices[1] || englishVoices[0] : 
-          englishVoices[0];
+      if (voiceType === 'male') {
+        // Prefer Aaron or Albert for male
+        selectedVoice = englishVoices.find(v => v.name.includes('Aaron')) || 
+                      englishVoices.find(v => v.name.includes('Albert')) ||
+                      englishVoices[1] || englishVoices[0];
+      } else {
+        // Prefer any voice that's not Samantha as first choice
+        selectedVoice = englishVoices.find(v => !v.name.includes('Samantha')) || 
+                      englishVoices[0];
       }
     }
     
@@ -221,10 +259,13 @@ export default function EnhancedAudioPlayer({
     return selectedVoice;
   };
 
-  const speakText = (text: string, stepVoiceSettings?: any) => {
+  const speakText = async (text: string, stepVoiceSettings?: any) => {
     if ('speechSynthesis' in window) {
       // Cancel any existing speech
       speechSynthesis.cancel();
+      
+      // Wait a moment for voices to be available
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       const utterance = new SpeechSynthesisUtterance(text);
       const voice = getOptimalVoice();
@@ -234,6 +275,13 @@ export default function EnhancedAudioPlayer({
         console.log('Voice applied:', voice.name, 'for step:', currentStep?.title);
       } else {
         console.log('No voice selected, using browser default');
+        // Force a specific voice if available
+        const voices = speechSynthesis.getVoices();
+        const fallbackVoice = voices.find(v => v.lang.startsWith('en'));
+        if (fallbackVoice) {
+          utterance.voice = fallbackVoice;
+          console.log('Using fallback voice:', fallbackVoice.name);
+        }
       }
       
       // Apply voice settings with proper fallbacks
@@ -293,7 +341,34 @@ export default function EnhancedAudioPlayer({
       
       utterance.onerror = (event) => {
         console.error('Speech synthesis error:', event);
+        console.log('Error details:', {
+          error: event.error,
+          utterance: {
+            text: utterance.text.substring(0, 50) + '...',
+            voice: utterance.voice?.name || 'default',
+            rate: utterance.rate,
+            pitch: utterance.pitch,
+            volume: utterance.volume
+          }
+        });
+        
+        // Stop background music
+        if (backgroundAudioRef.current) {
+          try {
+            backgroundAudioRef.current.pause();
+          } catch (e) {
+            console.log('Background music stop error:', e);
+          }
+        }
+        
         setIsPlaying(false);
+        
+        // Try to continue to next step after error
+        if (routine.autoAdvance && currentStepIndex < routine.steps.length - 1) {
+          setTimeout(() => {
+            nextStep();
+          }, 2000);
+        }
       };
       
       utteranceRef.current = utterance;
@@ -341,9 +416,9 @@ export default function EnhancedAudioPlayer({
       if (isPlaying) {
         speechSynthesis.cancel();
         stopProgressTracking();
-        setTimeout(() => {
+        setTimeout(async () => {
           const nextStepData = routine.steps[currentStepIndex + 1];
-          speakText(nextStepData.content, nextStepData.voiceSettings);
+          await speakText(nextStepData.content, nextStepData.voiceSettings);
         }, 500);
       }
     }
