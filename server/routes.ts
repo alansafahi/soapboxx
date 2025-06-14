@@ -3871,10 +3871,60 @@ Return JSON with this exact structure:
     }
   });
 
+  // Prayer request endpoints
+  app.get('/api/prayers', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.query;
+      const prayers = await storage.getPrayerRequests(churchId ? parseInt(churchId) : undefined);
+      res.json(prayers);
+    } catch (error) {
+      console.error("Error fetching prayer requests:", error);
+      res.status(500).json({ message: "Failed to fetch prayer requests" });
+    }
+  });
+
+  app.post('/api/prayers', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log("Prayer request body:", req.body);
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const prayerData = {
+        ...req.body,
+        authorId: userId,
+      };
+      
+      const prayer = await storage.createPrayerRequest(prayerData);
+      res.status(201).json(prayer);
+    } catch (error) {
+      console.error("Error creating prayer request:", error);
+      res.status(500).json({ message: "Failed to create prayer request" });
+    }
+  });
+
+  app.post('/api/prayers/:id/pray', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      const response = await storage.prayForRequest({
+        prayerRequestId,
+        userId,
+      });
+      
+      res.json(response);
+    } catch (error) {
+      console.error("Error praying for request:", error);
+      res.status(500).json({ message: "Failed to pray for request" });
+    }
+  });
+
   // Prayer response endpoints (supportive comments on prayers)
   app.post("/api/prayers/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user?.claims?.sub || req.user?.id;
       const prayerId = parseInt(req.params.id);
       const { content } = req.body;
       
