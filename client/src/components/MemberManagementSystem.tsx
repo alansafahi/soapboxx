@@ -96,11 +96,12 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
   if (error) {
     return (
       <div className="p-8 text-center">
-        <div className="text-red-600 mb-4">
-          <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-          <p>Error loading members: {error.message}</p>
+        <div className="text-blue-600 mb-4">
+          <Users className="h-8 w-8 mx-auto mb-2" />
+          <h3 className="text-lg font-semibold">Having trouble loading members</h3>
         </div>
-        <Button onClick={() => window.location.reload()}>Retry</Button>
+        <p className="text-gray-600 mb-4">We're working to get your member directory back up and running.</p>
+        <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">Try Again</Button>
       </div>
     );
   }

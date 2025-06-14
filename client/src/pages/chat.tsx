@@ -28,9 +28,9 @@ export default function Chat() {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
+        title: "Session Expired",
+        description: "Please sign in to continue using the chat feature.",
+        variant: "default",
       });
       setTimeout(() => {
         window.location.href = "/api/login";

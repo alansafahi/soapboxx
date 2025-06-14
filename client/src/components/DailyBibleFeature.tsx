@@ -743,7 +743,7 @@ export function DailyBibleFeature() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-2xl mx-auto p-6">
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-blue-200 bg-blue-50">
           <CardContent className="p-6 text-center">
             <div className="text-blue-600 mb-4">
               <BookOpen className="h-12 w-12 mx-auto mb-2" />
