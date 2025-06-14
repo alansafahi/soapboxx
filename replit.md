@@ -141,6 +141,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 14, 2025: Fixed Prayer Wall functionality and filtering
+  - Added sample prayer requests to populate empty Prayer Wall
+  - Fixed urgent prayer filtering to properly show prayers marked as urgent
+  - Resolved JSON encoding issues preventing prayer request submissions
+  - Prayer Wall now displays 8+ prayer requests across all categories properly
 - June 13, 2025: Enhanced Scripture lookup system with smart matching strategies
   - Added individual verse Matthew 11:28 to database for better coverage
   - Improved partial reference matching (e.g., "Matthew 11:28" finds "Matthew 11:28-30")
