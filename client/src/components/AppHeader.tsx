@@ -89,8 +89,7 @@ export default function AppHeader() {
         { href: "/audio-routines", label: "Devotional Routines", icon: Headphones },
         { href: "/video-library", label: "Video Library", icon: PlayCircle },
         { href: "/sermon-studio", label: "Sermon Studio", icon: Sparkles, roles: ["pastor", "lead_pastor", "church_admin"] },
-        { href: "/content-distribution", label: "Content Distribution", icon: Share2, roles: ["pastor", "lead_pastor", "church_admin"] },
-        { href: "/pastoral-demo", label: "AI Content Demo", icon: Star }
+        { href: "/content-distribution", label: "Content Distribution", icon: Share2, roles: ["pastor", "lead_pastor", "church_admin"] }
       ]
     },
     {
@@ -99,6 +98,7 @@ export default function AppHeader() {
       items: [
         { href: "/admin", label: "Admin Portal", icon: Settings, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
         { href: "/communications", label: "Bulk Communications", icon: Megaphone, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
+        { href: "/pastoral-demo", label: "AI Content Showcase", icon: Star, roles: ["church_admin", "system_admin", "super_admin", "pastor", "lead_pastor", "soapbox_owner"] },
         { href: "/role-management", label: "Role Management", icon: UserCog, roles: ["system_admin", "super_admin"] }
       ]
     },
