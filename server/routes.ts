@@ -4414,7 +4414,7 @@ Return JSON with this exact structure:
   app.delete('/api/soap/:id', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub || req.user?.id;
 
       // Check if entry exists and belongs to user
       const existingEntry = await storage.getSoapEntry(entryId);
