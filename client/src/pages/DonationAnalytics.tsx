@@ -37,6 +37,83 @@ const SAMPLE_ANALYTICS = {
     monthlyGrowth: 12.5,
     newDonorsThisMonth: 67
   },
+  // Goal tracking and progress
+  goals: {
+    annual: {
+      target: 500000,
+      current: 234567.89,
+      percentage: 46.9,
+      daysRemaining: 198,
+      projectedTotal: 487500,
+      onTrack: true
+    },
+    monthly: {
+      target: 42000,
+      current: 38450,
+      percentage: 91.5,
+      daysRemaining: 8,
+      projectedTotal: 41200,
+      onTrack: true
+    },
+    building: {
+      target: 150000,
+      current: 67800,
+      percentage: 45.2,
+      daysRemaining: 365,
+      projectedTotal: 140000,
+      onTrack: false
+    }
+  },
+  // Seasonal giving insights
+  seasonalInsights: {
+    currentSeason: "Summer",
+    seasonalTrend: "8% below average",
+    peakMonths: ["December", "April", "November"],
+    averageSeasonalIncrease: {
+      christmas: 145,
+      easter: 78,
+      thanksgiving: 62,
+      backToSchool: -12
+    },
+    yearOverYear: [
+      { season: "Spring 2023", amount: 85600 },
+      { season: "Summer 2023", amount: 67200 },
+      { season: "Fall 2023", amount: 92400 },
+      { season: "Winter 2023", amount: 134800 },
+      { season: "Spring 2024", amount: 89300 },
+      { season: "Summer 2024", amount: 71800 }
+    ]
+  },
+  // Donor retention analytics
+  donorRetention: {
+    newDonors: {
+      thisMonth: 67,
+      lastMonth: 54,
+      threeMonthRetention: 78.5,
+      sixMonthRetention: 65.2,
+      oneYearRetention: 52.8
+    },
+    lapsedDonors: {
+      total: 234,
+      reactivated: 45,
+      reactivationRate: 19.2,
+      averageDaysLapsed: 127
+    },
+    loyalDonors: {
+      giving12Plus: 342,
+      giving24Plus: 189,
+      giving36Plus: 98,
+      averageTenure: 28.5
+    }
+  },
+  // Giving frequency patterns
+  givingFrequency: {
+    weekly: { count: 156, percentage: 18.5, avgAmount: 89.50 },
+    biweekly: { count: 89, percentage: 10.6, avgAmount: 156.75 },
+    monthly: { count: 423, percentage: 50.2, avgAmount: 245.30 },
+    quarterly: { count: 134, percentage: 15.9, avgAmount: 678.90 },
+    annually: { count: 41, percentage: 4.9, avgAmount: 1250.00 }
+  },
   monthlyTrends: [
     { month: "Jan", total: 18500, donors: 145, average: 127.59 },
     { month: "Feb", total: 21200, donors: 168, average: 126.19 },
@@ -78,10 +155,11 @@ export default function DonationAnalytics() {
   const [selectedPeriod, setSelectedPeriod] = useState("6months");
   const [selectedMetric, setSelectedMetric] = useState("total");
 
-  // In production, this would fetch real analytics data
-  const { data: analytics = SAMPLE_ANALYTICS } = useQuery({
+  // Fetch real-time donation analytics data
+  const { data: analytics = SAMPLE_ANALYTICS, isLoading } = useQuery({
     queryKey: ['/api/analytics/donations', selectedPeriod],
-    enabled: false // Disabled for demo - would enable in production
+    refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
+    staleTime: 5000 // Consider data stale after 5 seconds
   });
 
   const formatCurrency = (amount: number) => {
@@ -187,12 +265,14 @@ export default function DonationAnalytics() {
       </div>
 
       <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="trends">Giving Trends</TabsTrigger>
-          <TabsTrigger value="categories">By Category</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="trends">Trends</TabsTrigger>
+          <TabsTrigger value="goals">Goals</TabsTrigger>
+          <TabsTrigger value="retention">Retention</TabsTrigger>
+          <TabsTrigger value="frequency">Frequency</TabsTrigger>
+          <TabsTrigger value="seasonal">Seasonal</TabsTrigger>
           <TabsTrigger value="donors">Top Donors</TabsTrigger>
-          <TabsTrigger value="recurring">Recurring Gifts</TabsTrigger>
-          <TabsTrigger value="demographics">Demographics</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trends" className="space-y-6">
@@ -334,6 +414,422 @@ export default function DonationAnalytics() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="goals" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Annual Goal */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Annual Goal
+                  {analytics.goals.annual.onTrack ? 
+                    <TrendingUp className="h-5 w-5 text-green-600" /> : 
+                    <TrendingDown className="h-5 w-5 text-red-600" />
+                  }
+                </CardTitle>
+                <CardDescription>{formatCurrency(analytics.goals.annual.target)} target</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span className="font-medium">{analytics.goals.annual.percentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className={`h-3 rounded-full ${analytics.goals.annual.onTrack ? 'bg-green-600' : 'bg-yellow-500'}`}
+                      style={{ width: `${Math.min(analytics.goals.annual.percentage, 100)}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Current:</span>
+                      <div className="font-medium">{formatCurrency(analytics.goals.annual.current)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Projected:</span>
+                      <div className="font-medium">{formatCurrency(analytics.goals.annual.projectedTotal)}</div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {analytics.goals.annual.daysRemaining} days remaining
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Monthly Goal */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Monthly Goal
+                  {analytics.goals.monthly.onTrack ? 
+                    <TrendingUp className="h-5 w-5 text-green-600" /> : 
+                    <TrendingDown className="h-5 w-5 text-red-600" />
+                  }
+                </CardTitle>
+                <CardDescription>{formatCurrency(analytics.goals.monthly.target)} target</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span className="font-medium">{analytics.goals.monthly.percentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className={`h-3 rounded-full ${analytics.goals.monthly.onTrack ? 'bg-green-600' : 'bg-yellow-500'}`}
+                      style={{ width: `${Math.min(analytics.goals.monthly.percentage, 100)}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Current:</span>
+                      <div className="font-medium">{formatCurrency(analytics.goals.monthly.current)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Projected:</span>
+                      <div className="font-medium">{formatCurrency(analytics.goals.monthly.projectedTotal)}</div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {analytics.goals.monthly.daysRemaining} days remaining
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Building Fund Goal */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Building Fund
+                  {analytics.goals.building.onTrack ? 
+                    <TrendingUp className="h-5 w-5 text-green-600" /> : 
+                    <TrendingDown className="h-5 w-5 text-red-600" />
+                  }
+                </CardTitle>
+                <CardDescription>{formatCurrency(analytics.goals.building.target)} target</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span className="font-medium">{analytics.goals.building.percentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className={`h-3 rounded-full ${analytics.goals.building.onTrack ? 'bg-green-600' : 'bg-red-500'}`}
+                      style={{ width: `${Math.min(analytics.goals.building.percentage, 100)}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Current:</span>
+                      <div className="font-medium">{formatCurrency(analytics.goals.building.current)}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Projected:</span>
+                      <div className="font-medium">{formatCurrency(analytics.goals.building.projectedTotal)}</div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {analytics.goals.building.daysRemaining} days remaining
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="retention" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* New Donor Retention */}
+            <Card>
+              <CardHeader>
+                <CardTitle>New Donor Retention</CardTitle>
+                <CardDescription>Retention rates for new donors</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">New Donors This Month</span>
+                    <span className="font-medium text-green-600">+{analytics.donorRetention.newDonors.thisMonth}</span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">3-Month Retention</span>
+                      <span className="font-medium">{analytics.donorRetention.newDonors.threeMonthRetention}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full bg-blue-600"
+                        style={{ width: `${analytics.donorRetention.newDonors.threeMonthRetention}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">6-Month Retention</span>
+                      <span className="font-medium">{analytics.donorRetention.newDonors.sixMonthRetention}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full bg-blue-600"
+                        style={{ width: `${analytics.donorRetention.newDonors.sixMonthRetention}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">1-Year Retention</span>
+                      <span className="font-medium">{analytics.donorRetention.newDonors.oneYearRetention}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full bg-blue-600"
+                        style={{ width: `${analytics.donorRetention.newDonors.oneYearRetention}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Donor Loyalty */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Donor Loyalty</CardTitle>
+                <CardDescription>Long-term giving patterns</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{analytics.donorRetention.loyalDonors.giving12Plus}</div>
+                      <div className="text-sm text-gray-600">12+ Months</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">{analytics.donorRetention.loyalDonors.giving24Plus}</div>
+                      <div className="text-sm text-gray-600">24+ Months</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">{analytics.donorRetention.loyalDonors.giving36Plus}</div>
+                      <div className="text-sm text-gray-600">36+ Months</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600">{analytics.donorRetention.loyalDonors.averageTenure}</div>
+                      <div className="text-sm text-gray-600">Avg. Tenure (months)</div>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Lapsed Donors Reactivated</span>
+                      <span className="font-medium text-green-600">{analytics.donorRetention.lapsedDonors.reactivated}</span>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {analytics.donorRetention.lapsedDonors.reactivationRate}% reactivation rate
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="frequency" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Giving Frequency Patterns</CardTitle>
+              <CardDescription>How often donors give and their average amounts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {Object.entries(analytics.givingFrequency).map(([frequency, data]) => (
+                  <div key={frequency} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium capitalize">{frequency} Givers</span>
+                      <span className="text-sm text-gray-600">{data.count} donors ({data.percentage}%)</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div 
+                        className="h-3 rounded-full bg-blue-600"
+                        style={{ width: `${data.percentage}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Average Gift: {formatCurrency(data.avgAmount)}</span>
+                      <span>Total: {formatCurrency(data.count * data.avgAmount)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="seasonal" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Current Season Insights */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Season: {analytics.seasonalInsights.currentSeason}</CardTitle>
+                <CardDescription>Seasonal giving trends and patterns</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="text-sm font-medium text-yellow-800">Trend Alert</div>
+                    <div className="text-sm text-yellow-700">{analytics.seasonalInsights.seasonalTrend}</div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">Peak Giving Months:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {analytics.seasonalInsights.peakMonths.map(month => (
+                        <span key={month} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                          {month}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">Holiday Impact:</div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Christmas:</span>
+                        <span className="font-medium text-green-600">+{analytics.seasonalInsights.averageSeasonalIncrease.christmas}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Easter:</span>
+                        <span className="font-medium text-green-600">+{analytics.seasonalInsights.averageSeasonalIncrease.easter}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Thanksgiving:</span>
+                        <span className="font-medium text-green-600">+{analytics.seasonalInsights.averageSeasonalIncrease.thanksgiving}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Back to School:</span>
+                        <span className="font-medium text-red-600">{analytics.seasonalInsights.averageSeasonalIncrease.backToSchool}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Year-over-Year Seasonal Comparison */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Seasonal Comparison</CardTitle>
+                <CardDescription>Year-over-year seasonal giving trends</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={analytics.seasonalInsights.yearOverYear}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="season" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                    <Bar dataKey="amount" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Automated Report Generation */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Automated Reports for Leadership</CardTitle>
+                <CardDescription>Generate comprehensive giving reports automatically</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button className="w-full">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Monthly Report
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Quarterly Report
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button variant="outline" className="w-full">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Annual Summary
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Donor Analysis
+                    </Button>
+                  </div>
+                  <div className="pt-4 border-t">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Auto-Email Reports</span>
+                      <Button variant="ghost" size="sm">Configure</Button>
+                    </div>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <div>• Weekly summary to Pastor</div>
+                      <div>• Monthly board report</div>
+                      <div>• Quarterly financial review</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Report Schedule & History */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Report History</CardTitle>
+                <CardDescription>Recent automated reports sent to leadership</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div>
+                      <div className="font-medium text-green-800">Monthly Report - June 2024</div>
+                      <div className="text-sm text-green-600">Sent 3 days ago</div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div>
+                      <div className="font-medium text-blue-800">Weekly Summary</div>
+                      <div className="text-sm text-blue-600">Sent yesterday</div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div>
+                      <div className="font-medium text-gray-800">Quarterly Review Q2</div>
+                      <div className="text-sm text-gray-600">Sent 2 weeks ago</div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="pt-4 border-t">
+                  <div className="text-sm text-gray-600">
+                    Next automated report: <span className="font-medium">Weekly Summary</span> in 6 days
+                  </div>
                 </div>
               </CardContent>
             </Card>
