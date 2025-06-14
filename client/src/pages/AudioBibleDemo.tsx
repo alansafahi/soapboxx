@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { BookOpen, Play, Volume2, Music, Headphones, Sparkles, Heart, Search, Filter } from "lucide-react";
@@ -145,70 +145,7 @@ export default function AudioBibleDemo() {
           </p>
         </div>
 
-        <Tabs defaultValue="individual" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="individual">Individual Verses</TabsTrigger>
-            <TabsTrigger value="custom-routine">Custom Routine</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="individual" className="space-y-6">
-            {/* Individual Verse Player */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Volume2 className="w-5 h-5 text-purple-600" />
-                  Single Verse Audio Player
-                </CardTitle>
-                <CardDescription>
-                  Select any verse to hear it with professional voice narration
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {filteredVerses.slice(0, 12).map((verse: any) => (
-                    <Card 
-                      key={verse.id} 
-                      className={`cursor-pointer transition-all hover:shadow-md ${
-                        currentVerseId === verse.id ? 'ring-2 ring-purple-500' : ''
-                      }`}
-                      onClick={() => setCurrentVerseId(verse.id)}
-                    >
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm">{verse.reference}</CardTitle>
-                          {verse.category && (
-                            <Badge variant="secondary" className="text-xs">
-                              {verse.category.charAt(0).toUpperCase() + verse.category.slice(1)}
-                            </Badge>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
-                          {verse.text}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {currentVerseId && (
-                  <div className="space-y-4">
-                    <BibleAudioPlayer 
-                      verseId={currentVerseId}
-                      showControls={true}
-                    />
-                    <div className="border-t pt-4">
-                      <h4 className="text-sm font-medium mb-2">Browser-Based Audio Test</h4>
-                      <SimpleAudioTest />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="custom-routine" className="space-y-6">
+        <div className="space-y-6">
             {/* Custom Routine Builder */}
             <Card>
               <CardHeader>
@@ -430,8 +367,7 @@ export default function AudioBibleDemo() {
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
-        </Tabs>
+        </div>
 
         {/* Audio Routine Player Modal */}
         {showPlayer && generatedRoutine && (

@@ -141,6 +141,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 14, 2025: Streamlined Audio Bible Experience by removing Individual Verses tab and making Custom Routine Builder the main interface
 - June 14, 2025: Reorganized navigation structure with new "Media Contents" tab for Audio Bible and Video Library
 - June 14, 2025: Moved SMS Giving and donation analytics to Admin Portal for better organization  
 - June 14, 2025: Configured SMS gateway for production use with Twilio integration
