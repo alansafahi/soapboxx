@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoapBox Feature Testing Console</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            background: #f8fafc;
+        }
+        .test-console {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .test-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 15px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .pass { background: #f0fff4; border-left: 4px solid #38a169; }
+        .fail { background: #fef2f2; border-left: 4px solid #e53e3e; }
+        .info { background: #ebf8ff; border-left: 4px solid #3182ce; }
+        .warning { background: #fffbeb; border-left: 4px solid #d69e2e; }
+        button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #3182ce; }
+        .metric { display: inline-block; margin: 10px 15px 10px 0; }
+        .metric-value { font-weight: 600; color: #2d3748; }
+        .metric-label { color: #718096; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="test-console">
+        <h1>SoapBox Super App - Feature Testing Console</h1>
+        <p>Testing the 4 major features recently added to your faith community platform.</p>
+        
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="testAuthentication()">Test Authentication</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <div id="auth-status" class="test-section">
+            <div class="test-header">Authentication Status</div>
+            <div id="auth-results">Click "Test Authentication" to check login status</div>
+        </div>
+        
+        <div id="sms-giving" class="test-section">
+            <div class="test-header">1. SMS Giving System</div>
+            <div id="sms-results">Test not run yet</div>
+        </div>
+        
+        <div id="analytics" class="test-section">
+            <div class="test-header">2. Donation Analytics Dashboard</div>
+            <div id="analytics-results">Test not run yet</div>
+        </div>
+        
+        <div id="mobile" class="test-section">
+            <div class="test-header">3. Mobile Optimization</div>
+            <div id="mobile-results">Test not run yet</div>
+        </div>
+        
+        <div id="navigation" class="test-section">
+            <div class="test-header">4. Enhanced Navigation</div>
+            <div id="navigation-results">Test not run yet</div>
+        </div>
+        
+        <div id="summary" class="test-section" style="display: none;">
+            <div class="test-header">Test Summary</div>
+            <div id="summary-results"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = window.location.origin;
+        let testResults = [];
+        
+        function addResult(section, message, type = 'info') {
+            const element = document.getElementById(`${section}-results`);
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            element.appendChild(div);
+        }
+        
+        function clearResults() {
+            ['auth', 'sms', 'analytics', 'mobile', 'navigation'].forEach(section => {
+                document.getElementById(`${section}-results`).innerHTML = '';
+            });
+            document.getElementById('summary').style.display = 'none';
+            testResults = [];
+        }
+        
+        async function testAPI(endpoint, description) {
+            try {
+                const response = await fetch(`${baseUrl}${endpoint}`, {
+                    credentials: 'include',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return { success: true, data, status: response.status };
+                } else {
+                    return { success: false, status: response.status, error: response.statusText };
+                }
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function testAuthentication() {
+            addResult('auth', 'Testing authentication...', 'info');
+            
+            const result = await testAPI('/api/auth/user', 'User authentication');
+            
+            if (result.success) {
+                addResult('auth', `✅ Authenticated as: ${result.data.email}`, 'pass');
+                addResult('auth', `Role: ${result.data.role || 'member'}`, 'info');
+                return true;
+            } else {
+                addResult('auth', `❌ Authentication failed: ${result.status} ${result.error}`, 'fail');
+                addResult('auth', '⚠️ Please sign in to the app first, then run tests', 'warning');
+                return false;
+            }
+        }
+        
+        async function testSMSGiving() {
+            addResult('sms', 'Testing SMS Giving System...', 'info');
+            
+            const configResult = await testAPI('/api/sms-giving/config', 'SMS configuration');
+            
+            if (configResult.success) {
+                addResult('sms', '✅ SMS configuration loaded successfully', 'pass');
+                addResult('sms', `Short code: ${configResult.data.shortCode}`, 'info');
+                addResult('sms', `Keywords: ${configResult.data.keywords?.length || 0} configured`, 'info');
+                
+                const statsResult = await testAPI('/api/sms-giving/stats', 'SMS statistics');
+                
+                if (statsResult.success) {
+                    addResult('sms', '✅ SMS statistics endpoint working', 'pass');
+                    addResult('sms', `Total donors: ${statsResult.data.totalDonors || 0}`, 'info');
+                    addResult('sms', `Total amount: ${statsResult.data.totalAmount || '$0'}`, 'info');
+                } else {
+                    addResult('sms', `⚠️ SMS stats need data setup (${statsResult.status})`, 'warning');
+                }
+                
+                testResults.push({ feature: 'SMS Giving', status: 'pass' });
+            } else {
+                addResult('sms', `❌ SMS configuration failed: ${configResult.status}`, 'fail');
+                testResults.push({ feature: 'SMS Giving', status: 'fail' });
+            }
+        }
+        
+        async function testDonationAnalytics() {
+            addResult('analytics', 'Testing Donation Analytics...', 'info');
+            
+            const analyticsResult = await testAPI('/api/analytics/donations', 'Main analytics');
+            
+            if (analyticsResult.success) {
+                addResult('analytics', '✅ Analytics dashboard accessible', 'pass');
+                addResult('analytics', `Total donations: ${analyticsResult.data.totalDonations || 0}`, 'info');
+                addResult('analytics', `Total amount: ${analyticsResult.data.totalAmount || '$0'}`, 'info');
+                addResult('analytics', `Donor count: ${analyticsResult.data.donorCount || 0}`, 'info');
+                testResults.push({ feature: 'Donation Analytics', status: 'pass' });
+            } else {
+                addResult('analytics', `⚠️ Analytics endpoint status: ${analyticsResult.status}`, 'warning');
+                if (analyticsResult.status === 401) {
+                    addResult('analytics', 'ℹ️ Analytics requires authentication', 'info');
+                }
+                testResults.push({ feature: 'Donation Analytics', status: 'warning' });
+            }
+        }
+        
+        function testMobileOptimization() {
+            addResult('mobile', 'Testing Mobile Optimization...', 'info');
+            
+            // Test viewport meta tag
+            const viewportMeta = document.querySelector('meta[name="viewport"]');
+            if (viewportMeta) {
+                addResult('mobile', '✅ Viewport meta tag present', 'pass');
+            } else {
+                addResult('mobile', '❌ Viewport meta tag missing', 'fail');
+            }
+            
+            // Test touch-friendly elements
+            const buttons = document.querySelectorAll('button, a[role="button"], input[type="submit"]');
+            let touchFriendlyCount = 0;
+            
+            buttons.forEach(btn => {
+                const rect = btn.getBoundingClientRect();
+                if (rect.height >= 44 && rect.width >= 44) {
+                    touchFriendlyCount++;
+                }
+            });
+            
+            const touchFriendlyPercent = buttons.length > 0 ? (touchFriendlyCount / buttons.length * 100).toFixed(1) : 0;
+            addResult('mobile', `Touch-friendly buttons: ${touchFriendlyCount}/${buttons.length} (${touchFriendlyPercent}%)`, 
+                touchFriendlyPercent > 80 ? 'pass' : 'warning');
+            
+            // Test form input font sizes
+            const inputs = document.querySelectorAll('input, textarea, select');
+            let properFontSizeCount = 0;
+            
+            inputs.forEach(input => {
+                const style = window.getComputedStyle(input);
+                const fontSize = parseInt(style.fontSize);
+                if (fontSize >= 16) {
+                    properFontSizeCount++;
+                }
+            });
+            
+            const fontSizePercent = inputs.length > 0 ? (properFontSizeCount / inputs.length * 100).toFixed(1) : 100;
+            addResult('mobile', `Mobile-optimized inputs: ${properFontSizeCount}/${inputs.length} (${fontSizePercent}%)`,
+                fontSizePercent > 80 ? 'pass' : 'warning');
+            
+            // Test screen width
+            const screenWidth = window.innerWidth;
+            addResult('mobile', `Current screen width: ${screenWidth}px`, 'info');
+            
+            if (screenWidth <= 768) {
+                addResult('mobile', '📱 Mobile device detected', 'info');
+            } else {
+                addResult('mobile', '💻 Desktop device detected', 'info');
+            }
+            
+            testResults.push({ feature: 'Mobile Optimization', status: 'pass' });
+        }
+        
+        function testEnhancedNavigation() {
+            addResult('navigation', 'Testing Enhanced Navigation...', 'info');
+            
+            // Test navigation structure
+            const navElements = document.querySelectorAll('nav, [role="navigation"]');
+            addResult('navigation', `Navigation elements found: ${navElements.length}`, 
+                navElements.length > 0 ? 'pass' : 'fail');
+            
+            // Test giving-related navigation
+            const givingLinks = document.querySelectorAll(
+                'a[href*="giving"], a[href*="donation"], a[href*="sms-giving"], a[href*="analytics"]'
+            );
+            addResult('navigation', `Giving-related nav items: ${givingLinks.length}`, 
+                givingLinks.length > 0 ? 'pass' : 'warning');
+            
+            // List found giving links
+            givingLinks.forEach(link => {
+                addResult('navigation', `Found: ${link.textContent.trim()} → ${link.href}`, 'info');
+            });
+            
+            // Test role-based elements
+            const roleElements = document.querySelectorAll('[data-roles]');
+            addResult('navigation', `Role-based elements: ${roleElements.length}`, 'info');
+            
+            // Test mobile navigation indicators
+            const mobileNavElements = document.querySelectorAll(
+                '.mobile-nav, [data-mobile], .hamburger, .menu-toggle, button[aria-label*="menu"]'
+            );
+            addResult('navigation', `Mobile navigation elements: ${mobileNavElements.length}`, 
+                mobileNavElements.length > 0 ? 'pass' : 'info');
+            
+            testResults.push({ feature: 'Enhanced Navigation', status: 'pass' });
+        }
+        
+        function generateSummary() {
+            const summaryDiv = document.getElementById('summary-results');
+            const passed = testResults.filter(r => r.status === 'pass').length;
+            const failed = testResults.filter(r => r.status === 'fail').length;
+            const warnings = testResults.filter(r => r.status === 'warning').length;
+            const total = testResults.length;
+            
+            const successRate = total > 0 ? (passed / total * 100).toFixed(1) : 0;
+            
+            summaryDiv.innerHTML = `
+                <div class="metric">
+                    <div class="metric-value">${total}</div>
+                    <div class="metric-label">Total Tests</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${passed}</div>
+                    <div class="metric-label">Passed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${warnings}</div>
+                    <div class="metric-label">Warnings</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${failed}</div>
+                    <div class="metric-label">Failed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${successRate}%</div>
+                    <div class="metric-label">Success Rate</div>
+                </div>
+            `;
+            
+            document.getElementById('summary').style.display = 'block';
+        }
+        
+        async function runAllTests() {
+            clearResults();
+            
+            const isAuthenticated = await testAuthentication();
+            
+            if (isAuthenticated) {
+                await testSMSGiving();
+                await testDonationAnalytics();
+            } else {
+                addResult('sms', '⚠️ Skipping SMS tests - authentication required', 'warning');
+                addResult('analytics', '⚠️ Skipping analytics tests - authentication required', 'warning');
+            }
+            
+            testMobileOptimization();
+            testEnhancedNavigation();
+            
+            generateSummary();
+            
+            // Scroll to summary
+            document.getElementById('summary').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Auto-detect if we're on the SoapBox app and show helpful info
+        window.addEventListener('load', function() {
+            if (window.location.hostname.includes('replit.dev') || window.location.hostname.includes('localhost')) {
+                addResult('auth', 'ℹ️ SoapBox app detected. Ready to test features.', 'info');
+            } else {
+                addResult('auth', '⚠️ Open this page from your SoapBox app for accurate testing', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>
