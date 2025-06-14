@@ -5096,7 +5096,8 @@ Please provide suggestions for the missing or incomplete sections.`
       const allowedRoles = ['soapbox_owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor', 'admin'];
       if (!userRole || !allowedRoles.includes(userRole)) {
         // Also check user_roles table for admin permissions
-        const adminRoleResult = await db.execute(
+        const { db: database } = await import("./db");
+        const adminRoleResult = await database.execute(
           sql`SELECT role FROM user_roles WHERE user_id = ${userId} AND is_active = true AND role IN ('lead_pastor', 'pastor', 'church_admin', 'admin', 'super_admin', 'soapbox_owner')`
         );
         
@@ -5127,11 +5128,12 @@ Please provide suggestions for the missing or incomplete sections.`
         mobileNumber: phoneNumber || '',
         address: address || '',
         hasCompletedOnboarding: true,
-        isEmailVerified: false
+        emailVerified: false
       });
 
       // Add user to church using direct database insert
-      await db
+      const { db: database } = await import("./db");
+      await database
         .insert(userChurches)
         .values({
           userId: newUserId,
