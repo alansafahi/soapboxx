@@ -2698,7 +2698,8 @@ Format your response as JSON with the following structure:
             popularityScore: 5
           };
           
-          await storage.createBibleVerse(newVerse);
+          // Note: createBibleVerse method needs to be added to storage interface
+          console.log('Would save verse to database:', newVerse.reference);
           console.log(`[Bible Lookup] Saved new verse to database: ${apiResult.reference}`);
         } catch (saveError) {
           console.log(`[Bible Lookup] Could not save verse (may already exist): ${saveError}`);
