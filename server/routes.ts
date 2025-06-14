@@ -4322,7 +4322,11 @@ Return JSON with this exact structure:
   // S.O.A.P. Entry Routes
   app.post('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const soapData = schema.insertSoapEntrySchema.parse({
         ...req.body,
         userId,
@@ -4338,7 +4342,7 @@ Return JSON with this exact structure:
 
   app.get('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub || req.user?.id;
       const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
 
       const options = {
@@ -4391,7 +4395,7 @@ Return JSON with this exact structure:
   app.put('/api/soap/:id', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub || req.user?.id;
 
       // Check if entry exists and belongs to user
       const existingEntry = await storage.getSoapEntry(entryId);
