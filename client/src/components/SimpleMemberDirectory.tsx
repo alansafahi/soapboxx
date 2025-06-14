@@ -40,8 +40,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
     mutationFn: async (memberData: typeof newMember) => {
       return await apiRequest("/api/members", {
         method: "POST",
-        body: JSON.stringify(memberData),
-        headers: { "Content-Type": "application/json" }
+        body: memberData
       });
     },
     onSuccess: () => {
