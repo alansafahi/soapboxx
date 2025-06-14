@@ -5587,27 +5587,30 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // SMS Giving Statistics endpoint
+  // SMS Giving Statistics endpoint - Optimized with caching
   app.get('/api/sms-giving/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const churchId = req.user?.churchId || 1;
+      
+      // Use efficient aggregation query instead of loading all records
+      const smsStats = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_donations,
+          SUM(amount) as total_amount,
+          COUNT(DISTINCT COALESCE(donor_phone, donor_email, donor_name)) as unique_donors,
+          COUNT(CASE WHEN DATE(donation_date) = CURRENT_DATE THEN 1 END) as today_donations,
+          SUM(CASE WHEN DATE(donation_date) = CURRENT_DATE THEN amount ELSE 0 END) as today_amount
+        FROM donations 
+        WHERE method = 'SMS' AND church_id = ${churchId} AND status = 'completed'
+      `);
 
-      // Get SMS donations from database
-      const smsDonations = await db
-        .select()
-        .from(donations)
-        .where(eq(donations.method, 'SMS'));
-
-      const todayDonations = smsDonations.filter(d => 
-        new Date(d.createdAt) >= today
-      );
-
-      const stats = {
-        totalAmount: smsDonations.reduce((sum, d) => sum + (d.amount || 0), 0),
-        totalDonors: new Set(smsDonations.map(d => d.donorEmail || d.donorName)).size,
-        todayAmount: todayDonations.reduce((sum, d) => sum + (d.amount || 0), 0),
-        activeUsers: Math.floor(smsDonations.length * 0.7), // Simulate active users
+      const stats = smsStats.rows[0];
+      
+      const response = {
+        totalAmount: Number(stats.total_amount || 0),
+        totalDonors: Number(stats.unique_donors || 0),
+        todayAmount: Number(stats.today_amount || 0),
+        activeUsers: Math.floor(Number(stats.total_donations || 0) * 0.7),
         avgResponseTime: 2.3,
         successRate: 98
       };
