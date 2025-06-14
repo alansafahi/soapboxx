@@ -360,24 +360,28 @@ async function populateCompleteBible() {
     for (let i = 0; i < completeBibleVerses.length; i += batchSize) {
       const batch = completeBibleVerses.slice(i, i + batchSize);
       
-      const insertPromises = batch.map(verse => 
-        sql`
-          INSERT INTO bible_verses (reference, text, category, topic_tags, ai_summary)
+      const insertPromises = batch.map(verse => {
+        const book = verse.reference.split(' ')[0];
+        const chapterVerse = verse.reference.split(' ').slice(1).join(' ');
+        const chapter = chapterVerse.split(':')[0];
+        const verseNum = chapterVerse.split(':')[1] || '1';
+        
+        return sql`
+          INSERT INTO bible_verses (reference, book, chapter, verse, text, translation, category, topic_tags, ai_summary)
           VALUES (
             ${verse.reference}, 
+            ${book},
+            ${parseInt(chapter) || 1},
+            ${verseNum},
             ${verse.text}, 
+            'NIV',
             ${verse.category}, 
             ${verse.tags}, 
             ${`This ${verse.category} verse from ${verse.reference} provides ${verse.tags[0]} and spiritual guidance.`}
           )
-          ON CONFLICT (reference) 
-          DO UPDATE SET 
-            text = EXCLUDED.text,
-            category = EXCLUDED.category,
-            topic_tags = EXCLUDED.topic_tags,
-            ai_summary = EXCLUDED.ai_summary
-        `
-      );
+          ON CONFLICT (reference, translation) DO NOTHING
+        `;
+      });
       
       await Promise.all(insertPromises);
       insertedCount += batch.length;
