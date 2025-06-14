@@ -23,7 +23,8 @@ import {
   Star,
   Award,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  FileText
 } from "lucide-react";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 

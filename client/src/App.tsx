@@ -25,6 +25,7 @@ import SettingsPage from "@/pages/settings";
 import RoleManagement from "@/pages/RoleManagement";
 import DonationDemo from "@/pages/DonationDemo";
 import DonationAnalytics from "@/pages/DonationAnalytics";
+import SMSGiving from "@/pages/SMSGiving";
 import PhoneVerification from "@/pages/PhoneVerification";
 import EmailVerification from "@/pages/EmailVerification";
 import WelcomeWizard from "@/components/welcome-wizard";
@@ -172,6 +173,7 @@ function AppRouter() {
               <Route path="/settings" component={SettingsPage} />
               <Route path="/donation-demo" component={DonationDemo} />
               <Route path="/donation-analytics" component={DonationAnalytics} />
+              <Route path="/sms-giving" component={SMSGiving} />
               <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="/email-verification" component={EmailVerification} />
               <Route path="/audio-routines" component={AudioRoutines} />

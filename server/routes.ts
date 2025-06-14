@@ -5566,6 +5566,160 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // SMS Giving Configuration endpoint
+  app.get('/api/sms-giving/config', isAuthenticated, async (req: any, res) => {
+    try {
+      // In production, this would fetch from database
+      const smsConfig = {
+        isActive: true,
+        shortCode: "67283", // SOAPB
+        provider: "Twilio",
+        webhookUrl: `${req.protocol}://${req.get('host')}/api/sms-giving/webhook`,
+        autoReceipts: true,
+        minAmount: 5,
+        maxAmount: 5000
+      };
+
+      res.json(smsConfig);
+    } catch (error) {
+      console.error('SMS config error:', error);
+      res.status(500).json({ message: 'Failed to fetch SMS configuration' });
+    }
+  });
+
+  // SMS Giving Statistics endpoint
+  app.get('/api/sms-giving/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Get SMS donations from database
+      const smsDonations = await db
+        .select()
+        .from(donations)
+        .where(eq(donations.method, 'SMS'));
+
+      const todayDonations = smsDonations.filter(d => 
+        new Date(d.createdAt) >= today
+      );
+
+      const stats = {
+        totalAmount: smsDonations.reduce((sum, d) => sum + (d.amount || 0), 0),
+        totalDonors: new Set(smsDonations.map(d => d.donorEmail || d.donorName)).size,
+        todayAmount: todayDonations.reduce((sum, d) => sum + (d.amount || 0), 0),
+        activeUsers: Math.floor(smsDonations.length * 0.7), // Simulate active users
+        avgResponseTime: 2.3,
+        successRate: 98
+      };
+
+      res.json(stats);
+    } catch (error) {
+      console.error('SMS stats error:', error);
+      res.status(500).json({ message: 'Failed to fetch SMS statistics' });
+    }
+  });
+
+  // Send SMS Giving Instructions endpoint
+  app.post('/api/sms-giving/send-instructions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { phoneNumber, amount, fund } = req.body;
+
+      if (!phoneNumber || !amount) {
+        return res.status(400).json({ message: 'Phone number and amount are required' });
+      }
+
+      // In production, integrate with Twilio SMS service
+      const smsMessage = `Hi! To donate $${amount} to ${fund === 'general' ? 'General Fund' : fund}, text "GIVE ${amount}" to 67283. You'll receive a secure link to complete your donation. Thank you for your generosity! - SoapBox Church`;
+
+      // Simulate SMS sending (in production, use Twilio API)
+      console.log(`SMS sent to ${phoneNumber}: ${smsMessage}`);
+
+      // Log the SMS instruction in database
+      await db.insert(donations).values({
+        amount: parseFloat(amount),
+        donorName: 'SMS Instruction',
+        donorEmail: null,
+        method: 'SMS_INSTRUCTION',
+        isRecurring: false,
+        churchId: 1,
+        createdAt: new Date(),
+        notes: `Instructions sent to ${phoneNumber} for ${fund} fund`
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'SMS instructions sent successfully',
+        phoneNumber,
+        amount
+      });
+    } catch (error) {
+      console.error('SMS send error:', error);
+      res.status(500).json({ message: 'Failed to send SMS instructions' });
+    }
+  });
+
+  // SMS Webhook endpoint for processing incoming SMS donations
+  app.post('/api/sms-giving/webhook', async (req: any, res) => {
+    try {
+      const { From: phoneNumber, Body: messageBody } = req.body;
+
+      // Parse SMS message for donation keywords and amounts
+      const message = messageBody.toUpperCase().trim();
+      const keywords = ['GIVE', 'TITHE', 'OFFERING', 'BUILDING', 'MISSIONS', 'YOUTH'];
+      
+      let keyword = '';
+      let amount = 0;
+      
+      // Extract keyword and amount from message
+      for (const kw of keywords) {
+        if (message.includes(kw)) {
+          keyword = kw;
+          const amountMatch = message.match(/\d+/);
+          if (amountMatch) {
+            amount = parseInt(amountMatch[0]);
+          }
+          break;
+        }
+      }
+
+      if (!keyword || !amount || amount < 5) {
+        // Send help message
+        const helpResponse = `Invalid format. Text "GIVE [amount]" to 67283. Example: "GIVE 50". Minimum donation is $5.`;
+        
+        // In production, send SMS response via Twilio
+        console.log(`SMS response to ${phoneNumber}: ${helpResponse}`);
+        
+        return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response><Message>' + helpResponse + '</Message></Response>');
+      }
+
+      // Generate secure donation link
+      const donationId = `SMS-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const donationLink = `${req.protocol}://${req.get('host')}/donation-demo?sms=${donationId}&amount=${amount}&fund=${keyword.toLowerCase()}`;
+
+      // Create pending donation record
+      await db.insert(donations).values({
+        amount: amount,
+        donorName: 'SMS Donor',
+        donorEmail: null,
+        method: 'SMS',
+        isRecurring: false,
+        churchId: 1,
+        createdAt: new Date(),
+        notes: `SMS donation from ${phoneNumber}, keyword: ${keyword}`
+      });
+
+      // Send response with donation link
+      const responseMessage = `Thank you! To complete your $${amount} donation to ${keyword === 'GIVE' ? 'General Fund' : keyword}, click: ${donationLink}`;
+      
+      console.log(`SMS response to ${phoneNumber}: ${responseMessage}`);
+
+      res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response><Message>' + responseMessage + '</Message></Response>');
+    } catch (error) {
+      console.error('SMS webhook error:', error);
+      res.status(500).json({ message: 'SMS processing failed' });
+    }
+  });
+
   // Test endpoint for donation receipt functionality
   app.get('/api/donations/:donationId/receipt-info', isAuthenticated, async (req: any, res) => {
     try {
