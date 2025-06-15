@@ -1,84 +1,443 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Play, Pause, Volume2, Settings, RefreshCw, Heart, Star, BookOpen, Headphones } from "lucide-react";
+
+interface BibleVerse {
+  id: number;
+  reference: string;
+  text: string;
+  category: string;
+  topicTags?: string[];
+}
+
+interface AudioRoutine {
+  verses: BibleVerse[];
+  voice: string;
+  musicBed: string;
+  totalDuration: number;
+}
 
 export default function FreshAudioBible() {
-  const [status, setStatus] = useState("Ready");
-  const [verseCount, setVerseCount] = useState<number | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  
+  // State management
+  const [selectedMood, setSelectedMood] = useState<string>("");
+  const [selectedVoice, setSelectedVoice] = useState("warm-female");
+  const [selectedMusicBed, setSelectedMusicBed] = useState("gentle-piano");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState([0.8]);
+  const [selectedVerses, setSelectedVerses] = useState<BibleVerse[]>([]);
+  const [customVerseCount, setCustomVerseCount] = useState(5);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [currentRoutine, setCurrentRoutine] = useState<AudioRoutine | null>(null);
+  const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
 
-  const testConnection = async () => {
-    setStatus("Testing connection...");
-    try {
-      // Test connection with a lightweight endpoint instead of loading all verses
-      const response = await fetch('/api/auth/user');
-      if (response.ok) {
-        setVerseCount(42561); // We know this from the logs
-        setStatus(`Success! Database contains 42,561 verses`);
+  // Mood options with enhanced spiritual context
+  const moodOptions = [
+    { id: "peaceful", label: "Seeking Peace", color: "bg-blue-100 text-blue-800", icon: "🕊️" },
+    { id: "anxious", label: "Feeling Anxious", color: "bg-purple-100 text-purple-800", icon: "🙏" },
+    { id: "grateful", label: "Grateful Heart", color: "bg-green-100 text-green-800", icon: "💚" },
+    { id: "struggling", label: "Going Through Challenges", color: "bg-red-100 text-red-800", icon: "💪" },
+    { id: "joyful", label: "Celebrating Joy", color: "bg-yellow-100 text-yellow-800", icon: "✨" },
+    { id: "seeking", label: "Seeking Guidance", color: "bg-indigo-100 text-indigo-800", icon: "🧭" },
+    { id: "mourning", label: "Processing Loss", color: "bg-gray-100 text-gray-800", icon: "🤗" },
+    { id: "hopeful", label: "Looking Forward", color: "bg-orange-100 text-orange-800", icon: "🌅" }
+  ];
+
+  // Voice options with enhanced descriptions
+  const voiceOptions = [
+    { id: "warm-female", label: "Sarah - Warm & Nurturing", description: "Gentle female voice perfect for comfort" },
+    { id: "gentle-male", label: "David - Gentle & Wise", description: "Calm male voice with pastoral tone" },
+    { id: "peaceful-female", label: "Grace - Peaceful & Serene", description: "Tranquil female voice for meditation" },
+    { id: "authoritative-male", label: "Samuel - Strong & Clear", description: "Confident male voice for proclamation" }
+  ];
+
+  // Music bed options
+  const musicBedOptions = [
+    { id: "gentle-piano", label: "Gentle Piano", description: "Soft piano melodies for reflection" },
+    { id: "nature-sounds", label: "Nature Sounds", description: "Birds and flowing water" },
+    { id: "orchestral-ambient", label: "Orchestral Ambient", description: "Ethereal strings and choir" },
+    { id: "worship-instrumental", label: "Worship Instrumental", description: "Contemporary worship background" }
+  ];
+
+  // Get contextual verse selection based on mood
+  const { data: contextualVerses, isLoading: loadingVerses, refetch: refetchVerses } = useQuery({
+    queryKey: ["/api/bible/contextual-selection", selectedMood, customVerseCount],
+    enabled: !!selectedMood,
+    queryFn: async () => {
+      const response = await apiRequest(`/api/bible/contextual-selection?mood=${selectedMood}&count=${customVerseCount}`);
+      return response;
+    }
+  });
+
+  // Generate audio routine mutation
+  const generateRoutineMutation = useMutation({
+    mutationFn: async (routine: { verseIds: number[], voice: string, musicBed: string }) => {
+      return await apiRequest("/api/audio/routines/bible-integrated", {
+        method: "POST",
+        body: routine
+      });
+    },
+    onSuccess: (data) => {
+      setCurrentRoutine(data);
+      setCurrentVerseIndex(0);
+      toast({
+        title: "Audio Routine Ready",
+        description: "Your personalized Bible audio experience has been created"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Generation Failed", 
+        description: "Please try again or select different options",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handle mood selection and verse generation
+  const handleMoodSelection = (mood: string) => {
+    setSelectedMood(mood);
+    setSelectedVerses([]);
+    setCurrentRoutine(null);
+  };
+
+  // Create audio routine from selected verses
+  const createAudioRoutine = () => {
+    if (selectedVerses.length === 0) {
+      toast({
+        title: "No Verses Selected",
+        description: "Please select verses to create your audio routine",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const verseIds = selectedVerses.map(v => v.id);
+    generateRoutineMutation.mutate({
+      verseIds,
+      voice: selectedVoice,
+      musicBed: selectedMusicBed
+    });
+  };
+
+  // Audio control functions
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
       } else {
-        setStatus("Please sign in to access Bible verses");
+        audioRef.current.play();
       }
-    } catch (error) {
-      setStatus("Connection error - please refresh");
+      setIsPlaying(!isPlaying);
     }
   };
 
-  const handleClick = () => {
-    alert("Button works! Interface is responsive.");
-  };
+  // Update selected verses when contextual verses are loaded
+  useEffect(() => {
+    if (contextualVerses?.verses) {
+      setSelectedVerses(contextualVerses.verses);
+    }
+  }, [contextualVerses]);
+
+  // Audio event handlers
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updateTime = () => setCurrentTime(audio.currentTime);
+    const updateDuration = () => setDuration(audio.duration);
+    const handleEnd = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener('timeupdate', updateTime);
+    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('ended', handleEnd);
+
+    return () => {
+      audio.removeEventListener('timeupdate', updateTime);
+      audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('ended', handleEnd);
+    };
+  }, [currentRoutine]);
+
+  // Update audio volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume[0];
+    }
+  }, [volume]);
 
   return (
-    <div className="min-h-screen bg-red-50 py-8">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8 border-4 border-red-500">
-          <div className="bg-red-100 p-4 rounded-lg mb-6 text-center">
-            <h2 className="text-2xl font-bold text-red-800">🔴 FRESH AUDIO BIBLE COMPONENT LOADING 🔴</h2>
-            <p className="text-red-600 font-semibold">This should show instead of complex mood selection interface</p>
-          </div>
-          <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">Fresh Audio Bible - Simple Interface</h1>
-        
-          <div className="text-center space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h2 className="text-xl font-semibold mb-2">Database Status</h2>
-              <p className="text-gray-700">Complete Bible: 42,561 verses available</p>
-              <p className="text-gray-700">Coverage: Genesis through Revelation</p>
-            </div>
-
-            <div className="space-y-3">
-              <button 
-                onClick={testConnection}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
-              >
-                Test Bible Connection
-              </button>
-              
-              <button 
-                onClick={handleClick}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium ml-4"
-              >
-                Test Interface
-              </button>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg mt-6">
-              <h3 className="font-semibold">Status:</h3>
-              <p className="text-gray-700 mt-2">{status}</p>
-              {verseCount && (
-                <p className="text-green-600 font-medium">
-                  ✓ Connected to database with {verseCount.toLocaleString()} verses
-                </p>
-              )}
-            </div>
-
-            <div className="bg-yellow-50 p-4 rounded-lg mt-6">
-              <h3 className="font-semibold text-yellow-800">Audio Features</h3>
-              <ul className="text-left mt-2 space-y-1 text-yellow-700">
-                <li>• Premium voice narration</li>
-                <li>• Custom reading routines</li>
-                <li>• Background music options</li>
-                <li>• Category-based verse selection</li>
-                <li>• Complete Bible access</li>
-              </ul>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Audio Bible Experience</h1>
+          <p className="text-lg text-gray-600">AI-powered personalized scripture listening with premium voices</p>
         </div>
+
+        <Tabs defaultValue="mood-selection" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="mood-selection">Mood-Based Selection</TabsTrigger>
+            <TabsTrigger value="custom-routine">Custom Routine Builder</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="mood-selection" className="space-y-6">
+            {/* Mood Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="h-5 w-5" />
+                  How are you feeling today?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {moodOptions.map((mood) => (
+                    <Button
+                      key={mood.id}
+                      variant={selectedMood === mood.id ? "default" : "outline"}
+                      className={`h-auto p-4 flex flex-col gap-2 ${mood.color}`}
+                      onClick={() => handleMoodSelection(mood.id)}
+                    >
+                      <span className="text-2xl">{mood.icon}</span>
+                      <span className="text-sm font-medium">{mood.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contextual Verse Display */}
+            {selectedMood && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Recommended Verses
+                    {loadingVerses && <RefreshCw className="h-4 w-4 animate-spin" />}
+                  </CardTitle>
+                  {contextualVerses?.context && (
+                    <div className="text-sm text-gray-600">
+                      <p><strong>Spiritual Theme:</strong> {contextualVerses.context.spiritualTheme}</p>
+                      <p><strong>Season:</strong> {contextualVerses.context.liturgicalSeason}</p>
+                    </div>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  {loadingVerses ? (
+                    <div className="text-center py-8">
+                      <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
+                      <p>Selecting personalized verses...</p>
+                    </div>
+                  ) : selectedVerses.length > 0 ? (
+                    <div className="space-y-4">
+                      {selectedVerses.map((verse, index) => (
+                        <div key={verse.id} className="border rounded-lg p-4 bg-white">
+                          <div className="flex justify-between items-start mb-2">
+                            <Badge variant="secondary">{verse.reference}</Badge>
+                            <Badge variant="outline">{verse.category}</Badge>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">{verse.text}</p>
+                          {verse.topicTags && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {verse.topicTags.map((tag, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-8 text-gray-500">Select a mood to see personalized verse recommendations</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="custom-routine" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Custom Routine Builder</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="verse-count">Number of verses</Label>
+                    <Input
+                      id="verse-count"
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={customVerseCount}
+                      onChange={(e) => setCustomVerseCount(parseInt(e.target.value) || 5)}
+                      className="w-24"
+                    />
+                  </div>
+                  <Button onClick={() => refetchVerses()} disabled={!selectedMood}>
+                    Generate Custom Selection
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Audio Controls and Settings */}
+        {selectedVerses.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Headphones className="h-5 w-5" />
+                Audio Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Voice Selection */}
+                <div>
+                  <Label htmlFor="voice-select">Choose Voice</Label>
+                  <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                    <SelectTrigger id="voice-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {voiceOptions.map((voice) => (
+                        <SelectItem key={voice.id} value={voice.id}>
+                          <div>
+                            <div className="font-medium">{voice.label}</div>
+                            <div className="text-sm text-gray-500">{voice.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Music Bed Selection */}
+                <div>
+                  <Label htmlFor="music-select">Background Music</Label>
+                  <Select value={selectedMusicBed} onValueChange={setSelectedMusicBed}>
+                    <SelectTrigger id="music-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {musicBedOptions.map((music) => (
+                        <SelectItem key={music.id} value={music.id}>
+                          <div>
+                            <div className="font-medium">{music.label}</div>
+                            <div className="text-sm text-gray-500">{music.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Volume Control */}
+              <div>
+                <Label>Volume</Label>
+                <div className="flex items-center gap-3 mt-2">
+                  <Volume2 className="h-4 w-4" />
+                  <Slider
+                    value={volume}
+                    onValueChange={setVolume}
+                    max={1}
+                    step={0.1}
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-medium w-12">{Math.round(volume[0] * 100)}%</span>
+                </div>
+              </div>
+
+              {/* Generate Audio Button */}
+              <div className="flex gap-3">
+                <Button 
+                  onClick={createAudioRoutine}
+                  disabled={selectedVerses.length === 0 || generateRoutineMutation.isPending}
+                  className="flex-1"
+                >
+                  {generateRoutineMutation.isPending ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                      Generating Audio...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      Create Audio Experience
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Audio Player */}
+        {currentRoutine && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Now Playing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={togglePlayPause}
+                  >
+                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  </Button>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">
+                      Verse {currentVerseIndex + 1} of {selectedVerses.length}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {selectedVerses[currentVerseIndex]?.reference}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-200"
+                    style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
+                  />
+                </div>
+                
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>{Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')}</span>
+                  <span>{Math.floor(duration / 60)}:{String(Math.floor(duration % 60)).padStart(2, '0')}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Hidden audio element */}
+        <audio ref={audioRef} />
       </div>
     </div>
   );
