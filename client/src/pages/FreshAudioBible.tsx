@@ -451,11 +451,22 @@ export default function FreshAudioBible() {
   };
 
   const handleStopAudio = () => {
-    window.speechSynthesis.cancel();
+    if (useOpenAIVoice && audioPlayer) {
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
+      setAudioPlayer(null);
+    } else {
+      window.speechSynthesis.cancel();
+    }
+    
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentVerseIndex(0);
+    setCurrentTime(0);
+    setDuration(0);
     setCurrentUtterance(null);
+    setPendingSettingsUpdate(false);
+    
     toast({
       title: "Audio stopped",
       description: "Ready to start from the beginning"
@@ -636,26 +647,73 @@ export default function FreshAudioBible() {
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Voice Selection */}
-                    <div>
-                      <Label htmlFor="voice-select">Choose Voice</Label>
-                      <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                        <SelectTrigger id="voice-select">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {voiceOptions.map((voice) => (
-                            <SelectItem key={voice.id} value={voice.id}>
-                              <div>
-                                <div className="font-medium">{voice.label}</div>
-                                <div className="text-sm text-gray-500">{voice.description}</div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  {/* Voice Quality Selection */}
+                  <div className="mb-6">
+                    <Label className="text-sm font-medium mb-3 block">Voice Quality</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        onClick={() => setUseOpenAIVoice(false)}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          !useOpenAIVoice 
+                            ? 'border-blue-500 bg-blue-50 text-blue-900' 
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="font-medium">Standard Voice</div>
+                        <div className="text-sm opacity-75">Browser built-in (Free)</div>
+                        <div className="text-xs mt-1">Settings restart verse</div>
+                      </button>
+                      <button
+                        onClick={() => setUseOpenAIVoice(true)}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          useOpenAIVoice 
+                            ? 'border-green-500 bg-green-50 text-green-900' 
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="font-medium">Premium Voice</div>
+                        <div className="text-sm opacity-75">OpenAI TTS (Pro)</div>
+                        <div className="text-xs mt-1">Real-time controls</div>
+                      </button>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {!useOpenAIVoice && (
+                      <div>
+                        <Label htmlFor="voice-select">Choose Voice</Label>
+                        <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                          <SelectTrigger id="voice-select">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {voiceOptions.map((voice) => (
+                              <SelectItem key={voice.id} value={voice.id}>
+                                <div>
+                                  <div className="font-medium">{voice.label}</div>
+                                  <div className="text-sm text-gray-500">{voice.description}</div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {useOpenAIVoice && (
+                      <div>
+                        <Label htmlFor="ai-voice-select">Premium Voice</Label>
+                        <Select value="alloy" disabled>
+                          <SelectTrigger id="ai-voice-select">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="alloy">Alloy - Natural & Clear</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <div className="text-xs text-gray-500 mt-1">More voices coming soon</div>
+                      </div>
+                    )}
 
                     {/* Playback Speed */}
                     <div>

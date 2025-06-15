@@ -6177,5 +6177,46 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Audio Bible verse compilation with premium OpenAI TTS
+  app.post('/api/audio/compile-verses', async (req, res) => {
+    try {
+      const { verses, voice = 'alloy', speed = 1.0 } = req.body;
+      
+      if (!verses || !Array.isArray(verses)) {
+        return res.status(400).json({ error: 'Verses array is required' });
+      }
+
+      // Compile all verses into a single text with proper spacing and pauses
+      const compiledText = verses.map(verse => 
+        `${verse.reference}. ${verse.text}`
+      ).join('... '); // Natural pause between verses
+
+      // Use OpenAI's HD model for premium Audio Bible experience
+      const mp3 = await openai.audio.speech.create({
+        model: "tts-1-hd", // Highest quality for Audio Bible
+        voice: voice, // Premium voice selection
+        input: compiledText.substring(0, 4096), // OpenAI character limit
+        speed: Math.max(0.25, Math.min(4.0, speed)),
+        response_format: "mp3"
+      });
+
+      const buffer = Buffer.from(await mp3.arrayBuffer());
+      
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': buffer.length.toString(),
+        'Cache-Control': 'public, max-age=1800', // 30-minute cache for Audio Bible
+        'Access-Control-Allow-Origin': '*',
+        'X-Audio-Duration': `${Math.ceil(compiledText.length / 15)}`, // Estimated duration
+        'X-Verse-Count': verses.length.toString()
+      });
+      
+      res.send(buffer);
+    } catch (error) {
+      console.error('Audio Bible compilation error:', error);
+      res.status(500).json({ error: 'Audio compilation failed' });
+    }
+  });
+
   return httpServer;
 }
