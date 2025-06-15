@@ -44,6 +44,50 @@ export default function FreshAudioBible() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState([0.8]);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+
+  // Apply settings changes immediately during playback
+  useEffect(() => {
+    if (isPlaying && currentUtterance && window.speechSynthesis.speaking) {
+      // Cancel current speech and restart with new settings
+      const wasPlaying = true;
+      const currentIndex = currentVerseIndex;
+      
+      window.speechSynthesis.cancel();
+      
+      // Show feedback to user
+      toast({
+        title: "Settings updated",
+        description: "Audio restarted with new settings",
+        duration: 2000
+      });
+      
+      // Small delay to ensure cancellation is processed
+      setTimeout(() => {
+        if (wasPlaying) {
+          speakVerse(currentIndex);
+        }
+      }, 100);
+    }
+  }, [playbackSpeed, volume]);
+
+  // Monitor for speech synthesis events
+  useEffect(() => {
+    const handleSpeechEnd = () => {
+      if (window.speechSynthesis.speaking === false && !isPaused) {
+        // Speech ended unexpectedly, might be due to settings change
+        console.log('Speech ended, checking state');
+      }
+    };
+
+    if ('speechSynthesis' in window) {
+      // Some browsers support these events
+      window.speechSynthesis.addEventListener?.('voiceschanged', handleSpeechEnd);
+    }
+
+    return () => {
+      window.speechSynthesis.removeEventListener?.('voiceschanged', handleSpeechEnd);
+    };
+  }, [isPaused]);
   const [selectedVerses, setSelectedVerses] = useState<BibleVerse[]>([]);
   const [customVerseCount, setCustomVerseCount] = useState(5);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -509,7 +553,14 @@ export default function FreshAudioBible() {
 
                     {/* Playback Speed */}
                     <div>
-                      <Label htmlFor="playback-speed">Playback Speed</Label>
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="playback-speed">Playback Speed</Label>
+                        {(isPlaying || isPaused) && (
+                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                            Applies instantly
+                          </span>
+                        )}
+                      </div>
                       <Select value={playbackSpeed.toString()} onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}>
                         <SelectTrigger id="playback-speed">
                           <SelectValue />
@@ -527,7 +578,14 @@ export default function FreshAudioBible() {
 
                   {/* Volume Control */}
                   <div>
-                    <Label htmlFor="volume-control">Volume: {Math.round((volume?.[0] || 0.8) * 100)}%</Label>
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="volume-control">Volume: {Math.round((volume?.[0] || 0.8) * 100)}%</Label>
+                      {(isPlaying || isPaused) && (
+                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                          Applies instantly
+                        </span>
+                      )}
+                    </div>
                     <Slider
                       id="volume-control"
                       min={0}
