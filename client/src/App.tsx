@@ -122,19 +122,7 @@ function AppRouter() {
     }
   }, [detectedUserRole]);
   
-  // Debug logging for onboarding state
-  console.log("Onboarding check:", {
-    isAuthenticated,
-    hasUser: !!user,
-    hasCompletedOnboarding: (user as any)?.has_completed_onboarding,
-    forceHideOnboarding,
-    needsOnboarding,
-    show2FAOnboarding,
-    shouldShowTour,
-    shouldShowPersonalizedTour,
-    detectedUserRole,
-    allOnboardingComplete
-  });
+  // Debug logging removed for performance optimization
 
   // Show loading spinner during initial auth check
   if (isLoading) {

@@ -56,7 +56,7 @@ export default function SocialFeed() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  console.log('SocialFeed component loaded with comment and share handlers');
+  // Performance optimization: removed console logging
   const [newPost, setNewPost] = useState("");
   // AI will automatically determine post type, so we don't need manual selection
   
@@ -65,10 +65,11 @@ export default function SocialFeed() {
   const [activePost, setActivePost] = useState<FeedPost | null>(null);
   const [commentText, setCommentText] = useState("");
 
-  // Fetch social feed data
+  // Fetch social feed data with optimized refresh
   const { data: feedPosts = [], isLoading } = useQuery({
     queryKey: ['/api/feed'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 60000, // Refresh every 60 seconds (reduced from 30)
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   // Create new post mutation
@@ -307,7 +308,7 @@ export default function SocialFeed() {
   };
 
   const handleLikePost = (post: FeedPost) => {
-    console.log('handleLikePost called with:', { postId: post.id, postType: post.type });
+    // Performance optimization: removed console logging
     if (post.type === 'prayer') {
       // Use direct prayer like mutation for prayer posts
       prayerLikeMutation.mutate(post.id);
@@ -320,7 +321,6 @@ export default function SocialFeed() {
   };
 
   const handleCommentPost = (post: FeedPost) => {
-    console.log('handleCommentPost called with:', { postId: post.id, postType: post.type });
     setActivePost(post);
     setCommentText("");
     setCommentModalOpen(true);
@@ -329,7 +329,7 @@ export default function SocialFeed() {
   const submitComment = () => {
     if (!activePost || !commentText.trim()) return;
     
-    console.log('Making comment request:', { postId: activePost.id, content: commentText.trim() });
+    // Performance optimization: removed console logging
     commentMutation.mutate({
       postId: activePost.id,
       postType: activePost.type,
@@ -346,7 +346,6 @@ export default function SocialFeed() {
   };
 
   const handleSharePost = (post: FeedPost) => {
-    console.log('handleSharePost called with:', { postId: post.id, postType: post.type });
     sharePostMutation.mutate({
       postId: post.id,
       postType: post.type
