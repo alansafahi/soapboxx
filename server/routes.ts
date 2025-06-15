@@ -2662,7 +2662,17 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
         const usedIds = selectedVerses.map(v => v.id);
         
         // Get mood-appropriate categories for fallback
-        const moodCategories = getMoodCategories(mood || 'seeking-guidance');
+        const moodCategoryMap = {
+          'peaceful': ['Peace', 'Comfort', 'Hope'],
+          'seeking-guidance': ['Wisdom', 'Faith', 'Purpose'],
+          'grateful': ['Joy', 'Worship', 'Grace'],
+          'struggling': ['Strength', 'Hope', 'Comfort'],
+          'celebrating': ['Joy', 'Worship', 'Grace'],
+          'reflective': ['Wisdom', 'Peace', 'Purpose'],
+          'hopeful': ['Hope', 'Faith', 'Joy'],
+          'anxious': ['Peace', 'Comfort', 'Strength']
+        };
+        const moodCategories = moodCategoryMap[mood] || ['Faith', 'Hope', 'Love'];
         const fallbackVerses = availableVerses
           .filter(v => 
             !usedIds.includes(v.id) && 
