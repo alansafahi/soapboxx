@@ -35,6 +35,7 @@ import { DemoTrigger } from "@/components/DemoTrigger";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AudioRoutines from "@/pages/AudioRoutines";
 import AudioBibleDemo from "@/pages/AudioBibleDemo";
+import AudioBibleMinimal from "@/pages/AudioBibleMinimal";
 import VideoLibrary from "@/pages/VideoLibrary";
 import FeatureCatalogPage from "@/pages/FeatureCatalogPage";
 import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
@@ -172,7 +173,7 @@ function AppRouter() {
               <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="/email-verification" component={EmailVerification} />
               <Route path="/audio-routines" component={AudioRoutines} />
-              <Route path="/audio-bible" component={AudioBibleDemo} />
+              <Route path="/audio-bible" component={AudioBibleMinimal} />
               <Route path="/video-library" component={VideoLibrary} />
               <Route path="/features" component={FeatureCatalogPage} />
               <Route path="/role-features" component={RoleSpecificFeaturesPage} />
