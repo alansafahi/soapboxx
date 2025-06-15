@@ -45,7 +45,7 @@ export default function FreshAudioBible() {
   const [volume, setVolume] = useState([0.8]);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [pendingSettingsUpdate, setPendingSettingsUpdate] = useState(false);
-  const [useOpenAIVoice, setUseOpenAIVoice] = useState(false);
+  const [useOpenAIVoice, setUseOpenAIVoice] = useState(true); // Default to premium voice
   const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
 
   // Optimized settings update with better user experience
@@ -261,18 +261,30 @@ export default function FreshAudioBible() {
     try {
       setIsGenerating(true);
       
-      const response = await apiRequest('/api/audio/compile-verses', {
+      const response = await fetch('/api/audio/compile-verses', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'audio/mpeg'
+        },
+        credentials: 'include', // Include session cookies for authentication
         body: JSON.stringify({
           verses,
-          voice: 'alloy', // High-quality OpenAI voice
+          voice: 'alloy',
           speed: playbackSpeed
         })
       });
 
       if (!response.ok) {
-        throw new Error('Audio generation failed');
+        const errorText = await response.text();
+        console.error('Audio API error:', errorText);
+        throw new Error(`Audio generation failed: ${response.status}`);
+      }
+
+      // Ensure we're getting audio data
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('audio')) {
+        throw new Error('Invalid response format - expected audio data');
       }
 
       const audioBlob = await response.blob();
@@ -290,6 +302,11 @@ export default function FreshAudioBible() {
     } catch (error) {
       console.error('OpenAI audio generation failed:', error);
       setIsGenerating(false);
+      toast({
+        title: "Premium voice unavailable",
+        description: "Switching to standard voice. Please try again."
+      });
+      setUseOpenAIVoice(false);
       return null;
     }
   };

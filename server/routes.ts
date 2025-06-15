@@ -6182,7 +6182,7 @@ Please provide suggestions for the missing or incomplete sections.`
   });
 
   // Audio Bible verse compilation with premium OpenAI TTS
-  app.post('/api/audio/compile-verses', async (req, res) => {
+  app.post('/api/audio/compile-verses', isAuthenticated, async (req, res) => {
     try {
       const { verses, voice = 'alloy', speed = 1.0 } = req.body;
       
