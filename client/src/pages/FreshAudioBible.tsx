@@ -21,10 +21,12 @@ interface BibleVerse {
 }
 
 interface AudioRoutine {
+  id: string;
   verses: BibleVerse[];
   voice: string;
   musicBed: string;
   totalDuration: number;
+  audioUrl?: string;
 }
 
 export default function FreshAudioBible() {
@@ -40,11 +42,13 @@ export default function FreshAudioBible() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState([0.8]);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [selectedVerses, setSelectedVerses] = useState<BibleVerse[]>([]);
   const [customVerseCount, setCustomVerseCount] = useState(5);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [currentRoutine, setCurrentRoutine] = useState<AudioRoutine | null>(null);
   const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
   
   // Manual selection state
   const [manuallySelectedVerses, setManuallySelectedVerses] = useState<BibleVerse[]>([]);
@@ -175,6 +179,55 @@ export default function FreshAudioBible() {
       }
       setIsPlaying(!isPlaying);
     }
+  };
+
+  const handlePlayAudio = async () => {
+    if (selectedVerses.length === 0) {
+      toast({
+        title: "No Verses Selected",
+        description: "Please select verses to generate audio",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    const verseIds = selectedVerses.map(v => v.id);
+    
+    try {
+      const routine = await generateRoutineMutation.mutateAsync({
+        verseIds,
+        voice: selectedVoice,
+        musicBed: selectedMusicBed
+      });
+      
+      if (routine?.audioUrl && audioRef.current) {
+        audioRef.current.src = routine.audioUrl;
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      toast({
+        title: "Audio Generation Failed",
+        description: "Please try again with different settings",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value[0];
+      setCurrentTime(value[0]);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Helper functions for manual verse selection
