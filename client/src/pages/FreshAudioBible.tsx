@@ -483,24 +483,24 @@ export default function FreshAudioBible() {
                         </Button>
                         <div className="flex-1">
                           <div className="text-sm font-medium mb-1">
-                            Now Playing: {currentRoutine.verses[0]?.reference || 'Audio Bible'}
+                            Now Playing: {currentRoutine?.verses?.[0]?.reference || 'Audio Bible'}
                           </div>
                           <Slider
-                            value={[currentTime]}
-                            max={duration}
+                            value={[currentTime || 0]}
+                            max={duration || 100}
                             step={1}
                             onValueChange={handleSeek}
                             className="w-full"
                           />
                           <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>{formatTime(currentTime)}</span>
-                            <span>{formatTime(duration)}</span>
+                            <span>{formatTime(currentTime || 0)}</span>
+                            <span>{formatTime(duration || 0)}</span>
                           </div>
                         </div>
                       </div>
                       <audio
                         ref={audioRef}
-                        src={currentRoutine.audioUrl}
+                        src={currentRoutine?.audioUrl || ''}
                         onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
                         onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
                         onEnded={() => setIsPlaying(false)}
