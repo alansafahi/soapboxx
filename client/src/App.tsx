@@ -40,6 +40,7 @@ import SimpleAudioBible from "@/pages/SimpleAudioBible";
 import TestPage from "@/pages/TestPage";
 import WorkingAudioBible from "@/pages/WorkingAudioBible";
 import FreshAudioBible from "@/pages/FreshAudioBible";
+import BasicAudioBible from "@/pages/BasicAudioBible";
 import VideoLibrary from "@/pages/VideoLibrary";
 import FeatureCatalogPage from "@/pages/FeatureCatalogPage";
 import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
