@@ -178,7 +178,7 @@ function AppRouter() {
               <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="/email-verification" component={EmailVerification} />
               <Route path="/audio-routines" component={AudioRoutines} />
-              <Route path="/audio-bible" component={BasicAudioBible} />
+              <Route path="/audio-bible" component={WorkingAudioBible} />
               <Route path="/video-library" component={VideoLibrary} />
               <Route path="/features" component={FeatureCatalogPage} />
               <Route path="/role-features" component={RoleSpecificFeaturesPage} />
