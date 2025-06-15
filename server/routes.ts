@@ -1937,15 +1937,35 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Get all Bible verses endpoint for Audio Bible
+  // Get Bible verses with pagination and filtering
   app.get('/api/bible/verses', isAuthenticated, async (req: any, res) => {
     try {
-      const { search, category, limit } = req.query;
-      const verses = await storage.getBibleVerses();
+      const { search, category, limit = 20, offset = 0 } = req.query;
+      const limitNum = Math.min(parseInt(limit) || 20, 100); // Max 100 verses per request
+      const offsetNum = parseInt(offset) || 0;
       
-      console.log(`Bible verses API returned ${verses.length} total verses`);
-      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.json(verses);
+      // Get total count for pagination
+      const totalCount = await storage.getBibleVersesCount();
+      
+      // Get paginated verses
+      const verses = await storage.getBibleVersesPaginated({
+        search,
+        category,
+        limit: limitNum,
+        offset: offsetNum
+      });
+      
+      console.log(`Bible verses API returned ${verses.length} of ${totalCount} total verses (limit: ${limitNum}, offset: ${offsetNum})`);
+      
+      res.json({
+        verses,
+        pagination: {
+          total: totalCount,
+          limit: limitNum,
+          offset: offsetNum,
+          hasMore: offsetNum + limitNum < totalCount
+        }
+      });
     } catch (error) {
       console.error("Error fetching Bible verses:", error);
       res.status(500).json({ message: "Failed to fetch Bible verses" });
