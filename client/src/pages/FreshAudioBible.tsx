@@ -286,7 +286,7 @@ export default function FreshAudioBible() {
 
   // Update audio volume
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && volume && volume.length > 0) {
       audioRef.current.volume = volume[0];
     }
   }, [volume]);
@@ -432,13 +432,13 @@ export default function FreshAudioBible() {
 
                   {/* Volume Control */}
                   <div>
-                    <Label htmlFor="volume-control">Volume: {Math.round(volume[0] * 100)}%</Label>
+                    <Label htmlFor="volume-control">Volume: {Math.round((volume?.[0] || 0.8) * 100)}%</Label>
                     <Slider
                       id="volume-control"
                       min={0}
                       max={1}
                       step={0.1}
-                      value={volume}
+                      value={volume || [0.8]}
                       onValueChange={setVolume}
                       className="mt-2"
                     />
