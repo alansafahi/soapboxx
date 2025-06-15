@@ -2643,21 +2643,39 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       });
 
       const aiSelection = JSON.parse(response.choices[0].message.content);
+      console.log('AI Selection Response:', aiSelection);
+      console.log('Available verses count:', availableVerses.length);
       
       // Validate and get the selected verses
-      const selectedVerses = aiSelection.selectedVerseIds
-        .map((id: number) => availableVerses.find(v => v.id === id))
-        .filter(Boolean)
-        .slice(0, parseInt(count.toString()));
+      let selectedVerses = [];
+      
+      if (aiSelection.selectedVerseIds && Array.isArray(aiSelection.selectedVerseIds)) {
+        selectedVerses = aiSelection.selectedVerseIds
+          .map((id: number) => availableVerses.find(v => v.id === id))
+          .filter(Boolean)
+          .slice(0, parseInt(count.toString()));
+      }
 
-      // If AI didn't provide enough verses, supplement with category-appropriate ones
+      // If AI didn't provide enough verses or none were found, use category-based fallback
       if (selectedVerses.length < parseInt(count.toString())) {
         const remainingCount = parseInt(count.toString()) - selectedVerses.length;
         const usedIds = selectedVerses.map(v => v.id);
-        const supplementaryVerses = availableVerses
-          .filter(v => !usedIds.includes(v.id))
+        
+        // Get mood-appropriate categories for fallback
+        const moodCategories = getMoodCategories(mood || 'seeking-guidance');
+        const fallbackVerses = availableVerses
+          .filter(v => 
+            !usedIds.includes(v.id) && 
+            (moodCategories.includes(v.category) || ['Core', 'Faith', 'Hope'].includes(v.category))
+          )
           .slice(0, remainingCount);
-        selectedVerses.push(...supplementaryVerses);
+        
+        selectedVerses.push(...fallbackVerses);
+      }
+
+      // Final safety check - if still no verses, use any available verses
+      if (selectedVerses.length === 0 && availableVerses.length > 0) {
+        selectedVerses = availableVerses.slice(0, parseInt(count.toString()));
       }
 
       res.json({
