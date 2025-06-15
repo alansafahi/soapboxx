@@ -45,8 +45,10 @@ export default function FreshAudioBible() {
   const [volume, setVolume] = useState([0.8]);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [pendingSettingsUpdate, setPendingSettingsUpdate] = useState(false);
+  const [useOpenAIVoice, setUseOpenAIVoice] = useState(false);
+  const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
 
-  // Debounced settings update to prevent multiple restarts
+  // Optimized settings update with better user experience
   useEffect(() => {
     if (isPlaying && window.speechSynthesis.speaking) {
       setPendingSettingsUpdate(true);
@@ -55,17 +57,39 @@ export default function FreshAudioBible() {
         if (isPlaying && window.speechSynthesis.speaking) {
           const currentIndex = currentVerseIndex;
           
-          window.speechSynthesis.cancel();
+          // Smooth transition with fade effect
+          const fadeOutDuration = 200;
+          const currentUtteranceRef = currentUtterance;
           
-          // Brief pause, then continue with new settings
-          setTimeout(() => {
-            if (isPlaying) {
-              speakVerse(currentIndex);
-              setPendingSettingsUpdate(false);
-            }
-          }, 150);
+          // Gradually reduce volume for smoother transition
+          if (currentUtteranceRef) {
+            let fadeStep = 0;
+            const fadeInterval = setInterval(() => {
+              fadeStep += 0.1;
+              if (fadeStep >= 1) {
+                clearInterval(fadeInterval);
+                window.speechSynthesis.cancel();
+                
+                // Quick restart with new settings
+                setTimeout(() => {
+                  if (isPlaying) {
+                    speakVerse(currentIndex);
+                    setPendingSettingsUpdate(false);
+                  }
+                }, 100);
+              }
+            }, fadeOutDuration / 10);
+          } else {
+            window.speechSynthesis.cancel();
+            setTimeout(() => {
+              if (isPlaying) {
+                speakVerse(currentIndex);
+                setPendingSettingsUpdate(false);
+              }
+            }, 100);
+          }
         }
-      }, 500); // Wait 500ms for multiple changes
+      }, 800); // Longer debounce for better user control
       
       return () => clearTimeout(debounceTimer);
     }
@@ -233,9 +257,45 @@ export default function FreshAudioBible() {
     }
   };
 
+  const generateOpenAIAudio = async (verses: any[]) => {
+    try {
+      setIsGenerating(true);
+      
+      const response = await apiRequest('/api/audio/compile-verses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          verses,
+          voice: 'alloy', // High-quality OpenAI voice
+          speed: playbackSpeed
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Audio generation failed');
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Create audio element with real-time controls
+      const audio = new Audio(audioUrl);
+      audio.volume = volume[0] || 0.8;
+      audio.playbackRate = playbackSpeed;
+      
+      setAudioPlayer(audio);
+      setIsGenerating(false);
+      
+      return audio;
+    } catch (error) {
+      console.error('OpenAI audio generation failed:', error);
+      setIsGenerating(false);
+      return null;
+    }
+  };
+
   const speakVerse = (verseIndex: number) => {
     if (verseIndex >= selectedVerses.length) {
-      // All verses completed
       setIsPlaying(false);
       setIsPaused(false);
       setCurrentVerseIndex(0);
@@ -251,7 +311,6 @@ export default function FreshAudioBible() {
     
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     
-    // Configure voice settings
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(voice => 
       voice.name.toLowerCase().includes('female') || 
@@ -275,10 +334,9 @@ export default function FreshAudioBible() {
     
     utterance.onend = () => {
       if (!isPaused) {
-        // Move to next verse automatically
         const nextIndex = verseIndex + 1;
         setCurrentVerseIndex(nextIndex);
-        setTimeout(() => speakVerse(nextIndex), 500); // Small pause between verses
+        setTimeout(() => speakVerse(nextIndex), 500);
       }
     };
     
@@ -296,7 +354,7 @@ export default function FreshAudioBible() {
     window.speechSynthesis.speak(utterance);
   };
 
-  const handlePlayAudio = () => {
+  const handlePlayAudio = async () => {
     if (selectedVerses.length === 0) {
       toast({
         title: "Please select verses first",
@@ -305,43 +363,90 @@ export default function FreshAudioBible() {
       return;
     }
 
-    if ('speechSynthesis' in window) {
-      if (isPlaying && !isPaused) {
-        // Currently playing - pause it
-        window.speechSynthesis.pause();
-        setIsPaused(true);
+    if (useOpenAIVoice) {
+      // Use premium OpenAI TTS with HTML5 audio controls
+      if (isPlaying && audioPlayer) {
+        audioPlayer.pause();
         setIsPlaying(false);
+        setIsPaused(true);
         toast({
           title: "Audio paused",
-          description: "Click play to resume where you left off"
+          description: "Premium voice playback paused"
         });
-      } else if (isPaused) {
-        // Currently paused - resume
-        window.speechSynthesis.resume();
-        setIsPaused(false);
+      } else if (isPaused && audioPlayer) {
+        audioPlayer.play();
         setIsPlaying(true);
+        setIsPaused(false);
         toast({
           title: "Audio resumed",
-          description: "Continuing from where you paused"
+          description: "Continuing from exact position"
         });
       } else {
-        // Not playing - start from beginning or current verse
-        window.speechSynthesis.cancel();
-        setIsGenerating(true);
-        setIsPaused(false);
-        
-        toast({
-          title: "Audio Bible started",
-          description: `Reading ${selectedVerses.length} verses aloud`
-        });
-        
-        speakVerse(currentVerseIndex);
+        // Generate new OpenAI audio
+        const audio = await generateOpenAIAudio(selectedVerses);
+        if (audio) {
+          audio.onended = () => {
+            setIsPlaying(false);
+            setIsPaused(false);
+            setCurrentVerseIndex(0);
+            toast({
+              title: "Audio Bible completed",
+              description: "All verses have been read"
+            });
+          };
+          
+          audio.ontimeupdate = () => {
+            setCurrentTime(audio.currentTime);
+            setDuration(audio.duration);
+          };
+          
+          audio.play();
+          setIsPlaying(true);
+          setIsPaused(false);
+          
+          toast({
+            title: "Premium Audio Started",
+            description: `Playing ${selectedVerses.length} verses with OpenAI voice`
+          });
+        }
       }
     } else {
-      toast({
-        title: "Audio not available",
-        description: "Please try refreshing the page or use a different browser"
-      });
+      // Use standard browser speech synthesis
+      if ('speechSynthesis' in window) {
+        if (isPlaying && !isPaused) {
+          window.speechSynthesis.pause();
+          setIsPaused(true);
+          setIsPlaying(false);
+          toast({
+            title: "Audio paused",
+            description: "Click play to resume where you left off"
+          });
+        } else if (isPaused) {
+          window.speechSynthesis.resume();
+          setIsPaused(false);
+          setIsPlaying(true);
+          toast({
+            title: "Audio resumed",
+            description: "Continuing from where you paused"
+          });
+        } else {
+          window.speechSynthesis.cancel();
+          setIsGenerating(true);
+          setIsPaused(false);
+          
+          toast({
+            title: "Audio Bible started",
+            description: `Reading ${selectedVerses.length} verses aloud`
+          });
+          
+          speakVerse(currentVerseIndex);
+        }
+      } else {
+        toast({
+          title: "Audio not available",
+          description: "Please try refreshing the page or use a different browser"
+        });
+      }
     }
   };
 
