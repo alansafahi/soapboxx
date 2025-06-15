@@ -39,6 +39,7 @@ import AudioBibleMinimal from "@/pages/AudioBibleMinimal";
 import SimpleAudioBible from "@/pages/SimpleAudioBible";
 import TestPage from "@/pages/TestPage";
 import WorkingAudioBible from "@/pages/WorkingAudioBible";
+import FreshAudioBible from "@/pages/FreshAudioBible";
 import VideoLibrary from "@/pages/VideoLibrary";
 import FeatureCatalogPage from "@/pages/FeatureCatalogPage";
 import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
@@ -176,7 +177,7 @@ function AppRouter() {
               <Route path="/phone-verification" component={PhoneVerification} />
               <Route path="/email-verification" component={EmailVerification} />
               <Route path="/audio-routines" component={AudioRoutines} />
-              <Route path="/audio-bible" component={WorkingAudioBible} />
+              <Route path="/audio-bible" component={FreshAudioBible} />
               <Route path="/video-library" component={VideoLibrary} />
               <Route path="/features" component={FeatureCatalogPage} />
               <Route path="/role-features" component={RoleSpecificFeaturesPage} />
