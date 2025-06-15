@@ -149,6 +149,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Enhanced voice selection interface with descriptive voice characteristics
   - Fixed real-time audio adjustment issue that previously required audio regeneration
   - Premium voices provide studio-quality narration with seamless user control
+  - Fixed audio overlap issue when switching between premium and standard voices
+  - Added comprehensive audio cleanup to prevent multiple voices playing simultaneously
 - June 15, 2025: Implemented hybrid Audio Bible system with premium OpenAI TTS integration
   - Added voice quality selection: Standard (browser voices) vs Premium (OpenAI TTS)
   - Created `/api/audio/compile-verses` endpoint for high-quality voice generation

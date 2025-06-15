@@ -413,6 +413,22 @@ export default function FreshAudioBible() {
       return;
     }
 
+    // Stop all audio sources when switching between voice types
+    if (audioPlayer) {
+      audioPlayer.pause();
+      audioPlayer.src = '';
+      setAudioPlayer(null);
+    }
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    
+    // Reset states
+    setIsPlaying(false);
+    setIsPaused(false);
+    setCurrentTime(0);
+    setDuration(0);
+
     if (useOpenAIVoice) {
       // Use premium OpenAI TTS with HTML5 audio controls
       if (isPlaying && audioPlayer) {
@@ -702,7 +718,22 @@ export default function FreshAudioBible() {
                     <Label className="text-sm font-medium mb-3 block">Voice Quality</Label>
                     <div className="grid grid-cols-2 gap-4">
                       <button
-                        onClick={() => setUseOpenAIVoice(false)}
+                        onClick={() => {
+                          // Stop all audio when switching voice types
+                          if (audioPlayer) {
+                            audioPlayer.pause();
+                            audioPlayer.src = '';
+                            setAudioPlayer(null);
+                          }
+                          if (window.speechSynthesis.speaking) {
+                            window.speechSynthesis.cancel();
+                          }
+                          setIsPlaying(false);
+                          setIsPaused(false);
+                          setCurrentTime(0);
+                          setDuration(0);
+                          setUseOpenAIVoice(false);
+                        }}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           !useOpenAIVoice 
                             ? 'border-blue-500 bg-blue-50 text-blue-900' 
@@ -714,7 +745,22 @@ export default function FreshAudioBible() {
                         <div className="text-xs mt-1">Settings restart verse</div>
                       </button>
                       <button
-                        onClick={() => setUseOpenAIVoice(true)}
+                        onClick={() => {
+                          // Stop all audio when switching voice types
+                          if (audioPlayer) {
+                            audioPlayer.pause();
+                            audioPlayer.src = '';
+                            setAudioPlayer(null);
+                          }
+                          if (window.speechSynthesis.speaking) {
+                            window.speechSynthesis.cancel();
+                          }
+                          setIsPlaying(false);
+                          setIsPaused(false);
+                          setCurrentTime(0);
+                          setDuration(0);
+                          setUseOpenAIVoice(true);
+                        }}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           useOpenAIVoice 
                             ? 'border-green-500 bg-green-50 text-green-900' 
