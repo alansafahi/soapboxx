@@ -251,6 +251,8 @@ export interface IStorage {
   searchBibleVersesByTopic(topics: string[]): Promise<any[]>;
   getRandomVerseByCategory(category?: string): Promise<any | null>;
   getBibleVerses(): Promise<any[]>;
+  getBibleVersesCount(): Promise<number>;
+  getBibleVersesPaginated(options: { search?: string; category?: string; limit: number; offset: number }): Promise<any[]>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -3487,6 +3489,39 @@ export class DatabaseStorage implements IStorage {
       .from(bibleVerses)
       .where(eq(bibleVerses.isActive, true))
       .orderBy(asc(bibleVerses.reference));
+  }
+
+  async getBibleVersesCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(bibleVerses)
+      .where(eq(bibleVerses.isActive, true));
+    return result.count;
+  }
+
+  async getBibleVersesPaginated(options: { search?: string; category?: string; limit: number; offset: number }): Promise<any[]> {
+    let query = db
+      .select()
+      .from(bibleVerses)
+      .where(eq(bibleVerses.isActive, true));
+
+    if (options.search) {
+      query = query.where(
+        or(
+          ilike(bibleVerses.reference, `%${options.search}%`),
+          ilike(bibleVerses.text, `%${options.search}%`)
+        )
+      );
+    }
+
+    if (options.category) {
+      query = query.where(eq(bibleVerses.category, options.category));
+    }
+
+    return await query
+      .orderBy(asc(bibleVerses.reference))
+      .limit(options.limit)
+      .offset(options.offset);
   }
 
   async saveBibleVerseFromAI(verseData: {

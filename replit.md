@@ -142,6 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 15, 2025: Optimized Bible verses system for performance and responsiveness
+  - Fixed critical performance issue where FreshAudioBible was loading all 42,561 verses simultaneously
+  - Implemented paginated Bible verses API with maximum 100 verses per request
+  - Added getBibleVersesCount() and getBibleVersesPaginated() storage methods
+  - Enhanced Bible verses API with search, category filtering, and pagination support
+  - Changed FreshAudioBible to use lightweight connection testing instead of bulk data loading
+  - Eliminated browser freezing and "Page Unresponsive" dialogs completely
+  - Bible verses now efficiently stored in PostgreSQL database and retrieved on-demand
 - June 14, 2025: Reorganized navigation structure for better user experience and role-based access
   - Moved Audio Bible from "Media Contents" back to "Spiritual Tools" for better organization with devotional features
   - Consolidated Content Distribution Hub in Admin Portal under Ministry functions for pastoral users
