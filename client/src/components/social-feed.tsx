@@ -187,7 +187,6 @@ export default function SocialFeed() {
   const likePostMutation = useMutation({
     mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
       const url = `/api/${postType}s/${postId}/like`;
-      console.log('Making like request to:', url);
       return await apiRequest(url, {
         method: 'POST'
       });
@@ -238,7 +237,7 @@ export default function SocialFeed() {
   // Prayer-specific like mutation
   const prayerLikeMutation = useMutation({
     mutationFn: async (prayerId: number) => {
-      console.log('Making prayer like request to:', `/api/prayers/${prayerId}/like`);
+      // Performance optimization: removed console logging
       return await apiRequest(`/api/prayers/${prayerId}/like`, {
         method: 'POST'
       });
