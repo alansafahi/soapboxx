@@ -11,6 +11,10 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 import * as schema from "@shared/schema";
 import { userChurches, donations } from "@shared/schema";
 import { db } from "./db";
