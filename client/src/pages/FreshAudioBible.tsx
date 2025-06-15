@@ -45,6 +45,12 @@ export default function FreshAudioBible() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [currentRoutine, setCurrentRoutine] = useState<AudioRoutine | null>(null);
   const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
+  
+  // Manual selection state
+  const [manuallySelectedVerses, setManuallySelectedVerses] = useState<BibleVerse[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Mood options with enhanced spiritual context
   const moodOptions = [
@@ -83,6 +89,30 @@ export default function FreshAudioBible() {
       return response;
     }
   });
+
+  // Get Bible verses for manual selection with search and filtering
+  const { data: manualVersesData, isLoading: loadingManualVerses } = useQuery({
+    queryKey: ["/api/bible/verses", currentPage, searchQuery, selectedCategory],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        limit: "20",
+        page: currentPage.toString()
+      });
+      
+      if (searchQuery.trim()) {
+        params.append("search", searchQuery.trim());
+      }
+      
+      if (selectedCategory !== "all") {
+        params.append("category", selectedCategory);
+      }
+      
+      const response = await apiRequest(`/api/bible/verses?${params.toString()}`);
+      return response;
+    }
+  });
+
+  const categories = ["all", "Faith", "Hope", "Love", "Peace", "Strength", "Wisdom", "Comfort", "Forgiveness", "Joy", "Purpose", "Grace", "Worship", "Core"];
 
   // Generate audio routine mutation
   const generateRoutineMutation = useMutation({
@@ -145,6 +175,30 @@ export default function FreshAudioBible() {
       }
       setIsPlaying(!isPlaying);
     }
+  };
+
+  // Helper functions for manual verse selection
+  const toggleVerseSelection = (verse: BibleVerse) => {
+    setManuallySelectedVerses(prev => {
+      const isSelected = prev.some(v => v.id === verse.id);
+      if (isSelected) {
+        return prev.filter(v => v.id !== verse.id);
+      } else {
+        return [...prev, verse];
+      }
+    });
+  };
+
+  const clearManualSelection = () => {
+    setManuallySelectedVerses([]);
+  };
+
+  const useManualSelection = () => {
+    setSelectedVerses(manuallySelectedVerses);
+    toast({
+      title: "Manual Selection Applied",
+      description: `${manuallySelectedVerses.length} verses selected for your audio routine`
+    });
   };
 
   // Update selected verses when contextual verses are loaded
@@ -274,28 +328,147 @@ export default function FreshAudioBible() {
           </TabsContent>
 
           <TabsContent value="custom-routine" className="space-y-6">
+            {/* Manual Selection Controls */}
             <Card>
               <CardHeader>
-                <CardTitle>Custom Routine Builder</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Manual Scripture Selection
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="verse-count">Number of verses</Label>
-                    <Input
-                      id="verse-count"
-                      type="number"
-                      min="1"
-                      max="20"
-                      value={customVerseCount}
-                      onChange={(e) => setCustomVerseCount(parseInt(e.target.value) || 5)}
-                      className="w-24"
-                    />
+                  {/* Search and Filter Controls */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="search-verses">Search Verses</Label>
+                      <Input
+                        id="search-verses"
+                        placeholder="Search by reference or text..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category-filter">Filter by Category</Label>
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger id="category-filter">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category === "all" ? "All Categories" : category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <Button onClick={() => refetchVerses()} disabled={!selectedMood}>
-                    Generate Custom Selection
-                  </Button>
+
+                  {/* Manual Selection Summary */}
+                  {manuallySelectedVerses.length > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-blue-900">
+                          {manuallySelectedVerses.length} verses selected
+                        </span>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={clearManualSelection}
+                          >
+                            Clear All
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={useManualSelection}
+                          >
+                            Use Selection
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Verse Browser */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Available Verses</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingManualVerses ? (
+                  <div className="text-center py-8">
+                    <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
+                    <p>Loading verses...</p>
+                  </div>
+                ) : manualVersesData?.verses?.length > 0 ? (
+                  <div className="space-y-3">
+                    {manualVersesData.verses.map((verse: BibleVerse) => {
+                      const isSelected = manuallySelectedVerses.some(v => v.id === verse.id);
+                      return (
+                        <div 
+                          key={verse.id}
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                            isSelected 
+                              ? 'border-blue-500 bg-blue-50' 
+                              : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'
+                          }`}
+                          onClick={() => toggleVerseSelection(verse)}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <Badge variant={isSelected ? "default" : "secondary"}>
+                              {verse.reference}
+                            </Badge>
+                            <Badge variant="outline">{verse.category}</Badge>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">{verse.text}</p>
+                          {verse.topicTags && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {verse.topicTags.map((tag, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Pagination */}
+                    {manualVersesData.totalPages > 1 && (
+                      <div className="flex justify-center gap-2 mt-6">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={currentPage <= 1}
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                        >
+                          Previous
+                        </Button>
+                        <span className="flex items-center px-3 py-2 text-sm">
+                          Page {currentPage} of {manualVersesData.totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={currentPage >= manualVersesData.totalPages}
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No verses found. Try adjusting your search or filter.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
