@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Play, Pause, Volume2, Settings, RefreshCw, Heart, Star, BookOpen, Headphones } from "lucide-react";
+import { Play, Pause, Volume2, Settings, RefreshCw, Heart, Star, BookOpen, Headphones, Square } from "lucide-react";
 
 interface BibleVerse {
   id: number;
@@ -578,45 +578,35 @@ export default function FreshAudioBible() {
                         variant="outline"
                         className="px-6"
                       >
-                        <Square className="h-5 w-5 mr-2" />
+                        ⏹️
                         Stop
                       </Button>
                     )}
                   </div>
 
-                  {/* Simple Audio Controls */}
-                  {isPlaying && (
+                  {/* Audio Progress Indicator */}
+                  {(isPlaying || isPaused) && (
                     <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
-                      <div className="flex items-center gap-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={togglePlayPause}
-                        >
-                          {isPlaying ? (
-                            <Pause className="h-4 w-4" />
-                          ) : (
-                            <Play className="h-4 w-4" />
+                      <div className="text-center">
+                        <p className="text-blue-800 font-medium">
+                          {isPaused ? "⏸️ Audio Paused" : "🎵 Audio Bible Playing"}
+                        </p>
+                        <p className="text-blue-600 text-sm mt-1">
+                          Verse {currentVerseIndex + 1} of {selectedVerses.length}
+                          {selectedVerses[currentVerseIndex] && (
+                            <span className="block mt-1 font-medium">
+                              {selectedVerses[currentVerseIndex].reference}
+                            </span>
                           )}
-                        </Button>
-                        <div className="flex-1">
-                          <div className="text-sm font-medium text-blue-900">
-                            Now Reading: {selectedVerses.length} Bible verses
-                          </div>
-                          <div className="text-xs text-blue-700 mt-1">
-                            Audio Bible playback active
-                          </div>
+                        </p>
+                        
+                        {/* Progress bar */}
+                        <div className="w-full bg-blue-200 rounded-full h-2 mt-3">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${((currentVerseIndex + 1) / selectedVerses.length) * 100}%` }}
+                          ></div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            window.speechSynthesis.cancel();
-                            setIsPlaying(false);
-                          }}
-                        >
-                          Stop
-                        </Button>
                       </div>
                     </div>
                   )}
