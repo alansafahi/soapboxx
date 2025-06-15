@@ -324,6 +324,139 @@ export default function FreshAudioBible() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Audio Controls for Mood-Based Selection */}
+            {selectedVerses.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Headphones className="h-5 w-5" />
+                    Audio Bible Player
+                  </CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Listen to your personalized scripture selection with premium voice narration
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Voice Selection */}
+                    <div>
+                      <Label htmlFor="voice-select">Choose Voice</Label>
+                      <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                        <SelectTrigger id="voice-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {voiceOptions.map((voice) => (
+                            <SelectItem key={voice.id} value={voice.id}>
+                              <div>
+                                <div className="font-medium">{voice.label}</div>
+                                <div className="text-sm text-gray-500">{voice.description}</div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Playback Speed */}
+                    <div>
+                      <Label htmlFor="playback-speed">Playback Speed</Label>
+                      <Select value={playbackSpeed.toString()} onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}>
+                        <SelectTrigger id="playback-speed">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0.5">0.5x (Slow)</SelectItem>
+                          <SelectItem value="0.75">0.75x (Slower)</SelectItem>
+                          <SelectItem value="1">1x (Normal)</SelectItem>
+                          <SelectItem value="1.25">1.25x (Faster)</SelectItem>
+                          <SelectItem value="1.5">1.5x (Fast)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Volume Control */}
+                  <div>
+                    <Label htmlFor="volume-control">Volume: {Math.round(volume[0] * 100)}%</Label>
+                    <Slider
+                      id="volume-control"
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      value={volume}
+                      onValueChange={setVolume}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  {/* Play Controls */}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={handlePlayAudio}
+                      disabled={isGenerating || selectedVerses.length === 0}
+                      size="lg"
+                      className="px-8"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                          Generating Audio...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-5 w-5 mr-2" />
+                          Play Audio Bible ({selectedVerses.length} verses)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Audio Player */}
+                  {currentRoutine && (
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center gap-4 mb-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={togglePlayPause}
+                        >
+                          {isPlaying ? (
+                            <Pause className="h-4 w-4" />
+                          ) : (
+                            <Play className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium mb-1">
+                            Now Playing: {currentRoutine.verses[0]?.reference || 'Audio Bible'}
+                          </div>
+                          <Slider
+                            value={[currentTime]}
+                            max={duration}
+                            step={1}
+                            onValueChange={handleSeek}
+                            className="w-full"
+                          />
+                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>{formatTime(currentTime)}</span>
+                            <span>{formatTime(duration)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <audio
+                        ref={audioRef}
+                        src={currentRoutine.audioUrl}
+                        onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
+                        onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
+                        onEnded={() => setIsPlaying(false)}
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="custom-routine" className="space-y-6">
