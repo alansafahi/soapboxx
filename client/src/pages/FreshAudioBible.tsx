@@ -716,7 +716,7 @@ export default function FreshAudioBible() {
                       >
                         <div className="font-medium">Premium Voice</div>
                         <div className="text-sm opacity-75">OpenAI TTS (Pro)</div>
-                        <div className="text-xs mt-1">Real-time controls</div>
+                        <div className="text-xs mt-1">True real-time controls</div>
                       </button>
                     </div>
                   </div>

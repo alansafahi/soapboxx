@@ -142,13 +142,18 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 15, 2025: Enhanced Audio Bible with 6 premium OpenAI voices and true real-time controls
+  - Added complete OpenAI voice selection: Alloy, Echo, Fable, Onyx, Nova, and Shimmer
+  - Implemented true real-time speed and volume controls using HTML Audio API
+  - Premium voices now support instant adjustments without audio restart
+  - Enhanced voice selection interface with descriptive voice characteristics
+  - Fixed real-time audio adjustment issue that previously required audio regeneration
+  - Premium voices provide studio-quality narration with seamless user control
 - June 15, 2025: Implemented hybrid Audio Bible system with premium OpenAI TTS integration
   - Added voice quality selection: Standard (browser voices) vs Premium (OpenAI TTS)
   - Created `/api/audio/compile-verses` endpoint for high-quality voice generation
-  - Implemented real-time audio controls for premium voices (no verse restarts)
   - Added proper error handling and fallback to standard voice if premium fails
   - Enhanced user interface with clear benefits for each voice option
-  - Premium voices support seamless speed and volume adjustments during playback
 - June 15, 2025: Completed Audio Bible system with optimized audio controls and transparent user feedback
   - Implemented debounced audio adjustments that restart current verse with new settings when speed/volume changes
   - Added proper pause and resume controls that continue from current verse position
