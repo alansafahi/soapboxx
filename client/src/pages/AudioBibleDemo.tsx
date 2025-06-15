@@ -31,9 +31,15 @@ export default function AudioBibleDemo() {
   const { data: verses = [], refetch: refetchVerses } = useQuery({
     queryKey: ["/api/bible/verses"],
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
   });
+
+  // Clear cache and refetch on component mount
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["/api/bible/verses"] });
+    refetchVerses();
+  }, [refetchVerses]);
 
   // Generate custom Bible routine mutation
   const generateRoutineMutation = useMutation({
