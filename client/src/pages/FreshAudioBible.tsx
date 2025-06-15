@@ -39,6 +39,7 @@ export default function FreshAudioBible() {
   const [selectedVoice, setSelectedVoice] = useState("warm-female");
   const [selectedMusicBed, setSelectedMusicBed] = useState("gentle-piano");
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState([0.8]);
@@ -49,6 +50,7 @@ export default function FreshAudioBible() {
   const [currentRoutine, setCurrentRoutine] = useState<AudioRoutine | null>(null);
   const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [currentUtterance, setCurrentUtterance] = useState<SpeechSynthesisUtterance | null>(null);
   
   // Manual selection state
   const [manuallySelectedVerses, setManuallySelectedVerses] = useState<BibleVerse[]>([]);
@@ -186,6 +188,69 @@ export default function FreshAudioBible() {
     }
   };
 
+  const speakVerse = (verseIndex: number) => {
+    if (verseIndex >= selectedVerses.length) {
+      // All verses completed
+      setIsPlaying(false);
+      setIsPaused(false);
+      setCurrentVerseIndex(0);
+      toast({
+        title: "Audio Bible completed",
+        description: "All verses have been read"
+      });
+      return;
+    }
+
+    const verse = selectedVerses[verseIndex];
+    const textToSpeak = `${verse.reference}. ${verse.text}`;
+    
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // Configure voice settings
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => 
+      voice.name.toLowerCase().includes('female') || 
+      voice.name.toLowerCase().includes('samantha') ||
+      voice.name.toLowerCase().includes('karen')
+    ) || voices[0];
+    
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+    
+    utterance.rate = playbackSpeed;
+    utterance.volume = volume?.[0] || 0.8;
+    utterance.pitch = 1;
+    
+    utterance.onstart = () => {
+      setIsPlaying(true);
+      setIsPaused(false);
+      setIsGenerating(false);
+    };
+    
+    utterance.onend = () => {
+      if (!isPaused) {
+        // Move to next verse automatically
+        const nextIndex = verseIndex + 1;
+        setCurrentVerseIndex(nextIndex);
+        setTimeout(() => speakVerse(nextIndex), 500); // Small pause between verses
+      }
+    };
+    
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setIsGenerating(false);
+      toast({
+        title: "Audio not available",
+        description: "Please ensure your device volume is turned up and try again"
+      });
+    };
+    
+    setCurrentUtterance(utterance);
+    window.speechSynthesis.speak(utterance);
+  };
+
   const handlePlayAudio = () => {
     if (selectedVerses.length === 0) {
       toast({
@@ -195,74 +260,56 @@ export default function FreshAudioBible() {
       return;
     }
 
-    // If already playing, stop current playback
-    if (isPlaying) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
-      return;
-    }
-
-    // Use Web Speech API for immediate text-to-speech
     if ('speechSynthesis' in window) {
-      // Stop any current speech
-      window.speechSynthesis.cancel();
-      
-      setIsGenerating(true);
-      
-      // Combine all verses into one text
-      const textToSpeak = selectedVerses.map(verse => 
-        `${verse.reference}. ${verse.text}`
-      ).join('. ');
-      
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      
-      // Configure voice settings
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(voice => 
-        voice.name.toLowerCase().includes('female') || 
-        voice.name.toLowerCase().includes('samantha') ||
-        voice.name.toLowerCase().includes('karen')
-      ) || voices[0];
-      
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
-      }
-      
-      utterance.rate = playbackSpeed;
-      utterance.volume = volume?.[0] || 0.8;
-      utterance.pitch = 1;
-      
-      utterance.onstart = () => {
-        setIsPlaying(true);
-        setIsGenerating(false);
-      };
-      
-      utterance.onend = () => {
+      if (isPlaying && !isPaused) {
+        // Currently playing - pause it
+        window.speechSynthesis.pause();
+        setIsPaused(true);
         setIsPlaying(false);
-        setIsGenerating(false);
-      };
-      
-      utterance.onerror = () => {
-        setIsPlaying(false);
-        setIsGenerating(false);
         toast({
-          title: "Audio not available",
-          description: "Please ensure your device volume is turned up and try again"
+          title: "Audio paused",
+          description: "Click play to resume where you left off"
         });
-      };
-      
-      window.speechSynthesis.speak(utterance);
-      
-      toast({
-        title: "Audio Bible started",
-        description: `Reading ${selectedVerses.length} verses aloud`
-      });
+      } else if (isPaused) {
+        // Currently paused - resume
+        window.speechSynthesis.resume();
+        setIsPaused(false);
+        setIsPlaying(true);
+        toast({
+          title: "Audio resumed",
+          description: "Continuing from where you paused"
+        });
+      } else {
+        // Not playing - start from beginning or current verse
+        window.speechSynthesis.cancel();
+        setIsGenerating(true);
+        setIsPaused(false);
+        
+        toast({
+          title: "Audio Bible started",
+          description: `Reading ${selectedVerses.length} verses aloud`
+        });
+        
+        speakVerse(currentVerseIndex);
+      }
     } else {
       toast({
         title: "Audio not available",
         description: "Please try refreshing the page or use a different browser"
       });
     }
+  };
+
+  const handleStopAudio = () => {
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
+    setCurrentVerseIndex(0);
+    setCurrentUtterance(null);
+    toast({
+      title: "Audio stopped",
+      description: "Ready to start from the beginning"
+    });
   };
 
   const handleSeek = (value: number[]) => {
@@ -493,23 +540,28 @@ export default function FreshAudioBible() {
                   </div>
 
                   {/* Play Controls */}
-                  <div className="flex justify-center">
+                  <div className="flex justify-center gap-4">
                     <Button
                       onClick={handlePlayAudio}
                       disabled={isGenerating || selectedVerses.length === 0}
                       size="lg"
                       className="px-8"
-                      variant={isPlaying ? "secondary" : "default"}
+                      variant={isPlaying || isPaused ? "secondary" : "default"}
                     >
                       {isGenerating ? (
                         <>
                           <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
                           Starting Audio...
                         </>
+                      ) : isPaused ? (
+                        <>
+                          <Play className="h-5 w-5 mr-2" />
+                          Resume Audio Bible
+                        </>
                       ) : isPlaying ? (
                         <>
                           <Pause className="h-5 w-5 mr-2" />
-                          Stop Audio Bible
+                          Pause Audio Bible
                         </>
                       ) : (
                         <>
@@ -518,6 +570,18 @@ export default function FreshAudioBible() {
                         </>
                       )}
                     </Button>
+                    
+                    {(isPlaying || isPaused) && (
+                      <Button
+                        onClick={handleStopAudio}
+                        size="lg"
+                        variant="outline"
+                        className="px-6"
+                      >
+                        <Square className="h-5 w-5 mr-2" />
+                        Stop
+                      </Button>
+                    )}
                   </div>
 
                   {/* Simple Audio Controls */}
