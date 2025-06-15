@@ -68,7 +68,7 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: 3 * 60 * 1000, // 3 minutes for optimal balance
@@ -87,6 +87,9 @@ export const queryClient = new QueryClient({
       retry: 1, // Single retry for mutations
       retryDelay: 1000,
       networkMode: 'online',
+      onError: (error) => {
+        console.warn('Mutation error handled:', error);
+      },
     },
   },
 });

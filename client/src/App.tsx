@@ -60,6 +60,19 @@ function AppRouter() {
   const [churchName, setChurchName] = useState("");
   const [location] = useLocation();
 
+  // Global error handler for unhandled promise rejections
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.warn('Promise rejection handled:', event.reason);
+      event.preventDefault();
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   // Check if user needs 2FA onboarding (only for role upgrades)
   const { data: onboardingData } = useQuery({
     queryKey: ["/api/auth/2fa/onboarding-status"],
