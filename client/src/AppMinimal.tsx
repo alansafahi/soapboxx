@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AppHeader from "@/components/AppHeader";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
-import AudioBibleDemo from "@/pages/AudioBibleDemo";
+import FreshAudioBible from "@/pages/FreshAudioBible";
 import NotFound from "@/pages/not-found";
 import ClickTest from "@/components/ClickTest";
 
@@ -32,7 +32,7 @@ function AppRouter() {
       <main className="container mx-auto px-4 py-8">
         <Switch>
           <Route path="/" component={() => <Home referralCode={null} />} />
-          <Route path="/audio-bible" component={AudioBibleDemo} />
+          <Route path="/audio-bible" component={FreshAudioBible} />
           <Route path="/click-test" component={ClickTest} />
           <Route component={NotFound} />
         </Switch>
