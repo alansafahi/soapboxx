@@ -287,10 +287,9 @@ export default function FreshAudioBible() {
                     Recommended Verses
                     {loadingVerses && <RefreshCw className="h-4 w-4 animate-spin" />}
                   </CardTitle>
-                  {contextualVerses?.context && (
+                  {contextualVerses?.verses?.length > 0 && (
                     <div className="text-sm text-gray-600">
-                      <p><strong>Spiritual Theme:</strong> {contextualVerses.context.spiritualTheme}</p>
-                      <p><strong>Season:</strong> {contextualVerses.context.liturgicalSeason}</p>
+                      <p>Personalized verses selected based on your current mood</p>
                     </div>
                   )}
                 </CardHeader>

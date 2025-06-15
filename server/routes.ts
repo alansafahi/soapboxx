@@ -2561,34 +2561,39 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       // Get diverse verses from multiple categories and books
       const allVerses = await storage.getBibleVerses();
       
-      // Create a diverse selection from different books and categories
-      const diverseVerses = [];
-      const booksSeen = new Set();
+      // Create a diverse selection from relevant categories
+      let diverseVerses = [];
       
       // First, get verses from relevant categories
       for (const category of relevantCategories) {
-        const categoryVerses = allVerses.filter(v => 
-          v.category === category && !booksSeen.has(v.book)
-        );
-        for (const verse of categoryVerses.slice(0, 10)) {
-          if (diverseVerses.length < 200) {
-            diverseVerses.push(verse);
-            booksSeen.add(verse.book);
-          }
-        }
+        const categoryVerses = allVerses.filter(v => v.category === category);
+        diverseVerses.push(...categoryVerses.slice(0, 15));
       }
       
-      // Add more verses from core categories if needed
-      if (diverseVerses.length < 150) {
+      // Add core verses if we don't have enough
+      if (diverseVerses.length < 20) {
         const coreVerses = allVerses.filter(v => 
-          ['Core', 'Faith', 'Hope', 'Love'].includes(v.category)
+          ['Core', 'Faith', 'Hope', 'Love', 'Peace', 'Strength'].includes(v.category)
         );
-        for (const verse of coreVerses) {
-          if (diverseVerses.length < 200 && !diverseVerses.find(dv => dv.id === verse.id)) {
-            diverseVerses.push(verse);
-          }
-        }
+        diverseVerses.push(...coreVerses.slice(0, 30));
       }
+
+      // Final fallback: add any verses if still not enough
+      if (diverseVerses.length < 10) {
+        const popularRefs = [
+          'John 3:16', 'Psalm 23:1', 'Philippians 4:13', 'Romans 8:28', 'Isaiah 41:10',
+          'Matthew 11:28', 'Jeremiah 29:11', 'Isaiah 40:31', 'Proverbs 3:5-6', 'Joshua 1:9'
+        ];
+        const fallbackVerses = allVerses.filter(v => 
+          popularRefs.includes(v.reference)
+        );
+        diverseVerses.push(...fallbackVerses.slice(0, 15));
+      }
+      
+      // Remove duplicates
+      diverseVerses = diverseVerses.filter((verse, index, self) => 
+        index === self.findIndex(v => v.id === verse.id)
+      );
       
       let availableVerses = diverseVerses;
       if (categories && categories.length > 0) {
