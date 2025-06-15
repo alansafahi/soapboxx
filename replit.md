@@ -142,14 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 15, 2025: Completed Audio Bible system with real-time audio adjustments and advanced controls
-  - Implemented instant playback speed and volume adjustments without requiring stop/restart
+- June 15, 2025: Completed Audio Bible system with optimized audio controls and transparent user feedback
+  - Implemented debounced audio adjustments that restart current verse with new settings when speed/volume changes
   - Added proper pause and resume controls that continue from current verse position
   - Created verse-by-verse progression with automatic advancement between readings
-  - Enhanced audio controls with visual feedback showing "Applies instantly" during playback
+  - Enhanced audio controls with honest feedback showing "Will restart verse" behavior during playback
   - Added real-time progress indicator showing current verse number and reference
-  - Implemented smart audio restart that applies new settings immediately while maintaining position
-  - Streamlined interface with intuitive controls and immediate user feedback
+  - Implemented smart debouncing to prevent multiple restarts when adjusting settings quickly
+  - Streamlined interface with clear user communication about browser speech synthesis limitations
 - June 15, 2025: Optimized Bible verses system for performance and responsiveness
   - Fixed critical performance issue where FreshAudioBible was loading all 42,561 verses simultaneously
   - Implemented paginated Bible verses API with maximum 100 verses per request

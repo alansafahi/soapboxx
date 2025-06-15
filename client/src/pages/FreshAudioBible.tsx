@@ -44,29 +44,30 @@ export default function FreshAudioBible() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState([0.8]);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [pendingSettingsUpdate, setPendingSettingsUpdate] = useState(false);
 
-  // Apply settings changes immediately during playback
+  // Debounced settings update to prevent multiple restarts
   useEffect(() => {
-    if (isPlaying && currentUtterance && window.speechSynthesis.speaking) {
-      // Cancel current speech and restart with new settings
-      const wasPlaying = true;
-      const currentIndex = currentVerseIndex;
+    if (isPlaying && window.speechSynthesis.speaking) {
+      setPendingSettingsUpdate(true);
       
-      window.speechSynthesis.cancel();
-      
-      // Show feedback to user
-      toast({
-        title: "Settings updated",
-        description: "Audio restarted with new settings",
-        duration: 2000
-      });
-      
-      // Small delay to ensure cancellation is processed
-      setTimeout(() => {
-        if (wasPlaying) {
-          speakVerse(currentIndex);
+      const debounceTimer = setTimeout(() => {
+        if (isPlaying && window.speechSynthesis.speaking) {
+          const currentIndex = currentVerseIndex;
+          
+          window.speechSynthesis.cancel();
+          
+          // Brief pause, then continue with new settings
+          setTimeout(() => {
+            if (isPlaying) {
+              speakVerse(currentIndex);
+              setPendingSettingsUpdate(false);
+            }
+          }, 150);
         }
-      }, 100);
+      }, 500); // Wait 500ms for multiple changes
+      
+      return () => clearTimeout(debounceTimer);
     }
   }, [playbackSpeed, volume]);
 
@@ -555,9 +556,14 @@ export default function FreshAudioBible() {
                     <div>
                       <div className="flex justify-between items-center">
                         <Label htmlFor="playback-speed">Playback Speed</Label>
-                        {(isPlaying || isPaused) && (
-                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                            Applies instantly
+                        {(isPlaying || isPaused) && !pendingSettingsUpdate && (
+                          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                            Will restart verse
+                          </span>
+                        )}
+                        {pendingSettingsUpdate && (
+                          <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                            Updating...
                           </span>
                         )}
                       </div>
@@ -580,9 +586,14 @@ export default function FreshAudioBible() {
                   <div>
                     <div className="flex justify-between items-center">
                       <Label htmlFor="volume-control">Volume: {Math.round((volume?.[0] || 0.8) * 100)}%</Label>
-                      {(isPlaying || isPaused) && (
-                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                          Applies instantly
+                      {(isPlaying || isPaused) && !pendingSettingsUpdate && (
+                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                          Will restart verse
+                        </span>
+                      )}
+                      {pendingSettingsUpdate && (
+                        <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                          Updating...
                         </span>
                       )}
                     </div>
