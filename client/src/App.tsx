@@ -44,6 +44,7 @@ import ContentDistributionPage from "@/pages/ContentDistributionPage";
 import PastoralContentDemoPage from "@/pages/PastoralContentDemoPage";
 import EngagementAnalytics from "@/pages/EngagementAnalytics";
 import SoapPage from "@/pages/soap";
+import ClickTest from "@/components/ClickTest";
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -51,43 +52,24 @@ import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
 
 function AppRouter() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [showWelcomeWizard, setShowWelcomeWizard] = useState(false);
+  const [location] = useLocation();
+  
+  // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [show2FAOnboarding, setShow2FAOnboarding] = useState(false);
-  const [showPersonalizedTour, setShowPersonalizedTour] = useState(false);
   const [userRole, setUserRole] = useState("");
   const [churchName, setChurchName] = useState("");
-  const [location] = useLocation();
 
-  // Global error handler for unhandled promise rejections
+  // Global error handler
   useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       console.warn('Promise rejection handled:', event.reason);
       event.preventDefault();
     };
-
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    return () => {
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    };
+    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection);
   }, []);
-
-  // Check if user needs 2FA onboarding (only for role upgrades)
-  const { data: onboardingData } = useQuery({
-    queryKey: ["/api/auth/2fa/onboarding-status"],
-    enabled: isAuthenticated && !!user,
-    retry: false,
-  });
-
-  // Show 2FA onboarding only if user has pending role upgrade requiring 2FA
-  useEffect(() => {
-    if (onboardingData?.needsOnboarding) {
-      setShow2FAOnboarding(true);
-      setUserRole(onboardingData.userRole);
-      setChurchName(onboardingData.churchName);
-    }
-  }, [onboardingData]);
 
   // Extract referral code from URL parameters
   useEffect(() => {
@@ -200,6 +182,7 @@ function AppRouter() {
               <Route path="/engagement-analytics" component={EngagementAnalytics} />
               <Route path="/communications" component={BulkCommunication} />
               <Route path="/soap" component={SoapPage} />
+              <Route path="/click-test" component={ClickTest} />
             </>
           )}
         </Switch>
@@ -223,18 +206,7 @@ function AppRouter() {
         />
       )}
 
-      {/* 2FA Onboarding Modal - Only for role upgrades */}
-      <TwoFactorOnboarding
-        isOpen={show2FAOnboarding}
-        onComplete={() => {
-          setShow2FAOnboarding(false);
-          // Refresh user data and clear the pending setup flag
-          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/auth/2fa/onboarding-status"] });
-        }}
-        userRole={userRole}
-        churchName={churchName}
-      />
+      {/* 2FA Onboarding Modal - Simplified for stability */}
 
       {/* Personalized Tour - Shows after onboarding completion */}
       <PersonalizedTour
