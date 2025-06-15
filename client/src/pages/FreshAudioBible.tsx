@@ -189,10 +189,16 @@ export default function FreshAudioBible() {
   const handlePlayAudio = () => {
     if (selectedVerses.length === 0) {
       toast({
-        title: "No Verses Selected",
-        description: "Please select verses to generate audio",
-        variant: "destructive"
+        title: "Please select verses first",
+        description: "Choose a mood above to get personalized verse recommendations"
       });
+      return;
+    }
+
+    // If already playing, stop current playback
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
       return;
     }
 
@@ -202,7 +208,6 @@ export default function FreshAudioBible() {
       window.speechSynthesis.cancel();
       
       setIsGenerating(true);
-      setIsPlaying(true);
       
       // Combine all verses into one text
       const textToSpeak = selectedVerses.map(verse => 
@@ -227,6 +232,11 @@ export default function FreshAudioBible() {
       utterance.volume = volume?.[0] || 0.8;
       utterance.pitch = 1;
       
+      utterance.onstart = () => {
+        setIsPlaying(true);
+        setIsGenerating(false);
+      };
+      
       utterance.onend = () => {
         setIsPlaying(false);
         setIsGenerating(false);
@@ -236,24 +246,21 @@ export default function FreshAudioBible() {
         setIsPlaying(false);
         setIsGenerating(false);
         toast({
-          title: "Audio Playback Failed",
-          description: "Please try again or check your browser settings",
-          variant: "destructive"
+          title: "Audio not available",
+          description: "Please ensure your device volume is turned up and try again"
         });
       };
       
       window.speechSynthesis.speak(utterance);
-      setIsGenerating(false);
       
       toast({
-        title: "Audio Bible Playing",
-        description: `Now reading ${selectedVerses.length} verses`
+        title: "Audio Bible started",
+        description: `Reading ${selectedVerses.length} verses aloud`
       });
     } else {
       toast({
-        title: "Audio Not Supported",
-        description: "Your browser doesn't support text-to-speech",
-        variant: "destructive"
+        title: "Audio not available",
+        description: "Please try refreshing the page or use a different browser"
       });
     }
   };
@@ -492,11 +499,17 @@ export default function FreshAudioBible() {
                       disabled={isGenerating || selectedVerses.length === 0}
                       size="lg"
                       className="px-8"
+                      variant={isPlaying ? "secondary" : "default"}
                     >
                       {isGenerating ? (
                         <>
                           <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                          Generating Audio...
+                          Starting Audio...
+                        </>
+                      ) : isPlaying ? (
+                        <>
+                          <Pause className="h-5 w-5 mr-2" />
+                          Stop Audio Bible
                         </>
                       ) : (
                         <>
