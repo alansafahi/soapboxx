@@ -2624,7 +2624,7 @@ From the available verses, provide verse IDs in order of importance. Respond wit
 }
 
 Available verses (ID: Reference - Text excerpt):
-${availableVerses.slice(0, 100).map(v => `${v.id}: ${v.reference} - ${v.text.substring(0, 100)}...`).join('\n')}`;
+${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.text.substring(0, 90)}...`).join('\n')}`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
