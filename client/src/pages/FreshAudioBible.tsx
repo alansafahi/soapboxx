@@ -269,6 +269,13 @@ export default function FreshAudioBible() {
 
   const generateOpenAIAudio = async (verses: any[]) => {
     try {
+      // Stop and cleanup any existing audio first to prevent overlap
+      if (audioPlayer) {
+        audioPlayer.pause();
+        audioPlayer.src = '';
+        setAudioPlayer(null);
+      }
+      
       setIsGenerating(true);
       
       const response = await fetch('/api/audio/compile-verses', {
