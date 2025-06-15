@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,8 +28,11 @@ export default function AudioBibleDemo() {
   const [useContextualSelection, setUseContextualSelection] = useState(false);
 
   // Get Bible verses for selection
-  const { data: verses = [] } = useQuery({
+  const { data: verses = [], refetch: refetchVerses } = useQuery({
     queryKey: ["/api/bible/verses"],
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: true,
   });
 
   // Generate custom Bible routine mutation

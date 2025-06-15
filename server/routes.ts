@@ -1940,7 +1940,11 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Get all Bible verses endpoint for Audio Bible
   app.get('/api/bible/verses', isAuthenticated, async (req: any, res) => {
     try {
+      const { search, category, limit } = req.query;
       const verses = await storage.getBibleVerses();
+      
+      console.log(`Bible verses API returned ${verses.length} total verses`);
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(verses);
     } catch (error) {
       console.error("Error fetching Bible verses:", error);
