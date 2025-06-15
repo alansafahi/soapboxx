@@ -171,17 +171,22 @@ export default function FreshAudioBible() {
 
   // Audio control functions
   const togglePlayPause = () => {
-    if (audioRef.current) {
+    if ('speechSynthesis' in window) {
       if (isPlaying) {
-        audioRef.current.pause();
+        window.speechSynthesis.pause();
+        setIsPlaying(false);
       } else {
-        audioRef.current.play();
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        } else {
+          handlePlayAudio();
+        }
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
-  const handlePlayAudio = async () => {
+  const handlePlayAudio = () => {
     if (selectedVerses.length === 0) {
       toast({
         title: "No Verses Selected",
@@ -191,29 +196,65 @@ export default function FreshAudioBible() {
       return;
     }
 
-    setIsGenerating(true);
-    const verseIds = selectedVerses.map(v => v.id);
-    
-    try {
-      const routine = await generateRoutineMutation.mutateAsync({
-        verseIds,
-        voice: selectedVoice,
-        musicBed: selectedMusicBed
-      });
+    // Use Web Speech API for immediate text-to-speech
+    if ('speechSynthesis' in window) {
+      // Stop any current speech
+      window.speechSynthesis.cancel();
       
-      if (routine?.audioUrl && audioRef.current) {
-        audioRef.current.src = routine.audioUrl;
-        audioRef.current.play();
-        setIsPlaying(true);
+      setIsGenerating(true);
+      setIsPlaying(true);
+      
+      // Combine all verses into one text
+      const textToSpeak = selectedVerses.map(verse => 
+        `${verse.reference}. ${verse.text}`
+      ).join('. ');
+      
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      
+      // Configure voice settings
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('samantha') ||
+        voice.name.toLowerCase().includes('karen')
+      ) || voices[0];
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
       }
-    } catch (error) {
+      
+      utterance.rate = playbackSpeed;
+      utterance.volume = volume?.[0] || 0.8;
+      utterance.pitch = 1;
+      
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setIsGenerating(false);
+      };
+      
+      utterance.onerror = () => {
+        setIsPlaying(false);
+        setIsGenerating(false);
+        toast({
+          title: "Audio Playback Failed",
+          description: "Please try again or check your browser settings",
+          variant: "destructive"
+        });
+      };
+      
+      window.speechSynthesis.speak(utterance);
+      setIsGenerating(false);
+      
       toast({
-        title: "Audio Generation Failed",
-        description: "Please try again with different settings",
+        title: "Audio Bible Playing",
+        description: `Now reading ${selectedVerses.length} verses`
+      });
+    } else {
+      toast({
+        title: "Audio Not Supported",
+        description: "Your browser doesn't support text-to-speech",
         variant: "destructive"
       });
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -466,10 +507,10 @@ export default function FreshAudioBible() {
                     </Button>
                   </div>
 
-                  {/* Audio Player */}
-                  {currentRoutine && (
-                    <div className="border rounded-lg p-4 bg-gray-50">
-                      <div className="flex items-center gap-4 mb-4">
+                  {/* Simple Audio Controls */}
+                  {isPlaying && (
+                    <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                      <div className="flex items-center gap-4">
                         <Button
                           variant="outline"
                           size="sm"
@@ -482,29 +523,24 @@ export default function FreshAudioBible() {
                           )}
                         </Button>
                         <div className="flex-1">
-                          <div className="text-sm font-medium mb-1">
-                            Now Playing: {currentRoutine?.verses?.[0]?.reference || 'Audio Bible'}
+                          <div className="text-sm font-medium text-blue-900">
+                            Now Reading: {selectedVerses.length} Bible verses
                           </div>
-                          <Slider
-                            value={[currentTime || 0]}
-                            max={duration || 100}
-                            step={1}
-                            onValueChange={handleSeek}
-                            className="w-full"
-                          />
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>{formatTime(currentTime || 0)}</span>
-                            <span>{formatTime(duration || 0)}</span>
+                          <div className="text-xs text-blue-700 mt-1">
+                            Audio Bible playback active
                           </div>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            window.speechSynthesis.cancel();
+                            setIsPlaying(false);
+                          }}
+                        >
+                          Stop
+                        </Button>
                       </div>
-                      <audio
-                        ref={audioRef}
-                        src={currentRoutine?.audioUrl || ''}
-                        onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
-                        onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
-                        onEnded={() => setIsPlaying(false)}
-                      />
                     </div>
                   )}
                 </CardContent>
@@ -659,97 +695,7 @@ export default function FreshAudioBible() {
           </TabsContent>
         </Tabs>
 
-        {/* Audio Controls and Settings */}
-        {selectedVerses.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Headphones className="h-5 w-5" />
-                Audio Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Voice Selection */}
-                <div>
-                  <Label htmlFor="voice-select">Choose Voice</Label>
-                  <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                    <SelectTrigger id="voice-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {voiceOptions.map((voice) => (
-                        <SelectItem key={voice.id} value={voice.id}>
-                          <div>
-                            <div className="font-medium">{voice.label}</div>
-                            <div className="text-sm text-gray-500">{voice.description}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                {/* Music Bed Selection */}
-                <div>
-                  <Label htmlFor="music-select">Background Music</Label>
-                  <Select value={selectedMusicBed} onValueChange={setSelectedMusicBed}>
-                    <SelectTrigger id="music-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {musicBedOptions.map((music) => (
-                        <SelectItem key={music.id} value={music.id}>
-                          <div>
-                            <div className="font-medium">{music.label}</div>
-                            <div className="text-sm text-gray-500">{music.description}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Volume Control */}
-              <div>
-                <Label>Volume</Label>
-                <div className="flex items-center gap-3 mt-2">
-                  <Volume2 className="h-4 w-4" />
-                  <Slider
-                    value={volume}
-                    onValueChange={setVolume}
-                    max={1}
-                    step={0.1}
-                    className="flex-1"
-                  />
-                  <span className="text-sm font-medium w-12">{Math.round(volume[0] * 100)}%</span>
-                </div>
-              </div>
-
-              {/* Generate Audio Button */}
-              <div className="flex gap-3">
-                <Button 
-                  onClick={createAudioRoutine}
-                  disabled={selectedVerses.length === 0 || generateRoutineMutation.isPending}
-                  className="flex-1"
-                >
-                  {generateRoutineMutation.isPending ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                      Generating Audio...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-4 w-4 mr-2" />
-                      Create Audio Experience
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Audio Player */}
         {currentRoutine && (
