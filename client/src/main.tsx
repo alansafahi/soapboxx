@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import App from "./AppMinimal";
 import "./index.css";
 
 // Handle unhandled promise rejections to prevent console errors
