@@ -2544,14 +2544,56 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const currentDate = new Date();
       const liturgicalContext = getLiturgicalSeason(currentDate);
       
-      // Get all available verses for filtering
+      // Get verses from database with mood-based category filtering
+      const moodCategoryMap: Record<string, string[]> = {
+        'peaceful': ['Peace', 'Comfort', 'Hope', 'Faith'],
+        'anxious': ['Peace', 'Comfort', 'Strength', 'Faith', 'Hope'],
+        'grateful': ['Joy', 'Worship', 'Grace', 'Faith'],
+        'struggling': ['Strength', 'Hope', 'Comfort', 'Faith', 'Purpose'],
+        'joyful': ['Joy', 'Worship', 'Grace', 'Purpose'],
+        'seeking': ['Wisdom', 'Purpose', 'Faith', 'Guidance'],
+        'mourning': ['Comfort', 'Hope', 'Peace', 'Healing'],
+        'hopeful': ['Hope', 'Purpose', 'Faith', 'Joy']
+      };
+
+      const relevantCategories = moodCategoryMap[mood] || ['Faith', 'Hope', 'Love', 'Peace'];
+      
+      // Get diverse verses from multiple categories and books
       const allVerses = await storage.getBibleVerses();
       
-      // Filter by categories if specified
-      let availableVerses = allVerses;
+      // Create a diverse selection from different books and categories
+      const diverseVerses = [];
+      const booksSeen = new Set();
+      
+      // First, get verses from relevant categories
+      for (const category of relevantCategories) {
+        const categoryVerses = allVerses.filter(v => 
+          v.category === category && !booksSeen.has(v.book)
+        );
+        for (const verse of categoryVerses.slice(0, 10)) {
+          if (diverseVerses.length < 200) {
+            diverseVerses.push(verse);
+            booksSeen.add(verse.book);
+          }
+        }
+      }
+      
+      // Add more verses from core categories if needed
+      if (diverseVerses.length < 150) {
+        const coreVerses = allVerses.filter(v => 
+          ['Core', 'Faith', 'Hope', 'Love'].includes(v.category)
+        );
+        for (const verse of coreVerses) {
+          if (diverseVerses.length < 200 && !diverseVerses.find(dv => dv.id === verse.id)) {
+            diverseVerses.push(verse);
+          }
+        }
+      }
+      
+      let availableVerses = diverseVerses;
       if (categories && categories.length > 0) {
         const categoryList = Array.isArray(categories) ? categories : [categories];
-        availableVerses = allVerses.filter(verse => 
+        availableVerses = diverseVerses.filter(verse => 
           verse.category && categoryList.includes(verse.category)
         );
       }
