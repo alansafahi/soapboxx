@@ -37,6 +37,7 @@ export default function FreshAudioBible() {
   // State management
   const [selectedMood, setSelectedMood] = useState<string>("");
   const [selectedVoice, setSelectedVoice] = useState("warm-female");
+  const [selectedOpenAIVoice, setSelectedOpenAIVoice] = useState("alloy");
   const [selectedMusicBed, setSelectedMusicBed] = useState("gentle-piano");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -48,9 +49,18 @@ export default function FreshAudioBible() {
   const [useOpenAIVoice, setUseOpenAIVoice] = useState(true); // Default to premium voice
   const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
 
-  // Optimized settings update with better user experience
+  // Real-time audio controls for premium voices (no restart needed)
   useEffect(() => {
-    if (isPlaying && window.speechSynthesis.speaking) {
+    if (audioPlayer && useOpenAIVoice) {
+      // Apply changes instantly to existing audio without restart
+      audioPlayer.playbackRate = playbackSpeed;
+      audioPlayer.volume = volume[0] || 0.8;
+      console.log('Real-time adjustment:', { speed: playbackSpeed, volume: volume[0] });
+      return;
+    }
+    
+    // Standard voice handling (requires restart due to browser limitations)
+    if (isPlaying && window.speechSynthesis.speaking && !useOpenAIVoice) {
       setPendingSettingsUpdate(true);
       
       const debounceTimer = setTimeout(() => {
@@ -93,7 +103,7 @@ export default function FreshAudioBible() {
       
       return () => clearTimeout(debounceTimer);
     }
-  }, [playbackSpeed, volume]);
+  }, [playbackSpeed, volume, audioPlayer, useOpenAIVoice]);
 
   // Monitor for speech synthesis events
   useEffect(() => {
@@ -270,7 +280,7 @@ export default function FreshAudioBible() {
         credentials: 'include', // Include session cookies for authentication
         body: JSON.stringify({
           verses,
-          voice: 'alloy',
+          voice: selectedOpenAIVoice,
           speed: playbackSpeed
         })
       });
@@ -294,6 +304,22 @@ export default function FreshAudioBible() {
       const audio = new Audio(audioUrl);
       audio.volume = volume[0] || 0.8;
       audio.playbackRate = playbackSpeed;
+      
+      // Set up event listeners for seamless playback
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+      });
+      
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
+      });
+      
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+        setIsPaused(false);
+        setCurrentTime(0);
+        URL.revokeObjectURL(audioUrl);
+      });
       
       setAudioPlayer(audio);
       setIsGenerating(false);
@@ -720,15 +746,20 @@ export default function FreshAudioBible() {
                     {useOpenAIVoice && (
                       <div>
                         <Label htmlFor="ai-voice-select">Premium Voice</Label>
-                        <Select value="alloy" disabled>
+                        <Select value={selectedOpenAIVoice} onValueChange={setSelectedOpenAIVoice}>
                           <SelectTrigger id="ai-voice-select">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="alloy">Alloy - Natural & Clear</SelectItem>
+                            <SelectItem value="echo">Echo - Deep & Resonant</SelectItem>
+                            <SelectItem value="fable">Fable - Warm & Engaging</SelectItem>
+                            <SelectItem value="onyx">Onyx - Rich & Authoritative</SelectItem>
+                            <SelectItem value="nova">Nova - Bright & Expressive</SelectItem>
+                            <SelectItem value="shimmer">Shimmer - Gentle & Soothing</SelectItem>
                           </SelectContent>
                         </Select>
-                        <div className="text-xs text-gray-500 mt-1">More voices coming soon</div>
+                        <div className="text-xs text-green-600 mt-1">6 premium voices available</div>
                       </div>
                     )}
 
