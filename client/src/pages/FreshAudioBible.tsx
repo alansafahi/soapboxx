@@ -25,10 +25,14 @@ export default function FreshAudioBible() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-red-50 py-8">
       <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">Audio Bible</h1>
+        <div className="bg-white rounded-lg shadow-lg p-8 border-4 border-red-500">
+          <div className="bg-red-100 p-4 rounded-lg mb-6 text-center">
+            <h2 className="text-2xl font-bold text-red-800">🔴 FRESH AUDIO BIBLE COMPONENT LOADING 🔴</h2>
+            <p className="text-red-600 font-semibold">This should show instead of complex mood selection interface</p>
+          </div>
+          <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">Fresh Audio Bible - Simple Interface</h1>
         
           <div className="text-center space-y-4">
             <div className="bg-blue-50 p-4 rounded-lg">
