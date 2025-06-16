@@ -4286,7 +4286,9 @@ Return JSON with this exact structure:
           audience: audience,
           isPublic: true,
           mood: mood || null,
-          suggestedVerses: suggestedVerses || null
+          suggestedVerses: suggestedVerses || null,
+          attachedMedia: attachedMedia || null,
+          linkedVerse: linkedVerse || null
         });
       } else if (type === 'prayer') {
         // Prayer content gets posted as a share since prayers belong in Prayer Wall
@@ -4298,7 +4300,9 @@ Return JSON with this exact structure:
           category: 'share',
           isPublic: true,
           mood: mood || null,
-          suggestedVerses: suggestedVerses || null
+          suggestedVerses: suggestedVerses || null,
+          attachedMedia: attachedMedia || null,
+          linkedVerse: linkedVerse || null
         });
       } else if (type === 'announcement') {
         post = await storage.createDiscussion({
@@ -4309,7 +4313,9 @@ Return JSON with this exact structure:
           category: 'announcement',
           isPublic: true,
           mood: mood || null,
-          suggestedVerses: suggestedVerses || null
+          suggestedVerses: suggestedVerses || null,
+          attachedMedia: attachedMedia || null,
+          linkedVerse: linkedVerse || null
         });
       } else { // type === 'share'
         // Set title based on audience
@@ -4329,7 +4335,9 @@ Return JSON with this exact structure:
           audience: audience,
           isPublic: true,
           mood: mood || null,
-          suggestedVerses: suggestedVerses || null
+          suggestedVerses: suggestedVerses || null,
+          attachedMedia: attachedMedia || null,
+          linkedVerse: linkedVerse || null
         });
       }
       
