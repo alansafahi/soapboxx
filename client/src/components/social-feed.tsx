@@ -976,6 +976,20 @@ export default function SocialFeed() {
                 <BookText className="w-4 h-4" />
               </Button>
 
+              {/* Verse Locator */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  // Open verse lookup modal or navigate to verse search
+                  window.open('/scripture-lookup', '_blank');
+                }}
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                title="Verse Locator - Look up specific Bible verses"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
+
               {/* Mood/Activity Button */}
               <div className="relative">
                 <Button
