@@ -51,12 +51,66 @@ interface FeedPost {
   tags?: string[];
   eventDate?: Date;
   location?: string;
+  mood?: string;
+  suggestedVerses?: any[];
 }
 
 export default function SocialFeed() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const getMoodEmoji = (mood: string) => {
+    const moodMap: { [key: string]: string } = {
+      // Emotional Support
+      lonely: "💙", overwhelmed: "🤗", shame: "💜", doubting: "🤔",
+      "needing-forgiveness": "🙏", "struggling-sin": "💭", "seeking-purpose": "🎯",
+      "starting-over": "🌱", "wanting-growth": "📈", grief: "💔",
+      
+      // Growth & Transformation  
+      hopeful: "✨", excited: "⭐", anticipating: "🔮", peaceful: "🕊️",
+      confident: "💪", motivated: "🚀", determined: "🎯", "seeking-wisdom": "📖",
+      faithful: "✝️", learning: "📚",
+      
+      // Life Situations
+      celebrating: "🎉", married: "💍", "new-baby": "👶", "new-job": "💼",
+      traveling: "✈️", "health-challenge": "🏥", moving: "📦", graduating: "🎓",
+      
+      // Faith & Worship-Specific
+      blessed: "🙌", grateful: "🙏", worshipful: "🎵", prayerful: "🤲",
+      evangelistic: "📢", serving: "🤝", studying: "📖", fasting: "🕯️",
+      "spirit-filled": "🔥", anxious: "😰"
+    };
+    return moodMap[mood] || "💭";
+  };
+
+  const getMoodDisplayName = (mood: string) => {
+    const moodNames: { [key: string]: string } = {
+      // Emotional Support
+      lonely: "feeling lonely", overwhelmed: "feeling overwhelmed", shame: "dealing with shame", 
+      doubting: "having doubts", "needing-forgiveness": "needing forgiveness", 
+      "struggling-sin": "struggling with sin", "seeking-purpose": "seeking purpose",
+      "starting-over": "starting over", "wanting-growth": "wanting to grow", grief: "grieving",
+      
+      // Growth & Transformation  
+      hopeful: "feeling hopeful", excited: "feeling excited", anticipating: "anticipating", 
+      peaceful: "feeling peaceful", confident: "feeling confident", motivated: "feeling motivated", 
+      determined: "feeling determined", "seeking-wisdom": "seeking wisdom", faithful: "feeling faithful", 
+      learning: "learning",
+      
+      // Life Situations
+      celebrating: "celebrating", married: "got married", "new-baby": "welcoming a new baby", 
+      "new-job": "starting a new job", traveling: "traveling", "health-challenge": "facing health challenges", 
+      moving: "moving", graduating: "graduating",
+      
+      // Faith & Worship-Specific
+      blessed: "feeling blessed", grateful: "feeling grateful", worshipful: "in worship", 
+      prayerful: "in prayer", evangelistic: "sharing the gospel", serving: "serving others", 
+      studying: "studying scripture", fasting: "fasting", "spirit-filled": "spirit-filled", 
+      anxious: "feeling anxious"
+    };
+    return moodNames[mood] || mood;
+  };
   
   // Performance optimization: removed console logging
   const [newPost, setNewPost] = useState("");

@@ -4286,7 +4286,7 @@ export class DatabaseStorage implements IStorage {
       .from(bibleVerses)
       .where(and(
         eq(bibleVerses.isActive, true),
-        sql`${bibleVerses.topicTags} && ${topics}`
+        sql`${bibleVerses.topicTags} && ARRAY[${topics.map(t => `'${t}'`).join(',')}]::text[]`
       ))
       .orderBy(desc(bibleVerses.popularityScore))
       .limit(10);
