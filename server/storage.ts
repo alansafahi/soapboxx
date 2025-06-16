@@ -224,7 +224,7 @@ import {
   type ReferralMilestone,
   type InsertReferralMilestone,
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
 
 export interface IStorage {
@@ -2402,67 +2402,7 @@ export class DatabaseStorage implements IStorage {
         };
       });
 
-      // Skip S.O.A.P. entries temporarily to fix feed (will re-enable after fixing schema issues)
-      const soapEntriesData = [];
 
-      // Transform S.O.A.P. entries for feed
-      for (const soap of soapEntriesData) {
-        // Get author info separately
-        const [author] = await db
-          .select()
-          .from(users)
-          .where(eq(users.id, soap.userId))
-          .limit(1);
-
-        const authorName = author ? 
-          (author.firstName && author.lastName ? `${author.firstName} ${author.lastName}` : author.email || 'Unknown User') :
-          'Unknown User';
-
-        // Format S.O.A.P. content for feed display
-        const soapContent = `📖 Scripture: ${soap.scriptureReference || 'Unknown'}
-"${soap.scripture}"
-
-👁️ Observation: ${soap.observation}
-
-💡 Application: ${soap.application}
-
-🙏 Prayer: ${soap.prayer}`;
-
-        feedPosts.push({
-          id: `soap_${soap.id}`,
-          type: 'soap',
-          title: `S.O.A.P. Reflection - ${soap.scriptureReference || 'Scripture Study'}`,
-          content: soapContent,
-          author: {
-            id: soap.userId,
-            name: authorName,
-            profileImage: author?.profileImageUrl || null
-          },
-          church: null,
-          createdAt: soap.createdAt,
-          likeCount: 0,
-          commentCount: 0,
-          shareCount: 0,
-          isLiked: false,
-          isBookmarked: false,
-          tags: ['soap', 'spiritual', soap.moodTag || 'reflection'],
-          comments: [],
-          soapData: {
-            scripture: soap.scripture,
-            scriptureReference: soap.scriptureReference,
-            observation: soap.observation,
-            application: soap.application,
-            prayer: soap.prayer,
-            moodTag: soap.moodTag,
-            aiAssisted: soap.aiAssisted,
-            isFeatured: soap.isFeatured,
-            streakDay: soap.streakDay
-          }
-        });
-      }
-
-      // Sort all posts by creation date (newest first)
-      feedPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
       return feedPosts;
 
