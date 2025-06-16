@@ -142,6 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Completed authentication system replacement from Replit auth to standard email/password authentication
+  - Removed Replit authentication dependency and implemented secure email/password login system
+  - Added user registration and login endpoints with bcrypt password hashing for security
+  - Updated user schema with username, password, and role fields for complete user management
+  - Modified App.tsx routing to display login page for unauthenticated users instead of landing page
+  - Enhanced authentication middleware to work with session-based authentication
+  - Users can now create accounts and sign in with email/password credentials
+  - All existing features remain functional with the new authentication system
 - June 16, 2025: Fixed Bible page 404 error and enhanced Today's Reading experience
   - Resolved client-side routing issues preventing access to Bible page at `/bible` URL
   - Created streamlined Bible reading interface with proper authentication handling

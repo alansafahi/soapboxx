@@ -2858,7 +2858,7 @@ export interface SermonIllustration {
 }
 
 // Video Content Types for AI Video Generator
-export interface VideoContent {
+export interface AIVideoContent {
   script: string;
   visualCues: string[];
   audioNarration: string;
@@ -3279,8 +3279,8 @@ export type MediaCollection = typeof mediaCollections.$inferSelect;
 export type InsertMediaCollection = typeof mediaCollections.$inferInsert;
 
 // Video system type definitions
-export type VideoContent = typeof videoContent.$inferSelect;
-export type InsertVideoContent = typeof videoContent.$inferInsert;
+export type VideoContentDB = typeof videoContent.$inferSelect;
+export type InsertVideoContentDB = typeof videoContent.$inferInsert;
 
 export type VideoSeries = typeof videoSeries.$inferSelect;
 export type InsertVideoSeries = typeof videoSeries.$inferInsert;
