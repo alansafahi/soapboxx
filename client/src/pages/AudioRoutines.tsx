@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Play, Headphones, Volume2, CheckCircle, Square } from 'lucide-react';
+import { Clock, Play, Headphones, Volume2, CheckCircle, Square, Mic } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface AudioRoutine {
   id: number;
@@ -19,7 +20,17 @@ export default function AudioRoutines() {
   const [selectedRoutineId, setSelectedRoutineId] = useState<number | null>(null);
   const [playingRoutine, setPlayingRoutine] = useState<number | null>(null);
   const [currentAudioContext, setCurrentAudioContext] = useState<AudioContext | null>(null);
+  const [selectedVoice, setSelectedVoice] = useState<string>('nova');
   const { toast } = useToast();
+
+  const premiumVoices = [
+    { id: 'nova', name: 'Nova', description: 'Warm, calming female voice - perfect for meditation' },
+    { id: 'shimmer', name: 'Shimmer', description: 'Gentle, peaceful female voice - ideal for spiritual content' },
+    { id: 'alloy', name: 'Alloy', description: 'Balanced, clear voice - versatile for all routines' },
+    { id: 'echo', name: 'Echo', description: 'Resonant, authoritative voice - great for scripture reading' },
+    { id: 'fable', name: 'Fable', description: 'Storytelling voice - engaging for guided meditations' },
+    { id: 'onyx', name: 'Onyx', description: 'Deep, grounding voice - powerful for prayer guidance' }
+  ];
 
   const { data: routines = [], isLoading, error } = useQuery<AudioRoutine[]>({
     queryKey: ['/api/audio/routines'],
@@ -93,65 +104,77 @@ export default function AudioRoutines() {
       
       // Gentle volume
       gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 1);
+      gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 1);
       
       // Start the peaceful tone
       oscillator.start();
       
-      // Read routine content with speech synthesis
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(
-          `Welcome to ${routine.name}. ${routine.description}. Take a deep breath and let yourself relax into this peaceful moment with God.`
-        );
+      // Generate premium voice using OpenAI TTS
+      try {
+        const voiceText = `Welcome to ${routine.name}. ${routine.description}. Take a deep breath and let yourself relax into this peaceful moment with God.`;
         
-        // Use a calm, slower speaking voice
-        utterance.rate = 0.8;
-        utterance.pitch = 0.9;
-        utterance.volume = 0.7;
+        toast({
+          title: "🎙️ Preparing Premium Voice",
+          description: "Creating beautiful audio with AI voice technology...",
+          duration: 3000,
+        });
         
-        // Try to find a female voice for gentler experience
-        const voices = speechSynthesis.getVoices();
-        const preferredVoice = voices.find(voice => 
-          voice.name.includes('Female') || 
-          voice.name.includes('Samantha') ||
-          voice.name.includes('Victoria') ||
-          voice.name.toLowerCase().includes('female')
-        );
-        if (preferredVoice) {
-          utterance.voice = preferredVoice;
+        const response = await fetch('/api/audio/generate-speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            text: voiceText,
+            voice: selectedVoice, // User-selected premium voice
+            model: 'tts-1-hd', // High quality model
+            speed: 0.85 // Slightly slower for meditation
+          }),
+        });
+        
+        if (response.ok) {
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const premiumAudio = new Audio(audioUrl);
+          
+          premiumAudio.onloadeddata = () => {
+            toast({
+              title: "✨ Premium Voice Ready",
+              description: "Now playing with studio-quality AI narration",
+              duration: 2000,
+            });
+            premiumAudio.play();
+          };
+          
+          premiumAudio.onended = () => {
+            // Fade out background tone
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+            setTimeout(() => {
+              oscillator.stop();
+              setPlayingRoutine(null);
+              setCurrentAudioContext(null);
+              URL.revokeObjectURL(audioUrl);
+              toast({
+                title: "🕊️ Session Complete",
+                description: "Your peaceful routine has finished. May you carry this tranquility with you.",
+                duration: 4000,
+              });
+            }, 2000);
+          };
+          
+          premiumAudio.onerror = () => {
+            // Fallback to system voice if premium fails
+            fallbackToSystemVoice(routine, gainNode, oscillator, audioContext);
+          };
+        } else {
+          // Fallback to system voice if API fails
+          fallbackToSystemVoice(routine, gainNode, oscillator, audioContext);
         }
-        
-        speechSynthesis.speak(utterance);
-        
-        utterance.onend = () => {
-          // Fade out background tone
-          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
-          setTimeout(() => {
-            oscillator.stop();
-            setPlayingRoutine(null);
-            setCurrentAudioContext(null);
-            toast({
-              title: "Session Complete",
-              description: "Your peaceful routine has finished. May you carry this tranquility with you.",
-              duration: 4000,
-            });
-          }, 2000);
-        };
-      } else {
-        // Fallback without speech
-        setTimeout(() => {
-          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
-          setTimeout(() => {
-            oscillator.stop();
-            setPlayingRoutine(null);
-            setCurrentAudioContext(null);
-            toast({
-              title: "Session Complete",
-              description: "Your peaceful routine has finished. May you carry this tranquility with you.",
-              duration: 4000,
-            });
-          }, 2000);
-        }, 8000);
+      } catch (error) {
+        console.error('Premium voice error:', error);
+        // Fallback to system voice if premium fails
+        fallbackToSystemVoice(routine, gainNode, oscillator, audioContext);
       }
     } catch (error) {
       console.error('Audio playback error:', error);
@@ -162,6 +185,46 @@ export default function AudioRoutines() {
       });
       setPlayingRoutine(null);
     }
+  };
+
+  const fallbackToSystemVoice = (routine: AudioRoutine, gainNode: GainNode, oscillator: OscillatorNode, audioContext: AudioContext) => {
+    const utterance = new SpeechSynthesisUtterance(
+      `Welcome to ${routine.name}. ${routine.description}. Take a deep breath and let yourself relax into this peaceful moment with God.`
+    );
+    
+    // Use a calm, slower speaking voice
+    utterance.rate = 0.8;
+    utterance.pitch = 0.9;
+    utterance.volume = 0.7;
+    
+    // Try to find the best available system voice
+    const voices = speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => 
+      voice.name.includes('Female') || 
+      voice.name.includes('Samantha') ||
+      voice.name.includes('Victoria') ||
+      voice.name.toLowerCase().includes('female')
+    );
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+    
+    speechSynthesis.speak(utterance);
+    
+    utterance.onend = () => {
+      // Fade out background tone
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+      setTimeout(() => {
+        oscillator.stop();
+        setPlayingRoutine(null);
+        setCurrentAudioContext(null);
+        toast({
+          title: "🕊️ Session Complete",
+          description: "Your peaceful routine has finished. May you carry this tranquility with you.",
+          duration: 4000,
+        });
+      }, 2000);
+    };
   };
 
   const stopAudioRoutine = () => {
@@ -247,6 +310,48 @@ export default function AudioRoutines() {
               </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Voice Selection */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-6 space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <Mic className="h-6 w-6 text-purple-600" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Premium AI Voice Selection</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Choose Your Narrator
+              </label>
+              <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a premium voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {premiumVoices.map((voice) => (
+                    <SelectItem key={voice.id} value={voice.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{voice.name}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{voice.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">Selected:</span> {premiumVoices.find(v => v.id === selectedVoice)?.name}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                {premiumVoices.find(v => v.id === selectedVoice)?.description}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                <CheckCircle className="h-3 w-3" />
+                Studio-quality AI narration powered by OpenAI
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Routines Grid */}

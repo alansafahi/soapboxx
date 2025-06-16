@@ -2756,6 +2756,47 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Premium OpenAI TTS for Audio Routines
+  app.post('/api/audio/generate-speech', isAuthenticated, async (req, res) => {
+    try {
+      const { text, voice = 'nova', model = 'tts-1-hd', speed = 1.0 } = req.body;
+
+      if (!text) {
+        return res.status(400).json({ error: 'Text is required' });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ error: 'AI service not configured' });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      const mp3Response = await openai.audio.speech.create({
+        model: model, // Use high-quality model
+        voice: voice, // Premium voices: alloy, echo, fable, onyx, nova, shimmer
+        input: text.substring(0, 4096), // OpenAI character limit
+        speed: Math.max(0.25, Math.min(4.0, speed)),
+      });
+
+      const audioBuffer = Buffer.from(await mp3Response.arrayBuffer());
+      
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': audioBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=300', // 5-minute cache
+        'Access-Control-Allow-Origin': '*',
+      });
+      
+      res.send(audioBuffer);
+    } catch (error) {
+      console.error('Premium speech generation error:', error);
+      res.status(500).json({ error: 'Failed to generate premium speech' });
+    }
+  });
+
   // Bible audio endpoints
   app.get('/api/bible/verses/:id', isAuthenticated, async (req, res) => {
     try {
