@@ -35,7 +35,37 @@ export default function AudioRoutines() {
   const [backgroundMusicType, setBackgroundMusicType] = useState('gentle-chords');
   const [isPaused, setIsPaused] = useState(false);
   const [autoPauseTimeout, setAutoPauseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [sessionProgress, setSessionProgress] = useState(0);
+  const [currentSegment, setCurrentSegment] = useState(0);
+  const [isInSilencePeriod, setIsInSilencePeriod] = useState(false);
   const { toast } = useToast();
+
+  // Meditation segments with their durations and pause points
+  const meditationSegments = [
+    { name: "Welcome & Breathing", duration: 120, pauseAfter: 15 }, // 2 min segment + 15s pause
+    { name: "Body Awareness", duration: 90, pauseAfter: 45 }, // 1.5 min segment + 45s pause
+    { name: "Mind Settling", duration: 100, pauseAfter: 90 }, // 1.67 min segment + 90s pause
+    { name: "Heart Center", duration: 110, pauseAfter: 120 }, // 1.83 min segment + 2min pause
+    { name: "Spiritual Connection", duration: 120, pauseAfter: 180 }, // 2 min segment + 3min pause
+    { name: "Gratitude Practice", duration: 90, pauseAfter: 30 }, // 1.5 min segment + 30s pause
+    { name: "Closing Blessing", duration: 70, pauseAfter: 0 }, // 1.17 min segment (no pause at end)
+  ];
+
+  // Calculate total session duration (15 minutes = 900 seconds)
+  const totalSessionDuration = meditationSegments.reduce((total, segment) => 
+    total + segment.duration + segment.pauseAfter, 0
+  );
+
+  // Calculate pause points for red dots on progress bar
+  const pausePoints: number[] = [];
+  let cumulativeTime = 0;
+  meditationSegments.forEach((segment, index) => {
+    cumulativeTime += segment.duration;
+    if (segment.pauseAfter > 0) {
+      pausePoints.push((cumulativeTime / totalSessionDuration) * 100);
+      cumulativeTime += segment.pauseAfter;
+    }
+  });
 
   // Background music options
   const backgroundMusicOptions = {
@@ -465,6 +495,17 @@ export default function AudioRoutines() {
       let currentSegmentIndex = 0;
       let sessionStartTime = Date.now();
       
+      // Progress tracking
+      const updateProgress = () => {
+        const elapsed = (Date.now() - sessionStartTime) / 1000;
+        const progress = Math.min((elapsed / totalSessionDuration) * 100, 100);
+        setSessionProgress(progress);
+        setCurrentSegment(currentSegmentIndex);
+      };
+      
+      // Update progress every second
+      const progressInterval = setInterval(updateProgress, 1000);
+      
       const playNextSegment = async () => {
         if (currentSegmentIndex >= meditationSegments.length) {
           // Session complete
@@ -741,30 +782,67 @@ export default function AudioRoutines() {
             
             <CardContent className="pt-0">
               {playingRoutine === routine.id ? (
-                <div className="space-y-2">
-                  <Button
-                    onClick={isPaused ? resumeAudioRoutine : pauseAudioRoutine}
-                    className="w-full bg-orange-600 hover:bg-orange-700"
-                  >
-                    {isPaused ? (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Resume Session
-                      </>
-                    ) : (
-                      <>
-                        <Pause className="h-4 w-4 mr-2" />
-                        Pause Session
-                      </>
+                <div className="space-y-4">
+                  {/* Progress Bar with Pause Points */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                      <span>{meditationSegments[currentSegment]?.name || "Preparing..."}</span>
+                      <span>{Math.round(sessionProgress)}%</span>
+                    </div>
+                    
+                    <div className="relative">
+                      {/* Progress Bar Background */}
+                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        {/* Progress Fill */}
+                        <div 
+                          className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000 ease-out"
+                          style={{ width: `${sessionProgress}%` }}
+                        />
+                      </div>
+                      
+                      {/* Red Dots for Pause Points */}
+                      {pausePoints.map((point, index) => (
+                        <div
+                          key={index}
+                          className="absolute top-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm transform -translate-y-0.5"
+                          style={{ left: `${point}%`, transform: 'translateX(-50%) translateY(-25%)' }}
+                          title={`Pause point ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                    
+                    {isInSilencePeriod && (
+                      <div className="text-center text-sm text-purple-600 dark:text-purple-400 font-medium">
+                        🕊️ Silent Reflection Time
+                      </div>
                     )}
-                  </Button>
-                  <Button
-                    onClick={() => handleRoutineClick(routine)}
-                    className="w-full bg-red-600 hover:bg-red-700"
-                  >
-                    <Square className="h-4 w-4 mr-2" />
-                    Stop Session
-                  </Button>
+                  </div>
+                  
+                  {/* Pause/Resume Button */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={isPaused ? resumeAudioRoutine : pauseAudioRoutine}
+                      className="flex-1 bg-orange-600 hover:bg-orange-700"
+                    >
+                      {isPaused ? (
+                        <>
+                          <Play className="h-4 w-4 mr-2" />
+                          Resume
+                        </>
+                      ) : (
+                        <>
+                          <Pause className="h-4 w-4 mr-2" />
+                          Pause
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => handleRoutineClick(routine)}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      <Square className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Button
