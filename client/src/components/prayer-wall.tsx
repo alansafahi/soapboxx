@@ -373,9 +373,7 @@ export default function PrayerWall() {
     }
   };
 
-  const selectAISuggestion = (suggestion: any) => {
-    console.log('Selecting AI suggestion:', suggestion);
-    
+  const selectAISuggestion = (suggestion: { title: string; content: string }) => {
     // Automatically submit the AI-generated prayer
     const prayerData = {
       title: suggestion.title || '',
@@ -387,7 +385,6 @@ export default function PrayerWall() {
       isUrgent: false,
     };
     
-    console.log('Auto-submitting AI prayer:', prayerData);
     createPrayerMutation.mutate(prayerData);
     
     setIsAIAssistanceOpen(false);
@@ -513,11 +510,7 @@ export default function PrayerWall() {
             <DialogTitle>Share Your Prayer Request</DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={(e) => {
-              console.log('Form submit event triggered');
-              console.log('Form data before submission:', form.getValues());
-              return form.handleSubmit(handleCreatePrayer)(e);
-            }} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleCreatePrayer)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="title"
@@ -908,7 +901,7 @@ export default function PrayerWall() {
                               <Avatar className="w-8 h-8">
                                 <AvatarImage src="/placeholder-avatar.png" />
                                 <AvatarFallback className="bg-purple-100 text-purple-600">
-                                  {user?.firstName?.[0] || "U"}
+                                  {(user as any)?.firstName?.[0] || "U"}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
