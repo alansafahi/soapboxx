@@ -142,6 +142,10 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Updated landing page color scheme to match SoapBox logo branding
+  - Changed all prominent colors from blue to purple to match SoapBox logo
+  - Updated header Sign In button, main CTA buttons, and background gradients to purple theme
+  - Enhanced brand consistency across landing page with purple-100 text colors and purple-600/700 button styling
 - June 16, 2025: Fixed landing page navigation and "Start Your Journey" button functionality
   - Corrected routing flow to show landing page first, then login page for new users
   - Fixed invisible "Start Your Journey" button by updating CSS classes from undefined faith-blue to standard Tailwind

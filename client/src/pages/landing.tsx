@@ -21,7 +21,7 @@ export default function Landing() {
             
             <Button 
               onClick={() => window.location.href = '/login'}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               Sign In
             </Button>
@@ -43,7 +43,7 @@ export default function Landing() {
           <Button 
             onClick={() => window.location.href = '/login'}
             size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
           >
             Start Your Journey
             <ChevronRight className="ml-2 w-5 h-5" />
@@ -158,18 +158,18 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-500 to-blue-600">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-500 to-purple-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Join Your Faith Community?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-purple-100 mb-8">
             Connect with believers, grow in faith, and make a difference in your community.
           </p>
           <Button 
             onClick={() => window.location.href = '/login'}
             size="lg"
-            className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
+            className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
           >
             Get Started Today
           </Button>
