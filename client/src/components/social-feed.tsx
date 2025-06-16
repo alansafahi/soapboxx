@@ -1422,6 +1422,33 @@ export default function SocialFeed() {
                       <Bookmark className="w-4 h-4" />
                     }
                   </Button>
+
+                  {/* Pin/Unpin Controls for Pastors and Church Admins */}
+                  {canPinPosts && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (post.isPinned) {
+                          unpinPostMutation.mutate(post.id);
+                        } else {
+                          pinPostMutation.mutate({ 
+                            postId: post.id, 
+                            category: 'announcement' 
+                          });
+                        }
+                      }}
+                      className={`${post.isPinned ? 'text-amber-600 hover:text-amber-700' : 'text-gray-500 hover:text-amber-600'} transition-colors`}
+                      disabled={pinPostMutation.isPending || unpinPostMutation.isPending}
+                      title={post.isPinned ? 'Unpin this post' : 'Pin this post to top of feed'}
+                    >
+                      {post.isPinned ? 
+                        <PinOff className="w-4 h-4" /> : 
+                        <Pin className="w-4 h-4" />
+                      }
+                    </Button>
+                  )}
                 </div>
               </div>
 
