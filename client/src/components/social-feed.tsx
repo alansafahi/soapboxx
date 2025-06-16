@@ -1495,7 +1495,7 @@ export default function SocialFeed() {
               )}
 
               {/* Linked Verse Display */}
-              {post.linkedVerse && (
+              {post.linkedVerse && post.linkedVerse.reference && post.linkedVerse.text && (
                 <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
                   <div className="flex items-start space-x-2">
                     <BookText className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5" />
