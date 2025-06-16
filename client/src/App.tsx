@@ -8,6 +8,7 @@ import AppHeader from "@/components/AppHeader";
 import { Home as HomeIcon, Church, Calendar, BookOpen, Heart, Mail, Settings } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import LoginPage from "@/pages/login";
 import Landing from "@/pages/landing";
 import EnhancedAdminPortal from "@/pages/admin-enhanced";
 import Profile from "@/pages/profile";
@@ -135,7 +136,7 @@ function AppRouter() {
         <Switch>
           {!isAuthenticated ? (
             <>
-              <Route path="*" component={Landing} />
+              <Route path="*" component={LoginPage} />
             </>
           ) : (
             <>

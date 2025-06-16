@@ -232,7 +232,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: any): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserProfile(userId: string, profileData: Partial<User>): Promise<User>;
   searchUsers(query: string): Promise<User[]>;
@@ -597,7 +597,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(userData: InsertUser): Promise<User> {
+  async createUser(userData: any): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)

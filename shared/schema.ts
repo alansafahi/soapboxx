@@ -56,6 +56,7 @@ export const users = pgTable("users", {
   email: varchar("email").unique(),
   username: varchar("username").unique(),
   password: varchar("password"), // Hashed password for standard auth
+  role: varchar("role").default("member"), // User role for permissions
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
