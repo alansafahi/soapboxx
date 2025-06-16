@@ -891,7 +891,7 @@ export default function SocialFeed() {
           </CardHeader>
           <CardContent className="pt-0">
             {/* Media Preview */}
-              {attachedMedia.length > 0 && (
+            {attachedMedia.length > 0 && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   {attachedMedia.map((media, index) => (
                     <div key={index} className="relative group">
@@ -1333,6 +1333,7 @@ export default function SocialFeed() {
                 <Send className="w-4 h-4 mr-2 text-white" />
                 {createPostMutation.isPending ? 'Posting...' : 'Share'}
               </Button>
+            </div>
             </div>
           </CardContent>
         </Card>
