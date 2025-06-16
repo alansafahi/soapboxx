@@ -145,7 +145,7 @@ export default function SocialFeed() {
   const [commentText, setCommentText] = useState("");
 
   // Enhanced composer state (X/Facebook-style features)
-  const [attachedMedia, setAttachedMedia] = useState<File[]>([]);
+  const [attachedMedia, setAttachedMedia] = useState<Array<{name: string; type: string; size: number; url: string; filename: string}>>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [linkedVerse, setLinkedVerse] = useState<{reference: string; text: string} | null>(null);
   const [showVerseSearch, setShowVerseSearch] = useState(false);
@@ -515,9 +515,28 @@ export default function SocialFeed() {
   });
 
   // Enhanced composer handlers
-  const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    setAttachedMedia(prev => [...prev, ...files]);
+    
+    // Convert files to base64 data URLs for storage and display
+    const mediaPromises = files.map(file => {
+      return new Promise<any>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            url: reader.result as string, // base64 data URL
+            filename: file.name
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    
+    const mediaData = await Promise.all(mediaPromises);
+    setAttachedMedia(prev => [...prev, ...mediaData]);
   };
 
   const removeAttachedMedia = (index: number) => {
@@ -752,26 +771,42 @@ export default function SocialFeed() {
               {/* Media Preview */}
               {attachedMedia.length > 0 && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  {attachedMedia.map((file, index) => (
+                  {attachedMedia.map((media, index) => (
                     <div key={index} className="relative group">
-                      <div className="bg-gray-100 rounded-lg p-3 flex items-center space-x-2">
-                        {file.type.startsWith('image/') ? (
-                          <Image className="w-5 h-5 text-gray-500" />
-                        ) : file.type.startsWith('video/') ? (
-                          <Video className="w-5 h-5 text-gray-500" />
-                        ) : (
-                          <FileText className="w-5 h-5 text-gray-500" />
-                        )}
-                        <span className="text-sm text-gray-700 truncate">{file.name}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeAttachedMedia(index)}
-                          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      {media.type.startsWith('image/') ? (
+                        <div className="relative bg-gray-100 rounded-lg p-2">
+                          <img
+                            src={media.url}
+                            alt={media.name}
+                            className="w-full h-20 object-cover rounded"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAttachedMedia(index)}
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 h-6 w-6 p-0 bg-black/50 hover:bg-black/70 text-white"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-100 rounded-lg p-3 flex items-center space-x-2">
+                          {media.type.startsWith('video/') ? (
+                            <Video className="w-5 h-5 text-gray-500" />
+                          ) : (
+                            <FileText className="w-5 h-5 text-gray-500" />
+                          )}
+                          <span className="text-sm text-gray-700 truncate">{media.name}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAttachedMedia(index)}
+                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
