@@ -23,9 +23,19 @@ export default function Landing() {
       console.log('Storage clear failed:', error);
     }
     
-    // Force immediate navigation using window.location
-    console.log('Executing window.location.href = "/login"');
-    window.location.href = '/login';
+    // Use React Router navigation first
+    console.log('Using setLocation to navigate to /login');
+    setLocation('/login');
+    
+    // Fallback with timeout if React routing fails
+    setTimeout(() => {
+      if (window.location.pathname !== '/login') {
+        console.log('React navigation failed, using window.location as fallback');
+        window.location.href = '/login';
+      } else {
+        console.log('React navigation successful!');
+      }
+    }, 100);
   };
 
   return (
