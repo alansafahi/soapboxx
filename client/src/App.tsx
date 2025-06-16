@@ -140,8 +140,8 @@ function AppRouter() {
           ) : (
             <>
               <Route path="/" component={() => <Home referralCode={referralCode} />} />
-              <Route path="/bible/read" component={BibleReader} />
               <Route path="/bible" component={BiblePage} />
+              <Route path="/bible/read" component={BibleReader} />
               <Route path="/community" component={Community} />
               <Route path="/churches" component={Churches} />
               <Route path="/events" component={Events} />
