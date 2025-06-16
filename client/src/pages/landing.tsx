@@ -11,8 +11,20 @@ export default function Landing() {
     e.preventDefault();
     e.stopPropagation();
     console.log('Start Journey button clicked!');
+    console.log('Current location:', window.location.href);
+    console.log('Attempting navigation to login...');
+    
+    // Clear any existing sessions that might interfere
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      console.log('Cleared storage');
+    } catch (error) {
+      console.log('Storage clear failed:', error);
+    }
     
     // Force immediate navigation using window.location
+    console.log('Executing window.location.href = "/login"');
     window.location.href = '/login';
   };
 
@@ -51,13 +63,15 @@ export default function Landing() {
             Join a platform that brings together believers, churches, and communities through 
             meaningful engagement, prayer, and spiritual growth.
           </p>
-          <button 
-            onClick={handleStartJourney}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-md font-medium flex items-center cursor-pointer transition-colors"
-          >
-            Start Your Journey
-            <ChevronRight className="ml-2 w-5 h-5" />
-          </button>
+          <div className="flex justify-center">
+            <button 
+              onClick={handleStartJourney}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-md font-medium flex items-center cursor-pointer transition-colors"
+            >
+              Start Your Journey
+              <ChevronRight className="ml-2 w-5 h-5" />
+            </button>
+          </div>
         </div>
       </section>
 
