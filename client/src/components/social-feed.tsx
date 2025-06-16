@@ -929,9 +929,32 @@ export default function SocialFeed() {
                 </div>
               )}
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Post Composer */}
+      {showComposer && (
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center space-x-3">
+              <Avatar className="w-10 h-10">
+                <AvatarFallback className="bg-purple-600 text-white">
+                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <SmartScriptureTextarea
+                  value={newPost}
+                  onChange={setNewPost}
+                  placeholder="Share your thoughts, prayers, or reflections..."
+                  className="w-full border-0 p-0 text-base resize-none focus:ring-0 bg-transparent"
+                  rows={3}
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
           {/* Selected Mood Display */}
           {selectedMood && (
             <div className="mb-3 flex items-center gap-2">
