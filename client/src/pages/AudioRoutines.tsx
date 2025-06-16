@@ -5,24 +5,33 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Play, Headphones, Volume2 } from 'lucide-react';
 
-export default function AudioRoutines() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedRoutineId, setSelectedRoutineId] = useState(null);
+interface AudioRoutine {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  totalDuration: number;
+}
 
-  const { data: routines = [], isLoading, error } = useQuery({
+export default function AudioRoutines() {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedRoutineId, setSelectedRoutineId] = useState<number | null>(null);
+  const [playingRoutine, setPlayingRoutine] = useState<number | null>(null);
+
+  const { data: routines = [], isLoading, error } = useQuery<AudioRoutine[]>({
     queryKey: ['/api/audio/routines'],
     enabled: true
   });
 
   console.log('AudioRoutines component rendering', { routines, isLoading, error });
 
-  const formatDuration = (seconds) => {
+  const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getCategoryIcon = (category) => {
+  const getCategoryIcon = (category: string): string => {
     switch (category) {
       case 'morning': return '🌅';
       case 'evening': return '🌙';
@@ -31,13 +40,30 @@ export default function AudioRoutines() {
     }
   };
 
-  const getCategoryColor = (category) => {
+  const getCategoryColor = (category: string): string => {
     switch (category) {
       case 'morning': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
       case 'evening': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
       case 'midday': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
+  };
+
+  const handleStartRoutine = (routine: AudioRoutine, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Starting routine:', routine.name);
+    setPlayingRoutine(routine.id);
+    
+    // Simple audio feedback
+    setTimeout(() => {
+      alert(`Starting "${routine.name}" - ${routine.description}`);
+      setPlayingRoutine(null);
+    }, 1000);
+  };
+
+  const handleRoutineClick = (routine: AudioRoutine) => {
+    console.log('Routine clicked:', routine.name);
+    setSelectedRoutineId(routine.id);
   };
 
   return (
@@ -131,11 +157,11 @@ export default function AudioRoutines() {
             </Card>
           ) : routines.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {routines.map((routine) => (
+              {routines.map((routine: AudioRoutine) => (
                 <Card 
                   key={routine.id} 
                   className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-purple-200 dark:hover:border-purple-700"
-                  onClick={() => setSelectedRoutineId(routine.id)}
+                  onClick={() => handleRoutineClick(routine)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -167,9 +193,14 @@ export default function AudioRoutines() {
                         {formatDuration(routine.totalDuration || 600)}
                       </div>
                       
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={playingRoutine === routine.id}
+                        onClick={(e) => handleStartRoutine(routine, e)}
+                      >
                         <Play className="h-3 w-3 mr-1" />
-                        Start
+                        {playingRoutine === routine.id ? 'Starting...' : 'Start'}
                       </Button>
                     </div>
                   </CardContent>
