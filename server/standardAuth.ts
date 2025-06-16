@@ -163,7 +163,8 @@ export function setupAuth(app: Express): void {
 // Authentication middleware
 export function isAuthenticated(req: any, res: any, next: any) {
   const sessionUser = (req.session as any)?.user;
-  if (!sessionUser) {
+  const userId = (req.session as any)?.userId;
+  if (!sessionUser || !userId) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
   
