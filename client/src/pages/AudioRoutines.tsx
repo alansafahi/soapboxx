@@ -427,15 +427,21 @@ export default function AudioRoutines() {
     
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      await audioContext.resume();
+      
+      // Force resume for mobile browsers
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
       
       const masterGain = audioContext.createGain();
       masterGain.connect(audioContext.destination);
-      masterGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+      masterGain.gain.setValueAtTime(0.2, audioContext.currentTime);
       
       const oscillators: OscillatorNode[] = [];
       const audioSources: AudioBufferSourceNode[] = [];
       const previewDuration = 3; // 3 seconds preview
+      
+      console.log(`Previewing sound: ${soundType}`);
       
       switch (soundType) {
         case 'gentle-chords':
@@ -445,19 +451,88 @@ export default function AudioRoutines() {
           createNatureSounds(audioContext, masterGain, audioSources, previewDuration);
           break;
         case 'ocean-waves':
-          createOceanWaves(audioContext, masterGain, oscillators, previewDuration);
+          // Fixed ocean waves for preview
+          for (let i = 0; i < 2; i++) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(60 + (i * 20), audioContext.currentTime);
+            gain.gain.setValueAtTime(0.1 - (i * 0.03), audioContext.currentTime);
+            
+            osc.connect(gain);
+            gain.connect(masterGain);
+            
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + previewDuration);
+            oscillators.push(osc);
+          }
           break;
         case 'soft-piano':
           createSoftPiano(audioContext, masterGain, oscillators, previewDuration);
           break;
         case 'ethereal-pads':
-          createEtherealPads(audioContext, masterGain, oscillators, previewDuration);
+          // Fixed ethereal pads for preview
+          const frequencies = [220, 293.66, 369.99]; // A-D-F# triad
+          frequencies.forEach((freq, index) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800, audioContext.currentTime);
+            filter.Q.setValueAtTime(2, audioContext.currentTime);
+            
+            gain.gain.setValueAtTime(0, audioContext.currentTime);
+            gain.gain.linearRampToValueAtTime(0.05 - (index * 0.01), audioContext.currentTime + 1);
+            gain.gain.setValueAtTime(0.03 - (index * 0.008), audioContext.currentTime + previewDuration - 1);
+            gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + previewDuration);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+            
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + previewDuration);
+            oscillators.push(osc);
+          });
           break;
         case 'tibetan-bowls':
           createTibetanBowls(audioContext, masterGain, oscillators, previewDuration);
           break;
         case 'gregorian-chant':
-          createGregorianChant(audioContext, masterGain, oscillators, previewDuration);
+          // Fixed Gregorian chant for preview
+          const baseFreq = 146.83; // D3
+          const intervals = [1, 5/4, 3/2]; // Simple sacred intervals
+          
+          intervals.forEach((interval, index) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(baseFreq * interval, audioContext.currentTime);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(500, audioContext.currentTime);
+            filter.Q.setValueAtTime(1, audioContext.currentTime);
+            
+            gain.gain.setValueAtTime(0, audioContext.currentTime);
+            gain.gain.linearRampToValueAtTime(0.06 - (index * 0.02), audioContext.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.04 - (index * 0.015), audioContext.currentTime + previewDuration - 0.5);
+            gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + previewDuration);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+            
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + previewDuration);
+            oscillators.push(osc);
+          });
           break;
         case 'christian-hymn':
           createChristianHymn(audioContext, masterGain, oscillators, previewDuration);
@@ -476,7 +551,7 @@ export default function AudioRoutines() {
       }, previewDuration * 1000);
       
     } catch (error) {
-      console.log('Sound preview unavailable');
+      console.error('Sound preview error:', error);
     }
   };
 
