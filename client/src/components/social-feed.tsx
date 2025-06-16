@@ -183,6 +183,16 @@ export default function SocialFeed() {
     });
   };
 
+  // Function to clean up S.O.A.P. formatting for display
+  const cleanupSoapFormatting = (content: string) => {
+    if (!content) return content;
+    
+    // Convert markdown bold to HTML bold and remove extra quotes
+    return content
+      .replace(/\*\*(Scripture|Observation|Application|Prayer)\*\*/g, '<strong>$1</strong>')
+      .replace(/""([^"]+)""/g, '"$1"'); // Remove double quotes around scripture
+  };
+
   // Audience options for posts (Facebook-style)
   const audienceOptions = [
     { 
@@ -1318,9 +1328,10 @@ export default function SocialFeed() {
                   {post.title}
                 </h3>
               )}
-              <p className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-wrap">
-                {post.content}
-              </p>
+              <div 
+                className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: cleanupSoapFormatting(post.content) }}
+              />
 
               {/* Media Display */}
               {post.attachedMedia && post.attachedMedia.length > 0 && (
