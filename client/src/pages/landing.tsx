@@ -10,32 +10,17 @@ export default function Landing() {
   const handleStartJourney = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Start Journey button clicked!');
-    console.log('Current location:', window.location.href);
-    console.log('Attempting navigation to login...');
     
     // Clear any existing sessions that might interfere
     try {
       localStorage.clear();
       sessionStorage.clear();
-      console.log('Cleared storage');
     } catch (error) {
       console.log('Storage clear failed:', error);
     }
     
-    // Use React Router navigation first
-    console.log('Using setLocation to navigate to /login');
+    // Navigate to login page using React Router
     setLocation('/login');
-    
-    // Fallback with timeout if React routing fails
-    setTimeout(() => {
-      if (window.location.pathname !== '/login') {
-        console.log('React navigation failed, using window.location as fallback');
-        window.location.href = '/login';
-      } else {
-        console.log('React navigation successful!');
-      }
-    }, 100);
   };
 
   return (
@@ -76,10 +61,7 @@ export default function Landing() {
           <div className="flex justify-center">
             <button 
               onClick={handleStartJourney}
-              onMouseDown={() => console.log('Button mouse down!')}
-              onMouseUp={() => console.log('Button mouse up!')}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-md font-medium flex items-center cursor-pointer transition-colors relative z-10"
-              style={{ pointerEvents: 'auto' }}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-md font-medium flex items-center cursor-pointer transition-colors"
             >
               Start Your Journey
               <ChevronRight className="ml-2 w-5 h-5" />
