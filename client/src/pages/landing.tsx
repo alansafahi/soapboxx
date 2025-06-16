@@ -7,7 +7,10 @@ import soapboxLogo from "@assets/SoapBox logo_1749686315479.jpeg";
 export default function Landing() {
   const [, setLocation] = useLocation();
   
-  const handleStartJourney = () => {
+  const handleStartJourney = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Start Journey button clicked!');
     setLocation('/login');
   };
 
@@ -46,14 +49,13 @@ export default function Landing() {
             Join a platform that brings together believers, churches, and communities through 
             meaningful engagement, prayer, and spiritual growth.
           </p>
-          <Button 
+          <button 
             onClick={handleStartJourney}
-            size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-md font-medium flex items-center cursor-pointer transition-colors"
           >
             Start Your Journey
             <ChevronRight className="ml-2 w-5 h-5" />
-          </Button>
+          </button>
         </div>
       </section>
 
