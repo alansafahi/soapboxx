@@ -1488,13 +1488,18 @@ export class DatabaseStorage implements IStorage {
   async createPrayerRequest(prayer: InsertPrayerRequest): Promise<PrayerRequest> {
     const [newPrayer] = await db.insert(prayerRequests).values(prayer).returning();
     
-    // Track activity
-    await this.trackUserActivity({
-      userId: prayer.authorId,
-      activityType: 'prayer_request',
-      entityId: newPrayer.id,
-      points: 10,
-    });
+    // Track activity - don't let this fail the main operation
+    try {
+      await this.trackUserActivity({
+        userId: prayer.authorId,
+        activityType: 'prayer_request',
+        entityId: newPrayer.id,
+        points: 10,
+      });
+    } catch (error) {
+      console.error("Error tracking prayer request activity:", error);
+      // Continue without failing the prayer creation
+    }
     
     return newPrayer;
   }

@@ -209,7 +209,21 @@ export default function PrayerWall() {
   const createPrayerMutation = useMutation({
     mutationFn: async (data: PrayerRequestFormData) => {
       console.log('Submitting prayer data:', data);
-      const result = await apiRequest("POST", "/api/prayers", data);
+      const response = await fetch('/api/prayers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit prayer request');
+      }
+      
+      const result = await response.json();
       console.log('Prayer submission result:', result);
       return result;
     },
