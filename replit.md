@@ -146,8 +146,9 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Integrated 6 premium OpenAI TTS voices (Nova, Shimmer, Alloy, Echo, Fable, Onyx) for studio-quality narration
   - Created beautiful voice selection interface with descriptions for each voice option
   - Built `/api/audio/generate-speech` endpoint using OpenAI TTS-1-HD model for high-quality audio
-  - Enhanced background music from monotone humming to evolving chord progressions (C major, D minor, F major, G major)
-  - Added peaceful ambient soundscape with gentle breathing effects and 15-second chord transitions
+  - Enhanced background music from monotone humming to distinct tonal progression with varied frequencies and waveforms
+  - Added clearly audible background tone sequence (G-C-E-D notes) with triangle and sine wave alternation
+  - Implemented 6-second tone intervals with pronounced volume envelopes for noticeable musical variation
   - Replaced harsh system voices with warm, calming AI narration optimized for spiritual content
   - Enhanced user experience with elegant toast notifications instead of ugly browser alerts
 - June 16, 2025: Successfully fixed audio-routines page 404 error and enhanced user experience

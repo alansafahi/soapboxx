@@ -97,52 +97,49 @@ export default function AudioRoutines() {
       masterGain.gain.setValueAtTime(0, audioContext.currentTime);
       masterGain.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 2);
       
-      // Create evolving chord progression for spiritual atmosphere
-      const chords = [
-        [261.63, 329.63, 392.00], // C major - peace
-        [293.66, 369.99, 440.00], // D minor - reflection  
-        [349.23, 440.00, 523.25], // F major - hope
-        [392.00, 493.88, 587.33]  // G major - joy
+      // Create highly contrasting chord progression for clear variation
+      const backgroundTones = [
+        { freq: 196.00, type: 'triangle' as OscillatorType }, // G note - grounding
+        { freq: 261.63, type: 'sine' as OscillatorType },     // C note - peace  
+        { freq: 329.63, type: 'triangle' as OscillatorType }, // E note - hope
+        { freq: 293.66, type: 'sine' as OscillatorType }      // D note - reflection
       ];
       
       const oscillators: OscillatorNode[] = [];
-      let chordIndex = 0;
+      let toneIndex = 0;
       
-      const createAmbientChord = (frequencies: number[], startTime: number, duration: number) => {
-        frequencies.forEach((freq, index) => {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          
-          osc.frequency.setValueAtTime(freq, startTime);
-          osc.type = index === 0 ? 'triangle' : 'sine'; // Warmer bass, pure harmonics
-          
-          // Gentle breathing effect
-          gain.gain.setValueAtTime(0, startTime);
-          gain.gain.linearRampToValueAtTime(0.3, startTime + 1.5);
-          gain.gain.linearRampToValueAtTime(0.15, startTime + duration/2);
-          gain.gain.linearRampToValueAtTime(0.25, startTime + duration - 1.5);
-          gain.gain.linearRampToValueAtTime(0, startTime + duration);
-          
-          osc.connect(gain);
-          gain.connect(masterGain);
-          
-          osc.start(startTime);
-          osc.stop(startTime + duration);
-          oscillators.push(osc);
-        });
+      // Create very noticeable background tone sequence
+      const createBackgroundTone = (tone: typeof backgroundTones[0], startTime: number, duration: number) => {
+        console.log(`Playing tone ${tone.freq}Hz (${tone.type}) at time ${startTime.toFixed(2)}`);
+        
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.frequency.setValueAtTime(tone.freq, startTime);
+        osc.type = tone.type;
+        
+        // Very clear volume envelope for distinct changes
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.25, startTime + 0.5);
+        gain.gain.linearRampToValueAtTime(0.15, startTime + duration/2);
+        gain.gain.linearRampToValueAtTime(0.20, startTime + duration - 0.5);
+        gain.gain.linearRampToValueAtTime(0, startTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(masterGain);
+        
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+        oscillators.push(osc);
       };
       
-      // Schedule peaceful chord progression
-      let currentTime = audioContext.currentTime + 1;
-      const scheduleChords = () => {
-        for (let i = 0; i < 8; i++) { // Create 2 minutes of ambient music
-          createAmbientChord(chords[chordIndex % chords.length], currentTime, 15);
-          chordIndex++;
-          currentTime += 15;
-        }
-      };
-      
-      scheduleChords();
+      // Create sequence of clearly different background tones
+      let currentTime = audioContext.currentTime;
+      for (let i = 0; i < 15; i++) {
+        createBackgroundTone(backgroundTones[toneIndex % backgroundTones.length], currentTime, 6);
+        toneIndex++;
+        currentTime += 6; // 6-second intervals for clear changes
+      }
       
       // Store reference for cleanup
       const backgroundMusic = {
