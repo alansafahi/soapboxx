@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -210,6 +210,9 @@ export default function SocialFeed() {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       setNewPost("");
       setSelectedMood(null); // Clear selected mood after successful post
+      setSelectedAudience('public'); // Reset audience to default
+      setShowMoodDropdown(false); // Close dropdowns
+      setShowAudienceDropdown(false);
       
       // Show Bible verse suggestions if provided
       if (data.suggestedVerses && data.suggestedVerses.length > 0) {
