@@ -79,26 +79,55 @@ export default function AudioRoutines() {
     startAudioRoutine(routine);
   };
 
+  // Universal device detection for consistent cross-platform support
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(userAgent);
+  const isAndroid = /android/.test(userAgent);
+  const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent);
+  const isChrome = /chrome/.test(userAgent);
+  const isKindle = /kindle|silk/.test(userAgent);
+  const isAppleWatch = /watchos/.test(userAgent);
+  const isMobile = isIOS || isAndroid || /mobile/.test(userAgent);
+
   const startAudioRoutine = async (routine: AudioRoutine) => {
     try {
-      // iOS-compatible AudioContext creation
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      const audioContext = new AudioContextClass({
-        sampleRate: 44100, // Standard sample rate for better iOS compatibility
-        latencyHint: 'interactive'
-      });
       
-      // Critical iOS fix: Ensure AudioContext is running
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
+      console.log('Device detected:', { isIOS, isAndroid, isSafari, isChrome, isKindle, isAppleWatch, isMobile });
+      
+      // Cross-platform AudioContext creation with device-specific optimizations
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      
+      let audioContextOptions: any = {
+        sampleRate: 44100, // Universal sample rate
+        latencyHint: 'interactive'
+      };
+      
+      // Device-specific audio optimizations
+      if (isIOS || isSafari) {
+        audioContextOptions.latencyHint = 'playback'; // Better for iOS
+      } else if (isAndroid) {
+        audioContextOptions.sampleRate = 48000; // Android prefers 48kHz
+      } else if (isKindle) {
+        audioContextOptions.latencyHint = 'balanced'; // Conservative for Kindle
       }
       
-      // Additional iOS check - create a silent buffer to "unlock" audio
-      const silentBuffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
-      const silentSource = audioContext.createBufferSource();
-      silentSource.buffer = silentBuffer;
-      silentSource.connect(audioContext.destination);
-      silentSource.start();
+      const audioContext = new AudioContextClass(audioContextOptions);
+      
+      // Universal AudioContext activation for all platforms
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+        console.log('AudioContext resumed for platform compatibility');
+      }
+      
+      // Enhanced audio unlock for strict mobile browsers
+      if (isMobile || isIOS || isAndroid) {
+        const silentBuffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
+        const silentSource = audioContext.createBufferSource();
+        silentSource.buffer = silentBuffer;
+        silentSource.connect(audioContext.destination);
+        silentSource.start();
+        console.log('Silent buffer played for mobile audio unlock');
+      }
       
       setCurrentAudioContext(audioContext);
       
@@ -190,26 +219,72 @@ export default function AudioRoutines() {
           const audioUrl = URL.createObjectURL(audioBlob);
           const premiumAudio = new Audio(audioUrl);
           
-          // iOS compatibility fixes
+          // Universal cross-platform audio configuration
           premiumAudio.preload = 'auto';
-          premiumAudio.playsInline = true;
-          premiumAudio.volume = 0.8;
+          premiumAudio.crossOrigin = 'anonymous';
+          
+          // Device-specific volume optimization
+          if (isAppleWatch) {
+            premiumAudio.volume = 1.0; // Max volume for watch speakers
+          } else if (isMobile || isKindle) {
+            premiumAudio.volume = 0.9; // Higher for mobile devices
+          } else {
+            premiumAudio.volume = 0.8; // Standard for desktop
+          }
+          
+          // Mobile and iOS specific attributes
+          if (isMobile) {
+            (premiumAudio as any).playsInline = true;
+            (premiumAudio as any).controls = false;
+            (premiumAudio as any).autoplay = false;
+          }
+          
+          // Webkit-specific optimizations for Safari/iOS
+          if (isIOS || isSafari) {
+            (premiumAudio as any).webkit = true;
+            (premiumAudio as any).webkitPlaysinline = true;
+          }
+          
+          // Android-specific optimizations
+          if (isAndroid) {
+            premiumAudio.preload = 'metadata'; // Conservative preloading for Android
+          }
           
           premiumAudio.onloadeddata = () => {
             toast({
-              title: "✨ Premium Voice Ready",
+              title: "Premium Voice Ready",
               description: "Now playing with studio-quality AI narration",
               duration: 2000,
             });
             
-            // iOS requires promise-based play handling
-            const playPromise = premiumAudio.play();
-            if (playPromise !== undefined) {
-              playPromise.catch(error => {
-                console.error('Audio play failed on iOS:', error);
-                // Fallback to system voice
+            // Universal play method with comprehensive error handling
+            const attemptPlay = async () => {
+              try {
+                // Modern browsers require promise handling
+                const playPromise = premiumAudio.play();
+                if (playPromise !== undefined) {
+                  await playPromise;
+                  console.log('Premium audio started successfully on', { isIOS, isAndroid, isSafari, isChrome });
+                } else {
+                  console.log('Legacy audio play initiated');
+                }
+              } catch (error) {
+                console.error('Premium audio failed on platform:', error, { isIOS, isAndroid, isSafari, isChrome });
+                // Immediate fallback to system voice
                 fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
-              });
+              }
+            };
+            
+            // Platform-specific play timing
+            if (isIOS || isSafari) {
+              // iOS needs immediate user gesture context
+              attemptPlay();
+            } else if (isAndroid || isKindle) {
+              // Small delay for Android audio preparation
+              setTimeout(attemptPlay, 100);
+            } else {
+              // Immediate play for desktop browsers
+              attemptPlay();
             }
           };
           
@@ -229,68 +304,176 @@ export default function AudioRoutines() {
             }, 2000);
           };
           
-          premiumAudio.onerror = () => {
-            // Fallback to system voice if premium fails
+          premiumAudio.onerror = (error) => {
+            console.error('Premium audio error on device:', error, userAgent);
+            // Device-specific error handling with immediate fallback
             fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
           };
+          
+          // Network stall recovery for slow connections
+          premiumAudio.onstalled = () => {
+            console.log('Audio stalled, attempting recovery...');
+            setTimeout(() => {
+              if (premiumAudio.readyState < 3) {
+                fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
+              }
+            }, 3000);
+          };
+          
         } else {
-          // Fallback to system voice if API fails
+          console.error('Premium audio API failed:', response.status);
           fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
         }
       } catch (error) {
-        console.error('Premium voice error:', error);
-        // Fallback to system voice if premium fails
+        console.error('Premium voice network error:', error);
         fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
       }
     } catch (error) {
-      console.error('Audio playback error:', error);
+      console.error('Audio system error:', error, userAgent);
+      
+      // Device-specific error messaging
+      let errorMessage = "Please tap to enable audio for your meditation routine.";
+      if (isIOS) {
+        errorMessage = "Please enable audio in Safari settings for meditation.";
+      } else if (isAndroid) {
+        errorMessage = "Please allow audio permission for your meditation routine.";
+      } else if (isKindle) {
+        errorMessage = "Audio may be limited on Kindle. Please check volume settings.";
+      } else if (isAppleWatch) {
+        errorMessage = "Audio capabilities are limited on Apple Watch.";
+      }
+      
       toast({
-        title: "Audio Permission Needed",
-        description: "Please allow audio playback to enjoy your meditation routine.",
-        duration: 3000,
+        title: "Audio Setup Needed",
+        description: errorMessage,
+        duration: 4000,
       });
       setPlayingRoutine(null);
     }
   };
 
   const fallbackToSystemVoice = (routine: AudioRoutine, masterGain: GainNode, backgroundMusic: { stop: () => void }, audioContext: AudioContext) => {
-    const utterance = new SpeechSynthesisUtterance(
-      `Welcome to ${routine.name}. ${routine.description}. Take a deep breath and let yourself relax into this peaceful moment with God.`
-    );
+    // Enhanced cross-platform speech synthesis
+    const voiceText = `Welcome to ${routine.name}. ${routine.description}. Take a deep breath and let yourself relax into this peaceful moment with God.`;
     
-    // Use a calm, slower speaking voice
-    utterance.rate = 0.8;
-    utterance.pitch = 0.9;
-    utterance.volume = 0.7;
-    
-    // Try to find the best available system voice
-    const voices = speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => 
-      voice.name.includes('Female') || 
-      voice.name.includes('Samantha') ||
-      voice.name.includes('Victoria') ||
-      voice.name.toLowerCase().includes('female')
-    );
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-    
-    speechSynthesis.speak(utterance);
-    
-    utterance.onend = () => {
-      // Fade out ambient soundscape
-      masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
-      setTimeout(() => {
-        backgroundMusic.stop();
-        setPlayingRoutine(null);
-        setCurrentAudioContext(null);
+    // Wait for voices to load on all platforms
+    const speakWithVoice = () => {
+      const utterance = new SpeechSynthesisUtterance(voiceText);
+      
+      // Cross-platform voice optimization
+      utterance.rate = 0.75; // Slower for meditation across all devices
+      utterance.pitch = 0.9;
+      utterance.volume = 0.8; // Higher volume for mobile devices
+      
+      // Enhanced voice selection for all platforms
+      const voices = speechSynthesis.getVoices();
+      console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+      
+      // Priority voice selection for different platforms
+      const preferredVoice = voices.find(voice => {
+        const name = voice.name.toLowerCase();
+        const lang = voice.lang.toLowerCase();
+        
+        // iOS/macOS voices
+        if (name.includes('samantha') || name.includes('victoria') || name.includes('allison')) return true;
+        // Android voices
+        if (name.includes('female') && lang.includes('en')) return true;
+        // Windows voices
+        if (name.includes('zira') || name.includes('hazel')) return true;
+        // Chrome/Edge voices
+        if (name.includes('google') && name.includes('female')) return true;
+        // General fallback
+        if (name.includes('female') || voice.name.includes('Female')) return true;
+        
+        return false;
+      });
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        console.log('Selected voice:', preferredVoice.name);
+      } else {
+        console.log('Using default voice');
+      }
+      
+      // Cross-platform event handling
+      utterance.onstart = () => {
+        console.log('Speech started on platform:', navigator.userAgent);
+      };
+      
+      utterance.onend = () => {
+        console.log('Speech ended, cleaning up audio context');
+        // Fade out ambient soundscape
+        try {
+          masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+        } catch (e) {
+          console.log('Audio context already closed');
+        }
+        
+        setTimeout(() => {
+          backgroundMusic.stop();
+          setPlayingRoutine(null);
+          setCurrentAudioContext(null);
+          toast({
+            title: "Session Complete",
+            description: "Your peaceful routine has finished. May you carry this tranquility with you.",
+            duration: 4000,
+          });
+        }, 2000);
+      };
+      
+      utterance.onerror = (error) => {
+        console.error('Speech synthesis error:', error);
+        // Still complete the session even if speech fails
+        setTimeout(() => {
+          backgroundMusic.stop();
+          setPlayingRoutine(null);
+          setCurrentAudioContext(null);
+          toast({
+            title: "Session Complete",
+            description: "Audio completed. Your meditation time is finished.",
+            duration: 4000,
+          });
+        }, 3000);
+      };
+      
+      // Platform-specific speech initiation
+      try {
+        speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.error('Failed to start speech synthesis:', error);
+        // Fallback to text-only completion
         toast({
-          title: "🕊️ Session Complete",
-          description: "Your peaceful routine has finished. May you carry this tranquility with you.",
-          duration: 4000,
+          title: "Meditation Text",
+          description: voiceText,
+          duration: 8000,
         });
-      }, 2000);
+        setTimeout(() => {
+          backgroundMusic.stop();
+          setPlayingRoutine(null);
+          setCurrentAudioContext(null);
+        }, 8000);
+      }
     };
+    
+    // Handle voice loading across platforms
+    if (speechSynthesis.getVoices().length === 0) {
+      // Voices not loaded yet - wait for them
+      speechSynthesis.onvoiceschanged = () => {
+        speechSynthesis.onvoiceschanged = null; // Prevent multiple calls
+        speakWithVoice();
+      };
+      
+      // Timeout fallback for platforms that don't fire onvoiceschanged
+      setTimeout(() => {
+        if (speechSynthesis.onvoiceschanged) {
+          speechSynthesis.onvoiceschanged = null;
+          speakWithVoice();
+        }
+      }, 1000);
+    } else {
+      // Voices already loaded
+      speakWithVoice();
+    }
   };
 
   const stopAudioRoutine = () => {
