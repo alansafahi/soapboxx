@@ -76,6 +76,7 @@ export default function SocialFeed() {
       // 🌿 Spiritual Growth & Readiness
       "hopeful": "🌅", "motivated": "✝️", "determined": "🧠", "confident": "🤔",
       "professional": "🧑‍💼", "meditated": "🧘‍♂️", "calm": "😌", "inspired": "😇",
+      "blessed-growth": "🙏",
       
       // ✨ Praise & Celebration
       "happy": "😄", "loved": "😊", "thankful": "🥰", "blessed": "😇",
@@ -100,6 +101,7 @@ export default function SocialFeed() {
       // 🌿 Spiritual Growth & Readiness
       "hopeful": "Hopeful", "motivated": "Motivated", "determined": "Determined", "confident": "Confident",
       "professional": "Professional", "meditated": "Meditated", "calm": "Calm", "inspired": "Inspired",
+      "blessed-growth": "Blessed",
       
       // ✨ Praise & Celebration
       "happy": "Happy", "loved": "Loved", "thankful": "Thankful", "blessed": "Blessed",
@@ -205,7 +207,8 @@ export default function SocialFeed() {
         { id: "professional", label: "Professional", icon: "🧑‍💼", color: "bg-slate-100 text-slate-800" },
         { id: "meditated", label: "Meditated", icon: "🧘‍♂️", color: "bg-teal-100 text-teal-800" },
         { id: "calm", label: "Calm", icon: "😌", color: "bg-blue-100 text-blue-800" },
-        { id: "inspired", label: "Inspired", icon: "😇", color: "bg-yellow-100 text-yellow-800" }
+        { id: "inspired", label: "Inspired", icon: "😇", color: "bg-yellow-100 text-yellow-800" },
+        { id: "blessed-growth", label: "Blessed", icon: "🙏", color: "bg-emerald-100 text-emerald-800" }
       ]
     },
     {
