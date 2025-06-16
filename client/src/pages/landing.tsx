@@ -66,7 +66,10 @@ export default function Landing() {
           <div className="flex justify-center">
             <button 
               onClick={handleStartJourney}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-md font-medium flex items-center cursor-pointer transition-colors"
+              onMouseDown={() => console.log('Button mouse down!')}
+              onMouseUp={() => console.log('Button mouse up!')}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-md font-medium flex items-center cursor-pointer transition-colors relative z-10"
+              style={{ pointerEvents: 'auto' }}
             >
               Start Your Journey
               <ChevronRight className="ml-2 w-5 h-5" />
