@@ -42,7 +42,8 @@ import {
   Pause,
   Pin,
   PinOff,
-  MoreHorizontal
+  MoreHorizontal,
+  Search
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
