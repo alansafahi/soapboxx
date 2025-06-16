@@ -4254,7 +4254,7 @@ Return JSON with this exact structure:
   app.post("/api/feed/posts", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
-      const { content, mood, audience = 'public' } = req.body;
+      const { content, mood, audience = 'public', attachedMedia, linkedVerse } = req.body;
       
       if (!content || !content.trim()) {
         return res.status(400).json({ message: "Post content is required" });

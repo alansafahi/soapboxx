@@ -600,6 +600,8 @@ export const discussions = pgTable("discussions", {
   audience: varchar("audience", { length: 20 }).default("public"), // 'public', 'church', 'private'
   mood: varchar("mood", { length: 50 }), // Facebook-style mood/activity tag
   suggestedVerses: jsonb("suggested_verses"), // AI-generated Bible verse suggestions
+  attachedMedia: jsonb("attached_media"), // Array of uploaded media files
+  linkedVerse: jsonb("linked_verse"), // User-selected Bible verse to link with post
   likeCount: integer("like_count").default(0),
   commentCount: integer("comment_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
