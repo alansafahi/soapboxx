@@ -1003,9 +1003,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 console.log('Form values:', form.getValues());
                 console.log('Form errors:', form.formState.errors);
                 console.log('Form is valid:', form.formState.isValid);
+                console.log('Form state:', form.formState);
                 
-                // Let the form handle submission naturally
-                // Don't prevent default - let it trigger form onSubmit
+                // Manually trigger form submission if validation passes
+                const values = form.getValues();
+                if (values.scripture && values.observation && values.application && values.prayer) {
+                  console.log('Manual form submission triggered');
+                  form.handleSubmit(handleSubmit)();
+                } else {
+                  console.log('Required fields missing, cannot submit');
+                }
               }}
             >
               <Save className="h-4 w-4" />
