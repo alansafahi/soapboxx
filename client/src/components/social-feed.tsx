@@ -108,7 +108,7 @@ export default function SocialFeed() {
       blessed: "feeling blessed", grateful: "feeling grateful", worshipful: "in worship", 
       prayerful: "in prayer", evangelistic: "sharing the gospel", serving: "serving others", 
       studying: "studying scripture", fasting: "fasting", "spirit-filled": "spirit-filled", 
-      anxious: "feeling anxious", seeking: "seeking guidance"
+      anxious: "feeling anxious", seeking: "Seeking Guidance"
     };
     return moodNames[mood] || mood;
   };
@@ -136,7 +136,7 @@ export default function SocialFeed() {
     { id: "reflective", label: "Reflective", icon: "🤔", color: "bg-purple-100 text-purple-800" },
     { id: "anxious", label: "Anxious", icon: "😰", color: "bg-gray-100 text-gray-800" },
     { id: "inspired", label: "Inspired", icon: "💡", color: "bg-indigo-100 text-indigo-800" },
-    { id: "seeking", label: "Seeking Guidance", icon: "🧭", color: "bg-teal-100 text-teal-800" },
+    { id: "seeking", label: "Seeking\nGuidance", icon: "🧭", color: "bg-teal-100 text-teal-800" },
     { id: "celebrating", label: "Celebrating", icon: "🎉", color: "bg-red-100 text-red-800" },
     { id: "praying", label: "Praying", icon: "🙏", color: "bg-violet-100 text-violet-800" },
     { id: "studying", label: "Studying Scripture", icon: "📖", color: "bg-amber-100 text-amber-800" }
@@ -566,7 +566,7 @@ export default function SocialFeed() {
                             className="justify-start h-auto p-2 text-left hover:bg-gray-50"
                           >
                             <span className="mr-2">{mood.icon}</span>
-                            <span className="text-sm">{mood.label}</span>
+                            <span className="text-sm whitespace-pre-line">{mood.label}</span>
                           </Button>
                         ))}
                       </div>
