@@ -4277,12 +4277,21 @@ Return JSON with this exact structure:
           suggestedVerses: suggestedVerses || null
         });
       } else { // type === 'share'
+        // Set title based on audience
+        let defaultTitle = 'Community Share';
+        if (audience === 'private') {
+          defaultTitle = 'Private Journal';
+        } else if (audience === 'church') {
+          defaultTitle = 'Church Share';
+        }
+        
         post = await storage.createDiscussion({
-          title: title || 'Community Share',
+          title: title || defaultTitle,
           content: content.trim(),
           authorId: userId,
           churchId: null,
           category: 'share',
+          audience: audience,
           isPublic: true,
           mood: mood || null,
           suggestedVerses: suggestedVerses || null
