@@ -506,6 +506,14 @@ export default function AudioRoutines() {
       // Update progress every second
       const progressInterval = setInterval(updateProgress, 1000);
       
+      // Store cleanup function
+      const cleanup = () => {
+        clearInterval(progressInterval);
+        setSessionProgress(0);
+        setCurrentSegment(0);
+        setIsInSilencePeriod(false);
+      };
+      
       const playNextSegment = async () => {
         if (currentSegmentIndex >= meditationSegments.length) {
           // Session complete
@@ -565,7 +573,8 @@ export default function AudioRoutines() {
             currentSegmentIndex++;
             
             if (segment.pauseAfter > 0) {
-              // Show pause notification
+              // Show pause notification and update silence period state
+              setIsInSilencePeriod(true);
               toast({
                 title: "Silent Meditation",
                 description: `Pausing for ${segment.pauseAfter} seconds of peaceful silence`,
@@ -575,6 +584,7 @@ export default function AudioRoutines() {
               // Wait for pause duration then continue
               setTimeout(() => {
                 if (playingRoutine === routine.id) {
+                  setIsInSilencePeriod(false);
                   playNextSegment();
                 }
               }, segment.pauseAfter * 1000);
@@ -590,6 +600,9 @@ export default function AudioRoutines() {
       
       // Start the segmented meditation
       await playNextSegment();
+      
+      // Store cleanup for session termination
+      (routine as any).cleanup = cleanup;
       
     } catch (error) {
       console.error('Meditation session error:', error);
@@ -801,7 +814,7 @@ export default function AudioRoutines() {
                       </div>
                       
                       {/* Red Dots for Pause Points */}
-                      {pausePoints.map((point, index) => (
+                      {pausePoints.map((point: number, index: number) => (
                         <div
                           key={index}
                           className="absolute top-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm transform -translate-y-0.5"
@@ -813,12 +826,12 @@ export default function AudioRoutines() {
                     
                     {isInSilencePeriod && (
                       <div className="text-center text-sm text-purple-600 dark:text-purple-400 font-medium">
-                        🕊️ Silent Reflection Time
+                        Silent Reflection Time
                       </div>
                     )}
                   </div>
                   
-                  {/* Pause/Resume Button */}
+                  {/* Pause/Resume and Stop Controls */}
                   <div className="flex items-center gap-2">
                     <Button
                       onClick={isPaused ? resumeAudioRoutine : pauseAudioRoutine}
