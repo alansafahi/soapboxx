@@ -477,19 +477,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     console.log('=== FORM SUBMISSION DEBUG ===');
     console.log('Form submission triggered with data:', data);
     console.log('Form validation errors:', form.formState.errors);
-    console.log('Form is valid:', form.formState.isValid);
-    console.log('Required fields check:', {
-      scripture: !!data.scripture,
-      observation: !!data.observation,
-      application: !!data.application,
-      prayer: !!data.prayer
-    });
-    console.log('Save mutation status:', {
-      isPending: saveMutation.isPending,
-      isError: saveMutation.isError,
-      isSuccess: saveMutation.isSuccess
-    });
-    console.log('User context in submit:', user);
     
     // Check if all required fields are filled
     if (!data.scripture || !data.observation || !data.application || !data.prayer) {
@@ -501,8 +488,15 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       return;
     }
     
+    // Convert devotionalDate string to Date object for schema validation
+    const submissionData = {
+      ...data,
+      devotionalDate: new Date(data.devotionalDate)
+    };
+    
+    console.log('Processed submission data:', submissionData);
     console.log('About to call saveMutation.mutate...');
-    saveMutation.mutate(data);
+    saveMutation.mutate(submissionData);
   };
 
   return (
