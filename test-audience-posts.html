@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Audience Posts - SoapBox</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .pending { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        button { margin: 5px; padding: 10px 15px; border: none; border-radius: 3px; cursor: pointer; }
+        .test-btn { background-color: #007bff; color: white; }
+        .test-btn:hover { background-color: #0056b3; }
+        textarea { width: 100%; height: 80px; margin: 10px 0; }
+        .post-preview { margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Audience Post Testing - SoapBox Super App</h1>
+    <p>Testing all post types with different audience settings to verify correct titles and functionality.</p>
+
+    <div class="test-section">
+        <h3>Test 1: Private Posts</h3>
+        <textarea id="privateContent" placeholder="Enter private post content...">This is my private journal entry. Only I should see this.</textarea>
+        <button class="test-btn" onclick="testPost('private', 'privateContent', 'privateResult')">Create Private Post</button>
+        <div id="privateResult" class="test-result pending">Ready to test...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 2: Church Posts</h3>
+        <textarea id="churchContent" placeholder="Enter church post content...">This is for my church family only. Sharing a prayer request with my church.</textarea>
+        <button class="test-btn" onclick="testPost('church', 'churchContent', 'churchResult')">Create Church Post</button>
+        <div id="churchResult" class="test-result pending">Ready to test...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 3: Public Posts</h3>
+        <textarea id="publicContent" placeholder="Enter public post content...">This is a public post that everyone on SoapBox can see. Sharing God's goodness!</textarea>
+        <button class="test-btn" onclick="testPost('public', 'publicContent', 'publicResult')">Create Public Post</button>
+        <div id="publicResult" class="test-result pending">Ready to test...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 4: Feed Verification</h3>
+        <button class="test-btn" onclick="verifyFeed()">Check Feed for All Posts</button>
+        <div id="feedResult" class="test-result pending">Ready to verify...</div>
+        <div id="feedPosts"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Expected Results</h3>
+        <ul>
+            <li><strong>Private Post:</strong> Should show title "Private Journal"</li>
+            <li><strong>Church Post:</strong> Should show title "Church Share"</li>
+            <li><strong>Public Post:</strong> Should show title "Community Share"</li>
+            <li><strong>Feed:</strong> Should display all posts with correct audience indicators</li>
+        </ul>
+    </div>
+
+    <script>
+        let createdPosts = [];
+
+        async function testPost(audience, contentId, resultId) {
+            const content = document.getElementById(contentId).value;
+            const resultDiv = document.getElementById(resultId);
+            
+            if (!content.trim()) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = 'Error: Please enter content for the post';
+                return;
+            }
+
+            resultDiv.className = 'test-result pending';
+            resultDiv.innerHTML = 'Creating post...';
+
+            try {
+                const response = await fetch('/api/feed/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        content: content,
+                        audience: audience,
+                        mood: 'peaceful'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                createdPosts.push(result);
+
+                // Verify the title is correct
+                let expectedTitle;
+                switch(audience) {
+                    case 'private': expectedTitle = 'Private Journal'; break;
+                    case 'church': expectedTitle = 'Church Share'; break;
+                    case 'public': expectedTitle = 'Community Share'; break;
+                    default: expectedTitle = 'Unknown';
+                }
+
+                const actualTitle = result.title;
+                const titleCorrect = actualTitle === expectedTitle;
+
+                resultDiv.className = titleCorrect ? 'test-result success' : 'test-result error';
+                resultDiv.innerHTML = `
+                    <strong>Post Created:</strong> ID ${result.id}<br>
+                    <strong>Expected Title:</strong> "${expectedTitle}"<br>
+                    <strong>Actual Title:</strong> "${actualTitle}"<br>
+                    <strong>Audience:</strong> ${result.audience || 'undefined'}<br>
+                    <strong>Status:</strong> ${titleCorrect ? '✅ PASS' : '❌ FAIL - Title mismatch!'}
+                `;
+
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        async function verifyFeed() {
+            const resultDiv = document.getElementById('feedResult');
+            const postsDiv = document.getElementById('feedPosts');
+            
+            resultDiv.className = 'test-result pending';
+            resultDiv.innerHTML = 'Fetching feed...';
+
+            try {
+                const response = await fetch('/api/feed', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const feedPosts = await response.json();
+                
+                // Find our created posts in the feed
+                const recentPosts = feedPosts.slice(0, 10); // Get most recent posts
+                let foundPosts = 0;
+                let correctTitles = 0;
+
+                let postsHtml = '<h4>Recent Feed Posts:</h4>';
+                recentPosts.forEach(post => {
+                    const isOurPost = createdPosts.some(cp => cp.id === post.id);
+                    const audienceIcon = post.audience === 'private' ? '🔒' : 
+                                       post.audience === 'church' ? '⛪' : '🌍';
+                    
+                    postsHtml += `
+                        <div class="post-preview ${isOurPost ? 'success' : ''}">
+                            <strong>${post.title}</strong> ${audienceIcon}<br>
+                            <small>Audience: ${post.audience} | Type: ${post.type}</small><br>
+                            <em>${post.content.substring(0, 100)}...</em>
+                        </div>
+                    `;
+
+                    if (isOurPost) {
+                        foundPosts++;
+                        // Check if title matches expected pattern
+                        if ((post.audience === 'private' && post.title === 'Private Journal') ||
+                            (post.audience === 'church' && post.title === 'Church Share') ||
+                            (post.audience === 'public' && post.title === 'Community Share')) {
+                            correctTitles++;
+                        }
+                    }
+                });
+
+                postsDiv.innerHTML = postsHtml;
+
+                const allCorrect = foundPosts === createdPosts.length && correctTitles === foundPosts;
+                resultDiv.className = allCorrect ? 'test-result success' : 'test-result error';
+                resultDiv.innerHTML = `
+                    <strong>Feed Verification:</strong><br>
+                    Posts found: ${foundPosts}/${createdPosts.length}<br>
+                    Correct titles: ${correctTitles}/${foundPosts}<br>
+                    <strong>Status:</strong> ${allCorrect ? '✅ ALL TESTS PASS' : '❌ Some tests failed'}
+                `;
+
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        // Auto-refresh every 30 seconds to show latest posts
+        setInterval(() => {
+            if (createdPosts.length > 0) {
+                verifyFeed();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
