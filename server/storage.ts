@@ -2412,6 +2412,7 @@ export class DatabaseStorage implements IStorage {
           type: 'discussion',
           title: d.title,
           content: d.content,
+          mood: d.mood || null,
           author: {
             id: d.authorId,
             name: authorName,
@@ -4286,7 +4287,7 @@ export class DatabaseStorage implements IStorage {
       .from(bibleVerses)
       .where(and(
         eq(bibleVerses.isActive, true),
-        sql`${bibleVerses.topicTags} && ${topics}`
+        sql`${bibleVerses.topicTags} && ARRAY[${topics.map(t => `'${t}'`).join(',')}]::text[]`
       ))
       .orderBy(desc(bibleVerses.popularityScore))
       .limit(10);
