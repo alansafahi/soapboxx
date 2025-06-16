@@ -444,7 +444,7 @@ export default function PrayerWall() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen overflow-y-auto space-y-6 pb-8">
       {/* Prayer Wall Header */}
       <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-0 shadow-sm">
         <CardHeader className="text-center pb-4">
