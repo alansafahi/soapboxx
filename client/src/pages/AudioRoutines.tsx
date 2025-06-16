@@ -91,23 +91,67 @@ export default function AudioRoutines() {
       
       setCurrentAudioContext(audioContext);
       
-      // Generate peaceful background tone
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      // Generate peaceful ambient soundscape
+      const masterGain = audioContext.createGain();
+      masterGain.connect(audioContext.destination);
+      masterGain.gain.setValueAtTime(0, audioContext.currentTime);
+      masterGain.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 2);
       
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      // Create evolving chord progression for spiritual atmosphere
+      const chords = [
+        [261.63, 329.63, 392.00], // C major - peace
+        [293.66, 369.99, 440.00], // D minor - reflection  
+        [349.23, 440.00, 523.25], // F major - hope
+        [392.00, 493.88, 587.33]  // G major - joy
+      ];
       
-      // Set peaceful frequency (C major chord)
-      oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C4
-      oscillator.type = 'sine';
+      const oscillators: OscillatorNode[] = [];
+      let chordIndex = 0;
       
-      // Gentle volume
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 1);
+      const createAmbientChord = (frequencies: number[], startTime: number, duration: number) => {
+        frequencies.forEach((freq, index) => {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          
+          osc.frequency.setValueAtTime(freq, startTime);
+          osc.type = index === 0 ? 'triangle' : 'sine'; // Warmer bass, pure harmonics
+          
+          // Gentle breathing effect
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(0.3, startTime + 1.5);
+          gain.gain.linearRampToValueAtTime(0.15, startTime + duration/2);
+          gain.gain.linearRampToValueAtTime(0.25, startTime + duration - 1.5);
+          gain.gain.linearRampToValueAtTime(0, startTime + duration);
+          
+          osc.connect(gain);
+          gain.connect(masterGain);
+          
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+          oscillators.push(osc);
+        });
+      };
       
-      // Start the peaceful tone
-      oscillator.start();
+      // Schedule peaceful chord progression
+      let currentTime = audioContext.currentTime + 1;
+      const scheduleChords = () => {
+        for (let i = 0; i < 8; i++) { // Create 2 minutes of ambient music
+          createAmbientChord(chords[chordIndex % chords.length], currentTime, 15);
+          chordIndex++;
+          currentTime += 15;
+        }
+      };
+      
+      scheduleChords();
+      
+      // Store reference for cleanup
+      const backgroundMusic = {
+        stop: () => {
+          oscillators.forEach(osc => {
+            try { osc.stop(); } catch (e) { /* Already stopped */ }
+          });
+        }
+      };
       
       // Generate premium voice using OpenAI TTS
       try {
@@ -148,10 +192,10 @@ export default function AudioRoutines() {
           };
           
           premiumAudio.onended = () => {
-            // Fade out background tone
-            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+            // Fade out ambient soundscape
+            masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
             setTimeout(() => {
-              oscillator.stop();
+              backgroundMusic.stop();
               setPlayingRoutine(null);
               setCurrentAudioContext(null);
               URL.revokeObjectURL(audioUrl);
@@ -165,16 +209,16 @@ export default function AudioRoutines() {
           
           premiumAudio.onerror = () => {
             // Fallback to system voice if premium fails
-            fallbackToSystemVoice(routine, gainNode, oscillator, audioContext);
+            fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
           };
         } else {
           // Fallback to system voice if API fails
-          fallbackToSystemVoice(routine, gainNode, oscillator, audioContext);
+          fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
         }
       } catch (error) {
         console.error('Premium voice error:', error);
         // Fallback to system voice if premium fails
-        fallbackToSystemVoice(routine, gainNode, oscillator, audioContext);
+        fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
       }
     } catch (error) {
       console.error('Audio playback error:', error);
@@ -187,7 +231,7 @@ export default function AudioRoutines() {
     }
   };
 
-  const fallbackToSystemVoice = (routine: AudioRoutine, gainNode: GainNode, oscillator: OscillatorNode, audioContext: AudioContext) => {
+  const fallbackToSystemVoice = (routine: AudioRoutine, masterGain: GainNode, backgroundMusic: { stop: () => void }, audioContext: AudioContext) => {
     const utterance = new SpeechSynthesisUtterance(
       `Welcome to ${routine.name}. ${routine.description}. Take a deep breath and let yourself relax into this peaceful moment with God.`
     );
@@ -212,10 +256,10 @@ export default function AudioRoutines() {
     speechSynthesis.speak(utterance);
     
     utterance.onend = () => {
-      // Fade out background tone
-      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+      // Fade out ambient soundscape
+      masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
       setTimeout(() => {
-        oscillator.stop();
+        backgroundMusic.stop();
         setPlayingRoutine(null);
         setCurrentAudioContext(null);
         toast({
