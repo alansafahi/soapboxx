@@ -1,0 +1,75 @@
+
+﻿
+client:536 WebSocket connection to 'wss://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/?token=wzad8GppZD77' failed: 
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=wzad8GppZD77' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+
+chunk-RPCDYKBN.js?v=7f0fa072:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+SoapEntryForm.tsx:995 === SAVE BUTTON CLICKED ===
+SoapEntryForm.tsx:996 Button event: 
+SyntheticBaseEvent {_reactName: 'onClick', _targetInst: null, type: 'click', nativeEvent: PointerEvent, target: button.justify-center.whitespace-nowrap.rounded-md.text-sm.font-medium.ring-offset-background.trans…, …}
+SoapEntryForm.tsx:997 Form values: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:998 Form errors: 
+{}
+SoapEntryForm.tsx:999 Form is valid: false
+SoapEntryForm.tsx:1000 Form state: 
+{…}
+SoapEntryForm.tsx:1004 Raw form values: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:1007 Manual form submission triggered
+SoapEntryForm.tsx:477 === FORM SUBMISSION DEBUG ===
+SoapEntryForm.tsx:478 Form submission triggered with data: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:479 Form validation errors: 
+{}
+SoapEntryForm.tsx:497 Processed submission data: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:498 About to call saveMutation.mutate...
+SoapEntryForm.tsx:121 === SAVE MUTATION START ===
+SoapEntryForm.tsx:122 Save mutation triggered with data: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:123 User context: 
+{id: 'xinjk1vlu2l', email: 'alan@safahi.com', username: 'alans', firstName: 'Alan', lastName: 'SGA', …}
+SoapEntryForm.tsx:124 Church ID from user: undefined
+SoapEntryForm.tsx:133 Final payload being sent: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:134 Entry mode: CREATE
+SoapEntryForm.tsx:145 Making POST request to: /api/soap
+queryClient.ts:20 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/soap 500 (Internal Server Error)
+SoapEntryForm.tsx:155 === SAVE MUTATION ERROR ===
+SoapEntryForm.tsx:156 Save mutation error: Error: 500: {"message":"Failed to create S.O.A.P. entry","error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"date\",\n    \"received\": \"string\",\n    \"path\": [\n      \"devotionalDate\"\n    ],\n    \"message\": \"Expected date, received string\"\n  }\n]","details":{"issues":[{"code":"invalid_type","expected":"date","received":"string","path":["devotionalDate"],"message":"Expected date, received string"}],"name":"ZodError"}}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:30:3)
+    at async Object.mutationFn (SoapEntryForm.tsx:146:20)
+SoapEntryForm.tsx:121 === SAVE MUTATION START ===
+SoapEntryForm.tsx:122 Save mutation triggered with data: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:123 User context: 
+{id: 'xinjk1vlu2l', email: 'alan@safahi.com', username: 'alans', firstName: 'Alan', lastName: 'SGA', …}
+SoapEntryForm.tsx:124 Church ID from user: undefined
+SoapEntryForm.tsx:133 Final payload being sent: 
+{scripture: '"Come to me, all you who are weary and burdened, a…uls. For my yoke is easy and my burden is light."', scriptureReference: 'Matthew 11:28-30', observation: 'In this passage, Jesus invites those who feel wear…on, making this invitation particularly resonant.', application: 'As we navigate the busy rhythms of life, especiall…ip with God and surrendering your burdens to Him.', prayer: "Gracious Father, I come to You weary and in need o…n to find rest for my soul. In Jesus' name, Amen.", …}
+SoapEntryForm.tsx:134 Entry mode: CREATE
+SoapEntryForm.tsx:145 Making POST request to: /api/soap
+queryClient.ts:20 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/soap 500 (Internal Server Error)
+SoapEntryForm.tsx:155 === SAVE MUTATION ERROR ===
+SoapEntryForm.tsx:156 Save mutation error: Error: 500: {"message":"Failed to create S.O.A.P. entry","error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"date\",\n    \"received\": \"string\",\n    \"path\": [\n      \"devotionalDate\"\n    ],\n    \"message\": \"Expected date, received string\"\n  }\n]","details":{"issues":[{"code":"invalid_type","expected":"date","received":"string","path":["devotionalDate"],"message":"Expected date, received string"}],"name":"ZodError"}}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:30:3)
+    at async Object.mutationFn (SoapEntryForm.tsx:146:20)
+SoapEntryForm.tsx:174 === SAVE MUTATION ERROR HANDLER ===
+SoapEntryForm.tsx:175 S.O.A.P. save error: Error: 500: {"message":"Failed to create S.O.A.P. entry","error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"date\",\n    \"received\": \"string\",\n    \"path\": [\n      \"devotionalDate\"\n    ],\n    \"message\": \"Expected date, received string\"\n  }\n]","details":{"issues":[{"code":"invalid_type","expected":"date","received":"string","path":["devotionalDate"],"message":"Expected date, received string"}],"name":"ZodError"}}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:30:3)
+    at async Object.mutationFn (SoapEntryForm.tsx:146:20)
+SoapEntryForm.tsx:176 Error details: {}
+SoapEntryForm.tsx:177 User context: 
+{id: 'xinjk1vlu2l', email: 'alan@safahi.com', username: 'alans', firstName: 'Alan', lastName: 'SGA', …}
+SoapEntryForm.tsx:178 Error type: object
+SoapEntryForm.tsx:179 Error constructor: Error
+SoapEntryForm.tsx:185 Parsed error message: 500: {"message":"Failed to create S.O.A.P. entry","error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"date\",\n    \"received\": \"string\",\n    \"path\": [\n      \"devotionalDate\"\n    ],\n    \"message\": \"Expected date, received string\"\n  }\n]","details":{"issues":[{"code":"invalid_type","expected":"date","received":"string","path":["devotionalDate"],"message":"Expected date, received string"}],"name":"ZodError"}}

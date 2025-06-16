@@ -2069,6 +2069,13 @@ export const insertSoapEntrySchema = createInsertSchema(soapEntries).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  devotionalDate: z.union([z.date(), z.string()]).transform((val) => {
+    if (typeof val === 'string') {
+      return new Date(val);
+    }
+    return val;
+  }),
 });
 
 // Daily Bible Zod Schemas
