@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock, Send, ChevronDown, ChevronUp, Share, Bookmark, Eye, MapPin, Award, TrendingUp, Zap, Filter } from "lucide-react";
+import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock, Send, ChevronDown, ChevronUp, Share, Bookmark, Eye, MapPin, Award, TrendingUp, Zap, Filter, Sparkles, Lightbulb, Pin, PinOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -76,6 +76,15 @@ export default function PrayerWall() {
   const [supportMessages, setSupportMessages] = useState<Map<number, any[]>>(new Map());
   const [prayerCircles, setPrayerCircles] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
+  const [isAIAssistanceOpen, setIsAIAssistanceOpen] = useState(false);
+  const [aiAssistanceData, setAIAssistanceData] = useState({
+    topic: '',
+    situation: '',
+    tone: 'hopeful',
+    prayerType: 'request'
+  });
+  const [aiSuggestions, setAISuggestions] = useState<any[]>([]);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),

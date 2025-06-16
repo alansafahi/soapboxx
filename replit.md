@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Successfully completed Prayer Wall like button and support message functionality
+  - Fixed missing like button API endpoint `/api/prayers/:id/like` with proper authentication
+  - Added support message API endpoints for posting and retrieving encouragement messages
+  - Fixed client-side authentication issues by adding proper credentials to all API calls
+  - Prayer Wall now fully functional: submission, like button, support messages, and PIN functionality all working
+  - User confirmed like button is working correctly with visual feedback (filled red heart icon)
 - June 16, 2025: Successfully completed image upload and display system in social feed
   - Fixed critical bug where File objects were converting to empty JSON objects in database storage
   - Implemented proper base64 data URL conversion system for reliable image storage and retrieval

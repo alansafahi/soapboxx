@@ -4737,6 +4737,109 @@ Return JSON with this exact structure:
     }
   });
 
+  // AI Prayer Writing Assistance
+  app.post('/api/prayers/ai-assistance', isAuthenticated, async (req: any, res) => {
+    try {
+      const { topic, situation, tone, prayerType } = req.body;
+
+      if (!topic && !situation) {
+        return res.status(400).json({ message: 'Please provide either a topic or situation for the prayer' });
+      }
+
+      // Check OpenAI API key
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ message: 'AI assistance is currently unavailable' });
+      }
+
+      const OpenAI = require('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Build prayer assistance prompt
+      let prompt = `You are a compassionate spiritual assistant helping someone write a prayer. `;
+      
+      if (prayerType === 'request') {
+        prompt += `Create a heartfelt prayer request that:
+        - Is respectful and sincere
+        - Expresses genuine need for divine guidance or intervention
+        - Shows humility and faith
+        - Is appropriate for sharing with a faith community`;
+      } else if (prayerType === 'thanksgiving') {
+        prompt += `Create a thanksgiving prayer that:
+        - Expresses genuine gratitude
+        - Acknowledges blessings received
+        - Shows appreciation for divine provision
+        - Inspires others with gratitude`;
+      } else {
+        prompt += `Create a meaningful prayer that is sincere, respectful, and appropriate for a faith community`;
+      }
+
+      if (topic) {
+        prompt += `\n\nTopic: ${topic}`;
+      }
+
+      if (situation) {
+        prompt += `\n\nSituation: ${situation}`;
+      }
+
+      const toneGuidance = {
+        'hopeful': 'Use hopeful, uplifting language that expresses trust in divine goodness',
+        'urgent': 'Express the urgency while maintaining reverence and faith',
+        'grateful': 'Focus on thankfulness and appreciation for blessings',
+        'peaceful': 'Use calm, serene language that brings comfort and peace',
+        'humble': 'Express humility and submission to divine will'
+      };
+
+      if (tone && toneGuidance[tone]) {
+        prompt += `\n\nTone: ${toneGuidance[tone]}`;
+      }
+
+      prompt += `\n\nProvide 3 different prayer suggestions, each about 2-3 sentences long. Make them personal, meaningful, and suitable for sharing with a faith community. Format as JSON with this structure:
+      {
+        "suggestions": [
+          {
+            "title": "Brief title for the prayer",
+            "content": "The prayer text"
+          }
+        ]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are a compassionate spiritual assistant who helps people write meaningful prayers. Always maintain reverence, respect, and appropriateness for faith communities."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 800,
+        temperature: 0.7
+      });
+
+      const aiResponse = JSON.parse(response.choices[0].message.content);
+      
+      res.json({
+        suggestions: aiResponse.suggestions || [],
+        usage: {
+          topic: topic || '',
+          situation: situation || '',
+          tone: tone || 'balanced',
+          type: prayerType || 'general'
+        }
+      });
+
+    } catch (error) {
+      console.error('Error generating AI prayer assistance:', error);
+      res.status(500).json({ 
+        message: 'Failed to generate prayer suggestions. Please try again or write your prayer manually.' 
+      });
+    }
+  });
+
   // Prayer Circles endpoints
   app.post("/api/prayer-circles", isAuthenticated, async (req: any, res) => {
     try {
