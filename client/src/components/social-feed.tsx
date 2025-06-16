@@ -1194,8 +1194,8 @@ export default function SocialFeed() {
                       <div key={index} className="relative">
                         {media.type?.startsWith('image/') ? (
                           <img
-                            src={media.url || `/uploads/${media.filename}`}
-                            alt={media.filename || `Image ${index + 1}`}
+                            src={media.url}
+                            alt={media.name || media.filename || `Image ${index + 1}`}
                             className="w-full h-auto rounded-lg border border-gray-200 dark:border-gray-600"
                             onError={(e) => {
                               console.error('Failed to load image:', media);
@@ -1204,7 +1204,7 @@ export default function SocialFeed() {
                           />
                         ) : media.type?.startsWith('video/') ? (
                           <video
-                            src={media.url || `/uploads/${media.filename}`}
+                            src={media.url}
                             controls
                             className="w-full h-auto rounded-lg border border-gray-200 dark:border-gray-600"
                             onError={(e) => {
@@ -1219,7 +1219,7 @@ export default function SocialFeed() {
                             <div className="flex items-center space-x-2">
                               <FileText className="w-5 h-5 text-gray-500" />
                               <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                                {media.filename || 'Attached file'}
+                                {media.name || media.filename || 'Attached file'}
                               </span>
                             </div>
                           </div>
