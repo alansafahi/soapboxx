@@ -2184,6 +2184,33 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Bible verse search endpoint for social feed linking
+  app.get('/api/bible/search', isAuthenticated, async (req: any, res) => {
+    try {
+      const { q: query, limit = 6 } = req.query;
+      
+      if (!query || query.length < 2) {
+        return res.json([]);
+      }
+      
+      const limitNum = Math.min(parseInt(limit) || 6, 10); // Max 10 verses per search
+      
+      // Search through our comprehensive Bible database
+      const verses = await storage.getBibleVersesPaginated({
+        search: query,
+        limit: limitNum,
+        offset: 0
+      });
+      
+      console.log(`Bible search for "${query}" returned ${verses.length} verses`);
+      
+      res.json(verses);
+    } catch (error) {
+      console.error("Error searching Bible verses:", error);
+      res.status(500).json({ message: "Failed to search Bible verses" });
+    }
+  });
+
   // Random verse endpoint for inspiration
   app.get('/api/bible/random-verse', isAuthenticated, async (req: any, res) => {
     try {

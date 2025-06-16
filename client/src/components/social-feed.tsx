@@ -578,6 +578,13 @@ export default function SocialFeed() {
 
   const canPinPosts = userRole && ['pastor', 'lead_pastor', 'church_admin', 'admin', 'system_admin'].includes(userRole.role);
 
+  // Bible verse search functionality using our comprehensive database
+  const { data: searchedVerses, isLoading: isSearchingVerses } = useQuery({
+    queryKey: ['/api/bible/search', verseQuery],
+    enabled: !!verseQuery && verseQuery.length >= 2,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
   // Enhanced composer handlers
   const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -1090,29 +1097,42 @@ export default function SocialFeed() {
                 />
                 {verseQuery && (
                   <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                    {[
-                      { reference: "John 3:16", text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life." },
-                      { reference: "Philippians 4:13", text: "I can do all this through him who gives me strength." },
-                      { reference: "Romans 8:28", text: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose." },
-                      { reference: "Jeremiah 29:11", text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future." },
-                      { reference: "1 Corinthians 13:4-5", text: "Love is patient, love is kind. It does not envy, it does not boast, it is not proud." }
-                    ].filter(verse => 
-                      verse.reference.toLowerCase().includes(verseQuery.toLowerCase()) ||
-                      verse.text.toLowerCase().includes(verseQuery.toLowerCase())
-                    ).slice(0, 3).map((verse, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setLinkedVerse(verse);
-                          setShowVerseSearch(false);
-                          setVerseQuery("");
-                        }}
-                        className="w-full text-left p-2 hover:bg-purple-100 rounded text-sm"
-                      >
-                        <div className="font-medium text-purple-800">{verse.reference}</div>
-                        <div className="text-purple-600 text-xs truncate">{verse.text}</div>
-                      </button>
-                    ))}
+                    {isSearchingVerses ? (
+                      <div className="p-2 text-center text-sm text-gray-500">
+                        Searching 42,000+ verses...
+                      </div>
+                    ) : searchedVerses && searchedVerses.length > 0 ? (
+                      searchedVerses.slice(0, 6).map((verse: any, index: number) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setLinkedVerse({
+                              reference: verse.verseReference || verse.reference,
+                              text: verse.verseText || verse.text
+                            });
+                            setShowVerseSearch(false);
+                            setVerseQuery("");
+                          }}
+                          className="w-full text-left p-2 hover:bg-purple-100 rounded text-sm"
+                        >
+                          <div className="font-medium text-purple-800">
+                            {verse.verseReference || verse.reference}
+                          </div>
+                          <div className="text-purple-600 text-xs truncate">
+                            {verse.verseText || verse.text}
+                          </div>
+                          {verse.category && (
+                            <div className="text-xs text-purple-500 mt-1">
+                              Category: {verse.category}
+                            </div>
+                          )}
+                        </button>
+                      ))
+                    ) : verseQuery.length >= 2 ? (
+                      <div className="p-2 text-center text-sm text-gray-500">
+                        No verses found for "{verseQuery}"
+                      </div>
+                    ) : null}
                   </div>
                 )}
               </div>
