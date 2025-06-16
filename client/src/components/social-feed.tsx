@@ -851,14 +851,17 @@ export default function SocialFeed() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-              <Textarea
-                ref={textareaRef}
-                placeholder="Share something with your community..."
-                value={newPost}
-                onChange={handleTextChange}
-                className="min-h-[80px] resize-none border-gray-200 dark:border-gray-600"
-              />
-              
+                <Textarea
+                  ref={textareaRef}
+                  placeholder="Share something with your community..."
+                  value={newPost}
+                  onChange={handleTextChange}
+                  className="min-h-[80px] resize-none border-gray-200 dark:border-gray-600"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
               {/* Media Preview */}
               {attachedMedia.length > 0 && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
@@ -1209,14 +1212,78 @@ export default function SocialFeed() {
               </div>
             )}
 
-            <Button 
-              onClick={handleCreatePost}
-              disabled={!newPost.trim() || createPostMutation.isPending}
-              className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-6 py-2 border-0"
-            >
-              <Send className="w-4 h-4 mr-2 text-white" />
-              {createPostMutation.isPending ? 'Posting...' : 'Share'}
-            </Button>
+            {/* Action Buttons Row */}
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center space-x-4">
+                {/* Media Upload */}
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*,audio/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-600 hover:text-green-600 hover:bg-green-50"
+                    type="button"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Photo
+                  </Button>
+                </label>
+
+                {/* Audio Recording */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={isRecording ? stopRecording : startRecording}
+                  className={`${
+                    isRecording 
+                      ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
+                      : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                  }`}
+                >
+                  <Mic className="w-4 h-4 mr-2" />
+                  {isRecording ? 'Stop' : 'Voice'}
+                </Button>
+
+                {/* Mood Selector */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowMoodDropdown(!showMoodDropdown)}
+                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50"
+                  >
+                    <Smile className="w-4 h-4 mr-2" />
+                    Feeling
+                  </Button>
+                </div>
+
+                {/* Bible Verse Link */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowVerseSearch(!showVerseSearch)}
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+                >
+                  <Book className="w-4 h-4 mr-2" />
+                  Verse
+                </Button>
+              </div>
+
+              <Button 
+                onClick={handleCreatePost}
+                disabled={!newPost.trim() || createPostMutation.isPending}
+                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-6 py-2 border-0"
+              >
+                <Send className="w-4 h-4 mr-2 text-white" />
+                {createPostMutation.isPending ? 'Posting...' : 'Share'}
+              </Button>
+            </div>
           </div>
         </CardContent>
         </Card>
@@ -1246,7 +1313,7 @@ export default function SocialFeed() {
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
                     <AvatarImage src={post.author.profileImage} />
-                    <AvatarFallback className="bg-faith-blue text-white">
+                    <AvatarFallback className="bg-purple-600 text-white">
                       {post.author.name[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
