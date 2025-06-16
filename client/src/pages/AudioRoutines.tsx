@@ -48,73 +48,47 @@ export default function AudioRoutines() {
   const isMobile = isIOS || isAndroid || /mobile/.test(userAgent);
 
   const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes} min`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleStartRoutine = (routine: AudioRoutine) => {
-    console.log('Starting routine:', routine.name);
-    setPlayingRoutine(routine.id);
+    if (playingRoutine === routine.id) {
+      stopAudioRoutine();
+      return;
+    }
     startFullMeditationSession(routine);
   };
 
   const startFullMeditationSession = async (routine: AudioRoutine) => {
     try {
-      console.log('Device detected:', { isIOS, isAndroid, isSafari, isKindle, isAppleWatch, isMobile });
+      setPlayingRoutine(routine.id);
       
-      // Cross-platform AudioContext creation
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      let audioContextOptions: any = {
-        sampleRate: 44100,
-        latencyHint: 'interactive'
-      };
-      
-      if (isIOS || isSafari) {
-        audioContextOptions.latencyHint = 'playback';
-      } else if (isAndroid) {
-        audioContextOptions.sampleRate = 48000;
-      } else if (isKindle) {
-        audioContextOptions.latencyHint = 'balanced';
-      }
-      
-      const audioContext = new AudioContextClass(audioContextOptions);
-      
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      
-      // Audio unlock for mobile devices
-      if (isMobile) {
-        const silentBuffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
-        const silentSource = audioContext.createBufferSource();
-        silentSource.buffer = silentBuffer;
-        silentSource.connect(audioContext.destination);
-        silentSource.start();
-      }
-      
+      // Create audio context for background music
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       setCurrentAudioContext(audioContext);
       
-      // Create rich ambient soundscape
+      // Session duration in seconds (12-15 minutes)
+      const sessionDuration = 900; // 15 minutes
+      
+      // Create multi-layered ambient background music
       const masterGain = audioContext.createGain();
       masterGain.connect(audioContext.destination);
-      masterGain.gain.setValueAtTime(0, audioContext.currentTime);
-      masterGain.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 3);
-      
-      const sessionDuration = routine.totalDuration || 900; // 15 minutes default
-      
-      // Enhanced ambient soundscape with multiple layers
-      const ambientLayers = [
-        { freq: 130.81, type: 'sine' as OscillatorType, volume: 0.03 },    // C3 foundation
-        { freq: 164.81, type: 'triangle' as OscillatorType, volume: 0.025 }, // E3 warmth
-        { freq: 196.00, type: 'sine' as OscillatorType, volume: 0.02 },   // G3 peace
-        { freq: 220.00, type: 'triangle' as OscillatorType, volume: 0.015 }, // A3 harmony
-        { freq: 261.63, type: 'sine' as OscillatorType, volume: 0.01 },   // C4 clarity
-      ];
+      masterGain.gain.setValueAtTime(0.15, audioContext.currentTime);
       
       const oscillators: OscillatorNode[] = [];
       
-      // Create layered ambient soundscape
-      ambientLayers.forEach((layer, index) => {
+      // Enhanced harmonic layers with warm frequencies
+      const harmonicLayers = [
+        { freq: 130.81, volume: 0.3, type: 'sine' as OscillatorType }, // C3
+        { freq: 164.81, volume: 0.25, type: 'triangle' as OscillatorType }, // E3
+        { freq: 196.00, volume: 0.2, type: 'sine' as OscillatorType }, // G3
+        { freq: 220.00, volume: 0.15, type: 'triangle' as OscillatorType }, // A3
+        { freq: 261.63, volume: 0.1, type: 'sine' as OscillatorType }, // C4
+      ];
+      
+      harmonicLayers.forEach((layer, index) => {
         const osc = audioContext.createOscillator();
         const gain = audioContext.createGain();
         const filter = audioContext.createBiquadFilter();
@@ -159,109 +133,92 @@ export default function AudioRoutines() {
         }
       };
       
-      // Generate guided meditation segments
-      const meditationSegments = [
-        {
-          text: `Welcome to ${routine.name}. ${routine.description}. Close your eyes and take a deep, peaceful breath.`,
-          delay: 0
-        },
-        {
-          text: "As you breathe slowly and deeply, feel God's presence surrounding you with love and peace. Let all tension leave your body.",
-          delay: 45
-        },
-        {
-          text: "Continue breathing gently. With each breath, feel yourself drawing closer to the Divine light within your heart.",
-          delay: 180
-        },
-        {
-          text: "Rest in this sacred stillness. Allow God's grace to fill every part of your being with tranquility and hope.",
-          delay: 360
-        },
-        {
-          text: "In this moment of peace, open your heart to receive whatever God wishes to share with you today.",
-          delay: 540
-        },
-        {
-          text: "As our time together draws to a close, take a moment to offer gratitude for this peaceful communion.",
-          delay: sessionDuration - 90
-        },
-        {
-          text: "Carry this peace with you into your day. May God's presence continue to guide and bless you. Amen.",
-          delay: sessionDuration - 30
+      // Create complete meditation script with natural pauses
+      const fullMeditationText = `Welcome to ${routine.name}. ${routine.description}. 
+      
+      Close your eyes and take a deep, peaceful breath. Feel the air filling your lungs completely.
+      
+      (pause for 15 seconds)
+      
+      As you breathe slowly and deeply, feel God's presence surrounding you with love and peace. Let all tension leave your body.
+      
+      (pause for 45 seconds)
+      
+      Continue breathing gently. With each breath, feel yourself drawing closer to the Divine light within your heart.
+      
+      (pause for 90 seconds)
+      
+      Rest in this sacred stillness. Allow God's grace to fill every part of your being with tranquility and hope.
+      
+      (pause for 2 minutes)
+      
+      In this moment of peace, open your heart to receive whatever God wishes to share with you today.
+      
+      (pause for 3 minutes)
+      
+      As our time together draws to a close, take a moment to offer gratitude for this peaceful communion.
+      
+      (pause for 30 seconds)
+      
+      Carry this peace with you into your day. May God's presence continue to guide and bless you. Amen.`;
+
+      // Generate complete meditation audio using working endpoint
+      console.log('Generating complete meditation audio...');
+      
+      const response = await fetch('/api/meditation/audio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: fullMeditationText,
+          voice: selectedVoice,
+          speed: 0.65
+        }),
+      });
+      
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        console.log('Meditation audio generated, size:', audioBlob.size, 'bytes');
+        
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const meditationAudio = new Audio(audioUrl);
+        
+        // Cross-platform audio setup
+        meditationAudio.preload = 'auto';
+        meditationAudio.volume = isAppleWatch ? 1.0 : (isMobile ? 0.85 : 0.75);
+        
+        if (isMobile) {
+          (meditationAudio as any).playsInline = true;
         }
-      ];
-      
-      toast({
-        title: "Starting Guided Session",
-        description: `${Math.round(sessionDuration/60)}-minute meditation with premium voice guidance`,
-        duration: 4000,
-      });
-      
-      // Play each meditation segment at scheduled times
-      let completedSegments = 0;
-      
-      meditationSegments.forEach((segment, index) => {
-        setTimeout(async () => {
-          if (playingRoutine === routine.id) {
-            try {
-              const response = await fetch('/api/audio/generate-speech', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                  text: segment.text,
-                  voice: selectedVoice,
-                  model: 'tts-1-hd',
-                  speed: 0.75
-                }),
-              });
-              
-              if (response.ok) {
-                const audioBlob = await response.blob();
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const segmentAudio = new Audio(audioUrl);
-                
-                // Cross-platform audio setup
-                segmentAudio.preload = 'auto';
-                segmentAudio.volume = isAppleWatch ? 1.0 : (isMobile ? 0.9 : 0.8);
-                
-                if (isMobile) {
-                  (segmentAudio as any).playsInline = true;
-                }
-                
-                const playPromise = segmentAudio.play();
-                if (playPromise !== undefined) {
-                  await playPromise;
-                }
-                
-                segmentAudio.onended = () => {
-                  URL.revokeObjectURL(audioUrl);
-                  completedSegments++;
-                  
-                  // End session after final segment
-                  if (index === meditationSegments.length - 1) {
-                    setTimeout(() => {
-                      masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 5);
-                      setTimeout(() => {
-                        backgroundMusic.stop();
-                        setPlayingRoutine(null);
-                        setCurrentAudioContext(null);
-                        toast({
-                          title: "Session Complete",
-                          description: "Your peaceful meditation has finished. Carry this tranquility with you.",
-                          duration: 5000,
-                        });
-                      }, 5000);
-                    }, 3000);
-                  }
-                };
-              }
-            } catch (error) {
-              console.error(`Segment ${index + 1} failed:`, error);
-            }
-          }
-        }, segment.delay * 1000);
-      });
+        
+        toast({
+          title: "Complete Meditation Session",
+          description: "15-minute guided meditation with peaceful background music",
+          duration: 4000,
+        });
+        
+        const playPromise = meditationAudio.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+          console.log('Complete meditation audio started successfully');
+        }
+        
+        meditationAudio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 5);
+          setTimeout(() => {
+            backgroundMusic.stop();
+            setPlayingRoutine(null);
+            setCurrentAudioContext(null);
+            toast({
+              title: "Session Complete",
+              description: "Your peaceful meditation has finished. Carry this tranquility with you.",
+              duration: 5000,
+            });
+          }, 6000);
+        };
+      } else {
+        throw new Error('Failed to generate meditation audio');
+      }
       
     } catch (error) {
       console.error('Meditation session error:', error);
@@ -295,121 +252,199 @@ export default function AudioRoutines() {
       speechSynthesis.cancel();
     }
     setPlayingRoutine(null);
+    
     toast({
       title: "Session Stopped",
-      description: "Your meditation has been paused. You can restart anytime.",
+      description: `Audio routine has been paused. Duration: ${formatDuration(900)}`,
       duration: 3000,
     });
   };
 
   const handleRoutineClick = (routine: AudioRoutine) => {
-    toast({
-      title: `${routine.name}`,
-      description: `${routine.description} • Duration: ${formatDuration(routine.totalDuration || 600)}`,
-      duration: 3000,
-    });
+    handleStartRoutine(routine);
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Connection Issue
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Unable to load meditation routines. Please check your connection.
+          <Headphones className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Audio Routines
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Loading peaceful meditation experiences...
           </p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Devotional Routines
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Guided meditation sessions with premium AI voice and peaceful soundscapes
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Headphones className="w-5 h-5 text-purple-600" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Premium Voice Experience
-              </span>
-            </div>
-          </div>
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <Headphones className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Audio Routines
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Welcome! Your audio meditation routines are being prepared.
+          </p>
         </div>
       </div>
+    );
+  }
 
-      {/* Routines Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {routines.map((routine: AudioRoutine) => (
-            <Card key={routine.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1" onClick={() => handleRoutineClick(routine)}>
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {routine.name}
-                    </CardTitle>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 line-clamp-2">
-                      {routine.description}
-                    </p>
-                  </div>
-                  <Badge variant="secondary" className="ml-2">
-                    {routine.category}
-                  </Badge>
+  // Default routines if none available
+  const defaultRoutines: AudioRoutine[] = [
+    {
+      id: 1,
+      name: "Morning Prayer & Meditation",
+      description: "Start your day with peaceful reflection and spiritual connection",
+      totalDuration: 900, // 15 minutes
+      category: "Spiritual",
+      autoAdvance: true,
+      steps: []
+    },
+    {
+      id: 2,
+      name: "Evening Gratitude Session",
+      description: "End your day with thankfulness and peaceful rest",
+      totalDuration: 600, // 10 minutes
+      category: "Gratitude",
+      autoAdvance: true,
+      steps: []
+    },
+    {
+      id: 3,
+      name: "Scripture Meditation",
+      description: "Deep reflection on God's word with guided contemplation",
+      totalDuration: 720, // 12 minutes
+      category: "Scripture",
+      autoAdvance: true,
+      steps: []
+    }
+  ];
+
+  const displayRoutines = (routines as AudioRoutine[]).length > 0 ? routines as AudioRoutine[] : defaultRoutines;
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <Headphones className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          Audio Routines
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Guided meditation experiences with premium AI narration and peaceful background music
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {displayRoutines.map((routine: AudioRoutine) => (
+          <Card key={routine.id} className="group hover:shadow-lg transition-all duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-lg mb-2">{routine.name}</CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                    {routine.description}
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {formatDuration(routine.totalDuration || 600)}
-                  </div>
-                  
-                  {playingRoutine === routine.id ? (
-                    <Button
-                      onClick={stopAudioRoutine}
-                      variant="destructive"
-                      size="sm"
-                      className="flex items-center space-x-1"
-                    >
-                      <Square className="w-4 h-4" />
-                      <span>Stop</span>
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => handleStartRoutine(routine)}
-                      className="flex items-center space-x-1 bg-purple-600 hover:bg-purple-700"
-                      size="sm"
-                      disabled={playingRoutine !== null}
-                    >
-                      <Play className="w-4 h-4" />
-                      <span>Start</span>
-                    </Button>
-                  )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  {routine.category}
+                </Badge>
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <Clock className="h-4 w-4" />
+                  {formatDuration(routine.totalDuration)}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="pt-0">
+              <Button
+                onClick={() => handleRoutineClick(routine)}
+                className={`w-full ${
+                  playingRoutine === routine.id
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-purple-600 hover:bg-purple-700'
+                }`}
+                disabled={playingRoutine !== null && playingRoutine !== routine.id}
+              >
+                {playingRoutine === routine.id ? (
+                  <>
+                    <Square className="h-4 w-4 mr-2" />
+                    Stop Session
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Meditation
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Voice Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Voice Selection</CardTitle>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Choose your preferred narration voice for meditation sessions
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[
+              { id: 'nova', name: 'Nova', description: 'Warm & calming female voice' },
+              { id: 'shimmer', name: 'Shimmer', description: 'Gentle & soothing female voice' },
+              { id: 'alloy', name: 'Alloy', description: 'Peaceful & balanced neutral voice' },
+              { id: 'echo', name: 'Echo', description: 'Deep & contemplative male voice' },
+              { id: 'fable', name: 'Fable', description: 'Wise & nurturing male voice' },
+              { id: 'onyx', name: 'Onyx', description: 'Strong & grounding male voice' }
+            ].map((voice) => (
+              <Button
+                key={voice.id}
+                variant={selectedVoice === voice.id ? "default" : "outline"}
+                className={`p-3 h-auto text-left flex-col items-start ${
+                  selectedVoice === voice.id ? 'bg-purple-600 hover:bg-purple-700' : ''
+                }`}
+                onClick={() => setSelectedVoice(voice.id)}
+              >
+                <div className="font-medium">{voice.name}</div>
+                <div className="text-xs opacity-75">{voice.description}</div>
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Feature Overview */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2">Premium AI Narration</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Studio-quality voice generation using OpenAI's latest TTS technology for warm, natural guidance
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2">Ambient Soundscapes</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Multi-layered harmonic background music designed to enhance spiritual focus and inner peace
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

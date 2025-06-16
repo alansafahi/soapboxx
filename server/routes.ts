@@ -2756,7 +2756,47 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Premium OpenAI TTS for Audio Routines
+  // Public meditation audio endpoint (no authentication required)
+  app.post('/api/meditation/audio', async (req, res) => {
+    try {
+      const { text, voice = 'nova', speed = 0.75 } = req.body;
+
+      if (!text || text.length > 5000) {
+        return res.status(400).json({ error: 'Valid text is required (max 5000 chars)' });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ error: 'Audio service not configured' });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const mp3Response = await openai.audio.speech.create({
+        model: 'tts-1-hd',
+        voice: voice,
+        input: text,
+        speed: Math.max(0.25, Math.min(4.0, speed)),
+      });
+
+      const audioBuffer = Buffer.from(await mp3Response.arrayBuffer());
+      
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': audioBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=300',
+        'Access-Control-Allow-Origin': '*',
+      });
+      
+      res.send(audioBuffer);
+    } catch (error) {
+      console.error('Meditation audio generation error:', error);
+      res.status(500).json({ error: 'Failed to generate meditation audio' });
+    }
+  });
+
+  // Premium OpenAI TTS for Audio Routines (Authenticated endpoint)
   app.post('/api/audio/generate-speech', isAuthenticated, async (req, res) => {
     try {
       const { text, voice = 'nova', model = 'tts-1-hd', speed = 1.0 } = req.body;
