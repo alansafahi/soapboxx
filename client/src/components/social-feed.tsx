@@ -578,6 +578,10 @@ export default function SocialFeed() {
   });
 
   const canPinPosts = userRole && ['pastor', 'lead_pastor', 'church_admin', 'admin', 'system_admin'].includes(userRole.role);
+  
+  // Debug logging for role detection
+  console.log('Current user role:', userRole);
+  console.log('Can pin posts:', canPinPosts);
 
   // Bible verse search functionality using our comprehensive database
   const { data: searchedVerses, isLoading: isSearchingVerses } = useQuery({
