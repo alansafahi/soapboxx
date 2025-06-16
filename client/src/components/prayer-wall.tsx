@@ -111,15 +111,21 @@ export default function PrayerWall() {
 
   const fetchSupportMessages = async (prayerId: number) => {
     try {
-      const response = await fetch(`/api/prayers/${prayerId}/support`);
-      if (response.ok) {
-        const messages = await response.json();
-        setSupportMessages(prev => {
-          const newMap = new Map(prev);
-          newMap.set(prayerId, messages);
-          return newMap;
-        });
+      const response = await fetch(`/api/prayers/${prayerId}/support`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        console.error(`Failed to fetch support messages: ${response.status}`);
+        return;
       }
+      
+      const messages = await response.json();
+      setSupportMessages(prev => {
+        const newMap = new Map(prev);
+        newMap.set(prayerId, messages || []);
+        return newMap;
+      });
     } catch (error) {
       console.error("Error fetching support messages:", error);
     }
@@ -263,7 +269,21 @@ export default function PrayerWall() {
   // Support comment mutation
   const supportCommentMutation = useMutation({
     mutationFn: async ({ prayerRequestId, content }: { prayerRequestId: number; content: string }) => {
-      await apiRequest("POST", `/api/prayers/${prayerRequestId}/support`, { content });
+      const response = await fetch(`/api/prayers/${prayerRequestId}/support`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ content })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send support message');
+      }
+      
+      return response.json();
     },
     onSuccess: (_, { prayerRequestId }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });

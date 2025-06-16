@@ -4698,6 +4698,45 @@ Return JSON with this exact structure:
     }
   });
 
+  app.post('/api/prayers/:id/support', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { content } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: "Support message cannot be empty" });
+      }
+      
+      const supportResponse = await storage.prayForRequest({
+        prayerRequestId,
+        userId,
+        responseType: 'support',
+        content: content.trim(),
+      });
+      
+      res.status(201).json(supportResponse);
+    } catch (error) {
+      console.error("Error adding support message:", error);
+      res.status(500).json({ message: "Failed to add support message" });
+    }
+  });
+
+  app.get('/api/prayers/:id/support', async (req, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const supportMessages = await storage.getPrayerSupportMessages(prayerRequestId);
+      res.json(supportMessages);
+    } catch (error) {
+      console.error("Error fetching support messages:", error);
+      res.status(500).json({ message: "Failed to fetch support messages" });
+    }
+  });
+
   // Prayer Circles endpoints
   app.post("/api/prayer-circles", isAuthenticated, async (req: any, res) => {
     try {
