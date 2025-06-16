@@ -4604,6 +4604,28 @@ Return JSON with this exact structure:
       console.log("Processed prayer data:", prayerData);
       const prayer = await storage.createPrayerRequest(prayerData);
       console.log("Created prayer:", prayer);
+      
+      // Also create a corresponding social feed post so prayers appear in the main feed
+      try {
+        const feedPost = await storage.createDiscussion({
+          title: `Prayer Request: ${prayer.title}`,
+          content: prayer.content,
+          authorId: userId,
+          churchId: prayer.churchId,
+          category: 'prayer',
+          audience: prayer.isPublic ? 'public' : 'church',
+          isPublic: prayer.isPublic,
+          mood: null,
+          suggestedVerses: null,
+          attachedMedia: null,
+          linkedVerse: null
+        });
+        console.log("Created corresponding feed post for prayer:", feedPost?.id);
+      } catch (feedError) {
+        // Don't fail the prayer creation if feed post fails
+        console.error("Failed to create feed post for prayer:", feedError);
+      }
+      
       res.status(201).json(prayer);
     } catch (error) {
       console.error("Error creating prayer request:", error);
