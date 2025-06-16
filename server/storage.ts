@@ -5445,48 +5445,6 @@ export class DatabaseStorage implements IStorage {
       },
       {
         id: 2,
-        name: "Evening Gratitude",
-        description: "End your day with thanksgiving and peaceful rest",
-        totalDuration: 720,
-        category: "evening",
-        autoAdvance: true,
-        steps: [
-          {
-            id: "step-5",
-            type: "reflection",
-            title: "Day Review",
-            content: "As evening comes, take a moment to reflect on the gifts of this day. What moments of grace did you experience? Where did you see God's hand at work?",
-            duration: 180,
-            voiceSettings: { voice: "warm-female", speed: 0.9, musicBed: "gentle-piano" }
-          },
-          {
-            id: "step-6",
-            type: "prayer",
-            title: "Gratitude Prayer",
-            content: "Thank you, loving God, for the blessings of this day - both seen and unseen. For breath in my lungs, love in my heart, and your constant presence by my side.",
-            duration: 240,
-            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "ambient-strings" }
-          },
-          {
-            id: "step-7",
-            type: "scripture",
-            title: "Rest in God's Peace",
-            content: "Let these words bring you peace: 'In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.' - Psalm 4:8",
-            duration: 180,
-            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
-          },
-          {
-            id: "step-8",
-            type: "meditation",
-            title: "Release and Rest",
-            content: "Release the day into God's hands. Let go of what was left undone, forgive what went wrong, and rest in the assurance of God's unfailing love.",
-            duration: 120,
-            voiceSettings: { voice: "peaceful-female", speed: 0.7, musicBed: "gentle-piano" }
-          }
-        ]
-      },
-      {
-        id: 3,
         name: "Midday Reset",
         description: "A quick spiritual refresh for busy schedules",
         totalDuration: 360,
@@ -5608,6 +5566,48 @@ export class DatabaseStorage implements IStorage {
             content: "Speak to God about what you've heard. Share your thoughts, feelings, and responses to His Word. Listen for His gentle reply in the silence of your heart.",
             duration: 120,
             voiceSettings: { voice: "warm-female", speed: 1.0, musicBed: "worship-instrumental" }
+          }
+        ]
+      },
+      {
+        id: 6,
+        name: "Evening Gratitude",
+        description: "End your day with thanksgiving and peaceful rest",
+        totalDuration: 720,
+        category: "evening",
+        autoAdvance: true,
+        steps: [
+          {
+            id: "step-5",
+            type: "reflection",
+            title: "Day Review",
+            content: "As evening comes, take a moment to reflect on the gifts of this day. What moments of grace did you experience? Where did you see God's hand at work?",
+            duration: 180,
+            voiceSettings: { voice: "warm-female", speed: 0.9, musicBed: "gentle-piano" }
+          },
+          {
+            id: "step-6",
+            type: "prayer",
+            title: "Gratitude Prayer",
+            content: "Thank you, loving God, for the blessings of this day - both seen and unseen. For breath in my lungs, love in my heart, and your constant presence by my side.",
+            duration: 240,
+            voiceSettings: { voice: "gentle-male", speed: 1.0, musicBed: "ambient-strings" }
+          },
+          {
+            id: "step-7",
+            type: "scripture",
+            title: "Rest in God's Peace",
+            content: "Let these words bring you peace: 'In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.' - Psalm 4:8",
+            duration: 180,
+            voiceSettings: { voice: "peaceful-female", speed: 0.8, musicBed: "nature-sounds" }
+          },
+          {
+            id: "step-8",
+            type: "meditation",
+            title: "Release and Rest",
+            content: "Release the day into God's hands. Let go of what was left undone, forgive what went wrong, and rest in the assurance of God's unfailing love.",
+            duration: 120,
+            voiceSettings: { voice: "peaceful-female", speed: 0.7, musicBed: "gentle-piano" }
           }
         ]
       }
