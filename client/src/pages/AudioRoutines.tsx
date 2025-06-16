@@ -77,8 +77,13 @@ export default function AudioRoutines() {
     },
     'ocean-waves': {
       name: 'Ocean Waves',
-      description: 'Rhythmic waves for deep relaxation',
+      description: 'Gentle rhythmic waves for deep relaxation',
       icon: '🌊'
+    },
+    'forest-rain': {
+      name: 'Forest Rain',
+      description: 'Peaceful raindrops on leaves with gentle nature ambience',
+      icon: '🌧️'
     },
     'soft-piano': {
       name: 'Soft Piano',
@@ -184,26 +189,29 @@ export default function AudioRoutines() {
   };
 
   const createOceanWaves = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
-    // Wave simulation using low-frequency oscillations
-    for (let i = 0; i < 3; i++) {
+    // Improved ocean waves with deeper, more realistic frequencies
+    const waveFreqs = [35, 55, 75, 95]; // Lower frequencies for authentic ocean sounds
+    
+    waveFreqs.forEach((freq, i) => {
       const osc = audioContext.createOscillator();
       const gain = audioContext.createGain();
       const filter = audioContext.createBiquadFilter();
       
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(0.2 + (i * 0.1), audioContext.currentTime); // Very low frequencies
+      osc.frequency.setValueAtTime(freq, audioContext.currentTime);
       
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(300, audioContext.currentTime);
+      filter.frequency.setValueAtTime(180 + (i * 30), audioContext.currentTime);
+      filter.Q.setValueAtTime(1.2, audioContext.currentTime);
       
-      gain.gain.setValueAtTime(0.08 - (i * 0.02), audioContext.currentTime);
-      
-      // Add wave-like amplitude modulation
+      // Enhanced wave-like amplitude modulation for realistic ocean rhythm
       const lfo = audioContext.createOscillator();
       const lfoGain = audioContext.createGain();
-      lfo.frequency.setValueAtTime(0.05 + (i * 0.02), audioContext.currentTime);
+      lfo.frequency.setValueAtTime(0.08 + (i * 0.03), audioContext.currentTime); // Slower, more natural wave rhythm
       lfo.type = 'sine';
-      lfoGain.gain.setValueAtTime(0.04, audioContext.currentTime);
+      lfoGain.gain.setValueAtTime(0.06 - (i * 0.01), audioContext.currentTime);
+      
+      gain.gain.setValueAtTime(0.1 - (i * 0.02), audioContext.currentTime);
       
       lfo.connect(lfoGain);
       lfoGain.connect(gain.gain);
@@ -218,7 +226,83 @@ export default function AudioRoutines() {
       lfo.stop(audioContext.currentTime + duration);
       
       oscillators.push(osc);
+    });
+  };
+
+  const createForestRain = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    // Create gentle raindrops with varying frequencies and timing
+    const rainDrops = 15; // Number of raindrop sounds
+    
+    for (let i = 0; i < rainDrops; i++) {
+      const startTime = audioContext.currentTime + (Math.random() * duration * 0.9);
+      const freq = 800 + (Math.random() * 1500); // Random frequencies for natural rain variation
+      
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+      
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(500, startTime);
+      filter.Q.setValueAtTime(0.5, startTime);
+      
+      // Create raindrop envelope - quick attack, gentle decay
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.02 + (Math.random() * 0.01), startTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3 + (Math.random() * 0.5));
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      
+      osc.start(startTime);
+      osc.stop(startTime + 1);
+      oscillators.push(osc);
     }
+    
+    // Add subtle forest ambience with low-frequency wind sounds
+    const ambientFreqs = [80, 120, 160];
+    ambientFreqs.forEach((freq, index) => {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(200 + (index * 50), audioContext.currentTime);
+      filter.Q.setValueAtTime(0.5, audioContext.currentTime);
+      
+      // Very subtle forest wind ambience
+      gain.gain.setValueAtTime(0, audioContext.currentTime);
+      gain.gain.linearRampToValueAtTime(0.015 - (index * 0.003), audioContext.currentTime + 5);
+      gain.gain.setValueAtTime(0.012 - (index * 0.002), audioContext.currentTime + duration - 5);
+      gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+      
+      // Add gentle modulation for natural wind movement
+      const lfo = audioContext.createOscillator();
+      const lfoGain = audioContext.createGain();
+      lfo.frequency.setValueAtTime(0.15 + (index * 0.05), audioContext.currentTime);
+      lfo.type = 'sine';
+      lfoGain.gain.setValueAtTime(15, audioContext.currentTime);
+      
+      lfo.connect(lfoGain);
+      lfoGain.connect(filter.frequency);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      
+      osc.start(audioContext.currentTime);
+      osc.stop(audioContext.currentTime + duration);
+      lfo.start(audioContext.currentTime);
+      lfo.stop(audioContext.currentTime + duration);
+      
+      oscillators.push(osc);
+    });
   };
 
   const createSoftPiano = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
@@ -451,22 +535,64 @@ export default function AudioRoutines() {
           createNatureSounds(audioContext, masterGain, audioSources, previewDuration);
           break;
         case 'ocean-waves':
-          // Fixed ocean waves for preview
-          for (let i = 0; i < 2; i++) {
+          // Improved ocean waves for preview - more realistic wave sounds
+          const waveFreqs = [40, 65, 90]; // Lower frequencies for deeper wave sounds
+          waveFreqs.forEach((freq, index) => {
             const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
             
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(60 + (i * 20), audioContext.currentTime);
-            gain.gain.setValueAtTime(0.1 - (i * 0.03), audioContext.currentTime);
+            osc.frequency.setValueAtTime(freq, audioContext.currentTime);
             
-            osc.connect(gain);
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(200 + (index * 50), audioContext.currentTime);
+            filter.Q.setValueAtTime(1, audioContext.currentTime);
+            
+            // Create wave-like envelope
+            gain.gain.setValueAtTime(0, audioContext.currentTime);
+            gain.gain.linearRampToValueAtTime(0.08 - (index * 0.02), audioContext.currentTime + 1.5);
+            gain.gain.linearRampToValueAtTime(0.04 - (index * 0.01), audioContext.currentTime + previewDuration - 1);
+            gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + previewDuration);
+            
+            osc.connect(filter);
+            filter.connect(gain);
             gain.connect(masterGain);
             
             osc.start(audioContext.currentTime);
             osc.stop(audioContext.currentTime + previewDuration);
             oscillators.push(osc);
-          }
+          });
+          break;
+        case 'forest-rain':
+          // Forest rain preview - gentle raindrops with nature ambience
+          const rainFreqs = [800, 1200, 1600, 2000]; // Higher frequencies for raindrop sounds
+          rainFreqs.forEach((freq, index) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq + (Math.random() * 200), audioContext.currentTime);
+            
+            filter.type = 'highpass';
+            filter.frequency.setValueAtTime(600, audioContext.currentTime);
+            filter.Q.setValueAtTime(0.5, audioContext.currentTime);
+            
+            // Create gentle raindrop envelope
+            gain.gain.setValueAtTime(0, audioContext.currentTime);
+            gain.gain.linearRampToValueAtTime(0.03 - (index * 0.005), audioContext.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.02 - (index * 0.003), audioContext.currentTime + previewDuration - 0.5);
+            gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + previewDuration);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+            
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + previewDuration);
+            oscillators.push(osc);
+          });
           break;
         case 'soft-piano':
           createSoftPiano(audioContext, masterGain, oscillators, previewDuration);
@@ -681,6 +807,9 @@ export default function AudioRoutines() {
           case 'ocean-waves':
             createOceanWaves(audioContext, masterGain, oscillators, sessionDuration);
             break;
+          case 'forest-rain':
+            createForestRain(audioContext, masterGain, oscillators, sessionDuration);
+            break;
           case 'soft-piano':
             createSoftPiano(audioContext, masterGain, oscillators, sessionDuration);
             break;
@@ -695,6 +824,9 @@ export default function AudioRoutines() {
             break;
           case 'christian-hymn':
             createChristianHymn(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'forest-rain':
+            createForestRain(audioContext, masterGain, oscillators, sessionDuration);
             break;
         }
       }
