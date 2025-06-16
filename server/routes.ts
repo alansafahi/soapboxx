@@ -2670,11 +2670,41 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
         const remainingCount = parseInt(count.toString()) - selectedVerses.length;
         const usedIds = selectedVerses.map(v => v.id);
         
-        // Get mood-appropriate categories for fallback
+        // Comprehensive mood-appropriate categories for fallback
         const moodCategoryMap = {
+          // Emotional & Spiritual Support
+          'lonely': ['Comfort', 'Love', 'Peace', 'Hope'],
+          'overwhelmed': ['Peace', 'Strength', 'Comfort', 'Hope'],
+          'shame': ['Forgiveness', 'Grace', 'Love', 'Hope'],
+          'doubting': ['Faith', 'Strength', 'Wisdom', 'Hope'],
+          'needing-forgiveness': ['Forgiveness', 'Grace', 'Love', 'Peace'],
+          'struggling-sin': ['Forgiveness', 'Strength', 'Grace', 'Purpose'],
+          
+          // Growth & Transformation
+          'seeking-purpose': ['Purpose', 'Wisdom', 'Faith', 'Strength'],
+          'starting-over': ['Hope', 'Purpose', 'Strength', 'Grace'],
+          'wanting-growth': ['Wisdom', 'Strength', 'Purpose', 'Faith'],
+          'building-confidence': ['Strength', 'Faith', 'Purpose', 'Hope'],
+          'desiring-wisdom': ['Wisdom', 'Faith', 'Purpose', 'Peace'],
+          'serving-others': ['Love', 'Purpose', 'Grace', 'Joy'],
+          
+          // Life Situations
+          'big-decision': ['Wisdom', 'Peace', 'Faith', 'Purpose'],
+          'waiting': ['Peace', 'Hope', 'Faith', 'Strength'],
+          'relationships': ['Love', 'Forgiveness', 'Peace', 'Wisdom'],
+          'change': ['Hope', 'Strength', 'Peace', 'Faith'],
+          'injustice': ['Strength', 'Hope', 'Peace', 'Faith'],
+          'illness': ['Comfort', 'Hope', 'Peace', 'Strength'],
+          
+          // Faith & Worship
+          'hungry-for-god': ['Worship', 'Love', 'Joy', 'Purpose'],
+          'worshipful': ['Worship', 'Joy', 'Love', 'Grace'],
+          'fasting-prayer': ['Purpose', 'Strength', 'Faith', 'Peace'],
+          'grateful': ['Joy', 'Worship', 'Grace', 'Love'],
+          
+          // Legacy moods for backwards compatibility
           'peaceful': ['Peace', 'Comfort', 'Hope'],
           'seeking-guidance': ['Wisdom', 'Faith', 'Purpose'],
-          'grateful': ['Joy', 'Worship', 'Grace'],
           'struggling': ['Strength', 'Hope', 'Comfort'],
           'celebrating': ['Joy', 'Worship', 'Grace'],
           'reflective': ['Wisdom', 'Peace', 'Purpose'],

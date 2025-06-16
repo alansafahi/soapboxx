@@ -137,16 +137,54 @@ export default function FreshAudioBible() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Mood options with enhanced spiritual context
-  const moodOptions = [
-    { id: "peaceful", label: "Seeking Peace", color: "bg-blue-100 text-blue-800", icon: "🕊️" },
-    { id: "anxious", label: "Feeling Anxious", color: "bg-purple-100 text-purple-800", icon: "🙏" },
-    { id: "grateful", label: "Grateful Heart", color: "bg-green-100 text-green-800", icon: "💚" },
-    { id: "struggling", label: "Going Through Challenges", color: "bg-red-100 text-red-800", icon: "💪" },
-    { id: "joyful", label: "Celebrating Joy", color: "bg-yellow-100 text-yellow-800", icon: "✨" },
-    { id: "seeking", label: "Seeking Guidance", color: "bg-indigo-100 text-indigo-800", icon: "🧭" },
-    { id: "mourning", label: "Processing Loss", color: "bg-gray-100 text-gray-800", icon: "🤗" },
-    { id: "hopeful", label: "Looking Forward", color: "bg-orange-100 text-orange-800", icon: "🌅" }
+  // Comprehensive mood options organized by category
+  const moodCategories = [
+    {
+      title: "Emotional & Spiritual Support",
+      icon: "💔",
+      moods: [
+        { id: "lonely", label: "Feeling Lonely", color: "bg-blue-100 text-blue-800", icon: "🤗", theme: "God's presence and companionship" },
+        { id: "overwhelmed", label: "Overwhelmed", color: "bg-purple-100 text-purple-800", icon: "😰", theme: "anxiety and fatigue relief" },
+        { id: "shame", label: "Shame or Guilt", color: "bg-red-100 text-red-800", icon: "💔", theme: "forgiveness, grace, redemption" },
+        { id: "doubting", label: "Doubting Faith", color: "bg-gray-100 text-gray-800", icon: "❓", theme: "wrestling with God, questions" },
+        { id: "needing-forgiveness", label: "Needing Forgiveness", color: "bg-pink-100 text-pink-800", icon: "🙏", theme: "grace and mercy" },
+        { id: "struggling-sin", label: "Struggling with Sin", color: "bg-orange-100 text-orange-800", icon: "⚖️", theme: "temptation, accountability, renewal" }
+      ]
+    },
+    {
+      title: "Growth & Transformation", 
+      icon: "🌿",
+      moods: [
+        { id: "seeking-purpose", label: "Seeking Purpose", color: "bg-indigo-100 text-indigo-800", icon: "🎯", theme: "identity in Christ, calling, direction" },
+        { id: "starting-over", label: "Starting Over", color: "bg-green-100 text-green-800", icon: "🌱", theme: "new beginnings, transformation" },
+        { id: "wanting-growth", label: "Wanting to Grow", color: "bg-teal-100 text-teal-800", icon: "📈", theme: "wisdom, discipline, sanctification" },
+        { id: "building-confidence", label: "Building Confidence", color: "bg-yellow-100 text-yellow-800", icon: "💪", theme: "strength, courage, fearlessness" },
+        { id: "desiring-wisdom", label: "Desiring Wisdom", color: "bg-amber-100 text-amber-800", icon: "🦉", theme: "Proverbs, guidance, discernment" },
+        { id: "serving-others", label: "Serving Others", color: "bg-emerald-100 text-emerald-800", icon: "🤝", theme: "compassion, generosity, humility" }
+      ]
+    },
+    {
+      title: "Life Situations",
+      icon: "🌎", 
+      moods: [
+        { id: "big-decision", label: "Before a Big Decision", color: "bg-violet-100 text-violet-800", icon: "🤔", theme: "discernment scriptures" },
+        { id: "waiting", label: "Waiting on God", color: "bg-slate-100 text-slate-800", icon: "⏰", theme: "patience, faith in timing" },
+        { id: "relationships", label: "Struggling in Relationships", color: "bg-rose-100 text-rose-800", icon: "💕", theme: "family, marriage, forgiveness" },
+        { id: "change", label: "Navigating Change", color: "bg-cyan-100 text-cyan-800", icon: "🔄", theme: "transitions, new seasons" },
+        { id: "injustice", label: "Dealing with Injustice", color: "bg-red-100 text-red-800", icon: "⚖️", theme: "encouragement in trials" },
+        { id: "illness", label: "Facing Illness", color: "bg-blue-100 text-blue-800", icon: "🩺", theme: "healing, peace in hardship" }
+      ]
+    },
+    {
+      title: "Faith & Worship",
+      icon: "🙏",
+      moods: [
+        { id: "hungry-for-god", label: "Hungry for God", color: "bg-purple-100 text-purple-800", icon: "🔥", theme: "spiritual thirst, revival, intimacy" },
+        { id: "worshipful", label: "Worshipful Heart", color: "bg-gold-100 text-gold-800", icon: "🎵", theme: "psalms, adoration, joy" },
+        { id: "fasting-prayer", label: "Fasting/Prayer Mode", color: "bg-indigo-100 text-indigo-800", icon: "🕯️", theme: "intensified seeking" },
+        { id: "grateful", label: "Grateful Heart", color: "bg-green-100 text-green-800", icon: "💚", theme: "thanksgiving and praise" }
+      ]
+    }
   ];
 
   // Voice options with enhanced descriptions
@@ -637,17 +675,32 @@ export default function FreshAudioBible() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {moodOptions.map((mood) => (
-                    <Button
-                      key={mood.id}
-                      variant={selectedMood === mood.id ? "default" : "outline"}
-                      className={`h-auto p-4 flex flex-col gap-2 ${mood.color}`}
-                      onClick={() => handleMoodSelection(mood.id)}
-                    >
-                      <span className="text-2xl">{mood.icon}</span>
-                      <span className="text-sm font-medium">{mood.label}</span>
-                    </Button>
+                <div className="space-y-6">
+                  {moodCategories.map((category) => (
+                    <div key={category.title} className="space-y-3">
+                      <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                        <span className="text-lg">{category.icon}</span>
+                        <h3 className="font-semibold text-gray-800">{category.title}</h3>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {category.moods.map((mood) => (
+                          <Button
+                            key={mood.id}
+                            variant={selectedMood === mood.id ? "default" : "outline"}
+                            className={`h-auto p-3 flex flex-col gap-2 text-left ${mood.color} ${
+                              selectedMood === mood.id ? 'ring-2 ring-blue-500' : ''
+                            }`}
+                            onClick={() => handleMoodSelection(mood.id)}
+                          >
+                            <div className="flex items-center gap-2 w-full">
+                              <span className="text-xl">{mood.icon}</span>
+                              <span className="text-sm font-medium flex-1">{mood.label}</span>
+                            </div>
+                            <p className="text-xs opacity-75 text-left">{mood.theme}</p>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </CardContent>
