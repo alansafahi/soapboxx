@@ -480,12 +480,13 @@ export default function PrayerWall() {
         </Button>
 
         {/* Create Prayer Request Button */}
-        <DialogTrigger asChild>
-          <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 text-lg">
-            <Plus className="w-5 h-5 mr-2" />
-            Add Prayer Request to Wall
-          </Button>
-        </DialogTrigger>
+        <Button 
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 text-lg"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Add Prayer Request to Wall
+        </Button>
       </div>
 
       {/* Create Prayer Request Dialog */}
