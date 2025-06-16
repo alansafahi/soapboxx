@@ -577,7 +577,7 @@ export default function PrayerWall() {
 
       {/* AI Prayer Assistance Modal */}
       <Dialog open={isAIAssistanceOpen} onOpenChange={setIsAIAssistanceOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <Sparkles className="w-5 h-5 mr-2 text-blue-600" />
@@ -588,7 +588,7 @@ export default function PrayerWall() {
             </p>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto flex-1 pr-2">
             <div>
               <label className="text-sm font-medium">What would you like to pray about?</label>
               <Input
@@ -677,20 +677,22 @@ export default function PrayerWall() {
             {/* AI Suggestions */}
             {aiSuggestions.length > 0 && (
               <div className="mt-6 space-y-3">
-                <h4 className="font-medium text-gray-900">AI Prayer Suggestions</h4>
-                {aiSuggestions.map((suggestion, index) => (
-                  <Card key={index} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => selectAISuggestion(suggestion)}>
-                    <div className="space-y-2">
-                      <h5 className="font-medium text-sm text-purple-600">{suggestion.title}</h5>
-                      <p className="text-sm text-gray-700">{suggestion.content}</p>
-                      <Button size="sm" variant="outline" className="w-full mt-2">
-                        <Plus className="w-3 h-3 mr-1" />
-                        Use This Prayer
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-                <p className="text-xs text-gray-500 mt-2">
+                <h4 className="font-medium text-gray-900 sticky top-0 bg-white pb-2 border-b">AI Prayer Suggestions</h4>
+                <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2">
+                  {aiSuggestions.map((suggestion, index) => (
+                    <Card key={index} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => selectAISuggestion(suggestion)}>
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-sm text-purple-600">{suggestion.title}</h5>
+                        <p className="text-sm text-gray-700">{suggestion.content}</p>
+                        <Button size="sm" variant="outline" className="w-full mt-2">
+                          <Plus className="w-3 h-3 mr-1" />
+                          Use This Prayer
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2 sticky bottom-0 bg-white pt-2 border-t">
                   Click any suggestion to use it as a starting point. You can edit it before posting.
                 </p>
               </div>
