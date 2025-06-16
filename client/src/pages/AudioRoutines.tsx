@@ -30,6 +30,7 @@ interface AudioRoutine {
 export default function AudioRoutines() {
   const [playingRoutine, setPlayingRoutine] = useState<number | null>(null);
   const [currentAudioContext, setCurrentAudioContext] = useState<AudioContext | null>(null);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [selectedVoice, setSelectedVoice] = useState('nova');
   const { toast } = useToast();
 
@@ -72,57 +73,66 @@ export default function AudioRoutines() {
       // Session duration in seconds (12-15 minutes)
       const sessionDuration = 900; // 15 minutes
       
-      // Create multi-layered ambient background music
+      // Create gentle nature-like background music  
       const masterGain = audioContext.createGain();
       masterGain.connect(audioContext.destination);
-      masterGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+      masterGain.gain.setValueAtTime(0.08, audioContext.currentTime); // Lower volume
       
       const oscillators: OscillatorNode[] = [];
       
-      // Enhanced harmonic layers with warm frequencies
-      const harmonicLayers = [
-        { freq: 130.81, volume: 0.3, type: 'sine' as OscillatorType }, // C3
-        { freq: 164.81, volume: 0.25, type: 'triangle' as OscillatorType }, // E3
-        { freq: 196.00, volume: 0.2, type: 'sine' as OscillatorType }, // G3
-        { freq: 220.00, volume: 0.15, type: 'triangle' as OscillatorType }, // A3
-        { freq: 261.63, volume: 0.1, type: 'sine' as OscillatorType }, // C4
+      // Create flowing chord progression with natural variations
+      const chordProgression = [
+        { freqs: [261.63, 329.63, 392.00], duration: 8, name: 'C Major' }, // C, E, G
+        { freqs: [293.66, 369.99, 440.00], duration: 8, name: 'D Minor' }, // D, F#, A  
+        { freqs: [246.94, 311.13, 369.99], duration: 8, name: 'B Diminished' }, // B, D, F
+        { freqs: [220.00, 277.18, 329.63], duration: 8, name: 'A Minor' }, // A, C, E
       ];
       
-      harmonicLayers.forEach((layer, index) => {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        const filter = audioContext.createBiquadFilter();
-        
-        osc.frequency.setValueAtTime(layer.freq, audioContext.currentTime);
-        osc.type = layer.type;
-        
-        // Warm filter
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1200, audioContext.currentTime);
-        filter.Q.setValueAtTime(0.3, audioContext.currentTime);
-        
-        const startTime = audioContext.currentTime + (index * 3);
-        const endTime = startTime + sessionDuration;
-        
-        // Gentle breathing pattern
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(layer.volume, startTime + 8);
-        
-        // Subtle variations throughout
-        for (let t = startTime + 15; t < endTime - 15; t += 25) {
-          gain.gain.linearRampToValueAtTime(layer.volume * 0.6, t);
-          gain.gain.linearRampToValueAtTime(layer.volume, t + 12);
-        }
-        
-        gain.gain.linearRampToValueAtTime(0, endTime - 8);
-        
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-        
-        osc.start(startTime);
-        osc.stop(endTime);
-        oscillators.push(osc);
+      chordProgression.forEach((chord, chordIndex) => {
+        chord.freqs.forEach((freq, noteIndex) => {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          const filter = audioContext.createBiquadFilter();
+          
+          // Gentle sine waves for peaceful tones
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+          
+          // Warm, natural filter
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(800 + (noteIndex * 200), audioContext.currentTime);
+          filter.Q.setValueAtTime(0.5, audioContext.currentTime);
+          
+          const startTime = audioContext.currentTime + (chordIndex * chord.duration);
+          const endTime = startTime + chord.duration;
+          
+          // Natural breathing envelope
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(0.15 - (noteIndex * 0.03), startTime + 2);
+          gain.gain.linearRampToValueAtTime(0.1 - (noteIndex * 0.02), endTime - 2);
+          gain.gain.linearRampToValueAtTime(0, endTime);
+          
+          // Add gentle tremolo for organic feel
+          const lfo = audioContext.createOscillator();
+          const lfoGain = audioContext.createGain();
+          lfo.frequency.setValueAtTime(0.5 + (noteIndex * 0.1), audioContext.currentTime);
+          lfo.type = 'sine';
+          lfoGain.gain.setValueAtTime(0.02, audioContext.currentTime);
+          
+          lfo.connect(lfoGain);
+          lfoGain.connect(gain.gain);
+          
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(masterGain);
+          
+          osc.start(startTime);
+          osc.stop(endTime);
+          lfo.start(startTime);
+          lfo.stop(endTime);
+          
+          oscillators.push(osc);
+        });
       });
       
       const backgroundMusic = {
@@ -171,7 +181,7 @@ export default function AudioRoutines() {
         body: JSON.stringify({
           text: fullMeditationText,
           voice: selectedVoice,
-          speed: 0.65
+          speed: 0.95
         }),
       });
       
@@ -181,6 +191,7 @@ export default function AudioRoutines() {
         
         const audioUrl = URL.createObjectURL(audioBlob);
         const meditationAudio = new Audio(audioUrl);
+        setCurrentAudio(meditationAudio);
         
         // Cross-platform audio setup
         meditationAudio.preload = 'auto';
@@ -244,18 +255,29 @@ export default function AudioRoutines() {
   };
 
   const stopAudioRoutine = () => {
+    // Stop meditation audio
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+    
+    // Stop background music by closing audio context
     if (currentAudioContext) {
       currentAudioContext.close();
       setCurrentAudioContext(null);
     }
+    
+    // Stop any browser speech synthesis
     if ('speechSynthesis' in window) {
       speechSynthesis.cancel();
     }
+    
     setPlayingRoutine(null);
     
     toast({
       title: "Session Stopped",
-      description: `Audio routine has been paused. Duration: ${formatDuration(900)}`,
+      description: "Meditation session has been stopped successfully",
       duration: 3000,
     });
   };
