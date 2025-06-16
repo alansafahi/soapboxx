@@ -94,6 +94,16 @@ export default function AudioRoutines() {
       name: 'Tibetan Bowls',
       description: 'Sacred singing bowls for meditation',
       icon: '🔔'
+    },
+    'gregorian-chant': {
+      name: 'Gregorian Chant',
+      description: 'Sacred monastic harmonies',
+      icon: '⛪'
+    },
+    'christian-hymn': {
+      name: 'Hymn Harmonies',
+      description: 'Traditional Christian melodies',
+      icon: '✝️'
     }
   };
 
@@ -310,6 +320,166 @@ export default function AudioRoutines() {
     }
   };
 
+  const createGregorianChant = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    // Gregorian chant uses modal scales and drone harmonics
+    const baseFreq = 146.83; // D3 - traditional chant root
+    const intervals = [1, 9/8, 5/4, 4/3, 3/2, 5/3, 15/8]; // Natural intervals
+    
+    // Create drone base
+    const drone = audioContext.createOscillator();
+    const droneGain = audioContext.createGain();
+    const droneFilter = audioContext.createBiquadFilter();
+    
+    drone.type = 'sine';
+    drone.frequency.setValueAtTime(baseFreq, audioContext.currentTime);
+    
+    droneFilter.type = 'lowpass';
+    droneFilter.frequency.setValueAtTime(400, audioContext.currentTime);
+    droneFilter.Q.setValueAtTime(2, audioContext.currentTime);
+    
+    droneGain.gain.setValueAtTime(0.04, audioContext.currentTime);
+    
+    drone.connect(droneFilter);
+    droneFilter.connect(droneGain);
+    droneGain.connect(masterGain);
+    
+    drone.start(audioContext.currentTime);
+    drone.stop(audioContext.currentTime + duration);
+    oscillators.push(drone);
+    
+    // Add harmonic overtones at sacred intervals
+    intervals.forEach((interval, index) => {
+      if (index > 0) {
+        const harmonic = audioContext.createOscillator();
+        const harmonicGain = audioContext.createGain();
+        const harmonicFilter = audioContext.createBiquadFilter();
+        
+        harmonic.type = 'sine';
+        harmonic.frequency.setValueAtTime(baseFreq * interval, audioContext.currentTime);
+        
+        harmonicFilter.type = 'lowpass';
+        harmonicFilter.frequency.setValueAtTime(600 + (index * 100), audioContext.currentTime);
+        harmonicFilter.Q.setValueAtTime(1.5, audioContext.currentTime);
+        
+        // Subtle volume with breathing envelope
+        const volume = 0.02 - (index * 0.003);
+        harmonicGain.gain.setValueAtTime(0, audioContext.currentTime);
+        harmonicGain.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 4);
+        harmonicGain.gain.linearRampToValueAtTime(volume * 0.7, audioContext.currentTime + duration - 4);
+        harmonicGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+        
+        harmonic.connect(harmonicFilter);
+        harmonicFilter.connect(harmonicGain);
+        harmonicGain.connect(masterGain);
+        
+        harmonic.start(audioContext.currentTime);
+        harmonic.stop(audioContext.currentTime + duration);
+        oscillators.push(harmonic);
+      }
+    });
+  };
+
+  const createChristianHymn = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    // Traditional hymn harmony using I-V-vi-IV progression in C Major
+    const chordProgression = [
+      { freqs: [261.63, 329.63, 392.00], duration: 12 }, // C Major (C-E-G)
+      { freqs: [392.00, 493.88, 587.33], duration: 12 }, // G Major (G-B-D)
+      { freqs: [220.00, 261.63, 329.63], duration: 12 }, // A Minor (A-C-E)
+      { freqs: [349.23, 440.00, 523.25], duration: 12 }, // F Major (F-A-C)
+    ];
+    
+    chordProgression.forEach((chord, chordIndex) => {
+      chord.freqs.forEach((freq, noteIndex) => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+        
+        osc.type = 'triangle'; // Warmer sound for hymns
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1200, audioContext.currentTime);
+        filter.Q.setValueAtTime(0.8, audioContext.currentTime);
+        
+        const startTime = audioContext.currentTime + (chordIndex * chord.duration);
+        const endTime = startTime + chord.duration;
+        
+        // Organ-like envelope
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.08 - (noteIndex * 0.02), startTime + 1);
+        gain.gain.setValueAtTime(0.06 - (noteIndex * 0.015), endTime - 1);
+        gain.gain.linearRampToValueAtTime(0, endTime);
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+        
+        osc.start(startTime);
+        osc.stop(endTime);
+        oscillators.push(osc);
+      });
+    });
+  };
+
+  // Sound preview functionality
+  const previewSound = async (soundType: string) => {
+    if (soundType === 'off') return;
+    
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      await audioContext.resume();
+      
+      const masterGain = audioContext.createGain();
+      masterGain.connect(audioContext.destination);
+      masterGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+      
+      const oscillators: OscillatorNode[] = [];
+      const audioSources: AudioBufferSourceNode[] = [];
+      const previewDuration = 3; // 3 seconds preview
+      
+      switch (soundType) {
+        case 'gentle-chords':
+          createGentleChords(audioContext, masterGain, oscillators, previewDuration);
+          break;
+        case 'nature-sounds':
+          createNatureSounds(audioContext, masterGain, audioSources, previewDuration);
+          break;
+        case 'ocean-waves':
+          createOceanWaves(audioContext, masterGain, oscillators, previewDuration);
+          break;
+        case 'soft-piano':
+          createSoftPiano(audioContext, masterGain, oscillators, previewDuration);
+          break;
+        case 'ethereal-pads':
+          createEtherealPads(audioContext, masterGain, oscillators, previewDuration);
+          break;
+        case 'tibetan-bowls':
+          createTibetanBowls(audioContext, masterGain, oscillators, previewDuration);
+          break;
+        case 'gregorian-chant':
+          createGregorianChant(audioContext, masterGain, oscillators, previewDuration);
+          break;
+        case 'christian-hymn':
+          createChristianHymn(audioContext, masterGain, oscillators, previewDuration);
+          break;
+      }
+      
+      // Auto-stop preview after 3 seconds
+      setTimeout(() => {
+        oscillators.forEach(osc => {
+          try { osc.stop(); } catch (e) { /* Already stopped */ }
+        });
+        audioSources.forEach(source => {
+          try { source.stop(); } catch (e) { /* Already stopped */ }
+        });
+        audioContext.close();
+      }, previewDuration * 1000);
+      
+    } catch (error) {
+      console.log('Sound preview unavailable');
+    }
+  };
+
   // Automatic pause detection function
   const setupAutoPauseDetection = (audio: HTMLAudioElement) => {
     const pausePatterns = [
@@ -444,6 +614,12 @@ export default function AudioRoutines() {
             break;
           case 'tibetan-bowls':
             createTibetanBowls(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'gregorian-chant':
+            createGregorianChant(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'christian-hymn':
+            createChristianHymn(audioContext, masterGain, oscillators, sessionDuration);
             break;
         }
       }
@@ -1078,7 +1254,10 @@ export default function AudioRoutines() {
                 className={`p-3 h-auto text-left flex-col items-start ${
                   backgroundMusicType === key ? 'bg-purple-600 hover:bg-purple-700' : ''
                 }`}
-                onClick={() => setBackgroundMusicType(key)}
+                onClick={() => {
+                  setBackgroundMusicType(key);
+                  previewSound(key);
+                }}
               >
                 <div className="text-lg mb-1">{option.icon}</div>
                 <div className="font-medium text-sm">{option.name}</div>
@@ -1089,26 +1268,7 @@ export default function AudioRoutines() {
         </CardContent>
       </Card>
 
-      {/* Feature Overview */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-2">Premium AI Narration</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Studio-quality voice generation using OpenAI's latest TTS technology for warm, natural guidance
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-2">Ambient Soundscapes</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Multi-layered harmonic background music designed to enhance spiritual focus and inner peace
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+
     </div>
   );
 }

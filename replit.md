@@ -149,7 +149,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Enhanced UI with current segment name display and "Silent Reflection Time" indicator
   - Progress tracking updates every second with smooth purple gradient fill animation
   - Compact stop button (red square) positioned next to pause/resume controls
-  - Restored full background music selection: Silent, Gentle Chords, Nature Sounds, Ocean Waves, Soft Piano, Ethereal Pads, Tibetan Bowls
+  - Restored full background music selection: Silent, Gentle Chords, Nature Sounds, Ocean Waves, Soft Piano, Ethereal Pads, Tibetan Bowls, Gregorian Chant, Hymn Harmonies
   - Fixed background sound functionality with audio context resume for mobile compatibility and increased volume
   - Enhanced stop button functionality with comprehensive audio cleanup and resource disposal
   - Created diverse meditation scripts: Morning Peace (intention setting), Evening Reflection (day review), Stress Relief (breathing techniques)
