@@ -456,6 +456,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pin/Unpin posts for pastors and church admins
+  app.post('/api/discussions/:id/pin', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { category, expiresAt } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Check if user has pastor/admin permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'system_admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Pastor or admin access required to pin posts" });
+      }
+
+      const discussion = await storage.getDiscussion(parseInt(id));
+      if (!discussion) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      // Pin the post
+      const pinnedPost = await storage.pinDiscussion(parseInt(id), {
+        pinnedBy: userId,
+        pinnedAt: new Date(),
+        pinnedUntil: expiresAt ? new Date(expiresAt) : null,
+        pinCategory: category || 'announcement'
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Post pinned successfully",
+        post: pinnedPost
+      });
+    } catch (error) {
+      console.error("Error pinning post:", error);
+      res.status(500).json({ message: "Failed to pin post" });
+    }
+  });
+
+  app.delete('/api/discussions/:id/pin', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Check if user has pastor/admin permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'system_admin'].includes(userRole)) {
+        return res.status(403).json({ message: "Pastor or admin access required to unpin posts" });
+      }
+
+      const discussion = await storage.getDiscussion(parseInt(id));
+      if (!discussion) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      // Unpin the post
+      const unpinnedPost = await storage.unpinDiscussion(parseInt(id));
+
+      res.json({ 
+        success: true, 
+        message: "Post unpinned successfully",
+        post: unpinnedPost
+      });
+    } catch (error) {
+      console.error("Error unpinning post:", error);
+      res.status(500).json({ message: "Failed to unpin post" });
+    }
+  });
+
+  // Get pinned posts for church
+  app.get('/api/discussions/pinned', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's church to filter pinned posts
+      const userChurches = await storage.getUserChurches(userId);
+      const churchId = userChurches?.[0]?.churchId || null;
+
+      const pinnedPosts = await storage.getPinnedDiscussions(churchId);
+
+      res.json(pinnedPosts);
+    } catch (error) {
+      console.error("Error fetching pinned posts:", error);
+      res.status(500).json({ message: "Failed to fetch pinned posts" });
+    }
+  });
+
   // Test SMS endpoint
   app.post('/api/test-sms', async (req, res) => {
     try {

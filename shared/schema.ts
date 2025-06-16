@@ -602,6 +602,11 @@ export const discussions = pgTable("discussions", {
   suggestedVerses: jsonb("suggested_verses"), // AI-generated Bible verse suggestions
   attachedMedia: jsonb("attached_media"), // Array of uploaded media files
   linkedVerse: jsonb("linked_verse"), // User-selected Bible verse to link with post
+  isPinned: boolean("is_pinned").default(false), // Featured posts from pastors/admins
+  pinnedBy: varchar("pinned_by").references(() => users.id), // Who pinned this post
+  pinnedAt: timestamp("pinned_at"), // When it was pinned
+  pinnedUntil: timestamp("pinned_until"), // Optional expiration for pin
+  pinCategory: varchar("pin_category", { length: 30 }), // 'announcement', 'sermon', 'weekly_encouragement', 'call_to_action'
   likeCount: integer("like_count").default(0),
   commentCount: integer("comment_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
