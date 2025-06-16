@@ -5376,7 +5376,7 @@ Return JSON with this exact structure:
           console.log('Creating feed post for public S.O.A.P. entry...');
           const feedPostData = {
             title: `S.O.A.P. Reflection: ${newEntry.scriptureReference}`,
-            content: `📖 **Scripture**: ${newEntry.scriptureReference}\n"${newEntry.scripture}"\n\n🔍 **Observation**: ${newEntry.observation}\n\n💡 **Application**: ${newEntry.application}\n\n🙏 **Prayer**: ${newEntry.prayer}`,
+            content: `📖 <strong>Scripture</strong>: ${newEntry.scriptureReference}\n${newEntry.scripture}\n\n🔍 <strong>Observation</strong>: ${newEntry.observation}\n\n💡 <strong>Application</strong>: ${newEntry.application}\n\n🙏 <strong>Prayer</strong>: ${newEntry.prayer}`,
             authorId: userId,
             churchId: newEntry.churchId || null,
             category: 'devotional',
