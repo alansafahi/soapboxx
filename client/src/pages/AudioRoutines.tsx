@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Clock, Play, Headphones, Settings, Volume2 } from 'lucide-react';
-import AudioRoutinePlayer from '@/components/AudioRoutinePlayer';
+// import AudioRoutinePlayer from '@/components/AudioRoutinePlayer';
 
 export default function AudioRoutines() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -59,16 +59,41 @@ export default function AudioRoutines() {
             </Button>
           </div>
           
-          <AudioRoutinePlayer
-            routine={selectedRoutine}
-            autoStart={false}
-            onComplete={() => {
-              console.log('Routine completed');
-            }}
-            onProgress={(stepIndex, timeElapsed) => {
-              console.log(`Progress: Step ${stepIndex + 1}, ${timeElapsed}s elapsed`);
-            }}
-          />
+          <Card className="bg-white dark:bg-gray-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <Play className="h-6 w-6 text-purple-600" />
+                {selectedRoutine.name}
+              </CardTitle>
+              <p className="text-gray-600 dark:text-gray-400">
+                {selectedRoutine.description}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <div className="mb-4">
+                  <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Headphones className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Audio Routine Player</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Duration: {formatDuration(selectedRoutine.totalDuration || 0)}
+                  </p>
+                </div>
+                
+                <div className="flex justify-center gap-4">
+                  <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Routine
+                  </Button>
+                  <Button variant="outline">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
