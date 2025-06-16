@@ -494,6 +494,7 @@ export default function AudioRoutines() {
       
       let currentSegmentIndex = 0;
       let sessionStartTime = Date.now();
+      let sessionRoutineId = routine.id;
       
       // Progress tracking
       const updateProgress = () => {
@@ -589,13 +590,9 @@ export default function AudioRoutines() {
               
               // Wait for pause duration then continue
               const pauseTimeout = setTimeout(() => {
-                if (playingRoutine === routine.id) {
-                  console.log(`Pause complete, continuing to next segment`);
-                  setIsInSilencePeriod(false);
-                  playNextSegment();
-                } else {
-                  console.log(`Session stopped during pause, not continuing`);
-                }
+                console.log(`Pause complete for segment ${currentSegmentIndex}, continuing session`);
+                setIsInSilencePeriod(false);
+                playNextSegment();
               }, segment.pauseAfter * 1000);
               
               // Store timeout for cleanup if needed
@@ -613,8 +610,9 @@ export default function AudioRoutines() {
       // Start the segmented meditation
       await playNextSegment();
       
-      // Store cleanup for session termination
+      // Store cleanup and session info for proper management
       (routine as any).cleanup = cleanup;
+      (routine as any).sessionId = sessionRoutineId;
       
     } catch (error) {
       console.error('Meditation session error:', error);
