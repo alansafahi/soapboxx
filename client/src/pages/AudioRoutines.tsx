@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Play, Headphones, Volume2, CheckCircle } from 'lucide-react';
+import { Clock, Play, Headphones, Volume2, CheckCircle, Square } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface AudioRoutine {
@@ -18,6 +18,7 @@ export default function AudioRoutines() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRoutineId, setSelectedRoutineId] = useState<number | null>(null);
   const [playingRoutine, setPlayingRoutine] = useState<number | null>(null);
+  const [currentAudioContext, setCurrentAudioContext] = useState<AudioContext | null>(null);
   const { toast } = useToast();
 
   const { data: routines = [], isLoading, error } = useQuery<AudioRoutine[]>({
@@ -56,22 +57,127 @@ export default function AudioRoutines() {
     console.log('Starting routine:', routine.name);
     setPlayingRoutine(routine.id);
     
-    // Beautiful toast notification instead of harsh alert
+    // Beautiful toast notification
     toast({
       title: "🎵 Starting Audio Routine",
       description: `"${routine.name}" - ${routine.description}`,
       duration: 4000,
     });
     
-    // Simulate audio loading
-    setTimeout(() => {
-      setPlayingRoutine(null);
+    // Start actual audio playback
+    startAudioRoutine(routine);
+  };
+
+  const startAudioRoutine = async (routine: AudioRoutine) => {
+    try {
+      // Create audio context for peaceful meditation experience
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Resume audio context if needed (Chrome requires user interaction)
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      
+      setCurrentAudioContext(audioContext);
+      
+      // Generate peaceful background tone
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Set peaceful frequency (C major chord)
+      oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime); // C4
+      oscillator.type = 'sine';
+      
+      // Gentle volume
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 1);
+      
+      // Start the peaceful tone
+      oscillator.start();
+      
+      // Read routine content with speech synthesis
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(
+          `Welcome to ${routine.name}. ${routine.description}. Take a deep breath and let yourself relax into this peaceful moment with God.`
+        );
+        
+        // Use a calm, slower speaking voice
+        utterance.rate = 0.8;
+        utterance.pitch = 0.9;
+        utterance.volume = 0.7;
+        
+        // Try to find a female voice for gentler experience
+        const voices = speechSynthesis.getVoices();
+        const preferredVoice = voices.find(voice => 
+          voice.name.includes('Female') || 
+          voice.name.includes('Samantha') ||
+          voice.name.includes('Victoria') ||
+          voice.name.toLowerCase().includes('female')
+        );
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+        
+        speechSynthesis.speak(utterance);
+        
+        utterance.onend = () => {
+          // Fade out background tone
+          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+          setTimeout(() => {
+            oscillator.stop();
+            setPlayingRoutine(null);
+            setCurrentAudioContext(null);
+            toast({
+              title: "Session Complete",
+              description: "Your peaceful routine has finished. May you carry this tranquility with you.",
+              duration: 4000,
+            });
+          }, 2000);
+        };
+      } else {
+        // Fallback without speech
+        setTimeout(() => {
+          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+          setTimeout(() => {
+            oscillator.stop();
+            setPlayingRoutine(null);
+            setCurrentAudioContext(null);
+            toast({
+              title: "Session Complete",
+              description: "Your peaceful routine has finished. May you carry this tranquility with you.",
+              duration: 4000,
+            });
+          }, 2000);
+        }, 8000);
+      }
+    } catch (error) {
+      console.error('Audio playback error:', error);
       toast({
-        title: "✨ Routine Ready",
-        description: `Your "${routine.name}" session is now playing. Find a peaceful space and enjoy.`,
+        title: "Audio Permission Needed",
+        description: "Please allow audio playback to enjoy your meditation routine.",
         duration: 3000,
       });
-    }, 2000);
+      setPlayingRoutine(null);
+    }
+  };
+
+  const stopAudioRoutine = () => {
+    if (currentAudioContext) {
+      currentAudioContext.close();
+      setCurrentAudioContext(null);
+    }
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+    }
+    setPlayingRoutine(null);
+    toast({
+      title: "Session Stopped",
+      description: "Your routine has been paused. You can restart anytime.",
+      duration: 3000,
+    });
   };
 
   const handleRoutineClick = (routine: AudioRoutine) => {
@@ -213,12 +319,27 @@ export default function AudioRoutines() {
                       
                       <Button 
                         size="sm" 
-                        variant="outline"
-                        disabled={playingRoutine === routine.id}
-                        onClick={(e) => handleStartRoutine(routine, e)}
+                        variant={playingRoutine === routine.id ? "destructive" : "outline"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (playingRoutine === routine.id) {
+                            stopAudioRoutine();
+                          } else {
+                            handleStartRoutine(routine, e);
+                          }
+                        }}
                       >
-                        <Play className="h-3 w-3 mr-1" />
-                        {playingRoutine === routine.id ? 'Starting...' : 'Start'}
+                        {playingRoutine === routine.id ? (
+                          <>
+                            <Square className="h-3 w-3 mr-1" />
+                            Stop
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-3 w-3 mr-1" />
+                            Start
+                          </>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
