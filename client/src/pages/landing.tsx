@@ -11,7 +11,21 @@ export default function Landing() {
     e.preventDefault();
     e.stopPropagation();
     console.log('Start Journey button clicked!');
-    setLocation('/login');
+    console.log('Attempting to navigate to /login');
+    
+    // Try multiple navigation methods
+    try {
+      setLocation('/login');
+      console.log('setLocation called');
+    } catch (error) {
+      console.error('setLocation failed:', error);
+    }
+    
+    // Fallback to window navigation
+    setTimeout(() => {
+      console.log('Using window.location fallback');
+      window.location.href = '/login';
+    }, 100);
   };
 
   return (
