@@ -707,6 +707,30 @@ export default function SocialFeed() {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    
+    // Convert files to base64 data URLs for storage and display
+    const mediaPromises = files.map(file => {
+      return new Promise<any>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            url: reader.result as string, // base64 data URL
+            filename: file.name
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    
+    const mediaFiles = await Promise.all(mediaPromises);
+    setAttachedMedia(prev => [...prev, ...mediaFiles]);
+  };
+
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
     
@@ -859,7 +883,7 @@ export default function SocialFeed() {
                   placeholder="Share something with your community..."
                   value={newPost}
                   onChange={handleTextChange}
-                  className="min-h-[80px] resize-none border-gray-200 dark:border-gray-600"
+                  className="min-h-[80px] resize-none border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
             </div>
