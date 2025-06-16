@@ -20,8 +20,8 @@ export default function Landing() {
             </div>
             
             <Button 
-              onClick={() => window.location.href = '/api/login'}
-              className="bg-faith-blue hover:bg-blue-600 text-white"
+              onClick={() => window.location.href = '/login'}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               Sign In
             </Button>
@@ -41,9 +41,9 @@ export default function Landing() {
             meaningful engagement, prayer, and spiritual growth.
           </p>
           <Button 
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => window.location.href = '/login'}
             size="lg"
-            className="bg-faith-blue hover:bg-blue-600 text-white px-8 py-4 text-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
           >
             Start Your Journey
             <ChevronRight className="ml-2 w-5 h-5" />
@@ -167,7 +167,7 @@ export default function Landing() {
             Connect with believers, grow in faith, and make a difference in your community.
           </p>
           <Button 
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => window.location.href = '/login'}
             size="lg"
             className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
           >

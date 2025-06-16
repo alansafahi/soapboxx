@@ -142,11 +142,15 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Fixed landing page navigation and "Start Your Journey" button functionality
+  - Corrected routing flow to show landing page first, then login page for new users
+  - Fixed invisible "Start Your Journey" button by updating CSS classes from undefined faith-blue to standard Tailwind
+  - Corrected all button redirects from /api/login to proper /login route
+  - Landing page now properly displays with working navigation buttons for user onboarding
 - June 16, 2025: Completed authentication system replacement from Replit auth to standard email/password authentication
   - Removed Replit authentication dependency and implemented secure email/password login system
   - Added user registration and login endpoints with bcrypt password hashing for security
   - Updated user schema with username, password, and role fields for complete user management
-  - Modified App.tsx routing to display login page for unauthenticated users instead of landing page
   - Enhanced authentication middleware to work with session-based authentication
   - Users can now create accounts and sign in with email/password credentials
   - All existing features remain functional with the new authentication system

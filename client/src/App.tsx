@@ -136,7 +136,8 @@ function AppRouter() {
         <Switch>
           {!isAuthenticated ? (
             <>
-              <Route path="*" component={LoginPage} />
+              <Route path="/login" component={LoginPage} />
+              <Route path="*" component={Landing} />
             </>
           ) : (
             <>
