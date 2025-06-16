@@ -32,12 +32,261 @@ export default function AudioRoutines() {
   const [currentAudioContext, setCurrentAudioContext] = useState<AudioContext | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [selectedVoice, setSelectedVoice] = useState('nova');
+  const [backgroundMusicType, setBackgroundMusicType] = useState('gentle-chords');
+  const [isPaused, setIsPaused] = useState(false);
+  const [autoPauseTimeout, setAutoPauseTimeout] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Background music options
+  const backgroundMusicOptions = {
+    'off': {
+      name: 'No Background Music',
+      description: 'Pure voice guidance without background sounds',
+      icon: '🔇'
+    },
+    'gentle-chords': {
+      name: 'Gentle Chords',
+      description: 'Flowing chord progressions for peaceful meditation',
+      icon: '🎵'
+    },
+    'nature-sounds': {
+      name: 'Nature Sounds',
+      description: 'Soft rain, gentle breeze, and natural ambience',
+      icon: '🌿'
+    },
+    'ocean-waves': {
+      name: 'Ocean Waves',
+      description: 'Rhythmic waves for deep relaxation',
+      icon: '🌊'
+    },
+    'soft-piano': {
+      name: 'Soft Piano',
+      description: 'Delicate piano melodies for contemplation',
+      icon: '🎹'
+    },
+    'ethereal-pads': {
+      name: 'Ethereal Pads',
+      description: 'Ambient soundscapes for spiritual focus',
+      icon: '✨'
+    },
+    'tibetan-bowls': {
+      name: 'Tibetan Bowls',
+      description: 'Sacred singing bowls for meditation',
+      icon: '🔔'
+    }
+  };
 
   const { data: routines = [], isLoading, error } = useQuery({
     queryKey: ["/api/audio/routines"],
     retry: false,
   });
+
+  // Background music generation functions
+  const createGentleChords = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    const chordProgression = [
+      { freqs: [261.63, 329.63, 392.00], duration: 8 }, // C Major
+      { freqs: [293.66, 369.99, 440.00], duration: 8 }, // D Minor
+      { freqs: [246.94, 311.13, 369.99], duration: 8 }, // B Diminished
+      { freqs: [220.00, 277.18, 329.63], duration: 8 }, // A Minor
+    ];
+    
+    chordProgression.forEach((chord, chordIndex) => {
+      chord.freqs.forEach((freq, noteIndex) => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800 + (noteIndex * 200), audioContext.currentTime);
+        filter.Q.setValueAtTime(0.5, audioContext.currentTime);
+        
+        const startTime = audioContext.currentTime + (chordIndex * chord.duration);
+        const endTime = startTime + chord.duration;
+        
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.15 - (noteIndex * 0.03), startTime + 2);
+        gain.gain.linearRampToValueAtTime(0.1 - (noteIndex * 0.02), endTime - 2);
+        gain.gain.linearRampToValueAtTime(0, endTime);
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+        
+        osc.start(startTime);
+        osc.stop(endTime);
+        oscillators.push(osc);
+      });
+    });
+  };
+
+  const createNatureSounds = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    // Rain simulation with filtered noise
+    const bufferSize = audioContext.sampleRate * 2;
+    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+    
+    const noiseSource = audioContext.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+    noiseSource.loop = true;
+    
+    const rainFilter = audioContext.createBiquadFilter();
+    rainFilter.type = 'lowpass';
+    rainFilter.frequency.setValueAtTime(2000, audioContext.currentTime);
+    rainFilter.Q.setValueAtTime(0.3, audioContext.currentTime);
+    
+    const rainGain = audioContext.createGain();
+    rainGain.gain.setValueAtTime(0.03, audioContext.currentTime);
+    
+    noiseSource.connect(rainFilter);
+    rainFilter.connect(rainGain);
+    rainGain.connect(masterGain);
+    
+    noiseSource.start(audioContext.currentTime);
+    noiseSource.stop(audioContext.currentTime + duration);
+  };
+
+  const createOceanWaves = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    // Wave simulation using low-frequency oscillations
+    for (let i = 0; i < 3; i++) {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(0.2 + (i * 0.1), audioContext.currentTime); // Very low frequencies
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(300, audioContext.currentTime);
+      
+      gain.gain.setValueAtTime(0.08 - (i * 0.02), audioContext.currentTime);
+      
+      // Add wave-like amplitude modulation
+      const lfo = audioContext.createOscillator();
+      const lfoGain = audioContext.createGain();
+      lfo.frequency.setValueAtTime(0.05 + (i * 0.02), audioContext.currentTime);
+      lfo.type = 'sine';
+      lfoGain.gain.setValueAtTime(0.04, audioContext.currentTime);
+      
+      lfo.connect(lfoGain);
+      lfoGain.connect(gain.gain);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      
+      osc.start(audioContext.currentTime);
+      osc.stop(audioContext.currentTime + duration);
+      lfo.start(audioContext.currentTime);
+      lfo.stop(audioContext.currentTime + duration);
+      
+      oscillators.push(osc);
+    }
+  };
+
+  const createSoftPiano = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    const pianoNotes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88]; // C major scale
+    
+    for (let i = 0; i < 20; i++) {
+      const noteIndex = Math.floor(Math.random() * pianoNotes.length);
+      const freq = pianoNotes[noteIndex];
+      const startTime = audioContext.currentTime + (Math.random() * duration * 0.8);
+      
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+      
+      // Piano-like envelope
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.1, startTime + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 3);
+      
+      osc.connect(gain);
+      gain.connect(masterGain);
+      
+      osc.start(startTime);
+      osc.stop(startTime + 3);
+      oscillators.push(osc);
+    }
+  };
+
+  const createEtherealPads = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    const etherealFreqs = [65.41, 82.41, 98.00, 123.47, 146.83]; // Low ethereal tones
+    
+    etherealFreqs.forEach((freq, index) => {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(400 + (index * 100), audioContext.currentTime);
+      filter.Q.setValueAtTime(2, audioContext.currentTime);
+      
+      gain.gain.setValueAtTime(0, audioContext.currentTime);
+      gain.gain.linearRampToValueAtTime(0.06 - (index * 0.01), audioContext.currentTime + 10);
+      gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration - 10);
+      
+      // Add slow modulation
+      const lfo = audioContext.createOscillator();
+      const lfoGain = audioContext.createGain();
+      lfo.frequency.setValueAtTime(0.1 + (index * 0.05), audioContext.currentTime);
+      lfo.type = 'sine';
+      lfoGain.gain.setValueAtTime(20, audioContext.currentTime);
+      
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      
+      osc.start(audioContext.currentTime);
+      osc.stop(audioContext.currentTime + duration);
+      lfo.start(audioContext.currentTime);
+      lfo.stop(audioContext.currentTime + duration);
+      
+      oscillators.push(osc);
+    });
+  };
+
+  const createTibetanBowls = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+    const bowlFreqs = [256, 341.3, 426.7, 512]; // Traditional bowl frequencies
+    
+    for (let i = 0; i < 8; i++) {
+      const freq = bowlFreqs[i % bowlFreqs.length];
+      const startTime = audioContext.currentTime + (i * 30); // Spaced out strikes
+      
+      if (startTime < audioContext.currentTime + duration) {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        // Bowl-like envelope with long decay
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.2, startTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 15);
+        
+        osc.connect(gain);
+        gain.connect(masterGain);
+        
+        osc.start(startTime);
+        osc.stop(startTime + 15);
+        oscillators.push(osc);
+      }
+    }
+  };
 
   // Universal device detection for cross-platform support
   const userAgent = navigator.userAgent.toLowerCase();
@@ -73,67 +322,35 @@ export default function AudioRoutines() {
       // Session duration in seconds (12-15 minutes)
       const sessionDuration = 900; // 15 minutes
       
-      // Create gentle nature-like background music  
+      // Create background music based on selected type
       const masterGain = audioContext.createGain();
       masterGain.connect(audioContext.destination);
-      masterGain.gain.setValueAtTime(0.08, audioContext.currentTime); // Lower volume
+      masterGain.gain.setValueAtTime(backgroundMusicType === 'off' ? 0 : 0.08, audioContext.currentTime);
       
       const oscillators: OscillatorNode[] = [];
       
-      // Create flowing chord progression with natural variations
-      const chordProgression = [
-        { freqs: [261.63, 329.63, 392.00], duration: 8, name: 'C Major' }, // C, E, G
-        { freqs: [293.66, 369.99, 440.00], duration: 8, name: 'D Minor' }, // D, F#, A  
-        { freqs: [246.94, 311.13, 369.99], duration: 8, name: 'B Diminished' }, // B, D, F
-        { freqs: [220.00, 277.18, 329.63], duration: 8, name: 'A Minor' }, // A, C, E
-      ];
-      
-      chordProgression.forEach((chord, chordIndex) => {
-        chord.freqs.forEach((freq, noteIndex) => {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          const filter = audioContext.createBiquadFilter();
-          
-          // Gentle sine waves for peaceful tones
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-          
-          // Warm, natural filter
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(800 + (noteIndex * 200), audioContext.currentTime);
-          filter.Q.setValueAtTime(0.5, audioContext.currentTime);
-          
-          const startTime = audioContext.currentTime + (chordIndex * chord.duration);
-          const endTime = startTime + chord.duration;
-          
-          // Natural breathing envelope
-          gain.gain.setValueAtTime(0, startTime);
-          gain.gain.linearRampToValueAtTime(0.15 - (noteIndex * 0.03), startTime + 2);
-          gain.gain.linearRampToValueAtTime(0.1 - (noteIndex * 0.02), endTime - 2);
-          gain.gain.linearRampToValueAtTime(0, endTime);
-          
-          // Add gentle tremolo for organic feel
-          const lfo = audioContext.createOscillator();
-          const lfoGain = audioContext.createGain();
-          lfo.frequency.setValueAtTime(0.5 + (noteIndex * 0.1), audioContext.currentTime);
-          lfo.type = 'sine';
-          lfoGain.gain.setValueAtTime(0.02, audioContext.currentTime);
-          
-          lfo.connect(lfoGain);
-          lfoGain.connect(gain.gain);
-          
-          osc.connect(filter);
-          filter.connect(gain);
-          gain.connect(masterGain);
-          
-          osc.start(startTime);
-          osc.stop(endTime);
-          lfo.start(startTime);
-          lfo.stop(endTime);
-          
-          oscillators.push(osc);
-        });
-      });
+      if (backgroundMusicType !== 'off') {
+        switch (backgroundMusicType) {
+          case 'gentle-chords':
+            createGentleChords(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'nature-sounds':
+            createNatureSounds(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'ocean-waves':
+            createOceanWaves(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'soft-piano':
+            createSoftPiano(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'ethereal-pads':
+            createEtherealPads(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+          case 'tibetan-bowls':
+            createTibetanBowls(audioContext, masterGain, oscillators, sessionDuration);
+            break;
+        }
+      }
       
       const backgroundMusic = {
         stop: () => {
@@ -254,7 +471,39 @@ export default function AudioRoutines() {
     }
   };
 
+  const pauseAudioRoutine = () => {
+    if (currentAudio && !isPaused) {
+      currentAudio.pause();
+      setIsPaused(true);
+      
+      toast({
+        title: "Session Paused",
+        description: "Meditation session paused. Click resume to continue.",
+        duration: 2000,
+      });
+    }
+  };
+
+  const resumeAudioRoutine = () => {
+    if (currentAudio && isPaused) {
+      currentAudio.play();
+      setIsPaused(false);
+      
+      toast({
+        title: "Session Resumed",
+        description: "Continuing your meditation session",
+        duration: 2000,
+      });
+    }
+  };
+
   const stopAudioRoutine = () => {
+    // Clear any auto-pause timeouts
+    if (autoPauseTimeout) {
+      clearTimeout(autoPauseTimeout);
+      setAutoPauseTimeout(null);
+    }
+    
     // Stop meditation audio
     if (currentAudio) {
       currentAudio.pause();
@@ -274,6 +523,7 @@ export default function AudioRoutines() {
     }
     
     setPlayingRoutine(null);
+    setIsPaused(false);
     
     toast({
       title: "Session Stopped",
