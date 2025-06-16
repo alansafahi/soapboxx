@@ -212,8 +212,6 @@ async function checkForNewRoleAssignment(userId: string, currentRole: string): P
   }
 }
 
-// Function cleaned up to avoid duplication
-
 export async function registerRoutes(app: Express): Promise<Server> {
 
 
