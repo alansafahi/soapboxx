@@ -56,17 +56,7 @@ export default function AudioRoutines() {
     total + segment.duration + segment.pauseAfter, 0
   );
 
-  // Calculate accurate pause points for red dots on progress bar
-  const pausePoints: number[] = [];
-  let cumulativeTime = 0;
-  meditationSegments.forEach((segment, index) => {
-    cumulativeTime += segment.duration;
-    if (segment.pauseAfter > 0) {
-      // Mark the exact point where pause begins (after segment ends)
-      pausePoints.push((cumulativeTime / totalSessionDuration) * 100);
-      cumulativeTime += segment.pauseAfter;
-    }
-  });
+
 
   // Background music options
   const backgroundMusicOptions = {
@@ -834,15 +824,7 @@ export default function AudioRoutines() {
                         />
                       </div>
                       
-                      {/* Red Dots for Pause Points */}
-                      {pausePoints.map((point: number, index: number) => (
-                        <div
-                          key={index}
-                          className="absolute top-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm transform -translate-y-0.5"
-                          style={{ left: `${point}%`, transform: 'translateX(-50%) translateY(-25%)' }}
-                          title={`Pause point ${index + 1}`}
-                        />
-                      ))}
+
                     </div>
                     
                     {isInSilencePeriod && (
