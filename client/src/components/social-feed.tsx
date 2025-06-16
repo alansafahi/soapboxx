@@ -126,6 +126,22 @@ export default function SocialFeed() {
   const [activePost, setActivePost] = useState<FeedPost | null>(null);
   const [commentText, setCommentText] = useState("");
 
+  // Expanded verses state for AI suggestions
+  const [expandedVerses, setExpandedVerses] = useState<Set<number>>(new Set());
+
+  // Toggle verse expansion for a specific post
+  const toggleVerseExpansion = (postId: number) => {
+    setExpandedVerses(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
+
   // Mood/feeling options for posts
   const moodOptions = [
     { id: "grateful", label: "Grateful", icon: "🙏", color: "bg-green-100 text-green-800" },
@@ -762,7 +778,7 @@ export default function SocialFeed() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    {post.suggestedVerses.slice(0, 2).map((verse: any, index: number) => (
+                    {(expandedVerses.has(post.id) ? post.suggestedVerses : post.suggestedVerses.slice(0, 2)).map((verse: any, index: number) => (
                       <div key={index} className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-3 border border-purple-100 dark:border-purple-700">
                         <div className="flex items-start space-x-2">
                           <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">
@@ -780,9 +796,15 @@ export default function SocialFeed() {
                       </div>
                     ))}
                     {post.suggestedVerses.length > 2 && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                        +{post.suggestedVerses.length - 2} more verses suggested
-                      </p>
+                      <button
+                        onClick={() => toggleVerseExpansion(post.id)}
+                        className="w-full text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 text-center py-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                      >
+                        {expandedVerses.has(post.id) 
+                          ? `Show less verses` 
+                          : `+${post.suggestedVerses.length - 2} more verses suggested`
+                        }
+                      </button>
                     )}
                   </div>
                 </div>
