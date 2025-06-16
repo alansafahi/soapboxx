@@ -1456,52 +1456,50 @@ export default function AudioRoutines() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg mb-2">{routine.name}</CardTitle>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                    {routine.description}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  {routine.category}
-                </Badge>
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Clock className="h-4 w-4" />
-                  {formatDuration(routine.totalDuration)}
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="pt-0">
-              {playingRoutine === routine.id ? (
-                <div className="space-y-4">
-                  {/* Progress Bar with Pause Points */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span>{meditationSegments[currentSegment]?.name || "Preparing..."}</span>
-                      <span>{Math.round(sessionProgress)}%</span>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                        {routine.description}
+                      </p>
                     </div>
-                    
-                    <div className="relative">
-                      {/* Progress Bar Background */}
-                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        {/* Progress Fill */}
-                        <div 
-                          className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000 ease-out"
-                          style={{ width: `${sessionProgress}%` }}
-                        />
-                      </div>
-                      
-
-                    </div>
-                    
-                    {isInSilencePeriod && (
-                      <div className="text-center text-sm text-purple-600 dark:text-purple-400 font-medium">
-                        Silent Reflection Time
-                      </div>
-                    )}
                   </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {routine.category}
+                    </Badge>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <Clock className="h-4 w-4" />
+                      {formatDuration(routine.totalDuration)}
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  {playingRoutine === routine.id ? (
+                    <div className="space-y-4">
+                      {/* Progress Bar with Pause Points */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                          <span>{meditationSegments[currentSegment]?.name || "Preparing..."}</span>
+                          <span>{Math.round(sessionProgress)}%</span>
+                        </div>
+                        
+                        <div className="relative">
+                          {/* Progress Bar Background */}
+                          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            {/* Progress Fill */}
+                            <div 
+                              className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000 ease-out"
+                              style={{ width: `${sessionProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                        
+                        {isInSilencePeriod && (
+                          <div className="text-center text-sm text-purple-600 dark:text-purple-400 font-medium">
+                            Silent Reflection Time
+                          </div>
+                        )}
+                      </div>
                   
                   {/* Pause/Resume and Stop Controls */}
                   <div className="flex items-center gap-2">
