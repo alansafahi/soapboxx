@@ -67,52 +67,48 @@ export default function SocialFeed() {
 
   const getMoodEmoji = (mood: string) => {
     const moodMap: { [key: string]: string } = {
-      // Emotional Support
-      lonely: "💙", overwhelmed: "🤗", shame: "💜", doubting: "🤔",
-      "needing-forgiveness": "🙏", "struggling-sin": "💭", "seeking-purpose": "🎯",
-      "starting-over": "🌱", "wanting-growth": "📈", grief: "💔",
+      // 🕊️ Emotional Support
+      "sad": "😢", "anxious": "😰", "heartbroken": "💔", "sleepy": "😴",
+      "exhausted": "😓", "thoughtful": "😔", "drained": "😶‍🌫️", "sick": "🤒",
+      "alone": "😞", "angry": "😡", "overwhelmed": "😩", "worried": "😟",
+      "hungry": "🍞", "ok": "😐", "tired": "🥱",
       
-      // Growth & Transformation  
-      hopeful: "✨", excited: "⭐", anticipating: "🔮", peaceful: "🕊️",
-      confident: "💪", motivated: "🚀", determined: "🎯", "seeking-wisdom": "📖",
-      faithful: "✝️", learning: "📚",
+      // 🌿 Spiritual Growth & Readiness
+      "hopeful": "🌅", "motivated": "✝️", "determined": "🧠", "confident": "🤔",
+      "professional": "🧑‍💼", "meditated": "🧘‍♂️", "calm": "😌", "inspired": "😇",
       
-      // Life Situations
-      celebrating: "🎉", married: "💍", "new-baby": "👶", "new-job": "💼",
-      traveling: "✈️", "health-challenge": "🏥", moving: "📦", graduating: "🎓",
+      // ✨ Praise & Celebration
+      "happy": "😄", "loved": "😊", "thankful": "🥰", "blessed": "😇",
+      "joyful": "😃", "grateful": "🤲", "excited": "😊", "proud": "💪",
+      "relaxed": "😌", "chill": "😎", "energized": "😋", "festive": "🤩",
+      "delighted": "😁", "wonderful": "😍", "in-love": "💕",
       
-      // Faith & Worship-Specific
-      blessed: "🙌", grateful: "🙏", worshipful: "🎵", prayerful: "🤲",
-      evangelistic: "📢", serving: "🤝", studying: "📖", fasting: "🕯️",
-      "spirit-filled": "🔥", anxious: "😰"
+      // 🌍 Everyday Check-In
+      "fresh": "😋", "rested": "🛌", "content": "😊", "fine": "😅", "silly": "🧁"
     };
     return moodMap[mood] || "💭";
   };
 
   const getMoodDisplayName = (mood: string) => {
     const moodNames: { [key: string]: string } = {
-      // Emotional Support
-      lonely: "feeling lonely", overwhelmed: "feeling overwhelmed", shame: "dealing with shame", 
-      doubting: "having doubts", "needing-forgiveness": "needing forgiveness", 
-      "struggling-sin": "struggling with sin", "seeking-purpose": "seeking purpose",
-      "starting-over": "starting over", "wanting-growth": "wanting to grow", grief: "grieving",
+      // 🕊️ Emotional Support
+      "sad": "Sad", "anxious": "Anxious", "heartbroken": "Heartbroken", "sleepy": "Sleepy",
+      "exhausted": "Exhausted", "thoughtful": "Thoughtful", "drained": "Drained", "sick": "Sick",
+      "alone": "Alone", "angry": "Angry", "overwhelmed": "Overwhelmed", "worried": "Worried",
+      "hungry": "Hungry", "ok": "OK", "tired": "Tired",
       
-      // Growth & Transformation  
-      hopeful: "feeling hopeful", excited: "feeling excited", anticipating: "anticipating", 
-      peaceful: "feeling peaceful", confident: "feeling confident", motivated: "feeling motivated", 
-      determined: "feeling determined", "seeking-wisdom": "seeking wisdom", faithful: "feeling faithful", 
-      learning: "learning",
+      // 🌿 Spiritual Growth & Readiness
+      "hopeful": "Hopeful", "motivated": "Motivated", "determined": "Determined", "confident": "Confident",
+      "professional": "Professional", "meditated": "Meditated", "calm": "Calm", "inspired": "Inspired",
       
-      // Life Situations
-      celebrating: "celebrating", married: "got married", "new-baby": "welcoming a new baby", 
-      "new-job": "starting a new job", traveling: "traveling", "health-challenge": "facing health challenges", 
-      moving: "moving", graduating: "graduating",
+      // ✨ Praise & Celebration
+      "happy": "Happy", "loved": "Loved", "thankful": "Thankful", "blessed": "Blessed",
+      "joyful": "Joyful", "grateful": "Grateful", "excited": "Excited", "proud": "Proud",
+      "relaxed": "Relaxed", "chill": "Chill", "energized": "Energized", "festive": "Festive",
+      "delighted": "Delighted", "wonderful": "Wonderful", "in-love": "In Love",
       
-      // Faith & Worship-Specific
-      blessed: "feeling blessed", grateful: "feeling grateful", worshipful: "in worship", 
-      prayerful: "in prayer", evangelistic: "sharing the gospel", serving: "serving others", 
-      studying: "studying scripture", fasting: "fasting", "spirit-filled": "spirit-filled", 
-      anxious: "feeling anxious", seeking: "Seeking Guidance"
+      // 🌍 Everyday Check-In
+      "fresh": "Fresh", "rested": "Rested", "content": "Content", "fine": "Fine", "silly": "Silly"
     };
     return moodNames[mood] || mood;
   };
@@ -175,20 +171,75 @@ export default function SocialFeed() {
     }
   ];
 
-  // Mood/feeling options for posts
-  const moodOptions = [
-    { id: "grateful", label: "Grateful", icon: "🙏", color: "bg-green-100 text-green-800" },
-    { id: "blessed", label: "Blessed", icon: "✨", color: "bg-yellow-100 text-yellow-800" },
-    { id: "peaceful", label: "Peaceful", icon: "🕊️", color: "bg-blue-100 text-blue-800" },
-    { id: "hopeful", label: "Hopeful", icon: "🌅", color: "bg-orange-100 text-orange-800" },
-    { id: "joyful", label: "Joyful", icon: "😊", color: "bg-pink-100 text-pink-800" },
-    { id: "reflective", label: "Reflective", icon: "🤔", color: "bg-purple-100 text-purple-800" },
-    { id: "anxious", label: "Anxious", icon: "😰", color: "bg-gray-100 text-gray-800" },
-    { id: "inspired", label: "Inspired", icon: "💡", color: "bg-indigo-100 text-indigo-800" },
-    { id: "seeking", label: "Seeking\nGuidance", icon: "🧭", color: "bg-teal-100 text-teal-800" },
-    { id: "celebrating", label: "Celebrating", icon: "🎉", color: "bg-red-100 text-red-800" },
-    { id: "praying", label: "Praying", icon: "🙏", color: "bg-violet-100 text-violet-800" },
-    { id: "studying", label: "Studying Scripture", icon: "📖", color: "bg-amber-100 text-amber-800" }
+  // Complete Mood Categories organized by purpose
+  const moodCategories = [
+    {
+      name: "🕊️ Emotional Support",
+      description: "For users seeking comfort, prayer, or empathy",
+      moods: [
+        { id: "sad", label: "Sad", icon: "😢", color: "bg-blue-100 text-blue-800" },
+        { id: "anxious", label: "Anxious", icon: "😰", color: "bg-yellow-100 text-yellow-800" },
+        { id: "heartbroken", label: "Heartbroken", icon: "💔", color: "bg-red-100 text-red-800" },
+        { id: "sleepy", label: "Sleepy", icon: "😴", color: "bg-indigo-100 text-indigo-800" },
+        { id: "exhausted", label: "Exhausted", icon: "😓", color: "bg-gray-100 text-gray-800" },
+        { id: "thoughtful", label: "Thoughtful", icon: "😔", color: "bg-purple-100 text-purple-800" },
+        { id: "drained", label: "Drained", icon: "😶‍🌫️", color: "bg-slate-100 text-slate-800" },
+        { id: "sick", label: "Sick", icon: "🤒", color: "bg-orange-100 text-orange-800" },
+        { id: "alone", label: "Alone", icon: "😞", color: "bg-blue-100 text-blue-800" },
+        { id: "angry", label: "Angry", icon: "😡", color: "bg-red-100 text-red-800" },
+        { id: "overwhelmed", label: "Overwhelmed", icon: "😩", color: "bg-yellow-100 text-yellow-800" },
+        { id: "worried", label: "Worried", icon: "😟", color: "bg-amber-100 text-amber-800" },
+        { id: "hungry", label: "Hungry", icon: "🍞", color: "bg-orange-100 text-orange-800" },
+        { id: "ok", label: "OK", icon: "😐", color: "bg-gray-100 text-gray-800" },
+        { id: "tired", label: "Tired", icon: "🥱", color: "bg-indigo-100 text-indigo-800" }
+      ]
+    },
+    {
+      name: "🌿 Spiritual Growth & Readiness",
+      description: "For users actively growing, searching, or recommitting",
+      moods: [
+        { id: "hopeful", label: "Hopeful", icon: "🌅", color: "bg-yellow-100 text-yellow-800" },
+        { id: "motivated", label: "Motivated", icon: "✝️", color: "bg-purple-100 text-purple-800" },
+        { id: "determined", label: "Determined", icon: "🧠", color: "bg-blue-100 text-blue-800" },
+        { id: "confident", label: "Confident", icon: "🤔", color: "bg-green-100 text-green-800" },
+        { id: "professional", label: "Professional", icon: "🧑‍💼", color: "bg-slate-100 text-slate-800" },
+        { id: "meditated", label: "Meditated", icon: "🧘‍♂️", color: "bg-teal-100 text-teal-800" },
+        { id: "calm", label: "Calm", icon: "😌", color: "bg-blue-100 text-blue-800" },
+        { id: "inspired", label: "Inspired", icon: "😇", color: "bg-yellow-100 text-yellow-800" }
+      ]
+    },
+    {
+      name: "✨ Praise & Celebration",
+      description: "For gratitude, testimony, and joy-sharing moments",
+      moods: [
+        { id: "happy", label: "Happy", icon: "😄", color: "bg-yellow-100 text-yellow-800" },
+        { id: "loved", label: "Loved", icon: "😊", color: "bg-pink-100 text-pink-800" },
+        { id: "thankful", label: "Thankful", icon: "🥰", color: "bg-red-100 text-red-800" },
+        { id: "blessed", label: "Blessed", icon: "😇", color: "bg-yellow-100 text-yellow-800" },
+        { id: "joyful", label: "Joyful", icon: "😃", color: "bg-orange-100 text-orange-800" },
+        { id: "grateful", label: "Grateful", icon: "🤲", color: "bg-green-100 text-green-800" },
+        { id: "excited", label: "Excited", icon: "😊", color: "bg-orange-100 text-orange-800" },
+        { id: "proud", label: "Proud", icon: "💪", color: "bg-blue-100 text-blue-800" },
+        { id: "relaxed", label: "Relaxed", icon: "😌", color: "bg-green-100 text-green-800" },
+        { id: "chill", label: "Chill", icon: "😎", color: "bg-blue-100 text-blue-800" },
+        { id: "energized", label: "Energized", icon: "😋", color: "bg-yellow-100 text-yellow-800" },
+        { id: "festive", label: "Festive", icon: "🤩", color: "bg-purple-100 text-purple-800" },
+        { id: "delighted", label: "Delighted", icon: "😁", color: "bg-pink-100 text-pink-800" },
+        { id: "wonderful", label: "Wonderful", icon: "😍", color: "bg-red-100 text-red-800" },
+        { id: "in-love", label: "In Love", icon: "💕", color: "bg-pink-100 text-pink-800" }
+      ]
+    },
+    {
+      name: "🌍 Everyday Check-In",
+      description: "For lightweight updates or general well-being expression",
+      moods: [
+        { id: "fresh", label: "Fresh", icon: "😋", color: "bg-green-100 text-green-800" },
+        { id: "rested", label: "Rested", icon: "🛌", color: "bg-blue-100 text-blue-800" },
+        { id: "content", label: "Content", icon: "😊", color: "bg-green-100 text-green-800" },
+        { id: "fine", label: "Fine", icon: "😅", color: "bg-gray-100 text-gray-800" },
+        { id: "silly", label: "Silly", icon: "🧁", color: "bg-pink-100 text-pink-800" }
+      ]
+    }
   ];
 
   // Fetch social feed data with optimized refresh
@@ -457,7 +508,14 @@ export default function SocialFeed() {
   };
 
   const getSelectedMoodData = () => {
-    return moodOptions.find(m => m.id === selectedMood);
+    if (!selectedMood) return null;
+    
+    for (const category of moodCategories) {
+      const mood = category.moods.find(m => m.id === selectedMood);
+      if (mood) return mood;
+    }
+    
+    return null;
   };
 
   const handleLikePost = (post: FeedPost) => {
@@ -577,7 +635,7 @@ export default function SocialFeed() {
             <div className="mb-3 flex items-center gap-2">
               <Badge className={`${getSelectedMoodData()?.color} border-0`}>
                 <span className="mr-1">{getSelectedMoodData()?.icon}</span>
-                Feeling {getSelectedMoodData()?.label}
+                {getSelectedMoodData()?.label}
               </Badge>
               <Button
                 variant="ghost"
@@ -592,7 +650,7 @@ export default function SocialFeed() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {/* Feeling/Activity Button */}
+              {/* Mood/Activity Button */}
               <div className="relative">
                 <Button
                   variant="ghost"
@@ -601,28 +659,38 @@ export default function SocialFeed() {
                   className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
                 >
                   <Smile className="w-4 h-4 mr-2" />
-                  Feeling
+                  Mood
                   <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
 
-                {/* Mood Dropdown */}
+                {/* Comprehensive Mood Dropdown */}
                 {showMoodDropdown && (
-                  <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-md shadow-lg min-w-64 max-h-64 overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-md shadow-lg min-w-80 max-h-96 overflow-y-auto">
                     <div className="p-2">
-                      <div className="grid grid-cols-2 gap-1">
-                        {moodOptions.map((mood) => (
-                          <Button
-                            key={mood.id}
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleMoodSelect(mood.id)}
-                            className="justify-start h-auto p-2 text-left hover:bg-gray-50"
-                          >
-                            <span className="mr-2">{mood.icon}</span>
-                            <span className="text-sm whitespace-pre-line">{mood.label}</span>
-                          </Button>
-                        ))}
-                      </div>
+                      {moodCategories.map((category) => (
+                        <div key={category.name} className="mb-4 last:mb-0">
+                          <div className="text-sm font-semibold text-gray-700 mb-1 px-2">
+                            {category.name}
+                          </div>
+                          <div className="text-xs text-gray-500 mb-2 px-2">
+                            {category.description}
+                          </div>
+                          <div className="grid grid-cols-3 gap-1">
+                            {category.moods.map((mood) => (
+                              <Button
+                                key={mood.id}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleMoodSelect(mood.id)}
+                                className="justify-start h-auto p-2 text-left hover:bg-gray-50 text-xs"
+                              >
+                                <span className="mr-1 text-sm">{mood.icon}</span>
+                                <span className="text-xs">{mood.label}</span>
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
