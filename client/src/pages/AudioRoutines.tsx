@@ -42,12 +42,12 @@ export default function AudioRoutines() {
 
   // Meditation segments with their durations and pause points
   const meditationSegments = [
-    { name: "Welcome & Breathing", duration: 120, pauseAfter: 15 }, // 2 min segment + 15s pause
-    { name: "Body Awareness", duration: 90, pauseAfter: 45 }, // 1.5 min segment + 45s pause
-    { name: "Mind Settling", duration: 100, pauseAfter: 90 }, // 1.67 min segment + 90s pause
-    { name: "Heart Center", duration: 110, pauseAfter: 120 }, // 1.83 min segment + 2min pause
-    { name: "Spiritual Connection", duration: 120, pauseAfter: 180 }, // 2 min segment + 3min pause
-    { name: "Gratitude Practice", duration: 90, pauseAfter: 30 }, // 1.5 min segment + 30s pause
+    { name: "Welcome & Breathing", duration: 120, pauseAfter: 5 }, // 2 min segment + 5s pause
+    { name: "Body Awareness", duration: 90, pauseAfter: 8 }, // 1.5 min segment + 8s pause
+    { name: "Mind Settling", duration: 100, pauseAfter: 10 }, // 1.67 min segment + 10s pause
+    { name: "Heart Center", duration: 110, pauseAfter: 12 }, // 1.83 min segment + 12s pause
+    { name: "Spiritual Connection", duration: 120, pauseAfter: 15 }, // 2 min segment + 15s pause
+    { name: "Gratitude Practice", duration: 90, pauseAfter: 8 }, // 1.5 min segment + 8s pause
     { name: "Closing Blessing", duration: 70, pauseAfter: 0 }, // 1.17 min segment (no pause at end)
   ];
 
@@ -509,6 +509,10 @@ export default function AudioRoutines() {
       // Store cleanup function
       const cleanup = () => {
         clearInterval(progressInterval);
+        if ((window as any).currentPauseTimeout) {
+          clearTimeout((window as any).currentPauseTimeout);
+          (window as any).currentPauseTimeout = null;
+        }
         setSessionProgress(0);
         setCurrentSegment(0);
         setIsInSilencePeriod(false);
@@ -575,19 +579,27 @@ export default function AudioRoutines() {
             if (segment.pauseAfter > 0) {
               // Show pause notification and update silence period state
               setIsInSilencePeriod(true);
+              console.log(`Starting ${segment.pauseAfter}s pause after segment ${currentSegmentIndex}`);
+              
               toast({
-                title: "Silent Meditation",
-                description: `Pausing for ${segment.pauseAfter} seconds of peaceful silence`,
-                duration: Math.min(segment.pauseAfter * 1000, 5000),
+                title: "Brief Pause",
+                description: `${segment.pauseAfter} seconds of peaceful silence`,
+                duration: 2000,
               });
               
               // Wait for pause duration then continue
-              setTimeout(() => {
+              const pauseTimeout = setTimeout(() => {
                 if (playingRoutine === routine.id) {
+                  console.log(`Pause complete, continuing to next segment`);
                   setIsInSilencePeriod(false);
                   playNextSegment();
+                } else {
+                  console.log(`Session stopped during pause, not continuing`);
                 }
               }, segment.pauseAfter * 1000);
+              
+              // Store timeout for cleanup if needed
+              (window as any).currentPauseTimeout = pauseTimeout;
             } else {
               // No pause, continue immediately
               playNextSegment();
@@ -660,6 +672,12 @@ export default function AudioRoutines() {
       setAutoPauseTimeout(null);
     }
     
+    // Clear pause timeouts
+    if ((window as any).currentPauseTimeout) {
+      clearTimeout((window as any).currentPauseTimeout);
+      (window as any).currentPauseTimeout = null;
+    }
+    
     // Stop meditation audio
     if (currentAudio) {
       currentAudio.pause();
@@ -678,8 +696,12 @@ export default function AudioRoutines() {
       speechSynthesis.cancel();
     }
     
+    // Reset all session state
     setPlayingRoutine(null);
     setIsPaused(false);
+    setSessionProgress(0);
+    setCurrentSegment(0);
+    setIsInSilencePeriod(false);
     
     toast({
       title: "Session Stopped",
