@@ -631,6 +631,14 @@ export default function SocialFeed() {
                         </>
                       )}
                     </div>
+                    {post.mood && (
+                      <div className="flex items-center space-x-1 mt-1">
+                        <span className="text-lg">{getMoodEmoji(post.mood)}</span>
+                        <span className="text-sm text-[#5A2671] font-medium">
+                          {post.author.name} is {getMoodDisplayName(post.mood)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
