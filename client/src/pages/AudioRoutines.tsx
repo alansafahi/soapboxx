@@ -35,7 +35,6 @@ export default function AudioRoutines() {
   const [backgroundMusicType, setBackgroundMusicType] = useState('gentle-chords');
   const [isPaused, setIsPaused] = useState(false);
   const [autoPauseTimeout, setAutoPauseTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [pauseDetectionCleanup, setPauseDetectionCleanup] = useState<(() => void) | null>(null);
   const { toast } = useToast();
 
   // Background music options
@@ -291,59 +290,52 @@ export default function AudioRoutines() {
 
   // Automatic pause detection function
   const setupAutoPauseDetection = (audio: HTMLAudioElement) => {
-    console.log('Setting up automatic pause detection...');
-    
-    // Track which pauses have been triggered to avoid duplicates
-    const triggeredPauses = new Set<number>();
-    
+    const pausePatterns = [
+      /pause for (\d+) seconds?/i,
+      /pause for (\d+) minutes?/i,
+      /take (\d+) seconds? to/i,
+      /rest for (\d+) seconds?/i,
+      /(\d+) seconds? of silence/i
+    ];
+
     // Monitor audio for pause cues by tracking time and checking against meditation script
     const checkForPauseCues = () => {
-      if (!audio || audio.paused || isPaused) return;
+      if (!audio || audio.paused) return;
       
       const currentTime = audio.currentTime;
-      console.log('Audio current time:', currentTime);
       
-      // Meditation timing markers for automatic pauses - adjusted for actual audio timing
+      // Meditation timing markers for automatic pauses
       const pauseMarkers = [
-        { time: 25, duration: 15, label: "15 seconds" }, // After "Close your eyes and take a deep breath"
-        { time: 45, duration: 45, label: "45 seconds" }, // After "feel God's presence surrounding you"  
-        { time: 95, duration: 90, label: "90 seconds" }, // After "Continue breathing gently"
-        { time: 200, duration: 120, label: "2 minutes" }, // After "Rest in this sacred stillness"
-        { time: 340, duration: 180, label: "3 minutes" }, // After "open your heart to receive"
-        { time: 540, duration: 30, label: "30 seconds" } // After "take a moment to offer gratitude"
+        { time: 35, duration: 15 }, // "pause for 15 seconds"
+        { time: 75, duration: 45 }, // "pause for 45 seconds"  
+        { time: 140, duration: 90 }, // "pause for 90 seconds"
+        { time: 250, duration: 120 }, // "pause for 2 minutes"
+        { time: 390, duration: 180 }, // "pause for 3 minutes"
+        { time: 590, duration: 30 } // "pause for 30 seconds"
       ];
       
       for (const marker of pauseMarkers) {
-        // Check if we're within 3 seconds of a pause marker and haven't triggered it yet
-        if (Math.abs(currentTime - marker.time) < 3 && !triggeredPauses.has(marker.time)) {
-          console.log(`Triggering automatic pause at ${currentTime}s for ${marker.duration}s`);
-          triggeredPauses.add(marker.time);
-          
+        if (Math.abs(currentTime - marker.time) < 2 && !isPaused) {
           // Trigger automatic pause
           audio.pause();
           setIsPaused(true);
           
           toast({
             title: "Automatic Pause",
-            description: `Pausing for ${marker.label} as instructed by the narrator`,
-            duration: 4000,
+            description: `Pausing for ${marker.duration} seconds as instructed`,
+            duration: 3000,
           });
           
           // Auto-resume after specified duration
           const resumeTimeout = setTimeout(() => {
-            if (audio && audio.paused) {
-              console.log('Auto-resuming meditation after pause');
-              audio.play().then(() => {
-                setIsPaused(false);
-                
-                toast({
-                  title: "Resuming",
-                  description: "Continuing your meditation session",
-                  duration: 2000,
-                });
-              }).catch(err => {
-                console.error('Error auto-resuming:', err);
-                setIsPaused(false);
+            if (audio && isPaused) {
+              audio.play();
+              setIsPaused(false);
+              
+              toast({
+                title: "Resuming",
+                description: "Continuing your meditation session",
+                duration: 2000,
               });
             }
           }, marker.duration * 1000);
@@ -354,19 +346,13 @@ export default function AudioRoutines() {
       }
     };
 
-    // Check for pause cues every second for more precise timing
-    const intervalId = setInterval(checkForPauseCues, 1000);
+    // Check for pause cues every 2 seconds
+    const intervalId = setInterval(checkForPauseCues, 2000);
     
     // Clean up on audio end
-    const cleanup = () => {
-      console.log('Cleaning up pause detection');
+    audio.addEventListener('ended', () => {
       clearInterval(intervalId);
-    };
-    
-    audio.addEventListener('ended', cleanup);
-    
-    // Return cleanup function
-    return cleanup;
+    });
   };
 
   // Universal device detection for cross-platform support
