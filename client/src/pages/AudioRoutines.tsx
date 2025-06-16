@@ -143,7 +143,7 @@ export default function AudioRoutines() {
     });
   };
 
-  const createNatureSounds = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
+  const createNatureSounds = (audioContext: AudioContext, masterGain: GainNode, audioSources: AudioBufferSourceNode[], duration: number) => {
     // Rain simulation with filtered noise
     const bufferSize = audioContext.sampleRate * 2;
     const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
@@ -162,7 +162,7 @@ export default function AudioRoutines() {
     rainFilter.Q.setValueAtTime(0.3, audioContext.currentTime);
     
     const rainGain = audioContext.createGain();
-    rainGain.gain.setValueAtTime(0.03, audioContext.currentTime);
+    rainGain.gain.setValueAtTime(0.08, audioContext.currentTime);
     
     noiseSource.connect(rainFilter);
     rainFilter.connect(rainGain);
@@ -170,6 +170,7 @@ export default function AudioRoutines() {
     
     noiseSource.start(audioContext.currentTime);
     noiseSource.stop(audioContext.currentTime + duration);
+    audioSources.push(noiseSource);
   };
 
   const createOceanWaves = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
@@ -410,20 +411,27 @@ export default function AudioRoutines() {
       // Session duration in seconds (12-15 minutes)
       const sessionDuration = 900; // 15 minutes
       
+      // Resume audio context if needed (for mobile browsers)
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      
       // Create background music based on selected type
       const masterGain = audioContext.createGain();
       masterGain.connect(audioContext.destination);
-      masterGain.gain.setValueAtTime(backgroundMusicType === 'off' ? 0 : 0.08, audioContext.currentTime);
+      masterGain.gain.setValueAtTime(backgroundMusicType === 'off' ? 0 : 0.12, audioContext.currentTime);
       
       const oscillators: OscillatorNode[] = [];
+      const audioSources: AudioBufferSourceNode[] = [];
       
       if (backgroundMusicType !== 'off') {
+        console.log(`Starting background music: ${backgroundMusicType}`);
         switch (backgroundMusicType) {
           case 'gentle-chords':
             createGentleChords(audioContext, masterGain, oscillators, sessionDuration);
             break;
           case 'nature-sounds':
-            createNatureSounds(audioContext, masterGain, oscillators, sessionDuration);
+            createNatureSounds(audioContext, masterGain, audioSources, sessionDuration);
             break;
           case 'ocean-waves':
             createOceanWaves(audioContext, masterGain, oscillators, sessionDuration);
@@ -445,40 +453,130 @@ export default function AudioRoutines() {
           oscillators.forEach(osc => {
             try { osc.stop(); } catch (e) { /* Already stopped */ }
           });
+          audioSources.forEach(source => {
+            try { source.stop(); } catch (e) { /* Already stopped */ }
+          });
         }
       };
       
-      // Create segmented meditation with proper timing for 15-minute session
-      const meditationSegments = [
-        {
-          text: `Welcome to ${routine.name}. ${routine.description}. Find a comfortable position where you can remain still and peaceful for the next fifteen minutes. Close your eyes gently, allowing your eyelids to feel heavy and relaxed. Begin by taking a deep, slow breath in through your nose, filling your lungs completely with fresh, life-giving air. Hold this breath for just a moment, feeling the fullness in your chest. Now slowly exhale through your mouth, releasing all tension and worry with each breath out.`,
-          pauseAfter: 15
-        },
-        {
-          text: `Continue this gentle rhythm of breathing. With each inhale, imagine you are drawing in God's peace and love. With each exhale, release any stress, anxiety, or concerns that may be weighing on your heart and mind. As you breathe, feel your body beginning to relax. Start with the top of your head, allowing any tension in your scalp to melt away. Let this wave of relaxation flow down to your forehead, smoothing away any lines of worry or stress.`,
-          pauseAfter: 45
-        },
-        {
-          text: `Allow your eyes to feel completely at rest behind your closed lids. Release any tension around your temples and let your jaw soften and relax. Feel your neck and shoulders dropping down, releasing the weight of the day. Let this peaceful feeling continue down your arms, through your chest, and into your heart space. Your heart is the sacred center where God's love dwells within you. Feel this divine love radiating warmth throughout your entire being.`,
-          pauseAfter: 90
-        },
-        {
-          text: `Continue to breathe slowly and deeply as this relaxation flows down through your torso, your abdomen, your hips, and into your legs. Feel your feet connecting you to the earth while your spirit soars toward heaven. Now that your body is completely relaxed, turn your attention to your heart and mind. In this sacred stillness, you are creating space for God to speak to your soul. You are opening yourself to receive divine wisdom, comfort, and guidance.`,
-          pauseAfter: 120
-        },
-        {
-          text: `Imagine yourself in a beautiful, peaceful garden where you can meet with the Divine. This is your sacred space, filled with everything that brings you peace. Perhaps there are gentle flowers swaying in a soft breeze, or a calm stream flowing nearby. In this garden of peace, you are completely safe and loved. God's presence surrounds you like warm sunlight, filling every cell of your body with healing light and unconditional love. Rest in this divine presence. You don't need to say anything or do anything. Simply be present with the One who created you and loves you beyond measure.`,
-          pauseAfter: 180
-        },
-        {
-          text: `If thoughts try to pull your attention away, gently acknowledge them without judgment and then return your focus to your breath and to God's loving presence with you. In this holy silence, allow your heart to open completely. If there are any burdens you've been carrying, offer them now to God. If there are any fears or worries troubling your mind, release them into divine care. Rest assured that you are deeply loved, perfectly known, and completely accepted just as you are in this moment. Continue to breathe peacefully in this sacred communion. Let your soul be nourished by this divine connection. Allow God's peace to penetrate every corner of your being. Take this time to listen with your heart. God may speak to you through a sense of peace, a gentle insight, or simply through the profound love you feel in this moment.`,
-          pauseAfter: 30
-        },
-        {
-          text: `As we begin to draw our time together to a close, take a moment to offer gratitude for this peaceful communion. Thank God for this time of rest and renewal, for the breath in your lungs, and for the love that surrounds you always. When you're ready, begin to gently wiggle your fingers and toes, bringing gentle movement back to your body. Take a deep breath and slowly open your eyes when it feels right. Carry this peace with you into your day. Remember that God's presence is always available to you, and you can return to this inner sanctuary of peace whenever you need comfort or guidance. May you walk forward with confidence, knowing you are loved, guided, and blessed. May God's peace be with you always. Amen.`,
-          pauseAfter: 0
+      // Create diverse meditation scripts based on routine type
+      const getRoutineScript = (routineName: string) => {
+        switch (routineName) {
+          case 'Morning Peace':
+            return [
+              {
+                text: `Good morning, and welcome to your Morning Peace meditation. As the dawn breaks and a new day begins, this is your sacred time to center yourself in God's presence before the world awakens around you. Find a comfortable seated position, perhaps near a window where you can sense the morning light. Place your feet flat on the floor and your hands gently resting on your lap. Close your eyes and take three deep, cleansing breaths, releasing yesterday's concerns and welcoming today's possibilities.`,
+                pauseAfter: 10
+              },
+              {
+                text: `Begin to notice your breath as it flows naturally in and out. With each inhale, imagine drawing in the fresh energy of this new morning. With each exhale, release any lingering sleepiness or anxiety about the day ahead. Feel your body awakening gently, like a flower opening to the morning sun. Starting from the crown of your head, send a warm wave of gratitude through your body - grateful for rest, grateful for this new day, grateful for the breath that sustains you.`,
+                pauseAfter: 15
+              },
+              {
+                text: `Now bring to mind your intentions for this day. Not your to-do list or your worries, but your deeper intentions. How do you want to show up in the world today? What qualities do you want to embody - perhaps patience, kindness, courage, or joy? Set these intentions like seeds in the fertile ground of your heart, trusting that they will grow and manifest throughout your day.`,
+                pauseAfter: 30
+              },
+              {
+                text: `Imagine yourself surrounded by a gentle, golden morning light. This light represents God's love and protection surrounding you. Feel this light filling you from within, giving you strength and clarity for the day ahead. Know that you carry this light with you wherever you go. When challenges arise today, you can return to this feeling of peace and centeredness.`,
+                pauseAfter: 45
+              },
+              {
+                text: `Take a moment now to offer a prayer of gratitude for this new day. Thank the Divine for the gift of life, for the people you love, for the opportunities that await you. Even if yesterday was difficult, today is a fresh start, a new chapter waiting to be written. You are exactly where you need to be in this moment.`,
+                pauseAfter: 60
+              },
+              {
+                text: `As we prepare to conclude this morning meditation, take three more deep breaths. With each breath, feel yourself becoming more alert and present, ready to meet the day with an open heart. When you're ready, gently wiggle your fingers and toes, roll your shoulders, and slowly open your eyes. Carry this morning peace with you as you step into your day, knowing that God's love goes before you and surrounds you always.`,
+                pauseAfter: 0
+              }
+            ];
+          
+          case 'Evening Reflection':
+            return [
+              {
+                text: `Welcome to this time of Evening Reflection, a sacred pause at the end of your day. As the sun sets and darkness gently embraces the earth, this is your invitation to turn inward and reflect on the journey of this day. Find a comfortable position where you can truly relax. Let your shoulders drop, soften your jaw, and allow your breath to deepen naturally. This is your time to release the day and prepare for restful sleep.`,
+                pauseAfter: 10
+              },
+              {
+                text: `Begin by taking a gentle inventory of your day, not with judgment, but with compassion. Recall the moments of joy - perhaps a kind word shared, a task completed, a moment of beauty you witnessed. Feel gratitude for these gifts, no matter how small they may seem. Allow appreciation to fill your heart for the experiences that brought you closer to love, to others, and to yourself.`,
+                pauseAfter: 20
+              },
+              {
+                text: `Now acknowledge the more challenging moments of today - times when you felt stressed, frustrated, or disconnected. Rather than criticizing yourself, offer these experiences the same gentle compassion you would give a dear friend. Every day contains both light and shadow, and both are part of your human journey. Breathe forgiveness into any mistakes you made, knowing that tomorrow offers new opportunities to love and grow.`,
+                pauseAfter: 40
+              },
+              {
+                text: `Release any conversations you need to have, any tasks left undone, any worries about tomorrow. Imagine placing all of these concerns in a beautiful basket and offering them to the Divine. You don't need to carry these burdens into your sleep. Trust that what needs to be handled will be, and what doesn't serve you can be released with love.`,
+                pauseAfter: 60
+              },
+              {
+                text: `Feel your body sinking deeper into relaxation with each breath. Starting from your toes and moving slowly upward, consciously relax each part of your body. Your legs, your hips, your abdomen, your chest, your arms, your neck, and finally your face. Let go completely, knowing you are held safely in God's love as you prepare for rest.`,
+                pauseAfter: 45
+              },
+              {
+                text: `As this day comes to a close, offer a prayer of gratitude for all you have experienced, learned, and received. You have grown today, even in ways you may not yet realize. Rest now in the peace that comes from knowing you are deeply loved, perfectly held, and beautifully human. May your sleep be filled with God's peace, and may you awaken refreshed and renewed. Sweet dreams, beloved soul.`,
+                pauseAfter: 0
+              }
+            ];
+          
+          case 'Stress Relief':
+            return [
+              {
+                text: `Welcome to this Stress Relief meditation. Right now, you are choosing to step away from the pressures and demands of life to find your center again. This is an act of self-care and wisdom. Find a position where you can be completely comfortable - sitting or lying down, whatever feels best for your body right now. Close your eyes and know that for the next few minutes, you have nowhere else to be and nothing else to do but care for your wellbeing.`,
+                pauseAfter: 8
+              },
+              {
+                text: `Begin by acknowledging the stress you're carrying without trying to fix or change it. Simply notice where you feel tension in your body. Is it in your shoulders? Your jaw? Your stomach? Breathe gently into these areas, sending them compassion rather than resistance. Say to yourself: "It's okay that I feel stressed. This is temporary, and I am capable of finding peace."`,
+                pauseAfter: 15
+              },
+              {
+                text: `Now we're going to practice a powerful breathing technique for stress relief. Inhale slowly through your nose for a count of four. Hold your breath gently for a count of four. Exhale completely through your mouth for a count of six. Let's do this together several times, allowing each exhale to release more tension from your body and mind.`,
+                pauseAfter: 25
+              },
+              {
+                text: `With each breath cycle, imagine that you're breathing in calm, peaceful energy, and breathing out stress and worry. Your nervous system is beginning to shift from fight-or-flight mode into rest and restoration. Feel your heart rate slowing, your muscles softening, your mind becoming clearer and more focused. You are returning to your natural state of balance and peace.`,
+                pauseAfter: 35
+              },
+              {
+                text: `Bring to mind something that always brings you comfort - perhaps a loved one's smile, a peaceful place in nature, or a cherished memory. Hold this image in your heart and let its warmth spread throughout your entire being. This comfort is always available to you. Even in the midst of life's storms, there is always a place of safety and peace within you.`,
+                pauseAfter: 50
+              },
+              {
+                text: `As we conclude this stress relief session, place one hand on your heart and one on your belly. Feel the steady rhythm of your heartbeat, the gentle rise and fall of your breath. Your body knows how to heal and restore itself when given the chance. Trust in your inner resilience and strength. When you return to your day, carry this calm centeredness with you. You can handle whatever comes with grace and wisdom.`,
+                pauseAfter: 0
+              }
+            ];
+          
+          default:
+            return [
+              {
+                text: `Welcome to this guided meditation session. This is your time to step away from the world and connect with your inner peace. Find a comfortable position and allow your eyes to close gently. Take a deep breath in, and as you exhale, let go of everything that brought you here today. This is your sacred time for rest and renewal.`,
+                pauseAfter: 10
+              },
+              {
+                text: `Focus on your breath, the most natural and life-giving rhythm in your body. With each inhale, feel yourself drawing in peace and calm. With each exhale, release any tension or stress you've been carrying. Allow your breathing to become slower and deeper with each cycle.`,
+                pauseAfter: 20
+              },
+              {
+                text: `Now bring your attention to your body, starting from the top of your head and slowly moving downward. Notice any areas of tension and breathe into them with kindness and compassion. Your body has carried you through this day and deserves your appreciation and care.`,
+                pauseAfter: 40
+              },
+              {
+                text: `In this quiet space, allow yourself to simply be. You don't need to fix anything, solve anything, or become anything other than what you are right now. Rest in the profound peace that comes from accepting this present moment exactly as it is.`,
+                pauseAfter: 60
+              },
+              {
+                text: `As we prepare to return to the world, take a moment to set an intention for how you want to carry this peace forward. Know that this calm centeredness is always available to you, just a few conscious breaths away.`,
+                pauseAfter: 30
+              },
+              {
+                text: `When you're ready, gently begin to move your fingers and toes, take a deep breath, and slowly open your eyes. Return to your day with renewed energy and clarity, carrying this inner peace with you.`,
+                pauseAfter: 0
+              }
+            ];
         }
-      ];
+      };
+      
+      const meditationSegments = getRoutineScript(routine.name);
 
       // Generate complete meditation audio with proper segmentation
       console.log('Starting segmented meditation session...');
@@ -655,48 +753,102 @@ export default function AudioRoutines() {
   };
 
   const stopAudioRoutine = () => {
-    // Clear any auto-pause timeouts
+    console.log('Stop button pressed - initiating complete session cleanup');
+    
+    // Clear all timeout references
     if (autoPauseTimeout) {
       clearTimeout(autoPauseTimeout);
       setAutoPauseTimeout(null);
     }
     
-    // Clear pause timeouts
     if ((window as any).currentPauseTimeout) {
       clearTimeout((window as any).currentPauseTimeout);
       (window as any).currentPauseTimeout = null;
     }
     
-    // Stop meditation audio
+    // Clear any progress intervals
+    if ((window as any).progressInterval) {
+      clearInterval((window as any).progressInterval);
+      (window as any).progressInterval = null;
+    }
+    
+    // Stop and cleanup meditation audio
     if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
+      try {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio.src = '';
+        currentAudio.removeEventListener('ended', () => {});
+        currentAudio.removeEventListener('canplay', () => {});
+      } catch (e) {
+        console.log('Audio cleanup completed');
+      }
       setCurrentAudio(null);
     }
     
-    // Stop background music by closing audio context
+    // Force stop all oscillators and close audio context
     if (currentAudioContext) {
-      currentAudioContext.close();
+      try {
+        // Stop all nodes
+        const allNodes = (currentAudioContext as any)._nodes || [];
+        allNodes.forEach((node: any) => {
+          try {
+            if (node.stop) node.stop();
+            if (node.disconnect) node.disconnect();
+          } catch (e) { /* Node already stopped */ }
+        });
+        
+        // Close the audio context
+        currentAudioContext.close().then(() => {
+          console.log('Audio context closed successfully');
+        }).catch((e) => {
+          console.log('Audio context cleanup completed');
+        });
+      } catch (e) {
+        console.log('Audio context force cleanup');
+      }
       setCurrentAudioContext(null);
     }
     
     // Stop any browser speech synthesis
     if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
+      try {
+        speechSynthesis.cancel();
+        speechSynthesis.pause();
+      } catch (e) {
+        console.log('Speech synthesis cleanup completed');
+      }
     }
     
-    // Reset all session state
+    // Force cleanup of any running routine
+    const currentRoutine = playingRoutine;
+    if (currentRoutine && (currentRoutine as any).cleanup) {
+      try {
+        (currentRoutine as any).cleanup();
+      } catch (e) {
+        console.log('Routine cleanup completed');
+      }
+    }
+    
+    // Reset all session state immediately
     setPlayingRoutine(null);
     setIsPaused(false);
     setSessionProgress(0);
     setCurrentSegment(0);
     setIsInSilencePeriod(false);
     
+    // Force garbage collection hint
+    if ((window as any).gc) {
+      (window as any).gc();
+    }
+    
     toast({
       title: "Session Stopped",
-      description: "Meditation session has been stopped successfully",
-      duration: 3000,
+      description: "Meditation session completely stopped",
+      duration: 2000,
     });
+    
+    console.log('Stop button - all cleanup completed');
   };
 
   const handleRoutineClick = (routine: AudioRoutine) => {
