@@ -142,6 +142,10 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Fixed avatar display issues in social feed post composer
+  - Replaced undefined `bg-faith-blue` class with proper `bg-purple-600` Tailwind class
+  - Enhanced avatar to show proper user initials "AS" (first name + last name) instead of user ID characters
+  - Avatar now displays correctly in both S.O.A.P. entries and social feed post composer
 - June 16, 2025: Successfully completed S.O.A.P. Journal system with full functionality
   - Fixed critical date validation issue in `insertSoapEntrySchema` by adding proper string-to-date conversion
   - Enhanced S.O.A.P. entry display to show proper user names instead of user IDs

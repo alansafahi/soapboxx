@@ -831,8 +831,10 @@ export default function SocialFeed() {
           <div className="flex items-center space-x-4">
             <Avatar className="w-10 h-10">
               <AvatarImage src={user?.profileImageUrl} />
-              <AvatarFallback className="bg-faith-blue text-white">
-                {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+              <AvatarFallback className="bg-purple-600 text-white">
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+                  : user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
