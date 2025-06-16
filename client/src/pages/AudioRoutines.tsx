@@ -81,13 +81,24 @@ export default function AudioRoutines() {
 
   const startAudioRoutine = async (routine: AudioRoutine) => {
     try {
-      // Create audio context for peaceful meditation experience
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // iOS-compatible AudioContext creation
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContextClass({
+        sampleRate: 44100, // Standard sample rate for better iOS compatibility
+        latencyHint: 'interactive'
+      });
       
-      // Resume audio context if needed (Chrome requires user interaction)
+      // Critical iOS fix: Ensure AudioContext is running
       if (audioContext.state === 'suspended') {
         await audioContext.resume();
       }
+      
+      // Additional iOS check - create a silent buffer to "unlock" audio
+      const silentBuffer = audioContext.createBuffer(1, 1, audioContext.sampleRate);
+      const silentSource = audioContext.createBufferSource();
+      silentSource.buffer = silentBuffer;
+      silentSource.connect(audioContext.destination);
+      silentSource.start();
       
       setCurrentAudioContext(audioContext);
       
@@ -179,13 +190,27 @@ export default function AudioRoutines() {
           const audioUrl = URL.createObjectURL(audioBlob);
           const premiumAudio = new Audio(audioUrl);
           
+          // iOS compatibility fixes
+          premiumAudio.preload = 'auto';
+          premiumAudio.playsInline = true;
+          premiumAudio.volume = 0.8;
+          
           premiumAudio.onloadeddata = () => {
             toast({
               title: "✨ Premium Voice Ready",
               description: "Now playing with studio-quality AI narration",
               duration: 2000,
             });
-            premiumAudio.play();
+            
+            // iOS requires promise-based play handling
+            const playPromise = premiumAudio.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(error => {
+                console.error('Audio play failed on iOS:', error);
+                // Fallback to system voice
+                fallbackToSystemVoice(routine, masterGain, backgroundMusic, audioContext);
+              });
+            }
           };
           
           premiumAudio.onended = () => {
