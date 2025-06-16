@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,18 @@ import {
   ChevronDown,
   Globe,
   Lock,
-  Eye
+  Eye,
+  Paperclip,
+  Mic,
+  MicOff,
+  BookText,
+  Hash,
+  AtSign,
+  Image,
+  Video,
+  FileText,
+  Play,
+  Pause
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -131,6 +142,20 @@ export default function SocialFeed() {
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [activePost, setActivePost] = useState<FeedPost | null>(null);
   const [commentText, setCommentText] = useState("");
+
+  // Enhanced composer state (X/Facebook-style features)
+  const [attachedMedia, setAttachedMedia] = useState<File[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [linkedVerse, setLinkedVerse] = useState<{reference: string; text: string} | null>(null);
+  const [showVerseSearch, setShowVerseSearch] = useState(false);
+  const [verseQuery, setVerseQuery] = useState("");
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [cursorPosition, setCursorPosition] = useState(0);
+  
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   // Expanded verses state for AI suggestions
   const [expandedVerses, setExpandedVerses] = useState<Set<number>>(new Set());
@@ -488,17 +513,109 @@ export default function SocialFeed() {
     },
   });
 
+  // Enhanced composer handlers
+  const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setAttachedMedia(prev => [...prev, ...files]);
+  };
+
+  const removeAttachedMedia = (index: number) => {
+    setAttachedMedia(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const startVoiceRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      const audioChunks: Blob[] = [];
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        // Convert speech to text using Web Speech API or send to server for Whisper processing
+        await convertSpeechToText(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      toast({
+        title: "Microphone Access Required",
+        description: "Please allow microphone access to record voice prayers.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const convertSpeechToText = async (audioBlob: Blob) => {
+    // Use Web Speech API for basic conversion or send to server for Whisper
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      // Fallback to Web Speech API if available
+      const recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setNewPost(prev => prev + (prev ? ' ' : '') + transcript);
+      };
+      
+      recognition.start();
+    }
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const position = e.target.selectionStart;
+    
+    setNewPost(value);
+    setCursorPosition(position);
+    
+    // Check for hashtags and mentions
+    const words = value.split(' ');
+    const currentWord = words[words.length - 1];
+    
+    if (currentWord.startsWith('#')) {
+      setMentionQuery(currentWord.slice(1));
+      setShowMentions(false);
+    } else if (currentWord.startsWith('@')) {
+      setMentionQuery(currentWord.slice(1));
+      setShowMentions(true);
+    } else {
+      setShowMentions(false);
+    }
+  };
+
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
     
     const postData = {
       content: newPost,
       mood: selectedMood,
-      audience: selectedAudience
+      audience: selectedAudience,
+      attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
+      linkedVerse: linkedVerse
       // AI will automatically determine post type and title
     };
     
     createPostMutation.mutate(postData);
+    
+    // Reset enhanced composer state
+    setAttachedMedia([]);
+    setLinkedVerse(null);
+    setShowVerseSearch(false);
   };
 
   const handleMoodSelect = (moodId: string) => {
@@ -624,11 +741,63 @@ export default function SocialFeed() {
             </Avatar>
             <div className="flex-1">
               <Textarea
+                ref={textareaRef}
                 placeholder="Share something with your community..."
                 value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
+                onChange={handleTextChange}
                 className="min-h-[80px] resize-none border-gray-200 dark:border-gray-600"
               />
+              
+              {/* Media Preview */}
+              {attachedMedia.length > 0 && (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {attachedMedia.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <div className="bg-gray-100 rounded-lg p-3 flex items-center space-x-2">
+                        {file.type.startsWith('image/') ? (
+                          <Image className="w-5 h-5 text-gray-500" />
+                        ) : file.type.startsWith('video/') ? (
+                          <Video className="w-5 h-5 text-gray-500" />
+                        ) : (
+                          <FileText className="w-5 h-5 text-gray-500" />
+                        )}
+                        <span className="text-sm text-gray-700 truncate">{file.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeAttachedMedia(index)}
+                          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Linked Verse Preview */}
+              {linkedVerse && (
+                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <BookText className="w-4 h-4 text-blue-600" />
+                        <span className="font-medium text-blue-800">{linkedVerse.reference}</span>
+                      </div>
+                      <p className="text-sm text-blue-700 italic">"{linkedVerse.text}"</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setLinkedVerse(null)}
+                      className="h-6 w-6 p-0 text-blue-400 hover:text-blue-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
