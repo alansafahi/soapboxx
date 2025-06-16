@@ -4249,7 +4249,8 @@ Return JSON with this exact structure:
           churchId: null,
           category: 'general',
           isPublic: true,
-          mood: mood || null
+          mood: mood || null,
+          suggestedVerses: suggestedVerses || null
         });
       } else if (type === 'prayer') {
         // Prayer content gets posted as a share since prayers belong in Prayer Wall
@@ -4260,7 +4261,8 @@ Return JSON with this exact structure:
           churchId: null,
           category: 'share',
           isPublic: true,
-          mood: mood || null
+          mood: mood || null,
+          suggestedVerses: suggestedVerses || null
         });
       } else if (type === 'announcement') {
         post = await storage.createDiscussion({
@@ -4270,7 +4272,8 @@ Return JSON with this exact structure:
           churchId: null,
           category: 'announcement',
           isPublic: true,
-          mood: mood || null
+          mood: mood || null,
+          suggestedVerses: suggestedVerses || null
         });
       } else { // type === 'share'
         post = await storage.createDiscussion({
@@ -4280,7 +4283,8 @@ Return JSON with this exact structure:
           churchId: null,
           category: 'share',
           isPublic: true,
-          mood: mood || null
+          mood: mood || null,
+          suggestedVerses: suggestedVerses || null
         });
       }
       

@@ -2413,6 +2413,7 @@ export class DatabaseStorage implements IStorage {
           title: d.title,
           content: d.content,
           mood: d.mood || null,
+          suggestedVerses: d.suggestedVerses || null,
           author: {
             id: d.authorId,
             name: authorName,

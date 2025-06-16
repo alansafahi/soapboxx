@@ -598,6 +598,7 @@ export const discussions = pgTable("discussions", {
   category: varchar("category", { length: 50 }), // general, prayer, bible_study, events
   isPublic: boolean("is_public").default(true),
   mood: varchar("mood", { length: 50 }), // Facebook-style mood/activity tag
+  suggestedVerses: jsonb("suggested_verses"), // AI-generated Bible verse suggestions
   likeCount: integer("like_count").default(0),
   commentCount: integer("comment_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),

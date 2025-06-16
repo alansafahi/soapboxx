@@ -48,6 +48,7 @@ interface FeedPost {
   shareCount: number;
   isLiked: boolean;
   isBookmarked?: boolean;
+  suggestedVerses?: any[];
   tags?: string[];
   eventDate?: Date;
   location?: string;
