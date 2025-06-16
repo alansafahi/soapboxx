@@ -4629,6 +4629,36 @@ Return JSON with this exact structure:
     }
   });
 
+  app.post('/api/prayers/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const prayerResponse = await storage.getUserPrayerResponse(prayerRequestId, userId);
+      
+      if (prayerResponse) {
+        // Remove the prayer response to "unlike"
+        await storage.removePrayerResponse(prayerRequestId, userId);
+        res.json({ liked: false });
+      } else {
+        // Add prayer response to "like"
+        await storage.prayForRequest({
+          prayerRequestId,
+          userId,
+          responseType: 'prayer',
+        });
+        res.json({ liked: true });
+      }
+    } catch (error) {
+      console.error("Error toggling prayer like:", error);
+      res.status(500).json({ message: "Failed to toggle like" });
+    }
+  });
+
   // Prayer response endpoints (supportive comments on prayers)
   app.post("/api/prayers/:id/comments", isAuthenticated, async (req: any, res) => {
     try {

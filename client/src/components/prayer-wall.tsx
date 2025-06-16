@@ -165,8 +165,12 @@ export default function PrayerWall() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error('Failed to toggle prayer like');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to toggle prayer like');
+      }
       return response.json();
     },
     onSuccess: (data, prayerRequestId) => {
