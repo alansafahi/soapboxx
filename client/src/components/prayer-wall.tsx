@@ -24,6 +24,7 @@ import { z } from "zod";
 import { formatDistanceToNow } from "date-fns";
 import type { PrayerRequest } from "@shared/schema";
 import SmartScriptureTextarea from "./SmartScriptureTextarea";
+import { ScriptureExpandedText } from "./ScriptureExpandedText";
 
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
@@ -742,9 +743,10 @@ export default function PrayerWall() {
                       <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{prayer.title}</h4>
                     )}
                     
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                      {prayer.content}
-                    </p>
+                    <ScriptureExpandedText 
+                      text={prayer.content}
+                      className="text-gray-700 dark:text-gray-300 leading-relaxed"
+                    />
                     
                     {/* Action Buttons */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
