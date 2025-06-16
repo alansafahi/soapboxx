@@ -208,7 +208,10 @@ export default function PrayerWall() {
   // Create prayer request mutation
   const createPrayerMutation = useMutation({
     mutationFn: async (data: PrayerRequestFormData) => {
-      await apiRequest("POST", "/api/prayers", data);
+      console.log('Submitting prayer data:', data);
+      const result = await apiRequest("POST", "/api/prayers", data);
+      console.log('Prayer submission result:', result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });

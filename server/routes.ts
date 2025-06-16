@@ -4589,8 +4589,10 @@ Return JSON with this exact structure:
   app.post('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
       console.log("Prayer request body:", req.body);
+      console.log("Prayer request user:", req.user);
       const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
+        console.error("No user ID found in request");
         return res.status(401).json({ message: 'User authentication required' });
       }
       
@@ -4599,11 +4601,14 @@ Return JSON with this exact structure:
         authorId: userId,
       };
       
+      console.log("Processed prayer data:", prayerData);
       const prayer = await storage.createPrayerRequest(prayerData);
+      console.log("Created prayer:", prayer);
       res.status(201).json(prayer);
     } catch (error) {
       console.error("Error creating prayer request:", error);
-      res.status(500).json({ message: "Failed to create prayer request" });
+      console.error("Error details:", error.message);
+      res.status(500).json({ message: "Failed to create prayer request", error: error.message });
     }
   });
 
