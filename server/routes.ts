@@ -12,6 +12,50 @@ import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
 
+// Configure file upload directories
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer for file uploads
+const storage_multer = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage_multer,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow various file types for media management
+    const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mov|avi|mp3|wav|m4a|pdf|doc|docx|ppt|pptx/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Unsupported file type'));
+    }
+  }
+});
+
+// Helper function to determine file type from mime type
+const getFileType = (mimeType: string): string => {
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('video/')) return 'video';
+  if (mimeType.startsWith('audio/')) return 'audio';
+  return 'document';
+};
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -168,14 +212,7 @@ async function checkForNewRoleAssignment(userId: string, currentRole: string): P
   }
 }
 
-function getFileType(mimetype: string): string {
-  if (mimetype.startsWith('image/')) return 'image';
-  if (mimetype.startsWith('video/')) return 'video';
-  if (mimetype.startsWith('audio/')) return 'audio';
-  if (mimetype === 'application/pdf') return 'document';
-  if (mimetype.includes('document') || mimetype.includes('text')) return 'document';
-  return 'other';
-}
+// Function cleaned up to avoid duplication
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -6369,6 +6406,66 @@ Please provide suggestions for the missing or incomplete sections.`
     } catch (error) {
       console.error('Audio Bible compilation error:', error);
       res.status(500).json({ error: 'Audio compilation failed' });
+    }
+  });
+
+  // Serve uploaded files statically
+  app.use('/uploads', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  });
+  app.use('/uploads', express.static(uploadsDir));
+
+  // Media file upload endpoint
+  app.post('/api/media/upload', isAuthenticated, upload.array('files', 10), async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded' });
+      }
+
+      const uploadedFiles = files.map(file => ({
+        filename: file.filename,
+        originalName: file.originalname,
+        type: file.mimetype,
+        size: file.size,
+        url: `/uploads/${file.filename}`,
+        uploadedBy: userId
+      }));
+
+      res.json({ files: uploadedFiles });
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      res.status(500).json({ message: 'Failed to upload files' });
+    }
+  });
+
+  // Single file upload endpoint for post attachments
+  app.post('/api/upload', isAuthenticated, upload.single('file'), async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const file = req.file;
+      
+      if (!file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const uploadedFile = {
+        filename: file.filename,
+        originalName: file.originalname,
+        type: file.mimetype,
+        size: file.size,
+        url: `/uploads/${file.filename}`,
+        uploadedBy: userId
+      };
+
+      res.json(uploadedFile);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).json({ message: 'Failed to upload file' });
     }
   });
 

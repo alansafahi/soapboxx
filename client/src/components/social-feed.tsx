@@ -1150,6 +1150,67 @@ export default function SocialFeed() {
               <p className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-wrap">
                 {post.content}
               </p>
+
+              {/* Media Display */}
+              {post.attachedMedia && post.attachedMedia.length > 0 && (
+                <div className="mb-4">
+                  <div className={`grid gap-2 ${post.attachedMedia.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                    {post.attachedMedia.map((media: any, index: number) => (
+                      <div key={index} className="relative">
+                        {media.type?.startsWith('image/') ? (
+                          <img
+                            src={media.url || `/uploads/${media.filename}`}
+                            alt={media.filename || `Image ${index + 1}`}
+                            className="w-full h-auto rounded-lg border border-gray-200 dark:border-gray-600"
+                            onError={(e) => {
+                              console.error('Failed to load image:', media);
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : media.type?.startsWith('video/') ? (
+                          <video
+                            src={media.url || `/uploads/${media.filename}`}
+                            controls
+                            className="w-full h-auto rounded-lg border border-gray-200 dark:border-gray-600"
+                            onError={(e) => {
+                              console.error('Failed to load video:', media);
+                              (e.target as HTMLVideoElement).style.display = 'none';
+                            }}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
+                          <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <div className="flex items-center space-x-2">
+                              <FileText className="w-5 h-5 text-gray-500" />
+                              <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                {media.filename || 'Attached file'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Linked Verse Display */}
+              {post.linkedVerse && (
+                <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                  <div className="flex items-start space-x-2">
+                    <BookText className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                    <div className="flex-1">
+                      <div className="font-medium text-blue-800 dark:text-blue-300 text-sm mb-1">
+                        {post.linkedVerse.reference}
+                      </div>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 italic">
+                        "{post.linkedVerse.text}"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {post.eventDate && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-4">
