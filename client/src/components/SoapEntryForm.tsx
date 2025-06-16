@@ -1007,9 +1007,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 
                 // Manually trigger form submission if validation passes
                 const values = form.getValues();
+                console.log('Raw form values:', values);
+                
                 if (values.scripture && values.observation && values.application && values.prayer) {
                   console.log('Manual form submission triggered');
-                  form.handleSubmit(handleSubmit)();
+                  
+                  // Try direct handleSubmit call to bypass form wrapper
+                  try {
+                    handleSubmit(values);
+                  } catch (error) {
+                    console.error('Direct handleSubmit error:', error);
+                  }
                 } else {
                   console.log('Required fields missing, cannot submit');
                 }
