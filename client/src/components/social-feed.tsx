@@ -823,21 +823,24 @@ export default function SocialFeed() {
     );
   }
 
+  // Removed debug logging for production
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Create Post Section */}
-      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <CardHeader className="pb-4">
-          <div className="flex items-center space-x-4">
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={user?.profileImageUrl} />
-              <AvatarFallback className="bg-purple-600 text-white">
-                {user?.firstName && user?.lastName 
-                  ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-                  : user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
+      {/* Create Post Section - Only show when authenticated */}
+      {user && (
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-4">
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={user?.profileImageUrl} />
+                <AvatarFallback className="bg-purple-600 text-white">
+                  {user?.firstName && user?.lastName 
+                    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+                    : user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'AS'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
               <Textarea
                 ref={textareaRef}
                 placeholder="Share something with your community..."
@@ -1206,7 +1209,8 @@ export default function SocialFeed() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      )}
 
       {/* Feed Posts */}
       <div className="space-y-6">
