@@ -163,7 +163,7 @@ export default function AudioRoutines() {
       const meditationSegments = [
         {
           text: `Welcome to ${routine.name}. ${routine.description}. Close your eyes and take a deep, peaceful breath.`,
-          delay: 0
+          delay: 3
         },
         {
           text: "As you breathe slowly and deeply, feel God's presence surrounding you with love and peace. Let all tension leave your body.",
@@ -200,8 +200,61 @@ export default function AudioRoutines() {
       // Play each meditation segment at scheduled times
       let completedSegments = 0;
       
-      meditationSegments.forEach((segment, index) => {
-        setTimeout(async () => {
+      // Immediate audio test to ensure iOS audio context is working
+      const testAudioGeneration = async () => {
+        try {
+          console.log('Testing immediate audio generation...');
+          const testResponse = await fetch('/api/audio/generate-speech', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              text: "Audio system is ready. Your meditation will begin now.",
+              voice: selectedVoice,
+              model: 'tts-1-hd',
+              speed: 0.75
+            }),
+          });
+          
+          if (testResponse.ok) {
+            const audioBlob = await testResponse.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const testAudio = new Audio(audioUrl);
+            
+            testAudio.volume = isMobile ? 0.8 : 0.6;
+            if (isMobile) {
+              (testAudio as any).playsInline = true;
+            }
+            
+            const playPromise = testAudio.play();
+            if (playPromise !== undefined) {
+              await playPromise;
+              console.log('Audio test successful - meditation audio will work');
+              
+              testAudio.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                // Start the actual meditation segments after test audio
+                startMeditationSegments();
+              };
+            }
+          } else {
+            console.error('Audio test failed, using fallback');
+            startMeditationSegments();
+          }
+        } catch (error) {
+          console.error('Audio test error:', error);
+          toast({
+            title: "Audio Setup Issue",
+            description: "Please check your device volume and internet connection",
+            duration: 4000,
+          });
+          startMeditationSegments();
+        }
+      };
+      
+      const startMeditationSegments = () => {
+        meditationSegments.forEach((segment, index) => {
+          setTimeout(async () => {
           if (playingRoutine === routine.id) {
             try {
               console.log(`Generating audio for segment ${index + 1}:`, segment.text.substring(0, 50) + '...');
@@ -277,7 +330,7 @@ export default function AudioRoutines() {
                       duration: 2000,
                     });
                   }
-                } catch (playError) {
+                } catch (playError: any) {
                   console.error(`Play failed for segment ${index + 1}:`, playError);
                   
                   // iOS-specific play retry
@@ -338,7 +391,11 @@ export default function AudioRoutines() {
             }
           }
         }, segment.delay * 1000);
-      });
+        });
+      };
+      
+      // Start with immediate audio test
+      testAudioGeneration();
       
     } catch (error) {
       console.error('Meditation session error:', error);
@@ -437,7 +494,7 @@ export default function AudioRoutines() {
       {/* Routines Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {routines.map((routine: AudioRoutine) => (
+          {(routines as AudioRoutine[]).map((routine: AudioRoutine) => (
             <Card key={routine.id} className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <div className="flex items-start justify-between">
