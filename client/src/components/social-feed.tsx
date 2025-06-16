@@ -22,7 +22,9 @@ import {
   Bookmark,
   BookmarkCheck,
   Send,
-  X
+  X,
+  Smile,
+  ChevronDown
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -60,10 +62,30 @@ export default function SocialFeed() {
   const [newPost, setNewPost] = useState("");
   // AI will automatically determine post type, so we don't need manual selection
   
+  // Mood/feeling selection for posts
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [showMoodDropdown, setShowMoodDropdown] = useState(false);
+  
   // Comment modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [activePost, setActivePost] = useState<FeedPost | null>(null);
   const [commentText, setCommentText] = useState("");
+
+  // Mood/feeling options for posts
+  const moodOptions = [
+    { id: "grateful", label: "Grateful", icon: "🙏", color: "bg-green-100 text-green-800" },
+    { id: "blessed", label: "Blessed", icon: "✨", color: "bg-yellow-100 text-yellow-800" },
+    { id: "peaceful", label: "Peaceful", icon: "🕊️", color: "bg-blue-100 text-blue-800" },
+    { id: "hopeful", label: "Hopeful", icon: "🌅", color: "bg-orange-100 text-orange-800" },
+    { id: "joyful", label: "Joyful", icon: "😊", color: "bg-pink-100 text-pink-800" },
+    { id: "reflective", label: "Reflective", icon: "🤔", color: "bg-purple-100 text-purple-800" },
+    { id: "anxious", label: "Anxious", icon: "😰", color: "bg-gray-100 text-gray-800" },
+    { id: "inspired", label: "Inspired", icon: "💡", color: "bg-indigo-100 text-indigo-800" },
+    { id: "seeking", label: "Seeking Guidance", icon: "🧭", color: "bg-teal-100 text-teal-800" },
+    { id: "celebrating", label: "Celebrating", icon: "🎉", color: "bg-red-100 text-red-800" },
+    { id: "praying", label: "Praying", icon: "🙏", color: "bg-violet-100 text-violet-800" },
+    { id: "studying", label: "Studying Scripture", icon: "📖", color: "bg-amber-100 text-amber-800" }
+  ];
 
   // Fetch social feed data with optimized refresh
   const { data: feedPosts = [], isLoading } = useQuery({
@@ -299,11 +321,25 @@ export default function SocialFeed() {
     if (!newPost.trim()) return;
     
     const postData = {
-      content: newPost
+      content: newPost,
+      mood: selectedMood
       // AI will automatically determine post type and title
     };
     
     createPostMutation.mutate(postData);
+  };
+
+  const handleMoodSelect = (moodId: string) => {
+    setSelectedMood(moodId);
+    setShowMoodDropdown(false);
+  };
+
+  const clearMood = () => {
+    setSelectedMood(null);
+  };
+
+  const getSelectedMoodData = () => {
+    return moodOptions.find(m => m.id === selectedMood);
   };
 
   const handleLikePost = (post: FeedPost) => {
@@ -418,7 +454,63 @@ export default function SocialFeed() {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="flex items-center justify-end">
+          {/* Selected Mood Display */}
+          {selectedMood && (
+            <div className="mb-3 flex items-center gap-2">
+              <Badge className={`${getSelectedMoodData()?.color} border-0`}>
+                <span className="mr-1">{getSelectedMoodData()?.icon}</span>
+                Feeling {getSelectedMoodData()?.label}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearMood}
+                className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {/* Feeling/Activity Button */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowMoodDropdown(!showMoodDropdown)}
+                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  <Smile className="w-4 h-4 mr-2" />
+                  Feeling
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+
+                {/* Mood Dropdown */}
+                {showMoodDropdown && (
+                  <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-md shadow-lg min-w-64 max-h-64 overflow-y-auto">
+                    <div className="p-2">
+                      <div className="grid grid-cols-2 gap-1">
+                        {moodOptions.map((mood) => (
+                          <Button
+                            key={mood.id}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleMoodSelect(mood.id)}
+                            className="justify-start h-auto p-2 text-left hover:bg-gray-50"
+                          >
+                            <span className="mr-2">{mood.icon}</span>
+                            <span className="text-sm">{mood.label}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <Button 
               onClick={handleCreatePost}
               disabled={!newPost.trim() || createPostMutation.isPending}
