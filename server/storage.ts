@@ -2374,10 +2374,39 @@ export class DatabaseStorage implements IStorage {
         LIMIT 10
       `);
 
-      const feedPosts = discussionsResult.rows.map(row => {
+      const feedPosts = await Promise.all(discussionsResult.rows.map(async row => {
         const authorName = row.first_name && row.last_name 
           ? `${row.first_name} ${row.last_name}`
           : row.email || 'Unknown User';
+
+        // Fetch comments for this discussion
+        const commentsResult = await pool.query(`
+          SELECT 
+            c.id,
+            c.content,
+            c.created_at,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.profile_image_url
+          FROM discussion_comments c
+          LEFT JOIN users u ON c.author_id = u.id
+          WHERE c.discussion_id = $1
+          ORDER BY c.created_at ASC
+          LIMIT 10
+        `, [row.id]);
+
+        const comments = commentsResult.rows.map(commentRow => ({
+          id: commentRow.id,
+          content: commentRow.content,
+          createdAt: commentRow.created_at,
+          author: {
+            name: commentRow.first_name && commentRow.last_name 
+              ? `${commentRow.first_name} ${commentRow.last_name}`
+              : commentRow.email || 'Anonymous',
+            profileImage: commentRow.profile_image_url || null
+          }
+        }));
 
         return {
           id: row.id,
@@ -2397,16 +2426,14 @@ export class DatabaseStorage implements IStorage {
           church: null,
           createdAt: row.created_at,
           likeCount: 0,
-          commentCount: 0,
+          commentCount: comments.length,
           shareCount: 0,
           isLiked: false,
           isBookmarked: false,
           tags: ['discussion'],
-          comments: []
+          comments: comments
         };
-      });
-
-
+      }));
 
       return feedPosts;
 
