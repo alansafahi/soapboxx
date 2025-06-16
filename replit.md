@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Created new "Devotional Routines" tab above "Meditation Routines" with structured spiritual content
+  - Added two complete devotional routines: "Peace in the Chaos" (Anxious) and "The Gift of Right Now" (Grateful)
+  - Implemented 4-part devotional structure: Opening Reflection → Scripture Reading → Guided Prayer → Closing Blessing
+  - Created tabbed interface with Book icon for Devotional Routines and Heart icon for Meditation Routines
+  - Added specific content including Philippians 4:6-7 and Psalm 107:1 scripture references
+  - Enhanced UI with mood tags, duration display, and beautiful card layouts with scripture highlighting
 - June 16, 2025: Enhanced background music system with improved Ocean Waves and new Forest Rain option
   - Fixed Ocean Waves sound quality with deeper, more realistic frequencies (35-95Hz) and natural wave rhythm
   - Added new Forest Rain background music with gentle raindrops (800-2300Hz) and subtle forest wind ambience

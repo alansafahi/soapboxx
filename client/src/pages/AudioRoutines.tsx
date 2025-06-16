@@ -1450,12 +1450,12 @@ export default function AudioRoutines() {
 
         <TabsContent value="meditation" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {displayRoutines.map((routine: AudioRoutine) => (
-          <Card key={routine.id} className="group hover:shadow-lg transition-all duration-200">
-            <CardHeader className="pb-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-lg mb-2">{routine.name}</CardTitle>
+            {displayRoutines.map((routine: AudioRoutine) => (
+              <Card key={routine.id} className="group hover:shadow-lg transition-all duration-200">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg mb-2">{routine.name}</CardTitle>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     {routine.description}
                   </p>
@@ -1539,76 +1539,75 @@ export default function AudioRoutines() {
                   Start Meditation
                 </Button>
               )}
+              </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Voice Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Voice Selection</CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Choose your preferred narration voice for meditation sessions
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {[
+                  { id: 'nova', name: 'Nova', description: 'Warm & calming female voice' },
+                  { id: 'shimmer', name: 'Shimmer', description: 'Gentle & soothing female voice' },
+                  { id: 'alloy', name: 'Alloy', description: 'Peaceful & balanced neutral voice' },
+                  { id: 'echo', name: 'Echo', description: 'Deep & contemplative male voice' },
+                  { id: 'fable', name: 'Fable', description: 'Wise & nurturing male voice' },
+                  { id: 'onyx', name: 'Onyx', description: 'Strong & grounding male voice' }
+                ].map((voice) => (
+                  <Button
+                    key={voice.id}
+                    variant={selectedVoice === voice.id ? "default" : "outline"}
+                    className={`p-3 h-auto text-left flex-col items-start ${
+                      selectedVoice === voice.id ? 'bg-purple-600 hover:bg-purple-700' : ''
+                    }`}
+                    onClick={() => setSelectedVoice(voice.id)}
+                  >
+                    <div className="font-medium">{voice.name}</div>
+                    <div className="text-xs opacity-75">{voice.description}</div>
+                  </Button>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      {/* Voice Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Voice Selection</CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Choose your preferred narration voice for meditation sessions
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {[
-              { id: 'nova', name: 'Nova', description: 'Warm & calming female voice' },
-              { id: 'shimmer', name: 'Shimmer', description: 'Gentle & soothing female voice' },
-              { id: 'alloy', name: 'Alloy', description: 'Peaceful & balanced neutral voice' },
-              { id: 'echo', name: 'Echo', description: 'Deep & contemplative male voice' },
-              { id: 'fable', name: 'Fable', description: 'Wise & nurturing male voice' },
-              { id: 'onyx', name: 'Onyx', description: 'Strong & grounding male voice' }
-            ].map((voice) => (
-              <Button
-                key={voice.id}
-                variant={selectedVoice === voice.id ? "default" : "outline"}
-                className={`p-3 h-auto text-left flex-col items-start ${
-                  selectedVoice === voice.id ? 'bg-purple-600 hover:bg-purple-700' : ''
-                }`}
-                onClick={() => setSelectedVoice(voice.id)}
-              >
-                <div className="font-medium">{voice.name}</div>
-                <div className="text-xs opacity-75">{voice.description}</div>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Background Music Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Background Music</CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Choose peaceful background sounds to accompany your meditation
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {Object.entries(backgroundMusicOptions).map(([key, option]) => (
-              <Button
-                key={key}
-                variant={backgroundMusicType === key ? "default" : "outline"}
-                className={`p-3 h-auto text-left flex-col items-start ${
-                  backgroundMusicType === key ? 'bg-purple-600 hover:bg-purple-700' : ''
-                }`}
-                onClick={() => {
-                  setBackgroundMusicType(key);
-                  previewSound(key);
-                }}
-              >
-                <div className="text-lg mb-1">{option.icon}</div>
-                <div className="font-medium text-sm">{option.name}</div>
-                <div className="text-xs opacity-75">{option.description}</div>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
+          {/* Background Music Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Background Music</CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Choose peaceful background sounds to accompany your meditation
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {Object.entries(backgroundMusicOptions).map(([key, option]) => (
+                  <Button
+                    key={key}
+                    variant={backgroundMusicType === key ? "default" : "outline"}
+                    className={`p-3 h-auto text-left flex-col items-start ${
+                      backgroundMusicType === key ? 'bg-purple-600 hover:bg-purple-700' : ''
+                    }`}
+                    onClick={() => {
+                      setBackgroundMusicType(key);
+                      previewSound(key);
+                    }}
+                  >
+                    <div className="text-lg mb-1">{option.icon}</div>
+                    <div className="font-medium text-sm">{option.name}</div>
+                    <div className="text-xs opacity-75">{option.description}</div>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
