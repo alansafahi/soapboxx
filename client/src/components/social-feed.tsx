@@ -716,6 +716,28 @@ export default function SocialFeed() {
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                       <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
+                      <span>•</span>
+                      {/* Audience visibility indicator */}
+                      <div className="flex items-center space-x-1">
+                        {post.audience === 'public' && (
+                          <>
+                            <Globe className="w-3 h-3" />
+                            <span>Public</span>
+                          </>
+                        )}
+                        {post.audience === 'church' && (
+                          <>
+                            <Church className="w-3 h-3" />
+                            <span>Church Only</span>
+                          </>
+                        )}
+                        {post.audience === 'private' && (
+                          <>
+                            <Lock className="w-3 h-3" />
+                            <span>Private</span>
+                          </>
+                        )}
+                      </div>
                       {post.church && (
                         <>
                           <span>•</span>

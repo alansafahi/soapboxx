@@ -2353,10 +2353,47 @@ export class DatabaseStorage implements IStorage {
     try {
       const feedPosts: any[] = [];
 
-      // Get discussions - simplified query to avoid field selection issues
+      // Get user's church membership for audience filtering
+      const [currentUser] = await db
+        .select({ churchId: users.churchId })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      const userChurchId = currentUser?.churchId;
+
+      // Get discussions with audience-based filtering
+      let whereCondition;
+      
+      if (userChurchId) {
+        // User has a church - can see public posts, church posts from same church, and own private posts
+        whereCondition = or(
+          eq(discussions.audience, 'public'),
+          and(
+            eq(discussions.audience, 'church'),
+            // Only show church posts from authors in the same church
+            sql`EXISTS (SELECT 1 FROM users u WHERE u.id = discussions.author_id AND u.church_id = ${userChurchId})`
+          ),
+          and(
+            eq(discussions.audience, 'private'),
+            eq(discussions.authorId, userId)
+          )
+        );
+      } else {
+        // User has no church - can only see public posts and own private posts
+        whereCondition = or(
+          eq(discussions.audience, 'public'),
+          and(
+            eq(discussions.audience, 'private'),
+            eq(discussions.authorId, userId)
+          )
+        );
+      }
+
       const discussionsData = await db
         .select()
         .from(discussions)
+        .where(whereCondition)
         .orderBy(desc(discussions.createdAt))
         .limit(10);
 
