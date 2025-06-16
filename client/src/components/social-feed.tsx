@@ -928,7 +928,6 @@ export default function SocialFeed() {
                   </div>
                 </div>
               )}
-            </div>
           </CardContent>
         </Card>
       )}
