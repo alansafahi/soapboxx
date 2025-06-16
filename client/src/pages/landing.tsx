@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight } from "lucide-react";
+import { Link } from "wouter";
 import soapboxLogo from "@assets/SoapBox logo_1749686315479.jpeg";
 
 export default function Landing() {
@@ -19,12 +20,11 @@ export default function Landing() {
               <span className="text-2xl font-bold text-gray-900">SoapBox Super App</span>
             </div>
             
-            <Button 
-              onClick={() => window.location.href = '/login'}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              Sign In
-            </Button>
+            <Link href="/login">
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                Sign In
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -40,14 +40,15 @@ export default function Landing() {
             Join a platform that brings together believers, churches, and communities through 
             meaningful engagement, prayer, and spiritual growth.
           </p>
-          <Button 
-            onClick={() => window.location.href = '/login'}
-            size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
-          >
-            Start Your Journey
-            <ChevronRight className="ml-2 w-5 h-5" />
-          </Button>
+          <Link href="/login">
+            <Button 
+              size="lg"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
+            >
+              Start Your Journey
+              <ChevronRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </section>
 
