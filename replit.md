@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Fixed "Start Your Journey" button navigation functionality
+  - Replaced problematic window.location.href with wouter's useLocation hook for proper React routing
+  - Added explicit onClick handler using setLocation('/login') for reliable navigation
+  - Updated both Sign In and Start Your Journey buttons with consistent navigation approach
+  - Resolved routing conflicts between browser navigation and React router
 - June 16, 2025: Updated landing page color scheme to match SoapBox logo branding
   - Changed all prominent colors from blue to purple to match SoapBox logo
   - Updated header Sign In button, main CTA buttons, and background gradients to purple theme

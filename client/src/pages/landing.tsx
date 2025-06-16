@@ -1,10 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import soapboxLogo from "@assets/SoapBox logo_1749686315479.jpeg";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
+  
+  const handleStartJourney = () => {
+    setLocation('/login');
+  };
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -40,15 +46,14 @@ export default function Landing() {
             Join a platform that brings together believers, churches, and communities through 
             meaningful engagement, prayer, and spiritual growth.
           </p>
-          <Link href="/login">
-            <Button 
-              size="lg"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
-            >
-              Start Your Journey
-              <ChevronRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
+          <Button 
+            onClick={handleStartJourney}
+            size="lg"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
+          >
+            Start Your Journey
+            <ChevronRight className="ml-2 w-5 h-5" />
+          </Button>
         </div>
       </section>
 
