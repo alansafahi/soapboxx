@@ -877,9 +877,6 @@ export default function AudioRoutines() {
           case 'christian-hymn':
             createChristianHymn(audioContext, masterGain, oscillators, sessionDuration);
             break;
-          case 'forest-rain':
-            createForestRain(audioContext, masterGain, oscillators, sessionDuration);
-            break;
         }
       }
       
