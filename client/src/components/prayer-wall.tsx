@@ -34,7 +34,6 @@ const prayerRequestSchema = z.object({
   churchId: z.number().optional(),
   isPublic: z.boolean().default(true),
   isUrgent: z.boolean().default(false),
-  isSilent: z.boolean().default(false),
 });
 
 const commentSchema = z.object({
@@ -418,6 +417,9 @@ export default function PrayerWall() {
   };
 
   const handleCreatePrayer = (data: PrayerRequestFormData) => {
+    console.log('handleCreatePrayer called with data:', data);
+    console.log('Form validation state:', form.formState);
+    console.log('Form errors:', form.formState.errors);
     createPrayerMutation.mutate(data);
   };
 
@@ -496,7 +498,11 @@ export default function PrayerWall() {
             <DialogTitle>Share Your Prayer Request</DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleCreatePrayer)} className="space-y-4">
+            <form onSubmit={(e) => {
+              console.log('Form submit event triggered');
+              console.log('Form data before submission:', form.getValues());
+              return form.handleSubmit(handleCreatePrayer)(e);
+            }} className="space-y-4">
               <FormField
                 control={form.control}
                 name="title"
