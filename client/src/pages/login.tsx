@@ -41,7 +41,7 @@ export default function LoginPage() {
 
       const response = await apiRequest(endpoint, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: data,
       });
 
       toast({
