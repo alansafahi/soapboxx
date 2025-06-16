@@ -477,14 +477,31 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     console.log('=== FORM SUBMISSION DEBUG ===');
     console.log('Form submission triggered with data:', data);
     console.log('Form validation errors:', form.formState.errors);
+    console.log('Form is valid:', form.formState.isValid);
+    console.log('Required fields check:', {
+      scripture: !!data.scripture,
+      observation: !!data.observation,
+      application: !!data.application,
+      prayer: !!data.prayer
+    });
     console.log('Save mutation status:', {
       isPending: saveMutation.isPending,
       isError: saveMutation.isError,
       isSuccess: saveMutation.isSuccess
     });
     console.log('User context in submit:', user);
-    console.log('About to call saveMutation.mutate...');
     
+    // Check if all required fields are filled
+    if (!data.scripture || !data.observation || !data.application || !data.prayer) {
+      toast({
+        title: "Missing Required Fields",
+        description: "Please fill out Scripture, Observation, Application, and Prayer sections.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    console.log('About to call saveMutation.mutate...');
     saveMutation.mutate(data);
   };
 
