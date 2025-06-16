@@ -59,18 +59,31 @@ export default function SmartScriptureTextarea({
       return await response.json();
     },
     onSuccess: (data, reference) => {
-      // Replace the reference with "reference - verse text" in the textarea
-      const updatedText = value.replace(
-        new RegExp(`\\b${reference.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g'),
-        `${reference} - "${data.text}"`
-      );
-      onChange(updatedText);
+      // Handle the correct response structure
+      const verseText = data.verse?.text || data.text;
+      const verseRef = data.verse?.reference || data.reference || reference;
       
-      toast({
-        title: "Scripture Found",
-        description: `Auto-populated verse text for ${reference}`,
-        duration: 3000,
-      });
+      if (verseText) {
+        // Replace the reference with "reference - verse text" in the textarea
+        const updatedText = value.replace(
+          new RegExp(`\\b${reference.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g'),
+          `${verseRef} - "${verseText}"`
+        );
+        onChange(updatedText);
+        
+        toast({
+          title: "Scripture Found",
+          description: `Auto-populated verse text for ${verseRef}`,
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: "Verse Not Found",
+          description: `Could not find ${reference}. You can continue typing manually.`,
+          variant: "destructive",
+          duration: 3000,
+        });
+      }
     },
     onError: (error: any, reference) => {
       toast({
