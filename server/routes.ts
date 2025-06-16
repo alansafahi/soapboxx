@@ -4219,7 +4219,7 @@ Return JSON with this exact structure:
   app.post("/api/feed/posts", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
-      const { content, mood } = req.body;
+      const { content, mood, audience = 'public' } = req.body;
       
       if (!content || !content.trim()) {
         return res.status(400).json({ message: "Post content is required" });
@@ -4248,6 +4248,7 @@ Return JSON with this exact structure:
           authorId: userId,
           churchId: null,
           category: 'general',
+          audience: audience,
           isPublic: true,
           mood: mood || null,
           suggestedVerses: suggestedVerses || null
