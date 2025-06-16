@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Fixed Prayer Wall 404 routing error and enhanced AI assistance accessibility
+  - Added missing `/prayer-wall` route mapping in App.tsx to resolve "Page Not Found" error
+  - Moved "Get AI Help Writing Prayer" button to top of Prayer Wall page for better visibility
+  - Created dual action button layout: AI Help and Add Prayer Request side by side
+  - Removed duplicate AI button from prayer creation form to avoid confusion
+  - Enhanced responsive design with grid layout for mobile and desktop users
+  - Prayer Wall now fully accessible via both `/prayer` and `/prayer-wall` URLs
 - June 16, 2025: Temporarily disabled scripture auto-expansion in Prayer Wall to resolve infinite loop performance issue
   - ScriptureExpandedText component was causing endless API calls to bible verse lookup endpoint
   - Prayer Wall now displays scripture references as plain text (e.g., "John 3:16") without automatic expansion

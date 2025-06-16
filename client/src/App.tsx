@@ -146,6 +146,7 @@ function AppRouter() {
               <Route path="/churches" component={Churches} />
               <Route path="/events" component={Events} />
               <Route path="/prayer" component={Prayer} />
+              <Route path="/prayer-wall" component={Prayer} />
               <Route path="/messages" component={Messages} />
               <Route path="/chat" component={Chat} />
               <Route path="/leaderboard" component={Leaderboard} />
