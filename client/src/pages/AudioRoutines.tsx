@@ -233,8 +233,11 @@ export default function AudioRoutines() {
               
               testAudio.onended = () => {
                 URL.revokeObjectURL(audioUrl);
+                console.log('Test audio finished, starting meditation segments...');
                 // Start the actual meditation segments after test audio
-                startMeditationSegments();
+                setTimeout(() => {
+                  startMeditationSegments();
+                }, 1000); // Small delay to ensure smooth transition
               };
             }
           } else {
@@ -253,11 +256,15 @@ export default function AudioRoutines() {
       };
       
       const startMeditationSegments = () => {
+        console.log('Starting meditation segments:', meditationSegments.length, 'total segments');
+        
         meditationSegments.forEach((segment, index) => {
+          console.log(`Scheduling segment ${index + 1} for ${segment.delay} seconds`);
+          
           setTimeout(async () => {
-          if (playingRoutine === routine.id) {
-            try {
-              console.log(`Generating audio for segment ${index + 1}:`, segment.text.substring(0, 50) + '...');
+            if (playingRoutine === routine.id) {
+              try {
+                console.log(`Generating audio for segment ${index + 1}:`, segment.text.substring(0, 50) + '...');
               
               const response = await fetch('/api/audio/generate-speech', {
                 method: 'POST',
