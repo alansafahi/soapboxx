@@ -4603,15 +4603,16 @@ Return JSON with this exact structure:
       
       console.log("Processed prayer data:", prayerData);
       const prayer = await storage.createPrayerRequest(prayerData);
-      console.log("Created prayer:", prayer);
+      console.log("Created prayer successfully:", prayer);
       
       // Also create a corresponding social feed post so prayers appear in the main feed
       try {
-        const feedPost = await storage.createDiscussion({
+        console.log("Creating feed post for prayer...");
+        const feedPostData = {
           title: `Prayer Request: ${prayer.title}`,
           content: prayer.content,
           authorId: userId,
-          churchId: prayer.churchId,
+          churchId: prayer.churchId || null,
           category: 'prayer',
           audience: prayer.isPublic ? 'public' : 'church',
           isPublic: prayer.isPublic,
@@ -4619,11 +4620,16 @@ Return JSON with this exact structure:
           suggestedVerses: null,
           attachedMedia: null,
           linkedVerse: null
-        });
+        };
+        console.log("Feed post data:", feedPostData);
+        
+        const feedPost = await storage.createDiscussion(feedPostData);
         console.log("Created corresponding feed post for prayer:", feedPost?.id);
       } catch (feedError) {
         // Don't fail the prayer creation if feed post fails
         console.error("Failed to create feed post for prayer:", feedError);
+        console.error("Feed error details:", feedError.message);
+        console.error("Feed error stack:", feedError.stack);
       }
       
       res.status(201).json(prayer);
