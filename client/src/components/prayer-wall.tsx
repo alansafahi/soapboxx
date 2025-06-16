@@ -468,14 +468,28 @@ export default function PrayerWall() {
         </CardHeader>
       </Card>
 
-      {/* Create Prayer Request Button */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+      {/* Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* AI Prayer Assistance Button */}
+        <Button 
+          onClick={() => setIsAIAssistanceOpen(true)}
+          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-6 text-lg"
+        >
+          <Sparkles className="w-5 h-5 mr-2" />
+          Get AI Help Writing Prayer
+        </Button>
+
+        {/* Create Prayer Request Button */}
         <DialogTrigger asChild>
-          <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 text-lg">
+          <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 text-lg">
             <Plus className="w-5 h-5 mr-2" />
             Add Prayer Request to Wall
           </Button>
         </DialogTrigger>
+      </div>
+
+      {/* Create Prayer Request Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Share Your Prayer Request</DialogTitle>
@@ -538,35 +552,22 @@ export default function PrayerWall() {
                 )}
               />
 
-              <div className="flex flex-col space-y-3 pt-4">
-                {/* AI Assistance Button */}
+              <div className="flex space-x-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsAIAssistanceOpen(true)}
-                  className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                  className="flex-1"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Get AI Help Writing Prayer
+                  Cancel
                 </Button>
-
-                <div className="flex space-x-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsCreateDialogOpen(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={createPrayerMutation.isPending}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700"
-                  >
-                    {createPrayerMutation.isPending ? "Posting..." : "Post to Wall"}
-                  </Button>
-                </div>
+                <Button 
+                  type="submit" 
+                  disabled={createPrayerMutation.isPending}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                >
+                  {createPrayerMutation.isPending ? "Posting..." : "Post to Wall"}
+                </Button>
               </div>
             </form>
           </Form>
