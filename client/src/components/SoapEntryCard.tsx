@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
 import type { SoapEntry } from "@shared/schema";
 
 interface SoapEntryCardProps {
@@ -57,6 +59,18 @@ export function SoapEntryCard({
   onUnfeature 
 }: SoapEntryCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Fetch current user to check if this is their entry
+  const { data: currentUser } = useQuery({
+    queryKey: ['/api/auth/user'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+  
+  // Determine if this is the current user's entry to show proper name
+  const isCurrentUserEntry = currentUser && entry.userId === currentUser.id;
+  const displayName = isCurrentUserEntry 
+    ? `${currentUser.firstName || currentUser.username || 'You'}`
+    : entry.userId;
   
   const formatDate = (date: Date | string | null) => {
     if (!date) return "Unknown date";
@@ -91,7 +105,7 @@ export function SoapEntryCard({
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h4 className="font-semibold text-sm">
-                  {entry.userId || 'Anonymous'}
+                  {displayName || 'Anonymous'}
                 </h4>
                 {entry.isFeatured && (
                   <Badge variant="secondary" className="gap-1 text-xs">
