@@ -328,6 +328,62 @@ export default function PrayerWall() {
     },
   });
 
+  // AI Prayer Assistance function
+  const getAIPrayerAssistance = async () => {
+    setIsLoadingAI(true);
+    try {
+      const response = await fetch('/api/prayers/ai-assistance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(aiAssistanceData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to get AI assistance');
+      }
+
+      const data = await response.json();
+      setAISuggestions(data.suggestions || []);
+      
+      if (data.suggestions && data.suggestions.length > 0) {
+        toast({
+          title: "AI Suggestions Ready",
+          description: `Generated ${data.suggestions.length} prayer suggestions for you`,
+        });
+      } else {
+        toast({
+          title: "No suggestions generated",
+          description: "Please try providing more details about your prayer topic",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('AI assistance error:', error);
+      toast({
+        title: "AI assistance unavailable",
+        description: "Please write your prayer manually or try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
+
+  const selectAISuggestion = (suggestion: any) => {
+    form.setValue('title', suggestion.title || '');
+    form.setValue('content', suggestion.content || '');
+    setIsAIAssistanceOpen(false);
+    setAISuggestions([]);
+    toast({
+      title: "Prayer suggestion applied",
+      description: "You can edit the suggestion before posting",
+    });
+  };
+
   const handlePrayForRequest = (prayerRequestId: number) => {
     // Add animation state
     setAnimatingButtons(prev => new Set([...Array.from(prev), prayerRequestId]));
@@ -481,25 +537,162 @@ export default function PrayerWall() {
                 )}
               />
 
-              <div className="flex space-x-2 pt-4">
+              <div className="flex flex-col space-y-3 pt-4">
+                {/* AI Assistance Button */}
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsCreateDialogOpen(false)}
-                  className="flex-1"
+                  onClick={() => setIsAIAssistanceOpen(true)}
+                  className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
                 >
-                  Cancel
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Get AI Help Writing Prayer
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={createPrayerMutation.isPending}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
-                >
-                  {createPrayerMutation.isPending ? "Posting..." : "Post to Wall"}
-                </Button>
+
+                <div className="flex space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateDialogOpen(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createPrayerMutation.isPending}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  >
+                    {createPrayerMutation.isPending ? "Posting..." : "Post to Wall"}
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Prayer Assistance Modal */}
+      <Dialog open={isAIAssistanceOpen} onOpenChange={setIsAIAssistanceOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Sparkles className="w-5 h-5 mr-2 text-blue-600" />
+              AI Prayer Writing Assistant
+            </DialogTitle>
+            <p className="text-sm text-gray-600">
+              Share what's on your heart and get personalized prayer suggestions
+            </p>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">What would you like to pray about?</label>
+              <Input
+                placeholder="e.g., Family healing, job interview, spiritual growth..."
+                value={aiAssistanceData.topic}
+                onChange={(e) => setAIAssistanceData(prev => ({ ...prev, topic: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Describe your situation (optional)</label>
+              <Textarea
+                placeholder="Share more details about your prayer need..."
+                value={aiAssistanceData.situation}
+                onChange={(e) => setAIAssistanceData(prev => ({ ...prev, situation: e.target.value }))}
+                className="mt-1 min-h-[80px]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Prayer Type</label>
+                <Select
+                  value={aiAssistanceData.prayerType}
+                  onValueChange={(value) => setAIAssistanceData(prev => ({ ...prev, prayerType: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="request">Prayer Request</SelectItem>
+                    <SelectItem value="thanksgiving">Thanksgiving</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Tone</label>
+                <Select
+                  value={aiAssistanceData.tone}
+                  onValueChange={(value) => setAIAssistanceData(prev => ({ ...prev, tone: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hopeful">Hopeful</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="grateful">Grateful</SelectItem>
+                    <SelectItem value="peaceful">Peaceful</SelectItem>
+                    <SelectItem value="humble">Humble</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAIAssistanceOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={getAIPrayerAssistance}
+                disabled={isLoadingAI || (!aiAssistanceData.topic && !aiAssistanceData.situation)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                {isLoadingAI ? (
+                  <>
+                    <Lightbulb className="w-4 h-4 mr-2 animate-pulse" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Get Suggestions
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* AI Suggestions */}
+            {aiSuggestions.length > 0 && (
+              <div className="mt-6 space-y-3">
+                <h4 className="font-medium text-gray-900">AI Prayer Suggestions</h4>
+                {aiSuggestions.map((suggestion, index) => (
+                  <Card key={index} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => selectAISuggestion(suggestion)}>
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm text-purple-600">{suggestion.title}</h5>
+                      <p className="text-sm text-gray-700">{suggestion.content}</p>
+                      <Button size="sm" variant="outline" className="w-full mt-2">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Use This Prayer
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+                <p className="text-xs text-gray-500 mt-2">
+                  Click any suggestion to use it as a starting point. You can edit it before posting.
+                </p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
