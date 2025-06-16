@@ -375,19 +375,27 @@ export default function PrayerWall() {
 
   const selectAISuggestion = (suggestion: any) => {
     console.log('Selecting AI suggestion:', suggestion);
-    form.setValue('title', suggestion.title || '');
-    form.setValue('content', suggestion.content || '');
-    console.log('Form values after AI suggestion:', form.getValues());
-    console.log('Form validation state after AI suggestion:', form.formState.isValid);
+    
+    // Automatically submit the AI-generated prayer
+    const prayerData = {
+      title: suggestion.title || '',
+      content: suggestion.content || '',
+      isAnonymous: false,
+      category: 'general',
+      churchId: undefined,
+      isPublic: true,
+      isUrgent: false,
+    };
+    
+    console.log('Auto-submitting AI prayer:', prayerData);
+    createPrayerMutation.mutate(prayerData);
+    
     setIsAIAssistanceOpen(false);
     setAISuggestions([]);
     
-    // Open the prayer creation dialog after AI suggestion is applied
-    setIsCreateDialogOpen(true);
-    
     toast({
-      title: "Prayer suggestion applied",
-      description: "You can edit the suggestion before posting",
+      title: "Prayer posted automatically",
+      description: "Your AI-generated prayer has been added to the Prayer Wall",
     });
   };
 
