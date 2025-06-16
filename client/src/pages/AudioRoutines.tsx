@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Play, Headphones, Volume2 } from 'lucide-react';
+import { Clock, Play, Headphones, Volume2, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface AudioRoutine {
   id: number;
@@ -17,6 +18,7 @@ export default function AudioRoutines() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRoutineId, setSelectedRoutineId] = useState<number | null>(null);
   const [playingRoutine, setPlayingRoutine] = useState<number | null>(null);
+  const { toast } = useToast();
 
   const { data: routines = [], isLoading, error } = useQuery<AudioRoutine[]>({
     queryKey: ['/api/audio/routines'],
@@ -54,11 +56,22 @@ export default function AudioRoutines() {
     console.log('Starting routine:', routine.name);
     setPlayingRoutine(routine.id);
     
-    // Simple audio feedback
+    // Beautiful toast notification instead of harsh alert
+    toast({
+      title: "🎵 Starting Audio Routine",
+      description: `"${routine.name}" - ${routine.description}`,
+      duration: 4000,
+    });
+    
+    // Simulate audio loading
     setTimeout(() => {
-      alert(`Starting "${routine.name}" - ${routine.description}`);
       setPlayingRoutine(null);
-    }, 1000);
+      toast({
+        title: "✨ Routine Ready",
+        description: `Your "${routine.name}" session is now playing. Find a peaceful space and enjoy.`,
+        duration: 3000,
+      });
+    }, 2000);
   };
 
   const handleRoutineClick = (routine: AudioRoutine) => {
