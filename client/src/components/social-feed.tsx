@@ -140,6 +140,9 @@ export default function SocialFeed() {
   const [newPost, setNewPost] = useState("");
   // AI will automatically determine post type, so we don't need manual selection
   
+  // Post composer visibility
+  const [showComposer, setShowComposer] = useState(false);
+  
   // Mood/feeling selection for posts
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [showMoodDropdown, setShowMoodDropdown] = useState(false);
