@@ -54,6 +54,8 @@ export const bibleVerses = pgTable("bible_verses", {
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
+  username: varchar("username").unique(),
+  password: varchar("password"), // Hashed password for standard auth
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
