@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, Square, Clock, Headphones, Pause } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Play, Square, Clock, Headphones, Pause, Book, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AudioRoutine {
@@ -27,8 +28,25 @@ interface AudioRoutine {
   }>;
 }
 
+interface DevotionalRoutine {
+  id: number;
+  title: string;
+  moodTag: string;
+  duration: number;
+  segments: {
+    openingReflection: string;
+    scriptureReading: {
+      reference: string;
+      text: string;
+    };
+    guidedPrayer: string;
+    closingBlessing: string;
+  };
+}
+
 export default function AudioRoutines() {
   const [playingRoutine, setPlayingRoutine] = useState<number | null>(null);
+  const [playingDevotional, setPlayingDevotional] = useState<number | null>(null);
   const [currentAudioContext, setCurrentAudioContext] = useState<AudioContext | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [selectedVoice, setSelectedVoice] = useState('nova');
@@ -39,6 +57,40 @@ export default function AudioRoutines() {
   const [currentSegment, setCurrentSegment] = useState(0);
   const [isInSilencePeriod, setIsInSilencePeriod] = useState(false);
   const { toast } = useToast();
+
+  // Devotional Routines data with your specific content
+  const devotionalRoutines: DevotionalRoutine[] = [
+    {
+      id: 1,
+      title: "Peace in the Chaos",
+      moodTag: "Anxious",
+      duration: 300, // 5 minutes
+      segments: {
+        openingReflection: "If your heart is racing or your mind is running in circles, pause with me for a moment. You're not alone. God invites us to bring our burdens to Him—not when we feel perfect, but especially when we're overwhelmed.",
+        scriptureReading: {
+          reference: "Philippians 4:6–7",
+          text: "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God… will guard your hearts and your minds in Christ Jesus."
+        },
+        guidedPrayer: "Lord, I give You the worries I can't fix, the outcomes I can't control, and the fears that weigh heavy on my heart. Replace my anxiety with Your peace. Help me breathe deeply, trust fully, and walk calmly through today. In Jesus' name, Amen.",
+        closingBlessing: "You don't need all the answers today—just the next step. God walks with you, even now. Take this peace with you into whatever comes next."
+      }
+    },
+    {
+      id: 2,
+      title: "The Gift of Right Now",
+      moodTag: "Grateful",
+      duration: 300, // 5 minutes
+      segments: {
+        openingReflection: "Gratitude opens our eyes to how deeply we are loved. Let's take a moment to thank God—not just for what's perfect, but for what's present.",
+        scriptureReading: {
+          reference: "Psalm 107:1",
+          text: "Give thanks to the Lord, for he is good; his love endures forever."
+        },
+        guidedPrayer: "Father, thank You—for breath in my lungs, for grace that meets me each morning, for people who love me, and even for the lessons hidden in difficulty. Teach me to live open-handed, in awe of Your goodness. Amen.",
+        closingBlessing: "Gratitude is more than a feeling—it's a rhythm of the soul. Keep counting blessings today. You'll be surprised how many there are."
+      }
+    }
+  ];
 
   // Meditation segments with their durations and pause points
   const meditationSegments = [
@@ -1311,11 +1363,93 @@ export default function AudioRoutines() {
           Audio Routines
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
-          Guided meditation experiences with premium AI narration and peaceful background music
+          Guided spiritual experiences with premium AI narration and peaceful background music
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <Tabs defaultValue="devotional" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="devotional" className="flex items-center gap-2">
+            <Book className="h-4 w-4" />
+            Devotional Routines
+          </TabsTrigger>
+          <TabsTrigger value="meditation" className="flex items-center gap-2">
+            <Heart className="h-4 w-4" />
+            Meditation Routines
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="devotional" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {devotionalRoutines.map((routine) => (
+              <Card key={routine.id} className="group hover:shadow-lg transition-all duration-200">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg mb-2">{routine.title}</CardTitle>
+                      <Badge variant="secondary" className="text-xs mb-3">
+                        {routine.moodTag}
+                      </Badge>
+                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                        <Clock className="h-4 w-4" />
+                        {Math.floor(routine.duration / 60)} minutes
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0 space-y-4">
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Opening Reflection</h4>
+                      <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
+                        {routine.segments.openingReflection}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Scripture</h4>
+                      <p className="text-purple-600 dark:text-purple-400 font-medium">
+                        {routine.segments.scriptureReading.reference}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 line-clamp-2 italic">
+                        "{routine.segments.scriptureReading.text}"
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {playingDevotional === routine.id ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setPlayingDevotional(null)}
+                          className="text-red-600 border-red-200 hover:bg-red-50"
+                        >
+                          <Square className="h-4 w-4 mr-1" />
+                          Stop
+                        </Button>
+                        <span className="text-sm text-green-600">Playing devotional...</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => setPlayingDevotional(routine.id)}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Start Devotional
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="meditation" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {displayRoutines.map((routine: AudioRoutine) => (
           <Card key={routine.id} className="group hover:shadow-lg transition-all duration-200">
             <CardHeader className="pb-4">
@@ -1475,7 +1609,8 @@ export default function AudioRoutines() {
         </CardContent>
       </Card>
 
-
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
