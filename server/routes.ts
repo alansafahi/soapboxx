@@ -5369,6 +5369,35 @@ Return JSON with this exact structure:
 
       const newEntry = await storage.createSoapEntry(validatedData);
       console.log('S.O.A.P. entry created successfully:', newEntry.id);
+      
+      // If S.O.A.P. entry is public, also create a corresponding social feed post
+      if (newEntry.isPublic) {
+        try {
+          console.log('Creating feed post for public S.O.A.P. entry...');
+          const feedPostData = {
+            title: `S.O.A.P. Reflection: ${newEntry.scriptureReference}`,
+            content: `📖 **Scripture**: ${newEntry.scriptureReference}\n"${newEntry.scripture}"\n\n🔍 **Observation**: ${newEntry.observation}\n\n💡 **Application**: ${newEntry.application}\n\n🙏 **Prayer**: ${newEntry.prayer}`,
+            authorId: userId,
+            churchId: newEntry.churchId || null,
+            category: 'devotional',
+            audience: 'public',
+            isPublic: true,
+            mood: newEntry.moodTag || null,
+            suggestedVerses: null,
+            attachedMedia: null,
+            linkedVerse: newEntry.scriptureReference
+          };
+          console.log('Feed post data for S.O.A.P.:', feedPostData);
+          
+          const feedPost = await storage.createDiscussion(feedPostData);
+          console.log('Created corresponding feed post for S.O.A.P. entry:', feedPost?.id);
+        } catch (feedError) {
+          // Don't fail the S.O.A.P. creation if feed post fails
+          console.error('Failed to create feed post for S.O.A.P. entry:', feedError);
+          console.error('Feed error details:', feedError.message);
+        }
+      }
+      
       res.status(201).json(newEntry);
     } catch (error) {
       console.error('Error creating S.O.A.P. entry:', error);
