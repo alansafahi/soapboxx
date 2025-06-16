@@ -2360,6 +2360,8 @@ export class DatabaseStorage implements IStorage {
           d.content,
           d.mood,
           d.suggested_verses,
+          d.attached_media,
+          d.linked_verse,
           d.audience,
           d.created_at,
           u.first_name,
@@ -2384,6 +2386,8 @@ export class DatabaseStorage implements IStorage {
           content: row.content,
           mood: row.mood || null,
           suggestedVerses: row.suggested_verses || null,
+          attachedMedia: row.attached_media || null,
+          linkedVerse: row.linked_verse || null,
           audience: row.audience || 'public',
           author: {
             id: row.author_id,
