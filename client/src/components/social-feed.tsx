@@ -39,7 +39,10 @@ import {
   Camera,
   Paperclip,
   Play,
-  Pause
+  Pause,
+  Pin,
+  PinOff,
+  MoreHorizontal
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -69,7 +72,12 @@ interface FeedPost {
   eventDate?: Date;
   location?: string;
   mood?: string;
-  suggestedVerses?: any[];
+  // Pinned posts fields for pastor/admin features
+  isPinned?: boolean;
+  pinnedBy?: string;
+  pinnedAt?: Date;
+  pinnedUntil?: Date;
+  pinCategory?: string;
 }
 
 export default function SocialFeed() {
@@ -513,6 +521,62 @@ export default function SocialFeed() {
       });
     },
   });
+
+  // Pin/Unpin post mutations for pastors and church admins
+  const pinPostMutation = useMutation({
+    mutationFn: async ({ postId, category, expiresAt }: { postId: number; category?: string; expiresAt?: Date }) => {
+      return await apiRequest(`/api/discussions/${postId}/pin`, {
+        method: 'POST',
+        body: { category: category || 'announcement', expiresAt }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions/pinned'] });
+      toast({
+        title: "Post pinned",
+        description: "This message is now featured at the top of the feed",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Unable to pin post",
+        description: error.message || "Only pastors and church administrators can pin posts",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const unpinPostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return await apiRequest(`/api/discussions/${postId}/pin`, {
+        method: 'DELETE'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions/pinned'] });
+      toast({
+        title: "Post unpinned",
+        description: "This message is no longer featured",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Unable to unpin post",
+        description: error.message || "Only pastors and church administrators can unpin posts",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Check if user can pin posts (pastor/admin roles)
+  const { data: userRole } = useQuery({
+    queryKey: ['/api/auth/user-role'],
+    enabled: !!user
+  });
+
+  const canPinPosts = userRole && ['pastor', 'lead_pastor', 'church_admin', 'admin', 'system_admin'].includes(userRole.role);
 
   // Enhanced composer handlers
   const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1102,6 +1166,21 @@ export default function SocialFeed() {
         {Array.isArray(feedPosts) && feedPosts.length > 0 ? feedPosts.map((post: FeedPost) => (
           <Card key={`${post.type}-${post.id}`} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
             <CardHeader className="pb-4">
+              {/* Pinned Post Banner */}
+              {post.isPinned && (
+                <div className="mb-3 flex items-center space-x-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2">
+                  <Pin className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    Pinned by {post.pinnedBy || 'Leadership'}
+                  </span>
+                  {post.pinCategory && (
+                    <Badge variant="outline" className="text-xs border-amber-300 text-amber-700 dark:text-amber-300">
+                      {post.pinCategory}
+                    </Badge>
+                  )}
+                </div>
+              )}
+
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
@@ -1119,6 +1198,12 @@ export default function SocialFeed() {
                         {getPostIcon(post.type)}
                         <span className="text-xs">{getPostTypeLabel(post.type)}</span>
                       </Badge>
+                      {post.isPinned && (
+                        <Badge variant="outline" className="flex items-center space-x-1 bg-amber-50 border-amber-300 text-amber-700">
+                          <Pin className="w-3 h-3" />
+                          <span className="text-xs">Pinned</span>
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                       <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>

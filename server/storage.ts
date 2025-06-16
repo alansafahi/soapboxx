@@ -318,6 +318,16 @@ export interface IStorage {
   unlikeDiscussion(discussionId: number, userId: string): Promise<void>;
   getUserDiscussionLike(discussionId: number, userId: string): Promise<boolean>;
   
+  // Pinned posts operations for pastors/admins
+  pinDiscussion(discussionId: number, pinData: {
+    pinnedBy: string;
+    pinnedAt: Date;
+    pinnedUntil?: Date | null;
+    pinCategory?: string;
+  }): Promise<Discussion>;
+  unpinDiscussion(discussionId: number): Promise<Discussion>;
+  getPinnedDiscussions(churchId?: number | null): Promise<Discussion[]>;
+  
   // Comment operations
   getDiscussionComments(discussionId: number): Promise<DiscussionComment[]>;
   createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment>;
@@ -1318,6 +1328,109 @@ export class DatabaseStorage implements IStorage {
         eq(discussionLikes.userId, userId)
       ));
     return !!like;
+  }
+
+  // Pinned posts operations for pastors/admins
+  async pinDiscussion(discussionId: number, pinData: {
+    pinnedBy: string;
+    pinnedAt: Date;
+    pinnedUntil?: Date | null;
+    pinCategory?: string;
+  }): Promise<Discussion> {
+    const [pinnedPost] = await db
+      .update(discussions)
+      .set({
+        isPinned: true,
+        pinnedBy: pinData.pinnedBy,
+        pinnedAt: pinData.pinnedAt,
+        pinnedUntil: pinData.pinnedUntil,
+        pinCategory: pinData.pinCategory || 'announcement',
+        updatedAt: new Date()
+      })
+      .where(eq(discussions.id, discussionId))
+      .returning();
+    
+    return pinnedPost;
+  }
+
+  async unpinDiscussion(discussionId: number): Promise<Discussion> {
+    const [unpinnedPost] = await db
+      .update(discussions)
+      .set({
+        isPinned: false,
+        pinnedBy: null,
+        pinnedAt: null,
+        pinnedUntil: null,
+        pinCategory: null,
+        updatedAt: new Date()
+      })
+      .where(eq(discussions.id, discussionId))
+      .returning();
+    
+    return unpinnedPost;
+  }
+
+  async getPinnedDiscussions(churchId?: number | null): Promise<Discussion[]> {
+    let query = db
+      .select({
+        id: discussions.id,
+        authorId: discussions.authorId,
+        churchId: discussions.churchId,
+        title: discussions.title,
+        content: discussions.content,
+        category: discussions.category,
+        isPublic: discussions.isPublic,
+        audience: discussions.audience,
+        mood: discussions.mood,
+        suggestedVerses: discussions.suggestedVerses,
+        attachedMedia: discussions.attachedMedia,
+        linkedVerse: discussions.linkedVerse,
+        isPinned: discussions.isPinned,
+        pinnedBy: discussions.pinnedBy,
+        pinnedAt: discussions.pinnedAt,
+        pinnedUntil: discussions.pinnedUntil,
+        pinCategory: discussions.pinCategory,
+        likeCount: discussions.likeCount,
+        commentCount: discussions.commentCount,
+        createdAt: discussions.createdAt,
+        updatedAt: discussions.updatedAt,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(discussions)
+      .innerJoin(users, eq(discussions.authorId, users.id))
+      .where(
+        and(
+          eq(discussions.isPinned, true),
+          // Only show non-expired pins
+          or(
+            isNull(discussions.pinnedUntil),
+            gt(discussions.pinnedUntil, new Date())
+          )
+        )
+      );
+
+    // Filter by church if provided
+    if (churchId) {
+      query = query.where(
+        and(
+          eq(discussions.isPinned, true),
+          eq(discussions.churchId, churchId),
+          or(
+            isNull(discussions.pinnedUntil),
+            gt(discussions.pinnedUntil, new Date())
+          )
+        )
+      );
+    }
+
+    return await query
+      .orderBy(desc(discussions.pinnedAt))
+      .limit(10); // Limit to 10 pinned posts max
   }
 
   // Comment operations
