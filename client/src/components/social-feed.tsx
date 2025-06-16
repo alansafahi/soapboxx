@@ -107,7 +107,7 @@ export default function SocialFeed() {
       blessed: "feeling blessed", grateful: "feeling grateful", worshipful: "in worship", 
       prayerful: "in prayer", evangelistic: "sharing the gospel", serving: "serving others", 
       studying: "studying scripture", fasting: "fasting", "spirit-filled": "spirit-filled", 
-      anxious: "feeling anxious"
+      anxious: "feeling anxious", seeking: "seeking guidance"
     };
     return moodNames[mood] || mood;
   };
@@ -746,6 +746,46 @@ export default function SocialFeed() {
                   </Button>
                 </div>
               </div>
+
+              {/* AI Bible Verse Suggestions */}
+              {post.suggestedVerses && post.suggestedVerses.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center mb-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-medium text-[#5A2671] dark:text-purple-400">
+                        ✨ AI Spiritual Guidance
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        Based on your mood
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {post.suggestedVerses.slice(0, 2).map((verse: any, index: number) => (
+                      <div key={index} className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-3 border border-purple-100 dark:border-purple-700">
+                        <div className="flex items-start space-x-2">
+                          <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                            {verse.reference}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 italic">
+                          "{verse.text}"
+                        </p>
+                        {verse.category && (
+                          <span className="inline-block mt-2 px-2 py-1 text-xs bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-full">
+                            {verse.category}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    {post.suggestedVerses.length > 2 && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                        +{post.suggestedVerses.length - 2} more verses suggested
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Comments Section */}
               {post.comments && post.comments.length > 0 && (

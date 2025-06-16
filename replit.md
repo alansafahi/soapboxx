@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 15, 2025: Completed Facebook-style mood/feeling selection system for social feed posts
+  - Added comprehensive mood selection dropdown with 12 emotional states (grateful, blessed, peaceful, hopeful, joyful, reflective, anxious, inspired, seeking guidance, celebrating, praying, studying scripture)
+  - Implemented mood data storage in discussions database table with proper schema migration
+  - Enhanced social feed to display mood selections with appropriate emojis and descriptive text
+  - Fixed database query errors for AI-powered Bible verse suggestions based on mood
+  - Optimized mood display text length to prevent UI truncation issues
+  - Users can now express their emotional state when posting, creating more meaningful community connections
 - June 15, 2025: Enhanced Audio Bible with 6 premium OpenAI voices and true real-time controls
   - Added complete OpenAI voice selection: Alloy, Echo, Fable, Onyx, Nova, and Shimmer
   - Implemented true real-time speed and volume controls using HTML Audio API
