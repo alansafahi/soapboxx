@@ -99,7 +99,9 @@ export function SoapEntryCard({
             <Avatar className="h-10 w-10">
               <AvatarImage src="" />
               <AvatarFallback>
-                {entry.userId?.substring(0, 2).toUpperCase() || 'U'}
+                {isCurrentUserEntry && currentUser?.firstName && currentUser?.lastName
+                  ? `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase()
+                  : entry.userId?.substring(0, 2).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
