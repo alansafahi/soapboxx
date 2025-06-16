@@ -102,13 +102,23 @@ export default function SocialFeed() {
         body: postData
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       setNewPost("");
-      toast({
-        title: "Post Created",
-        description: "Your post has been shared with the community!",
-      });
+      setSelectedMood(null); // Clear selected mood after successful post
+      
+      // Show Bible verse suggestions if provided
+      if (data.suggestedVerses && data.suggestedVerses.length > 0) {
+        toast({
+          title: "Post Created with Spiritual Guidance",
+          description: `Your post has been shared! We've suggested ${data.suggestedVerses.length} Bible verses that might encourage you.`,
+        });
+      } else {
+        toast({
+          title: "Post Created",
+          description: "Your post has been shared with the community!",
+        });
+      }
     },
     onError: (error) => {
       toast({

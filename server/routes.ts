@@ -22,6 +22,89 @@ import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } fr
 import DonationReceiptService from './donation-receipts';
 
 // AI-powered post categorization
+// Generate mood-based Bible verse suggestions
+async function generateMoodBasedVerses(moodId: string) {
+  try {
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    // Map mood to spiritual themes for verse selection
+    const moodToThemes = {
+      'lonely': ['companionship', 'God\'s presence', 'community', 'comfort'],
+      'overwhelmed': ['peace', 'strength', 'rest', 'trust'],
+      'shame': ['forgiveness', 'grace', 'redemption', 'acceptance'],
+      'doubting': ['faith', 'trust', 'God\'s faithfulness', 'assurance'],
+      'needing-forgiveness': ['mercy', 'forgiveness', 'grace', 'redemption'],
+      'struggling-sin': ['victory', 'freedom', 'strength', 'renewal'],
+      'seeking-purpose': ['calling', 'purpose', 'plans', 'direction'],
+      'starting-over': ['new beginnings', 'hope', 'restoration', 'fresh start'],
+      'wanting-growth': ['spiritual growth', 'maturity', 'wisdom', 'transformation'],
+      'grieving-loss': ['comfort', 'hope', 'eternal life', 'healing'],
+      'facing-illness': ['healing', 'strength', 'peace', 'faith'],
+      'financial-stress': ['provision', 'trust', 'contentment', 'stewardship'],
+      'relationship-issues': ['love', 'forgiveness', 'reconciliation', 'unity'],
+      'work-challenges': ['wisdom', 'perseverance', 'integrity', 'excellence'],
+      'parenting-struggles': ['wisdom', 'patience', 'guidance', 'love'],
+      'big-decision': ['wisdom', 'guidance', 'discernment', 'trust'],
+      'celebrating': ['joy', 'gratitude', 'praise', 'thanksgiving'],
+      'grateful': ['thanksgiving', 'praise', 'blessings', 'gratitude'],
+      'blessed': ['gratitude', 'praise', 'thanksgiving', 'joy'],
+      'peaceful': ['peace', 'rest', 'calm', 'serenity'],
+      'hopeful': ['hope', 'future', 'promises', 'faith'],
+      'joyful': ['joy', 'celebration', 'praise', 'thanksgiving'],
+      'loved': ['love', 'acceptance', 'belonging', 'grace'],
+      'confident': ['confidence', 'strength', 'boldness', 'faith'],
+      'excited': ['joy', 'anticipation', 'future', 'blessings'],
+      'inspired': ['inspiration', 'purpose', 'calling', 'motivation'],
+      'content': ['contentment', 'satisfaction', 'peace', 'gratitude'],
+      'anxious': ['peace', 'trust', 'calm', 'rest']
+    };
+
+    const themes = moodToThemes[moodId] || ['comfort', 'peace', 'hope', 'strength'];
+    
+    // Use AI to find relevant verses from our database
+    const verses = await storage.searchBibleVersesByTopic(themes);
+    
+    // Select 3-5 most relevant verses using AI
+    const prompt = `Based on someone feeling "${moodId}", select 3-4 most relevant and comforting Bible verses from this list:
+
+${verses.slice(0, 20).map(v => `${v.reference}: "${v.text}"`).join('\n')}
+
+For each selected verse, provide:
+- reference
+- text  
+- encouragement (brief personal message about how this verse applies to their feeling)
+
+Respond in JSON format with an array of objects containing these fields.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a compassionate spiritual guide helping people find relevant Bible verses for their current emotional state. Select verses that provide genuine comfort, hope, and biblical truth."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1000
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    return result.verses || verses.slice(0, 3);
+  } catch (error) {
+    console.error('Error generating mood-based verses:', error);
+    // Fallback to basic verses from database
+    const fallbackThemes = ['peace', 'comfort', 'hope'];
+    const verses = await storage.searchBibleVersesByTopic(fallbackThemes);
+    return verses.slice(0, 3);
+  }
+}
+
 async function categorizePost(content: string): Promise<{ type: 'discussion' | 'prayer' | 'announcement' | 'share', title?: string }> {
   try {
     const openai = new OpenAI({
@@ -4136,7 +4219,7 @@ Return JSON with this exact structure:
   app.post("/api/feed/posts", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
-      const { content } = req.body;
+      const { content, mood } = req.body;
       
       if (!content || !content.trim()) {
         return res.status(400).json({ message: "Post content is required" });
@@ -4145,6 +4228,17 @@ Return JSON with this exact structure:
       // Use AI to categorize the post
       const categorization = await categorizePost(content.trim());
       const { type, title } = categorization;
+
+      // If post has mood data, provide AI-powered Bible verse suggestions
+      let suggestedVerses = null;
+      if (mood) {
+        try {
+          suggestedVerses = await generateMoodBasedVerses(mood);
+        } catch (error) {
+          console.error('Error generating mood-based verses:', error);
+          // Continue with post creation even if verse suggestions fail
+        }
+      }
       
       let post;
       if (type === 'discussion') {
@@ -4187,7 +4281,15 @@ Return JSON with this exact structure:
       }
       
       console.log(`Created AI-categorized ${type} post for user ${userId}:`, post?.id);
-      res.json(post);
+      
+      // Include suggested verses in response if mood was provided
+      const response = {
+        ...post,
+        suggestedVerses: suggestedVerses || null,
+        mood: mood || null
+      };
+      
+      res.json(response);
     } catch (error) {
       console.error("Error creating feed post:", error);
       res.status(500).json({ message: "Failed to create post" });
