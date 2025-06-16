@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, Square, Clock, Headphones } from "lucide-react";
+import { Play, Square, Clock, Headphones, Pause } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AudioRoutine {
@@ -288,6 +288,73 @@ export default function AudioRoutines() {
     }
   };
 
+  // Automatic pause detection function
+  const setupAutoPauseDetection = (audio: HTMLAudioElement) => {
+    const pausePatterns = [
+      /pause for (\d+) seconds?/i,
+      /pause for (\d+) minutes?/i,
+      /take (\d+) seconds? to/i,
+      /rest for (\d+) seconds?/i,
+      /(\d+) seconds? of silence/i
+    ];
+
+    // Monitor audio for pause cues by tracking time and checking against meditation script
+    const checkForPauseCues = () => {
+      if (!audio || audio.paused) return;
+      
+      const currentTime = audio.currentTime;
+      
+      // Meditation timing markers for automatic pauses
+      const pauseMarkers = [
+        { time: 35, duration: 15 }, // "pause for 15 seconds"
+        { time: 75, duration: 45 }, // "pause for 45 seconds"  
+        { time: 140, duration: 90 }, // "pause for 90 seconds"
+        { time: 250, duration: 120 }, // "pause for 2 minutes"
+        { time: 390, duration: 180 }, // "pause for 3 minutes"
+        { time: 590, duration: 30 } // "pause for 30 seconds"
+      ];
+      
+      for (const marker of pauseMarkers) {
+        if (Math.abs(currentTime - marker.time) < 2 && !isPaused) {
+          // Trigger automatic pause
+          audio.pause();
+          setIsPaused(true);
+          
+          toast({
+            title: "Automatic Pause",
+            description: `Pausing for ${marker.duration} seconds as instructed`,
+            duration: 3000,
+          });
+          
+          // Auto-resume after specified duration
+          const resumeTimeout = setTimeout(() => {
+            if (audio && isPaused) {
+              audio.play();
+              setIsPaused(false);
+              
+              toast({
+                title: "Resuming",
+                description: "Continuing your meditation session",
+                duration: 2000,
+              });
+            }
+          }, marker.duration * 1000);
+          
+          setAutoPauseTimeout(resumeTimeout);
+          break;
+        }
+      }
+    };
+
+    // Check for pause cues every 2 seconds
+    const intervalId = setInterval(checkForPauseCues, 2000);
+    
+    // Clean up on audio end
+    audio.addEventListener('ended', () => {
+      clearInterval(intervalId);
+    });
+  };
+
   // Universal device detection for cross-platform support
   const userAgent = navigator.userAgent.toLowerCase();
   const isIOS = /iphone|ipad|ipod/.test(userAgent);
@@ -428,6 +495,9 @@ export default function AudioRoutines() {
         if (playPromise !== undefined) {
           await playPromise;
           console.log('Complete meditation audio started successfully');
+          
+          // Set up automatic pause detection
+          setupAutoPauseDetection(meditationAudio);
         }
         
         meditationAudio.onended = () => {
@@ -638,27 +708,42 @@ export default function AudioRoutines() {
             </CardHeader>
             
             <CardContent className="pt-0">
-              <Button
-                onClick={() => handleRoutineClick(routine)}
-                className={`w-full ${
-                  playingRoutine === routine.id
-                    ? 'bg-red-600 hover:bg-red-700'
-                    : 'bg-purple-600 hover:bg-purple-700'
-                }`}
-                disabled={playingRoutine !== null && playingRoutine !== routine.id}
-              >
-                {playingRoutine === routine.id ? (
-                  <>
+              {playingRoutine === routine.id ? (
+                <div className="space-y-2">
+                  <Button
+                    onClick={isPaused ? resumeAudioRoutine : pauseAudioRoutine}
+                    className="w-full bg-orange-600 hover:bg-orange-700"
+                  >
+                    {isPaused ? (
+                      <>
+                        <Play className="h-4 w-4 mr-2" />
+                        Resume Session
+                      </>
+                    ) : (
+                      <>
+                        <Pause className="h-4 w-4 mr-2" />
+                        Pause Session
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() => handleRoutineClick(routine)}
+                    className="w-full bg-red-600 hover:bg-red-700"
+                  >
                     <Square className="h-4 w-4 mr-2" />
                     Stop Session
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4 mr-2" />
-                    Start Meditation
-                  </>
-                )}
-              </Button>
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => handleRoutineClick(routine)}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  disabled={playingRoutine !== null}
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Meditation
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}
