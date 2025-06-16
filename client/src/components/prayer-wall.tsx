@@ -374,10 +374,17 @@ export default function PrayerWall() {
   };
 
   const selectAISuggestion = (suggestion: any) => {
+    console.log('Selecting AI suggestion:', suggestion);
     form.setValue('title', suggestion.title || '');
     form.setValue('content', suggestion.content || '');
+    console.log('Form values after AI suggestion:', form.getValues());
+    console.log('Form validation state after AI suggestion:', form.formState.isValid);
     setIsAIAssistanceOpen(false);
     setAISuggestions([]);
+    
+    // Open the prayer creation dialog after AI suggestion is applied
+    setIsCreateDialogOpen(true);
+    
     toast({
       title: "Prayer suggestion applied",
       description: "You can edit the suggestion before posting",
