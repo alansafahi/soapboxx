@@ -427,81 +427,47 @@ export default function AudioRoutines() {
         }
       };
       
-      // Create complete meditation script with natural pauses
-      const fullMeditationText = `Welcome to ${routine.name}. ${routine.description}. 
-      
-      Close your eyes and take a deep, peaceful breath. Feel the air filling your lungs completely.
-      
-      (pause for 15 seconds)
-      
-      As you breathe slowly and deeply, feel God's presence surrounding you with love and peace. Let all tension leave your body.
-      
-      (pause for 45 seconds)
-      
-      Continue breathing gently. With each breath, feel yourself drawing closer to the Divine light within your heart.
-      
-      (pause for 90 seconds)
-      
-      Rest in this sacred stillness. Allow God's grace to fill every part of your being with tranquility and hope.
-      
-      (pause for 2 minutes)
-      
-      In this moment of peace, open your heart to receive whatever God wishes to share with you today.
-      
-      (pause for 3 minutes)
-      
-      As our time together draws to a close, take a moment to offer gratitude for this peaceful communion.
-      
-      (pause for 30 seconds)
-      
-      Carry this peace with you into your day. May God's presence continue to guide and bless you. Amen.`;
+      // Create segmented meditation with proper timing for 15-minute session
+      const meditationSegments = [
+        {
+          text: `Welcome to ${routine.name}. ${routine.description}. Find a comfortable position where you can remain still and peaceful for the next fifteen minutes. Close your eyes gently, allowing your eyelids to feel heavy and relaxed. Begin by taking a deep, slow breath in through your nose, filling your lungs completely with fresh, life-giving air. Hold this breath for just a moment, feeling the fullness in your chest. Now slowly exhale through your mouth, releasing all tension and worry with each breath out.`,
+          pauseAfter: 15
+        },
+        {
+          text: `Continue this gentle rhythm of breathing. With each inhale, imagine you are drawing in God's peace and love. With each exhale, release any stress, anxiety, or concerns that may be weighing on your heart and mind. As you breathe, feel your body beginning to relax. Start with the top of your head, allowing any tension in your scalp to melt away. Let this wave of relaxation flow down to your forehead, smoothing away any lines of worry or stress.`,
+          pauseAfter: 45
+        },
+        {
+          text: `Allow your eyes to feel completely at rest behind your closed lids. Release any tension around your temples and let your jaw soften and relax. Feel your neck and shoulders dropping down, releasing the weight of the day. Let this peaceful feeling continue down your arms, through your chest, and into your heart space. Your heart is the sacred center where God's love dwells within you. Feel this divine love radiating warmth throughout your entire being.`,
+          pauseAfter: 90
+        },
+        {
+          text: `Continue to breathe slowly and deeply as this relaxation flows down through your torso, your abdomen, your hips, and into your legs. Feel your feet connecting you to the earth while your spirit soars toward heaven. Now that your body is completely relaxed, turn your attention to your heart and mind. In this sacred stillness, you are creating space for God to speak to your soul. You are opening yourself to receive divine wisdom, comfort, and guidance.`,
+          pauseAfter: 120
+        },
+        {
+          text: `Imagine yourself in a beautiful, peaceful garden where you can meet with the Divine. This is your sacred space, filled with everything that brings you peace. Perhaps there are gentle flowers swaying in a soft breeze, or a calm stream flowing nearby. In this garden of peace, you are completely safe and loved. God's presence surrounds you like warm sunlight, filling every cell of your body with healing light and unconditional love. Rest in this divine presence. You don't need to say anything or do anything. Simply be present with the One who created you and loves you beyond measure.`,
+          pauseAfter: 180
+        },
+        {
+          text: `If thoughts try to pull your attention away, gently acknowledge them without judgment and then return your focus to your breath and to God's loving presence with you. In this holy silence, allow your heart to open completely. If there are any burdens you've been carrying, offer them now to God. If there are any fears or worries troubling your mind, release them into divine care. Rest assured that you are deeply loved, perfectly known, and completely accepted just as you are in this moment. Continue to breathe peacefully in this sacred communion. Let your soul be nourished by this divine connection. Allow God's peace to penetrate every corner of your being. Take this time to listen with your heart. God may speak to you through a sense of peace, a gentle insight, or simply through the profound love you feel in this moment.`,
+          pauseAfter: 30
+        },
+        {
+          text: `As we begin to draw our time together to a close, take a moment to offer gratitude for this peaceful communion. Thank God for this time of rest and renewal, for the breath in your lungs, and for the love that surrounds you always. When you're ready, begin to gently wiggle your fingers and toes, bringing gentle movement back to your body. Take a deep breath and slowly open your eyes when it feels right. Carry this peace with you into your day. Remember that God's presence is always available to you, and you can return to this inner sanctuary of peace whenever you need comfort or guidance. May you walk forward with confidence, knowing you are loved, guided, and blessed. May God's peace be with you always. Amen.`,
+          pauseAfter: 0
+        }
+      ];
 
-      // Generate complete meditation audio using working endpoint
-      console.log('Generating complete meditation audio...');
+      // Generate complete meditation audio with proper segmentation
+      console.log('Starting segmented meditation session...');
       
-      const response = await fetch('/api/meditation/audio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: fullMeditationText,
-          voice: selectedVoice,
-          speed: 0.95
-        }),
-      });
+      let currentSegmentIndex = 0;
+      let sessionStartTime = Date.now();
       
-      if (response.ok) {
-        const audioBlob = await response.blob();
-        console.log('Meditation audio generated, size:', audioBlob.size, 'bytes');
-        
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const meditationAudio = new Audio(audioUrl);
-        setCurrentAudio(meditationAudio);
-        
-        // Cross-platform audio setup
-        meditationAudio.preload = 'auto';
-        meditationAudio.volume = isAppleWatch ? 1.0 : (isMobile ? 0.85 : 0.75);
-        
-        if (isMobile) {
-          (meditationAudio as any).playsInline = true;
-        }
-        
-        toast({
-          title: "Complete Meditation Session",
-          description: "15-minute guided meditation with peaceful background music",
-          duration: 4000,
-        });
-        
-        const playPromise = meditationAudio.play();
-        if (playPromise !== undefined) {
-          await playPromise;
-          console.log('Complete meditation audio started successfully');
-          
-          // Set up automatic pause detection
-          setupAutoPauseDetection(meditationAudio);
-        }
-        
-        meditationAudio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
+      const playNextSegment = async () => {
+        if (currentSegmentIndex >= meditationSegments.length) {
+          // Session complete
           masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 5);
           setTimeout(() => {
             backgroundMusic.stop();
@@ -509,14 +475,80 @@ export default function AudioRoutines() {
             setCurrentAudioContext(null);
             toast({
               title: "Session Complete",
-              description: "Your peaceful meditation has finished. Carry this tranquility with you.",
+              description: "Your 15-minute meditation has finished. Carry this peace with you.",
               duration: 5000,
             });
           }, 6000);
-        };
-      } else {
-        throw new Error('Failed to generate meditation audio');
-      }
+          return;
+        }
+        
+        const segment = meditationSegments[currentSegmentIndex];
+        console.log(`Playing segment ${currentSegmentIndex + 1}/${meditationSegments.length}`);
+        
+        // Generate audio for this segment
+        const response = await fetch('/api/meditation/audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: segment.text,
+            voice: selectedVoice,
+            speed: 0.95
+          }),
+        });
+        
+        if (response.ok) {
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const segmentAudio = new Audio(audioUrl);
+          setCurrentAudio(segmentAudio);
+          
+          // Cross-platform audio setup
+          segmentAudio.preload = 'auto';
+          segmentAudio.volume = isAppleWatch ? 1.0 : (isMobile ? 0.85 : 0.75);
+          
+          if (isMobile) {
+            (segmentAudio as any).playsInline = true;
+          }
+          
+          toast({
+            title: `Meditation Segment ${currentSegmentIndex + 1}`,
+            description: `${meditationSegments.length - currentSegmentIndex} segments remaining`,
+            duration: 3000,
+          });
+          
+          await segmentAudio.play();
+          
+          // When segment ends, pause for specified duration then play next
+          segmentAudio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            currentSegmentIndex++;
+            
+            if (segment.pauseAfter > 0) {
+              // Show pause notification
+              toast({
+                title: "Silent Meditation",
+                description: `Pausing for ${segment.pauseAfter} seconds of peaceful silence`,
+                duration: Math.min(segment.pauseAfter * 1000, 5000),
+              });
+              
+              // Wait for pause duration then continue
+              setTimeout(() => {
+                if (playingRoutine === routine.id) {
+                  playNextSegment();
+                }
+              }, segment.pauseAfter * 1000);
+            } else {
+              // No pause, continue immediately
+              playNextSegment();
+            }
+          };
+        } else {
+          throw new Error('Failed to generate segment audio');
+        }
+      };
+      
+      // Start the segmented meditation
+      await playNextSegment();
       
     } catch (error) {
       console.error('Meditation session error:', error);

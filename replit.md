@@ -142,11 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 16, 2025: Successfully completed meditation audio system with pause controls and automatic pause detection
+- June 16, 2025: Successfully completed 15-minute segmented meditation system with proper duration and pause controls
+  - Fixed critical duration issue where sessions only lasted 1-2 minutes instead of full 15 minutes
+  - Implemented segmented meditation system with 7 distinct narration segments and actual silence periods (15s, 45s, 90s, 2min, 3min, 30s)
+  - Created comprehensive meditation scripts with extended content to achieve proper 15-minute duration through multiple audio segments
   - Added manual pause/resume button controls for meditation sessions with orange pause button and play button for resume
-  - Implemented automatic pause detection that monitors audio timeline and pauses when narrator mentions "pause for X seconds"
-  - Created intelligent pause markers at 6 specific meditation points (15s, 45s, 90s, 2min, 3min, 30s) with automatic resume functionality
-  - Enhanced user experience with toast notifications for pause/resume actions and automatic pause notifications
+  - Enhanced user experience with toast notifications showing segment progress and silence period notifications
   - Added multiple background music options: Gentle Chords, Nature Sounds, Ocean Waves, Soft Piano, Ethereal Pads, Tibetan Bowls, and Silent mode
   - Users can now turn off background music completely by selecting "Silent" option
   - Fixed authentication blocking issue by creating public `/api/meditation/audio` endpoint that bypasses authentication requirements
