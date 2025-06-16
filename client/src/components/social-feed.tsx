@@ -24,7 +24,10 @@ import {
   Send,
   X,
   Smile,
-  ChevronDown
+  ChevronDown,
+  Globe,
+  Lock,
+  Eye
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -42,6 +45,7 @@ interface FeedPost {
     id: number;
     name: string;
   };
+  audience?: 'public' | 'church' | 'private';
   createdAt: Date;
   likeCount: number;
   commentCount: number;
@@ -120,6 +124,10 @@ export default function SocialFeed() {
   // Mood/feeling selection for posts
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [showMoodDropdown, setShowMoodDropdown] = useState(false);
+  
+  // Audience selection for posts (Facebook-style)
+  const [selectedAudience, setSelectedAudience] = useState<'public' | 'church' | 'private'>('public');
+  const [showAudienceDropdown, setShowAudienceDropdown] = useState(false);
   
   // Comment modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false);
