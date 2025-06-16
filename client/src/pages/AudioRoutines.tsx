@@ -163,7 +163,7 @@ export default function AudioRoutines() {
       const meditationSegments = [
         {
           text: `Welcome to ${routine.name}. ${routine.description}. Close your eyes and take a deep, peaceful breath.`,
-          delay: 3
+          delay: 0
         },
         {
           text: "As you breathe slowly and deeply, feel God's presence surrounding you with love and peace. Let all tension leave your body.",
@@ -200,72 +200,10 @@ export default function AudioRoutines() {
       // Play each meditation segment at scheduled times
       let completedSegments = 0;
       
-      // Immediate audio test to ensure iOS audio context is working
-      const testAudioGeneration = async () => {
-        try {
-          console.log('Testing immediate audio generation...');
-          const testResponse = await fetch('/api/audio/generate-speech', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              text: "Audio system is ready. Your meditation will begin now.",
-              voice: selectedVoice,
-              model: 'tts-1-hd',
-              speed: 0.75
-            }),
-          });
-          
-          if (testResponse.ok) {
-            const audioBlob = await testResponse.blob();
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const testAudio = new Audio(audioUrl);
-            
-            testAudio.volume = isMobile ? 0.8 : 0.6;
-            if (isMobile) {
-              (testAudio as any).playsInline = true;
-            }
-            
-            const playPromise = testAudio.play();
-            if (playPromise !== undefined) {
-              await playPromise;
-              console.log('Audio test successful - meditation audio will work');
-              
-              testAudio.onended = () => {
-                URL.revokeObjectURL(audioUrl);
-                console.log('Test audio finished, starting meditation segments...');
-                // Start the actual meditation segments after test audio
-                setTimeout(() => {
-                  startMeditationSegments();
-                }, 1000); // Small delay to ensure smooth transition
-              };
-            }
-          } else {
-            console.error('Audio test failed, using fallback');
-            startMeditationSegments();
-          }
-        } catch (error) {
-          console.error('Audio test error:', error);
-          toast({
-            title: "Audio Setup Issue",
-            description: "Please check your device volume and internet connection",
-            duration: 4000,
-          });
-          startMeditationSegments();
-        }
-      };
-      
-      const startMeditationSegments = () => {
-        console.log('Starting meditation segments:', meditationSegments.length, 'total segments');
-        
-        meditationSegments.forEach((segment, index) => {
-          console.log(`Scheduling segment ${index + 1} for ${segment.delay} seconds`);
-          
-          setTimeout(async () => {
-            if (playingRoutine === routine.id) {
-              try {
-                console.log(`Generating audio for segment ${index + 1}:`, segment.text.substring(0, 50) + '...');
-              
+      meditationSegments.forEach((segment, index) => {
+        setTimeout(async () => {
+          if (playingRoutine === routine.id) {
+            try {
               const response = await fetch('/api/audio/generate-speech', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -278,86 +216,25 @@ export default function AudioRoutines() {
                 }),
               });
               
-              console.log(`Audio API response for segment ${index + 1}:`, response.status, response.statusText);
-              
               if (response.ok) {
                 const audioBlob = await response.blob();
-                console.log(`Audio blob size for segment ${index + 1}:`, audioBlob.size, 'bytes');
-                
                 const audioUrl = URL.createObjectURL(audioBlob);
                 const segmentAudio = new Audio(audioUrl);
                 
-                // Enhanced cross-platform audio setup
+                // Cross-platform audio setup
                 segmentAudio.preload = 'auto';
-                segmentAudio.crossOrigin = 'anonymous';
                 segmentAudio.volume = isAppleWatch ? 1.0 : (isMobile ? 0.9 : 0.8);
                 
-                // iOS-specific audio attributes
                 if (isMobile) {
                   (segmentAudio as any).playsInline = true;
-                  (segmentAudio as any).controls = false;
-                  (segmentAudio as any).muted = false;
                 }
                 
-                // Webkit optimizations for Safari/iOS
-                if (isIOS || isSafari) {
-                  (segmentAudio as any).webkitPlaysinline = true;
-                  (segmentAudio as any).webkit = true;
-                }
-                
-                // Error handling for audio playback
-                segmentAudio.onerror = (error) => {
-                  console.error(`Audio playback error for segment ${index + 1}:`, error);
-                  toast({
-                    title: "Audio Issue",
-                    description: `Segment ${index + 1} couldn't play. Please check your device audio settings.`,
-                    duration: 3000,
-                  });
-                };
-                
-                segmentAudio.onloadeddata = () => {
-                  console.log(`Audio loaded for segment ${index + 1}, duration:`, segmentAudio.duration);
-                };
-                
-                segmentAudio.oncanplay = () => {
-                  console.log(`Audio ready to play for segment ${index + 1}`);
-                };
-                
-                try {
-                  console.log(`Attempting to play segment ${index + 1}`);
-                  const playPromise = segmentAudio.play();
-                  
-                  if (playPromise !== undefined) {
-                    await playPromise;
-                    console.log(`Successfully started playback for segment ${index + 1}`);
-                    
-                    toast({
-                      title: `Guidance ${index + 1}`,
-                      description: "Audio meditation guidance playing",
-                      duration: 2000,
-                    });
-                  }
-                } catch (playError: any) {
-                  console.error(`Play failed for segment ${index + 1}:`, playError);
-                  
-                  // iOS-specific play retry
-                  if (isIOS && playError.name === 'NotAllowedError') {
-                    toast({
-                      title: "Audio Permission Needed",
-                      description: "Please tap to enable audio for your meditation",
-                      duration: 4000,
-                    });
-                  } else {
-                    toast({
-                      title: "Audio Playback Issue",
-                      description: "Please check your device volume and audio settings",
-                      duration: 3000,
-                    });
-                  }
+                const playPromise = segmentAudio.play();
+                if (playPromise !== undefined) {
+                  await playPromise;
                 }
                 
                 segmentAudio.onended = () => {
-                  console.log(`Segment ${index + 1} finished playing`);
                   URL.revokeObjectURL(audioUrl);
                   completedSegments++;
                   
@@ -378,31 +255,13 @@ export default function AudioRoutines() {
                     }, 3000);
                   }
                 };
-              } else {
-                const errorText = await response.text();
-                console.error(`API error for segment ${index + 1}:`, response.status, errorText);
-                
-                toast({
-                  title: "Connection Issue",
-                  description: `Segment ${index + 1} couldn't load. Please check your internet connection.`,
-                  duration: 3000,
-                });
               }
             } catch (error) {
               console.error(`Segment ${index + 1} failed:`, error);
-              toast({
-                title: "Audio Generation Failed",
-                description: `Segment ${index + 1} encountered an error. Please try restarting the session.`,
-                duration: 3000,
-              });
             }
           }
         }, segment.delay * 1000);
-        });
-      };
-      
-      // Start with immediate audio test
-      testAudioGeneration();
+      });
       
     } catch (error) {
       console.error('Meditation session error:', error);
@@ -501,7 +360,7 @@ export default function AudioRoutines() {
       {/* Routines Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {(routines as AudioRoutine[]).map((routine: AudioRoutine) => (
+          {routines.map((routine: AudioRoutine) => (
             <Card key={routine.id} className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <div className="flex items-start justify-between">
