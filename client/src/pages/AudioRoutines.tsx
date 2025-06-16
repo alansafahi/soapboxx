@@ -76,7 +76,12 @@ export default function AudioRoutines() {
 
   const handleRoutineClick = (routine: AudioRoutine) => {
     console.log('Routine clicked:', routine.name);
-    setSelectedRoutineId(routine.id);
+    // Show routine details in a beautiful toast instead of navigation
+    toast({
+      title: `🎯 ${routine.name}`,
+      description: `${routine.description} • Duration: ${formatDuration(routine.totalDuration || 600)}`,
+      duration: 3000,
+    });
   };
 
   return (
