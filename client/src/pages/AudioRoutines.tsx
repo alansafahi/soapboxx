@@ -204,6 +204,8 @@ export default function AudioRoutines() {
         setTimeout(async () => {
           if (playingRoutine === routine.id) {
             try {
+              console.log(`Generating audio for segment ${index + 1}:`, segment.text.substring(0, 50) + '...');
+              
               const response = await fetch('/api/audio/generate-speech', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -216,25 +218,86 @@ export default function AudioRoutines() {
                 }),
               });
               
+              console.log(`Audio API response for segment ${index + 1}:`, response.status, response.statusText);
+              
               if (response.ok) {
                 const audioBlob = await response.blob();
+                console.log(`Audio blob size for segment ${index + 1}:`, audioBlob.size, 'bytes');
+                
                 const audioUrl = URL.createObjectURL(audioBlob);
                 const segmentAudio = new Audio(audioUrl);
                 
-                // Cross-platform audio setup
+                // Enhanced cross-platform audio setup
                 segmentAudio.preload = 'auto';
+                segmentAudio.crossOrigin = 'anonymous';
                 segmentAudio.volume = isAppleWatch ? 1.0 : (isMobile ? 0.9 : 0.8);
                 
+                // iOS-specific audio attributes
                 if (isMobile) {
                   (segmentAudio as any).playsInline = true;
+                  (segmentAudio as any).controls = false;
+                  (segmentAudio as any).muted = false;
                 }
                 
-                const playPromise = segmentAudio.play();
-                if (playPromise !== undefined) {
-                  await playPromise;
+                // Webkit optimizations for Safari/iOS
+                if (isIOS || isSafari) {
+                  (segmentAudio as any).webkitPlaysinline = true;
+                  (segmentAudio as any).webkit = true;
+                }
+                
+                // Error handling for audio playback
+                segmentAudio.onerror = (error) => {
+                  console.error(`Audio playback error for segment ${index + 1}:`, error);
+                  toast({
+                    title: "Audio Issue",
+                    description: `Segment ${index + 1} couldn't play. Please check your device audio settings.`,
+                    duration: 3000,
+                  });
+                };
+                
+                segmentAudio.onloadeddata = () => {
+                  console.log(`Audio loaded for segment ${index + 1}, duration:`, segmentAudio.duration);
+                };
+                
+                segmentAudio.oncanplay = () => {
+                  console.log(`Audio ready to play for segment ${index + 1}`);
+                };
+                
+                try {
+                  console.log(`Attempting to play segment ${index + 1}`);
+                  const playPromise = segmentAudio.play();
+                  
+                  if (playPromise !== undefined) {
+                    await playPromise;
+                    console.log(`Successfully started playback for segment ${index + 1}`);
+                    
+                    toast({
+                      title: `Guidance ${index + 1}`,
+                      description: "Audio meditation guidance playing",
+                      duration: 2000,
+                    });
+                  }
+                } catch (playError) {
+                  console.error(`Play failed for segment ${index + 1}:`, playError);
+                  
+                  // iOS-specific play retry
+                  if (isIOS && playError.name === 'NotAllowedError') {
+                    toast({
+                      title: "Audio Permission Needed",
+                      description: "Please tap to enable audio for your meditation",
+                      duration: 4000,
+                    });
+                  } else {
+                    toast({
+                      title: "Audio Playback Issue",
+                      description: "Please check your device volume and audio settings",
+                      duration: 3000,
+                    });
+                  }
                 }
                 
                 segmentAudio.onended = () => {
+                  console.log(`Segment ${index + 1} finished playing`);
                   URL.revokeObjectURL(audioUrl);
                   completedSegments++;
                   
@@ -255,9 +318,23 @@ export default function AudioRoutines() {
                     }, 3000);
                   }
                 };
+              } else {
+                const errorText = await response.text();
+                console.error(`API error for segment ${index + 1}:`, response.status, errorText);
+                
+                toast({
+                  title: "Connection Issue",
+                  description: `Segment ${index + 1} couldn't load. Please check your internet connection.`,
+                  duration: 3000,
+                });
               }
             } catch (error) {
               console.error(`Segment ${index + 1} failed:`, error);
+              toast({
+                title: "Audio Generation Failed",
+                description: `Segment ${index + 1} encountered an error. Please try restarting the session.`,
+                duration: 3000,
+              });
             }
           }
         }, segment.delay * 1000);
