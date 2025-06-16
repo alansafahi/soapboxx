@@ -28,15 +28,16 @@ import {
   Globe,
   Lock,
   Eye,
-  Paperclip,
-  Mic,
-  MicOff,
-  BookText,
-  Hash,
-  AtSign,
   Image,
   Video,
   FileText,
+  BookText,
+  Mic,
+  MicOff,
+  Hash,
+  AtSign,
+  Camera,
+  Paperclip,
   Play,
   Pause
 } from "lucide-react";
@@ -822,13 +823,60 @@ export default function SocialFeed() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
+              {/* Enhanced Composer Toolbar - X/Facebook Style */}
+              
+              {/* Media Upload */}
+              <input
+                type="file"
+                ref={mediaInputRef}
+                onChange={handleMediaUpload}
+                multiple
+                accept="image/*,video/*"
+                className="hidden"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => mediaInputRef.current?.click()}
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                title="Add photos or videos"
+              >
+                <Image className="w-4 h-4" />
+              </Button>
+
+              {/* Voice Prayer Recording */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                className={`${
+                  isRecording 
+                    ? "text-red-600 hover:text-red-700 bg-red-50" 
+                    : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                }`}
+                title={isRecording ? "Stop voice prayer" : "Record voice prayer"}
+              >
+                {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </Button>
+
+              {/* Bible Verse Linking */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowVerseSearch(!showVerseSearch)}
+                className="text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+                title="Link Bible verse"
+              >
+                <BookText className="w-4 h-4" />
+              </Button>
+
               {/* Mood/Activity Button */}
               <div className="relative">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowMoodDropdown(!showMoodDropdown)}
-                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                  className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50"
                 >
                   <Smile className="w-4 h-4 mr-2" />
                   Mood
@@ -918,6 +966,89 @@ export default function SocialFeed() {
                 )}
               </div>
             </div>
+
+            {/* Bible Verse Search Dropdown */}
+            {showVerseSearch && (
+              <div className="mt-3 border border-purple-200 rounded-lg p-3 bg-purple-50">
+                <div className="flex items-center space-x-2 mb-2">
+                  <BookText className="w-4 h-4 text-purple-600" />
+                  <span className="text-sm font-medium text-purple-800">Link Bible Verse</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowVerseSearch(false)}
+                    className="h-6 w-6 p-0 text-purple-400 hover:text-purple-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search for a verse (e.g., John 3:16, love, hope, faith)"
+                  value={verseQuery}
+                  onChange={(e) => setVerseQuery(e.target.value)}
+                  className="w-full p-2 text-sm border border-purple-200 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                {verseQuery && (
+                  <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
+                    {[
+                      { reference: "John 3:16", text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life." },
+                      { reference: "Philippians 4:13", text: "I can do all this through him who gives me strength." },
+                      { reference: "Romans 8:28", text: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose." },
+                      { reference: "Jeremiah 29:11", text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future." },
+                      { reference: "1 Corinthians 13:4-5", text: "Love is patient, love is kind. It does not envy, it does not boast, it is not proud." }
+                    ].filter(verse => 
+                      verse.reference.toLowerCase().includes(verseQuery.toLowerCase()) ||
+                      verse.text.toLowerCase().includes(verseQuery.toLowerCase())
+                    ).slice(0, 3).map((verse, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setLinkedVerse(verse);
+                          setShowVerseSearch(false);
+                          setVerseQuery("");
+                        }}
+                        className="w-full text-left p-2 hover:bg-purple-100 rounded text-sm"
+                      >
+                        <div className="font-medium text-purple-800">{verse.reference}</div>
+                        <div className="text-purple-600 text-xs truncate">{verse.text}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Hashtag/Mention Autocomplete */}
+            {showMentions && (
+              <div className="mt-2 border border-gray-200 rounded-lg p-2 bg-gray-50 max-h-32 overflow-y-auto">
+                <div className="text-xs text-gray-500 mb-1">
+                  {mentionQuery.startsWith('@') ? 'Mention someone' : 'Add hashtag'}
+                </div>
+                <div className="space-y-1">
+                  {(mentionQuery.startsWith('@') ? 
+                    ['@PastorDavid', '@SisterMaria', '@YouthLeader', '@WorshipTeam'] :
+                    ['#prayer', '#faith', '#worship', '#fellowship', '#blessing', '#testimony']
+                  ).filter(item => 
+                    item.toLowerCase().includes(mentionQuery.toLowerCase())
+                  ).slice(0, 4).map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        const words = newPost.split(' ');
+                        words[words.length - 1] = item;
+                        setNewPost(words.join(' ') + ' ');
+                        setShowMentions(false);
+                        setMentionQuery('');
+                      }}
+                      className="block w-full text-left p-1 hover:bg-gray-100 rounded text-sm text-blue-600"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Button 
               onClick={handleCreatePost}
