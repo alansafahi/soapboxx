@@ -172,6 +172,8 @@ function AppRouter() {
               <Route path="/communications" component={BulkCommunication} />
               <Route path="/soap" component={SoapPage} />
               <Route path="/click-test" component={ClickTest} />
+              {/* Catch all unmatched routes */}
+              <Route component={NotFound} />
             </>
           )}
         </Switch>
