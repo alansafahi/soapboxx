@@ -997,6 +997,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               type="submit" 
               disabled={saveMutation.isPending}
               className="flex items-center gap-2"
+              onClick={(e) => {
+                console.log('=== SAVE BUTTON CLICKED ===');
+                console.log('Button event:', e);
+                console.log('Form values:', form.getValues());
+                console.log('Form errors:', form.formState.errors);
+                console.log('Form is valid:', form.formState.isValid);
+                
+                // Let the form handle submission naturally
+                // Don't prevent default - let it trigger form onSubmit
+              }}
             >
               <Save className="h-4 w-4" />
               {saveMutation.isPending ? 'Saving...' : entry ? 'Update Entry' : 'Save Entry'}
