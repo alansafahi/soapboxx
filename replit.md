@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 16, 2025: Temporarily disabled scripture auto-expansion in Prayer Wall to resolve infinite loop performance issue
+  - ScriptureExpandedText component was causing endless API calls to bible verse lookup endpoint
+  - Prayer Wall now displays scripture references as plain text (e.g., "John 3:16") without automatic expansion
+  - SmartScriptureTextarea still works correctly for scripture auto-population during prayer composition
+  - Need to implement more efficient scripture expansion solution that doesn't cause React infinite loops
 - June 16, 2025: Successfully implemented AI prayer writing assistance for Prayer Wall
   - Added comprehensive AI prayer assistance modal with guided input forms
   - Integrated OpenAI GPT-4o for generating personalized prayer suggestions

@@ -743,10 +743,9 @@ export default function PrayerWall() {
                       <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{prayer.title}</h4>
                     )}
                     
-                    <ScriptureExpandedText 
-                      text={prayer.content}
-                      className="text-gray-700 dark:text-gray-300 leading-relaxed"
-                    />
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {prayer.content}
+                    </p>
                     
                     {/* Action Buttons */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
