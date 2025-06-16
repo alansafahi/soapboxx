@@ -56,12 +56,13 @@ export default function AudioRoutines() {
     total + segment.duration + segment.pauseAfter, 0
   );
 
-  // Calculate pause points for red dots on progress bar
+  // Calculate accurate pause points for red dots on progress bar
   const pausePoints: number[] = [];
   let cumulativeTime = 0;
   meditationSegments.forEach((segment, index) => {
     cumulativeTime += segment.duration;
     if (segment.pauseAfter > 0) {
+      // Mark the exact point where pause begins (after segment ends)
       pausePoints.push((cumulativeTime / totalSessionDuration) * 100);
       cumulativeTime += segment.pauseAfter;
     }
@@ -920,6 +921,34 @@ export default function AudioRoutines() {
               >
                 <div className="font-medium">{voice.name}</div>
                 <div className="text-xs opacity-75">{voice.description}</div>
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Background Music Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Background Music</CardTitle>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Choose peaceful background sounds to accompany your meditation
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Object.entries(backgroundMusicOptions).map(([key, option]) => (
+              <Button
+                key={key}
+                variant={backgroundMusicType === key ? "default" : "outline"}
+                className={`p-3 h-auto text-left flex-col items-start ${
+                  backgroundMusicType === key ? 'bg-purple-600 hover:bg-purple-700' : ''
+                }`}
+                onClick={() => setBackgroundMusicType(key)}
+              >
+                <div className="text-lg mb-1">{option.icon}</div>
+                <div className="font-medium text-sm">{option.name}</div>
+                <div className="text-xs opacity-75">{option.description}</div>
               </Button>
             ))}
           </div>
