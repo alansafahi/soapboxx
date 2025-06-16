@@ -4751,7 +4751,6 @@ Return JSON with this exact structure:
         return res.status(500).json({ message: 'AI assistance is currently unavailable' });
       }
 
-      const OpenAI = require('openai');
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       // Build prayer assistance prompt
