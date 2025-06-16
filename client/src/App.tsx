@@ -147,6 +147,7 @@ function AppRouter() {
               <Route path="/events" component={Events} />
               <Route path="/prayer" component={Prayer} />
               <Route path="/prayer-wall" component={Prayer} />
+              <Route path="/soap" component={SoapPage} />
               <Route path="/messages" component={Messages} />
               <Route path="/chat" component={Chat} />
               <Route path="/leaderboard" component={Leaderboard} />
