@@ -151,25 +151,60 @@ export function DailyBibleFeature() {
   // Fetch daily verse based on current journey type
   const { data: dailyVerse, isLoading: verseLoading, error: verseError, refetch: refetchVerse } = useQuery<DailyVerse>({
     queryKey: ["/api/bible/daily-verse", currentJourneyType],
-    queryFn: () => fetch(`/api/bible/daily-verse?journeyType=${currentJourneyType}`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/bible/daily-verse?journeyType=${currentJourneyType}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch daily verse');
+      }
+      return response.json();
+    },
     enabled: isAuthenticated,
   });
 
   // Fetch user streak
   const { data: streak, isLoading: streakLoading, error: streakError } = useQuery<UserBibleStreak>({
     queryKey: ["/api/bible/streak"],
+    queryFn: async () => {
+      const response = await fetch("/api/bible/streak", {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to fetch streak');
+      return response.json();
+    },
     enabled: isAuthenticated,
   });
 
   // Fetch user badges
   const { data: badges, error: badgesError } = useQuery<BibleBadge[]>({
     queryKey: ["/api/bible/badges"],
+    queryFn: async () => {
+      const response = await fetch("/api/bible/badges", {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to fetch badges');
+      return response.json();
+    },
     enabled: isAuthenticated,
   });
 
   // Fetch community statistics
   const { data: communityStatsData } = useQuery<{todayReads: number, weekReads: number}>({
     queryKey: ["/api/bible/community-stats"],
+    queryFn: async () => {
+      const response = await fetch("/api/bible/community-stats", {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error('Failed to fetch community stats');
+      return response.json();
+    },
   });
 
   // Record bible reading mutation
@@ -180,7 +215,7 @@ export function DailyBibleFeature() {
       emotionalReaction?: string;
       audioListened?: boolean;
     }) => {
-      return await apiRequest("POST", "/api/bible/reading", data);
+      return await apiRequest("/api/bible/reading", { method: "POST", body: data });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bible/streak"] });
@@ -207,7 +242,7 @@ export function DailyBibleFeature() {
       platform: string;
       shareText: string;
     }) => {
-      return await apiRequest("POST", "/api/bible/share", data);
+      return await apiRequest("/api/bible/share", { method: "POST", body: data });
     },
     onSuccess: (data, variables) => {
       setShowShareDialog(false);
