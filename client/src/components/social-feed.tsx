@@ -28,7 +28,7 @@ import {
   Globe,
   Lock,
   Eye,
-  Image,
+  Image as ImageIcon,
   Video,
   FileText,
   BookText,
@@ -43,7 +43,8 @@ import {
   Pin,
   PinOff,
   MoreHorizontal,
-  Search
+  Search,
+  Book
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -889,7 +890,7 @@ export default function SocialFeed() {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-              {/* Media Preview */}
+            {/* Media Preview */}
               {attachedMedia.length > 0 && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   {attachedMedia.map((media, index) => (
@@ -1288,7 +1289,7 @@ export default function SocialFeed() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={isRecording ? stopRecording : startRecording}
+                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
                   className={`${
                     isRecording 
                       ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
@@ -1333,8 +1334,7 @@ export default function SocialFeed() {
                 {createPostMutation.isPending ? 'Posting...' : 'Share'}
               </Button>
             </div>
-          </div>
-        </CardContent>
+          </CardContent>
         </Card>
       )}
 
