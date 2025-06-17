@@ -3,6 +3,15 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/hooks/useTheme";
 import soapboxLogo from "@/assets/soapbox-logo.jpeg";
 import { 
   Home, 
@@ -23,7 +32,11 @@ import {
   Share2,
   TrendingUp,
   User,
-  LogOut
+  LogOut,
+  Bell,
+  Sun,
+  Moon,
+  Monitor
 } from "lucide-react";
 
 interface NavigationItem {
@@ -150,8 +163,9 @@ export default function Sidebar() {
               className="w-12 h-12 object-contain rounded-lg"
             />
           </div>
-          <div className="flex items-center min-w-0 flex-1">
-            <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox Super App</div>
+          <div className="flex flex-col min-w-0 flex-1">
+            <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox</div>
+            <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">Super App</div>
           </div>
         </Link>
       </div>
