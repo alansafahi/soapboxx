@@ -142,12 +142,16 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 17, 2025: Completed post composer functionality with working photo upload and optimized dropdown positioning
+- June 17, 2025: Successfully completed post composer functionality with full photo upload integration and JSON parsing fixes
   - Fixed photo button to properly trigger computer file dialog with programmatic click handler
   - Enhanced Bible verse search dropdown positioning to prevent frame overflow (left-aligned with responsive width)
   - Implemented comprehensive post composer features: mood selection, voice recording, Bible verse search, audience settings
   - Added click-outside functionality for all dropdowns with proper cleanup
   - Created visual feedback system for selected attachments, moods, and linked verses with removal options
+  - Fixed critical JSON parsing error by removing double stringification in apiRequest calls
+  - Added missing POST /api/discussions endpoint with proper authentication handling
+  - Updated user avatar display to show proper initials from user name instead of undefined properties
+  - All post composer buttons now fully functional: photo upload confirmed working with file browser and preview thumbnails
 - June 17, 2025: Fixed SoapBox logo and company name layout in sidebar navigation
   - Enhanced header layout with proper flexbox structure for clean logo display
   - Increased logo size from 8x8 to 10x10 pixels for better visibility and branding

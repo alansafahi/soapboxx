@@ -143,7 +143,7 @@ export default function SocialFeed() {
     mutationFn: async (postData: any) => {
       return apiRequest('/api/discussions', {
         method: 'POST',
-        body: JSON.stringify(postData),
+        body: postData,
       });
     },
     onSuccess: () => {
@@ -157,10 +157,11 @@ export default function SocialFeed() {
         description: "Post shared successfully!",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Post creation error:", error);
       toast({
         title: "Error",
-        description: "Failed to share post. Please try again.",
+        description: `Failed to share post: ${error.message || 'Please try again.'}`,
         variant: "destructive",
       });
     }
