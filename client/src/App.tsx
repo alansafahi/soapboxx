@@ -221,8 +221,6 @@ function AppRouter() {
 
       {/* Interactive Demo Trigger - Always available for authenticated users */}
       {isAuthenticated && <DemoTrigger variant="floating" />}
-        </Switch>
-      </main>
     </div>
   );
 }
