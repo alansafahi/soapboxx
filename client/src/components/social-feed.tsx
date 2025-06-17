@@ -1269,8 +1269,8 @@ export default function SocialFeed() {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-wrap overflow-hidden min-w-0 flex-1">
               {/* Enhanced Composer Toolbar - X/Facebook Style */}
               
               {/* Media Upload */}
@@ -1285,11 +1285,18 @@ export default function SocialFeed() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => mediaInputRef.current?.click()}
-                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 px-3 py-1.5 h-8 flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (mediaInputRef.current) {
+                    mediaInputRef.current.click();
+                  }
+                }}
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 px-2 py-1 h-7 text-xs flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
                 title="Add photos or videos"
+                type="button"
               >
-                <ImageIcon className="w-4 h-4 mr-1" />
+                <ImageIcon className="w-3 h-3 mr-1" />
                 Photo
               </Button>
 
@@ -1298,14 +1305,14 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                className={`px-3 py-1.5 h-8 flex-shrink-0 border-0 focus:ring-0 focus:outline-none ${
+                className={`px-2 py-1 h-7 text-xs flex-shrink-0 border-0 focus:ring-0 focus:outline-none ${
                   isRecording 
                     ? "text-red-600 hover:text-red-700 bg-red-50 dark:bg-red-900/20" 
                     : "text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20"
                 }`}
                 title={isRecording ? "Stop voice prayer" : "Record voice prayer"}
               >
-                {isRecording ? <MicOff className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
+                {isRecording ? <MicOff className="w-3 h-3 mr-1" /> : <Mic className="w-3 h-3 mr-1" />}
                 Voice
               </Button>
 
@@ -1314,10 +1321,10 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowMoodSelector(!showMoodSelector)}
-                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 px-3 py-1.5 h-8 flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
+                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 px-2 py-1 h-7 text-xs flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
                 title="Share your feeling"
               >
-                <Heart className="w-4 h-4 mr-1" />
+                <Heart className="w-3 h-3 mr-1" />
                 Feeling
               </Button>
 
@@ -1327,10 +1334,10 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 px-3 py-1.5 h-8 border-0 focus:ring-0 focus:outline-none"
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 px-2 py-1 h-7 text-xs border-0 focus:ring-0 focus:outline-none"
                   title="Link Bible verse"
                 >
-                  <BookText className="w-4 h-4 mr-1" />
+                  <BookText className="w-3 h-3 mr-1" />
                   Verse
                 </Button>
 
@@ -1468,11 +1475,11 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
-                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 h-7 text-xs"
                 >
-                  {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-4 h-4 mr-2" })}
+                  {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-3 h-3 mr-1" })}
                   {audienceOptions.find(opt => opt.id === selectedAudience)?.label}
-                  <ChevronDown className="w-3 h-3 ml-1" />
+                  <ChevronDown className="w-2 h-2 ml-1" />
                 </Button>
 
                 {/* Audience Dropdown */}
