@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, Square, Clock, Headphones, Pause, Book, Heart } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Play, Square, Clock, Headphones, Pause, Book, Heart, ChevronDown, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AudioRoutine {
@@ -59,7 +60,64 @@ export default function AudioRoutines() {
   const [sessionProgress, setSessionProgress] = useState(0);
   const [currentSegment, setCurrentSegment] = useState(0);
   const [isInSilencePeriod, setIsInSilencePeriod] = useState(false);
+  const [expandedMoodCategories, setExpandedMoodCategories] = useState<Record<string, boolean>>({
+    "Stress & Anxiety": true,
+    "Gratitude & Joy": false,
+    "Spiritual Growth": false,
+    "Difficult Emotions": false,
+    "Life Challenges": false
+  });
   const { toast } = useToast();
+
+  // Toggle function for mood categories
+  const toggleMoodCategory = (category: string) => {
+    setExpandedMoodCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  // Mood category definitions with emojis and descriptions
+  const moodCategories = {
+    "Stress & Anxiety": {
+      emoji: "😰",
+      description: "Find peace and calm in overwhelming moments",
+      moods: ["Anxious", "Overwhelmed", "Stressed"]
+    },
+    "Gratitude & Joy": {
+      emoji: "🙏",
+      description: "Celebrate blessings and cultivate thankfulness",
+      moods: ["Grateful", "Joyful", "Celebrating"]
+    },
+    "Spiritual Growth": {
+      emoji: "🌱",
+      description: "Deepen your faith and spiritual understanding",
+      moods: ["Seeking Guidance", "Studying", "Growing"]
+    },
+    "Difficult Emotions": {
+      emoji: "💔",
+      description: "Process challenging feelings with grace",
+      moods: ["Feeling Broken", "Guilty", "Angry", "Afraid"]
+    },
+    "Life Challenges": {
+      emoji: "⏳",
+      description: "Navigate life's transitions and challenges",
+      moods: ["Waiting", "Lonely", "Discouraged"]
+    }
+  };
+
+  // Function to categorize devotional routines by mood
+  const categorizeDevotionalsByMood = () => {
+    const categorized: Record<string, DevotionalRoutine[]> = {};
+    
+    Object.keys(moodCategories).forEach(category => {
+      categorized[category] = devotionalRoutines.filter(routine => 
+        moodCategories[category as keyof typeof moodCategories].moods.includes(routine.moodTag)
+      );
+    });
+    
+    return categorized;
+  };
 
   // Comprehensive Devotional Routines covering all emotional and spiritual needs
   const devotionalRoutines: DevotionalRoutine[] = [
@@ -1811,84 +1869,127 @@ export default function AudioRoutines() {
         </TabsList>
 
         <TabsContent value="devotional" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            {devotionalRoutines.map((routine) => (
-              <Card key={routine.id} className="group hover:shadow-lg transition-all duration-200">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-2">{routine.title}</CardTitle>
-                      <Badge variant="secondary" className="text-xs mb-3">
-                        {routine.moodTag}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                        <Clock className="h-4 w-4" />
-                        {Math.floor(routine.duration / 60)} minutes
+          <div className="space-y-4">
+            {Object.entries(categorizeDevotionalsByMood()).map(([category, routines]) => (
+              <Collapsible 
+                key={category}
+                open={expandedMoodCategories[category]}
+                onOpenChange={() => toggleMoodCategory(category)}
+              >
+                <CollapsibleTrigger asChild>
+                  <Card className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{moodCategories[category as keyof typeof moodCategories].emoji}</span>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                              {category}
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {moodCategories[category as keyof typeof moodCategories].description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {routines.length} routines
+                          </Badge>
+                          {expandedMoodCategories[category] ? (
+                            <ChevronDown className="h-5 w-5 text-gray-500" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-gray-500" />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </CardHeader>
+                    </CardHeader>
+                  </Card>
+                </CollapsibleTrigger>
                 
-                <CardContent className="pt-0 space-y-4">
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Opening Reflection</h4>
-                      <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
-                        {routine.segments.openingReflection}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Scripture</h4>
-                      <p className="text-purple-600 dark:text-purple-400 font-medium">
-                        {routine.segments.scriptureReading.reference}
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-400 line-clamp-2 italic">
-                        "{routine.segments.scriptureReading.text}"
-                      </p>
-                    </div>
+                <CollapsibleContent className="space-y-4 mt-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {routines.map((routine) => (
+                      <Card key={routine.id} className="group hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-400">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg mb-2">{routine.title}</CardTitle>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                  {routine.moodTag}
+                                </Badge>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                  <Clock className="h-4 w-4" />
+                                  {Math.floor(routine.duration / 60)} min
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        
+                        <CardContent className="pt-0 space-y-4">
+                          <div className="space-y-3 text-sm">
+                            <div>
+                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Opening Reflection</h4>
+                              <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
+                                {routine.segments.openingReflection}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Scripture</h4>
+                              <p className="text-purple-600 dark:text-purple-400 font-medium">
+                                {routine.segments.scriptureReading.reference}
+                              </p>
+                              <p className="text-gray-600 dark:text-gray-400 line-clamp-2 italic">
+                                "{routine.segments.scriptureReading.text}"
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {playingDevotional === routine.id ? (
+                            <div className="space-y-3">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                                  <span>Playing devotional...</span>
+                                  <span>{Math.round(devotionalProgress)}%</span>
+                                </div>
+                                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000 ease-out"
+                                    style={{ width: `${devotionalProgress}%` }}
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={stopDevotionalRoutine}
+                                  className="text-red-600 border-red-200 hover:bg-red-50"
+                                >
+                                  <Square className="h-4 w-4 mr-1" />
+                                  Stop
+                                </Button>
+                                <span className="text-sm text-green-600">Premium AI narration active</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => playDevotionalRoutine(routine)}
+                              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                            >
+                              <Play className="h-4 w-4 mr-2" />
+                              Start Devotional
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                  
-                  {playingDevotional === routine.id ? (
-                    <div className="space-y-3">
-                      {/* Progress Bar */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                          <span>Playing devotional...</span>
-                          <span>{Math.round(devotionalProgress)}%</span>
-                        </div>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000 ease-out"
-                            style={{ width: `${devotionalProgress}%` }}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={stopDevotionalRoutine}
-                          className="text-red-600 border-red-200 hover:bg-red-50"
-                        >
-                          <Square className="h-4 w-4 mr-1" />
-                          Stop
-                        </Button>
-                        <span className="text-sm text-green-600">Premium AI narration active</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={() => playDevotionalRoutine(routine)}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      <Play className="h-4 w-4 mr-2" />
-                      Start Devotional
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+                </CollapsibleContent>
+              </Collapsible>
             ))}
           </div>
         </TabsContent>
