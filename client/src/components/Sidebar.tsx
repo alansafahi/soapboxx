@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "@/hooks/useTheme";
 import soapboxLogo from "@/assets/soapbox-logo.jpeg";
-import { 
+import {
   Home, 
   Users, 
   Calendar, 
@@ -68,12 +70,6 @@ export default function Sidebar() {
     enabled: !!user,
   });
 
-  // Get available roles for role switching
-  const { data: roleData } = useQuery({
-    queryKey: ["/api/auth/available-roles"],
-    enabled: !!user,
-  });
-
   const navigationGroups: NavigationGroup[] = [
     {
       label: "COMMUNITY",
@@ -81,65 +77,49 @@ export default function Sidebar() {
         { label: "Home", href: "/", icon: Home },
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
-        { label: "Messages", href: "/messages", icon: MessageSquare },
-        { label: "Prayer Wall", href: "/prayer", icon: Heart },
-      ],
+        { label: "Discussions", href: "/discussions", icon: MessageSquare },
+        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
+      ]
     },
     {
       label: "SPIRITUAL TOOLS",
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
-        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
-      ],
+        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+      ]
     },
     {
       label: "MEDIA CONTENTS",
       items: [
         { label: "Video Library", href: "/video-library", icon: Video },
-      ],
-    },
-    {
-      label: "GIVING & DONATIONS",
-      items: [
-        { label: "Give Now", href: "/donation-demo", icon: DollarSign },
-      ],
+      ]
     },
     {
       label: "ADMIN PORTAL",
       items: [
-        { label: "Admin Dashboard", href: "/admin", icon: BarChart3, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Bulk Communication", href: "/communications", icon: Megaphone, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Content Distribution Hub", href: "/content-distribution", icon: Share2, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "AI Content Showcase", href: "/pastoral-demo", icon: BarChart3, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-      ],
-    },
-    {
-      label: "ACCOUNT",
-      items: [
-        { label: "Profile", href: "/profile", icon: User },
-        { label: "Settings", href: "/settings", icon: Settings },
-      ],
-    },
+        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+      ]
+    }
   ];
 
-  // Filter navigation items based on current active role
-  const getVisibleGroups = () => {
-    const currentRole = (roleData as any)?.currentRole || (userRole as any)?.role || '';
-    
-    return navigationGroups.map(group => ({
-      ...group,
-      items: group.items.filter(item => {
-        if (!item.roles) return true;
-        return item.roles.includes(currentRole);
-      })
-    })).filter(group => group.items.length > 0);
-  };
-
-  const visibleGroups = getVisibleGroups();
+  // Filter groups based on user role
+  const visibleGroups = navigationGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => 
+      !item.roles || item.roles.some(role => 
+        (userRole as any)?.roles?.includes(role) || (userRole as any)?.roles?.includes('super-admin')
+      )
+    )
+  })).filter(group => group.items.length > 0);
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
@@ -151,6 +131,10 @@ export default function Sidebar() {
       }
       return newSet;
     });
+  };
+
+  const logout = () => {
+    window.location.href = '/login';
   };
 
   if (!user) {
@@ -223,35 +207,36 @@ export default function Sidebar() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-3 py-2">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {(user as any)?.firstName || 'User'}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {(user as any)?.email || 'user@example.com'}
-                  </p>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex items-center w-full">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings" className="flex items-center w-full">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => window.location.href = '/login'}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-3 py-2">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {(user as any)?.firstName || 'User'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {(user as any)?.email || 'user@example.com'}
+                    </p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center w-full">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings" className="flex items-center w-full">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col space-y-2 items-center">
@@ -300,7 +285,7 @@ export default function Sidebar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => window.location.href = '/login'}>
+                <DropdownMenuItem onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
@@ -318,7 +303,7 @@ export default function Sidebar() {
             {navigationGroups.flatMap(group => 
               group.items.filter(item => 
                 !item.roles || item.roles.some(role => 
-                  userRole?.roles?.includes(role) || userRole?.roles?.includes('super-admin')
+                  (userRole as any)?.roles?.includes(role) || (userRole as any)?.roles?.includes('super-admin')
                 )
               )
             ).map((item) => {
@@ -364,27 +349,26 @@ export default function Sidebar() {
                       return (
                         <Link key={item.href} href={item.href}>
                           <Button
-                          variant={isActive ? "default" : "ghost"}
-                          className={`w-full justify-start h-auto py-2 px-3 ${
-                            isActive 
-                              ? "bg-purple-600 text-white hover:bg-purple-700" 
-                              : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                          }`}
-                        >
-                          <Icon className="h-4 w-4 mr-3" />
-                          <span className="text-sm">{item.label}</span>
-                        </Button>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                            variant={isActive ? "default" : "ghost"}
+                            className={`w-full justify-start h-auto py-2 px-3 ${
+                              isActive 
+                                ? "bg-purple-600 text-white hover:bg-purple-700" 
+                                : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4 mr-3" />
+                            <span className="text-sm">{item.label}</span>
+                          </Button>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </nav>
-
-
     </div>
   );
 }
