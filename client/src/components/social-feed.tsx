@@ -1259,7 +1259,7 @@ export default function SocialFeed() {
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 flex-wrap">
               {/* Enhanced Composer Toolbar - X/Facebook Style */}
               
               {/* Media Upload */}
@@ -1275,10 +1275,10 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={() => mediaInputRef.current?.click()}
-                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400"
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 px-3 py-1.5 h-8 flex-shrink-0"
                 title="Add photos or videos"
               >
-                <ImageIcon className="w-4 h-4 mr-2" />
+                <ImageIcon className="w-4 h-4 mr-1" />
                 Photo
               </Button>
 
@@ -1287,14 +1287,14 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                className={`${
+                className={`px-3 py-1.5 h-8 flex-shrink-0 ${
                   isRecording 
                     ? "text-red-600 hover:text-red-700 bg-red-50 dark:bg-red-900/20" 
                     : "text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20"
                 }`}
                 title={isRecording ? "Stop voice prayer" : "Record voice prayer"}
               >
-                {isRecording ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
+                {isRecording ? <MicOff className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
                 Voice
               </Button>
 
@@ -1303,23 +1303,23 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowMoodSelector(!showMoodSelector)}
-                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20"
+                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 px-3 py-1.5 h-8 flex-shrink-0"
                 title="Share your feeling"
               >
-                <Heart className="w-4 h-4 mr-2" />
+                <Heart className="w-4 h-4 mr-1" />
                 Feeling
               </Button>
 
               {/* Bible Verse Linking */}
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20"
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 px-3 py-1.5 h-8"
                   title="Link Bible verse"
                 >
-                  <BookText className="w-4 h-4 mr-2" />
+                  <BookText className="w-4 h-4 mr-1" />
                   Verse
                 </Button>
 
