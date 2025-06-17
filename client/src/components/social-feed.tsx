@@ -1506,9 +1506,9 @@ export default function SocialFeed() {
 
             {/* Action Buttons Row */}
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 overflow-hidden">
-              <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
+              <div className="flex items-center gap-1 flex-wrap min-w-0 flex-1">
                 {/* Media Upload */}
-                <label className="cursor-pointer">
+                <label className="cursor-pointer" title="Add photo or video">
                   <input
                     type="file"
                     multiple
@@ -1519,11 +1519,10 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-gray-600 hover:text-green-600 hover:bg-green-50 px-2 py-1 h-7 text-xs"
+                    className="text-gray-600 hover:text-green-600 hover:bg-green-50 p-1.5 h-8 w-8"
                     type="button"
                   >
-                    <ImageIcon className="w-3 h-3 mr-1" />
-                    Photo
+                    <ImageIcon className="w-4 h-4" />
                   </Button>
                 </label>
 
@@ -1532,14 +1531,14 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                  className={`px-2 py-1 h-7 text-xs ${
+                  className={`p-1.5 h-8 w-8 ${
                     isRecording 
                       ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
                       : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
                   }`}
+                  title={isRecording ? 'Stop recording' : 'Record voice message'}
                 >
-                  <Mic className="w-3 h-3 mr-1" />
-                  {isRecording ? 'Stop' : 'Voice'}
+                  <Mic className="w-4 h-4" />
                 </Button>
 
                 {/* Mood Selector */}
@@ -1548,10 +1547,10 @@ export default function SocialFeed() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowMoodDropdown(!showMoodDropdown)}
-                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 px-2 py-1 h-7 text-xs"
+                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 p-1.5 h-8 w-8"
+                    title="Add feeling"
                   >
-                    <Smile className="w-3 h-3 mr-1" />
-                    Feeling
+                    <Smile className="w-4 h-4" />
                   </Button>
                 </div>
 
@@ -1560,10 +1559,10 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-2 py-1 h-7 text-xs"
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 p-1.5 h-8 w-8"
+                  title="Add Bible verse"
                 >
-                  <Book className="w-3 h-3 mr-1" />
-                  Verse
+                  <Book className="w-4 h-4" />
                 </Button>
 
                 {/* Audience Selector */}
@@ -1572,11 +1571,10 @@ export default function SocialFeed() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
-                    className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 h-7 text-xs"
+                    className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 p-1.5 h-8 w-8"
+                    title={`Post visibility: ${audienceOptions.find(opt => opt.id === selectedAudience)?.label || 'Public'}`}
                   >
-                    {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-3 h-3 mr-1" })}
-                    Public
-                    <ChevronDown className="w-2 h-2 ml-1" />
+                    {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-4 h-4" })}
                   </Button>
 
                   {/* Audience Dropdown */}
@@ -1620,10 +1618,10 @@ export default function SocialFeed() {
               <Button 
                 onClick={handleCreatePost}
                 disabled={!newPost.trim() || createPostMutation.isPending}
-                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-3 py-1.5 h-7 text-xs border-0 flex-shrink-0 ml-2"
+                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium p-2 h-8 w-8 border-0 flex-shrink-0 ml-2"
+                title={createPostMutation.isPending ? 'Posting...' : 'Share post'}
               >
-                <Send className="w-3 h-3 mr-1 text-white" />
-                {createPostMutation.isPending ? 'Posting...' : 'Share'}
+                <Send className="w-4 h-4 text-white" />
               </Button>
             </div>
             </div>
