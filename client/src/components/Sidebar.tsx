@@ -186,14 +186,15 @@ export default function Sidebar() {
                 </div>
               </Link>
               
-              {/* Expand Toggle Button - Collapsed Mode */}
+              {/* Expand Toggle Button - Collapsed Mode - More Prominent */}
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="icon" 
-                className="w-8 h-8" 
+                className="w-8 h-8 border-purple-300 hover:bg-purple-50 dark:border-purple-600 dark:hover:bg-purple-900/20" 
                 onClick={() => setIsCollapsed(!isCollapsed)}
+                title="Expand sidebar"
               >
-                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                <ChevronRight className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               </Button>
             </>
           )}

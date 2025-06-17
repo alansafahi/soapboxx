@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 17, 2025: Successfully completed collapsible sidebar functionality with working expand/collapse toggle
+  - Fixed expand button visibility and accessibility in collapsed mode
+  - Added prominent purple outlined expand button with tooltip for better user experience
+  - Implemented proper layout positioning for both expanded and collapsed states
+  - Both collapse and expand actions now work seamlessly with visual feedback
 - June 17, 2025: Completed SoapBox logo implementation across entire site replacing placeholder purple "S" icons
   - Replaced all placeholder purple "S" logo icons with actual SoapBox logo throughout the application
   - Updated sidebar navigation, landing pages (landing.tsx, clean-landing.tsx, simple-landing.tsx) with proper logo imports
