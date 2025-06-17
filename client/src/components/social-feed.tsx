@@ -752,6 +752,29 @@ export default function SocialFeed() {
     setShowVerseSearch(false);
   };
 
+  const submitPost = () => {
+    if (!newPost.trim() && attachedMedia.length === 0) return;
+    
+    const postData = {
+      content: newPost,
+      mood: selectedMood,
+      audience: selectedAudience,
+      attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
+      linkedVerse: linkedVerse
+    };
+    
+    createPostMutation.mutate(postData);
+    
+    // Reset composer state
+    setNewPost('');
+    setAttachedMedia([]);
+    setLinkedVerse(null);
+    setSelectedMood(null);
+    setShowVerseSearch(false);
+    setShowMoodDropdown(false);
+    setShowAudienceDropdown(false);
+  };
+
   const handleMoodSelect = (moodId: string) => {
     setSelectedMood(moodId);
     setShowMoodDropdown(false);
