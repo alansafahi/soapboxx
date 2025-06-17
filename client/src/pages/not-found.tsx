@@ -2,12 +2,6 @@ import { Card } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
-  // Only show if explicitly navigated to a 404 page
-  const currentPath = window.location.pathname;
-  if (currentPath === '/churches' || currentPath === '/') {
-    return null; // Don't show 404 for valid pages
-  }
-  
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <Card className="w-full max-w-md mx-4 p-6">

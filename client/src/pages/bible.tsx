@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function BiblePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [currentVerse, setCurrentVerse] = useState({
     reference: "Philippians 4:13",
     text: "I can do all this through him who gives me strength.",
@@ -24,11 +26,11 @@ export default function BiblePage() {
         variant: "default",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        setLocation("/login");
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading, toast, setLocation]);
 
   if (isLoading) {
     return (
