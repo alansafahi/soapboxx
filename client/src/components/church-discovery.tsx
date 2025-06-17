@@ -171,9 +171,9 @@ export default function ChurchDiscovery() {
             >
               <div className="flex items-start space-x-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
-                  {church.imageUrl ? (
+                  {(church as any).imageUrl ? (
                     <img 
-                      src={church.imageUrl} 
+                      src={(church as any).imageUrl} 
                       alt={`${church.name} building`} 
                       className="w-full h-full object-cover" 
                     />
