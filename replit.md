@@ -142,12 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 17, 2025: Completed dark mode church discovery optimization with significantly improved contrast and readability
-  - Changed church card backgrounds from dark gray-700 to light gray-100 in dark mode for excellent visibility
-  - Updated all text colors to dark gray variants (gray-900, gray-700) for proper contrast on light backgrounds
-  - Fixed contact link colors and border colors to maintain readability standards
+- June 17, 2025: Completed dark mode church discovery implementation to match main page design consistency
+  - Changed church card backgrounds to proper dark theme (gray-800) matching main page's dark background approach
+  - Updated text colors to white for headings and light gray (gray-300) for secondary text for proper dark mode contrast
+  - Fixed contact link colors with lighter purple hover effects (purple-400) for better visibility on dark backgrounds
   - Removed intrusive "Did you forget to add the page to the router?" error message that was appearing inappropriately
-  - Church discovery section now provides optimal user experience in both light and dark modes
+  - Church discovery section now maintains consistent dark mode theming across the entire application
 - June 17, 2025: Fixed dark mode implementation with proper purple theming and theme toggle functionality
   - Enhanced dark mode color scheme to use purple-based design instead of blue, maintaining brand consistency
   - Added theme toggle button to AppHeader with Moon/Sun icons for intuitive dark/light mode switching
