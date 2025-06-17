@@ -47,6 +47,9 @@ interface DevotionalRoutine {
 export default function AudioRoutines() {
   const [playingRoutine, setPlayingRoutine] = useState<number | null>(null);
   const [playingDevotional, setPlayingDevotional] = useState<number | null>(null);
+  const [devotionalAudio, setDevotionalAudio] = useState<HTMLAudioElement | null>(null);
+  const [devotionalProgress, setDevotionalProgress] = useState(0);
+  const [currentDevotionalSegment, setCurrentDevotionalSegment] = useState(0);
   const [currentAudioContext, setCurrentAudioContext] = useState<AudioContext | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [selectedVoice, setSelectedVoice] = useState('nova');
@@ -1184,6 +1187,110 @@ export default function AudioRoutines() {
     }
   };
 
+  const playDevotionalRoutine = async (routine: DevotionalRoutine) => {
+    try {
+      setPlayingDevotional(routine.id);
+      setCurrentDevotionalSegment(0);
+      setDevotionalProgress(0);
+
+      // Create the full devotional script
+      const devotionalScript = `
+        ${routine.segments.openingReflection}
+        
+        Now let's turn to God's Word. From ${routine.segments.scriptureReading.reference}: 
+        ${routine.segments.scriptureReading.text}
+        
+        Let's pray together:
+        ${routine.segments.guidedPrayer}
+        
+        ${routine.segments.closingBlessing}
+      `;
+
+      console.log('Generating devotional audio with OpenAI TTS...');
+      
+      // Generate audio using OpenAI TTS
+      const response = await fetch('/api/audio/generate-speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          text: devotionalScript,
+          voice: selectedVoice,
+          speed: 0.9
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate devotional audio');
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Create and play audio
+      const audio = new Audio(audioUrl);
+      setDevotionalAudio(audio);
+      
+      // Set up progress tracking
+      const updateProgress = () => {
+        if (audio.duration > 0) {
+          const progress = (audio.currentTime / audio.duration) * 100;
+          setDevotionalProgress(progress);
+        }
+      };
+
+      audio.addEventListener('timeupdate', updateProgress);
+      audio.addEventListener('ended', () => {
+        setPlayingDevotional(null);
+        setDevotionalProgress(0);
+        setCurrentDevotionalSegment(0);
+        URL.revokeObjectURL(audioUrl);
+        toast({
+          title: "Devotional Complete",
+          description: "May God's peace be with you today",
+          duration: 3000,
+        });
+      });
+
+      await audio.play();
+      
+      toast({
+        title: "Devotional Started",
+        description: `Playing "${routine.title}" with premium voice`,
+        duration: 2000,
+      });
+
+    } catch (error) {
+      console.error('Devotional audio error:', error);
+      setPlayingDevotional(null);
+      
+      toast({
+        title: "Audio Setup Needed",
+        description: "Please tap to enable audio for your devotional routine",
+        duration: 4000,
+      });
+    }
+  };
+
+  const stopDevotionalRoutine = () => {
+    if (devotionalAudio) {
+      devotionalAudio.pause();
+      devotionalAudio.currentTime = 0;
+      setDevotionalAudio(null);
+    }
+    setPlayingDevotional(null);
+    setDevotionalProgress(0);
+    setCurrentDevotionalSegment(0);
+    
+    toast({
+      title: "Devotional Stopped",
+      description: "Audio routine ended",
+      duration: 2000,
+    });
+  };
+
   const stopAudioRoutine = () => {
     console.log('Stop button pressed - initiating complete session cleanup');
     
@@ -1417,22 +1524,36 @@ export default function AudioRoutines() {
                   
                   {playingDevotional === routine.id ? (
                     <div className="space-y-3">
+                      {/* Progress Bar */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                          <span>Playing devotional...</span>
+                          <span>{Math.round(devotionalProgress)}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-1000 ease-out"
+                            style={{ width: `${devotionalProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                      
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setPlayingDevotional(null)}
+                          onClick={stopDevotionalRoutine}
                           className="text-red-600 border-red-200 hover:bg-red-50"
                         >
                           <Square className="h-4 w-4 mr-1" />
                           Stop
                         </Button>
-                        <span className="text-sm text-green-600">Playing devotional...</span>
+                        <span className="text-sm text-green-600">Premium AI narration active</span>
                       </div>
                     </div>
                   ) : (
                     <Button
-                      onClick={() => setPlayingDevotional(routine.id)}
+                      onClick={() => playDevotionalRoutine(routine)}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                     >
                       <Play className="h-4 w-4 mr-2" />
