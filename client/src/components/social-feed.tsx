@@ -45,7 +45,8 @@ import {
   MoreHorizontal,
   Search,
   Book,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -105,6 +106,8 @@ export default function SocialFeed() {
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<number | null>(null);
   
   // Refs for click-outside functionality
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -169,6 +172,42 @@ export default function SocialFeed() {
       });
     }
   });
+
+  // Delete post mutation
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return apiRequest(`/api/discussions/${postId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      toast({
+        title: "Success",
+        description: "Post deleted successfully!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete post: ${error.message || 'Please try again.'}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleDeletePost = (postId: number) => {
+    setPostToDelete(postId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePost = () => {
+    if (postToDelete) {
+      deletePostMutation.mutate(postToDelete);
+    }
+  };
 
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
@@ -798,6 +837,19 @@ export default function SocialFeed() {
                     {post.shareCount}
                   </Button>
                 </div>
+                
+                {/* Delete Button - Only show for post author */}
+                {user && post.author.id === user.id && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleDeletePost(post.id)}
+                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    title="Delete post"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -807,6 +859,34 @@ export default function SocialFeed() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deletePostMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeletePost}
+              disabled={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
