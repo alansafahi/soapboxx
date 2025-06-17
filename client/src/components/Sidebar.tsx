@@ -35,6 +35,7 @@ import {
   TrendingUp,
   User,
   LogOut,
+  Bell,
   Sun,
   Moon,
   ChevronLeft,
