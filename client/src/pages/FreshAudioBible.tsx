@@ -652,11 +652,11 @@ export default function FreshAudioBible() {
   }, [volume]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Audio Bible Experience</h1>
-          <p className="text-lg text-gray-600">AI-powered personalized scripture listening with premium voices</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Audio Bible Experience</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300">AI-powered personalized scripture listening with premium voices</p>
         </div>
 
         <Tabs defaultValue="mood-selection" className="space-y-6">
@@ -678,9 +678,9 @@ export default function FreshAudioBible() {
                 <div className="space-y-6">
                   {moodCategories.map((category) => (
                     <div key={category.title} className="space-y-3">
-                      <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                      <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-600">
                         <span className="text-lg">{category.icon}</span>
-                        <h3 className="font-semibold text-gray-800">{category.title}</h3>
+                        <h3 className="font-semibold text-gray-800 dark:text-white">{category.title}</h3>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {category.moods.map((mood) => (
@@ -716,7 +716,7 @@ export default function FreshAudioBible() {
                     {loadingVerses && <RefreshCw className="h-4 w-4 animate-spin" />}
                   </CardTitle>
                   {contextualVerses?.verses?.length > 0 && (
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-300">
                       <p>Personalized verses selected based on your current mood</p>
                     </div>
                   )}
@@ -730,12 +730,12 @@ export default function FreshAudioBible() {
                   ) : selectedVerses.length > 0 ? (
                     <div className="space-y-4">
                       {selectedVerses.map((verse, index) => (
-                        <div key={verse.id} className="border rounded-lg p-4 bg-white">
+                        <div key={verse.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 dark:border-gray-600">
                           <div className="flex justify-between items-start mb-2">
                             <Badge variant="secondary">{verse.reference}</Badge>
                             <Badge variant="outline">{verse.category}</Badge>
                           </div>
-                          <p className="text-gray-700 leading-relaxed">{verse.text}</p>
+                          <p className="text-gray-700 dark:text-gray-200 leading-relaxed">{verse.text}</p>
                           {verse.topicTags && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {verse.topicTags.map((tag, i) => (
@@ -747,7 +747,7 @@ export default function FreshAudioBible() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center py-8 text-gray-500">Select a mood to see personalized verse recommendations</p>
+                    <p className="text-center py-8 text-gray-500 dark:text-gray-400">Select a mood to see personalized verse recommendations</p>
                   )}
                 </CardContent>
               </Card>
@@ -761,7 +761,7 @@ export default function FreshAudioBible() {
                     <Headphones className="h-5 w-5" />
                     Audio Bible Player
                   </CardTitle>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     Listen to your personalized scripture selection with premium voice narration
                   </p>
                 </CardHeader>
@@ -789,8 +789,8 @@ export default function FreshAudioBible() {
                         }}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           !useOpenAIVoice 
-                            ? 'border-blue-500 bg-blue-50 text-blue-900' 
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-900 dark:text-purple-300' 
+                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'
                         }`}
                       >
                         <div className="font-medium">Standard Voice</div>
