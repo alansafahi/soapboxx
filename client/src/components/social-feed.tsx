@@ -101,6 +101,31 @@ export default function SocialFeed() {
   const [isRecording, setIsRecording] = useState(false);
   const [linkedVerse, setLinkedVerse] = useState<{reference: string; text: string} | null>(null);
   const [attachedMedia, setAttachedMedia] = useState<Array<{name: string; type: string; size: number; url: string; filename: string}>>([]);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  
+  // Refs for click-outside functionality
+  const moodDropdownRef = useRef<HTMLDivElement>(null);
+  const verseDropdownRef = useRef<HTMLDivElement>(null);
+  const audienceDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moodDropdownRef.current && !moodDropdownRef.current.contains(event.target as Node)) {
+        setShowMoodDropdown(false);
+      }
+      if (verseDropdownRef.current && !verseDropdownRef.current.contains(event.target as Node)) {
+        setShowVerseSearch(false);
+      }
+      if (audienceDropdownRef.current && !audienceDropdownRef.current.contains(event.target as Node)) {
+        setShowAudienceDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Fetch feed posts
   const { data: feedPosts = [], isLoading } = useQuery({
@@ -108,7 +133,7 @@ export default function SocialFeed() {
   });
 
   // Search verses
-  const { data: verseSearchResults, isLoading: isSearchingVerses } = useQuery({
+  const { data: verseSearchResults, isLoading: isSearchingVerses } = useQuery<Array<{id: string; reference: string; text: string}>>({
     queryKey: ['/api/bible-verses/search', verseQuery],
     enabled: verseQuery.length >= 2,
   });
@@ -185,14 +210,61 @@ export default function SocialFeed() {
     });
   };
 
-  const startVoiceRecording = () => {
-    setIsRecording(true);
-    // Voice recording implementation
+  const startVoiceRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setAudioChunks(prev => [...prev, event.data]);
+        }
+      };
+      
+      recorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const audioData = {
+            name: 'voice-recording.wav',
+            type: 'audio/wav',
+            size: audioBlob.size,
+            url: e.target?.result as string,
+            filename: 'voice-recording.wav'
+          };
+          setAttachedMedia(prev => [...prev, audioData]);
+        };
+        reader.readAsDataURL(audioBlob);
+        setAudioChunks([]);
+      };
+      
+      setMediaRecorder(recorder);
+      recorder.start();
+      setIsRecording(true);
+      
+      toast({
+        title: "Recording started",
+        description: "Speak your message now...",
+      });
+    } catch (error) {
+      toast({
+        title: "Recording failed",
+        description: "Please allow microphone access to record audio.",
+        variant: "destructive",
+      });
+    }
   };
 
   const stopVoiceRecording = () => {
-    setIsRecording(false);
-    // Stop recording implementation
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
+      toast({
+        title: "Recording saved",
+        description: "Your voice message has been attached.",
+      });
+    }
   };
 
   const audienceOptions = [
@@ -219,14 +291,24 @@ export default function SocialFeed() {
     }
   ];
 
+  const moodOptions = [
+    { id: 'grateful', label: 'Grateful', icon: '🙏', category: 'Positive', color: 'bg-blue-100 text-blue-800' },
+    { id: 'blessed', label: 'Blessed', icon: '✨', category: 'Positive', color: 'bg-purple-100 text-purple-800' },
+    { id: 'peaceful', label: 'Peaceful', icon: '🕊️', category: 'Positive', color: 'bg-green-100 text-green-800' },
+    { id: 'hopeful', label: 'Hopeful', icon: '🌅', category: 'Positive', color: 'bg-orange-100 text-orange-800' },
+    { id: 'joyful', label: 'Joyful', icon: '😊', category: 'Positive', color: 'bg-yellow-100 text-yellow-800' },
+    { id: 'reflective', label: 'Reflective', icon: '🤔', category: 'Contemplative', color: 'bg-indigo-100 text-indigo-800' },
+    { id: 'seeking', label: 'Seeking Guidance', icon: '🙏', category: 'Seeking', color: 'bg-purple-100 text-purple-800' },
+    { id: 'anxious', label: 'Anxious', icon: '😰', category: 'Struggling', color: 'bg-red-100 text-red-800' },
+    { id: 'celebrating', label: 'Celebrating', icon: '🎉', category: 'Positive', color: 'bg-pink-100 text-pink-800' },
+    { id: 'praying', label: 'Praying', icon: '🙏', category: 'Spiritual', color: 'bg-blue-100 text-blue-800' },
+    { id: 'studying', label: 'Studying Scripture', icon: '📖', category: 'Spiritual', color: 'bg-green-100 text-green-800' },
+    { id: 'inspired', label: 'Inspired', icon: '💡', category: 'Positive', color: 'bg-yellow-100 text-yellow-800' }
+  ];
+
   const getSelectedMoodData = () => {
-    // Mock mood data for now
     if (!selectedMood) return null;
-    return {
-      icon: '😊',
-      label: 'Joyful',
-      color: 'bg-yellow-100 text-yellow-800'
-    };
+    return moodOptions.find(mood => mood.id === selectedMood) || null;
   };
 
   const clearMood = () => {
@@ -284,6 +366,61 @@ export default function SocialFeed() {
               </div>
             )}
 
+            {/* Linked Verse Display */}
+            {linkedVerse && (
+              <div className="mb-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-md border border-purple-200 dark:border-purple-700">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-purple-800 dark:text-purple-200 text-sm mb-1">{linkedVerse.reference}</div>
+                    <div className="text-purple-700 dark:text-purple-300 text-sm italic">"{linkedVerse.text}"</div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLinkedVerse(null)}
+                    className="h-6 w-6 p-0 text-purple-400 hover:text-purple-600 ml-2"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Attached Media Display */}
+            {attachedMedia.length > 0 && (
+              <div className="mb-3 space-y-2">
+                {attachedMedia.map((media, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-md">
+                    <div className="flex-shrink-0">
+                      {media.type.startsWith('image/') ? (
+                        <img src={media.url} alt={media.name} className="w-12 h-12 object-cover rounded" />
+                      ) : media.type.startsWith('audio/') ? (
+                        <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded flex items-center justify-center">
+                          <Mic className="w-6 h-6 text-red-600" />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded flex items-center justify-center">
+                          <FileText className="w-6 h-6 text-blue-600" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{media.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{(media.size / 1024 / 1024).toFixed(1)} MB</div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setAttachedMedia(prev => prev.filter((_, i) => i !== index))}
+                      className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Action Buttons Row - Icon Only with Tooltips */}
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
@@ -322,7 +459,7 @@ export default function SocialFeed() {
                 </Button>
 
                 {/* Mood Selector */}
-                <div className="relative">
+                <div className="relative" ref={moodDropdownRef}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -332,18 +469,119 @@ export default function SocialFeed() {
                   >
                     <Smile className="w-4 h-4" />
                   </Button>
+
+                  {/* Mood Dropdown */}
+                  {showMoodDropdown && (
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg w-64">
+                      <div className="p-3">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">How are you feeling?</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {moodOptions.map((mood) => (
+                            <Button
+                              key={mood.id}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedMood(mood.id);
+                                setShowMoodDropdown(false);
+                              }}
+                              className="h-auto p-2 justify-start text-left hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                              <span className="mr-2 text-lg">{mood.icon}</span>
+                              <span className="text-sm">{mood.label}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Bible Verse Link */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 p-1.5 h-8 w-8"
-                  title="Add Bible verse"
-                >
-                  <Book className="w-4 h-4" />
-                </Button>
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowVerseSearch(!showVerseSearch)}
+                    className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 p-1.5 h-8 w-8"
+                    title="Add Bible verse"
+                  >
+                    <Book className="w-4 h-4" />
+                  </Button>
+
+                  {/* Bible Verse Search Dropdown */}
+                  {showVerseSearch && (
+                    <div className="absolute top-full right-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg w-80">
+                      <div className="p-3">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">Search Bible Verses</div>
+                        <div className="relative mb-3">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <input
+                            type="text"
+                            value={verseQuery}
+                            onChange={(e) => setVerseQuery(e.target.value)}
+                            placeholder="Search by reference or keywords..."
+                            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                          />
+                        </div>
+                        
+                        {linkedVerse && (
+                          <div className="mb-3 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-md">
+                            <div className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Selected Verse:</div>
+                            <div className="text-sm text-purple-800 dark:text-purple-200 font-medium">{linkedVerse.reference}</div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setLinkedVerse(null)}
+                              className="mt-1 h-6 px-2 text-xs text-purple-600 hover:text-purple-800"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        )}
+
+                        {isSearchingVerses && (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            <span className="text-sm text-gray-500">Searching verses...</span>
+                          </div>
+                        )}
+
+                        {verseSearchResults && verseSearchResults.length > 0 && (
+                          <div className="max-h-40 overflow-y-auto space-y-1">
+                            {verseSearchResults.slice(0, 5).map((verse: any) => (
+                              <Button
+                                key={verse.id}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setLinkedVerse({
+                                    reference: verse.reference,
+                                    text: verse.text
+                                  });
+                                  setShowVerseSearch(false);
+                                  setVerseQuery('');
+                                }}
+                                className="w-full h-auto p-2 text-left justify-start hover:bg-gray-50 dark:hover:bg-gray-700"
+                              >
+                                <div className="w-full">
+                                  <div className="font-medium text-sm text-gray-900 dark:text-white">{verse.reference}</div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-300 truncate">{verse.text}</div>
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+
+                        {verseQuery.length >= 2 && !isSearchingVerses && (!verseSearchResults || verseSearchResults.length === 0) && (
+                          <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                            No verses found. Try different keywords or a reference like "John 3:16"
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Audience Selector */}
                 <div className="relative">
