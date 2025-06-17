@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import soapboxLogo from "@/assets/soapbox-logo.jpeg";
 import { 
   Home, 
   Users, 
@@ -142,8 +143,12 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <Link href="/" className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-xl">S</span>
+          <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
+            <img 
+              src={soapboxLogo} 
+              alt="SoapBox Logo" 
+              className="w-12 h-12 object-contain rounded-lg"
+            />
           </div>
           <div className="flex items-center min-w-0 flex-1">
             <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox Super App</div>
