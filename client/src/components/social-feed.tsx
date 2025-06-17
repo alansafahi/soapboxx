@@ -1554,8 +1554,8 @@ export default function SocialFeed() {
             )}
 
             {/* Action Buttons Row */}
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-              <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 overflow-hidden">
+              <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
                 {/* Media Upload */}
                 <label className="cursor-pointer">
                   <input
@@ -1568,10 +1568,10 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-gray-600 hover:text-green-600 hover:bg-green-50"
+                    className="text-gray-600 hover:text-green-600 hover:bg-green-50 px-2 py-1 h-7 text-xs"
                     type="button"
                   >
-                    <ImageIcon className="w-4 h-4 mr-2" />
+                    <ImageIcon className="w-3 h-3 mr-1" />
                     Photo
                   </Button>
                 </label>
@@ -1581,13 +1581,13 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                  className={`${
+                  className={`px-2 py-1 h-7 text-xs ${
                     isRecording 
                       ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
                       : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
                   }`}
                 >
-                  <Mic className="w-4 h-4 mr-2" />
+                  <Mic className="w-3 h-3 mr-1" />
                   {isRecording ? 'Stop' : 'Voice'}
                 </Button>
 
@@ -1597,9 +1597,9 @@ export default function SocialFeed() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowMoodDropdown(!showMoodDropdown)}
-                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50"
+                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 px-2 py-1 h-7 text-xs"
                   >
-                    <Smile className="w-4 h-4 mr-2" />
+                    <Smile className="w-3 h-3 mr-1" />
                     Feeling
                   </Button>
                 </div>
@@ -1609,9 +1609,9 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 px-2 py-1 h-7 text-xs"
                 >
-                  <Book className="w-4 h-4 mr-2" />
+                  <Book className="w-3 h-3 mr-1" />
                   Verse
                 </Button>
               </div>
@@ -1619,7 +1619,7 @@ export default function SocialFeed() {
               <Button 
                 onClick={handleCreatePost}
                 disabled={!newPost.trim() || createPostMutation.isPending}
-                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-3 py-1.5 h-7 text-xs border-0 flex-shrink-0"
+                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-3 py-1.5 h-7 text-xs border-0 flex-shrink-0 ml-2"
               >
                 <Send className="w-3 h-3 mr-1 text-white" />
                 {createPostMutation.isPending ? 'Posting...' : 'Share'}
