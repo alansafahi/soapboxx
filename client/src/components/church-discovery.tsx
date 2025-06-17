@@ -167,7 +167,7 @@ export default function ChurchDiscovery() {
           churches.slice(0, 3).map((church) => (
             <div 
               key={church.id} 
-              className="border border-gray-100 dark:border-gray-600 rounded-xl p-4 hover:border-purple-600 transition-colors cursor-pointer bg-white dark:bg-gray-700"
+              className="border border-gray-100 dark:border-gray-400 rounded-xl p-4 hover:border-purple-600 transition-colors cursor-pointer bg-white dark:bg-gray-400"
             >
               <div className="flex items-start space-x-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
@@ -284,7 +284,7 @@ export default function ChurchDiscovery() {
                           href={church.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 flex items-center"
+                          className="text-xs text-gray-500 dark:text-gray-300 hover:text-purple-600 flex items-center"
                         >
                           <Globe className="w-3 h-3 mr-1" />
                           Website
