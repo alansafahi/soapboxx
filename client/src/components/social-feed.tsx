@@ -110,6 +110,7 @@ export default function SocialFeed() {
   const moodDropdownRef = useRef<HTMLDivElement>(null);
   const verseDropdownRef = useRef<HTMLDivElement>(null);
   const audienceDropdownRef = useRef<HTMLDivElement>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Click outside to close dropdowns
   useEffect(() => {
@@ -230,28 +231,55 @@ export default function SocialFeed() {
       
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
           setAudioChunks(prev => [...prev, event.data]);
         }
       };
       
       recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        // Use ref for current chunks to avoid stale state
+        const currentChunks = audioChunksRef.current;
+        console.log('Audio chunks count:', currentChunks.length);
+        
+        if (currentChunks.length === 0) {
+          toast({
+            title: "Recording failed",
+            description: "No audio data captured. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        const audioBlob = new Blob(currentChunks, { type: 'audio/webm' });
+        console.log('Audio blob size:', audioBlob.size);
+        
         const reader = new FileReader();
         reader.onload = (e) => {
+          const result = e.target?.result as string;
+          console.log('Audio data URL length:', result?.length || 0);
+          
           const audioData = {
             name: `voice-recording-${recordingDuration}s.webm`,
             type: 'audio/webm',
             size: audioBlob.size,
-            url: e.target?.result as string,
+            url: result,
             filename: `voice-recording-${recordingDuration}s.webm`
           };
           setAttachedMedia(prev => [...prev, audioData]);
+          
+          // Reset both state and ref
           setAudioChunks([]);
+          audioChunksRef.current = [];
         };
         reader.readAsDataURL(audioBlob);
       };
       
       setMediaRecorder(recorder);
+      
+      // Reset audio chunks before starting
+      setAudioChunks([]);
+      audioChunksRef.current = [];
+      
       recorder.start();
       setIsRecording(true);
       setRecordingDuration(0);
