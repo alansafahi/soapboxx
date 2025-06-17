@@ -50,6 +50,7 @@ import {
   volunteerRoles,
   volunteerOpportunities,
   bibleVerses,
+  videoContent,
   volunteerRegistrations,
   volunteerHours,
   volunteerAwards,
@@ -223,6 +224,8 @@ import {
   type InsertReferralReward,
   type ReferralMilestone,
   type InsertReferralMilestone,
+  type VideoContentDB,
+  type InsertVideoContentDB,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
@@ -5667,19 +5670,19 @@ export class DatabaseStorage implements IStorage {
   async getPublicVideos(limit = 20, offset = 0): Promise<any[]> {
     return await db
       .select()
-      .from(videos)
+      .from(videoContent)
       .where(
         and(
-          eq(videos.isPublic, true),
-          eq(videos.isActive, true)
+          eq(videoContent.isPublic, true),
+          eq(videoContent.isActive, true)
         )
       )
-      .orderBy(desc(videos.publishedAt))
+      .orderBy(desc(videoContent.publishedAt))
       .limit(limit)
       .offset(offset);
   }
 
-  async updateVideoContent(id: number, updates: Partial<InsertVideoContent>): Promise<VideoContent> {
+  async updateVideoContent(id: number, updates: Partial<InsertVideoContentDB>): Promise<VideoContentDB> {
     const [video] = await db
       .update(videoContent)
       .set({
