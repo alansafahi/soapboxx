@@ -816,8 +816,8 @@ export default function FreshAudioBible() {
                         }}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           useOpenAIVoice 
-                            ? 'border-green-500 bg-green-50 text-green-900' 
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-900 dark:text-purple-300' 
+                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'
                         }`}
                       >
                         <div className="font-medium">Premium Voice</div>
@@ -840,7 +840,7 @@ export default function FreshAudioBible() {
                               <SelectItem key={voice.id} value={voice.id}>
                                 <div>
                                   <div className="font-medium">{voice.label}</div>
-                                  <div className="text-sm text-gray-500">{voice.description}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">{voice.description}</div>
                                 </div>
                               </SelectItem>
                             ))}
@@ -904,12 +904,12 @@ export default function FreshAudioBible() {
                     <div className="flex justify-between items-center">
                       <Label htmlFor="volume-control">Volume: {Math.round((volume?.[0] || 0.8) * 100)}%</Label>
                       {(isPlaying || isPaused) && !pendingSettingsUpdate && (
-                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                        <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded-full">
                           Will restart verse
                         </span>
                       )}
                       {pendingSettingsUpdate && (
-                        <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                        <span className="text-xs text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-full">
                           Updating...
                         </span>
                       )}
@@ -972,12 +972,12 @@ export default function FreshAudioBible() {
 
                   {/* Audio Progress Indicator */}
                   {(isPlaying || isPaused) && (
-                    <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                    <div className="border rounded-lg p-4 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-600">
                       <div className="text-center">
-                        <p className="text-blue-800 font-medium">
+                        <p className="text-purple-800 dark:text-purple-300 font-medium">
                           {isPaused ? "⏸️ Audio Paused" : "🎵 Audio Bible Playing"}
                         </p>
-                        <p className="text-blue-600 text-sm mt-1">
+                        <p className="text-purple-600 dark:text-purple-400 text-sm mt-1">
                           Verse {currentVerseIndex + 1} of {selectedVerses.length}
                           {selectedVerses[currentVerseIndex] && (
                             <span className="block mt-1 font-medium">
@@ -987,9 +987,9 @@ export default function FreshAudioBible() {
                         </p>
                         
                         {/* Progress bar */}
-                        <div className="w-full bg-blue-200 rounded-full h-2 mt-3">
+                        <div className="w-full bg-purple-200 dark:bg-purple-800 rounded-full h-2 mt-3">
                           <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-purple-600 dark:bg-purple-400 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${((currentVerseIndex + 1) / selectedVerses.length) * 100}%` }}
                           ></div>
                         </div>
@@ -1042,9 +1042,9 @@ export default function FreshAudioBible() {
 
                   {/* Manual Selection Summary */}
                   {manuallySelectedVerses.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-600 rounded-lg p-4">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-blue-900">
+                        <span className="font-medium text-purple-900 dark:text-purple-300">
                           {manuallySelectedVerses.length} verses selected
                         </span>
                         <div className="flex gap-2">
@@ -1089,8 +1089,8 @@ export default function FreshAudioBible() {
                           key={verse.id}
                           className={`border rounded-lg p-4 cursor-pointer transition-all ${
                             isSelected 
-                              ? 'border-blue-500 bg-blue-50' 
-                              : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'
+                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-400' 
+                              : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
                           }`}
                           onClick={() => toggleVerseSelection(verse)}
                         >
