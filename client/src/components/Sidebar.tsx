@@ -145,9 +145,8 @@ export default function Sidebar() {
           <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-xl">S</span>
           </div>
-          <div className="flex flex-col min-w-0 flex-1">
-            <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">SoapBox</div>
-            <div className="text-sm text-purple-600 dark:text-purple-400 leading-tight">Super App</div>
+          <div className="flex items-center min-w-0 flex-1">
+            <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox Super App</div>
           </div>
         </Link>
       </div>
