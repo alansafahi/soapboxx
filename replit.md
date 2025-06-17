@@ -148,6 +148,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Improved dark mode contrast with proper background (hsl(283, 25%, 8%)) and foreground colors
   - Updated dark mode primary colors to use #7C3AED purple instead of blue for consistent branding
   - Implemented proper theme persistence using localStorage with system preference detection
+  - Fixed church discovery cards styling with proper dark mode backgrounds and text colors for better readability
+  - Removed old Passport.js dependencies causing "Unknown authentication strategy" production errors
 - June 17, 2025: Fixed brand consistency by restoring purple color scheme throughout all landing pages
   - Updated landing.tsx, clean-landing.tsx, and simple-landing.tsx to use purple instead of blue
   - Fixed hero sections, CTA buttons, feature icons, and hover states to maintain consistent SoapBox branding

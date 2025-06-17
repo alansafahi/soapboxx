@@ -222,16 +222,16 @@ export default function ChurchDiscovery() {
                           <div className="flex">
                             {renderStarRating(church.rating)}
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
                             {church.rating.toFixed(1)}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400">No rating yet</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">No rating yet</span>
                       )}
                       
                       {church.memberCount && church.memberCount > 0 && (
-                        <span className="text-xs text-gray-500 flex items-center">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                           <Users className="w-3 h-3 mr-1" />
                           {church.memberCount}
                         </span>
@@ -269,11 +269,11 @@ export default function ChurchDiscovery() {
                   
                   {/* Contact Information */}
                   {(church.phone || church.website) && (
-                    <div className="flex items-center space-x-3 mt-2 pt-2 border-t border-gray-100">
+                    <div className="flex items-center space-x-3 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                       {church.phone && (
                         <a 
                           href={`tel:${church.phone}`}
-                          className="text-xs text-gray-500 hover:text-soapbox-purple flex items-center"
+                          className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 flex items-center"
                         >
                           <Phone className="w-3 h-3 mr-1" />
                           Call
@@ -284,7 +284,7 @@ export default function ChurchDiscovery() {
                           href={church.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-gray-500 hover:text-soapbox-purple flex items-center"
+                          className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 flex items-center"
                         >
                           <Globe className="w-3 h-3 mr-1" />
                           Website
