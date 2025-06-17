@@ -235,20 +235,20 @@ export default function SocialFeed() {
       };
       
       recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         const reader = new FileReader();
         reader.onload = (e) => {
           const audioData = {
-            name: `voice-recording-${recordingDuration}s.wav`,
-            type: 'audio/wav',
+            name: `voice-recording-${recordingDuration}s.webm`,
+            type: 'audio/webm',
             size: audioBlob.size,
             url: e.target?.result as string,
-            filename: `voice-recording-${recordingDuration}s.wav`
+            filename: `voice-recording-${recordingDuration}s.webm`
           };
           setAttachedMedia(prev => [...prev, audioData]);
+          setAudioChunks([]);
         };
         reader.readAsDataURL(audioBlob);
-        setAudioChunks([]);
       };
       
       setMediaRecorder(recorder);
@@ -737,9 +737,13 @@ export default function SocialFeed() {
                             <audio 
                               controls 
                               className="w-full mt-3"
-                              src={media.url}
-                              style={{ height: '32px' }}
+                              style={{ height: '40px' }}
+                              onError={(e) => {
+                                console.error('Audio playback error:', e);
+                                console.log('Audio URL:', media.url);
+                              }}
                             >
+                              <source src={media.url} type={media.type} />
                               Your browser does not support the audio element.
                             </audio>
                           </div>

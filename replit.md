@@ -154,6 +154,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - All post composer buttons now fully functional: photo upload confirmed working with file browser and preview thumbnails
   - Added image display functionality to social feed posts to show uploaded media properly
   - Enhanced voice recording UI with animated pulse, recording duration timer, and clearer start/stop states
+  - Added voice recording display functionality in social feed with professional audio player interface
+  - Fixed audio format from WAV to WebM for better browser compatibility and playback support
   - Complete post creation and display workflow now functional end-to-end
 - June 17, 2025: Fixed SoapBox logo and company name layout in sidebar navigation
   - Enhanced header layout with proper flexbox structure for clean logo display
