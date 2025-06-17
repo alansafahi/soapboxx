@@ -25,7 +25,7 @@ export default function ChurchDiscovery() {
   // Join church mutation
   const joinChurchMutation = useMutation({
     mutationFn: async (churchId: number) => {
-      await apiRequest("POST", `/api/churches/${churchId}/join`);
+      await apiRequest(`/api/churches/${churchId}/join`, { method: "POST" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/churches/nearby"] });
