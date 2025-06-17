@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -35,12 +35,8 @@ import {
   TrendingUp,
   User,
   LogOut,
-  Bell,
   Sun,
   Moon,
-  Monitor,
-  Menu,
-  X,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -62,7 +58,34 @@ export default function Sidebar() {
   const [location] = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS']));
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  // Responsive sidebar behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobileScreen = window.innerWidth < 768; // md breakpoint
+      const isLargeScreen = window.innerWidth >= 1024; // lg breakpoint
+      
+      setIsMobile(isMobileScreen);
+      
+      // Auto-collapse on small screens, expand on large screens
+      if (isMobileScreen) {
+        setIsCollapsed(true);
+      } else if (isLargeScreen) {
+        setIsCollapsed(false);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+    
+    // Listen for window resize
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Get user role data
   const { data: userRole } = useQuery({
@@ -142,7 +165,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto flex flex-col transition-all duration-300`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'}`}>
       {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         {/* Logo and Toggle */}
