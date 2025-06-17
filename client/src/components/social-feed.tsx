@@ -425,9 +425,10 @@ export default function SocialFeed() {
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
                 {/* Media Upload */}
-                <label className="cursor-pointer" title="Add photo">
+                <div className="relative">
                   <input
                     type="file"
+                    id="file-upload"
                     multiple
                     accept="image/*,video/*,audio/*"
                     onChange={handleFileUpload}
@@ -436,12 +437,14 @@ export default function SocialFeed() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => document.getElementById('file-upload')?.click()}
                     className="text-gray-600 hover:text-green-600 hover:bg-green-50 p-1.5 h-8 w-8"
                     type="button"
+                    title="Add photo"
                   >
                     <ImageIcon className="w-4 h-4" />
                   </Button>
-                </label>
+                </div>
 
                 {/* Audio Recording */}
                 <Button
