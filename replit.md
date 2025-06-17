@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 17, 2025: Fixed SoapBox logo and company name layout in sidebar navigation
+  - Enhanced header layout with proper flexbox structure for clean logo display
+  - Increased logo size from 8x8 to 10x10 pixels for better visibility and branding
+  - Added flex-shrink-0 to prevent logo compression and maintain consistent sizing
+  - Improved text spacing with leading-tight for cleaner "SoapBox" and "Super App" appearance
+  - Fixed sidebar container layout using flex-col with proper flex-1 for navigation scrolling
+  - Replaced absolute positioning with flex-shrink-0 for user profile section stability
 - June 17, 2025: Successfully completed post composer button optimization with icon-only design and tooltip system
   - Converted all post composer buttons to clean icon-only format with descriptive hover tooltips
   - Reduced button size to compact 8x8 format with optimized gap-2 spacing for better visual balance

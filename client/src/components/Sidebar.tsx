@@ -138,22 +138,22 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto">
+    <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto flex flex-col">
       {/* Logo */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">S</span>
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <Link href="/" className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold text-lg">S</span>
           </div>
-          <div>
-            <div className="text-lg font-bold text-gray-900 dark:text-white">SoapBox</div>
-            <div className="text-sm text-purple-600">Super App</div>
+          <div className="flex flex-col min-w-0">
+            <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox</div>
+            <div className="text-sm text-purple-600 dark:text-purple-400 leading-tight">Super App</div>
           </div>
         </Link>
       </div>
 
       {/* Navigation Groups */}
-      <nav className="p-4 space-y-6">
+      <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
         {visibleGroups.map((group) => {
           const isExpanded = expandedGroups.has(group.label);
           return (
@@ -195,9 +195,9 @@ export default function Sidebar() {
       </nav>
 
       {/* User Profile Section */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-white text-sm font-medium">
               {(user as any)?.firstName?.[0] || 'U'}
             </span>

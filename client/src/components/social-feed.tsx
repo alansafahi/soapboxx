@@ -498,7 +498,7 @@ export default function SocialFeed() {
                 </div>
 
                 {/* Bible Verse Link */}
-                <div className="relative">
+                <div className="relative" ref={verseDropdownRef}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -584,7 +584,7 @@ export default function SocialFeed() {
                 </div>
 
                 {/* Audience Selector */}
-                <div className="relative">
+                <div className="relative" ref={audienceDropdownRef}>
                   <Button
                     variant="ghost"
                     size="sm"
