@@ -152,6 +152,9 @@ export default function SocialFeed() {
   const [selectedAudience, setSelectedAudience] = useState<'public' | 'church' | 'private'>('public');
   const [showAudienceDropdown, setShowAudienceDropdown] = useState(false);
   
+  // Post submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   // Comment modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [activePost, setActivePost] = useState<FeedPost | null>(null);
@@ -752,27 +755,37 @@ export default function SocialFeed() {
     setShowVerseSearch(false);
   };
 
-  const submitPost = () => {
+  const submitPost = async () => {
     if (!newPost.trim() && attachedMedia.length === 0) return;
+    if (isSubmitting) return; // Prevent double submission
     
-    const postData = {
-      content: newPost,
-      mood: selectedMood,
-      audience: selectedAudience,
-      attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
-      linkedVerse: linkedVerse
-    };
+    setIsSubmitting(true);
     
-    createPostMutation.mutate(postData);
-    
-    // Reset composer state
-    setNewPost('');
-    setAttachedMedia([]);
-    setLinkedVerse(null);
-    setSelectedMood(null);
-    setShowVerseSearch(false);
-    setShowMoodDropdown(false);
-    setShowAudienceDropdown(false);
+    try {
+      const postData = {
+        content: newPost,
+        mood: selectedMood,
+        audience: selectedAudience,
+        attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
+        linkedVerse: linkedVerse
+      };
+      
+      await createPostMutation.mutateAsync(postData);
+      
+      // Reset composer state only on success
+      setNewPost('');
+      setAttachedMedia([]);
+      setLinkedVerse(null);
+      setSelectedMood(null);
+      setShowVerseSearch(false);
+      setShowMoodDropdown(false);
+      setShowAudienceDropdown(false);
+    } catch (error) {
+      // Error is handled by the mutation's onError callback
+      console.error('Post submission failed:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleMoodSelect = (moodId: string) => {
