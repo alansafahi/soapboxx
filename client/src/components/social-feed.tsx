@@ -169,13 +169,27 @@ export default function SocialFeed() {
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
 
+    // Ensure all data is properly serializable
     const postData = {
       type: 'discussion',
       content: newPost,
-      mood: selectedMood,
+      mood: selectedMood ? {
+        id: selectedMood.id,
+        label: selectedMood.label,
+        emoji: selectedMood.emoji
+      } : null,
       audience: selectedAudience,
-      linkedVerse,
-      attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
+      linkedVerse: linkedVerse ? {
+        reference: linkedVerse.reference,
+        text: linkedVerse.text
+      } : null,
+      attachedMedia: attachedMedia.length > 0 ? attachedMedia.map(media => ({
+        name: media.name,
+        type: media.type,
+        size: media.size,
+        url: media.url,
+        filename: media.filename
+      })) : null,
     };
 
     createPostMutation.mutate(postData);
