@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 17, 2025: Successfully completed post deletion functionality with comprehensive security and user experience features
+  - Added DELETE endpoint `/api/discussions/:id` with proper authentication and ownership validation ensuring only post authors can delete their own content
+  - Implemented `deleteDiscussion` method in storage layer with cascading deletion of related data (comments, likes, bookmarks) to maintain database integrity
+  - Added delete button (trash icon) in social feed posts that appears only for post authors with proper permission checks
+  - Created confirmation dialog with "Cancel" and "Delete" options to prevent accidental deletions
+  - Implemented delete mutation with loading states, success/error toast notifications, and immediate UI updates
+  - Complete post deletion system now functional with security measures, user-friendly interface, and comprehensive error handling
 - June 17, 2025: Successfully completed collapsible sidebar functionality with working expand/collapse toggle
   - Fixed expand button visibility and accessibility in collapsed mode
   - Added prominent purple outlined expand button with tooltip for better user experience
