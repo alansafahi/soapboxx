@@ -2550,7 +2550,23 @@ export class DatabaseStorage implements IStorage {
           }
         }));
 
-        return {
+        // Debug attached media from database
+      if (row.attached_media) {
+        console.log(`Post ${row.id} attached_media from DB:`, JSON.stringify(row.attached_media, null, 2));
+        if (Array.isArray(row.attached_media) && row.attached_media.length > 0) {
+          row.attached_media.forEach((media, index) => {
+            console.log(`DB Media ${index}:`, {
+              type: media.type,
+              name: media.name,
+              size: media.size,
+              urlLength: media.url ? media.url.length : 0,
+              urlPreview: media.url ? media.url.substring(0, 50) + '...' : 'no url'
+            });
+          });
+        }
+      }
+
+      return {
           id: row.id,
           type: 'discussion',
           title: row.title,
