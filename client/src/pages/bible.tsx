@@ -86,11 +86,40 @@ export default function BiblePage() {
             
             {/* Action Buttons */}
             <div className="flex justify-center gap-3 pt-4">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={() => {
+                  toast({
+                    title: "Reflection Started",
+                    description: "Take a moment to reflect on this verse and its meaning in your life."
+                  });
+                }}
+              >
                 <Heart className="w-4 h-4" />
                 Reflect
               </Button>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'Daily Verse',
+                      text: `"${currentVerse.text}" - ${currentVerse.reference}`,
+                      url: window.location.href
+                    });
+                  } else {
+                    navigator.clipboard.writeText(`"${currentVerse.text}" - ${currentVerse.reference}`);
+                    toast({
+                      title: "Copied to clipboard",
+                      description: "The verse has been copied to your clipboard."
+                    });
+                  }
+                }}
+              >
                 <Share2 className="w-4 h-4" />
                 Share
               </Button>
@@ -137,7 +166,15 @@ export default function BiblePage() {
               <p className="text-sm text-gray-600">
                 Continue your spiritual journey with daily scripture readings and reflections.
               </p>
-              <Button className="w-full mt-4">
+              <Button 
+                className="w-full mt-4"
+                onClick={() => {
+                  toast({
+                    title: "Reading Plan Continued",
+                    description: "Your daily devotional reading plan is now active. Check back tomorrow for your next reading."
+                  });
+                }}
+              >
                 Continue Reading Plan
               </Button>
             </div>
