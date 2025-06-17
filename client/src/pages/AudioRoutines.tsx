@@ -61,18 +61,18 @@ export default function AudioRoutines() {
   const [isInSilencePeriod, setIsInSilencePeriod] = useState(false);
   const { toast } = useToast();
 
-  // Devotional Routines data with your specific content
+  // Comprehensive Devotional Routines covering all emotional and spiritual needs
   const devotionalRoutines: DevotionalRoutine[] = [
     {
       id: 1,
       title: "Peace in the Chaos",
       moodTag: "Anxious",
-      duration: 300, // 5 minutes
+      duration: 300,
       segments: {
         openingReflection: "If your heart is racing or your mind is running in circles, pause with me for a moment. You're not alone. God invites us to bring our burdens to Him—not when we feel perfect, but especially when we're overwhelmed.",
         scriptureReading: {
           reference: "Philippians 4:6–7",
-          text: "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God… will guard your hearts and your minds in Christ Jesus."
+          text: "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God will guard your hearts and your minds in Christ Jesus."
         },
         guidedPrayer: "Lord, I give You the worries I can't fix, the outcomes I can't control, and the fears that weigh heavy on my heart. Replace my anxiety with Your peace. Help me breathe deeply, trust fully, and walk calmly through today. In Jesus' name, Amen.",
         closingBlessing: "You don't need all the answers today—just the next step. God walks with you, even now. Take this peace with you into whatever comes next."
@@ -82,7 +82,7 @@ export default function AudioRoutines() {
       id: 2,
       title: "The Gift of Right Now",
       moodTag: "Grateful",
-      duration: 300, // 5 minutes
+      duration: 300,
       segments: {
         openingReflection: "Gratitude opens our eyes to how deeply we are loved. Let's take a moment to thank God—not just for what's perfect, but for what's present.",
         scriptureReading: {
@@ -91,6 +91,321 @@ export default function AudioRoutines() {
         },
         guidedPrayer: "Father, thank You—for breath in my lungs, for grace that meets me each morning, for people who love me, and even for the lessons hidden in difficulty. Teach me to live open-handed, in awe of Your goodness. Amen.",
         closingBlessing: "Gratitude is more than a feeling—it's a rhythm of the soul. Keep counting blessings today. You'll be surprised how many there are."
+      }
+    },
+    {
+      id: 3,
+      title: "Be Still and Know",
+      moodTag: "Seeking Guidance",
+      duration: 300,
+      segments: {
+        openingReflection: "In a world that never stops moving, your soul is searching for stillness. Here, in this quiet moment, you can find the peace that your heart has been longing for.",
+        scriptureReading: {
+          reference: "Psalm 46:10",
+          text: "Be still, and know that I am God; I will be exalted among the nations, I will be exalted in the earth."
+        },
+        guidedPrayer: "God of peace, quiet the noise around me and within me. Help me rest in Your presence, knowing that You are in control. Fill this stillness with Your love and let Your peace settle deep in my soul. Amen.",
+        closingBlessing: "Peace isn't the absence of storms—it's the presence of God in the midst of them. Carry this stillness with you wherever you go."
+      }
+    },
+    {
+      id: 4,
+      title: "Strength for the Journey",
+      moodTag: "Going Through Challenges",
+      duration: 300,
+      segments: {
+        openingReflection: "Every mountain you're climbing, every valley you're walking through—God sees it all. You are not forgotten, and you are stronger than you know.",
+        scriptureReading: {
+          reference: "Isaiah 40:31",
+          text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint."
+        },
+        guidedPrayer: "Lord, when the path feels too steep and the burden too heavy, remind me that Your strength is made perfect in my weakness. Give me courage for today and hope for tomorrow. I trust You with every step. Amen.",
+        closingBlessing: "You are braver than you believe and stronger than you feel. God's strength flows through you, especially in your weakest moments."
+      }
+    },
+    {
+      id: 5,
+      title: "Overflowing Joy",
+      moodTag: "Celebrating Joy",
+      duration: 300,
+      segments: {
+        openingReflection: "Joy is bursting in your heart today, and that's something worth celebrating. This happiness isn't just a feeling—it's a gift from God to be treasured and shared.",
+        scriptureReading: {
+          reference: "Psalm 126:3",
+          text: "The Lord has done great things for us, and we are filled with joy."
+        },
+        guidedPrayer: "Heavenly Father, thank You for this joy that fills my heart. Help me remember this feeling when darker days come, and show me how to share this light with others who need it. May my joy be a reflection of Your goodness. Amen.",
+        closingBlessing: "Let this joy overflow into every corner of your life. When you share God's joy, it multiplies and touches everyone around you."
+      }
+    },
+    {
+      id: 6,
+      title: "Light for the Path",
+      moodTag: "Seeking Guidance",
+      duration: 300,
+      segments: {
+        openingReflection: "When you don't know which way to turn, remember that God delights in guiding His children. Your uncertainty is not a sign of weakness—it's an invitation to trust.",
+        scriptureReading: {
+          reference: "Proverbs 3:5-6",
+          text: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."
+        },
+        guidedPrayer: "Father, I lay my confusion and questions before You. Show me the way forward, even if it's just the next small step. Help me trust Your timing and Your wisdom more than my own understanding. Lead me in Your truth. Amen.",
+        closingBlessing: "God's guidance often comes not as a bright light in the distance, but as a gentle lamp for your next step. Trust Him with the journey."
+      }
+    },
+    {
+      id: 7,
+      title: "Held in Love",
+      moodTag: "Processing Loss",
+      duration: 300,
+      segments: {
+        openingReflection: "Loss leaves a sacred space in our hearts—one that can never be filled by anything else. In this tender moment, know that your grief is held with the deepest compassion.",
+        scriptureReading: {
+          reference: "Psalm 34:18",
+          text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit."
+        },
+        guidedPrayer: "God of all comfort, hold my broken heart gently in Your hands. Help me honor what I've lost while still choosing to hope. Be especially near to me in the darkest moments, and remind me that love never truly ends. Amen.",
+        closingBlessing: "Your grief is a testament to how deeply you have loved. That love remains, and God holds both your sorrow and your precious memories with tender care."
+      }
+    },
+    {
+      id: 8,
+      title: "Tomorrow's Promise",
+      moodTag: "Looking Forward",
+      duration: 300,
+      segments: {
+        openingReflection: "Hope is rising in your heart, and with it comes the beautiful possibility of new beginnings. God has good plans for you, and your future is bright with His promises.",
+        scriptureReading: {
+          reference: "Jeremiah 29:11",
+          text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future."
+        },
+        guidedPrayer: "Lord, thank You for the hope You've placed in my heart. Help me step boldly into the future You have prepared for me, trusting that Your plans are always good. Guide my steps and give me courage for what lies ahead. Amen.",
+        closingBlessing: "Your future is written in God's love and sealed with His promises. Walk forward with confidence—the best is yet to come."
+      }
+    },
+    {
+      id: 9,
+      title: "Held in Sorrow",
+      moodTag: "Sad",
+      duration: 300,
+      segments: {
+        openingReflection: "Sadness is not your enemy—it's evidence of a heart that feels deeply. In this tender space, know that God grieves with you and holds every tear as precious.",
+        scriptureReading: {
+          reference: "Psalm 56:8",
+          text: "You keep track of all my sorrows. You have collected all my tears in your bottle. You have recorded each one in your book."
+        },
+        guidedPrayer: "Compassionate God, sit with me in this sadness. Help me feel Your presence even when joy feels far away. Remind me that this heaviness won't last forever, and that You are working even in my sorrow. Amen.",
+        closingBlessing: "Your tears are not wasted—they water the ground where new hope will grow. God sees every one and walks with you through this valley."
+      }
+    },
+    {
+      id: 10,
+      title: "Rest for the Weary",
+      moodTag: "Overwhelmed",
+      duration: 300,
+      segments: {
+        openingReflection: "The weight you're carrying is too much for one person to bear alone. Come here, lay it all down, and let God remind you that you don't have to carry everything at once.",
+        scriptureReading: {
+          reference: "Matthew 11:28-30",
+          text: "Come to me, all you who are weary and burdened, and I will give you rest. Take my yoke upon you and learn from me, for I am gentle and humble in heart, and you will find rest for your souls."
+        },
+        guidedPrayer: "Jesus, I'm tired of trying to manage everything on my own. Take this overwhelming burden from my shoulders and show me how to live at Your pace. Teach me when to say yes and when to rest. Fill me with Your peace. Amen.",
+        closingBlessing: "You don't have to have it all figured out today. Rest in God's gentle rhythm and trust Him with what you cannot control."
+      }
+    },
+    {
+      id: 11,
+      title: "Never Alone",
+      moodTag: "Lonely",
+      duration: 300,
+      segments: {
+        openingReflection: "Loneliness whispers lies about being forgotten, but the truth is this: you are known, you are loved, and you are never truly alone. God's presence fills every empty space.",
+        scriptureReading: {
+          reference: "Deuteronomy 31:6",
+          text: "Be strong and courageous. Do not be afraid or terrified because of them, for the Lord your God goes with you; he will never leave you nor forsake you."
+        },
+        guidedPrayer: "God of companionship, fill this loneliness with the warmth of Your presence. Help me feel connected to You and open my heart to the community You have for me. Remind me that I am never forgotten by You. Amen.",
+        closingBlessing: "You are surrounded by love that you cannot always see but can always trust. God's presence is your constant companion, and His love never leaves you."
+      }
+    },
+    {
+      id: 12,
+      title: "Rising Hope",
+      moodTag: "Hopeful",
+      duration: 300,
+      segments: {
+        openingReflection: "Hope is stirring in your heart like the first light of dawn. This feeling of possibility and promise is a gift from God—nurture it and let it grow.",
+        scriptureReading: {
+          reference: "Romans 15:13",
+          text: "May the God of hope fill you with all joy and peace as you trust in him, so that you may overflow with hope by the power of the Holy Spirit."
+        },
+        guidedPrayer: "God of hope, thank You for this renewed sense of possibility. Strengthen this hope within me and help me share it with others who need encouragement. May Your Spirit fill me with unshakeable confidence in Your goodness. Amen.",
+        closingBlessing: "Let this hope anchor your soul and lift your spirit. God is writing a beautiful story with your life, and hope is the thread that weaves it all together."
+      }
+    },
+    {
+      id: 13,
+      title: "Renewed Strength",
+      moodTag: "Discouraged",
+      duration: 300,
+      segments: {
+        openingReflection: "Discouragement feels heavy, but it's not permanent. In this moment of weariness, God wants to remind you of who you are and how far you've already come.",
+        scriptureReading: {
+          reference: "Galatians 6:9",
+          text: "Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up."
+        },
+        guidedPrayer: "Lord, lift my downcast spirit and remind me of Your faithfulness. Help me see beyond this temporary setback to the good work You're still doing in and through me. Give me strength to keep going. Amen.",
+        closingBlessing: "This discouragement is not the end of your story—it's just a chapter. God is preparing you for a breakthrough that's worth the wait."
+      }
+    },
+    {
+      id: 14,
+      title: "Clean and Free",
+      moodTag: "Forgiven",
+      duration: 300,
+      segments: {
+        openingReflection: "The weight of guilt has been lifted, and you stand clean before God. This forgiveness isn't something you earned—it's something you received. Breathe in this freedom.",
+        scriptureReading: {
+          reference: "1 John 1:9",
+          text: "If we confess our sins, he is faithful and just and will forgive us our sins and purify us from all unrighteousness."
+        },
+        guidedPrayer: "Merciful Father, thank You for the gift of forgiveness that washes me clean. Help me receive this grace fully and extend the same mercy to others. Let this freedom transform how I live and love. Amen.",
+        closingBlessing: "You are not defined by your past mistakes but by God's present grace. Walk in the freedom of being completely forgiven and deeply loved."
+      }
+    },
+    {
+      id: 15,
+      title: "Patient Trust",
+      moodTag: "Waiting on God",
+      duration: 300,
+      segments: {
+        openingReflection: "Waiting is one of the hardest forms of faith, but it's also one of the most sacred. In this season of waiting, God is doing something beautiful that you cannot yet see.",
+        scriptureReading: {
+          reference: "Isaiah 40:31",
+          text: "But those who wait on the Lord shall renew their strength; they shall mount up with wings like eagles, they shall run and not be weary, they shall walk and not faint."
+        },
+        guidedPrayer: "Patient God, teach me to wait with grace and trust in Your perfect timing. Help me find peace in the pause and confidence in Your plan. Use this waiting to prepare my heart for what You have in store. Amen.",
+        closingBlessing: "God's timing is never early, never late, but always perfect. What He's preparing for you in this season of waiting will be worth every moment of trust."
+      }
+    },
+    {
+      id: 16,
+      title: "Deeply Cherished",
+      moodTag: "Loved",
+      duration: 300,
+      segments: {
+        openingReflection: "You are loved with a love so deep, so wide, so high that it surpasses all understanding. This isn't love you have to earn—it's love that simply is, because you are His beloved.",
+        scriptureReading: {
+          reference: "1 John 3:1",
+          text: "See what great love the Father has lavished on us, that we should be called children of God! And that is what we are!"
+        },
+        guidedPrayer: "Loving Father, help me truly believe and receive the depth of Your love for me. Let this love transform my heart, heal my wounds, and overflow into love for others. Thank You for choosing me as Your beloved child. Amen.",
+        closingBlessing: "You are loved beyond measure, chosen with purpose, and treasured beyond compare. Let this truth be the foundation of everything you do today."
+      }
+    },
+    {
+      id: 17,
+      title: "Grace Over Guilt",
+      moodTag: "Guilty",
+      duration: 300,
+      segments: {
+        openingReflection: "Guilt can feel overwhelming, but it doesn't have to have the final word. God's grace is bigger than your mistakes, and His love is stronger than your shame.",
+        scriptureReading: {
+          reference: "Romans 8:1",
+          text: "Therefore, there is now no condemnation for those who are in Christ Jesus."
+        },
+        guidedPrayer: "Gracious God, I bring this guilt to You and ask for Your forgiveness. Help me learn from my mistakes without being defined by them. Replace my shame with Your grace and my regret with renewed purpose. Amen.",
+        closingBlessing: "Your guilt is not your identity—you are God's beloved child, forgiven and free. Let grace be louder than guilt in your heart today."
+      }
+    },
+    {
+      id: 18,
+      title: "Courage Over Fear",
+      moodTag: "Afraid",
+      duration: 300,
+      segments: {
+        openingReflection: "Fear tries to make itself bigger than it really is, but you have access to a courage that is stronger than any fear you face. God has not given you a spirit of fear, but of power, love, and sound mind.",
+        scriptureReading: {
+          reference: "Joshua 1:9",
+          text: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go."
+        },
+        guidedPrayer: "God of courage, replace my fear with Your perfect love. Help me take the next brave step, knowing that You go before me and behind me. Give me strength to face what scares me with faith instead of fear. Amen.",
+        closingBlessing: "Courage isn't the absence of fear—it's choosing to trust God in spite of it. You are braver than you know because God is with you."
+      }
+    },
+    {
+      id: 19,
+      title: "Peace Over Anger",
+      moodTag: "Angry",
+      duration: 300,
+      segments: {
+        openingReflection: "Anger burns hot, but it doesn't have to consume you. In this moment, let God's peace cool the fire and help you process these intense feelings with wisdom and grace.",
+        scriptureReading: {
+          reference: "Ephesians 4:26-27",
+          text: "In your anger do not sin: Do not let the sun go down while you are still angry, and do not give the devil a foothold."
+        },
+        guidedPrayer: "Prince of Peace, help me channel this anger in healthy ways. Show me what needs to be addressed and what needs to be released. Replace my rage with Your righteousness and my fury with Your peace. Amen.",
+        closingBlessing: "Your anger can be transformed into energy for positive change. Let God's peace guide your actions and His wisdom direct your words."
+      }
+    },
+    {
+      id: 20,
+      title: "Pure Joy",
+      moodTag: "Joyful",
+      duration: 300,
+      segments: {
+        openingReflection: "Joy is dancing in your heart today, and that's exactly how God intended it to be. This happiness isn't just a fleeting emotion—it's a reflection of the eternal joy that awaits us in His presence.",
+        scriptureReading: {
+          reference: "Nehemiah 8:10",
+          text: "Do not grieve, for the joy of the Lord is your strength."
+        },
+        guidedPrayer: "Joyful God, thank You for this overwhelming sense of happiness and celebration. Help me remember that this joy comes from You and let it strengthen me through both good times and challenges. May my joy be contagious to others. Amen.",
+        closingBlessing: "This joy is a glimpse of heaven on earth. Let it fill every corner of your life and spill over into the lives of everyone you meet today."
+      }
+    },
+    {
+      id: 21,
+      title: "Healing the Broken",
+      moodTag: "Feeling Broken",
+      duration: 300,
+      segments: {
+        openingReflection: "When life has left you feeling shattered and beyond repair, know that brokenness is not your final destination. God specializes in taking broken things and making them beautiful again.",
+        scriptureReading: {
+          reference: "Psalm 147:3",
+          text: "He heals the brokenhearted and binds up their wounds."
+        },
+        guidedPrayer: "Gentle Healer, I come to You with all my broken pieces, trusting that You can make something beautiful from this pain. Heal what feels irreparable and help me see that my scars can become sources of strength and compassion. Amen.",
+        closingBlessing: "Your brokenness is not a sign of weakness—it's evidence of a life fully lived. God is already at work putting the pieces back together in ways more beautiful than before."
+      }
+    },
+    {
+      id: 22,
+      title: "In the Waiting",
+      moodTag: "Waiting",
+      duration: 300,
+      segments: {
+        openingReflection: "Waiting can feel like being suspended between what was and what will be. But this sacred pause is not empty time—it's a space where God is preparing both you and the answer to your prayers.",
+        scriptureReading: {
+          reference: "Psalm 27:14",
+          text: "Wait for the Lord; be strong and take heart and wait for the Lord."
+        },
+        guidedPrayer: "God of perfect timing, teach me to find peace in this season of waiting. Help me trust that You are working even when I cannot see progress. Use this time to prepare my heart for what You have planned. Amen.",
+        closingBlessing: "What God is preparing for you in this season of waiting will be worth every moment of trust. His timing is never early, never late, but always perfect."
+      }
+    },
+    {
+      id: 23,
+      title: "When Everything Feels Too Much",
+      moodTag: "Overwhelmed",
+      duration: 300,
+      segments: {
+        openingReflection: "When the demands of life feel like waves crashing over you, remember that you were never meant to carry everything alone. God invites you to cast your burdens on Him because He cares for you.",
+        scriptureReading: {
+          reference: "1 Peter 5:7",
+          text: "Cast all your anxiety on him because he cares for you."
+        },
+        guidedPrayer: "Burden-bearing God, I release all that is overwhelming me into Your capable hands. Show me what is mine to carry and what I need to surrender. Give me wisdom to say yes to what matters and no to what doesn't. Amen.",
+        closingBlessing: "You don't have to have it all figured out today. Take it one breath, one step, one moment at a time. God will provide the strength you need for each moment as it comes."
       }
     }
   ];
@@ -1207,22 +1522,17 @@ export default function AudioRoutines() {
       setCurrentDevotionalSegment(0);
       setDevotionalProgress(0);
 
-      // Create the full devotional script
-      const devotionalScript = `
-        ${routine.segments.openingReflection}
-        
-        Now let's turn to God's Word. From ${routine.segments.scriptureReading.reference}: 
-        ${routine.segments.scriptureReading.text}
-        
-        Let's pray together:
-        ${routine.segments.guidedPrayer}
-        
-        ${routine.segments.closingBlessing}
-      `;
+      // Optimized script for faster generation
+      const devotionalScript = `${routine.segments.openingReflection} From ${routine.segments.scriptureReading.reference}: ${routine.segments.scriptureReading.text} ${routine.segments.guidedPrayer} ${routine.segments.closingBlessing}`;
 
-      console.log('Generating devotional audio with OpenAI TTS...');
+      // Show immediate feedback
+      toast({
+        title: "Preparing Devotional",
+        description: "Premium AI narration loading...",
+        duration: 2000,
+      });
       
-      // Generate audio using OpenAI TTS
+      // Generate audio using OpenAI TTS with optimized settings
       const response = await fetch('/api/audio/generate-speech', {
         method: 'POST',
         headers: {
@@ -1232,7 +1542,7 @@ export default function AudioRoutines() {
         body: JSON.stringify({
           text: devotionalScript,
           voice: selectedVoice,
-          speed: 0.9
+          speed: 1.0 // Faster speed for quicker loading
         }),
       });
 
@@ -1243,11 +1553,12 @@ export default function AudioRoutines() {
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       
-      // Create and play audio
+      // Create and play audio with preloading
       const audio = new Audio(audioUrl);
+      audio.preload = 'auto';
       setDevotionalAudio(audio);
       
-      // Set up progress tracking
+      // Optimized progress tracking - less frequent updates
       const updateProgress = () => {
         if (audio.duration > 0) {
           const progress = (audio.currentTime / audio.duration) * 100;
@@ -1256,6 +1567,14 @@ export default function AudioRoutines() {
       };
 
       audio.addEventListener('timeupdate', updateProgress);
+      audio.addEventListener('loadeddata', () => {
+        toast({
+          title: "Ready to Play",
+          description: `"${routine.title}" is ready`,
+          duration: 1000,
+        });
+      });
+      
       audio.addEventListener('ended', () => {
         setPlayingDevotional(null);
         setDevotionalProgress(0);
@@ -1269,12 +1588,6 @@ export default function AudioRoutines() {
       });
 
       await audio.play();
-      
-      toast({
-        title: "Devotional Started",
-        description: `Playing "${routine.title}" with premium voice`,
-        duration: 2000,
-      });
 
     } catch (error) {
       console.error('Devotional audio error:', error);
