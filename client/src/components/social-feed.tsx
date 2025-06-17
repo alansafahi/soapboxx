@@ -615,12 +615,9 @@ export default function SocialFeed() {
 
   // Enhanced composer handlers
   const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('handleMediaUpload triggered');
     const files = Array.from(event.target.files || []);
-    console.log('Selected files:', files);
     
     if (files.length === 0) {
-      console.log('No files selected');
       return;
     }
     
@@ -642,7 +639,6 @@ export default function SocialFeed() {
     });
     
     const mediaData = await Promise.all(mediaPromises);
-    console.log('Processed media data:', mediaData);
     setAttachedMedia(prev => [...prev, ...mediaData]);
     
     // Show success toast
@@ -1289,12 +1285,8 @@ export default function SocialFeed() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  console.log('Photo button clicked');
-                  console.log('mediaInputRef.current:', mediaInputRef.current);
-                  mediaInputRef.current?.click();
-                }}
-                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 px-3 py-1.5 h-8 flex-shrink-0"
+                onClick={() => mediaInputRef.current?.click()}
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 px-3 py-1.5 h-8 flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
                 title="Add photos or videos"
               >
                 <ImageIcon className="w-4 h-4 mr-1" />
@@ -1306,7 +1298,7 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                className={`px-3 py-1.5 h-8 flex-shrink-0 ${
+                className={`px-3 py-1.5 h-8 flex-shrink-0 border-0 focus:ring-0 focus:outline-none ${
                   isRecording 
                     ? "text-red-600 hover:text-red-700 bg-red-50 dark:bg-red-900/20" 
                     : "text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20"
@@ -1322,7 +1314,7 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowMoodSelector(!showMoodSelector)}
-                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 px-3 py-1.5 h-8 flex-shrink-0"
+                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 px-3 py-1.5 h-8 flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
                 title="Share your feeling"
               >
                 <Heart className="w-4 h-4 mr-1" />
@@ -1335,7 +1327,7 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 px-3 py-1.5 h-8"
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 px-3 py-1.5 h-8 border-0 focus:ring-0 focus:outline-none"
                   title="Link Bible verse"
                 >
                   <BookText className="w-4 h-4 mr-1" />
