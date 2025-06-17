@@ -1469,55 +1469,6 @@ export default function SocialFeed() {
                 )}
               </div>
 
-              {/* Audience Selector (Facebook-style) */}
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
-                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 h-7 text-xs"
-                >
-                  {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-3 h-3 mr-1" })}
-                  {audienceOptions.find(opt => opt.id === selectedAudience)?.label}
-                  <ChevronDown className="w-2 h-2 ml-1" />
-                </Button>
-
-                {/* Audience Dropdown */}
-                {showAudienceDropdown && (
-                  <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-md shadow-lg min-w-64">
-                    <div className="p-2">
-                      <div className="text-xs font-medium text-gray-500 mb-2 px-2">Who can see this?</div>
-                      {audienceOptions.map((audience) => (
-                        <Button
-                          key={audience.id}
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedAudience(audience.id as 'public' | 'church' | 'private');
-                            setShowAudienceDropdown(false);
-                          }}
-                          className={`w-full justify-start h-auto p-3 text-left hover:bg-gray-50 ${
-                            selectedAudience === audience.id ? 'bg-blue-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-start space-x-3">
-                            {React.createElement(audience.icon, { className: `w-5 h-5 ${audience.color} mt-0.5` })}
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm text-gray-900">{audience.label}</div>
-                              <div className="text-xs text-gray-500 mt-0.5">{audience.description}</div>
-                            </div>
-                            {selectedAudience === audience.id && (
-                              <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center mt-0.5">
-                                <div className="w-2 h-2 bg-white rounded-full"></div>
-                              </div>
-                            )}
-                          </div>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
 
@@ -1614,6 +1565,56 @@ export default function SocialFeed() {
                   <Book className="w-3 h-3 mr-1" />
                   Verse
                 </Button>
+
+                {/* Audience Selector */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
+                    className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 h-7 text-xs"
+                  >
+                    {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-3 h-3 mr-1" })}
+                    Public
+                    <ChevronDown className="w-2 h-2 ml-1" />
+                  </Button>
+
+                  {/* Audience Dropdown */}
+                  {showAudienceDropdown && (
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-64">
+                      <div className="p-2">
+                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">Who can see this?</div>
+                        {audienceOptions.map((audience) => (
+                          <Button
+                            key={audience.id}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedAudience(audience.id as 'public' | 'church' | 'private');
+                              setShowAudienceDropdown(false);
+                            }}
+                            className={`w-full justify-start h-auto p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                              selectedAudience === audience.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              {React.createElement(audience.icon, { className: `w-5 h-5 ${audience.color} mt-0.5` })}
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm text-gray-900 dark:text-white">{audience.label}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{audience.description}</div>
+                              </div>
+                              {selectedAudience === audience.id && (
+                                <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center mt-0.5">
+                                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                              )}
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <Button 
