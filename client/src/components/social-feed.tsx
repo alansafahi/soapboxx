@@ -173,28 +173,49 @@ export default function SocialFeed() {
     }
   });
 
-  // Delete post mutation
+  // Delete post mutation with improved error handling
   const deletePostMutation = useMutation({
     mutationFn: async (postId: number) => {
-      return apiRequest(`/api/discussions/${postId}`, {
-        method: 'DELETE',
-      });
+      try {
+        const response = await apiRequest(`/api/discussions/${postId}`, {
+          method: 'DELETE',
+        });
+        return response;
+      } catch (error) {
+        console.error('Delete post error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
-      // Use optimistic update instead of invalidation to prevent app restart
-      queryClient.setQueryData(['/api/feed'], (oldData: any) => {
-        if (!oldData) return oldData;
-        return oldData.filter((post: any) => post.id !== postToDelete);
-      });
-      
-      setDeleteDialogOpen(false);
-      setPostToDelete(null);
-      toast({
-        title: "Success",
-        description: "Post deleted successfully!",
-      });
+      try {
+        // Safely update cache without triggering route changes
+        queryClient.setQueryData(['/api/feed'], (oldData: any) => {
+          if (!oldData || !Array.isArray(oldData)) return oldData;
+          return oldData.filter((post: any) => post.id !== postToDelete);
+        });
+        
+        // Reset dialog state first to prevent UI issues
+        setDeleteDialogOpen(false);
+        setPostToDelete(null);
+        
+        // Provide user feedback
+        setTimeout(() => {
+          toast({
+            title: "Success",
+            description: "Post deleted successfully!",
+          });
+        }, 100);
+        
+      } catch (error) {
+        console.error('Post-deletion update error:', error);
+        // Fallback: refresh the feed data if cache update fails
+        queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      }
     },
     onError: (error: any) => {
+      console.error('Delete mutation error:', error);
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
       toast({
         title: "Error",
         description: `Failed to delete post: ${error.message || 'Please try again.'}`,
