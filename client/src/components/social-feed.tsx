@@ -103,6 +103,8 @@ export default function SocialFeed() {
   const [attachedMedia, setAttachedMedia] = useState<Array<{name: string; type: string; size: number; url: string; filename: string}>>([]);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
   
   // Refs for click-outside functionality
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -237,11 +239,11 @@ export default function SocialFeed() {
         const reader = new FileReader();
         reader.onload = (e) => {
           const audioData = {
-            name: 'voice-recording.wav',
+            name: `voice-recording-${recordingDuration}s.wav`,
             type: 'audio/wav',
             size: audioBlob.size,
             url: e.target?.result as string,
-            filename: 'voice-recording.wav'
+            filename: `voice-recording-${recordingDuration}s.wav`
           };
           setAttachedMedia(prev => [...prev, audioData]);
         };
@@ -252,10 +254,17 @@ export default function SocialFeed() {
       setMediaRecorder(recorder);
       recorder.start();
       setIsRecording(true);
+      setRecordingDuration(0);
+      
+      // Start timer
+      const timer = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+      setRecordingTimer(timer);
       
       toast({
         title: "Recording started",
-        description: "Speak your message now...",
+        description: "Click the mic button again to stop recording",
       });
     } catch (error) {
       toast({
@@ -271,9 +280,16 @@ export default function SocialFeed() {
       mediaRecorder.stop();
       mediaRecorder.stream.getTracks().forEach(track => track.stop());
       setIsRecording(false);
+      
+      // Clear timer
+      if (recordingTimer) {
+        clearInterval(recordingTimer);
+        setRecordingTimer(null);
+      }
+      
       toast({
         title: "Recording saved",
-        description: "Your voice message has been attached.",
+        description: `Voice message (${recordingDuration}s) has been attached.`,
       });
     }
   };
@@ -458,19 +474,29 @@ export default function SocialFeed() {
                 </div>
 
                 {/* Audio Recording */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                  className={`p-1.5 h-8 w-8 ${
-                    isRecording 
-                      ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
-                      : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
-                  }`}
-                  title="Record voice"
-                >
-                  <Mic className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                    className={`relative p-1.5 h-8 w-8 ${
+                      isRecording 
+                        ? 'text-red-600 hover:text-red-700 hover:bg-red-50 animate-pulse' 
+                        : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                    }`}
+                    title={isRecording ? "Click to stop recording" : "Click to start voice recording"}
+                  >
+                    <Mic className={`w-4 h-4 ${isRecording ? 'fill-current' : ''}`} />
+                    {isRecording && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                    )}
+                  </Button>
+                  {isRecording && (
+                    <span className="text-red-600 text-xs font-medium bg-red-50 px-2 py-1 rounded">
+                      {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
+                    </span>
+                  )}
+                </div>
 
                 {/* Mood Selector */}
                 <div className="relative" ref={moodDropdownRef}>
