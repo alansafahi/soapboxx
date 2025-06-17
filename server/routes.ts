@@ -4630,22 +4630,7 @@ Return JSON with this exact structure:
         return res.status(400).json({ message: "Content is required" });
       }
 
-      // Debug attached media
-      if (attachedMedia) {
-        console.log("Attached media received:", JSON.stringify(attachedMedia, null, 2));
-        console.log("Attached media length:", Array.isArray(attachedMedia) ? attachedMedia.length : 'not array');
-        if (Array.isArray(attachedMedia) && attachedMedia.length > 0) {
-          attachedMedia.forEach((media, index) => {
-            console.log(`Media ${index}:`, {
-              type: media.type,
-              name: media.name,
-              size: media.size,
-              urlLength: media.url ? media.url.length : 0,
-              urlPreview: media.url ? media.url.substring(0, 50) + '...' : 'no url'
-            });
-          });
-        }
-      }
+
 
       // Set default type if not provided
       const postType = type || 'discussion';
