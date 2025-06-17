@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import AppHeader from "@/components/AppHeader";
+import Sidebar from "@/components/Sidebar";
 import { Home as HomeIcon, Church, Calendar, BookOpen, Heart, Mail, Settings } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -130,9 +130,9 @@ function AppRouter() {
   }
 
   return (
-    <>
-      {isAuthenticated && <AppHeader />}
-      <main className={isAuthenticated ? "min-h-screen bg-gray-50 lg:ml-64 transition-all duration-300" : ""}>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {isAuthenticated && <Sidebar />}
+      <main className={isAuthenticated ? "flex-1 overflow-y-auto" : "flex-1"}>
         <Switch>
           {!isAuthenticated ? (
             <>
@@ -221,7 +221,9 @@ function AppRouter() {
 
       {/* Interactive Demo Trigger - Always available for authenticated users */}
       {isAuthenticated && <DemoTrigger variant="floating" />}
-    </>
+        </Switch>
+      </main>
+    </div>
   );
 }
 

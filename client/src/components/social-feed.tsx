@@ -956,6 +956,223 @@ export default function SocialFeed() {
                   </div>
                 </div>
               )}
+
+            {/* Selected Mood Display */}
+            {selectedMood && (
+              <div className="mb-3 flex items-center gap-2">
+                <Badge className={`${getSelectedMoodData()?.color} border-0`}>
+                  <span className="mr-1">{getSelectedMoodData()?.icon}</span>
+                  {getSelectedMoodData()?.label}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearMood}
+                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+
+            {/* Action Buttons Row - Photo, Voice, Feeling, Verse, Audience */}
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center space-x-4">
+                {/* Media Upload */}
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*,audio/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-600 hover:text-green-600 hover:bg-green-50 dark:text-gray-400 dark:hover:text-green-400"
+                    type="button"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Photo
+                  </Button>
+                </label>
+
+                {/* Audio Recording */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                  className={`${
+                    isRecording 
+                      ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400' 
+                      : 'text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400'
+                  }`}
+                >
+                  <Mic className="w-4 h-4 mr-2" />
+                  {isRecording ? 'Stop' : 'Voice'}
+                </Button>
+
+                {/* Mood Selector */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowMoodDropdown(!showMoodDropdown)}
+                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 dark:text-gray-400 dark:hover:text-yellow-400"
+                  >
+                    <Smile className="w-4 h-4 mr-2" />
+                    Feeling
+                  </Button>
+
+                  {/* Comprehensive Mood Dropdown */}
+                  {showMoodDropdown && (
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg min-w-80 max-h-96 overflow-y-auto">
+                      <div className="p-2">
+                        {moodCategories.map((category) => (
+                          <div key={category.name} className="mb-4 last:mb-0">
+                            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 px-2">
+                              {category.name}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 px-2">
+                              {category.description}
+                            </div>
+                            <div className="grid grid-cols-3 gap-1">
+                              {category.moods.map((mood) => (
+                                <Button
+                                  key={mood.id}
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleMoodSelect(mood.id)}
+                                  className="justify-start h-auto p-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-xs"
+                                >
+                                  <span className="mr-1 text-sm">{mood.icon}</span>
+                                  <span className="text-xs">{mood.label}</span>
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bible Verse Link */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowVerseSearch(!showVerseSearch)}
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400"
+                >
+                  <BookText className="w-4 h-4 mr-2" />
+                  Verse
+                </Button>
+
+                {/* Audience Selector (Facebook-style) */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
+                    className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-4 h-4 mr-2" })}
+                    {audienceOptions.find(opt => opt.id === selectedAudience)?.label}
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+
+                  {/* Audience Dropdown */}
+                  {showAudienceDropdown && (
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg min-w-64">
+                      <div className="p-2">
+                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">Who can see this?</div>
+                        {audienceOptions.map((audience) => (
+                          <Button
+                            key={audience.id}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleAudienceSelect(audience.id)}
+                            className={`w-full justify-start h-auto p-2 text-left ${
+                              selectedAudience === audience.id 
+                                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' 
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                                {React.createElement(audience.icon, { className: "w-4 h-4 text-gray-600 dark:text-gray-300" })}
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{audience.label}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{audience.description}</div>
+                              </div>
+                              {selectedAudience === audience.id && (
+                                <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                              )}
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Share Button */}
+              <Button
+                onClick={submitPost}
+                disabled={isSubmitting || (!newPost.trim() && attachedMedia.length === 0)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sharing...
+                  </>
+                ) : (
+                  'Share'
+                )}
+              </Button>
+            </div>
+
+            {/* Bible Verse Search Dropdown */}
+            {showVerseSearch && (
+              <div className="mt-3 border border-gray-200 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-700">
+                <div className="flex items-center space-x-2 mb-2">
+                  <BookText className="w-4 h-4 text-purple-600" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Find Bible Verse</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search for a verse... (e.g., 'John 3:16' or 'love')"
+                  value={verseQuery}
+                  onChange={(e) => setVerseQuery(e.target.value)}
+                  className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                />
+                {verseQuery.length >= 2 && (
+                  <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+                    {verseSearchResults?.slice(0, 5).map((verse, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleVerseSelect(verse)}
+                        className="w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-sm border border-gray-100 dark:border-gray-600"
+                      >
+                        <div className="font-medium text-purple-700 dark:text-purple-300">{verse.reference}</div>
+                        <div className="text-purple-600 dark:text-purple-400 text-xs mt-1 line-clamp-2">
+                          {verse.verseText || verse.text}
+                        </div>
+                        {verse.category && (
+                          <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">
+                            Category: {verse.category}
+                          </div>
+                        )}
+                      </button>
+                    )) }
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
