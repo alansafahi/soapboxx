@@ -38,32 +38,32 @@
 }
 
 .dark {
-  --background: hsl(222, 84%, 4.9%);
-  --foreground: hsl(210, 40%, 98%);
-  --muted: hsl(217, 32%, 17%);
-  --muted-foreground: hsl(215, 20%, 65%);
-  --popover: hsl(222, 84%, 4.9%);
-  --popover-foreground: hsl(210, 40%, 98%);
-  --card: hsl(222, 84%, 4.9%);
-  --card-foreground: hsl(210, 40%, 98%);
-  --border: hsl(217, 32%, 17%);
-  --input: hsl(217, 32%, 17%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(217, 32%, 17%);
-  --secondary-foreground: hsl(210, 40%, 98%);
-  --accent: hsl(217, 32%, 17%);
-  --accent-foreground: hsl(210, 40%, 98%);
-  --destructive: hsl(0, 62%, 30%);
-  --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(207, 90%, 54%);
+  --background: hsl(283, 25%, 8%);
+  --foreground: hsl(283, 10%, 95%);
+  --muted: hsl(283, 15%, 15%);
+  --muted-foreground: hsl(283, 8%, 65%);
+  --popover: hsl(283, 20%, 12%);
+  --popover-foreground: hsl(283, 10%, 95%);
+  --card: hsl(283, 20%, 12%);
+  --card-foreground: hsl(283, 10%, 95%);
+  --border: hsl(283, 15%, 20%);
+  --input: hsl(283, 15%, 20%);
+  --primary: #7C3AED;
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(283, 15%, 18%);
+  --secondary-foreground: hsl(283, 10%, 95%);
+  --accent: hsl(283, 15%, 18%);
+  --accent-foreground: hsl(283, 10%, 95%);
+  --destructive: hsl(0, 62%, 45%);
+  --destructive-foreground: hsl(283, 10%, 95%);
+  --ring: #7C3AED;
   
-  /* Faith-inspired custom colors for dark mode */
-  --faith-blue: hsl(207, 90%, 54%);
-  --faith-gold: hsl(43, 74%, 49%);
-  --warm-white: hsl(222, 84%, 4.9%);
-  --light-blue: hsl(207, 73%, 15%);
-  --warm-yellow: hsl(48, 96%, 19%);
+  /* SoapBox brand colors for dark mode */
+  --soapbox-purple: #7C3AED;
+  --soapbox-purple-light: hsl(283, 80%, 75%);
+  --soapbox-purple-dark: hsl(283, 80%, 25%);
+  --soapbox-accent: hsl(43, 74%, 60%);
+  --warm-white: hsl(283, 10%, 95%);
 }
 
 @layer base {

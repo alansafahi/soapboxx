@@ -1,7 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles, ChevronDown, ChevronRight, Shield, UserCog, Star, Share2, BarChart3, Megaphone, TrendingUp } from "lucide-react";
+import { Bell, User, MessageSquare, Search, Home, Church, Calendar, BookOpen, Heart, Mail, DollarSign, Settings, Users, Menu, X, Smartphone, Headphones, Volume2, PlayCircle, Sparkles, ChevronDown, ChevronRight, Shield, UserCog, Star, Share2, BarChart3, Megaphone, TrendingUp, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ export default function AppHeader() {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     community: true,
     spiritual: true,
@@ -513,6 +515,10 @@ export default function AppHeader() {
                 <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                   1
                 </span>
+              </Button>
+              
+              <Button variant="ghost" size="sm" onClick={toggleTheme}>
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
             </div>
 
