@@ -142,6 +142,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 17, 2025: Updated navigation structure - renamed "Meditation Routines" to "Audio Routines" and moved below "Audio Bible" in Spiritual Tools section
 - June 17, 2025: Completed comprehensive devotional routine system with optimized loading and mood-based categorization
   - Added complete library of 23 devotional routines covering all emotional and spiritual needs
   - Implemented mood-based categorization system: Anxious, Grateful, Seeking Guidance, Feeling Broken, Waiting, Overwhelmed, etc.

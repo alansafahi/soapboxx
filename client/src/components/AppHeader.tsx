@@ -85,8 +85,8 @@ export default function AppHeader() {
       items: [
         { href: "/bible", label: "Today's Reading", icon: BookOpen },
         { href: "/soap", label: "S.O.A.P. Journal", icon: Heart },
-        { href: "/audio-routines", label: "Meditation Routines", icon: Headphones },
-        { href: "/audio-bible", label: "Audio Bible", icon: Volume2 }
+        { href: "/audio-bible", label: "Audio Bible", icon: Volume2 },
+        { href: "/audio-routines", label: "Audio Routines", icon: Headphones }
       ]
     },
     {
