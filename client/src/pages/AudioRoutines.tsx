@@ -1857,14 +1857,14 @@ export default function AudioRoutines() {
       </div>
 
       <Tabs defaultValue="devotional" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="devotional" className="flex items-center gap-2">
-            <Book className="h-4 w-4" />
-            Devotional Routines
+        <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl h-14">
+          <TabsTrigger value="devotional" className="flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-all data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-md dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-purple-400">
+            <Book className="h-5 w-5" />
+            Devotional
           </TabsTrigger>
-          <TabsTrigger value="meditation" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Meditation Routines
+          <TabsTrigger value="meditation" className="flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-all data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-md dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-purple-400">
+            <Heart className="h-5 w-5" />
+            Meditation
           </TabsTrigger>
         </TabsList>
 
