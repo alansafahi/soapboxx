@@ -47,13 +47,13 @@ export default function SimpleLanding() {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-purple-100">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Unite Your Faith
               <br />
-              <span className="text-blue-600">Community</span>
+              <span className="text-purple-600">Community</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               SoapBox Super App brings your congregation together with powerful tools for prayer, 
@@ -65,7 +65,7 @@ export default function SimpleLanding() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Play className="w-5 h-5 mr-2" />
               Get Started Free

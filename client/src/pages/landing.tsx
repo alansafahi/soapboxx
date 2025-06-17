@@ -24,7 +24,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="w-full min-h-screen bg-gradient-to-br from-purple-50 to-purple-100">
       {/* Header */}
       <header className="relative bg-white border-b border-gray-200 w-full z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

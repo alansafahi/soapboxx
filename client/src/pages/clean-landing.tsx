@@ -47,11 +47,11 @@ export default function CleanLanding() {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-purple-100">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Connect Your Faith
-            <span className="text-blue-600"> Community</span>
+            <span className="text-purple-600"> Community</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             The comprehensive platform that brings churches, believers, and communities together through modern technology and meaningful engagement.
@@ -59,7 +59,7 @@ export default function CleanLanding() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
               onClick={() => window.location.href = '/api/login'}
             >
               Start Your Journey
@@ -92,8 +92,8 @@ export default function CleanLanding() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                <MessageCircle className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
+                <MessageCircle className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Community Discussions</h3>
               <p className="text-gray-600">
@@ -178,18 +178,18 @@ export default function CleanLanding() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-blue-600">
+      <section className="py-20 px-4 bg-purple-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Transform Your Faith Community?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-purple-100 mb-8">
             Join thousands of believers who are strengthening their faith through meaningful connections.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
+              className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
               onClick={() => window.location.href = '/api/login'}
             >
               Get Started Free
@@ -197,7 +197,7 @@ export default function CleanLanding() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg"
+              className="border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 text-lg"
               onClick={() => window.location.href = '/demo'}
             >
               Schedule Demo
