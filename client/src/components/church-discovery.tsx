@@ -167,7 +167,7 @@ export default function ChurchDiscovery() {
           churches.slice(0, 3).map((church) => (
             <div 
               key={church.id} 
-              className="border border-gray-100 dark:border-gray-700 rounded-xl p-4 hover:border-purple-600 transition-colors cursor-pointer bg-white dark:bg-gray-800"
+              className="border border-gray-100 dark:border-gray-600 rounded-xl p-4 hover:border-purple-600 transition-colors cursor-pointer bg-white dark:bg-gray-700"
             >
               <div className="flex items-start space-x-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
@@ -190,7 +190,7 @@ export default function ChurchDiscovery() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 dark:text-white text-sm mb-1 truncate">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1 truncate">
                         {church.name}
                       </h3>
                       <div className="flex items-center gap-2 mb-2">
@@ -200,7 +200,7 @@ export default function ChurchDiscovery() {
                           </Badge>
                         )}
                         {church.city && church.state && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                          <span className="text-xs text-gray-500 dark:text-gray-300 flex items-center">
                             <MapPin className="w-3 h-3 mr-1" />
                             {church.city}, {church.state}
                           </span>
@@ -210,7 +210,7 @@ export default function ChurchDiscovery() {
                   </div>
                   
                   {church.description && (
-                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-200 mb-3 line-clamp-2">
                       {church.description}
                     </p>
                   )}
@@ -222,7 +222,7 @@ export default function ChurchDiscovery() {
                           <div className="flex">
                             {renderStarRating(church.rating)}
                           </div>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-gray-500 dark:text-gray-300">
                             {church.rating.toFixed(1)}
                           </span>
                         </div>
@@ -231,7 +231,7 @@ export default function ChurchDiscovery() {
                       )}
                       
                       {church.memberCount && church.memberCount > 0 && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                        <span className="text-xs text-gray-500 dark:text-gray-300 flex items-center">
                           <Users className="w-3 h-3 mr-1" />
                           {church.memberCount}
                         </span>
@@ -269,11 +269,11 @@ export default function ChurchDiscovery() {
                   
                   {/* Contact Information */}
                   {(church.phone || church.website) && (
-                    <div className="flex items-center space-x-3 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center space-x-3 mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
                       {church.phone && (
                         <a 
                           href={`tel:${church.phone}`}
-                          className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 flex items-center"
+                          className="text-xs text-gray-500 dark:text-gray-300 hover:text-purple-600 flex items-center"
                         >
                           <Phone className="w-3 h-3 mr-1" />
                           Call
