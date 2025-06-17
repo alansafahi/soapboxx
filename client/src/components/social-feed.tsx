@@ -723,6 +723,27 @@ export default function SocialFeed() {
                             style={{ maxHeight: '400px', objectFit: 'cover' }}
                           />
                         )}
+                        {media.type?.startsWith('audio/') && (
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 max-w-md">
+                            <div className="flex items-center space-x-3">
+                              <div className="bg-red-100 dark:bg-red-900/20 p-2 rounded-full">
+                                <Mic className="w-5 h-5 text-red-600" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">Voice Message</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{media.name || 'voice-recording.wav'}</p>
+                              </div>
+                            </div>
+                            <audio 
+                              controls 
+                              className="w-full mt-3"
+                              src={media.url}
+                              style={{ height: '32px' }}
+                            >
+                              Your browser does not support the audio element.
+                            </audio>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
