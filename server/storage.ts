@@ -2491,6 +2491,30 @@ export class DatabaseStorage implements IStorage {
     return discussion;
   }
 
+  async deleteDiscussion(discussionId: number): Promise<void> {
+    // Delete all related data first (due to foreign key constraints)
+    
+    // Delete discussion comments
+    await db
+      .delete(discussionComments)
+      .where(eq(discussionComments.discussionId, discussionId));
+    
+    // Delete discussion likes
+    await db
+      .delete(discussionLikes)
+      .where(eq(discussionLikes.discussionId, discussionId));
+    
+    // Delete discussion bookmarks
+    await db
+      .delete(discussionBookmarks)
+      .where(eq(discussionBookmarks.discussionId, discussionId));
+    
+    // Finally delete the discussion itself
+    await db
+      .delete(discussions)
+      .where(eq(discussions.id, discussionId));
+  }
+
   async getFeedPosts(userId: string): Promise<any[]> {
     try {
       // Use raw SQL to bypass Drizzle ORM schema issues

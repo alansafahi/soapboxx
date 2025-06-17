@@ -4734,6 +4734,40 @@ Return JSON with this exact structure:
     }
   });
 
+  // Delete discussion endpoint - users can delete their own posts
+  app.delete("/api/discussions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const discussionId = parseInt(req.params.id);
+      
+      // Get the discussion to check ownership
+      const discussion = await storage.getDiscussion(discussionId);
+      if (!discussion) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Check if user is the author or has admin permissions
+      const userRole = await storage.getUserRole(userId);
+      const isAuthor = discussion.authorId === userId;
+      const isAdmin = ['admin', 'system_admin', 'church_admin', 'pastor', 'lead_pastor'].includes(userRole);
+      
+      if (!isAuthor && !isAdmin) {
+        return res.status(403).json({ message: "You can only delete your own posts" });
+      }
+      
+      // Delete the discussion and all related data (comments, likes, bookmarks)
+      await storage.deleteDiscussion(discussionId);
+      
+      res.json({ 
+        message: "Post deleted successfully",
+        deletedBy: isAuthor ? "author" : "admin"
+      });
+    } catch (error) {
+      console.error("Error deleting discussion:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+
   app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
