@@ -55,6 +55,7 @@ export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS']));
+  const { theme, toggleTheme } = useTheme();
 
   // Get user role data
   const { data: userRole } = useQuery({
@@ -153,9 +154,10 @@ export default function Sidebar() {
 
   return (
     <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto flex flex-col">
-      {/* Logo */}
+      {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <Link href="/" className="flex items-center space-x-3">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-3 mb-4">
           <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
             <img 
               src={soapboxLogo} 
@@ -168,6 +170,66 @@ export default function Sidebar() {
             <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">Super App</div>
           </div>
         </Link>
+
+        {/* Header Actions */}
+        <div className="flex items-center justify-between">
+          {/* Notification Bell */}
+          <Button variant="ghost" size="icon" className="w-8 h-8">
+            <Bell className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </Button>
+
+          {/* Theme Toggle and Profile */}
+          <div className="flex items-center space-x-2">
+            {/* Theme Toggle */}
+            <Button variant="ghost" size="icon" className="w-8 h-8" onClick={toggleTheme}>
+              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+
+            {/* User Profile Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="w-8 h-8">
+                  <Avatar className="w-6 h-6">
+                    <AvatarImage src={(user as any)?.profileImageUrl || ""} />
+                    <AvatarFallback className="bg-purple-600 text-white text-xs">
+                      {(user as any)?.firstName?.[0] || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {(user as any)?.firstName || 'User'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {(user as any)?.email || 'user@example.com'}
+                  </p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="flex items-center w-full">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center w-full">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => window.location.href = '/login'}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </div>
 
       {/* Navigation Groups */}
@@ -212,24 +274,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* User Profile Section */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-sm font-medium">
-              {(user as any)?.firstName?.[0] || 'U'}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-              {(user as any)?.firstName || 'User'}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {(userRole as any)?.role || 'Member'}
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 }
