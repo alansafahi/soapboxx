@@ -181,7 +181,12 @@ export default function SocialFeed() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      // Use optimistic update instead of invalidation to prevent app restart
+      queryClient.setQueryData(['/api/feed'], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.filter((post: any) => post.id !== postToDelete);
+      });
+      
       setDeleteDialogOpen(false);
       setPostToDelete(null);
       toast({
