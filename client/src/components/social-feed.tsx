@@ -601,10 +601,15 @@ export default function SocialFeed() {
   console.log('Can pin posts:', canPinPosts);
 
   // Bible verse search functionality using our comprehensive database
-  const { data: searchedVerses, isLoading: isSearchingVerses } = useQuery({
+  const { data: verseSearchResults, isLoading: isSearchingVerses } = useQuery({
     queryKey: ['/api/bible/search', verseQuery],
     enabled: !!verseQuery && verseQuery.length >= 2,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    select: (data) => {
+      // Ensure data is properly formatted
+      if (!data) return [];
+      return Array.isArray(data) ? data : [data];
+    }
   });
 
   // Enhanced composer handlers
@@ -1270,10 +1275,11 @@ export default function SocialFeed() {
                 variant="ghost"
                 size="sm"
                 onClick={() => mediaInputRef.current?.click()}
-                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400"
                 title="Add photos or videos"
               >
-                <Image className="w-4 h-4" />
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Photo
               </Button>
 
               {/* Voice Prayer Recording */}
