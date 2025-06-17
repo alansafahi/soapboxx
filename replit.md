@@ -142,6 +142,16 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 17, 2025: Fixed Audio Bible page dark mode visibility issues throughout entire interface
+  - Updated main page background from light blue gradient to proper dark gray (gray-900 to gray-800) for dark mode
+  - Fixed page title and subtitle text colors to white and gray-300 for proper contrast in dark mode
+  - Enhanced mood selection section with white text headings and gray-600 borders for category separators
+  - Updated verse display cards with gray-800 backgrounds and white text in dark mode
+  - Fixed voice quality selection buttons with purple theming and proper dark mode contrast
+  - Replaced all blue color schemes with consistent purple branding (purple-500, purple-600, purple-900)
+  - Updated audio progress indicators and status messages with purple theming and dark mode compatibility
+  - Fixed Custom Routine Builder section with proper dark mode styling for verse browser and selection cards
+  - All text, backgrounds, borders, and interactive elements now fully visible and accessible in dark mode
 - June 17, 2025: Completed dark mode church discovery implementation to match main page design consistency
   - Changed church card backgrounds to proper dark theme (gray-800) matching main page's dark background approach
   - Updated text colors to white for headings and light gray (gray-300) for secondary text for proper dark mode contrast

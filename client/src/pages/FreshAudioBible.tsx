@@ -1100,7 +1100,7 @@ export default function FreshAudioBible() {
                             </Badge>
                             <Badge variant="outline">{verse.category}</Badge>
                           </div>
-                          <p className="text-gray-700 leading-relaxed">{verse.text}</p>
+                          <p className="text-gray-700 dark:text-gray-200 leading-relaxed">{verse.text}</p>
                           {verse.topicTags && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {verse.topicTags.map((tag, i) => (
@@ -1138,8 +1138,8 @@ export default function FreshAudioBible() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                     <p>No verses found. Try adjusting your search or filter.</p>
                   </div>
                 )}
