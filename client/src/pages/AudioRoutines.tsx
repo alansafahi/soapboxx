@@ -285,79 +285,93 @@ export default function AudioRoutines() {
   };
 
   const createForestRain = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
-    // Create gentle raindrops with varying frequencies and timing
-    const rainDrops = 15; // Number of raindrop sounds
+    // Create continuous rain patterns with overlapping droplets
+    const createRainLayer = (baseFreq: number, dropletCount: number, interval: number) => {
+      for (let i = 0; i < Math.floor(duration / interval); i++) {
+        const startTime = audioContext.currentTime + (i * interval) + (Math.random() * interval * 0.8);
+        
+        // Create multiple droplets at this time interval
+        for (let j = 0; j < dropletCount; j++) {
+          const dropletDelay = Math.random() * 0.5; // Spread droplets within 500ms
+          const actualStartTime = startTime + dropletDelay;
+          
+          if (actualStartTime < audioContext.currentTime + duration) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            
+            // Randomize frequency for natural variation
+            const freq = baseFreq + (Math.random() * 400) - 200;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, actualStartTime);
+            
+            // High-pass filter for raindrop clarity
+            filter.type = 'highpass';
+            filter.frequency.setValueAtTime(600 + (Math.random() * 200), actualStartTime);
+            filter.Q.setValueAtTime(0.3, actualStartTime);
+            
+            // Sharp attack, quick decay for raindrop effect
+            const volume = 0.008 + (Math.random() * 0.005);
+            gain.gain.setValueAtTime(0, actualStartTime);
+            gain.gain.linearRampToValueAtTime(volume, actualStartTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, actualStartTime + 0.15 + (Math.random() * 0.1));
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+            
+            osc.start(actualStartTime);
+            osc.stop(actualStartTime + 0.3);
+            oscillators.push(osc);
+          }
+        }
+      }
+    };
     
-    for (let i = 0; i < rainDrops; i++) {
-      const startTime = audioContext.currentTime + (Math.random() * duration * 0.9);
-      const freq = 800 + (Math.random() * 1500); // Random frequencies for natural rain variation
-      
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
-      
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, startTime);
-      
-      filter.type = 'highpass';
-      filter.frequency.setValueAtTime(500, startTime);
-      filter.Q.setValueAtTime(0.5, startTime);
-      
-      // Create raindrop envelope - quick attack, gentle decay
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.02 + (Math.random() * 0.01), startTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3 + (Math.random() * 0.5));
-      
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterGain);
-      
-      osc.start(startTime);
-      osc.stop(startTime + 1);
-      oscillators.push(osc);
-    }
+    // Create multiple rain layers for rich texture
+    createRainLayer(1200, 3, 0.8); // Main rain layer - medium droplets
+    createRainLayer(1800, 2, 1.2); // Higher frequency droplets
+    createRainLayer(900, 2, 1.5);  // Lower frequency droplets
     
-    // Add subtle forest ambience with low-frequency wind sounds
-    const ambientFreqs = [80, 120, 160];
-    ambientFreqs.forEach((freq, index) => {
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
-      
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-      
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(200 + (index * 50), audioContext.currentTime);
-      filter.Q.setValueAtTime(0.5, audioContext.currentTime);
-      
-      // Very subtle forest wind ambience
-      gain.gain.setValueAtTime(0, audioContext.currentTime);
-      gain.gain.linearRampToValueAtTime(0.015 - (index * 0.003), audioContext.currentTime + 5);
-      gain.gain.setValueAtTime(0.012 - (index * 0.002), audioContext.currentTime + duration - 5);
-      gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
-      
-      // Add gentle modulation for natural wind movement
-      const lfo = audioContext.createOscillator();
-      const lfoGain = audioContext.createGain();
-      lfo.frequency.setValueAtTime(0.15 + (index * 0.05), audioContext.currentTime);
-      lfo.type = 'sine';
-      lfoGain.gain.setValueAtTime(15, audioContext.currentTime);
-      
-      lfo.connect(lfoGain);
-      lfoGain.connect(filter.frequency);
-      
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterGain);
-      
-      osc.start(audioContext.currentTime);
-      osc.stop(audioContext.currentTime + duration);
-      lfo.start(audioContext.currentTime);
-      lfo.stop(audioContext.currentTime + duration);
-      
-      oscillators.push(osc);
-    });
+    // Add very subtle forest wind ambience (much quieter)
+    const windFreq = 85;
+    const windOsc = audioContext.createOscillator();
+    const windGain = audioContext.createGain();
+    const windFilter = audioContext.createBiquadFilter();
+    
+    windOsc.type = 'sawtooth';
+    windOsc.frequency.setValueAtTime(windFreq, audioContext.currentTime);
+    
+    windFilter.type = 'lowpass';
+    windFilter.frequency.setValueAtTime(150, audioContext.currentTime);
+    windFilter.Q.setValueAtTime(0.3, audioContext.currentTime);
+    
+    // Very quiet wind - just a subtle background
+    windGain.gain.setValueAtTime(0, audioContext.currentTime);
+    windGain.gain.linearRampToValueAtTime(0.004, audioContext.currentTime + 8);
+    windGain.gain.setValueAtTime(0.003, audioContext.currentTime + duration - 8);
+    windGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+    
+    // Gentle wind modulation
+    const windLfo = audioContext.createOscillator();
+    const windLfoGain = audioContext.createGain();
+    windLfo.frequency.setValueAtTime(0.1, audioContext.currentTime);
+    windLfo.type = 'sine';
+    windLfoGain.gain.setValueAtTime(8, audioContext.currentTime);
+    
+    windLfo.connect(windLfoGain);
+    windLfoGain.connect(windFilter.frequency);
+    
+    windOsc.connect(windFilter);
+    windFilter.connect(windGain);
+    windGain.connect(masterGain);
+    
+    windOsc.start(audioContext.currentTime);
+    windOsc.stop(audioContext.currentTime + duration);
+    windLfo.start(audioContext.currentTime);
+    windLfo.stop(audioContext.currentTime + duration);
+    
+    oscillators.push(windOsc);
   };
 
   const createSoftPiano = (audioContext: AudioContext, masterGain: GainNode, oscillators: OscillatorNode[], duration: number) => {
