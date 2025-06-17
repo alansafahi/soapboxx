@@ -52,7 +52,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
             Connect with Your 
-            <span className="text-faith-blue"> Faith Community</span>
+            <span className="text-purple-600"> Faith Community</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Join a platform that brings together believers, churches, and communities through 
@@ -83,10 +83,10 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-2 hover:border-faith-blue transition-colors">
+            <Card className="border-2 hover:border-purple-600 transition-colors">
               <CardHeader>
-                <div className="w-12 h-12 bg-light-blue rounded-xl flex items-center justify-center mb-4">
-                  <MessageCircle className="w-6 h-6 text-faith-blue" />
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                  <MessageCircle className="w-6 h-6 text-purple-600" />
                 </div>
                 <CardTitle>Community Discussions</CardTitle>
               </CardHeader>
@@ -98,7 +98,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-faith-blue transition-colors">
+            <Card className="border-2 hover:border-purple-600 transition-colors">
               <CardHeader>
                 <div className="w-12 h-12 bg-warm-yellow rounded-xl flex items-center justify-center mb-4">
                   <Calendar className="w-6 h-6 text-faith-gold" />
@@ -113,7 +113,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-faith-blue transition-colors">
+            <Card className="border-2 hover:border-purple-600 transition-colors">
               <CardHeader>
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
                   <Heart className="w-6 h-6 text-green-600" />
@@ -128,7 +128,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-faith-blue transition-colors">
+            <Card className="border-2 hover:border-purple-600 transition-colors">
               <CardHeader>
                 <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-purple-600" />
@@ -143,7 +143,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-faith-blue transition-colors">
+            <Card className="border-2 hover:border-purple-600 transition-colors">
               <CardHeader>
                 <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
                   <Star className="w-6 h-6 text-orange-600" />
@@ -158,10 +158,10 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-faith-blue transition-colors">
+            <Card className="border-2 hover:border-purple-600 transition-colors">
               <CardHeader>
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                  <MessageCircle className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                  <MessageCircle className="w-6 h-6 text-purple-600" />
                 </div>
                 <CardTitle>Mobile First</CardTitle>
               </CardHeader>

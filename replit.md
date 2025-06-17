@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 17, 2025: Fixed brand consistency by restoring purple color scheme throughout all landing pages
+  - Updated landing.tsx, clean-landing.tsx, and simple-landing.tsx to use purple instead of blue
+  - Fixed hero sections, CTA buttons, feature icons, and hover states to maintain consistent SoapBox branding
+  - Replaced all faith-blue, blue-600, and related classes with purple-600 equivalents
+  - Removed old authentication files causing "Unknown authentication strategy" errors
 - June 17, 2025: Completed optimal devotional routine experience with full content display
   - Enhanced devotional cards to show complete scripture text, guided prayer, and closing blessing when expanded
   - Added purple-highlighted scripture boxes with proper visual emphasis and typography
