@@ -4620,6 +4620,51 @@ Return JSON with this exact structure:
     }
   });
 
+  // Create discussion endpoint
+  app.post("/api/discussions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      const { type, content, mood, audience, linkedVerse, attachedMedia, title } = req.body;
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+
+      // Set default type if not provided
+      const postType = type || 'discussion';
+      
+      // Set title based on type and audience
+      let defaultTitle = 'Community Discussion';
+      if (postType === 'share') {
+        if (audience === 'private') {
+          defaultTitle = 'Private Journal';
+        } else if (audience === 'church') {
+          defaultTitle = 'Church Share';
+        } else {
+          defaultTitle = 'Community Share';
+        }
+      }
+      
+      const post = await storage.createDiscussion({
+        title: title || defaultTitle,
+        content: content.trim(),
+        authorId: userId,
+        churchId: null,
+        category: postType === 'discussion' ? 'general' : 'share',
+        audience: audience || 'public',
+        isPublic: true,
+        mood: mood || null,
+        attachedMedia: attachedMedia || null,
+        linkedVerse: linkedVerse || null
+      });
+      
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Error creating discussion:", error);
+      res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+
   // Discussion interaction endpoints
   app.post("/api/discussions/:id/like", isAuthenticated, async (req: any, res) => {
     try {
