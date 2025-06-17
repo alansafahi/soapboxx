@@ -1311,16 +1311,16 @@ export default function SocialFeed() {
 
                 {/* Bible Verse Search Dropdown */}
                 {showVerseSearch && (
-                  <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-purple-200 rounded-lg shadow-lg min-w-80 max-w-96">
-                    <div className="p-3 bg-purple-50 rounded-t-lg">
+                  <div className="absolute top-full right-0 mt-1 z-[60] bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-600 rounded-lg shadow-xl min-w-80 max-w-96">
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-t-lg">
                       <div className="flex items-center space-x-2 mb-2">
-                        <BookText className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm font-medium text-purple-800">Link Bible Verse</span>
+                        <BookText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Link Bible Verse</span>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setShowVerseSearch(false)}
-                          className="h-6 w-6 p-0 text-purple-400 hover:text-purple-600 ml-auto"
+                          className="h-6 w-6 p-0 text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 ml-auto"
                         >
                           <X className="h-3 w-3" />
                         </Button>
@@ -1330,17 +1330,17 @@ export default function SocialFeed() {
                         placeholder="Search for a verse (e.g., John 3:16, love, hope, faith)"
                         value={verseQuery}
                         onChange={(e) => setVerseQuery(e.target.value)}
-                        className="w-full p-2 text-sm border border-purple-200 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full p-2 text-sm border border-purple-200 dark:border-purple-600 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
                     {verseQuery && (
                       <div className="max-h-64 overflow-y-auto">
                         {isSearchingVerses ? (
-                          <div className="p-4 text-center text-sm text-gray-500">
-                            Searching 42,000+ verses...
+                          <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                            Searching Bible verses...
                           </div>
-                        ) : searchedVerses && searchedVerses.length > 0 ? (
-                          searchedVerses.slice(0, 6).map((verse: any, index: number) => (
+                        ) : verseSearchResults && verseSearchResults.length > 0 ? (
+                          verseSearchResults.slice(0, 6).map((verse: any, index: number) => (
                             <button
                               key={index}
                               onClick={() => {
@@ -1351,23 +1351,23 @@ export default function SocialFeed() {
                                 setShowVerseSearch(false);
                                 setVerseQuery("");
                               }}
-                              className="w-full text-left p-3 hover:bg-purple-50 border-b border-gray-100 last:border-b-0"
+                              className="w-full text-left p-3 hover:bg-purple-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
                             >
-                              <div className="font-medium text-purple-800 text-sm">
+                              <div className="font-medium text-purple-800 dark:text-purple-300 text-sm">
                                 {verse.verseReference || verse.reference}
                               </div>
-                              <div className="text-purple-600 text-xs mt-1 line-clamp-2">
+                              <div className="text-purple-600 dark:text-purple-400 text-xs mt-1 line-clamp-2">
                                 {verse.verseText || verse.text}
                               </div>
                               {verse.category && (
-                                <div className="text-xs text-purple-500 mt-1">
+                                <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">
                                   Category: {verse.category}
                                 </div>
                               )}
                             </button>
                           ))
                         ) : verseQuery.length >= 2 ? (
-                          <div className="p-4 text-center text-sm text-gray-500">
+                          <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                             No verses found for "{verseQuery}"
                           </div>
                         ) : null}
