@@ -44,7 +44,8 @@ import {
   PinOff,
   MoreHorizontal,
   Search,
-  Book
+  Book,
+  Loader2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -614,7 +615,14 @@ export default function SocialFeed() {
 
   // Enhanced composer handlers
   const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleMediaUpload triggered');
     const files = Array.from(event.target.files || []);
+    console.log('Selected files:', files);
+    
+    if (files.length === 0) {
+      console.log('No files selected');
+      return;
+    }
     
     // Convert files to base64 data URLs for storage and display
     const mediaPromises = files.map(file => {
@@ -634,7 +642,14 @@ export default function SocialFeed() {
     });
     
     const mediaData = await Promise.all(mediaPromises);
+    console.log('Processed media data:', mediaData);
     setAttachedMedia(prev => [...prev, ...mediaData]);
+    
+    // Show success toast
+    toast({
+      title: "Photo uploaded successfully",
+      description: `${files.length} file(s) attached to your post`,
+    });
   };
 
   const removeAttachedMedia = (index: number) => {
@@ -1274,7 +1289,11 @@ export default function SocialFeed() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => mediaInputRef.current?.click()}
+                onClick={() => {
+                  console.log('Photo button clicked');
+                  console.log('mediaInputRef.current:', mediaInputRef.current);
+                  mediaInputRef.current?.click();
+                }}
                 className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 px-3 py-1.5 h-8 flex-shrink-0"
                 title="Add photos or videos"
               >
