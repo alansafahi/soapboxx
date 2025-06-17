@@ -1928,21 +1928,35 @@ export default function AudioRoutines() {
                         </CardHeader>
                         
                         <CardContent className="pt-0 space-y-4">
-                          <div className="space-y-3 text-sm">
+                          <div className="space-y-4 text-sm">
                             <div>
-                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Opening Reflection</h4>
-                              <p className="text-gray-600 dark:text-gray-400 line-clamp-2">
+                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Opening Reflection</h4>
+                              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                                 {routine.segments.openingReflection}
                               </p>
                             </div>
                             
                             <div>
-                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Scripture</h4>
-                              <p className="text-purple-600 dark:text-purple-400 font-medium">
+                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Scripture Reading</h4>
+                              <p className="text-purple-600 dark:text-purple-400 font-medium mb-2">
                                 {routine.segments.scriptureReading.reference}
                               </p>
-                              <p className="text-gray-600 dark:text-gray-400 line-clamp-2 italic">
+                              <p className="text-gray-600 dark:text-gray-400 italic leading-relaxed bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-purple-400">
                                 "{routine.segments.scriptureReading.text}"
+                              </p>
+                            </div>
+
+                            <div>
+                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Guided Prayer</h4>
+                              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                {routine.segments.guidedPrayer}
+                              </p>
+                            </div>
+
+                            <div>
+                              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Closing Blessing</h4>
+                              <p className="text-gray-600 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
+                                {routine.segments.closingBlessing}
                               </p>
                             </div>
                           </div>
