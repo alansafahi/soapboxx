@@ -1269,241 +1269,6 @@ export default function SocialFeed() {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 flex-wrap overflow-hidden min-w-0 flex-1">
-              {/* Enhanced Composer Toolbar - X/Facebook Style */}
-              
-              {/* Media Upload */}
-              <input
-                type="file"
-                ref={mediaInputRef}
-                onChange={handleMediaUpload}
-                multiple
-                accept="image/*,video/*"
-                className="hidden"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (mediaInputRef.current) {
-                    mediaInputRef.current.click();
-                  }
-                }}
-                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 px-2 py-1 h-7 text-xs flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
-                title="Add photos or videos"
-                type="button"
-              >
-                <ImageIcon className="w-3 h-3 mr-1" />
-                Photo
-              </Button>
-
-              {/* Voice Prayer Recording */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                className={`px-2 py-1 h-7 text-xs flex-shrink-0 border-0 focus:ring-0 focus:outline-none ${
-                  isRecording 
-                    ? "text-red-600 hover:text-red-700 bg-red-50 dark:bg-red-900/20" 
-                    : "text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20"
-                }`}
-                title={isRecording ? "Stop voice prayer" : "Record voice prayer"}
-              >
-                {isRecording ? <MicOff className="w-3 h-3 mr-1" /> : <Mic className="w-3 h-3 mr-1" />}
-                Voice
-              </Button>
-
-              {/* Feeling/Mood Selection */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowMoodSelector(!showMoodSelector)}
-                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20 px-2 py-1 h-7 text-xs flex-shrink-0 border-0 focus:ring-0 focus:outline-none"
-                title="Share your feeling"
-              >
-                <Heart className="w-3 h-3 mr-1" />
-                Feeling
-              </Button>
-
-              {/* Bible Verse Linking */}
-              <div className="relative flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 px-2 py-1 h-7 text-xs border-0 focus:ring-0 focus:outline-none"
-                  title="Link Bible verse"
-                >
-                  <BookText className="w-3 h-3 mr-1" />
-                  Verse
-                </Button>
-
-                {/* Bible Verse Search Dropdown */}
-                {showVerseSearch && (
-                  <div className="absolute top-full right-0 mt-1 z-[60] bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-600 rounded-lg shadow-xl min-w-80 max-w-96">
-                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-t-lg">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <BookText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                        <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Link Bible Verse</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowVerseSearch(false)}
-                          className="h-6 w-6 p-0 text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 ml-auto"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Search for a verse (e.g., John 3:16, love, hope, faith)"
-                        value={verseQuery}
-                        onChange={(e) => setVerseQuery(e.target.value)}
-                        className="w-full p-2 text-sm border border-purple-200 dark:border-purple-600 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      />
-                    </div>
-                    {verseQuery && (
-                      <div className="max-h-64 overflow-y-auto">
-                        {isSearchingVerses ? (
-                          <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                            Searching Bible verses...
-                          </div>
-                        ) : verseSearchResults && verseSearchResults.length > 0 ? (
-                          verseSearchResults.slice(0, 6).map((verse: any, index: number) => (
-                            <button
-                              key={index}
-                              onClick={() => {
-                                setLinkedVerse({
-                                  reference: verse.verseReference || verse.reference,
-                                  text: verse.verseText || verse.text
-                                });
-                                setShowVerseSearch(false);
-                                setVerseQuery("");
-                              }}
-                              className="w-full text-left p-3 hover:bg-purple-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
-                            >
-                              <div className="font-medium text-purple-800 dark:text-purple-300 text-sm">
-                                {verse.verseReference || verse.reference}
-                              </div>
-                              <div className="text-purple-600 dark:text-purple-400 text-xs mt-1 line-clamp-2">
-                                {verse.verseText || verse.text}
-                              </div>
-                              {verse.category && (
-                                <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">
-                                  Category: {verse.category}
-                                </div>
-                              )}
-                            </button>
-                          ))
-                        ) : verseQuery.length >= 2 ? (
-                          <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                            No verses found for "{verseQuery}"
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Verse Locator */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  // Open verse lookup modal or navigate to verse search
-                  window.open('/scripture-lookup', '_blank');
-                }}
-                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-                title="Verse Locator - Look up specific Bible verses"
-              >
-                <Search className="w-4 h-4" />
-              </Button>
-
-              {/* Mood/Activity Button */}
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowMoodDropdown(!showMoodDropdown)}
-                  className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50"
-                >
-                  <Smile className="w-4 h-4 mr-2" />
-                  Mood
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-
-                {/* Comprehensive Mood Dropdown */}
-                {showMoodDropdown && (
-                  <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-md shadow-lg min-w-80 max-h-96 overflow-y-auto">
-                    <div className="p-2">
-                      {moodCategories.map((category) => (
-                        <div key={category.name} className="mb-4 last:mb-0">
-                          <div className="text-sm font-semibold text-gray-700 mb-1 px-2">
-                            {category.name}
-                          </div>
-                          <div className="text-xs text-gray-500 mb-2 px-2">
-                            {category.description}
-                          </div>
-                          <div className="grid grid-cols-3 gap-1">
-                            {category.moods.map((mood) => (
-                              <Button
-                                key={mood.id}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleMoodSelect(mood.id)}
-                                className="justify-start h-auto p-2 text-left hover:bg-gray-50 text-xs"
-                              >
-                                <span className="mr-1 text-sm">{mood.icon}</span>
-                                <span className="text-xs">{mood.label}</span>
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-            </div>
-
-
-
-            {/* Hashtag/Mention Autocomplete */}
-            {showMentions && (
-              <div className="mt-2 border border-gray-200 rounded-lg p-2 bg-gray-50 max-h-32 overflow-y-auto">
-                <div className="text-xs text-gray-500 mb-1">
-                  {mentionQuery.startsWith('@') ? 'Mention someone' : 'Add hashtag'}
-                </div>
-                <div className="space-y-1">
-                  {(mentionQuery.startsWith('@') ? 
-                    ['@PastorDavid', '@SisterMaria', '@YouthLeader', '@WorshipTeam'] :
-                    ['#prayer', '#faith', '#worship', '#fellowship', '#blessing', '#testimony']
-                  ).filter(item => 
-                    item.toLowerCase().includes(mentionQuery.toLowerCase())
-                  ).slice(0, 4).map((item, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        const words = newPost.split(' ');
-                        words[words.length - 1] = item;
-                        setNewPost(words.join(' ') + ' ');
-                        setShowMentions(false);
-                        setMentionQuery('');
-                      }}
-                      className="block w-full text-left p-1 hover:bg-gray-100 rounded text-sm text-blue-600"
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Action Buttons Row */}
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 overflow-hidden">
               <div className="flex items-center gap-1 flex-wrap min-w-0 flex-1">
@@ -1513,6 +1278,125 @@ export default function SocialFeed() {
                     type="file"
                     multiple
                     accept="image/*,video/*,audio/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-600 hover:text-green-600 hover:bg-green-50 p-1.5 h-8 w-8"
+                    type="button"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                  </Button>
+                </label>
+
+                {/* Audio Recording */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                  className={`p-1.5 h-8 w-8 ${
+                    isRecording 
+                      ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
+                      : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                  }`}
+                  title={isRecording ? 'Stop recording' : 'Record voice message'}
+                >
+                  <Mic className="w-4 h-4" />
+                </Button>
+
+                {/* Mood Selector */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowMoodDropdown(!showMoodDropdown)}
+                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 p-1.5 h-8 w-8"
+                    title="Add feeling"
+                  >
+                    <Smile className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Bible Verse Link */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowVerseSearch(!showVerseSearch)}
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 p-1.5 h-8 w-8"
+                  title="Add Bible verse"
+                >
+                  <Book className="w-4 h-4" />
+                </Button>
+
+                {/* Audience Selector */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
+                    className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 p-1.5 h-8 w-8"
+                    title={`Post visibility: ${audienceOptions.find(opt => opt.id === selectedAudience)?.label || 'Public'}`}
+                  >
+                    {React.createElement(audienceOptions.find(opt => opt.id === selectedAudience)?.icon || Globe, { className: "w-4 h-4" })}
+                  </Button>
+
+                  {/* Audience Dropdown */}
+                  {showAudienceDropdown && (
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-64">
+                      <div className="p-2">
+                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">Who can see this?</div>
+                        {audienceOptions.map((audience) => (
+                          <Button
+                            key={audience.id}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedAudience(audience.id as 'public' | 'church' | 'private');
+                              setShowAudienceDropdown(false);
+                            }}
+                            className={`w-full justify-start h-auto p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                              selectedAudience === audience.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              {React.createElement(audience.icon, { className: `w-5 h-5 ${audience.color} mt-0.5` })}
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm text-gray-900 dark:text-white">{audience.label}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{audience.description}</div>
+                              </div>
+                              {selectedAudience === audience.id && (
+                                <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center mt-0.5">
+                                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                              )}
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleCreatePost}
+                disabled={!newPost.trim() || createPostMutation.isPending}
+                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium p-2 h-8 w-8 border-0 flex-shrink-0 ml-2"
+                title={createPostMutation.isPending ? 'Posting...' : 'Share post'}
+              >
+                <Send className="w-4 h-4 text-white" />
+              </Button>
+            </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Feed Posts */}
+      <div className="space-y-6">
+        {Array.isArray(feedPosts) && feedPosts.length > 0 ? feedPosts.map((post: FeedPost) => (
                     onChange={handleFileUpload}
                     className="hidden"
                   />
