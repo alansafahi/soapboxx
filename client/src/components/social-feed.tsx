@@ -1619,9 +1619,9 @@ export default function SocialFeed() {
               <Button 
                 onClick={handleCreatePost}
                 disabled={!newPost.trim() || createPostMutation.isPending}
-                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-6 py-2 border-0"
+                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-3 py-1.5 h-7 text-xs border-0 flex-shrink-0"
               >
-                <Send className="w-4 h-4 mr-2 text-white" />
+                <Send className="w-3 h-3 mr-1 text-white" />
                 {createPostMutation.isPending ? 'Posting...' : 'Share'}
               </Button>
             </div>
