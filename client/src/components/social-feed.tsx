@@ -511,7 +511,7 @@ export default function SocialFeed() {
 
                   {/* Bible Verse Search Dropdown */}
                   {showVerseSearch && (
-                    <div className="absolute top-full right-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg w-80">
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg w-72 max-w-[calc(100vw-2rem)]">
                       <div className="p-3">
                         <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">Search Bible Verses</div>
                         <div className="relative mb-3">
