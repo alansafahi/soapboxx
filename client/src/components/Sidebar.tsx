@@ -146,36 +146,57 @@ export default function Sidebar() {
       {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         {/* Logo and Toggle */}
-        <div className="flex items-center justify-between mb-4">
-          <Link href="/" className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
-            <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
-              <img 
-                src={soapboxLogo} 
-                alt="SoapBox Logo" 
-                className="w-12 h-12 object-contain rounded-lg"
-              />
-            </div>
-            {!isCollapsed && (
-              <div className="flex flex-col min-w-0 flex-1">
-                <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox</div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">Super App</div>
-              </div>
-            )}
-          </Link>
-          
-          {/* Collapse Toggle Button */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="w-8 h-8" 
-            onClick={() => setIsCollapsed(!isCollapsed)}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            ) : (
-              <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            )}
-          </Button>
+        <div className={`flex items-center mb-4 ${isCollapsed ? 'flex-col space-y-2' : 'justify-between'}`}>
+          {!isCollapsed ? (
+            <>
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
+                  <img 
+                    src={soapboxLogo} 
+                    alt="SoapBox Logo" 
+                    className="w-12 h-12 object-contain rounded-lg"
+                  />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox</div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">Super App</div>
+                </div>
+              </Link>
+              
+              {/* Collapse Toggle Button - Expanded Mode */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="w-8 h-8" 
+                onClick={() => setIsCollapsed(!isCollapsed)}
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              </Button>
+            </>
+          ) : (
+            <>
+              {/* Logo - Collapsed Mode */}
+              <Link href="/" className="flex items-center justify-center">
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                  <img 
+                    src={soapboxLogo} 
+                    alt="SoapBox Logo" 
+                    className="w-8 h-8 object-contain rounded-lg"
+                  />
+                </div>
+              </Link>
+              
+              {/* Expand Toggle Button - Collapsed Mode */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="w-8 h-8" 
+                onClick={() => setIsCollapsed(!isCollapsed)}
+              >
+                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Header Actions */}
