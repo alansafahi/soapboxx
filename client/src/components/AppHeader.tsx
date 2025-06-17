@@ -132,7 +132,7 @@ export default function AppHeader() {
   // Filter navigation items based on current active role
   const getVisibleGroups = () => {
     // Use current active role from role switcher, fallback to base user role
-    const currentRole = roleData?.currentRole || userRole?.role || '';
+    const currentRole = (roleData as any)?.currentRole || (userRole as any)?.role || '';
     
     return navigationGroups.map(group => ({
       ...group,
