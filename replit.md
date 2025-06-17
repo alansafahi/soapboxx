@@ -152,6 +152,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Added missing POST /api/discussions endpoint with proper authentication handling
   - Updated user avatar display to show proper initials from user name instead of undefined properties
   - All post composer buttons now fully functional: photo upload confirmed working with file browser and preview thumbnails
+  - Added image display functionality to social feed posts to show uploaded media properly
+  - Complete post creation and display workflow now functional end-to-end
 - June 17, 2025: Fixed SoapBox logo and company name layout in sidebar navigation
   - Enhanced header layout with proper flexbox structure for clean logo display
   - Increased logo size from 8x8 to 10x10 pixels for better visibility and branding

@@ -683,6 +683,26 @@ export default function SocialFeed() {
                 </div>
               </div>
 
+              {/* Attached Media */}
+              {post.attachedMedia && post.attachedMedia.length > 0 && (
+                <div className="mt-4">
+                  <div className="grid grid-cols-1 gap-2">
+                    {post.attachedMedia.map((media: any, index: number) => (
+                      <div key={index} className="relative">
+                        {media.type?.startsWith('image/') && (
+                          <img
+                            src={media.url}
+                            alt={media.name || 'Attached image'}
+                            className="w-full max-w-md rounded-lg border border-gray-200 dark:border-gray-700"
+                            style={{ maxHeight: '400px', objectFit: 'cover' }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Post Actions */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center space-x-4">
