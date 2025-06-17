@@ -286,7 +286,7 @@ export default function SocialFeed() {
 
             {/* Action Buttons Row - Icon Only with Tooltips */}
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-1 flex-wrap min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
                 {/* Media Upload */}
                 <label className="cursor-pointer" title="Add photo">
                   <input
