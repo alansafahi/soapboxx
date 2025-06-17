@@ -1289,12 +1289,25 @@ export default function SocialFeed() {
                 onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
                 className={`${
                   isRecording 
-                    ? "text-red-600 hover:text-red-700 bg-red-50" 
-                    : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                    ? "text-red-600 hover:text-red-700 bg-red-50 dark:bg-red-900/20" 
+                    : "text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20"
                 }`}
                 title={isRecording ? "Stop voice prayer" : "Record voice prayer"}
               >
-                {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                {isRecording ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
+                Voice
+              </Button>
+
+              {/* Feeling/Mood Selection */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMoodSelector(!showMoodSelector)}
+                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 dark:text-gray-400 dark:hover:text-orange-400 dark:hover:bg-orange-900/20"
+                title="Share your feeling"
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Feeling
               </Button>
 
               {/* Bible Verse Linking */}
@@ -1303,10 +1316,11 @@ export default function SocialFeed() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowVerseSearch(!showVerseSearch)}
-                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20"
                   title="Link Bible verse"
                 >
-                  <BookText className="w-4 h-4" />
+                  <BookText className="w-4 h-4 mr-2" />
+                  Verse
                 </Button>
 
                 {/* Bible Verse Search Dropdown */}

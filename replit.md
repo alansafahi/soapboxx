@@ -142,6 +142,16 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 17, 2025: Fixed post composer button formatting and enhanced dark mode compatibility
+  - Fixed verse search dropdown positioning to avoid overlap with Daily Check-In widget on right sidebar
+  - Enhanced Bible verse search with proper dark mode styling and comprehensive error handling
+  - Updated post composer action buttons (Photo, Voice, Feeling, Verse) with consistent horizontal layout and proper text labels
+  - Added missing "Feeling" button with Heart icon and orange hover effects
+  - Fixed "Voice" button with proper text label and red theming for voice recording states
+  - Enhanced "Verse" button with BookText icon and purple theming matching app branding
+  - Improved verse search dropdown positioning with higher z-index and right-side alignment
+  - Added comprehensive dark mode support throughout verse search interface with proper contrast colors
+  - All post composer buttons now properly formatted with consistent styling and clear labeling
 - June 17, 2025: Successfully completed left sidebar navigation restoration and comprehensive post composer functionality
   - Created complete Sidebar.tsx component with collapsible navigation groups matching user's preferred layout
   - Updated App.tsx to use flex layout with left sidebar instead of top header navigation
