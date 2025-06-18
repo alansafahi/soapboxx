@@ -320,10 +320,11 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Avatar className="h-32 w-32">
                       <AvatarImage 
-                        src={isEditing ? (profileData.profileImageUrl || displayProfile?.profileImageUrl || undefined) : (displayProfile?.profileImageUrl || undefined)} 
-                        alt={displayName} 
+                        src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || undefined) : (profile?.profileImageUrl || undefined)} 
+                        alt={displayName}
+                        className="object-cover"
                       />
-                      <AvatarFallback className="text-2xl">
+                      <AvatarFallback className="text-2xl bg-purple-600 text-white">
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>
