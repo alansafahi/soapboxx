@@ -165,7 +165,18 @@ export default function ProfilePage() {
 
   const handleSaveProfile = () => {
     const updatedData = {
-      ...profileData,
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      email: profileData.email,
+      bio: profileData.bio,
+      mobileNumber: profileData.mobileNumber,
+      address: profileData.address,
+      city: profileData.city,
+      state: profileData.state,
+      zipCode: profileData.zipCode,
+      country: profileData.country,
+      denomination: profileData.denomination,
+      profileImageUrl: profileData.profileImageUrl,
       interests: selectedInterests,
     };
     updateProfileMutation.mutate(updatedData);

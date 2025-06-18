@@ -4562,7 +4562,7 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      // Update user profile
+      // Update user profile - map frontend fields to database schema
       const updatedUser = await storage.updateUserProfile(userId, {
         firstName,
         lastName,
@@ -4571,12 +4571,12 @@ Return JSON with this exact structure:
         address,
         bio,
         profileImageUrl,
-        spiritualInterests,
-        dateOfBirth,
-        gender,
-        maritalStatus,
-        occupation,
-        emergencyContact,
+        interests: spiritualInterests || req.body.interests, // Handle both field names
+        city: req.body.city,
+        state: req.body.state,
+        zipCode: req.body.zipCode,
+        country: req.body.country,
+        denomination: req.body.denomination,
         updatedAt: new Date()
       });
 
