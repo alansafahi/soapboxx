@@ -388,8 +388,8 @@ export default function ProfilePage() {
                             {profile?.email || "No email provided"}
                           </p>
                         </div>
-                        {profile?.bio && (
-                          <p className="text-gray-600 dark:text-gray-300">{profile.bio}</p>
+                        {displayProfile?.bio && (
+                          <p className="text-gray-600 dark:text-gray-300">{displayProfile.bio}</p>
                         )}
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
@@ -438,11 +438,11 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{profile?.email || "Not provided"}</span>
+                      <span>{displayProfile?.email || "Not provided"}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{profile?.mobileNumber || "Not provided"}</span>
+                      <span>{displayProfile?.mobileNumber || "Not provided"}</span>
                     </div>
                   </div>
                 )}
@@ -501,12 +501,12 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div>
-                    {profile?.address || profile?.city ? (
+                    {displayProfile?.address || displayProfile?.city ? (
                       <p className="text-gray-600 dark:text-gray-300">
-                        {profile?.address && `${profile.address}, `}
-                        {profile?.city && `${profile.city}, `}
-                        {profile?.state && `${profile.state} `}
-                        {profile?.zipCode}
+                        {displayProfile?.address && `${displayProfile.address}, `}
+                        {displayProfile?.city && `${displayProfile.city}, `}
+                        {displayProfile?.state && `${displayProfile.state} `}
+                        {displayProfile?.zipCode}
                       </p>
                     ) : (
                       <p className="text-muted-foreground">No address provided</p>
@@ -564,14 +564,14 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Denomination</p>
                       <p className="text-gray-900 dark:text-white">
-                        {profile?.denomination || "Not specified"}
+                        {displayProfile?.denomination || "Not specified"}
                       </p>
                     </div>
-                    {profile?.interests && profile.interests.length > 0 && (
+                    {displayProfile?.interests && displayProfile.interests.length > 0 && (
                       <div>
                         <p className="text-sm font-medium text-muted-foreground mb-2">Spiritual Interests</p>
                         <div className="flex flex-wrap gap-2">
-                          {profile.interests.map((interest) => (
+                          {displayProfile.interests.map((interest) => (
                             <Badge key={interest} variant="secondary">
                               {interest}
                             </Badge>
