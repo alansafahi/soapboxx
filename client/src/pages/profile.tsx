@@ -322,7 +322,15 @@ export default function ProfilePage() {
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   {/* Profile Picture */}
                   <div className="relative">
-                    {(profile?.profileImageUrl || profileData.profileImageUrl) ? (
+                    {(() => {
+                      console.log('=== PROFILE IMAGE DEBUG ===');
+                      console.log('profile:', profile);
+                      console.log('profile?.profileImageUrl exists:', !!profile?.profileImageUrl);
+                      console.log('profile?.profileImageUrl length:', profile?.profileImageUrl?.length);
+                      console.log('profileData.profileImageUrl exists:', !!profileData.profileImageUrl);
+                      console.log('Final condition result:', !!(profile?.profileImageUrl || profileData.profileImageUrl));
+                      return !!(profile?.profileImageUrl || profileData.profileImageUrl);
+                    })() ? (
                       <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <img 
                           src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '')} 
