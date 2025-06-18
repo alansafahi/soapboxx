@@ -47,6 +47,7 @@ export default function EnhancedChurchDiscovery() {
   const [churchNameInput, setChurchNameInput] = useState("");
   const [userLocation, setUserLocation] = useState<string>("");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [isManuallyTyping, setIsManuallyTyping] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
   // Auto-detect user location on component mount
@@ -66,8 +67,11 @@ export default function EnhancedChurchDiscovery() {
                 if (data.city && data.principalSubdivision) {
                   const detectedLocation = `${data.city}, ${data.principalSubdivision}`;
                   setUserLocation(detectedLocation);
-                  setLocationInputValue(detectedLocation);
-                  setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  // Only update input if user hasn't started typing manually
+                  if (!isManuallyTyping) {
+                    setLocationInputValue(detectedLocation);
+                    setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  }
                   toast({
                     title: "Precise Location Detected",
                     description: `Using GPS location: ${detectedLocation}`,
@@ -86,8 +90,11 @@ export default function EnhancedChurchDiscovery() {
                 if (data.city && data.region) {
                   const detectedLocation = `${data.city}, ${data.region}`;
                   setUserLocation(detectedLocation);
-                  setLocationInputValue(detectedLocation);
-                  setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  // Only update input if user hasn't started typing manually
+                  if (!isManuallyTyping) {
+                    setLocationInputValue(detectedLocation);
+                    setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  }
                   toast({
                     title: "Approximate Location Detected",
                     description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
@@ -108,8 +115,11 @@ export default function EnhancedChurchDiscovery() {
                 if (data.city && data.region) {
                   const detectedLocation = `${data.city}, ${data.region}`;
                   setUserLocation(detectedLocation);
-                  setLocationInputValue(detectedLocation);
-                  setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  // Only update input if user hasn't started typing manually
+                  if (!isManuallyTyping) {
+                    setLocationInputValue(detectedLocation);
+                    setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  }
                   toast({
                     title: "Approximate Location Detected",
                     description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
@@ -133,8 +143,11 @@ export default function EnhancedChurchDiscovery() {
           if (data.city && data.region) {
             const detectedLocation = `${data.city}, ${data.region}`;
             setUserLocation(detectedLocation);
-            setLocationInputValue(detectedLocation);
-            setFilters(prev => ({ ...prev, location: detectedLocation }));
+            // Only update input if user hasn't started typing manually
+            if (!isManuallyTyping) {
+              setLocationInputValue(detectedLocation);
+              setFilters(prev => ({ ...prev, location: detectedLocation }));
+            }
             toast({
               title: "Approximate Location Detected",
               description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
@@ -159,6 +172,7 @@ export default function EnhancedChurchDiscovery() {
 
   // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
+    setIsManuallyTyping(true);
     setLocationInputValue(value);
     
     if (debounceTimerRef.current) {
