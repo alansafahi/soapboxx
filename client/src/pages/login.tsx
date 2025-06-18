@@ -58,12 +58,12 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Invalidate auth cache and force refetch
-        await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-        // Wait a moment for the cache to clear
-        await new Promise(resolve => setTimeout(resolve, 100));
-        // Force a hard refresh to ensure clean state
-        window.location.reload();
+        // Clear all cached data and force fresh authentication check
+        queryClient.clear();
+        // Small delay to ensure session is established
+        await new Promise(resolve => setTimeout(resolve, 200));
+        // Redirect to home page with fresh state
+        window.location.href = '/';
       }
     } catch (error: any) {
       toast({
