@@ -17,6 +17,9 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import sgMail from "@sendgrid/mail";
+import bcrypt from "bcrypt";
+import htmlPdf from "html-pdf-node";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
 
 // Configure file upload directories
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -318,7 +321,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate reset token
-      const crypto = require("crypto");
       const resetToken = crypto.randomBytes(32).toString('hex');
       const resetExpires = new Date(Date.now() + 3600000); // 1 hour
 
@@ -339,8 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
         
-        const sgMail = require('@sendgrid/mail');
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
         const msg = {
           to: email,
