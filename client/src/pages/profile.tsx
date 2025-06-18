@@ -267,6 +267,17 @@ export default function ProfilePage() {
     ? `${displayProfile.firstName[0]}${displayProfile.lastName[0]}`
     : displayProfile?.firstName?.[0] || displayProfile?.email?.[0] || "A";
 
+  // Debug image URL
+  useEffect(() => {
+    if (profile?.profileImageUrl) {
+      console.log('DEBUG: Profile image URL exists, length:', profile.profileImageUrl.length);
+      console.log('DEBUG: Image URL starts with:', profile.profileImageUrl.substring(0, 50));
+      console.log('DEBUG: Image URL type:', typeof profile.profileImageUrl);
+    } else {
+      console.log('DEBUG: No profile image URL found');
+    }
+  }, [profile?.profileImageUrl]);
+
 
 
   return (
@@ -321,11 +332,26 @@ export default function ProfilePage() {
                   {/* Profile Picture */}
                   <div className="relative">
                     {(profile?.profileImageUrl || profileData.profileImageUrl) ? (
-                      <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      <div className="relative">
+                        <div className="h-32 w-32 rounded-full overflow-hidden bg-red-200 border-4 border-red-500 flex items-center justify-center">
+                          <span className="text-red-800 text-xs font-bold">IMAGE CONTAINER</span>
+                        </div>
                         <img 
                           src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '')} 
                           alt={displayName}
-                          className="h-full w-full object-cover"
+                          className="absolute top-0 left-0 h-32 w-32 rounded-full object-cover z-10"
+                          onLoad={(e) => {
+                            console.log('✅ Image loaded successfully');
+                            console.log('Image dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
+                            console.log('Image src length:', e.currentTarget.src.length);
+                            console.log('Image visibility:', window.getComputedStyle(e.currentTarget).visibility);
+                            console.log('Image display:', window.getComputedStyle(e.currentTarget).display);
+                            console.log('Image opacity:', window.getComputedStyle(e.currentTarget).opacity);
+                            console.log('Image z-index:', window.getComputedStyle(e.currentTarget).zIndex);
+                          }}
+                          onError={(e) => {
+                            console.log('❌ Image failed to load:', e);
+                          }}
                         />
                       </div>
                     ) : (
