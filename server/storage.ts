@@ -811,7 +811,7 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  async searchChurches(params: { denomination?: string; location?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]> {
+  async searchChurches(params: { denomination?: string; location?: string; churchName?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]> {
     try {
       let whereConditions = [
         eq(churches.isActive, true),
@@ -821,6 +821,14 @@ export class DatabaseStorage implements IStorage {
       // Filter by denomination
       if (params.denomination) {
         whereConditions.push(eq(churches.denomination, params.denomination));
+      }
+      
+      // Filter by church name
+      if (params.churchName && params.churchName.trim()) {
+        const nameTerm = `%${params.churchName.trim()}%`;
+        whereConditions.push(
+          sql`${churches.name} ILIKE ${nameTerm}`
+        );
       }
       
       // Filter by location (search in city, state, or zip code)

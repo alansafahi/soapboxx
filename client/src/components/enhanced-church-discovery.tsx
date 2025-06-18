@@ -18,6 +18,7 @@ interface FilterState {
   location: string;
   size: string;
   proximity: number;
+  churchName: string;
 }
 
 interface ChurchWithDistance extends Church {
@@ -35,27 +36,87 @@ export default function EnhancedChurchDiscovery() {
     denomination: "all",
     location: "",
     size: "all",
-    proximity: 25 // Default 25 miles
+    proximity: 25, // Default 25 miles
+    churchName: ""
   });
   const [showFilters, setShowFilters] = useState(false);
   
-  // Separate state for location input to prevent React Query re-render conflicts
+  // Search mode: 'location' or 'name'
+  const [searchMode, setSearchMode] = useState<'location' | 'name'>('location');
   const [locationInputValue, setLocationInputValue] = useState("");
+  const [churchNameInput, setChurchNameInput] = useState("");
+  const [userLocation, setUserLocation] = useState<string>("");
   const debounceTimerRef = useRef<NodeJS.Timeout>();
+
+  // Auto-detect user location on component mount
+  useEffect(() => {
+    const detectLocation = async () => {
+      try {
+        // Try IP-based geolocation first
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        if (data.city && data.region) {
+          const detectedLocation = `${data.city}, ${data.region}`;
+          setUserLocation(detectedLocation);
+          setLocationInputValue(detectedLocation);
+          setFilters(prev => ({ ...prev, location: detectedLocation }));
+        }
+      } catch (error) {
+        console.log('IP geolocation not available, trying browser geolocation...');
+        
+        // Fallback to browser geolocation
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              try {
+                const { latitude, longitude } = position.coords;
+                // Reverse geocoding using a simple service
+                const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                const data = await response.json();
+                if (data.city && data.principalSubdivision) {
+                  const detectedLocation = `${data.city}, ${data.principalSubdivision}`;
+                  setUserLocation(detectedLocation);
+                  setLocationInputValue(detectedLocation);
+                  setFilters(prev => ({ ...prev, location: detectedLocation }));
+                }
+              } catch (error) {
+                console.log('Reverse geocoding failed');
+              }
+            },
+            (error) => {
+              console.log('Browser geolocation denied or unavailable');
+            }
+          );
+        }
+      }
+    };
+
+    detectLocation();
+  }, []);
 
   // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
-    // Update input value immediately for UI responsiveness
     setLocationInputValue(value);
     
-    // Clear existing debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Set new debounce timer for filter update
     debounceTimerRef.current = setTimeout(() => {
-      setFilters(prev => ({ ...prev, location: value }));
+      setFilters(prev => ({ ...prev, location: value, churchName: "" }));
+    }, 300);
+  }, []);
+
+  // Handle church name search
+  const handleChurchNameChange = useCallback((value: string) => {
+    setChurchNameInput(value);
+    
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setFilters(prev => ({ ...prev, churchName: value, location: "" }));
     }, 300);
   }, []);
 
@@ -66,6 +127,7 @@ export default function EnhancedChurchDiscovery() {
       const params = new URLSearchParams();
       if (filters.denomination && filters.denomination !== "all") params.append('denomination', filters.denomination);
       if (filters.location) params.append('location', filters.location);
+      if (filters.churchName) params.append('churchName', filters.churchName);
       if (filters.size && filters.size !== "all") params.append('size', filters.size);
       params.append('proximity', filters.proximity.toString());
       params.append('limit', '1000'); // Get all for client-side pagination
@@ -139,10 +201,12 @@ export default function EnhancedChurchDiscovery() {
       denomination: "all",
       location: "",
       size: "all",
-      proximity: 25
+      proximity: 25,
+      churchName: ""
     });
-    // Clear location input value
+    // Clear input values
     setLocationInputValue("");
+    setChurchNameInput("");
     setDisplayedCount(10);
   };
 
@@ -341,17 +405,52 @@ export default function EnhancedChurchDiscovery() {
                     </div>
                   </div>
                   
-                  {/* Second row: Location search */}
+                  {/* Second row: Search mode toggle */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Location (City, State, or ZIP Code)
+                      Search Method
                     </label>
-                    <Input
-                      placeholder="Enter city, state, or zip code..."
-                      value={locationInputValue}
-                      onChange={(e) => handleLocationChange(e.target.value)}
-                      className="w-full"
-                    />
+                    <div className="flex gap-2 mb-3">
+                      <Button
+                        variant={searchMode === 'location' ? 'default' : 'outline'}
+                        onClick={() => setSearchMode('location')}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        📍 By Location
+                      </Button>
+                      <Button
+                        variant={searchMode === 'name' ? 'default' : 'outline'}
+                        onClick={() => setSearchMode('name')}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        🏛️ By Church Name
+                      </Button>
+                    </div>
+                    
+                    {searchMode === 'location' ? (
+                      <div>
+                        <Input
+                          placeholder={userLocation ? `Current: ${userLocation}` : "Enter city, state, or zip code..."}
+                          value={locationInputValue}
+                          onChange={(e) => handleLocationChange(e.target.value)}
+                          className="w-full"
+                        />
+                        {userLocation && (
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                            ✓ Auto-detected your location from device IP
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <Input
+                        placeholder="Enter church name..."
+                        value={churchNameInput}
+                        onChange={(e) => handleChurchNameChange(e.target.value)}
+                        className="w-full"
+                      />
+                    )}
                   </div>
                   
                   {/* Third row: Distance slider */}
