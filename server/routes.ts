@@ -300,7 +300,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(user);
+      
+      // Map database field names to frontend camelCase format
+      const mappedUser = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        bio: user.bio,
+        mobileNumber: user.mobileNumber,
+        address: user.address,
+        city: user.city,
+        state: user.state,
+        zipCode: user.zipCode,
+        country: user.country,
+        denomination: user.denomination,
+        interests: user.interests || [],
+        hasCompletedOnboarding: user.hasCompletedOnboarding,
+        onboardingData: user.onboardingData,
+        referredBy: user.referredBy,
+        referralCode: user.referralCode,
+        twoFactorEnabled: user.twoFactorEnabled,
+        twoFactorMethod: user.twoFactorMethod,
+        emailVerified: user.emailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      };
+      
+      res.json(mappedUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

@@ -148,8 +148,10 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Added optimistic UI updates for immediate visual feedback during profile edits
   - Implemented proper authentication handling and session management for profile updates
   - Fixed profile display issue by updating all UI sections to use displayProfile data instead of cached profile data
+  - CRITICAL FIX: Resolved field mapping issue in /api/auth/user endpoint - now properly maps database fields to frontend camelCase format
+  - Profile data now displays correctly: name, bio, contact details, address, and spiritual interests all visible in UI
   - Users can now edit all profile fields: name, bio, contact details, address, and interests
-  - Confirmed working: profile changes save correctly and persist in database with real-time UI updates
+  - Confirmed working: profile changes save correctly and persist in database with real-time UI updates and proper display
 - June 18, 2025: Successfully completed notification system database integration with full functionality
   - MAJOR FIX: Replaced hardcoded dummy notification data with complete database operations
   - Created notifications table with proper schema matching (user_id, type, title, message, is_read, created_at, action_url)
