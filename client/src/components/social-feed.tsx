@@ -110,6 +110,10 @@ export default function SocialFeed() {
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+  const [commentSort, setCommentSort] = useState<'newest' | 'most_liked'>('newest');
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [visibleCommentsCount, setVisibleCommentsCount] = useState<{[key: number]: number}>({});
   
   // Refs for click-outside functionality
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -550,7 +554,7 @@ export default function SocialFeed() {
             <div className="flex items-center space-x-3">
               <Avatar className="w-10 h-10">
                 <AvatarFallback className="bg-purple-600 text-white">
-                  {user?.firstName && user?.lastName ? `${user.firstName[0]}${user.lastName[0]}` : user?.firstName?.[0] || 'U'}
+                  {(user as any)?.firstName && (user as any)?.lastName ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : (user as any)?.firstName?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -960,7 +964,15 @@ export default function SocialFeed() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => setCommentDialogOpen(post.id)}
+                    onClick={() => {
+                      const newExpanded = new Set(expandedComments);
+                      if (expandedComments.has(post.id)) {
+                        newExpanded.delete(post.id);
+                      } else {
+                        newExpanded.add(post.id);
+                      }
+                      setExpandedComments(newExpanded);
+                    }}
                     className="text-gray-500 hover:text-blue-500"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
@@ -979,7 +991,7 @@ export default function SocialFeed() {
                 </div>
                 
                 {/* Delete Button - Only show for post author */}
-                {user && post.author.id === user.id && (
+                {user && post.author.id === (user as any).id && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -991,6 +1003,145 @@ export default function SocialFeed() {
                   </Button>
                 )}
               </div>
+
+              {/* Comments Section */}
+              {expandedComments.has(post.id) && (
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  {/* Comment Sort Options */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Sort by:</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCommentSort('newest')}
+                        className={`text-xs ${commentSort === 'newest' ? 'text-blue-600 font-medium' : 'text-gray-500'}`}
+                      >
+                        Newest
+                      </Button>
+                      <span className="text-gray-300">|</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCommentSort('most_liked')}
+                        className={`text-xs ${commentSort === 'most_liked' ? 'text-blue-600 font-medium' : 'text-gray-500'}`}
+                      >
+                        Most liked
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Add Comment Form */}
+                  <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="bg-purple-600 text-white text-sm">
+                          {(user as any)?.firstName && (user as any)?.lastName ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : (user as any)?.firstName?.[0] || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <Textarea
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          placeholder="Write a comment..."
+                          className="min-h-[60px] text-sm resize-none border-0 bg-white dark:bg-gray-700 focus:ring-1 focus:ring-blue-500"
+                        />
+                        <div className="flex justify-end mt-2">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (commentText.trim()) {
+                                commentMutation.mutate({ 
+                                  postId: post.id, 
+                                  content: commentText.trim() 
+                                });
+                              }
+                            }}
+                            disabled={commentMutation.isPending || !commentText.trim()}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                          >
+                            {commentMutation.isPending ? "Posting..." : "Comment"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Comments List */}
+                  {post.comments && post.comments.length > 0 ? (
+                    <div className="space-y-3">
+                      {post.comments
+                        .sort((a: any, b: any) => {
+                          if (commentSort === 'newest') {
+                            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                          } else {
+                            return (b.likeCount || 0) - (a.likeCount || 0);
+                          }
+                        })
+                        .slice(0, visibleCommentsCount[post.id] || 3)
+                        .map((comment: any) => (
+                          <div key={comment.id} className="flex items-start space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                            <Avatar className="w-8 h-8">
+                              <AvatarFallback className="bg-gray-500 text-white text-sm">
+                                {comment.author?.name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className="font-medium text-sm text-gray-900 dark:text-white">
+                                  {comment.author?.name || 'Anonymous'}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{comment.content}</p>
+                              <div className="flex items-center space-x-4">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-xs text-gray-500 hover:text-red-500 p-0 h-auto"
+                                >
+                                  <Heart className="w-3 h-3 mr-1" />
+                                  {comment.likeCount || 0}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setReplyingTo(comment.id)}
+                                  className="text-xs text-gray-500 hover:text-blue-500 p-0 h-auto"
+                                >
+                                  Reply
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                      {/* View More Comments Button */}
+                      {post.comments.length > (visibleCommentsCount[post.id] || 3) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setVisibleCommentsCount(prev => ({
+                              ...prev,
+                              [post.id]: (prev[post.id] || 3) + 5
+                            }));
+                          }}
+                          className="w-full text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        >
+                          View {Math.min(5, post.comments.length - (visibleCommentsCount[post.id] || 3))} more comments
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No comments yet. Be the first to comment!</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         )) : (
