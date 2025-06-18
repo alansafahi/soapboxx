@@ -238,23 +238,34 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile</h1>
-          <Button
-            onClick={handleEditToggle}
-            variant={isEditing ? "outline" : "default"}
-            className="flex items-center gap-2"
-          >
-            {isEditing ? (
-              <>
+          <div className="flex gap-2">
+            {isEditing && (
+              <Button
+                onClick={handleSaveProfile}
+                disabled={updateProfileMutation.isPending}
+                className="flex items-center gap-2"
+              >
                 <Save className="h-4 w-4" />
-                Cancel
-              </>
-            ) : (
-              <>
-                <Edit2 className="h-4 w-4" />
-                Edit Profile
-              </>
+                {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
             )}
-          </Button>
+            <Button
+              onClick={handleEditToggle}
+              variant={isEditing ? "outline" : "default"}
+              className="flex items-center gap-2"
+            >
+              {isEditing ? (
+                <>
+                  Cancel
+                </>
+              ) : (
+                <>
+                  <Edit2 className="h-4 w-4" />
+                  Edit Profile
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
