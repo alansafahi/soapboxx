@@ -811,6 +811,105 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
+  async searchChurches(params: { denomination?: string; location?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]> {
+    let whereConditions = [eq(churches.isActive, true)];
+    
+    // Filter by denomination
+    if (params.denomination) {
+      whereConditions.push(eq(churches.denomination, params.denomination));
+    }
+    
+    // Filter by location (search in city or state)
+    if (params.location) {
+      whereConditions.push(
+        or(
+          ilike(churches.city, `%${params.location}%`),
+          ilike(churches.state, `%${params.location}%`),
+          ilike(churches.zipCode, `%${params.location}%`)
+        )
+      );
+    }
+    
+    // Base query with member count calculation
+    const query = db
+      .select({
+        id: churches.id,
+        name: churches.name,
+        denomination: churches.denomination,
+        description: churches.description,
+        bio: churches.bio,
+        address: churches.address,
+        city: churches.city,
+        state: churches.state,
+        zipCode: churches.zipCode,
+        country: churches.country,
+        website: churches.website,
+        phone: churches.phone,
+        email: churches.email,
+        profileImageUrl: churches.profileImageUrl,
+        coverImageUrl: churches.coverImageUrl,
+        socialMediaLinks: churches.socialMediaLinks,
+        isActive: churches.isActive,
+        isVerified: churches.isVerified,
+        visibility: churches.visibility,
+        servicesSchedule: churches.servicesSchedule,
+        demographics: churches.demographics,
+        ministries: churches.ministries,
+        beliefs: churches.beliefs,
+        history: churches.history,
+        isClaimed: churches.isClaimed,
+        adminEmail: churches.adminEmail,
+        createdAt: churches.createdAt,
+        updatedAt: churches.updatedAt,
+        memberCount: sql<number>`(
+          SELECT COUNT(*)::int 
+          FROM ${userChurches} 
+          WHERE ${userChurches.churchId} = ${churches.id} 
+          AND ${userChurches.isActive} = true
+        )`,
+        distance: sql<number>`0` // Placeholder for distance - would use actual geo calculations in production
+      })
+      .from(churches)
+      .where(and(...whereConditions));
+    
+    let results = await query.limit(params.limit || 1000);
+    
+    // Filter by size if specified
+    if (params.size) {
+      results = results.filter(church => {
+        const memberCount = church.memberCount || 0;
+        switch (params.size) {
+          case 'small': return memberCount < 100;
+          case 'medium': return memberCount >= 100 && memberCount < 500;
+          case 'large': return memberCount >= 500 && memberCount < 1500;
+          case 'mega': return memberCount >= 1500;
+          default: return true;
+        }
+      });
+    }
+    
+    // Sort by proximity (using memberCount as proxy for now, would use actual distance in production)
+    results.sort((a, b) => (b.memberCount || 0) - (a.memberCount || 0));
+    
+    return results;
+  }
+
+  async getChurchDenominations(): Promise<string[]> {
+    const result = await db
+      .select({ denomination: churches.denomination })
+      .from(churches)
+      .where(and(
+        eq(churches.isActive, true),
+        isNotNull(churches.denomination)
+      ))
+      .groupBy(churches.denomination)
+      .orderBy(asc(churches.denomination));
+    
+    return result
+      .map(row => row.denomination)
+      .filter(denomination => denomination !== null && denomination.trim() !== '') as string[];
+  }
+
   async getChurch(id: number): Promise<Church | undefined> {
     const [church] = await db.select().from(churches).where(eq(churches.id, id));
     return church;
