@@ -267,6 +267,12 @@ export default function ProfilePage() {
     ? `${displayProfile.firstName[0]}${displayProfile.lastName[0]}`
     : displayProfile?.firstName?.[0] || displayProfile?.email?.[0] || "A";
 
+  // Debug profile image data
+  console.log('Profile image URL:', profile?.profileImageUrl?.substring(0, 100) + '...');
+  console.log('Profile data image URL:', profileData.profileImageUrl?.substring(0, 100) + '...');
+  console.log('Has profile image:', !!profile?.profileImageUrl);
+  console.log('Profile image starts with data:', profile?.profileImageUrl?.startsWith('data:'));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -319,14 +325,22 @@ export default function ProfilePage() {
                   {/* Profile Picture */}
                   <div className="relative">
                     <Avatar className="h-32 w-32">
-                      <AvatarImage 
-                        src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || undefined) : (profile?.profileImageUrl || undefined)} 
-                        alt={displayName}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="text-2xl bg-purple-600 text-white">
-                        {userInitials}
-                      </AvatarFallback>
+                      {(profile?.profileImageUrl || profileData.profileImageUrl) ? (
+                        <img 
+                          src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl) : profile?.profileImageUrl} 
+                          alt={displayName}
+                          className="h-32 w-32 rounded-full object-cover"
+                          onError={(e) => {
+                            console.log('Image failed to load:', e);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                          onLoad={() => console.log('Image loaded successfully')}
+                        />
+                      ) : (
+                        <AvatarFallback className="text-2xl bg-purple-600 text-white h-32 w-32">
+                          {userInitials}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     {isEditing && (
                       <Button
