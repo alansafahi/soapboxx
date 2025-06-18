@@ -59,13 +59,17 @@ function AppRouter() {
   
   // Handle post-login authentication refresh
   useEffect(() => {
-    const justLoggedIn = sessionStorage.getItem('justLoggedIn');
-    if (justLoggedIn && !isAuthenticated && !isLoading) {
-      sessionStorage.removeItem('justLoggedIn');
-      // Force authentication refresh
-      refetch();
+    const loginSuccess = sessionStorage.getItem('loginSuccess');
+    if (loginSuccess) {
+      sessionStorage.removeItem('loginSuccess');
+      // Force immediate authentication refresh
+      refetch().then(() => {
+        console.log('Authentication refreshed after login');
+      }).catch((error) => {
+        console.error('Authentication refresh failed:', error);
+      });
     }
-  }, [isAuthenticated, isLoading, refetch]);
+  }, [refetch]);
   
   // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);

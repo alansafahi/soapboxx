@@ -10,8 +10,9 @@ export function getSession() {
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    tableName: 'session',
-    createTableIfMissing: true,
+    tableName: 'sessions',
+    createTableIfMissing: false,
+    ttl: sessionTtl,
   });
 
   return session({
@@ -19,10 +20,12 @@ export function getSession() {
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Set to false for development
       httpOnly: true,
       maxAge: sessionTtl,
+      sameSite: 'lax',
     },
   });
 }
@@ -78,13 +81,21 @@ export function setupAuth(app: Express): void {
         role: newUser.role,
       };
 
-      res.status(201).json({
-        id: newUser.id,
-        email: newUser.email,
-        username: newUser.username,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
+      // Force session save before responding
+      req.session.save((err: any) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session creation failed' });
+        }
+        
+        res.status(201).json({
+          id: newUser.id,
+          email: newUser.email,
+          username: newUser.username,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          role: newUser.role,
+        });
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -124,13 +135,21 @@ export function setupAuth(app: Express): void {
         role: user.role,
       };
 
-      res.json({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
+      // Force session save before responding
+      req.session.save((err: any) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session creation failed' });
+        }
+        
+        res.json({
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        });
       });
     } catch (error) {
       console.error('Login error:', error);
@@ -157,6 +176,16 @@ export function setupAuth(app: Express): void {
 export function isAuthenticated(req: any, res: any, next: any) {
   const sessionUser = (req.session as any)?.user;
   const userId = (req.session as any)?.userId;
+  
+  // Debug session data
+  console.log('Session check:', {
+    sessionId: req.sessionID,
+    hasSession: !!req.session,
+    userId: userId,
+    hasUser: !!sessionUser,
+    userEmail: sessionUser?.email
+  });
+  
   if (!sessionUser || !userId) {
     return res.status(401).json({ message: 'Unauthorized' });
   }

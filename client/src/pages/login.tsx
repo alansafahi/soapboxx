@@ -58,14 +58,15 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Clear all React Query cache to force fresh state
+        // Store login success flag before any redirects
+        sessionStorage.setItem('loginSuccess', 'true');
+        
+        // Complete cache reset for fresh authentication state
         queryClient.clear();
+        localStorage.clear();
         
-        // Set a flag to indicate successful login
-        sessionStorage.setItem('justLoggedIn', 'true');
-        
-        // Force complete page reload to ensure clean authentication state
-        window.location.replace('/');
+        // Immediate redirect without delays
+        window.location.href = '/';
       }
     } catch (error: any) {
       toast({
