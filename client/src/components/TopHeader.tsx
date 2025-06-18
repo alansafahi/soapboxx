@@ -40,14 +40,24 @@ export default function TopHeader() {
   
   const typedUser = user as User | null;
 
-  // Local state to track read notifications for immediate UI updates
-  const [readNotificationIds, setReadNotificationIds] = useState<Set<number>>(new Set());
+  // Local state for immediate UI feedback with notifications
+  const [localNotifications, setLocalNotifications] = useState<Notification[]>([]);
 
-  // Fetch notifications
-  const { data: notifications = [] } = useQuery<Notification[]>({
+  // Fetch notifications from server
+  const { data: serverNotifications = [] } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
     enabled: !!user,
   });
+
+  // Update local state when server data changes
+  useEffect(() => {
+    if (serverNotifications.length > 0) {
+      setLocalNotifications(serverNotifications);
+    }
+  }, [serverNotifications]);
+
+  // Use local notifications for display, fallback to server data
+  const notifications = localNotifications.length > 0 ? localNotifications : serverNotifications;
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
@@ -55,17 +65,21 @@ export default function TopHeader() {
       apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
     onMutate: (notificationId) => {
       // Immediate local state update for instant UI feedback
-      setReadNotificationIds(prev => new Set(Array.from(prev).concat(notificationId)));
+      setLocalNotifications(prev => 
+        prev.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      );
     },
-    onError: (_, notificationId) => {
-      // Rollback local state on error
-      setReadNotificationIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(notificationId);
-        return newSet;
-      });
+    onError: () => {
+      // Rollback local state on error - restore from server data
+      setLocalNotifications(serverNotifications);
     },
     onSuccess: () => {
+      // Refresh server data in background
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: "Notification marked as read",
       });
@@ -76,17 +90,18 @@ export default function TopHeader() {
   const markAllAsReadMutation = useMutation({
     mutationFn: () => 
       apiRequest("/api/notifications/mark-all-read", { method: "POST" }),
+    onMutate: () => {
+      // Immediate local state update for instant UI feedback
+      setLocalNotifications(prev => 
+        prev.map(notification => ({ ...notification, isRead: true }))
+      );
+    },
+    onError: () => {
+      // Rollback local state on error
+      setLocalNotifications(serverNotifications);
+    },
     onSuccess: () => {
-      console.log('Marking all notifications as read');
-      // Optimistically update all notifications to read
-      queryClient.setQueryData(["/api/notifications"], (oldData: Notification[] | undefined) => {
-        console.log('Old notification data (mark all):', oldData);
-        if (!oldData) return oldData;
-        const newData = oldData.map(notification => ({ ...notification, isRead: true }));
-        console.log('New notification data (mark all):', newData);
-        return newData;
-      });
-      // Force immediate refetch
+      // Refresh server data in background
       queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: "All notifications marked as read",
@@ -94,11 +109,8 @@ export default function TopHeader() {
     },
   });
 
-  // Calculate unread count using both server data and local state
-  const unreadCount = notifications.filter(n => !n.isRead && !readNotificationIds.has(n.id)).length;
-  console.log('Current notifications:', notifications);
-  console.log('Read notification IDs:', Array.from(readNotificationIds));
-  console.log('Calculated unread count:', unreadCount);
+  // Calculate unread count from current notifications
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
