@@ -831,36 +831,60 @@ export class DatabaseStorage implements IStorage {
         );
       }
       
-      // Simplified query to avoid Drizzle ORM issues
-      let results = await db
-        .select()
+      // Optimized single query with left join for member counts
+      const results = await db
+        .select({
+          id: churches.id,
+          name: churches.name,
+          denomination: churches.denomination,
+          description: churches.description,
+          bio: churches.bio,
+          address: churches.address,
+          city: churches.city,
+          state: churches.state,
+          zipCode: churches.zipCode,
+          country: churches.country,
+          website: churches.website,
+          phone: churches.phone,
+          email: churches.email,
+          profileImageUrl: churches.profileImageUrl,
+          coverImageUrl: churches.coverImageUrl,
+          socialMediaLinks: churches.socialMediaLinks,
+          isActive: churches.isActive,
+          isVerified: churches.isVerified,
+          visibility: churches.visibility,
+          servicesSchedule: churches.servicesSchedule,
+          demographics: churches.demographics,
+          ministries: churches.ministries,
+          beliefs: churches.beliefs,
+          history: churches.history,
+          isClaimed: churches.isClaimed,
+          adminEmail: churches.adminEmail,
+          createdAt: churches.createdAt,
+          updatedAt: churches.updatedAt,
+          memberCount: sql<number>`COALESCE(COUNT(${userChurches.churchId}), 0)::int`,
+          distance: sql<number>`0` // Placeholder for distance
+        })
         .from(churches)
+        .leftJoin(userChurches, and(
+          eq(userChurches.churchId, churches.id),
+          eq(userChurches.isActive, true)
+        ))
         .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
+        .groupBy(churches.id, churches.name, churches.denomination, churches.description, 
+                 churches.bio, churches.address, churches.city, churches.state, 
+                 churches.zipCode, churches.country, churches.website, churches.phone,
+                 churches.email, churches.profileImageUrl, churches.coverImageUrl,
+                 churches.socialMediaLinks, churches.isActive, churches.isVerified,
+                 churches.visibility, churches.servicesSchedule, churches.demographics,
+                 churches.ministries, churches.beliefs, churches.history, churches.isClaimed,
+                 churches.adminEmail, churches.createdAt, churches.updatedAt)
         .limit(params.limit || 1000);
       
-      // Calculate member count for each church
-      const resultsWithCounts = await Promise.all(
-        results.map(async (church) => {
-          const memberCountResult = await db
-            .select({ count: sql<number>`COUNT(*)::int` })
-            .from(userChurches)
-            .where(and(
-              eq(userChurches.churchId, church.id),
-              eq(userChurches.isActive, true)
-            ));
-          
-          return {
-            ...church,
-            memberCount: memberCountResult[0]?.count || 0,
-            distance: 0 // Placeholder for distance - would use actual geo calculations in production
-          };
-        })
-      );
-      
-      // Filter by size if specified
-      let filteredResults = resultsWithCounts;
-      if (params.size) {
-        filteredResults = resultsWithCounts.filter(church => {
+      // Filter by size if specified (exclude "all" value)
+      let filteredResults = results;
+      if (params.size && params.size !== "all") {
+        filteredResults = results.filter(church => {
           const memberCount = church.memberCount || 0;
           switch (params.size) {
             case 'small': return memberCount < 100;
@@ -879,13 +903,19 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error in searchChurches:', error);
       
-      // Fallback to simple query without advanced features
+      // Fallback to simple query without member counts
       try {
-        return await db
+        const simpleResults = await db
           .select()
           .from(churches)
           .where(eq(churches.isActive, true))
           .limit(params.limit || 100);
+          
+        return simpleResults.map(church => ({
+          ...church,
+          memberCount: 0,
+          distance: 0
+        }));
       } catch (fallbackError) {
         console.error('Fallback search also failed:', fallbackError);
         return [];

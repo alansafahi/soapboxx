@@ -34,7 +34,7 @@ export default function EnhancedChurchDiscovery() {
   const [filters, setFilters] = useState<FilterState>({
     denomination: "all",
     location: "",
-    size: "",
+    size: "all",
     proximity: 25 // Default 25 miles
   });
   const [showFilters, setShowFilters] = useState(false);
@@ -46,7 +46,7 @@ export default function EnhancedChurchDiscovery() {
       const params = new URLSearchParams();
       if (filters.denomination && filters.denomination !== "all") params.append('denomination', filters.denomination);
       if (filters.location) params.append('location', filters.location);
-      if (filters.size) params.append('size', filters.size);
+      if (filters.size && filters.size !== "all") params.append('size', filters.size);
       params.append('proximity', filters.proximity.toString());
       params.append('limit', '1000'); // Get all for client-side pagination
       
@@ -118,7 +118,7 @@ export default function EnhancedChurchDiscovery() {
     setFilters({
       denomination: "all",
       location: "",
-      size: "",
+      size: "all",
       proximity: 25
     });
     setDisplayedCount(10);
@@ -296,7 +296,7 @@ export default function EnhancedChurchDiscovery() {
                         <SelectValue placeholder="Any size" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any size</SelectItem>
+                        <SelectItem value="all">Any size</SelectItem>
                         <SelectItem value="small">Small (Under 100)</SelectItem>
                         <SelectItem value="medium">Medium (100-500)</SelectItem>
                         <SelectItem value="large">Large (500-1500)</SelectItem>
