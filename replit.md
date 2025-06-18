@@ -146,7 +146,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - Completely eliminated auto-detection interference by removing all IP fallback logic that was updating input field during manual typing
   - Implemented robust manual typing protection using `hasUserInteracted` state flag to disable auto-detection once user starts typing
   - Enhanced "Use My Location" button to reset interaction flag allowing intentional location updates while preserving manual typing protection
-  - Increased debounce timer to 500ms for better typing experience without interruptions
+  - Increased debounce timer to 1000ms (1 second) for both location and church name search fields to eliminate typing interruptions
   - Location input now allows continuous typing of "San Francisco" and other locations without cursor resets or field interruptions
   - Comprehensive fix ensures auto-detection never interferes with manual user input while maintaining GPS-first location detection for new users
 - June 18, 2025: Successfully completed enhanced geolocation system with GPS priority and improved accuracy messaging

@@ -47,7 +47,6 @@ export default function EnhancedChurchDiscovery() {
   const [churchNameInput, setChurchNameInput] = useState("");
   const [userLocation, setUserLocation] = useState<string>("");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
-  const [isManuallyTyping, setIsManuallyTyping] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
@@ -112,8 +111,7 @@ export default function EnhancedChurchDiscovery() {
 
   // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
-    // Immediately set user interaction flags to prevent any auto-detection
-    setIsManuallyTyping(true);
+    // Immediately set user interaction flag to prevent any auto-detection
     setHasUserInteracted(true);
     setLocationInputValue(value);
     
@@ -125,7 +123,7 @@ export default function EnhancedChurchDiscovery() {
     // Only update filters after user stops typing
     debounceTimerRef.current = setTimeout(() => {
       setFilters(prev => ({ ...prev, location: value, churchName: "" }));
-    }, 500); // Increased debounce time to 500ms for better typing experience
+    }, 1000); // Increased debounce time to 1000ms for better typing experience
   }, []);
 
   // Handle church name search
@@ -138,7 +136,7 @@ export default function EnhancedChurchDiscovery() {
 
     debounceTimerRef.current = setTimeout(() => {
       setFilters(prev => ({ ...prev, churchName: value, location: "" }));
-    }, 300);
+    }, 1000); // Increased debounce time to 1000ms for better typing experience
   }, []);
 
   // Fetch churches with filtering
