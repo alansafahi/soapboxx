@@ -4537,6 +4537,67 @@ Return JSON with this exact structure:
     }
   });
 
+  // User profile update endpoint
+  app.put('/api/users/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const {
+        firstName,
+        lastName,
+        email,
+        mobileNumber,
+        address,
+        bio,
+        profileImageUrl,
+        spiritualInterests,
+        dateOfBirth,
+        gender,
+        maritalStatus,
+        occupation,
+        emergencyContact
+      } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Update user profile
+      const updatedUser = await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        email,
+        mobileNumber,
+        address,
+        bio,
+        profileImageUrl,
+        spiritualInterests,
+        dateOfBirth,
+        gender,
+        maritalStatus,
+        occupation,
+        emergencyContact,
+        updatedAt: new Date()
+      });
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        user: updatedUser
+      });
+
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      res.status(500).json({ 
+        message: 'Failed to update profile',
+        error: error.message 
+      });
+    }
+  });
+
   // Church routes
   app.get('/api/churches', async (req, res) => {
     try {

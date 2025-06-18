@@ -37,6 +37,50 @@ function parseCSVLine(line) {
 }
 
 /**
+ * Extract denomination from church name
+ */
+function extractDenomination(churchName) {
+  const name = churchName.toLowerCase();
+  
+  // Denomination keywords mapping
+  const denominations = {
+    'presbyterian': ['presbyterian', 'pca', 'pcusa'],
+    'baptist': ['baptist', 'southern baptist', 'first baptist', 'missionary baptist'],
+    'methodist': ['methodist', 'united methodist', 'wesleyan'],
+    'lutheran': ['lutheran', 'elca', 'lcms'],
+    'episcopal': ['episcopal', 'anglican'],
+    'catholic': ['catholic', 'roman catholic', 'st.', 'saint', 'our lady', 'sacred heart'],
+    'pentecostal': ['pentecostal', 'assembly of god', 'foursquare', 'apostolic'],
+    'reformed': ['reformed', 'christian reformed'],
+    'evangelical': ['evangelical', 'evangelical free', 'evangelical covenant'],
+    'congregational': ['congregational', 'united church of christ', 'ucc'],
+    'adventist': ['adventist', 'seventh-day adventist'],
+    'nazarene': ['nazarene', 'church of the nazarene'],
+    'christian': ['christian church', 'disciples of christ', 'church of christ'],
+    'community': ['community church', 'community', 'non-denominational', 'fellowship'],
+    'calvary': ['calvary chapel', 'calvary church'],
+    'bible': ['bible church', 'bible fellowship']
+  };
+  
+  // Check for specific denomination keywords
+  for (const [denomination, keywords] of Object.entries(denominations)) {
+    for (const keyword of keywords) {
+      if (name.includes(keyword)) {
+        return denomination.charAt(0).toUpperCase() + denomination.slice(1);
+      }
+    }
+  }
+  
+  // Check for generic church types
+  if (name.includes('new life') || name.includes('grace') || name.includes('faith')) {
+    return 'Community';
+  }
+  
+  // Default fallback
+  return 'Non-denominational';
+}
+
+/**
  * Clean and validate church data
  */
 function cleanChurchData(data) {
