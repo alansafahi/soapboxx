@@ -58,15 +58,13 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Store login success flag before any redirects
-        sessionStorage.setItem('loginSuccess', 'true');
-        
-        // Complete cache reset for fresh authentication state
+        // Clear all cached data to force fresh authentication state
         queryClient.clear();
-        localStorage.clear();
         
-        // Immediate redirect without delays
-        window.location.href = '/';
+        // Wait briefly for session to be established, then redirect
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
       }
     } catch (error: any) {
       toast({

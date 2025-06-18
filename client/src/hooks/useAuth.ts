@@ -11,6 +11,8 @@ export function useAuth() {
     retry: false,
     staleTime: 0, // Always fresh for auth queries
     gcTime: 0, // Don't cache auth data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Check for demo user in localStorage if API auth fails

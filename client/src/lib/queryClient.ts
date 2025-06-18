@@ -71,8 +71,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 3 * 60 * 1000, // 3 minutes for optimal balance
-      gcTime: 15 * 60 * 1000, // 15 minutes for better memory management
+      staleTime: 0, // Always fresh queries for auth reliability
+      gcTime: 0, // No caching for immediate auth state updates
       retry: (failureCount, error: any) => {
         // Don't retry on auth errors or client errors
         if (error?.message?.includes('401') || error?.message?.includes('40')) {

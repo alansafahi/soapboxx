@@ -57,19 +57,13 @@ function AppRouter() {
   const { user, isAuthenticated, isLoading, refetch } = useAuth();
   const [location] = useLocation();
   
-  // Handle post-login authentication refresh
+  // Check for authentication on initial load
   useEffect(() => {
-    const loginSuccess = sessionStorage.getItem('loginSuccess');
-    if (loginSuccess) {
-      sessionStorage.removeItem('loginSuccess');
-      // Force immediate authentication refresh
-      refetch().then(() => {
-        console.log('Authentication refreshed after login');
-      }).catch((error) => {
-        console.error('Authentication refresh failed:', error);
-      });
+    if (!isAuthenticated && !isLoading) {
+      // Single retry for authentication check
+      refetch();
     }
-  }, [refetch]);
+  }, [isAuthenticated, isLoading, refetch]);
   
   // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);
