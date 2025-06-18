@@ -309,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl,
+        profileImageUrl: user.profileImageUrl || user.profile_image_url, // Handle both field name formats
         bio: user.bio,
         mobileNumber: user.mobileNumber,
         address: user.address,
@@ -329,6 +329,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
+      
+      // Debug: Check if profile image is being mapped correctly
+      if (user.profileImageUrl || user.profile_image_url) {
+        console.log('Profile image found, length:', (user.profileImageUrl || user.profile_image_url)?.length);
+      }
       
       res.json(mappedUser);
     } catch (error) {

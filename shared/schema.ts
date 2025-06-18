@@ -76,7 +76,7 @@ export const users = pgTable("users", {
   role: varchar("role").default("member"), // User role for permissions
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  profileImageUrl: text("profile_image_url"), // Changed to text to support base64 images
   bio: text("bio"),
   mobileNumber: varchar("mobile_number"),
   address: text("address"),
