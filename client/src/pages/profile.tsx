@@ -269,14 +269,27 @@ export default function ProfilePage() {
 
   // Debug image URL
   useEffect(() => {
+    console.log('🔍 Profile data debug:');
+    console.log('profile object:', profile);
+    console.log('profile?.profileImageUrl:', profile?.profileImageUrl);
+    console.log('profileData object:', profileData);
+    console.log('profileData.profileImageUrl:', profileData.profileImageUrl);
+    console.log('Condition result:', (profile?.profileImageUrl || profileData.profileImageUrl));
+    
     if (profile?.profileImageUrl) {
-      console.log('DEBUG: Profile image URL exists, length:', profile.profileImageUrl.length);
-      console.log('DEBUG: Image URL starts with:', profile.profileImageUrl.substring(0, 50));
-      console.log('DEBUG: Image URL type:', typeof profile.profileImageUrl);
+      console.log('✅ Profile image URL exists, length:', profile.profileImageUrl.length);
+      console.log('✅ Image URL starts with:', profile.profileImageUrl.substring(0, 50));
     } else {
-      console.log('DEBUG: No profile image URL found');
+      console.log('❌ No profile image URL found in profile object');
     }
-  }, [profile?.profileImageUrl]);
+
+    if (profileData.profileImageUrl) {
+      console.log('✅ ProfileData image URL exists, length:', profileData.profileImageUrl.length);
+      console.log('✅ ProfileData image URL starts with:', profileData.profileImageUrl.substring(0, 50));
+    } else {
+      console.log('❌ No profile image URL found in profileData object');
+    }
+  }, [profile, profileData]);
 
 
 
