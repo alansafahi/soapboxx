@@ -39,29 +39,18 @@ export default function EnhancedChurchDiscovery() {
   });
   const [showFilters, setShowFilters] = useState(false);
   
-  // Separate state for location inputs to prevent reset while typing
+  // Separate state for location input to prevent reset while typing
   const [locationInput, setLocationInput] = useState("");
-  const [cityInput, setCityInput] = useState("");
-  const [stateInput, setStateInput] = useState("");
-  const [zipInput, setZipInput] = useState("");
   const [debouncedLocation, setDebouncedLocation] = useState("");
 
-  // Debounce location inputs to prevent constant API calls
+  // Debounce location input to prevent constant API calls
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Combine city, state, and zip into a single location string
-      const locationParts = [
-        cityInput.trim(),
-        stateInput.trim(),
-        zipInput.trim()
-      ].filter(Boolean);
-      
-      const combinedLocation = locationParts.join(', ');
-      setDebouncedLocation(combinedLocation);
-    }, 500);
+      setDebouncedLocation(locationInput);
+    }, 300); // Reduced delay for faster response
 
     return () => clearTimeout(timer);
-  }, [cityInput, stateInput, zipInput]);
+  }, [locationInput]);
 
   // Update filters when debounced location changes
   useEffect(() => {
@@ -150,11 +139,8 @@ export default function EnhancedChurchDiscovery() {
       size: "all",
       proximity: 25
     });
-    // Clear all input states
+    // Clear location input state
     setLocationInput("");
-    setCityInput("");
-    setStateInput("");
-    setZipInput("");
     setDisplayedCount(10);
   };
 
@@ -353,40 +339,17 @@ export default function EnhancedChurchDiscovery() {
                     </div>
                   </div>
                   
-                  {/* Second row: Location search fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        City
-                      </label>
-                      <Input
-                        placeholder="Enter city name"
-                        value={cityInput}
-                        onChange={(e) => setCityInput(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        State
-                      </label>
-                      <Input
-                        placeholder="Enter state"
-                        value={stateInput}
-                        onChange={(e) => setStateInput(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        ZIP Code
-                      </label>
-                      <Input
-                        placeholder="Enter ZIP code"
-                        value={zipInput}
-                        onChange={(e) => setZipInput(e.target.value)}
-                      />
-                    </div>
+                  {/* Second row: Location search */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Location (City, State, or ZIP Code)
+                    </label>
+                    <Input
+                      placeholder="Enter city, state, or zip code..."
+                      value={locationInput}
+                      onChange={(e) => setLocationInput(e.target.value)}
+                      className="w-full"
+                    />
                   </div>
                   
                   {/* Third row: Distance slider */}
