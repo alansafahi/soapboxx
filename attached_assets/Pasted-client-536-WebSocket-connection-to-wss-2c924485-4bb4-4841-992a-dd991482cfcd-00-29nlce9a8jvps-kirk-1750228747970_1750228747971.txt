@@ -1,0 +1,44 @@
+client:536 WebSocket connection to 'wss://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/?token=_e6sDzhS5clR' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531Understand this error
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=_e6sDzhS5clR' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555Understand this error
+chunk-RPCDYKBN.js?v=dd2df170:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+TopHeader.tsx:62 Current display notifications: []
+TopHeader.tsx:63 Local notifications state: []
+TopHeader.tsx:64 Server notifications: []
+TopHeader.tsx:128 Calculated unread count: 0
+TopHeader.tsx:62 Current display notifications: []
+TopHeader.tsx:63 Local notifications state: []
+TopHeader.tsx:64 Server notifications: []
+TopHeader.tsx:128 Calculated unread count: 0
+TopHeader.tsx:62 Current display notifications: []
+TopHeader.tsx:63 Local notifications state: []
+TopHeader.tsx:64 Server notifications: []
+TopHeader.tsx:128 Calculated unread count: 0
+TopHeader.tsx:62 Current display notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:63 Local notifications state: []
+TopHeader.tsx:64 Server notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:128 Calculated unread count: 2
+TopHeader.tsx:55 Updating local notifications from server: (3) [{…}, {…}, {…}]
+TopHeader.tsx:62 Current display notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:63 Local notifications state: (3) [{…}, {…}, {…}]
+TopHeader.tsx:64 Server notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:128 Calculated unread count: 2
+TopHeader.tsx:62 Current display notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:63 Local notifications state: (3) [{…}, {…}, {…}]
+TopHeader.tsx:64 Server notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:128 Calculated unread count: 2
+TopHeader.tsx:62 Current display notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:63 Local notifications state: (3) [{…}, {…}, {…}]
+TopHeader.tsx:64 Server notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:128 Calculated unread count: 2
+TopHeader.tsx:62 Current display notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:63 Local notifications state: (3) [{…}, {…}, {…}]
+TopHeader.tsx:64 Server notifications: (3) [{…}, {…}, {…}]
+TopHeader.tsx:128 Calculated unread count: 2
