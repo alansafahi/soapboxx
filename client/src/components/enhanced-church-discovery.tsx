@@ -463,84 +463,76 @@ export default function EnhancedChurchDiscovery() {
                             onClick={async () => {
                               setIsDetectingLocation(true);
                               setHasUserInteracted(false); // Reset to allow location update
+                              
                               try {
-                                // Try GPS first for accuracy
-                                if (navigator.geolocation) {
-                                  navigator.geolocation.getCurrentPosition(
-                                    async (position) => {
-                                      try {
-                                        const { latitude, longitude } = position.coords;
-                                        const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
-                                        const data = await response.json();
-                                        if (data.city && data.principalSubdivision) {
-                                          const detectedLocation = `${data.city}, ${data.principalSubdivision}`;
-                                          setUserLocation(detectedLocation);
-                                          setLocationInputValue(detectedLocation);
-                                          setFilters(prev => ({ ...prev, location: detectedLocation }));
-                                          toast({
-                                            title: "Precise Location Updated",
-                                            description: `Using GPS location: ${detectedLocation}`,
-                                          });
-                                          setIsDetectingLocation(false);
-                                          return;
-                                        }
-                                      } catch (error) {
-                                        console.log('GPS reverse geocoding failed, trying IP...');
+                                // Check if geolocation is supported
+                                if (!navigator.geolocation) {
+                                  throw new Error('Geolocation not supported');
+                                }
+
+                                // Use Promise wrapper for getCurrentPosition to handle timeouts better
+                                const getCurrentPosition = () => {
+                                  return new Promise<GeolocationPosition>((resolve, reject) => {
+                                    navigator.geolocation.getCurrentPosition(
+                                      resolve,
+                                      reject,
+                                      {
+                                        enableHighAccuracy: true,
+                                        timeout: 10000, // 10 seconds timeout
+                                        maximumAge: 300000 // 5 minutes cache
                                       }
-                                      
-                                      // Fallback to IP location
-                                      try {
-                                        const response = await fetch('https://ipapi.co/json/');
-                                        const data = await response.json();
-                                        if (data.city && data.region) {
-                                          const detectedLocation = `${data.city}, ${data.region}`;
-                                          setUserLocation(detectedLocation);
-                                          setLocationInputValue(detectedLocation);
-                                          setFilters(prev => ({ ...prev, location: detectedLocation }));
-                                          toast({
-                                            title: "Approximate Location Updated",
-                                            description: `Using ISP location: ${detectedLocation}. Please correct if this isn't accurate.`,
-                                          });
-                                        }
-                                      } catch (error) {
-                                        toast({
-                                          title: "Location Error",
-                                          description: "Could not detect your location. Please enter manually.",
-                                          variant: "destructive"
-                                        });
-                                      } finally {
-                                        setIsDetectingLocation(false);
-                                      }
-                                    },
-                                    async (error) => {
-                                      // GPS denied, try IP location
-                                      try {
-                                        const response = await fetch('https://ipapi.co/json/');
-                                        const data = await response.json();
-                                        if (data.city && data.region) {
-                                          const detectedLocation = `${data.city}, ${data.region}`;
-                                          setUserLocation(detectedLocation);
-                                          setLocationInputValue(detectedLocation);
-                                          setFilters(prev => ({ ...prev, location: detectedLocation }));
-                                          toast({
-                                            title: "Approximate Location Updated",
-                                            description: `Using ISP location: ${detectedLocation}. Please correct if this isn't accurate.`,
-                                          });
-                                        }
-                                      } catch (error) {
-                                        toast({
-                                          title: "Location Error",
-                                          description: "Could not detect your location. Please enter manually.",
-                                          variant: "destructive"
-                                        });
-                                      } finally {
-                                        setIsDetectingLocation(false);
-                                      }
+                                    );
+                                  });
+                                };
+
+                                try {
+                                  const position = await getCurrentPosition();
+                                  const { latitude, longitude } = position.coords;
+                                  
+                                  // Try reverse geocoding with GPS coordinates
+                                  try {
+                                    const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                                    if (!response.ok) throw new Error('Geocoding failed');
+                                    
+                                    const data = await response.json();
+                                    if (data.city && data.principalSubdivision) {
+                                      const detectedLocation = `${data.city}, ${data.principalSubdivision}`;
+                                      setUserLocation(detectedLocation);
+                                      setLocationInputValue(detectedLocation);
+                                      setFilters(prev => ({ ...prev, location: detectedLocation }));
+                                      toast({
+                                        title: "Location Found",
+                                        description: `Using your precise location: ${detectedLocation}`,
+                                      });
+                                      setIsDetectingLocation(false);
+                                      return;
                                     }
-                                  );
-                                } else {
-                                  // No GPS available, use IP
+                                  } catch (geocodeError) {
+                                    console.log('Geocoding service failed, falling back to IP location');
+                                  }
+                                } catch (gpsError: any) {
+                                  console.log('GPS location failed:', gpsError?.message || gpsError);
+                                  
+                                  // Show specific error message for GPS denial
+                                  if (gpsError?.code === 1) { // PERMISSION_DENIED
+                                    toast({
+                                      title: "Location Permission Denied",
+                                      description: "Please enable location access in your browser settings, then try again.",
+                                      variant: "destructive"
+                                    });
+                                  } else if (gpsError?.code === 3) { // TIMEOUT
+                                    toast({
+                                      title: "Location Timeout",
+                                      description: "GPS is taking too long. Trying alternate method...",
+                                    });
+                                  }
+                                }
+
+                                // Fallback to IP-based location
+                                try {
                                   const response = await fetch('https://ipapi.co/json/');
+                                  if (!response.ok) throw new Error('IP location service failed');
+                                  
                                   const data = await response.json();
                                   if (data.city && data.region) {
                                     const detectedLocation = `${data.city}, ${data.region}`;
@@ -548,15 +540,25 @@ export default function EnhancedChurchDiscovery() {
                                     setLocationInputValue(detectedLocation);
                                     setFilters(prev => ({ ...prev, location: detectedLocation }));
                                     toast({
-                                      title: "Approximate Location Updated",
-                                      description: `Using ISP location: ${detectedLocation}. Please correct if this isn't accurate.`,
+                                      title: "Approximate Location Found",
+                                      description: `Using network location: ${detectedLocation}. Adjust if needed.`,
                                     });
+                                  } else {
+                                    throw new Error('Invalid location data received');
                                   }
+                                } catch (ipError) {
+                                  console.error('IP location failed:', ipError);
+                                  toast({
+                                    title: "Location Detection Failed",
+                                    description: "Unable to detect location. Please enter your city manually.",
+                                    variant: "destructive"
+                                  });
                                 }
                               } catch (error) {
+                                console.error('Location detection error:', error);
                                 toast({
                                   title: "Location Error",
-                                  description: "Could not detect your location. Please enter manually.",
+                                  description: "Something went wrong. Please enter your location manually.",
                                   variant: "destructive"
                                 });
                               } finally {
