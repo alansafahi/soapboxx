@@ -108,6 +108,8 @@ export default function SocialFeed() {
   const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+  const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
+  const [commentText, setCommentText] = useState("");
   
   // Refs for click-outside functionality
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -142,6 +144,78 @@ export default function SocialFeed() {
   const { data: verseSearchResults, isLoading: isSearchingVerses } = useQuery<Array<{id: string; reference: string; text: string}>>({
     queryKey: ['/api/bible-verses/search', verseQuery],
     enabled: verseQuery.length >= 2,
+  });
+
+  // Like post mutation
+  const likeMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return apiRequest(`/api/discussions/${postId}/like`, {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      toast({
+        title: "Success",
+        description: "Post liked successfully"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to like post",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Comment submission mutation
+  const commentMutation = useMutation({
+    mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
+      return apiRequest(`/api/discussions/${postId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ content })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      setCommentText("");
+      setCommentDialogOpen(null);
+      toast({
+        title: "Success",
+        description: "Comment added successfully"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add comment",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Share/repost mutation
+  const shareMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return apiRequest(`/api/discussions/${postId}/share`, {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      toast({
+        title: "Success",
+        description: "Post shared successfully"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to share post",
+        variant: "destructive"
+      });
+    }
   });
 
   // Create post mutation
@@ -850,15 +924,32 @@ export default function SocialFeed() {
               {/* Post Actions */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center space-x-4">
-                  <Button variant="ghost" size="sm" className="text-gray-500 hover:text-red-500">
-                    <Heart className="w-4 h-4 mr-1" />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => likeMutation.mutate(post.id)}
+                    className={`${post.isLiked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500`}
+                    disabled={likeMutation.isPending}
+                  >
+                    <Heart className={`w-4 h-4 mr-1 ${post.isLiked ? 'fill-current' : ''}`} />
                     {post.likeCount}
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-500">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setCommentDialogOpen(post.id)}
+                    className="text-gray-500 hover:text-blue-500"
+                  >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     {post.commentCount}
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-gray-500 hover:text-green-500">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => shareMutation.mutate(post.id)}
+                    className="text-gray-500 hover:text-green-500"
+                    disabled={shareMutation.isPending}
+                  >
                     <RotateCw className="w-4 h-4 mr-1" />
                     {post.shareCount}
                   </Button>
@@ -885,6 +976,48 @@ export default function SocialFeed() {
           </div>
         )}
       </div>
+
+      {/* Comment Dialog */}
+      <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Comment</DialogTitle>
+            <DialogDescription>
+              Share your thoughts on this post.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Write your comment..."
+              className="min-h-[100px]"
+            />
+            <div className="flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setCommentDialogOpen(null)}
+                disabled={commentMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (commentDialogOpen && commentText.trim()) {
+                    commentMutation.mutate({ 
+                      postId: commentDialogOpen, 
+                      content: commentText.trim() 
+                    });
+                  }
+                }}
+                disabled={commentMutation.isPending || !commentText.trim()}
+              >
+                {commentMutation.isPending ? "Adding..." : "Add Comment"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
