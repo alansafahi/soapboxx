@@ -83,77 +83,17 @@ export default function EnhancedChurchDiscovery() {
                 console.log('Reverse geocoding failed, trying IP location...');
               }
               
-              // Fallback to IP-based geolocation
-              try {
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                if (data.city && data.region) {
-                  const detectedLocation = `${data.city}, ${data.region}`;
-                  setUserLocation(detectedLocation);
-                  // Only update input if user hasn't started typing manually
-                  if (!isManuallyTyping) {
-                    setLocationInputValue(detectedLocation);
-                    setFilters(prev => ({ ...prev, location: detectedLocation }));
-                  }
-                  toast({
-                    title: "Approximate Location Detected",
-                    description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
-                    variant: "default"
-                  });
-                }
-              } catch (error) {
-                console.log('IP geolocation also failed');
-              }
+              // Skip IP fallback to prevent interference with manual typing
+              setIsDetectingLocation(false);
             },
-            async (error) => {
-              console.log('Browser geolocation denied, trying IP location...');
-              
-              // Fallback to IP-based geolocation
-              try {
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                if (data.city && data.region) {
-                  const detectedLocation = `${data.city}, ${data.region}`;
-                  setUserLocation(detectedLocation);
-                  // Only update input if user hasn't started typing manually
-                  if (!isManuallyTyping) {
-                    setLocationInputValue(detectedLocation);
-                    setFilters(prev => ({ ...prev, location: detectedLocation }));
-                  }
-                  toast({
-                    title: "Approximate Location Detected",
-                    description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
-                    variant: "default"
-                  });
-                }
-              } catch (error) {
-                console.log('All location detection methods failed');
-                toast({
-                  title: "Location Detection Unavailable",
-                  description: "Please enter your location manually",
-                  variant: "destructive"
-                });
-              }
+            (error) => {
+              console.log('Browser geolocation denied');
+              setIsDetectingLocation(false);
             }
           );
         } else {
-          // No browser geolocation, try IP-based
-          const response = await fetch('https://ipapi.co/json/');
-          const data = await response.json();
-          if (data.city && data.region) {
-            const detectedLocation = `${data.city}, ${data.region}`;
-            setUserLocation(detectedLocation);
-            // Only update input if user hasn't started typing manually
-            if (!isManuallyTyping) {
-              setLocationInputValue(detectedLocation);
-              setFilters(prev => ({ ...prev, location: detectedLocation }));
-            }
-            toast({
-              title: "Approximate Location Detected",
-              description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
-              variant: "default"
-            });
-          }
+          // No browser geolocation available
+          setIsDetectingLocation(false);
         }
       } catch (error) {
         console.log('All location detection failed');
@@ -172,17 +112,20 @@ export default function EnhancedChurchDiscovery() {
 
   // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
+    // Immediately set user interaction flags to prevent any auto-detection
     setIsManuallyTyping(true);
-    setHasUserInteracted(true); // Mark that user has interacted with the field
+    setHasUserInteracted(true);
     setLocationInputValue(value);
     
+    // Clear any existing debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
+    // Only update filters after user stops typing
     debounceTimerRef.current = setTimeout(() => {
       setFilters(prev => ({ ...prev, location: value, churchName: "" }));
-    }, 300);
+    }, 500); // Increased debounce time to 500ms for better typing experience
   }, []);
 
   // Handle church name search
