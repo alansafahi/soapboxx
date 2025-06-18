@@ -4651,6 +4651,37 @@ Return JSON with this exact structure:
     }
   });
 
+  // Join church endpoint
+  app.post('/api/churches/:id/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const churchId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      console.log(`Church join request: User ${userId} joining church ${churchId}`);
+      
+      // Verify church exists
+      const church = await storage.getChurch(churchId);
+      if (!church) {
+        return res.status(404).json({ message: "Church not found" });
+      }
+      
+      // Join the church using storage method
+      await storage.joinChurch(userId, churchId);
+      
+      console.log(`Successfully joined church: User ${userId} joined church ${churchId}`);
+      
+      res.json({ 
+        success: true, 
+        message: "Successfully joined church",
+        churchId,
+        churchName: church.name
+      });
+    } catch (error) {
+      console.error("Error joining church:", error);
+      res.status(500).json({ message: "Failed to join church" });
+    }
+  });
+
   // Feed routes
   app.get("/api/feed", isAuthenticated, async (req: any, res) => {
     try {
