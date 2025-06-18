@@ -54,8 +54,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
 
 function AppRouter() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, refetch } = useAuth();
   const [location] = useLocation();
+  
+  // Handle post-login authentication refresh
+  useEffect(() => {
+    const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+    if (justLoggedIn && !isAuthenticated && !isLoading) {
+      sessionStorage.removeItem('justLoggedIn');
+      // Force authentication refresh
+      refetch();
+    }
+  }, [isAuthenticated, isLoading, refetch]);
   
   // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);

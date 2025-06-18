@@ -9,6 +9,8 @@ export function useAuth() {
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
+    staleTime: 0, // Always fresh for auth queries
+    gcTime: 0, // Don't cache auth data
   });
 
   // Check for demo user in localStorage if API auth fails
