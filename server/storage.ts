@@ -887,10 +887,14 @@ export class DatabaseStorage implements IStorage {
         filteredResults = results.filter(church => {
           const memberCount = church.memberCount || 0;
           switch (params.size) {
-            case 'small': return memberCount < 100;
-            case 'medium': return memberCount >= 100 && memberCount < 500;
-            case 'large': return memberCount >= 500 && memberCount < 1500;
-            case 'mega': return memberCount >= 1500;
+            case 'micro': return memberCount >= 1 && memberCount <= 50;
+            case 'small': return memberCount >= 51 && memberCount <= 100;
+            case 'medium': return memberCount >= 101 && memberCount <= 250;
+            case 'large': return memberCount >= 251 && memberCount <= 500;
+            case 'very-large': return memberCount >= 501 && memberCount <= 1000;
+            case 'mega': return memberCount >= 1001 && memberCount <= 2000;
+            case 'giga': return memberCount >= 2001 && memberCount <= 10000;
+            case 'meta': return memberCount >= 10001;
             default: return true;
           }
         });

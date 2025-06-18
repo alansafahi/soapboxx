@@ -172,10 +172,15 @@ export default function EnhancedChurchDiscovery() {
 
   const getSizeLabel = (memberCount?: number) => {
     if (!memberCount) return "Community";
-    if (memberCount < 100) return "Small";
-    if (memberCount < 500) return "Medium";
-    if (memberCount < 1500) return "Large";
-    return "Mega";
+    if (memberCount >= 1 && memberCount <= 50) return "Micro";
+    if (memberCount >= 51 && memberCount <= 100) return "Small";
+    if (memberCount >= 101 && memberCount <= 250) return "Medium";
+    if (memberCount >= 251 && memberCount <= 500) return "Large";
+    if (memberCount >= 501 && memberCount <= 1000) return "Very Large";
+    if (memberCount >= 1001 && memberCount <= 2000) return "Mega";
+    if (memberCount >= 2001 && memberCount <= 10000) return "Giga";
+    if (memberCount >= 10001) return "Meta";
+    return "Community";
   };
 
   const handleWebsiteClick = (websiteUrl?: string) => {
@@ -191,6 +196,19 @@ export default function EnhancedChurchDiscovery() {
 
   // Get displayed churches (top 10 by proximity, then paginated)
   const displayedChurches = allChurches.slice(0, displayedCount);
+
+  // Helper function to get church size category with nickname
+  const getChurchSizeDisplay = (memberCount: number) => {
+    if (memberCount >= 1 && memberCount <= 50) return "Micro Church (House church)";
+    if (memberCount >= 51 && memberCount <= 100) return "Small Church (Close-knit)";
+    if (memberCount >= 101 && memberCount <= 250) return "Medium Church (Community)";
+    if (memberCount >= 251 && memberCount <= 500) return "Large Church (Multi-ministry)";
+    if (memberCount >= 501 && memberCount <= 1000) return "Very Large Church (Multi-staff)";
+    if (memberCount >= 1001 && memberCount <= 2000) return "Mega Church (Extensive programming)";
+    if (memberCount >= 2001 && memberCount <= 10000) return "Giga Church (High tech)";
+    if (memberCount >= 10001) return "Meta Church (National reach)";
+    return "Size not specified";
+  };
   const remainingCount = allChurches.length - displayedCount;
   const hasUserDenomination = user && (user as any).denomination;
   const userDenominationMatches = hasUserDenomination 
@@ -297,10 +315,14 @@ export default function EnhancedChurchDiscovery() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Any size</SelectItem>
-                        <SelectItem value="small">Small (Under 100)</SelectItem>
-                        <SelectItem value="medium">Medium (100-500)</SelectItem>
-                        <SelectItem value="large">Large (500-1500)</SelectItem>
-                        <SelectItem value="mega">Mega (1500+)</SelectItem>
+                        <SelectItem value="micro">Micro Church (1-50)</SelectItem>
+                        <SelectItem value="small">Small Church (51-100)</SelectItem>
+                        <SelectItem value="medium">Medium Church (101-250)</SelectItem>
+                        <SelectItem value="large">Large Church (251-500)</SelectItem>
+                        <SelectItem value="very-large">Very Large Church (501-1,000)</SelectItem>
+                        <SelectItem value="mega">Mega Church (1,001-2,000)</SelectItem>
+                        <SelectItem value="giga">Giga Church (2,001-10,000)</SelectItem>
+                        <SelectItem value="meta">Meta Church (10,000+)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
