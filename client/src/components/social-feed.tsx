@@ -1082,6 +1082,13 @@ export default function SocialFeed() {
                         .map((comment: any) => (
                           <div key={comment.id} className="flex items-start space-x-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                             <Avatar className="w-8 h-8">
+                              {comment.author?.profileImageUrl && (
+                                <AvatarImage 
+                                  src={comment.author.profileImageUrl} 
+                                  alt={comment.author.name || 'User'} 
+                                  className="object-cover"
+                                />
+                              )}
                               <AvatarFallback className="bg-gray-500 text-white text-sm">
                                 {comment.author?.name?.charAt(0) || 'U'}
                               </AvatarFallback>

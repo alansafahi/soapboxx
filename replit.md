@@ -142,6 +142,15 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 18, 2025: Successfully completed enhanced comment system with nested responses and profile image display
+  - COMMENT SYSTEM ENHANCEMENT: Implemented nested comment responses below original posts with expandable sections
+  - Added comprehensive sorting options: "Sort by: Newest | Most liked" for better content organization
+  - Implemented "View more comments" button displaying 5 additional comments progressively
+  - Created inline comment form with user avatar and instant posting functionality
+  - Added "Reply" buttons under each comment for threaded conversation support
+  - PROFILE IMAGE FIX: Updated getDiscussionComments function to include author profile images in comment avatars
+  - Fixed TypeScript errors for proper user authentication handling across comment system
+  - Comments now display actual profile photos instead of initials, matching main post avatar functionality
 - June 18, 2025: Successfully fixed like button functionality with optimistic updates for instant visual feedback
   - LIKE BUTTON FIX: Implemented optimistic updates for immediate visual response when users click heart icon
   - Enhanced user experience with instant like/unlike feedback before server confirmation

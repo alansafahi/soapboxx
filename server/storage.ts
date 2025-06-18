@@ -2861,11 +2861,28 @@ export class DatabaseStorage implements IStorage {
 
   async getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
     const comments = await db
-      .select()
+      .select({
+        id: discussionComments.id,
+        discussionId: discussionComments.discussionId,
+        authorId: discussionComments.authorId,
+        content: discussionComments.content,
+        parentId: discussionComments.parentId,
+        likeCount: discussionComments.likeCount,
+        createdAt: discussionComments.createdAt,
+        updatedAt: discussionComments.updatedAt,
+        author: {
+          id: users.id,
+          name: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
       .from(discussionComments)
+      .leftJoin(users, eq(discussionComments.authorId, users.id))
       .where(eq(discussionComments.discussionId, discussionId))
       .orderBy(asc(discussionComments.createdAt));
-    return comments;
+    return comments as any;
   }
 
   async getDiscussion(discussionId: number): Promise<Discussion | undefined> {
