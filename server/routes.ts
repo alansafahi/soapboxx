@@ -4546,43 +4546,59 @@ Return JSON with this exact structure:
   app.put('/api/users/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const {
-        firstName,
-        lastName,
-        email,
-        mobileNumber,
-        address,
-        bio,
-        profileImageUrl,
-        spiritualInterests,
-        dateOfBirth,
-        gender,
-        maritalStatus,
-        occupation,
-        emergencyContact
-      } = req.body;
-
+      
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      // Update user profile - map frontend fields to database schema
-      const updatedUser = await storage.updateUserProfile(userId, {
-        firstName,
-        lastName,
-        email,
-        mobileNumber,
-        address,
-        bio,
-        profileImageUrl,
-        interests: spiritualInterests || req.body.interests, // Handle both field names
+      console.log('Profile update request body:', req.body);
+
+      // Map all possible frontend field names to database schema
+      const updateData = {
+        // Name fields
+        firstName: req.body.firstName || req.body.first_name,
+        lastName: req.body.lastName || req.body.last_name,
+        
+        // Contact fields
+        email: req.body.email,
+        mobileNumber: req.body.mobileNumber || req.body.mobile_number || req.body.phoneNumber,
+        
+        // Address fields
+        address: req.body.address,
         city: req.body.city,
         state: req.body.state,
-        zipCode: req.body.zipCode,
+        zipCode: req.body.zipCode || req.body.zip_code,
         country: req.body.country,
+        
+        // Profile fields
+        bio: req.body.bio,
+        profileImageUrl: req.body.profileImageUrl || req.body.profile_image_url,
+        
+        // Spiritual fields
+        interests: req.body.spiritualInterests || req.body.interests || [],
         denomination: req.body.denomination,
+        
+        // Other fields
+        dateOfBirth: req.body.dateOfBirth || req.body.date_of_birth,
+        gender: req.body.gender,
+        maritalStatus: req.body.maritalStatus || req.body.marital_status,
+        occupation: req.body.occupation,
+        emergencyContact: req.body.emergencyContact || req.body.emergency_contact,
+        
         updatedAt: new Date()
+      };
+
+      // Remove undefined fields to avoid overwriting with null
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
       });
+
+      console.log('Mapped update data:', updateData);
+
+      // Update user profile
+      const updatedUser = await storage.updateUserProfile(userId, updateData);
 
       if (!updatedUser) {
         return res.status(404).json({ message: 'User not found' });
