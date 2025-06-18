@@ -110,6 +110,7 @@ export const churches = pgTable("churches", {
   isActive: boolean("is_active").default(true),
   isClaimed: boolean("is_claimed").default(false), // Track if church has been claimed by admin
   adminEmail: varchar("admin_email", { length: 255 }), // Email of designated admin for claiming
+  isDemo: boolean("is_demo").default(true), // Mark as demo church unless imported from production CSV
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

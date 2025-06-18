@@ -815,7 +815,7 @@ export class DatabaseStorage implements IStorage {
     try {
       let whereConditions = [
         eq(churches.isActive, true),
-        isNotNull(churches.adminEmail) // Only show production churches with admin emails
+        eq(churches.isDemo, false) // Only show production churches, not demo churches
       ];
       
       // Filter by denomination
@@ -863,6 +863,7 @@ export class DatabaseStorage implements IStorage {
           history: churches.history,
           isClaimed: churches.isClaimed,
           adminEmail: churches.adminEmail,
+          isDemo: churches.isDemo,
           createdAt: churches.createdAt,
           updatedAt: churches.updatedAt,
           memberCount: sql<number>`COALESCE(COUNT(${userChurches.churchId}), 0)::int`,
