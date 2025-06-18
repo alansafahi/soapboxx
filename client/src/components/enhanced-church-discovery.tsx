@@ -777,7 +777,7 @@ export default function EnhancedChurchDiscovery() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleWebsiteClick(church.website)}
+                                onClick={() => handleWebsiteClick(church.website ?? undefined)}
                                 className="flex items-center gap-1"
                               >
                                 <Globe className="w-3 h-3" />
