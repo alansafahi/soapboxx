@@ -554,7 +554,7 @@ export default function SocialFeed() {
             <div className="flex items-center space-x-3">
               <Avatar className="w-10 h-10">
                 <AvatarFallback className="bg-purple-600 text-white">
-                  {(user as any)?.firstName && (user as any)?.lastName ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : (user as any)?.firstName?.[0] || 'U'}
+                  {user && typeof user === 'object' && 'firstName' in user && 'lastName' in user ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : user && typeof user === 'object' && 'firstName' in user ? (user as any).firstName[0] : 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -991,7 +991,7 @@ export default function SocialFeed() {
                 </div>
                 
                 {/* Delete Button - Only show for post author */}
-                {user && post.author.id === (user as any).id && (
+                {user && typeof user === 'object' && 'id' in user && post.author.id === (user as any).id && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -1036,7 +1036,7 @@ export default function SocialFeed() {
                     <div className="flex items-start space-x-3">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="bg-purple-600 text-white text-sm">
-                          {(user as any)?.firstName && (user as any)?.lastName ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : (user as any)?.firstName?.[0] || 'U'}
+                          {user && typeof user === 'object' && 'firstName' in user && 'lastName' in user ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : user && typeof user === 'object' && 'firstName' in user ? (user as any).firstName[0] : 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
