@@ -67,14 +67,11 @@ export default function EnhancedChurchDiscovery() {
                 // Reverse geocoding using a simple service
                 const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
                 const data = await response.json();
-                if (data.city && data.principalSubdivision) {
+                if (data.city && data.principalSubdivision && !hasUserInteracted) {
                   const detectedLocation = `${data.city}, ${data.principalSubdivision}`;
                   setUserLocation(detectedLocation);
-                  // Only update input if user hasn't started typing manually
-                  if (!isManuallyTyping) {
-                    setLocationInputValue(detectedLocation);
-                    setFilters(prev => ({ ...prev, location: detectedLocation }));
-                  }
+                  setLocationInputValue(detectedLocation);
+                  setFilters(prev => ({ ...prev, location: detectedLocation }));
                   toast({
                     title: "Precise Location Detected",
                     description: `Using GPS location: ${detectedLocation}`,
@@ -171,7 +168,7 @@ export default function EnhancedChurchDiscovery() {
     };
 
     detectLocation();
-  }, [toast]);
+  }, [toast, hasUserInteracted]);
 
   // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
@@ -524,6 +521,7 @@ export default function EnhancedChurchDiscovery() {
                             size="sm"
                             onClick={async () => {
                               setIsDetectingLocation(true);
+                              setHasUserInteracted(false); // Reset to allow location update
                               try {
                                 // Try GPS first for accuracy
                                 if (navigator.geolocation) {
