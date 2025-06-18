@@ -54,23 +54,7 @@ export default function EnhancedChurchDiscovery() {
     const detectLocation = async () => {
       setIsDetectingLocation(true);
       try {
-        // Try IP-based geolocation first
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
-        if (data.city && data.region) {
-          const detectedLocation = `${data.city}, ${data.region}`;
-          setUserLocation(detectedLocation);
-          setLocationInputValue(detectedLocation);
-          setFilters(prev => ({ ...prev, location: detectedLocation }));
-          toast({
-            title: "Location Detected",
-            description: `Found your location: ${detectedLocation}`,
-          });
-        }
-      } catch (error) {
-        console.log('IP geolocation not available, trying browser geolocation...');
-        
-        // Fallback to browser geolocation
+        // Try browser geolocation first for more accuracy
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             async (position) => {
@@ -85,19 +69,86 @@ export default function EnhancedChurchDiscovery() {
                   setLocationInputValue(detectedLocation);
                   setFilters(prev => ({ ...prev, location: detectedLocation }));
                   toast({
-                    title: "Location Detected",
-                    description: `Found your location: ${detectedLocation}`,
+                    title: "Precise Location Detected",
+                    description: `Using GPS location: ${detectedLocation}`,
+                  });
+                  setIsDetectingLocation(false);
+                  return;
+                }
+              } catch (error) {
+                console.log('Reverse geocoding failed, trying IP location...');
+              }
+              
+              // Fallback to IP-based geolocation
+              try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                if (data.city && data.region) {
+                  const detectedLocation = `${data.city}, ${data.region}`;
+                  setUserLocation(detectedLocation);
+                  setLocationInputValue(detectedLocation);
+                  setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  toast({
+                    title: "Approximate Location Detected",
+                    description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
+                    variant: "default"
                   });
                 }
               } catch (error) {
-                console.log('Reverse geocoding failed');
+                console.log('IP geolocation also failed');
               }
             },
-            (error) => {
-              console.log('Browser geolocation denied or unavailable');
+            async (error) => {
+              console.log('Browser geolocation denied, trying IP location...');
+              
+              // Fallback to IP-based geolocation
+              try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                if (data.city && data.region) {
+                  const detectedLocation = `${data.city}, ${data.region}`;
+                  setUserLocation(detectedLocation);
+                  setLocationInputValue(detectedLocation);
+                  setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  toast({
+                    title: "Approximate Location Detected",
+                    description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
+                    variant: "default"
+                  });
+                }
+              } catch (error) {
+                console.log('All location detection methods failed');
+                toast({
+                  title: "Location Detection Unavailable",
+                  description: "Please enter your location manually",
+                  variant: "destructive"
+                });
+              }
             }
           );
+        } else {
+          // No browser geolocation, try IP-based
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          if (data.city && data.region) {
+            const detectedLocation = `${data.city}, ${data.region}`;
+            setUserLocation(detectedLocation);
+            setLocationInputValue(detectedLocation);
+            setFilters(prev => ({ ...prev, location: detectedLocation }));
+            toast({
+              title: "Approximate Location Detected",
+              description: `Using ISP location: ${detectedLocation}. This may not be exact - please correct if needed.`,
+              variant: "default"
+            });
+          }
         }
+      } catch (error) {
+        console.log('All location detection failed');
+        toast({
+          title: "Location Detection Failed",
+          description: "Please enter your location manually",
+          variant: "destructive"
+        });
       } finally {
         setIsDetectingLocation(false);
       }
@@ -456,17 +507,94 @@ export default function EnhancedChurchDiscovery() {
                             onClick={async () => {
                               setIsDetectingLocation(true);
                               try {
-                                const response = await fetch('https://ipapi.co/json/');
-                                const data = await response.json();
-                                if (data.city && data.region) {
-                                  const detectedLocation = `${data.city}, ${data.region}`;
-                                  setUserLocation(detectedLocation);
-                                  setLocationInputValue(detectedLocation);
-                                  setFilters(prev => ({ ...prev, location: detectedLocation }));
-                                  toast({
-                                    title: "Location Updated",
-                                    description: `Using your location: ${detectedLocation}`,
-                                  });
+                                // Try GPS first for accuracy
+                                if (navigator.geolocation) {
+                                  navigator.geolocation.getCurrentPosition(
+                                    async (position) => {
+                                      try {
+                                        const { latitude, longitude } = position.coords;
+                                        const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                                        const data = await response.json();
+                                        if (data.city && data.principalSubdivision) {
+                                          const detectedLocation = `${data.city}, ${data.principalSubdivision}`;
+                                          setUserLocation(detectedLocation);
+                                          setLocationInputValue(detectedLocation);
+                                          setFilters(prev => ({ ...prev, location: detectedLocation }));
+                                          toast({
+                                            title: "Precise Location Updated",
+                                            description: `Using GPS location: ${detectedLocation}`,
+                                          });
+                                          setIsDetectingLocation(false);
+                                          return;
+                                        }
+                                      } catch (error) {
+                                        console.log('GPS reverse geocoding failed, trying IP...');
+                                      }
+                                      
+                                      // Fallback to IP location
+                                      try {
+                                        const response = await fetch('https://ipapi.co/json/');
+                                        const data = await response.json();
+                                        if (data.city && data.region) {
+                                          const detectedLocation = `${data.city}, ${data.region}`;
+                                          setUserLocation(detectedLocation);
+                                          setLocationInputValue(detectedLocation);
+                                          setFilters(prev => ({ ...prev, location: detectedLocation }));
+                                          toast({
+                                            title: "Approximate Location Updated",
+                                            description: `Using ISP location: ${detectedLocation}. Please correct if this isn't accurate.`,
+                                          });
+                                        }
+                                      } catch (error) {
+                                        toast({
+                                          title: "Location Error",
+                                          description: "Could not detect your location. Please enter manually.",
+                                          variant: "destructive"
+                                        });
+                                      } finally {
+                                        setIsDetectingLocation(false);
+                                      }
+                                    },
+                                    async (error) => {
+                                      // GPS denied, try IP location
+                                      try {
+                                        const response = await fetch('https://ipapi.co/json/');
+                                        const data = await response.json();
+                                        if (data.city && data.region) {
+                                          const detectedLocation = `${data.city}, ${data.region}`;
+                                          setUserLocation(detectedLocation);
+                                          setLocationInputValue(detectedLocation);
+                                          setFilters(prev => ({ ...prev, location: detectedLocation }));
+                                          toast({
+                                            title: "Approximate Location Updated",
+                                            description: `Using ISP location: ${detectedLocation}. Please correct if this isn't accurate.`,
+                                          });
+                                        }
+                                      } catch (error) {
+                                        toast({
+                                          title: "Location Error",
+                                          description: "Could not detect your location. Please enter manually.",
+                                          variant: "destructive"
+                                        });
+                                      } finally {
+                                        setIsDetectingLocation(false);
+                                      }
+                                    }
+                                  );
+                                } else {
+                                  // No GPS available, use IP
+                                  const response = await fetch('https://ipapi.co/json/');
+                                  const data = await response.json();
+                                  if (data.city && data.region) {
+                                    const detectedLocation = `${data.city}, ${data.region}`;
+                                    setUserLocation(detectedLocation);
+                                    setLocationInputValue(detectedLocation);
+                                    setFilters(prev => ({ ...prev, location: detectedLocation }));
+                                    toast({
+                                      title: "Approximate Location Updated",
+                                      description: `Using ISP location: ${detectedLocation}. Please correct if this isn't accurate.`,
+                                    });
+                                  }
                                 }
                               } catch (error) {
                                 toast({
