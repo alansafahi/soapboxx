@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -144,8 +144,11 @@ export default function EnhancedChurchDiscovery() {
       size: "all",
       proximity: 25
     });
-    // Clear location input state
-    setLocationInput("");
+    // Clear location input using ref
+    if (locationInputRef.current) {
+      locationInputRef.current.value = "";
+    }
+    setDebouncedLocation("");
     setDisplayedCount(10);
   };
 
@@ -350,9 +353,9 @@ export default function EnhancedChurchDiscovery() {
                       Location (City, State, or ZIP Code)
                     </label>
                     <Input
+                      ref={locationInputRef}
                       placeholder="Enter city, state, or zip code..."
-                      value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
+                      onChange={(e) => handleLocationChange(e.target.value)}
                       className="w-full"
                     />
                   </div>
