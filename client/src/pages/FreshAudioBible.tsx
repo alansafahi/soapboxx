@@ -731,11 +731,11 @@ export default function FreshAudioBible() {
                     <div className="space-y-4">
                       {selectedVerses.map((verse, index) => (
                         <div key={verse.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800 dark:border-gray-600">
-                          <div className="flex justify-between items-start mb-2">
-                            <Badge variant="secondary">{verse.reference}</Badge>
-                            <Badge variant="outline">{verse.category}</Badge>
+                          <div className="flex flex-wrap justify-between items-start mb-2 gap-2">
+                            <Badge variant="secondary" className="text-xs sm:text-sm flex-shrink-0">{verse.reference}</Badge>
+                            <Badge variant="outline" className="text-xs sm:text-sm">{verse.category}</Badge>
                           </div>
-                          <p className="text-gray-700 dark:text-gray-200 leading-relaxed">{verse.text}</p>
+                          <p className="text-gray-700 dark:text-gray-200 leading-relaxed break-words text-sm sm:text-base whitespace-pre-wrap overflow-wrap-anywhere hyphens-auto">{verse.text}</p>
                           {verse.topicTags && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {verse.topicTags.map((tag, i) => (
@@ -1094,13 +1094,13 @@ export default function FreshAudioBible() {
                           }`}
                           onClick={() => toggleVerseSelection(verse)}
                         >
-                          <div className="flex justify-between items-start mb-2">
-                            <Badge variant={isSelected ? "default" : "secondary"}>
+                          <div className="flex flex-wrap justify-between items-start mb-2 gap-2">
+                            <Badge variant={isSelected ? "default" : "secondary"} className="text-xs sm:text-sm flex-shrink-0">
                               {verse.reference}
                             </Badge>
-                            <Badge variant="outline">{verse.category}</Badge>
+                            <Badge variant="outline" className="text-xs sm:text-sm">{verse.category}</Badge>
                           </div>
-                          <p className="text-gray-700 dark:text-gray-200 leading-relaxed">{verse.text}</p>
+                          <p className="text-gray-700 dark:text-gray-200 leading-relaxed break-words text-sm sm:text-base whitespace-pre-wrap overflow-wrap-anywhere hyphens-auto">{verse.text}</p>
                           {verse.topicTags && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {verse.topicTags.map((tag, i) => (

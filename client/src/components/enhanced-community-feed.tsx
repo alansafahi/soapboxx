@@ -365,8 +365,8 @@ export default function EnhancedCommunityFeed() {
 
                     {/* Post Content */}
                     <div className="space-y-3">
-                      <h3 className="font-semibold text-lg text-gray-900">{post.title}</h3>
-                      <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
+                      <h3 className="font-semibold text-base sm:text-lg text-gray-900 break-words hyphens-auto leading-tight">{post.title}</h3>
+                      <p className="text-gray-700 whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
                       
                       {/* Tags */}
                       {post.tags && post.tags.length > 0 && (
@@ -412,8 +412,8 @@ export default function EnhancedCommunityFeed() {
                       )}
 
                       {/* Reaction Buttons */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-1">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                        <div className="flex items-center flex-wrap gap-1">
                           {REACTION_TYPES.slice(0, 4).map((reactionType) => {
                             const postReaction = post.reactions.find(r => r.type === reactionType.type);
                             const isActive = postReaction?.userReacted;
@@ -424,23 +424,23 @@ export default function EnhancedCommunityFeed() {
                                 variant={isActive ? "default" : "ghost"}
                                 size="sm"
                                 onClick={() => handleReaction(post, reactionType.type)}
-                                className={`text-sm ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
+                                className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
                               >
                                 <span className="mr-1">{reactionType.emoji}</span>
-                                {postReaction?.count || 0}
+                                <span className="hidden sm:inline">{postReaction?.count || 0}</span>
                               </Button>
                             );
                           })}
                         </div>
 
-                        <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm">
-                            <MessageCircle className="h-4 w-4 mr-1" />
-                            Comment
+                        <div className="flex items-center space-x-1 sm:space-x-2">
+                          <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+                            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="hidden sm:inline">Comment</span>
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Share2 className="h-4 w-4 mr-1" />
-                            Share
+                          <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+                            <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="hidden sm:inline">Share</span>
                           </Button>
                         </div>
                       </div>
