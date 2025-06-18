@@ -58,12 +58,14 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Clear all cached data and force fresh authentication check
-        queryClient.clear();
-        // Small delay to ensure session is established
-        await new Promise(resolve => setTimeout(resolve, 200));
-        // Redirect to home page with fresh state
-        window.location.href = '/';
+        // Successful login - invalidate auth cache and redirect
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+        
+        // Use setTimeout to allow React Query to process the cache updates
+        setTimeout(() => {
+          window.location.replace('/');
+        }, 300);
       }
     } catch (error: any) {
       toast({
