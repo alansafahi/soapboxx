@@ -48,14 +48,14 @@ export default function BiblePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 pb-20 md:pb-0">
-      <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 pb-16 sm:pb-20 md:pb-0">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="text-center mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">
             Today's Reading
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
@@ -66,7 +66,7 @@ export default function BiblePage() {
         </div>
 
         {/* Daily Verse Card */}
-        <Card className="mb-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="mb-4 sm:mb-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <BookOpen className="w-6 h-6 text-blue-600" />

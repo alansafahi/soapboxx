@@ -134,9 +134,9 @@ function AppRouter() {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {isAuthenticated && <Sidebar />}
-      <div className={isAuthenticated ? "flex-1 flex flex-col" : "flex-1"}>
+      <div className={isAuthenticated ? "flex-1 flex flex-col min-w-0" : "flex-1"}>
         {isAuthenticated && <TopHeader />}
-        <main className={isAuthenticated ? "flex-1 overflow-y-auto" : "flex-1"}>
+        <main className={isAuthenticated ? "flex-1 overflow-y-auto px-2 sm:px-4 md:px-6 py-2 sm:py-4" : "flex-1"}>
         <Switch>
           {!isAuthenticated ? (
             <>

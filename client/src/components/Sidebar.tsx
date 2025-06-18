@@ -166,7 +166,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'}`}>
+    <div className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'}`}>
       {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         {/* Logo and Toggle */}
@@ -244,7 +244,7 @@ export default function Sidebar() {
                   <Button
                     variant={isActive ? "default" : "ghost"}
                     size="icon"
-                    className={`w-10 h-10 ${
+                    className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
                       isActive 
                         ? 'bg-purple-600 text-white hover:bg-purple-700' 
                         : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'

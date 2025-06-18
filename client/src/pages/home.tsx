@@ -55,29 +55,29 @@ export default function Home({ referralCode }: HomeProps = {}) {
   }
 
   return (
-    <div className="min-h-screen bg-warm-white dark:bg-gray-900 pt-16">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-warm-white dark:bg-gray-900">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-4 md:py-6 lg:py-8">
         {/* Referral Welcome Banner */}
         {referralCode && (
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <ReferralWelcome referralCode={referralCode} />
           </div>
         )}
         
-        {/* Main Social Feed Layout - Twitter/Facebook Style */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Social Feed Layout - Mobile-First Responsive */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {/* Primary Feed Column */}
-          <div className="lg:col-span-2">
-            <div id="social-feed">
+          <div className="lg:col-span-2 min-w-0">
+            <div id="social-feed" className="mb-4 sm:mb-6">
               <SocialFeed />
             </div>
-            <div id="events-list">
+            <div id="events-list" className="mb-4 sm:mb-6 lg:mb-0">
               <EventsList />
             </div>
           </div>
           
-          {/* Right Sidebar */}
-          <div className="space-y-6">
+          {/* Right Sidebar - Stack on Mobile */}
+          <div className="space-y-3 sm:space-y-4 md:space-y-6">
             <div id="check-in-system">
               <CheckInSystem />
             </div>
