@@ -2034,6 +2034,7 @@ export class DatabaseStorage implements IStorage {
         isActive: churches.isActive,
         isClaimed: churches.isClaimed,
         adminEmail: churches.adminEmail,
+        isDemo: churches.isDemo,
         createdAt: churches.createdAt,
         updatedAt: churches.updatedAt,
       })
@@ -2071,6 +2072,7 @@ export class DatabaseStorage implements IStorage {
         isActive: churches.isActive,
         isClaimed: churches.isClaimed,
         adminEmail: churches.adminEmail,
+        isDemo: churches.isDemo,
         createdAt: churches.createdAt,
         updatedAt: churches.updatedAt,
       })

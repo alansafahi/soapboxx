@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 18, 2025: Successfully completed production church filtering system with authentic data
+  - Added `isDemo` boolean field to churches table to distinguish production from demo churches
+  - Marked 1,830 production churches from CSV import as non-demo (is_demo = false)
+  - Marked 800 existing placeholder churches as demo churches (is_demo = true) 
+  - Updated church search filtering logic to show only production churches, excluding demo churches
+  - Church discovery now displays only authentic church data from the imported CSV file
+  - Database contains 2,630 total churches: 1,830 production + 800 demo churches
 - June 18, 2025: Successfully implemented comprehensive church size categorization system with 8 detailed categories
   - Added granular church size filtering: Micro (1-50), Small (51-100), Medium (101-250), Large (251-500), Very Large (501-1,000), Mega (1,001-2,000), Giga (2,001-10,000), Meta (10,000+)
   - Enhanced church discovery UI with descriptive nicknames: House church, Close-knit, Community, Multi-ministry, Multi-staff, Extensive programming, High tech, National reach

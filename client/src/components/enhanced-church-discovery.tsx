@@ -22,7 +22,7 @@ interface FilterState {
 
 interface ChurchWithDistance extends Church {
   distance?: number;
-  memberCount?: number;
+  memberCount: number | null;
 }
 
 export default function EnhancedChurchDiscovery() {
