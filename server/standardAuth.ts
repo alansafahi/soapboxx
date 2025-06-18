@@ -8,20 +8,26 @@ import { emailService } from "./emailService";
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
+  // Enhanced PostgreSQL session store with better error handling
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
     tableName: 'sessions',
     createTableIfMissing: false,
-    ttl: sessionTtl / 1000, // Convert to seconds for PostgreSQL
+    ttl: sessionTtl / 1000, // Convert to seconds
+  });
+
+  // Handle PostgreSQL store errors
+  sessionStore.on('error', (error) => {
+    console.error('Session store error:', error);
   });
 
   return session({
     store: sessionStore,
-    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
-    resave: true, // Force session save on each request
+    secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
+    resave: true,
     saveUninitialized: false,
-    rolling: true,
+    rolling: false, // Disable rolling sessions to prevent conflicts
     cookie: {
       secure: false,
       httpOnly: true,
