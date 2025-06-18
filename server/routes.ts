@@ -4450,6 +4450,93 @@ Return JSON with this exact structure:
     }
   });
 
+  // Church claiming API endpoints
+  app.get('/api/churches/claimable', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.email) {
+        return res.status(400).json({ message: 'User email required for church claiming' });
+      }
+
+      const claimableChurches = await storage.getClaimableChurches(user.email);
+      res.json(claimableChurches);
+    } catch (error) {
+      console.error('Error fetching claimable churches:', error);
+      res.status(500).json({ message: 'Failed to fetch claimable churches' });
+    }
+  });
+
+  app.post('/api/churches/:churchId/claim', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const churchId = parseInt(req.params.churchId);
+
+      if (!churchId || isNaN(churchId)) {
+        return res.status(400).json({ message: 'Valid church ID required' });
+      }
+
+      const result = await storage.claimChurch(churchId, userId);
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          message: 'Church claimed successfully',
+          church: result.church
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.error || 'Failed to claim church'
+        });
+      }
+    } catch (error) {
+      console.error('Error claiming church:', error);
+      res.status(500).json({ message: 'Failed to claim church' });
+    }
+  });
+
+  // Bulk church import (admin only)
+  app.post('/api/churches/bulk-import', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Check admin permissions
+      if (!user || !user.email || !user.email.includes('admin')) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const { runChurchImport } = await import('../church-bulk-import.js');
+      const result = await runChurchImport();
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error running bulk import:', error);
+      res.status(500).json({ message: 'Bulk import failed' });
+    }
+  });
+
+  // Remove demo churches (admin only)
+  app.delete('/api/churches/demo', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Check admin permissions
+      if (!user || !user.email || !user.email.includes('admin')) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const result = await storage.removeDemoChurches();
+      res.json(result);
+    } catch (error) {
+      console.error('Error removing demo churches:', error);
+      res.status(500).json({ message: 'Failed to remove demo churches' });
+    }
+  });
+
   // Church routes
   app.get('/api/churches', async (req, res) => {
     try {

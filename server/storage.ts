@@ -1931,6 +1931,8 @@ export class DatabaseStorage implements IStorage {
         rating: churches.rating,
         memberCount: churches.memberCount,
         isActive: churches.isActive,
+        isClaimed: churches.isClaimed,
+        adminEmail: churches.adminEmail,
         createdAt: churches.createdAt,
         updatedAt: churches.updatedAt,
       })
@@ -2050,6 +2052,170 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return friendship;
+  }
+
+  // Church claiming operations
+  async getClaimableChurches(userEmail: string): Promise<Church[]> {
+    return await db
+      .select({
+        id: churches.id,
+        name: churches.name,
+        denomination: churches.denomination,
+        description: churches.description,
+        address: churches.address,
+        city: churches.city,
+        state: churches.state,
+        zipCode: churches.zipCode,
+        phone: churches.phone,
+        email: churches.email,
+        website: churches.website,
+        logoUrl: churches.logoUrl,
+        bio: churches.bio,
+        socialLinks: churches.socialLinks,
+        communityTags: churches.communityTags,
+        latitude: churches.latitude,
+        longitude: churches.longitude,
+        rating: churches.rating,
+        memberCount: churches.memberCount,
+        isActive: churches.isActive,
+        isClaimed: churches.isClaimed,
+        adminEmail: churches.adminEmail,
+        createdAt: churches.createdAt,
+        updatedAt: churches.updatedAt,
+      })
+      .from(churches)
+      .where(and(
+        eq(churches.isClaimed, false),
+        eq(churches.adminEmail, userEmail),
+        eq(churches.isActive, true)
+      ));
+  }
+
+  async claimChurch(churchId: number, userId: string): Promise<{ success: boolean; church?: Church; error?: string }> {
+    try {
+      // Get user email
+      const user = await this.getUser(userId);
+      if (!user || !user.email) {
+        return { success: false, error: 'User email required for claiming' };
+      }
+
+      // Verify church is claimable by this user
+      const church = await db
+        .select()
+        .from(churches)
+        .where(and(
+          eq(churches.id, churchId),
+          eq(churches.isClaimed, false),
+          eq(churches.adminEmail, user.email),
+          eq(churches.isActive, true)
+        ))
+        .limit(1);
+
+      if (church.length === 0) {
+        return { success: false, error: 'Church not found or not claimable by this user' };
+      }
+
+      // Get church_admin role
+      const adminRole = await db
+        .select()
+        .from(roles)
+        .where(eq(roles.name, 'church_admin'))
+        .limit(1);
+
+      if (adminRole.length === 0) {
+        return { success: false, error: 'Church admin role not found' };
+      }
+
+      // Start transaction
+      await db.transaction(async (tx) => {
+        // Mark church as claimed and remove admin email
+        await tx
+          .update(churches)
+          .set({ 
+            isClaimed: true, 
+            adminEmail: null,
+            updatedAt: new Date()
+          })
+          .where(eq(churches.id, churchId));
+
+        // Add user as church admin
+        await tx
+          .insert(userChurches)
+          .values({
+            userId: userId,
+            churchId: churchId,
+            roleId: adminRole[0].id,
+            isActive: true,
+            joinedAt: new Date()
+          });
+      });
+
+      // Return updated church
+      const updatedChurch = await this.getChurch(churchId);
+      return { success: true, church: updatedChurch };
+
+    } catch (error) {
+      console.error('Error claiming church:', error);
+      return { success: false, error: 'Failed to claim church' };
+    }
+  }
+
+  async bulkImportChurches(churchData: any[]): Promise<{ success: boolean; imported: number; error?: string }> {
+    try {
+      if (churchData.length === 0) {
+        return { success: false, error: 'No church data provided' };
+      }
+
+      // Insert in batches of 100
+      const batchSize = 100;
+      let totalInserted = 0;
+
+      for (let i = 0; i < churchData.length; i += batchSize) {
+        const batch = churchData.slice(i, i + batchSize);
+        
+        try {
+          const result = await db.insert(churches).values(batch).returning({ id: churches.id });
+          totalInserted += result.length;
+        } catch (error) {
+          console.error(`Error inserting batch ${Math.floor(i / batchSize) + 1}:`, error);
+          // Continue with next batch
+        }
+      }
+
+      return { success: true, imported: totalInserted };
+
+    } catch (error) {
+      console.error('Error bulk importing churches:', error);
+      return { success: false, imported: 0, error: 'Bulk import failed' };
+    }
+  }
+
+  async removeDemoChurches(): Promise<{ success: boolean; removed: number; error?: string }> {
+    try {
+      // Find and remove demo churches
+      const demoPatterns = [
+        'Demo Church',
+        'Test Church', 
+        'Sample Church',
+        'Victory Christian',
+        'Grace Community',
+        'First Baptist'
+      ];
+
+      let totalRemoved = 0;
+
+      for (const pattern of demoPatterns) {
+        const result = await db.delete(churches)
+          .where(eq(churches.name, pattern));
+        totalRemoved += result.rowCount || 0;
+      }
+
+      return { success: true, removed: totalRemoved };
+
+    } catch (error) {
+      console.error('Error removing demo churches:', error);
+      return { success: false, removed: 0, error: 'Failed to remove demo churches' };
+    }
   }
 
   // Chat operations
