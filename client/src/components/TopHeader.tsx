@@ -6,6 +6,7 @@ import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,9 @@ export default function TopHeader() {
   const { toast } = useToast();
   
   const typedUser = user as User | null;
+
+  // Local state to track read notifications for immediate UI updates
+  const [readNotificationIds, setReadNotificationIds] = useState<Set<number>>(new Set());
 
   // Fetch notifications
   const { data: notifications = [] } = useQuery<Notification[]>({
@@ -90,7 +94,11 @@ export default function TopHeader() {
     },
   });
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  // Calculate unread count using both server data and local state
+  const unreadCount = notifications.filter(n => !n.isRead && !readNotificationIds.has(n.id)).length;
+  console.log('Current notifications:', notifications);
+  console.log('Read notification IDs:', Array.from(readNotificationIds));
+  console.log('Calculated unread count:', unreadCount);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
