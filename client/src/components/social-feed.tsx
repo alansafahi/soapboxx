@@ -153,19 +153,42 @@ export default function SocialFeed() {
         method: 'POST'
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-      toast({
-        title: "Success",
-        description: "Post liked successfully"
+    onMutate: async (postId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/feed'] });
+      
+      // Snapshot the previous value
+      const previousFeed = queryClient.getQueryData(['/api/feed']);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(['/api/feed'], (old: any) => {
+        if (!old) return old;
+        return old.map((post: any) => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              isLiked: !post.isLiked,
+              likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1
+            };
+          }
+          return post;
+        });
       });
+      
+      return { previousFeed };
     },
-    onError: () => {
+    onError: (err, postId, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData(['/api/feed'], context?.previousFeed);
       toast({
         title: "Error",
         description: "Failed to like post",
         variant: "destructive"
       });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
     }
   });
 
