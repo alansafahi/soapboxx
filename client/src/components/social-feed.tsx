@@ -83,7 +83,7 @@ interface FeedPost {
   pinCategory?: string;
   attachedMedia?: Array<{name: string; type: string; size: number; url: string; filename: string}>;
   linkedVerse?: {reference: string; text: string};
-  comments?: Array<{id: number; content: string; author: {name: string}; createdAt: Date}>;
+  comments?: Array<{id: number; content: string; author: {name: string; profileImageUrl?: string}; createdAt: Date}>;
 }
 
 export default function SocialFeed() {
