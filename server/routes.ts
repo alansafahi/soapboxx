@@ -11,6 +11,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
+import crypto from "crypto";
 
 // Configure file upload directories
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -285,6 +286,202 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Forgot password endpoint
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Return success even if user doesn't exist for security
+        return res.json({ message: "Password reset email sent if account exists" });
+      }
+
+      // Generate reset token
+      const crypto = require("crypto");
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetExpires = new Date(Date.now() + 3600000); // 1 hour
+
+      // Store reset token (you'd implement this in storage)
+      await storage.storePasswordResetToken(user.id, resetToken, resetExpires);
+
+      // Send reset email (implement with SendGrid)
+      try {
+        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+        
+        // Using SendGrid to send password reset email
+        const sgMail = require('@sendgrid/mail');
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+        const msg = {
+          to: email,
+          from: 'noreply@soapbox.com',
+          subject: 'Password Reset Request',
+          html: `
+            <h2>Password Reset Request</h2>
+            <p>You requested a password reset for your SoapBox account.</p>
+            <p>Click the link below to reset your password:</p>
+            <a href="${resetUrl}" style="background-color: #7C3AED; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Reset Password</a>
+            <p>This link will expire in 1 hour.</p>
+            <p>If you didn't request this reset, please ignore this email.</p>
+          `
+        };
+
+        await sgMail.send(msg);
+      } catch (emailError) {
+        console.error("Email sending error:", emailError);
+        // Continue - don't expose email errors to user
+      }
+
+      res.json({ message: "Password reset email sent if account exists" });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Password reset request failed" });
+    }
+  });
+
+  // Google OAuth routes
+  app.get("/api/auth/google", (req, res) => {
+    // Redirect to Google OAuth
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${process.env.GOOGLE_CLIENT_ID}&` +
+      `redirect_uri=${encodeURIComponent(`${req.protocol}://${req.get('host')}/api/auth/google/callback`)}&` +
+      `response_type=code&` +
+      `scope=email profile&` +
+      `state=${crypto.randomUUID()}`;
+    
+    res.redirect(googleAuthUrl);
+  });
+
+  app.get("/api/auth/google/callback", async (req, res) => {
+    try {
+      const { code } = req.query;
+      
+      // Exchange code for tokens
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: process.env.GOOGLE_CLIENT_ID!,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+          code: code as string,
+          grant_type: 'authorization_code',
+          redirect_uri: `${req.protocol}://${req.get('host')}/api/auth/google/callback`,
+        }),
+      });
+
+      const tokens = await tokenResponse.json();
+      
+      // Get user info from Google
+      const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          Authorization: `Bearer ${tokens.access_token}`,
+        },
+      });
+
+      const googleUser = await userResponse.json();
+      
+      // Check if user exists or create new one
+      let user = await storage.getUserByEmail(googleUser.email);
+      if (!user) {
+        user = await storage.createUser({
+          id: crypto.randomUUID(),
+          email: googleUser.email,
+          username: googleUser.email.split('@')[0],
+          firstName: googleUser.given_name || '',
+          lastName: googleUser.family_name || '',
+          profileImageUrl: googleUser.picture || null,
+          role: "member",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+
+      // Set session
+      req.session.userId = user.id;
+      req.session.user = user;
+
+      res.redirect('/');
+    } catch (error) {
+      console.error("Google OAuth error:", error);
+      res.redirect('/login?error=oauth_failed');
+    }
+  });
+
+  // Apple ID OAuth routes (Sign in with Apple)
+  app.get("/api/auth/apple", (req, res) => {
+    // Redirect to Apple OAuth
+    const appleAuthUrl = `https://appleid.apple.com/auth/authorize?` +
+      `client_id=${process.env.APPLE_CLIENT_ID}&` +
+      `redirect_uri=${encodeURIComponent(`${req.protocol}://${req.get('host')}/api/auth/apple/callback`)}&` +
+      `response_type=code&` +
+      `scope=name email&` +
+      `response_mode=form_post&` +
+      `state=${crypto.randomUUID()}`;
+    
+    res.redirect(appleAuthUrl);
+  });
+
+  app.post("/api/auth/apple/callback", async (req, res) => {
+    try {
+      const { code, user: appleUserData } = req.body;
+      
+      // Exchange code for tokens
+      const tokenResponse = await fetch('https://appleid.apple.com/auth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: process.env.APPLE_CLIENT_ID!,
+          client_secret: process.env.APPLE_CLIENT_SECRET!,
+          code: code as string,
+          grant_type: 'authorization_code',
+          redirect_uri: `${req.protocol}://${req.get('host')}/api/auth/apple/callback`,
+        }),
+      });
+
+      const tokens = await tokenResponse.json();
+      
+      // Decode ID token to get user info
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.decode(tokens.id_token);
+      
+      let userData = decoded;
+      if (appleUserData) {
+        // First time sign in - Apple provides user data
+        const parsedUserData = typeof appleUserData === 'string' ? JSON.parse(appleUserData) : appleUserData;
+        userData = { ...decoded, ...parsedUserData };
+      }
+
+      // Check if user exists or create new one
+      let user = await storage.getUserByEmail(userData.email);
+      if (!user) {
+        user = await storage.createUser({
+          id: crypto.randomUUID(),
+          email: userData.email,
+          username: userData.email.split('@')[0],
+          firstName: userData.name?.firstName || '',
+          lastName: userData.name?.lastName || '',
+          role: "member",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+
+      // Set session
+      req.session.userId = user.id;
+      req.session.user = user;
+
+      res.redirect('/');
+    } catch (error) {
+      console.error("Apple OAuth error:", error);
+      res.redirect('/login?error=oauth_failed');
     }
   });
 
