@@ -4472,12 +4472,13 @@ Return JSON with this exact structure:
     try {
       const userId = req.user.claims.sub;
       const churchId = parseInt(req.params.churchId);
+      const { verifiedDenomination } = req.body; // Admin-verified denomination
 
       if (!churchId || isNaN(churchId)) {
         return res.status(400).json({ message: 'Valid church ID required' });
       }
 
-      const result = await storage.claimChurch(churchId, userId);
+      const result = await storage.claimChurch(churchId, userId, verifiedDenomination);
       
       if (result.success) {
         res.json({

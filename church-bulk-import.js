@@ -203,7 +203,7 @@ async function importChurchesFromCSV(csvFilePath) {
         adminEmail: cleanData.email, // Store admin email for claiming
         memberCount: 0,
         rating: 0,
-        denomination: 'Presbyterian' // Based on the CSV data
+        denomination: extractDenomination(cleanData.name)
       };
       
       churches_to_import.push(churchRecord);

@@ -2091,7 +2091,7 @@ export class DatabaseStorage implements IStorage {
       ));
   }
 
-  async claimChurch(churchId: number, userId: string): Promise<{ success: boolean; church?: Church; error?: string }> {
+  async claimChurch(churchId: number, userId: string, verifiedDenomination?: string): Promise<{ success: boolean; church?: Church; error?: string }> {
     try {
       // Get user email
       const user = await this.getUser(userId);
@@ -2128,14 +2128,22 @@ export class DatabaseStorage implements IStorage {
 
       // Start transaction
       await db.transaction(async (tx) => {
-        // Mark church as claimed and remove admin email
+        // Prepare update data
+        const updateData: any = {
+          isClaimed: true, 
+          adminEmail: null,
+          updatedAt: new Date()
+        };
+
+        // Update denomination if verified by admin
+        if (verifiedDenomination) {
+          updateData.denomination = verifiedDenomination;
+        }
+
+        // Mark church as claimed and update denomination if provided
         await tx
           .update(churches)
-          .set({ 
-            isClaimed: true, 
-            adminEmail: null,
-            updatedAt: new Date()
-          })
+          .set(updateData)
           .where(eq(churches.id, churchId));
 
         // Add user as church admin
