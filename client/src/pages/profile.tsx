@@ -322,25 +322,12 @@ export default function ProfilePage() {
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   {/* Profile Picture */}
                   <div className="relative">
-                    {(() => {
-                      console.log('DEBUG IMAGE CONDITION:');
-                      console.log('profile?.profileImageUrl:', profile?.profileImageUrl);
-                      console.log('profileData.profileImageUrl:', profileData.profileImageUrl);
-                      console.log('Condition result:', !!(profile?.profileImageUrl || profileData.profileImageUrl));
-                      return !!(profile?.profileImageUrl || profileData.profileImageUrl);
-                    })() ? (
+                    {(profile?.profileImageUrl || profileData.profileImageUrl) ? (
                       <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <img 
-                          src={(() => {
-                            const imgSrc = isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '');
-                            console.log('DEBUG IMG SRC:', imgSrc ? `${imgSrc.substring(0, 50)}... (length: ${imgSrc.length})` : 'EMPTY');
-                            console.log('isEditing:', isEditing);
-                            return imgSrc;
-                          })()}
+                          src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '')} 
                           alt={displayName}
                           className="h-full w-full object-cover"
-                          onLoad={() => console.log('✅ Image onLoad fired successfully')}
-                          onError={(e) => console.log('❌ Image onError fired:', e)}
                         />
                       </div>
                     ) : (
