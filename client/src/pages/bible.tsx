@@ -85,11 +85,11 @@ export default function BiblePage() {
             </p>
             
             {/* Action Buttons */}
-            <div className="flex justify-center gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-3 sm:pt-4">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2"
                 onClick={() => {
                   toast({
                     title: "Reflection Started",
@@ -103,7 +103,7 @@ export default function BiblePage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2"
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({

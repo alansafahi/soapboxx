@@ -229,20 +229,20 @@ export default function EnhancedCommunityFeed() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-4 md:space-y-6">
       {/* Enhanced Filter Bar */}
       <Card>
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex-1 min-w-64">
+        <CardContent className="p-2 sm:p-3 md:p-4">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
+              <div className="flex-1 min-w-0 sm:min-w-48 md:min-w-64">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
                   <Input
                     placeholder="Search posts, authors, or topics..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-8 sm:pl-10 text-sm sm:text-base py-2"
                   />
                 </div>
               </div>
