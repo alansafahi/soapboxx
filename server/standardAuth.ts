@@ -7,26 +7,20 @@ import { emailService } from "./emailService";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    tableName: 'sessions',
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-  });
-
+  
+  // Use memory store for development to avoid PostgreSQL session issues
   return session({
-    store: sessionStore,
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      secure: false, // Set to false for development
+      secure: false,
       httpOnly: true,
       maxAge: sessionTtl,
       sameSite: 'lax',
     },
+    name: 'connect.sid',
   });
 }
 
@@ -177,14 +171,7 @@ export function isAuthenticated(req: any, res: any, next: any) {
   const sessionUser = (req.session as any)?.user;
   const userId = (req.session as any)?.userId;
   
-  // Debug session data
-  console.log('Session check:', {
-    sessionId: req.sessionID,
-    hasSession: !!req.session,
-    userId: userId,
-    hasUser: !!sessionUser,
-    userEmail: sessionUser?.email
-  });
+
   
   if (!sessionUser || !userId) {
     return res.status(401).json({ message: 'Unauthorized' });
