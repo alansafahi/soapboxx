@@ -8,10 +8,18 @@ import { emailService } from "./emailService";
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
-  // Use memory store for development to avoid PostgreSQL session issues
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    tableName: 'sessions',
+    createTableIfMissing: false,
+    ttl: sessionTtl / 1000, // Convert to seconds for PostgreSQL
+  });
+
   return session({
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
-    resave: false,
+    resave: true, // Force session save on each request
     saveUninitialized: false,
     rolling: true,
     cookie: {
