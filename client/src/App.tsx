@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Sidebar from "@/components/Sidebar";
+import TopHeader from "@/components/TopHeader";
 import { Home as HomeIcon, Church, Calendar, BookOpen, Heart, Mail, Settings } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -133,7 +134,9 @@ function AppRouter() {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {isAuthenticated && <Sidebar />}
-      <main className={isAuthenticated ? "flex-1 overflow-y-auto" : "flex-1"}>
+      <div className={isAuthenticated ? "flex-1 flex flex-col" : "flex-1"}>
+        {isAuthenticated && <TopHeader />}
+        <main className={isAuthenticated ? "flex-1 overflow-y-auto" : "flex-1"}>
         <Switch>
           {!isAuthenticated ? (
             <>
@@ -181,7 +184,8 @@ function AppRouter() {
             </>
           )}
         </Switch>
-      </main>
+        </main>
+      </div>
       
       {needsOnboarding && (
         <WelcomeWizard 
