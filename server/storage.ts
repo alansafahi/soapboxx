@@ -654,15 +654,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserProfile(userId: string, profileData: Partial<User>): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({
-        ...profileData,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
+    try {
+      // Filter out undefined/null values and ensure proper field mapping
+      const updateData: any = {};
+      
+      if (profileData.firstName !== undefined) updateData.firstName = profileData.firstName;
+      if (profileData.lastName !== undefined) updateData.lastName = profileData.lastName;
+      if (profileData.email !== undefined) updateData.email = profileData.email;
+      if (profileData.mobileNumber !== undefined) updateData.mobileNumber = profileData.mobileNumber;
+      if (profileData.address !== undefined) updateData.address = profileData.address;
+      if (profileData.city !== undefined) updateData.city = profileData.city;
+      if (profileData.state !== undefined) updateData.state = profileData.state;
+      if (profileData.zipCode !== undefined) updateData.zipCode = profileData.zipCode;
+      if (profileData.country !== undefined) updateData.country = profileData.country;
+      if (profileData.bio !== undefined) updateData.bio = profileData.bio;
+      if (profileData.profileImageUrl !== undefined) updateData.profileImageUrl = profileData.profileImageUrl;
+      if (profileData.denomination !== undefined) updateData.denomination = profileData.denomination;
+      if (profileData.interests !== undefined) updateData.interests = profileData.interests;
+      
+      // Always update timestamp
+      updateData.updatedAt = new Date();
+
+      const [user] = await db
+        .update(users)
+        .set(updateData)
+        .where(eq(users.id, userId))
+        .returning();
+        
+      if (!user) {
+        throw new Error(`User not found with ID: ${userId}`);
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('Database error updating user profile:', error);
+      throw error;
+    }
   }
 
   async searchUsers(query: string): Promise<User[]> {

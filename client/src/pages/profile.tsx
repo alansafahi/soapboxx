@@ -120,10 +120,13 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
-      return apiRequest("/api/users/profile", {
+      console.log('Sending profile update:', data);
+      const response = await apiRequest("/api/users/profile", {
         method: "PUT",
         body: data,
       });
+      console.log('Profile update response:', response);
+      return response;
     },
     onMutate: async (updatedData) => {
       // Immediate local state update for instant UI feedback
@@ -154,7 +157,7 @@ export default function ProfilePage() {
         variant: "destructive",
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Clear local updates on successful save
       setLocalProfileUpdates({});
       
@@ -164,6 +167,8 @@ export default function ProfilePage() {
       });
       
       setIsEditing(false);
+      // Update the cache with the returned data
+      queryClient.setQueryData(["/api/auth/user"], data.user || data);
       queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
   });
