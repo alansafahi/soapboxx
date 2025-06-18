@@ -331,9 +331,16 @@ export default function ProfilePage() {
                     })() ? (
                       <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <img 
-                          src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '')} 
+                          src={(() => {
+                            const imgSrc = isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '');
+                            console.log('DEBUG IMG SRC:', imgSrc ? `${imgSrc.substring(0, 50)}... (length: ${imgSrc.length})` : 'EMPTY');
+                            console.log('isEditing:', isEditing);
+                            return imgSrc;
+                          })()}
                           alt={displayName}
                           className="h-full w-full object-cover"
+                          onLoad={() => console.log('✅ Image onLoad fired successfully')}
+                          onError={(e) => console.log('❌ Image onError fired:', e)}
                         />
                       </div>
                     ) : (
