@@ -823,14 +823,11 @@ export class DatabaseStorage implements IStorage {
         whereConditions.push(eq(churches.denomination, params.denomination));
       }
       
-      // Filter by location (search in city or state)
-      if (params.location) {
+      // Filter by location (search in city, state, or zip code)
+      if (params.location && params.location.trim()) {
+        const locationTerm = `%${params.location.trim()}%`;
         whereConditions.push(
-          or(
-            ilike(churches.city, `%${params.location}%`),
-            ilike(churches.state, `%${params.location}%`),
-            ilike(churches.zipCode, `%${params.location}%`)
-          )
+          sql`(${churches.city} ILIKE ${locationTerm} OR ${churches.state} ILIKE ${locationTerm} OR ${churches.zipCode} ILIKE ${locationTerm})`
         );
       }
       
@@ -846,27 +843,23 @@ export class DatabaseStorage implements IStorage {
           city: churches.city,
           state: churches.state,
           zipCode: churches.zipCode,
-          country: churches.country,
           website: churches.website,
           phone: churches.phone,
           email: churches.email,
-          profileImageUrl: churches.profileImageUrl,
-          coverImageUrl: churches.coverImageUrl,
-          socialMediaLinks: churches.socialMediaLinks,
+          logoUrl: churches.logoUrl,
+          socialLinks: churches.socialLinks,
+          communityTags: churches.communityTags,
+          latitude: churches.latitude,
+          longitude: churches.longitude,
+          rating: churches.rating,
+          memberCount: churches.memberCount,
           isActive: churches.isActive,
-          isVerified: churches.isVerified,
-          visibility: churches.visibility,
-          servicesSchedule: churches.servicesSchedule,
-          demographics: churches.demographics,
-          ministries: churches.ministries,
-          beliefs: churches.beliefs,
-          history: churches.history,
           isClaimed: churches.isClaimed,
           adminEmail: churches.adminEmail,
           isDemo: churches.isDemo,
           createdAt: churches.createdAt,
           updatedAt: churches.updatedAt,
-          memberCount: sql<number>`COALESCE(COUNT(${userChurches.churchId}), 0)::int`,
+          actualMemberCount: sql<number>`COALESCE(COUNT(${userChurches.churchId}), 0)::int`,
           distance: sql<number>`0` // Placeholder for distance
         })
         .from(churches)
@@ -875,14 +868,7 @@ export class DatabaseStorage implements IStorage {
           eq(userChurches.isActive, true)
         ))
         .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
-        .groupBy(churches.id, churches.name, churches.denomination, churches.description, 
-                 churches.bio, churches.address, churches.city, churches.state, 
-                 churches.zipCode, churches.country, churches.website, churches.phone,
-                 churches.email, churches.profileImageUrl, churches.coverImageUrl,
-                 churches.socialMediaLinks, churches.isActive, churches.isVerified,
-                 churches.visibility, churches.servicesSchedule, churches.demographics,
-                 churches.ministries, churches.beliefs, churches.history, churches.isClaimed,
-                 churches.adminEmail, churches.createdAt, churches.updatedAt)
+        .groupBy(churches.id)
         .limit(params.limit || 1000);
       
       // Filter by size if specified (exclude "all" value)
