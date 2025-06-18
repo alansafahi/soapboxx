@@ -16,6 +16,7 @@ import jwt from "jsonwebtoken";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
+import sgMail from "@sendgrid/mail";
 
 // Configure file upload directories
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -298,7 +299,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email } = req.body;
       
-      const user = await storage.getUserByEmail(email);
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      // Check if user exists
+      let user;
+      try {
+        user = await storage.getUserByEmail(email);
+      } catch (dbError) {
+        console.error("Database error during user lookup:", dbError);
+        return res.status(500).json({ message: "Service temporarily unavailable" });
+      }
+
       if (!user) {
         // Return success even if user doesn't exist for security
         return res.json({ message: "Password reset email sent if account exists" });
@@ -309,38 +322,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const resetToken = crypto.randomBytes(32).toString('hex');
       const resetExpires = new Date(Date.now() + 3600000); // 1 hour
 
-      // Store reset token (you'd implement this in storage)
-      await storage.storePasswordResetToken(user.id, resetToken, resetExpires);
-
-      // Send reset email (implement with SendGrid)
+      // Store reset token with error handling
       try {
+        await storage.storePasswordResetToken(user.id, resetToken, resetExpires);
+      } catch (dbError) {
+        console.error("Database error storing reset token:", dbError);
+        return res.status(500).json({ message: "Unable to process reset request" });
+      }
+
+      // Send reset email with enhanced error handling
+      try {
+        if (!process.env.SENDGRID_API_KEY) {
+          console.error("SENDGRID_API_KEY not configured");
+          return res.status(500).json({ message: "Email service not configured" });
+        }
+
         const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
         
-        // Using SendGrid to send password reset email
         const sgMail = require('@sendgrid/mail');
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
         const msg = {
           to: email,
-          from: 'noreply@soapbox.com',
-          subject: 'Password Reset Request',
+          from: 'noreply@soapboxapp.com', // Use valid domain
+          subject: 'SoapBox - Password Reset Request',
           html: `
-            <h2>Password Reset Request</h2>
-            <p>You requested a password reset for your SoapBox account.</p>
-            <p>Click the link below to reset your password:</p>
-            <a href="${resetUrl}" style="background-color: #7C3AED; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">Reset Password</a>
-            <p>This link will expire in 1 hour.</p>
-            <p>If you didn't request this reset, please ignore this email.</p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #7C3AED;">Password Reset Request</h2>
+              <p>You requested a password reset for your SoapBox account.</p>
+              <p>Click the button below to reset your password:</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="background-color: #7C3AED; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
+              </div>
+              <p style="color: #666;">This link will expire in 1 hour for security.</p>
+              <p style="color: #666;">If you didn't request this reset, please ignore this email.</p>
+              <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+              <p style="color: #999; font-size: 12px;">SoapBox Super App - Connecting Faith Communities</p>
+            </div>
           `
         };
 
         await sgMail.send(msg);
+        console.log(`Password reset email sent to ${email}`);
       } catch (emailError) {
         console.error("Email sending error:", emailError);
-        // Continue - don't expose email errors to user
+        return res.status(500).json({ message: "Unable to send reset email" });
       }
 
-      res.json({ message: "Password reset email sent if account exists" });
+      res.json({ message: "Password reset email sent successfully" });
     } catch (error) {
       console.error("Forgot password error:", error);
       res.status(500).json({ message: "Password reset request failed" });

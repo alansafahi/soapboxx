@@ -14,12 +14,13 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Configure connection pool with proper settings for Neon
+// Configure connection pool with optimized settings for Neon serverless
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 1, // Limit connections for serverless
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
+  max: 3, // Allow multiple connections for concurrent requests
+  connectionTimeoutMillis: 15000, // Increased timeout
+  idleTimeoutMillis: 60000, // Increased idle timeout
+  allowExitOnIdle: true, // Allow process to exit when idle
 });
 
 export const db = drizzle({ client: pool, schema });
