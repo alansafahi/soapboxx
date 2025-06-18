@@ -39,18 +39,29 @@ export default function EnhancedChurchDiscovery() {
   });
   const [showFilters, setShowFilters] = useState(false);
   
-  // Separate state for location input to prevent reset while typing
+  // Separate state for location inputs to prevent reset while typing
   const [locationInput, setLocationInput] = useState("");
+  const [cityInput, setCityInput] = useState("");
+  const [stateInput, setStateInput] = useState("");
+  const [zipInput, setZipInput] = useState("");
   const [debouncedLocation, setDebouncedLocation] = useState("");
 
-  // Debounce location input to prevent constant API calls
+  // Debounce location inputs to prevent constant API calls
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedLocation(locationInput);
+      // Combine city, state, and zip into a single location string
+      const locationParts = [
+        cityInput.trim(),
+        stateInput.trim(),
+        zipInput.trim()
+      ].filter(Boolean);
+      
+      const combinedLocation = locationParts.join(', ');
+      setDebouncedLocation(combinedLocation);
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [locationInput]);
+  }, [cityInput, stateInput, zipInput]);
 
   // Update filters when debounced location changes
   useEffect(() => {
@@ -139,7 +150,11 @@ export default function EnhancedChurchDiscovery() {
       size: "all",
       proximity: 25
     });
-    setLocationInput(""); // Also clear the input state
+    // Clear all input states
+    setLocationInput("");
+    setCityInput("");
+    setStateInput("");
+    setZipInput("");
     setDisplayedCount(10);
   };
 
@@ -293,59 +308,88 @@ export default function EnhancedChurchDiscovery() {
               className="overflow-hidden"
             >
               <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Denomination
-                    </label>
-                    <Select value={filters.denomination} onValueChange={(value) => handleFilterChange('denomination', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any denomination" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Any denomination</SelectItem>
-                        {denominations.map((denom) => (
-                          <SelectItem key={denom} value={denom}>
-                            {denom}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div className="space-y-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  {/* First row: Denomination and Church Size side by side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Denomination
+                      </label>
+                      <Select value={filters.denomination} onValueChange={(value) => handleFilterChange('denomination', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Any denomination" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Any denomination</SelectItem>
+                          {denominations.map((denom) => (
+                            <SelectItem key={denom} value={denom}>
+                              {denom}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Church Size
+                      </label>
+                      <Select value={filters.size} onValueChange={(value) => handleFilterChange('size', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Any size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Any size</SelectItem>
+                          <SelectItem value="micro">Micro Church (1-50)</SelectItem>
+                          <SelectItem value="small">Small Church (51-100)</SelectItem>
+                          <SelectItem value="medium">Medium Church (101-250)</SelectItem>
+                          <SelectItem value="large">Large Church (251-500)</SelectItem>
+                          <SelectItem value="very-large">Very Large Church (501-1,000)</SelectItem>
+                          <SelectItem value="mega">Mega Church (1,001-2,000)</SelectItem>
+                          <SelectItem value="giga">Giga Church (2,001-10,000)</SelectItem>
+                          <SelectItem value="meta">Meta Church (10,000+)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Location
-                    </label>
-                    <Input
-                      placeholder="City, State or ZIP"
-                      value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
-                    />
+                  {/* Second row: Location search fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        City
+                      </label>
+                      <Input
+                        placeholder="Enter city name"
+                        value={cityInput}
+                        onChange={(e) => setCityInput(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        State
+                      </label>
+                      <Input
+                        placeholder="Enter state"
+                        value={stateInput}
+                        onChange={(e) => setStateInput(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        ZIP Code
+                      </label>
+                      <Input
+                        placeholder="Enter ZIP code"
+                        value={zipInput}
+                        onChange={(e) => setZipInput(e.target.value)}
+                      />
+                    </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Church Size
-                    </label>
-                    <Select value={filters.size} onValueChange={(value) => handleFilterChange('size', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Any size</SelectItem>
-                        <SelectItem value="micro">Micro Church (1-50)</SelectItem>
-                        <SelectItem value="small">Small Church (51-100)</SelectItem>
-                        <SelectItem value="medium">Medium Church (101-250)</SelectItem>
-                        <SelectItem value="large">Large Church (251-500)</SelectItem>
-                        <SelectItem value="very-large">Very Large Church (501-1,000)</SelectItem>
-                        <SelectItem value="mega">Mega Church (1,001-2,000)</SelectItem>
-                        <SelectItem value="giga">Giga Church (2,001-10,000)</SelectItem>
-                        <SelectItem value="meta">Meta Church (10,000+)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
+                  {/* Third row: Distance slider */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Max Distance: {filters.proximity} miles

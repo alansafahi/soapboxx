@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 18, 2025: Successfully completed church discovery UI optimization with improved layout and persistent search
+  - Moved church size filter to the right of denomination filter for better visual organization
+  - Implemented separate input fields for City, State, and ZIP Code with persistent data entry
+  - Added debounced search functionality that combines location inputs without resetting fields while typing
+  - Enhanced Clear Filters functionality to reset all input fields including separate location inputs
+  - Organized filter layout into logical groups: Denomination + Church Size, Location fields (City/State/ZIP), Distance slider
+  - Users can now continuously enter location data without inputs resetting back to beginning during typing
 - June 18, 2025: Successfully completed production church filtering system with authentic data
   - Added `isDemo` boolean field to churches table to distinguish production from demo churches
   - Marked 1,830 production churches from CSV import as non-demo (is_demo = false)
