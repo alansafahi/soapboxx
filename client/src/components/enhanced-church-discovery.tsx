@@ -48,10 +48,13 @@ export default function EnhancedChurchDiscovery() {
   const [userLocation, setUserLocation] = useState<string>("");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [isManuallyTyping, setIsManuallyTyping] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
-  // Auto-detect user location on component mount
+  // Auto-detect user location on component mount (only if user hasn't interacted)
   useEffect(() => {
+    if (hasUserInteracted) return; // Skip entirely if user has interacted
+    
     const detectLocation = async () => {
       setIsDetectingLocation(true);
       try {
@@ -173,6 +176,7 @@ export default function EnhancedChurchDiscovery() {
   // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
     setIsManuallyTyping(true);
+    setHasUserInteracted(true); // Mark that user has interacted with the field
     setLocationInputValue(value);
     
     if (debounceTimerRef.current) {
