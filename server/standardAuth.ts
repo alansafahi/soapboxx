@@ -96,6 +96,7 @@ export function setupAuth(app: Express): void {
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log('Login attempt for email:', email);
 
       if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
@@ -103,13 +104,19 @@ export function setupAuth(app: Express): void {
 
       // Find user by email
       const user = await storage.getUserByEmail(email);
+      console.log('User found:', user ? `ID: ${user.id}, Email: ${user.email}` : 'No user found');
+      
       if (!user || !user.password) {
+        console.log('Login failed: User not found or no password');
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.password);
+      console.log('Password valid:', isValidPassword);
+      
       if (!isValidPassword) {
+        console.log('Login failed: Invalid password');
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
