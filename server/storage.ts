@@ -813,7 +813,10 @@ export class DatabaseStorage implements IStorage {
 
   async searchChurches(params: { denomination?: string; location?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]> {
     try {
-      let whereConditions = [eq(churches.isActive, true)];
+      let whereConditions = [
+        eq(churches.isActive, true),
+        isNotNull(churches.adminEmail) // Only show production churches with admin emails
+      ];
       
       // Filter by denomination
       if (params.denomination) {
