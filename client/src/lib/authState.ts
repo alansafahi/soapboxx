@@ -25,7 +25,9 @@ export const authManager = {
   
   subscribe: (listener: (state: AuthState) => void) => {
     listeners.add(listener);
-    return () => listeners.delete(listener);
+    return () => {
+      listeners.delete(listener);
+    };
   },
   
   async checkAuth(): Promise<User | null> {

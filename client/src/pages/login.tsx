@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useDirectAuth } from "@/hooks/useDirectAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const directAuth = useDirectAuth();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -58,8 +60,19 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Force complete application reload to ensure fresh authentication state
-        window.location.reload();
+        // Use direct authentication to bypass React Query caching issues
+        const user = await directAuth.login(formData.email, formData.password);
+        if (user) {
+          // Clear React Query cache and force redirect
+          queryClient.clear();
+          window.location.href = '/';
+        } else {
+          toast({
+            title: "Login Failed",
+            description: "Invalid credentials. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error: any) {
       toast({

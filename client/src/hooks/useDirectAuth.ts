@@ -12,7 +12,9 @@ export function useDirectAuth() {
     // Check authentication on mount
     authManager.checkAuth();
     
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return {

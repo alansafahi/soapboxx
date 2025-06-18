@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useDirectAuth } from "@/hooks/useDirectAuth";
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
 import { Home as HomeIcon, Church, Calendar, BookOpen, Heart, Mail, Settings } from "lucide-react";
@@ -55,24 +56,19 @@ import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
 
 function AppRouter() {
   const { user, isAuthenticated, isLoading, refetch } = useAuth();
+  const directAuth = useDirectAuth();
   const [location] = useLocation();
   
-  // Force authentication check on app load
+  // Use direct authentication instead of React Query
   useEffect(() => {
-    // Always attempt authentication refresh on mount
-    refetch();
+    // Check authentication on app load using direct system
+    directAuth.checkAuth();
   }, []);
-  
-  // Additional check for authentication state inconsistencies
-  useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      // Delay retry to avoid rapid firing
-      const timer = setTimeout(() => {
-        refetch();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthenticated, isLoading, refetch]);
+
+  // Use direct auth state for rendering decisions
+  const currentUser = directAuth.user || user;
+  const currentIsAuthenticated = directAuth.isAuthenticated || isAuthenticated;
+  const currentIsLoading = directAuth.isLoading || isLoading;
   
   // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);
