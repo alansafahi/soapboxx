@@ -16,6 +16,7 @@ export default function ChurchDiscovery() {
   const { toast } = useToast();
   const [joinedChurches, setJoinedChurches] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
+  const [showAllChurches, setShowAllChurches] = useState(false);
 
   // Fetch nearby churches
   const { data: churches = [], isLoading } = useQuery<Church[]>({
@@ -164,7 +165,7 @@ export default function ChurchDiscovery() {
             </p>
           </div>
         ) : (
-          churches.slice(0, 3).map((church) => (
+          (showAllChurches ? churches : churches.slice(0, 3)).map((church) => (
             <div 
               key={church.id} 
               className="border border-gray-100 dark:border-gray-600 rounded-xl p-4 hover:border-purple-600 transition-colors cursor-pointer bg-white dark:bg-gray-800"
@@ -281,10 +282,14 @@ export default function ChurchDiscovery() {
                       )}
                       {church.website && (
                         <a 
-                          href={church.website}
+                          href={church.website.startsWith('http') ? church.website : `https://${church.website}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-gray-500 dark:text-gray-300 hover:text-purple-400 flex items-center"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(church.website.startsWith('http') ? church.website : `https://${church.website}`, '_blank');
+                          }}
                         >
                           <Globe className="w-3 h-3 mr-1" />
                           Website
@@ -298,9 +303,14 @@ export default function ChurchDiscovery() {
           ))
         )}
         
-        {churches.length > 3 && (
+        {churches.length > 3 && !showAllChurches && (
           <div className="text-center pt-2">
-            <Button variant="outline" size="sm" className="text-faith-blue border-faith-blue hover:bg-light-blue">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-purple-600 border-purple-600 hover:bg-purple-50"
+              onClick={() => setShowAllChurches(true)}
+            >
               View {churches.length - 3} More Churches
             </Button>
           </div>
