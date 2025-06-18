@@ -239,9 +239,9 @@ export default function TopHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="relative">
-            {typedUser?.profilePicture ? (
+            {typedUser?.profileImageUrl ? (
               <img 
-                src={typedUser.profilePicture} 
+                src={typedUser.profileImageUrl} 
                 alt="Profile" 
                 className="h-5 w-5 rounded-full object-cover"
               />
