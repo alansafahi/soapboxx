@@ -592,6 +592,12 @@ export interface IStorage {
   getDevotionAnalytics(churchId: number, startDate: Date): Promise<any>;
   getAtRiskMembers(churchId: number, thresholdDate: Date): Promise<any[]>;
   getEngagementOverview(churchId: number): Promise<any>;
+
+  // Notification operations
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(notificationId: number, userId: string): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
 }
 
 export class DatabaseStorage implements IStorage {
