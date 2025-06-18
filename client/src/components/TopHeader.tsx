@@ -1,8 +1,11 @@
-import { Bell, Moon, Sun, User } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface User {
   id?: string;
@@ -18,11 +22,64 @@ interface User {
   profilePicture?: string;
 }
 
+interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  actionUrl?: string;
+}
+
 export default function TopHeader() {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
+  const { toast } = useToast();
   
   const typedUser = user as User | null;
+
+  // Fetch notifications
+  const { data: notifications = [] } = useQuery<Notification[]>({
+    queryKey: ["/api/notifications"],
+    enabled: !!user,
+  });
+
+  // Mark notification as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: (notificationId: number) => 
+      apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+    },
+  });
+
+  // Mark all notifications as read mutation
+  const markAllAsReadMutation = useMutation({
+    mutationFn: () => 
+      apiRequest("/api/notifications/mark-all-read", { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      toast({
+        title: "All notifications marked as read",
+      });
+    },
+  });
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'prayer':
+        return <Heart className="h-4 w-4 text-red-500" />;
+      case 'event':
+        return <Calendar className="h-4 w-4 text-blue-500" />;
+      case 'message':
+        return <MessageSquare className="h-4 w-4 text-green-500" />;
+      default:
+        return <Bell className="h-4 w-4 text-gray-500" />;
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -38,11 +95,72 @@ export default function TopHeader() {
   return (
     <header className="flex items-center justify-end gap-2 p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
       {/* Alert/Notifications */}
-      <Button variant="ghost" size="icon" className="relative">
-        <Bell className="h-5 w-5" />
-        {/* Notification badge - can be conditionally shown */}
-        <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
+          <div className="flex items-center justify-between p-3 border-b">
+            <h3 className="font-semibold">Notifications</h3>
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => markAllAsReadMutation.mutate()}
+                disabled={markAllAsReadMutation.isPending}
+              >
+                Mark all read
+              </Button>
+            )}
+          </div>
+          
+          {notifications.length === 0 ? (
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+              No notifications yet
+            </div>
+          ) : (
+            <div className="max-h-64 overflow-y-auto">
+              {notifications.slice(0, 10).map((notification) => (
+                <DropdownMenuItem
+                  key={notification.id}
+                  className={`p-3 cursor-pointer ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                  onClick={() => {
+                    if (!notification.isRead) {
+                      markAsReadMutation.mutate(notification.id);
+                    }
+                    if (notification.actionUrl) {
+                      window.location.href = notification.actionUrl;
+                    }
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    {getNotificationIcon(notification.type)}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{notification.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        {new Date(notification.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    {!notification.isRead && (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Theme Toggle */}
       <Button

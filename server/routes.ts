@@ -7266,5 +7266,77 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Notification API endpoints
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      // Return sample notifications for now - in production this would query actual notification data
+      const notifications = [
+        {
+          id: 1,
+          type: 'prayer',
+          title: 'Prayer Request Support',
+          message: 'John D. is praying for your prayer request about job interviews',
+          isRead: false,
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          actionUrl: '/prayer-wall'
+        },
+        {
+          id: 2,
+          type: 'event',
+          title: 'Upcoming Event',
+          message: 'Weekly Bible Study starts in 30 minutes',
+          isRead: false,
+          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+          actionUrl: '/events'
+        },
+        {
+          id: 3,
+          type: 'message',
+          title: 'New Comment',
+          message: 'Sarah M. commented on your post "Finding Peace in Difficult Times"',
+          isRead: true,
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+          actionUrl: '/community'
+        }
+      ];
+      
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: 'Failed to fetch notifications' });
+    }
+  });
+
+  app.post('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const userId = req.user?.claims?.sub;
+      
+      // In production, this would update the notification read status in the database
+      console.log(`Marking notification ${notificationId} as read for user ${userId}`);
+      
+      res.json({ success: true, message: 'Notification marked as read' });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ message: 'Failed to mark notification as read' });
+    }
+  });
+
+  app.post('/api/notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      // In production, this would update all unread notifications for the user
+      console.log(`Marking all notifications as read for user ${userId}`);
+      
+      res.json({ success: true, message: 'All notifications marked as read' });
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      res.status(500).json({ message: 'Failed to mark all notifications as read' });
+    }
+  });
+
   return httpServer;
 }
