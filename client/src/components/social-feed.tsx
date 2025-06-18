@@ -527,7 +527,7 @@ export default function SocialFeed() {
             <div className="flex items-center space-x-3">
               <Avatar className="w-10 h-10">
                 <AvatarFallback className="bg-purple-600 text-white">
-                  {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'AS'}
+                  {user?.firstName && user?.lastName ? `${user.firstName[0]}${user.lastName[0]}` : user?.firstName?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">

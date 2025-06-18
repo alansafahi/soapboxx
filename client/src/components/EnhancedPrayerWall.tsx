@@ -157,7 +157,7 @@ export default function EnhancedPrayerWall() {
       return await apiRequest(`/api/prayers/${prayerId}/pray`, { method: "POST", body: {} });
     },
     onSuccess: (_, prayerId) => {
-      setPrayedRequests(prev => new Set([...prev, prayerId]));
+      setPrayedRequests(prev => new Set(Array.from(prev).concat([prayerId])));
       // Update reaction count locally
       setReactions(prev => {
         const newMap = new Map(prev);
