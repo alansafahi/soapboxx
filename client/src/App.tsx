@@ -46,6 +46,7 @@ import PastoralContentDemoPage from "@/pages/PastoralContentDemoPage";
 import EngagementAnalytics from "@/pages/EngagementAnalytics";
 import SoapPage from "@/pages/soap";
 import ClickTest from "@/components/ClickTest";
+import ChurchClaiming from "@/pages/church-claiming";
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -146,6 +147,7 @@ function AppRouter() {
               <Route path="/bible/read" component={BibleReader} />
               <Route path="/community" component={Community} />
               <Route path="/churches" component={Churches} />
+              <Route path="/church-claiming" component={ChurchClaiming} />
               <Route path="/events" component={Events} />
               <Route path="/prayer" component={Prayer} />
               <Route path="/prayer-wall" component={Prayer} />
