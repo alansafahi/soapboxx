@@ -43,18 +43,41 @@ export default function EnhancedChurchDiscovery() {
   const [locationInput, setLocationInput] = useState("");
   const [debouncedLocation, setDebouncedLocation] = useState("");
 
+  // Debug logging to track input changes
+  useEffect(() => {
+    console.log('🎥 RECORDING: Location input changed to:', locationInput);
+  }, [locationInput]);
+
+  useEffect(() => {
+    console.log('🎥 RECORDING: Debounced location changed to:', debouncedLocation);
+  }, [debouncedLocation]);
+
+  useEffect(() => {
+    console.log('🎥 RECORDING: Filters changed to:', filters);
+  }, [filters]);
+
   // Debounce location input to prevent constant API calls
   useEffect(() => {
+    console.log('🎥 RECORDING: Starting debounce timer for:', locationInput);
     const timer = setTimeout(() => {
+      console.log('🎥 RECORDING: Debounce timer fired, setting debounced location to:', locationInput);
       setDebouncedLocation(locationInput);
-    }, 300); // Reduced delay for faster response
+    }, 500); // Increased delay to see timing better
 
-    return () => clearTimeout(timer);
+    return () => {
+      console.log('🎥 RECORDING: Clearing debounce timer');
+      clearTimeout(timer);
+    };
   }, [locationInput]);
 
   // Update filters when debounced location changes
   useEffect(() => {
-    setFilters(prev => ({ ...prev, location: debouncedLocation }));
+    console.log('🎥 RECORDING: Updating filters with debounced location:', debouncedLocation);
+    setFilters(prev => {
+      const newFilters = { ...prev, location: debouncedLocation };
+      console.log('🎥 RECORDING: New filters object:', newFilters);
+      return newFilters;
+    });
   }, [debouncedLocation]);
 
   // Fetch churches with filtering
@@ -347,7 +370,17 @@ export default function EnhancedChurchDiscovery() {
                     <Input
                       placeholder="Enter city, state, or zip code..."
                       value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
+                      onChange={(e) => {
+                        console.log('🎥 RECORDING: Input onChange fired, new value:', e.target.value);
+                        console.log('🎥 RECORDING: Previous locationInput was:', locationInput);
+                        setLocationInput(e.target.value);
+                      }}
+                      onInput={(e) => {
+                        console.log('🎥 RECORDING: Input onInput fired, value:', e.currentTarget.value);
+                      }}
+                      onKeyDown={(e) => {
+                        console.log('🎥 RECORDING: Key pressed:', e.key, 'Current value:', e.currentTarget.value);
+                      }}
                       className="w-full"
                     />
                   </div>
