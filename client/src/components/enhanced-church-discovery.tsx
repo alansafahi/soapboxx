@@ -43,41 +43,18 @@ export default function EnhancedChurchDiscovery() {
   const [locationInput, setLocationInput] = useState("");
   const [debouncedLocation, setDebouncedLocation] = useState("");
 
-  // Debug logging to track input changes
-  useEffect(() => {
-    console.log('🎥 RECORDING: Location input changed to:', locationInput);
-  }, [locationInput]);
-
-  useEffect(() => {
-    console.log('🎥 RECORDING: Debounced location changed to:', debouncedLocation);
-  }, [debouncedLocation]);
-
-  useEffect(() => {
-    console.log('🎥 RECORDING: Filters changed to:', filters);
-  }, [filters]);
-
   // Debounce location input to prevent constant API calls
   useEffect(() => {
-    console.log('🎥 RECORDING: Starting debounce timer for:', locationInput);
     const timer = setTimeout(() => {
-      console.log('🎥 RECORDING: Debounce timer fired, setting debounced location to:', locationInput);
       setDebouncedLocation(locationInput);
-    }, 500); // Increased delay to see timing better
+    }, 300); // 300ms delay for responsive search
 
-    return () => {
-      console.log('🎥 RECORDING: Clearing debounce timer');
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [locationInput]);
 
   // Update filters when debounced location changes
   useEffect(() => {
-    console.log('🎥 RECORDING: Updating filters with debounced location:', debouncedLocation);
-    setFilters(prev => {
-      const newFilters = { ...prev, location: debouncedLocation };
-      console.log('🎥 RECORDING: New filters object:', newFilters);
-      return newFilters;
-    });
+    setFilters(prev => ({ ...prev, location: debouncedLocation }));
   }, [debouncedLocation]);
 
   // Fetch churches with filtering
