@@ -110,7 +110,7 @@ function AppRouter() {
   // Fetch user's primary role for tour personalization
   const { data: userRoleData } = useQuery({
     queryKey: ["/api/auth/user-role"],
-    enabled: isAuthenticated && !!user && !needsOnboarding && !show2FAOnboarding,
+    enabled: currentIsAuthenticated && !!currentUser && !needsOnboarding && !show2FAOnboarding,
     retry: false,
   });
 
@@ -122,9 +122,9 @@ function AppRouter() {
   } = useRoleBasedTour();
 
   // Calculate if tour should show based on current state
-  const hasCompletedOnboarding = (user as any)?.has_completed_onboarding;
+  const hasCompletedOnboarding = (currentUser as any)?.has_completed_onboarding;
   const allOnboardingComplete = hasCompletedOnboarding && !show2FAOnboarding && !needsOnboarding;
-  const shouldShowPersonalizedTour = isAuthenticated && shouldShowTour && allOnboardingComplete && !forceHideOnboarding;
+  const shouldShowPersonalizedTour = currentIsAuthenticated && shouldShowTour && allOnboardingComplete && !forceHideOnboarding;
   
   // Update user role when detected
   useEffect(() => {
@@ -136,7 +136,7 @@ function AppRouter() {
   // Route debugging removed - routing issue fixed
 
   // Show loading spinner during initial auth check
-  if (isLoading) {
+  if (currentIsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -148,12 +148,12 @@ function AppRouter() {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {isAuthenticated && <Sidebar />}
-      <div className={isAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
-        {isAuthenticated && <TopHeader />}
-        <main className={isAuthenticated ? "flex-1 overflow-y-auto px-1 sm:px-2 md:px-4 lg:px-6 py-1 sm:py-2 md:py-4" : "flex-1"}>
+      {currentIsAuthenticated && <Sidebar />}
+      <div className={currentIsAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
+        {currentIsAuthenticated && <TopHeader />}
+        <main className={currentIsAuthenticated ? "flex-1 overflow-y-auto px-1 sm:px-2 md:px-4 lg:px-6 py-1 sm:py-2 md:py-4" : "flex-1"}>
         <Switch>
-          {!isAuthenticated ? (
+          {!currentIsAuthenticated ? (
             <>
               <Route path="/login" component={LoginPage} />
               <Route path="*" component={Landing} />
