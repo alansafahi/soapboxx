@@ -227,6 +227,8 @@ import {
   type InsertReferralMilestone,
   type VideoContentDB,
   type InsertVideoContentDB,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
@@ -6672,6 +6674,37 @@ export class DatabaseStorage implements IStorage {
       .where(eq(soapEntries.id, id))
       .returning();
     return unfeaturedEntry;
+  }
+
+  // Notification operations
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(notificationId: number, userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [newNotification] = await db
+      .insert(notifications)
+      .values(notification)
+      .returning();
+    return newNotification;
   }
 }
 

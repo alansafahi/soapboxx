@@ -7271,36 +7271,8 @@ Please provide suggestions for the missing or incomplete sections.`
     try {
       const userId = req.user?.claims?.sub;
       
-      // Return sample notifications for now - in production this would query actual notification data
-      const notifications = [
-        {
-          id: 1,
-          type: 'prayer',
-          title: 'Prayer Request Support',
-          message: 'John D. is praying for your prayer request about job interviews',
-          isRead: false,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          actionUrl: '/prayer-wall'
-        },
-        {
-          id: 2,
-          type: 'event',
-          title: 'Upcoming Event',
-          message: 'Weekly Bible Study starts in 30 minutes',
-          isRead: false,
-          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-          actionUrl: '/events'
-        },
-        {
-          id: 3,
-          type: 'message',
-          title: 'New Comment',
-          message: 'Sarah M. commented on your post "Finding Peace in Difficult Times"',
-          isRead: true,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-          actionUrl: '/community'
-        }
-      ];
+      // Get actual notifications from database
+      const notifications = await storage.getUserNotifications(userId);
       
       res.json(notifications);
     } catch (error) {
@@ -7314,8 +7286,8 @@ Please provide suggestions for the missing or incomplete sections.`
       const notificationId = parseInt(req.params.id);
       const userId = req.user?.claims?.sub;
       
-      // In production, this would update the notification read status in the database
-      console.log(`Marking notification ${notificationId} as read for user ${userId}`);
+      // Actually mark notification as read in database
+      await storage.markNotificationAsRead(notificationId, userId);
       
       res.json({ success: true, message: 'Notification marked as read' });
     } catch (error) {
@@ -7328,8 +7300,8 @@ Please provide suggestions for the missing or incomplete sections.`
     try {
       const userId = req.user?.claims?.sub;
       
-      // In production, this would update all unread notifications for the user
-      console.log(`Marking all notifications as read for user ${userId}`);
+      // Actually mark all notifications as read in database
+      await storage.markAllNotificationsAsRead(userId);
       
       res.json({ success: true, message: 'All notifications marked as read' });
     } catch (error) {
