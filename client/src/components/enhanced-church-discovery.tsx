@@ -39,28 +39,25 @@ export default function EnhancedChurchDiscovery() {
   });
   const [showFilters, setShowFilters] = useState(false);
   
-  // Use useRef to maintain input value independently of React state
-  const locationInputRef = useRef<HTMLInputElement>(null);
-  const [debouncedLocation, setDebouncedLocation] = useState("");
+  // Separate state for location input to prevent React Query re-render conflicts
+  const [locationInputValue, setLocationInputValue] = useState("");
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
-  // Handle location input changes with immediate UI update and debounced search
+  // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
+    // Update input value immediately for UI responsiveness
+    setLocationInputValue(value);
+    
     // Clear existing debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Set new debounce timer
+    // Set new debounce timer for filter update
     debounceTimerRef.current = setTimeout(() => {
-      setDebouncedLocation(value);
+      setFilters(prev => ({ ...prev, location: value }));
     }, 300);
   }, []);
-
-  // Update filters when debounced location changes
-  useEffect(() => {
-    setFilters(prev => ({ ...prev, location: debouncedLocation }));
-  }, [debouncedLocation]);
 
   // Fetch churches with filtering
   const { data: allChurches = [], isLoading } = useQuery<ChurchWithDistance[]>({
@@ -144,11 +141,8 @@ export default function EnhancedChurchDiscovery() {
       size: "all",
       proximity: 25
     });
-    // Clear location input using ref
-    if (locationInputRef.current) {
-      locationInputRef.current.value = "";
-    }
-    setDebouncedLocation("");
+    // Clear location input value
+    setLocationInputValue("");
     setDisplayedCount(10);
   };
 
@@ -353,8 +347,8 @@ export default function EnhancedChurchDiscovery() {
                       Location (City, State, or ZIP Code)
                     </label>
                     <Input
-                      ref={locationInputRef}
                       placeholder="Enter city, state, or zip code..."
+                      value={locationInputValue}
                       onChange={(e) => handleLocationChange(e.target.value)}
                       className="w-full"
                     />
