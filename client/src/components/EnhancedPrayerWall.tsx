@@ -154,7 +154,7 @@ export default function EnhancedPrayerWall() {
   // Pray for request mutation
   const prayForRequestMutation = useMutation({
     mutationFn: async (prayerId: number) => {
-      return await apiRequest(`/api/prayers/${prayerId}/pray`, { method: "POST", body: JSON.stringify({}) });
+      return await apiRequest(`/api/prayers/${prayerId}/pray`, { method: "POST", body: {} });
     },
     onSuccess: (_, prayerId) => {
       setPrayedRequests(prev => new Set([...prev, prayerId]));
@@ -175,7 +175,7 @@ export default function EnhancedPrayerWall() {
   // React to prayer mutation
   const reactToPrayerMutation = useMutation({
     mutationFn: async ({ prayerId, reaction }: { prayerId: number, reaction: string }) => {
-      return await apiRequest(`/api/prayers/${prayerId}/react`, { method: "POST", body: JSON.stringify({ reaction }) });
+      return await apiRequest(`/api/prayers/${prayerId}/react`, { method: "POST", body: { reaction } });
     },
     onSuccess: (_, { prayerId, reaction }) => {
       setReactions(prev => {
@@ -193,7 +193,7 @@ export default function EnhancedPrayerWall() {
   // Bookmark prayer mutation
   const bookmarkPrayerMutation = useMutation({
     mutationFn: async (prayerId: number) => {
-      return await apiRequest(`/api/prayers/${prayerId}/bookmark`, { method: "POST", body: JSON.stringify({}) });
+      return await apiRequest(`/api/prayers/${prayerId}/bookmark`, { method: "POST", body: {} });
     },
     onSuccess: (_, prayerId) => {
       setBookmarkedRequests(prev => {

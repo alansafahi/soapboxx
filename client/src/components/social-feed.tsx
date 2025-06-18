@@ -174,7 +174,7 @@ export default function SocialFeed() {
     mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
       return apiRequest(`/api/discussions/${postId}/comments`, {
         method: 'POST',
-        body: JSON.stringify({ content })
+        body: { content }
       });
     },
     onSuccess: () => {
