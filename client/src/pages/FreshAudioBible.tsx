@@ -665,38 +665,38 @@ export default function FreshAudioBible() {
             <TabsTrigger value="custom-routine" className="text-xs sm:text-sm">Custom Routine Builder</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="mood-selection" className="space-y-6">
+          <TabsContent value="mood-selection" className="space-y-3 sm:space-y-4 md:space-y-6">
             {/* Mood Selection */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5" />
+              <CardHeader className="p-3 sm:p-4 md:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
                   How are you feeling today?
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
+              <CardContent className="p-3 sm:p-4 md:p-6">
+                <div className="space-y-4 sm:space-y-6">
                   {moodCategories.map((category) => (
-                    <div key={category.title} className="space-y-3">
+                    <div key={category.title} className="space-y-2 sm:space-y-3">
                       <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-600">
-                        <span className="text-lg">{category.icon}</span>
-                        <h3 className="font-semibold text-gray-800 dark:text-white">{category.title}</h3>
+                        <span className="text-base sm:text-lg">{category.icon}</span>
+                        <h3 className="font-semibold text-gray-800 dark:text-white text-sm sm:text-base">{category.title}</h3>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                         {category.moods.map((mood) => (
                           <Button
                             key={mood.id}
                             variant={selectedMood === mood.id ? "default" : "outline"}
-                            className={`h-auto p-3 flex flex-col gap-2 text-left ${mood.color} ${
+                            className={`h-auto p-2 sm:p-3 flex flex-col gap-1 sm:gap-2 text-left ${mood.color} ${
                               selectedMood === mood.id ? 'ring-2 ring-blue-500' : ''
                             }`}
                             onClick={() => handleMoodSelection(mood.id)}
                           >
                             <div className="flex items-center gap-2 w-full">
-                              <span className="text-xl">{mood.icon}</span>
-                              <span className="text-sm font-medium flex-1">{mood.label}</span>
+                              <span className="text-lg sm:text-xl">{mood.icon}</span>
+                              <span className="text-xs sm:text-sm font-medium flex-1">{mood.label}</span>
                             </div>
-                            <p className="text-xs opacity-75 text-left">{mood.theme}</p>
+                            <p className="text-xs opacity-75 text-left leading-tight">{mood.theme}</p>
                           </Button>
                         ))}
                       </div>
