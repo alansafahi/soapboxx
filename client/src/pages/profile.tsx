@@ -124,14 +124,20 @@ export default function ProfilePage() {
         body: data,
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, updatedData) => {
+      // Optimistically update the user cache immediately
+      queryClient.setQueryData(["/api/auth/user"], (oldUser: any) => {
+        if (!oldUser) return oldUser;
+        return { ...oldUser, ...updatedData };
+      });
+      
       toast({
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
       });
-      // Force refetch to update UI immediately
+      
+      // Also invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       setIsEditing(false);
     },
     onError: (error) => {

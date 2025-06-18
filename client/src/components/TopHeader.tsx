@@ -49,10 +49,18 @@ export default function TopHeader() {
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: number) => 
       apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
-    onSuccess: () => {
-      // Force refetch to update count immediately
+    onSuccess: (_, notificationId) => {
+      // Optimistically update the cache immediately
+      queryClient.setQueryData(["/api/notifications"], (oldData: Notification[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, isRead: true }
+            : notification
+        );
+      });
+      // Also invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
     },
   });
 
@@ -61,9 +69,13 @@ export default function TopHeader() {
     mutationFn: () => 
       apiRequest("/api/notifications/mark-all-read", { method: "POST" }),
     onSuccess: () => {
-      // Force refetch to update count immediately
+      // Optimistically update all notifications to read
+      queryClient.setQueryData(["/api/notifications"], (oldData: Notification[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(notification => ({ ...notification, isRead: true }));
+      });
+      // Also invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: "All notifications marked as read",
       });
