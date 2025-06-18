@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -56,7 +56,8 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Redirect to home page
+        // Invalidate auth cache and redirect to home page
+        await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         window.location.href = '/';
       }
     } catch (error: any) {
