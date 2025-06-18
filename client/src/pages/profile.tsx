@@ -267,11 +267,7 @@ export default function ProfilePage() {
     ? `${displayProfile.firstName[0]}${displayProfile.lastName[0]}`
     : displayProfile?.firstName?.[0] || displayProfile?.email?.[0] || "A";
 
-  // Debug profile image data
-  console.log('Profile image URL:', profile?.profileImageUrl?.substring(0, 100) + '...');
-  console.log('Profile data image URL:', profileData.profileImageUrl?.substring(0, 100) + '...');
-  console.log('Has profile image:', !!profile?.profileImageUrl);
-  console.log('Profile image starts with data:', profile?.profileImageUrl?.startsWith('data:'));
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
@@ -324,24 +320,19 @@ export default function ProfilePage() {
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   {/* Profile Picture */}
                   <div className="relative">
-                    <Avatar className="h-32 w-32">
-                      {(profile?.profileImageUrl || profileData.profileImageUrl) ? (
+                    {(profile?.profileImageUrl || profileData.profileImageUrl) ? (
+                      <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <img 
-                          src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl) : profile?.profileImageUrl} 
+                          src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '')} 
                           alt={displayName}
-                          className="h-32 w-32 rounded-full object-cover"
-                          onError={(e) => {
-                            console.log('Image failed to load:', e);
-                            e.currentTarget.style.display = 'none';
-                          }}
-                          onLoad={() => console.log('Image loaded successfully')}
+                          className="h-full w-full object-cover"
                         />
-                      ) : (
-                        <AvatarFallback className="text-2xl bg-purple-600 text-white h-32 w-32">
-                          {userInitials}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
+                      </div>
+                    ) : (
+                      <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center">
+                        <span className="text-2xl font-semibold text-white">{userInitials}</span>
+                      </div>
+                    )}
                     {isEditing && (
                       <Button
                         size="sm"
