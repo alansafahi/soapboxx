@@ -150,14 +150,7 @@ export function setupAuth(app: Express): void {
     });
   });
 
-  // Get current user endpoint
-  app.get('/api/auth/user', (req, res) => {
-    const sessionUser = (req.session as any)?.user;
-    if (!sessionUser) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-    res.json(sessionUser);
-  });
+  // Current user endpoint is handled in routes.ts with fresh database data
 }
 
 // Authentication middleware
