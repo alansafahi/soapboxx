@@ -52,32 +52,41 @@ export default function TopHeader() {
   // Update local state when server data changes
   useEffect(() => {
     if (serverNotifications.length > 0) {
+      console.log('Updating local notifications from server:', serverNotifications);
       setLocalNotifications(serverNotifications);
     }
   }, [serverNotifications]);
 
   // Use local notifications for display, fallback to server data
   const notifications = localNotifications.length > 0 ? localNotifications : serverNotifications;
+  console.log('Current display notifications:', notifications);
+  console.log('Local notifications state:', localNotifications);
+  console.log('Server notifications:', serverNotifications);
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: number) => 
       apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
     onMutate: (notificationId) => {
+      console.log('Optimistically marking notification as read:', notificationId);
       // Immediate local state update for instant UI feedback
-      setLocalNotifications(prev => 
-        prev.map(notification => 
+      setLocalNotifications(prev => {
+        const updated = prev.map(notification => 
           notification.id === notificationId 
             ? { ...notification, isRead: true }
             : notification
-        )
-      );
+        );
+        console.log('Updated local notifications:', updated);
+        return updated;
+      });
     },
     onError: () => {
+      console.log('Error occurred, rolling back to server data');
       // Rollback local state on error - restore from server data
       setLocalNotifications(serverNotifications);
     },
     onSuccess: () => {
+      console.log('Successfully marked notification as read on server');
       // Refresh server data in background
       queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       toast({
@@ -91,16 +100,21 @@ export default function TopHeader() {
     mutationFn: () => 
       apiRequest("/api/notifications/mark-all-read", { method: "POST" }),
     onMutate: () => {
+      console.log('Optimistically marking all notifications as read');
       // Immediate local state update for instant UI feedback
-      setLocalNotifications(prev => 
-        prev.map(notification => ({ ...notification, isRead: true }))
-      );
+      setLocalNotifications(prev => {
+        const updated = prev.map(notification => ({ ...notification, isRead: true }));
+        console.log('Updated all local notifications to read:', updated);
+        return updated;
+      });
     },
     onError: () => {
+      console.log('Error occurred with mark all, rolling back to server data');
       // Rollback local state on error
       setLocalNotifications(serverNotifications);
     },
     onSuccess: () => {
+      console.log('Successfully marked all notifications as read on server');
       // Refresh server data in background
       queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       toast({
@@ -111,6 +125,7 @@ export default function TopHeader() {
 
   // Calculate unread count from current notifications
   const unreadCount = notifications.filter(n => !n.isRead).length;
+  console.log('Calculated unread count:', unreadCount);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
