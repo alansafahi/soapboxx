@@ -250,6 +250,10 @@ export interface IStorage {
   verifyEmailToken(token: string): Promise<User | null>;
   markEmailAsVerified(userId: string): Promise<void>;
   
+  // Password reset operations
+  storePasswordResetToken(userId: string, token: string, expires: Date): Promise<void>;
+  verifyPasswordResetToken(token: string): Promise<User | undefined>;
+  
   // Tour completion operations
   getTourCompletion(userId: string, tourType: string): Promise<any>;
   saveTourCompletion(data: any): Promise<any>;
@@ -768,6 +772,34 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
+  }
+
+  // Password reset operations
+  async storePasswordResetToken(userId: string, token: string, expires: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        passwordResetToken: token,
+        passwordResetExpires: expires,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async verifyPasswordResetToken(token: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.passwordResetToken, token));
+    
+    if (!user) return undefined;
+    
+    // Check if token is not expired
+    if (!user.passwordResetExpires || new Date() > user.passwordResetExpires) {
+      return undefined; // Token expired
+    }
+    
+    return user;
   }
 
   // Tour completion operations
