@@ -3,8 +3,8 @@
  * Imports real churches from CSV and sets up claiming functionality
  */
 
-import { db } from './server/db.js';
-import { churches } from './shared/schema.js';
+import { db } from './server/db.ts';
+import { churches } from './shared/schema.ts';
 import { eq } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';

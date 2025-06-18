@@ -142,6 +142,15 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 18, 2025: Successfully completed church import and claiming system with production-ready functionality
+  - Imported 1,830 real churches from CSV data to replace demo churches with authentic information
+  - Added `is_claimed` and `admin_email` fields to churches table for ownership tracking
+  - Implemented complete church claiming system with email verification for admin access
+  - Created API endpoints: GET /api/churches/claimable, POST /api/churches/:id/claim, bulk import, demo removal
+  - Built secure claiming process: only verified email addresses can claim their designated churches
+  - All churches function normally while unclaimed but can be claimed by designated admins for full management
+  - Enhanced storage layer with getClaimableChurches, claimChurch, bulkImportChurches, and removeDemoChurches methods
+  - Church admins can now register, verify email, and claim ownership to gain administrative privileges
 - June 17, 2025: Successfully completed responsive sidebar navigation with automatic screen size adaptation
   - Implemented automatic sidebar collapse for screens smaller than 768px (mobile)
   - Added automatic sidebar expansion for screens 1024px and larger (desktop)
