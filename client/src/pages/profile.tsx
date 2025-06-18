@@ -158,8 +158,19 @@ export default function ProfilePage() {
       });
     },
     onSuccess: (data) => {
+      console.log('Profile update response:', data);
+      
       // Clear local updates on successful save
       setLocalProfileUpdates({});
+      
+      // Update the profile data state immediately with server response
+      if (data.user) {
+        setProfileData(data.user);
+        queryClient.setQueryData(["/api/auth/user"], data.user);
+      }
+      
+      // Force cache refresh
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       
       toast({
         title: "Profile Updated", 
@@ -167,9 +178,6 @@ export default function ProfilePage() {
       });
       
       setIsEditing(false);
-      // Update the cache with the returned data
-      queryClient.setQueryData(["/api/auth/user"], data.user || data);
-      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
   });
 

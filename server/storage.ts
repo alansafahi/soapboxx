@@ -676,9 +676,6 @@ export class DatabaseStorage implements IStorage {
       // Always update timestamp
       updateData.updatedAt = new Date();
 
-      console.log('Updating user profile with data:', updateData);
-      console.log('User ID:', userId);
-
       const [user] = await db
         .update(users)
         .set(updateData)
@@ -689,7 +686,6 @@ export class DatabaseStorage implements IStorage {
         throw new Error(`User not found with ID: ${userId}`);
       }
       
-      console.log('Profile update successful:', user);
       return user;
     } catch (error) {
       console.error('Database error updating user profile:', error);
