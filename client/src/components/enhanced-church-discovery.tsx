@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +38,24 @@ export default function EnhancedChurchDiscovery() {
     proximity: 25 // Default 25 miles
   });
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Separate state for location input to prevent reset while typing
+  const [locationInput, setLocationInput] = useState("");
+  const [debouncedLocation, setDebouncedLocation] = useState("");
+
+  // Debounce location input to prevent constant API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedLocation(locationInput);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [locationInput]);
+
+  // Update filters when debounced location changes
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, location: debouncedLocation }));
+  }, [debouncedLocation]);
 
   // Fetch churches with filtering
   const { data: allChurches = [], isLoading } = useQuery<ChurchWithDistance[]>({
@@ -121,6 +139,7 @@ export default function EnhancedChurchDiscovery() {
       size: "all",
       proximity: 25
     });
+    setLocationInput(""); // Also clear the input state
     setDisplayedCount(10);
   };
 
@@ -300,8 +319,8 @@ export default function EnhancedChurchDiscovery() {
                     </label>
                     <Input
                       placeholder="City, State or ZIP"
-                      value={filters.location}
-                      onChange={(e) => handleFilterChange('location', e.target.value)}
+                      value={locationInput}
+                      onChange={(e) => setLocationInput(e.target.value)}
                     />
                   </div>
                   
