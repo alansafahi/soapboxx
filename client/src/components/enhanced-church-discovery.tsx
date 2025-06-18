@@ -46,11 +46,13 @@ export default function EnhancedChurchDiscovery() {
   const [locationInputValue, setLocationInputValue] = useState("");
   const [churchNameInput, setChurchNameInput] = useState("");
   const [userLocation, setUserLocation] = useState<string>("");
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
   // Auto-detect user location on component mount
   useEffect(() => {
     const detectLocation = async () => {
+      setIsDetectingLocation(true);
       try {
         // Try IP-based geolocation first
         const response = await fetch('https://ipapi.co/json/');
@@ -60,6 +62,10 @@ export default function EnhancedChurchDiscovery() {
           setUserLocation(detectedLocation);
           setLocationInputValue(detectedLocation);
           setFilters(prev => ({ ...prev, location: detectedLocation }));
+          toast({
+            title: "Location Detected",
+            description: `Found your location: ${detectedLocation}`,
+          });
         }
       } catch (error) {
         console.log('IP geolocation not available, trying browser geolocation...');
@@ -78,6 +84,10 @@ export default function EnhancedChurchDiscovery() {
                   setUserLocation(detectedLocation);
                   setLocationInputValue(detectedLocation);
                   setFilters(prev => ({ ...prev, location: detectedLocation }));
+                  toast({
+                    title: "Location Detected",
+                    description: `Found your location: ${detectedLocation}`,
+                  });
                 }
               } catch (error) {
                 console.log('Reverse geocoding failed');
@@ -88,11 +98,13 @@ export default function EnhancedChurchDiscovery() {
             }
           );
         }
+      } finally {
+        setIsDetectingLocation(false);
       }
     };
 
     detectLocation();
-  }, []);
+  }, [toast]);
 
   // Handle location input changes with debounced filter updates
   const handleLocationChange = useCallback((value: string) => {
@@ -430,15 +442,60 @@ export default function EnhancedChurchDiscovery() {
                     </div>
                     
                     {searchMode === 'location' ? (
-                      <div>
-                        <Input
-                          placeholder={userLocation ? `Current: ${userLocation}` : "Enter city, state, or zip code..."}
-                          value={locationInputValue}
-                          onChange={(e) => handleLocationChange(e.target.value)}
-                          className="w-full"
-                        />
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder={userLocation ? `Current: ${userLocation}` : "Enter city, state, or zip code..."}
+                            value={locationInputValue}
+                            onChange={(e) => handleLocationChange(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              setIsDetectingLocation(true);
+                              try {
+                                const response = await fetch('https://ipapi.co/json/');
+                                const data = await response.json();
+                                if (data.city && data.region) {
+                                  const detectedLocation = `${data.city}, ${data.region}`;
+                                  setUserLocation(detectedLocation);
+                                  setLocationInputValue(detectedLocation);
+                                  setFilters(prev => ({ ...prev, location: detectedLocation }));
+                                  toast({
+                                    title: "Location Updated",
+                                    description: `Using your location: ${detectedLocation}`,
+                                  });
+                                }
+                              } catch (error) {
+                                toast({
+                                  title: "Location Error",
+                                  description: "Could not detect your location. Please enter manually.",
+                                  variant: "destructive"
+                                });
+                              } finally {
+                                setIsDetectingLocation(false);
+                              }
+                            }}
+                            disabled={isDetectingLocation}
+                            className="whitespace-nowrap"
+                          >
+                            {isDetectingLocation ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mr-1"></div>
+                                Detecting...
+                              </>
+                            ) : (
+                              <>
+                                <MapPin className="w-4 h-4 mr-1" />
+                                Use My Location
+                              </>
+                            )}
+                          </Button>
+                        </div>
                         {userLocation && (
-                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                          <p className="text-xs text-green-600 dark:text-green-400">
                             ✓ Auto-detected your location from device IP
                           </p>
                         )}

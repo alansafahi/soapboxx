@@ -4640,11 +4640,12 @@ Return JSON with this exact structure:
   // Enhanced church search with filtering
   app.get('/api/churches/search', async (req, res) => {
     try {
-      const { denomination, location, size, proximity, limit } = req.query;
+      const { denomination, location, churchName, size, proximity, limit } = req.query;
       
       const searchParams = {
         denomination: denomination as string,
         location: location as string,
+        churchName: churchName as string,
         size: size as string,
         proximity: proximity ? parseInt(proximity as string) : 25,
         limit: limit ? parseInt(limit as string) : 1000
