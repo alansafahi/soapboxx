@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 
 export function useAuth() {
   const [demoUser, setDemoUser] = useState(null);
+  const [forceRefresh, setForceRefresh] = useState(0);
 
   const { data: user, isLoading, refetch } = useQuery({
-    queryKey: ["/api/auth/user"],
+    queryKey: ["/api/auth/user", forceRefresh],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
     staleTime: 0, // Always fresh for auth queries
@@ -14,6 +15,11 @@ export function useAuth() {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
+
+  // Force refresh mechanism
+  const forceAuthRefresh = () => {
+    setForceRefresh(prev => prev + 1);
+  };
 
   // Check for demo user in localStorage if API auth fails
   useEffect(() => {
@@ -42,5 +48,6 @@ export function useAuth() {
     isAuthenticated: !!currentUser,
     isDemoMode: !!demoUser && !user,
     refetch,
+    forceAuthRefresh,
   };
 }

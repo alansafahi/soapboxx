@@ -57,11 +57,20 @@ function AppRouter() {
   const { user, isAuthenticated, isLoading, refetch } = useAuth();
   const [location] = useLocation();
   
-  // Check for authentication on initial load
+  // Force authentication check on app load
+  useEffect(() => {
+    // Always attempt authentication refresh on mount
+    refetch();
+  }, []);
+  
+  // Additional check for authentication state inconsistencies
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
-      // Single retry for authentication check
-      refetch();
+      // Delay retry to avoid rapid firing
+      const timer = setTimeout(() => {
+        refetch();
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [isAuthenticated, isLoading, refetch]);
   

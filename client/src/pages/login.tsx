@@ -58,13 +58,8 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Clear all cached data to force fresh authentication state
-        queryClient.clear();
-        
-        // Wait briefly for session to be established, then redirect
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
+        // Force complete application reload to ensure fresh authentication state
+        window.location.reload();
       }
     } catch (error: any) {
       toast({
