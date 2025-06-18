@@ -53,22 +53,22 @@ export default function TopHeader() {
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: number) => 
       apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
-    onSuccess: (_, notificationId) => {
-      console.log('Marking notification as read:', notificationId);
-      // Optimistically update the cache immediately
-      queryClient.setQueryData(["/api/notifications"], (oldData: Notification[] | undefined) => {
-        console.log('Old notification data:', oldData);
-        if (!oldData) return oldData;
-        const newData = oldData.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, isRead: true }
-            : notification
-        );
-        console.log('New notification data:', newData);
-        return newData;
+    onMutate: (notificationId) => {
+      // Immediate local state update for instant UI feedback
+      setReadNotificationIds(prev => new Set(Array.from(prev).concat(notificationId)));
+    },
+    onError: (_, notificationId) => {
+      // Rollback local state on error
+      setReadNotificationIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        return newSet;
       });
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Notification marked as read",
+      });
     },
   });
 

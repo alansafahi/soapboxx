@@ -100,6 +100,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState<Partial<UserProfile>>({});
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [localProfileUpdates, setLocalProfileUpdates] = useState<Partial<UserProfile>>({});
 
   // Fetch user profile data
   const { data: profile, isLoading: profileLoading } = useQuery<UserProfile>({
@@ -119,24 +120,32 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
-      console.log('Updating profile with data:', data);
       return apiRequest("/api/users/profile", {
         method: "PUT",
         body: data,
       });
     },
-    onSuccess: (response, updatedData) => {
-      console.log('Profile update response:', response);
-      console.log('Profile update data:', updatedData);
+    onMutate: async (updatedData) => {
+      // Immediate local state update for instant UI feedback
+      setLocalProfileUpdates(prev => ({ ...prev, ...updatedData }));
       
-      // Optimistically update the user cache immediately
+      // Also update React Query cache
+      await queryClient.cancelQueries({ queryKey: ["/api/auth/user"] });
+      const previousProfile = queryClient.getQueryData(["/api/auth/user"]);
+      
       queryClient.setQueryData(["/api/auth/user"], (oldUser: any) => {
-        console.log('Old user data:', oldUser);
         if (!oldUser) return oldUser;
-        const newUser = { ...oldUser, ...updatedData };
-        console.log('New user data:', newUser);
-        return newUser;
+        return { ...oldUser, ...updatedData };
       });
+      
+      return { previousProfile };
+    },
+    onError: (_, __, context) => {
+      // Rollback local state on error
+      setLocalProfileUpdates({});
+      queryClient.setQueryData(["/api/auth/user"], context?.previousProfile);
+    },
+    onSuccess: () => {
       
       toast({
         title: "Profile Updated",
@@ -232,13 +241,16 @@ export default function ProfilePage() {
     );
   }
 
-  const displayName = profile?.firstName && profile?.lastName 
-    ? `${profile.firstName} ${profile.lastName}`
-    : profile?.firstName || profile?.email || "Anonymous User";
+  // Merge server data with local updates for immediate UI feedback
+  const displayProfile = { ...profile, ...localProfileUpdates };
+  
+  const displayName = displayProfile?.firstName && displayProfile?.lastName 
+    ? `${displayProfile.firstName} ${displayProfile.lastName}`
+    : displayProfile?.firstName || displayProfile?.email || "Anonymous User";
 
-  const userInitials = profile?.firstName && profile?.lastName
-    ? `${profile.firstName[0]}${profile.lastName[0]}`
-    : profile?.firstName?.[0] || profile?.email?.[0] || "A";
+  const userInitials = displayProfile?.firstName && displayProfile?.lastName
+    ? `${displayProfile.firstName[0]}${displayProfile.lastName[0]}`
+    : displayProfile?.firstName?.[0] || displayProfile?.email?.[0] || "A";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
