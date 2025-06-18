@@ -32,7 +32,7 @@ export default function EnhancedChurchDiscovery() {
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
   const [displayedCount, setDisplayedCount] = useState(10);
   const [filters, setFilters] = useState<FilterState>({
-    denomination: "",
+    denomination: "all",
     location: "",
     size: "",
     proximity: 25 // Default 25 miles
@@ -44,7 +44,7 @@ export default function EnhancedChurchDiscovery() {
     queryKey: ["/api/churches/search", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (filters.denomination) params.append('denomination', filters.denomination);
+      if (filters.denomination && filters.denomination !== "all") params.append('denomination', filters.denomination);
       if (filters.location) params.append('location', filters.location);
       if (filters.size) params.append('size', filters.size);
       params.append('proximity', filters.proximity.toString());
@@ -116,7 +116,7 @@ export default function EnhancedChurchDiscovery() {
 
   const clearFilters = () => {
     setFilters({
-      denomination: "",
+      denomination: "all",
       location: "",
       size: "",
       proximity: 25
@@ -266,7 +266,7 @@ export default function EnhancedChurchDiscovery() {
                         <SelectValue placeholder="Any denomination" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any denomination</SelectItem>
+                        <SelectItem value="all">Any denomination</SelectItem>
                         {denominations.map((denom) => (
                           <SelectItem key={denom} value={denom}>
                             {denom}
