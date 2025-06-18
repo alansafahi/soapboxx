@@ -50,7 +50,9 @@ export default function TopHeader() {
     mutationFn: (notificationId: number) => 
       apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
     onSuccess: () => {
+      // Force refetch to update count immediately
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
     },
   });
 
@@ -59,7 +61,9 @@ export default function TopHeader() {
     mutationFn: () => 
       apiRequest("/api/notifications/mark-all-read", { method: "POST" }),
     onSuccess: () => {
+      // Force refetch to update count immediately
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: "All notifications marked as read",
       });

@@ -142,13 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 18, 2025: Successfully fixed Edit Profile save functionality and temporarily hidden "Page Not Found" error message
+- June 18, 2025: Successfully fixed Edit Profile save functionality and notification count update issues
   - Fixed Edit Profile save button functionality by separating "Save Changes" and "Cancel" buttons
-  - Added proper "Save Changes" button that appears during edit mode with loading state indicator
-  - Enhanced save functionality with proper mutation handling and success feedback
+  - Enhanced profile save mutation to use apiRequest helper with proper authentication handling
+  - Added force refetch functionality to immediately update UI after profile changes
+  - Fixed notification count not updating when notifications marked as read
+  - Enhanced notification mutations with forced refetch to update count badges immediately
   - Temporarily hidden "Page Not Found" error message component to prevent incorrect displays until root cause identified
-  - Edit Profile now properly saves all form data including name, bio, contact info, denomination, and interests
-  - Profile save mutation correctly updates database and invalidates cache for immediate UI refresh
+  - Both profile saving and notification count updates now work properly with immediate visual feedback
 - June 18, 2025: Successfully fixed notification alert icon functionality with comprehensive notification system
   - Fixed missing notification count display in red badge (now shows actual count: 2 unread notifications)
   - Added clickable dropdown menu with proper notification list display including titles, messages, and timestamps
