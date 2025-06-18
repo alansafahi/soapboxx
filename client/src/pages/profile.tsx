@@ -140,29 +140,31 @@ export default function ProfilePage() {
       
       return { previousProfile };
     },
-    onError: (_, __, context) => {
+    onError: (error, _, context) => {
       // Rollback local state on error
       setLocalProfileUpdates({});
-      queryClient.setQueryData(["/api/auth/user"], context?.previousProfile);
-    },
-    onSuccess: () => {
+      if (context?.previousProfile) {
+        queryClient.setQueryData(["/api/auth/user"], context.previousProfile);
+      }
       
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
-      });
-      
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
-      setIsEditing(false);
-    },
-    onError: (error) => {
       console.error('Profile update error:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
+    },
+    onSuccess: () => {
+      // Clear local updates on successful save
+      setLocalProfileUpdates({});
+      
+      toast({
+        title: "Profile Updated", 
+        description: "Your profile has been successfully updated.",
+      });
+      
+      setIsEditing(false);
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
   });
 
@@ -305,7 +307,7 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Avatar className="h-32 w-32">
                       <AvatarImage 
-                        src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || undefined) : (profile?.profileImageUrl || undefined)} 
+                        src={isEditing ? (profileData.profileImageUrl || displayProfile?.profileImageUrl || undefined) : (displayProfile?.profileImageUrl || undefined)} 
                         alt={displayName} 
                       />
                       <AvatarFallback className="text-2xl">
