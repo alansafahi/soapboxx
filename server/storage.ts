@@ -1894,6 +1894,8 @@ export class DatabaseStorage implements IStorage {
         rating: churches.rating,
         memberCount: churches.memberCount,
         isActive: churches.isActive,
+        isClaimed: churches.isClaimed,
+        adminEmail: churches.adminEmail,
         createdAt: churches.createdAt,
         updatedAt: churches.updatedAt,
       })

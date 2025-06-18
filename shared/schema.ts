@@ -108,6 +108,8 @@ export const churches = pgTable("churches", {
   rating: real("rating").default(0),
   memberCount: integer("member_count").default(0),
   isActive: boolean("is_active").default(true),
+  isClaimed: boolean("is_claimed").default(false), // Track if church has been claimed by admin
+  adminEmail: varchar("admin_email", { length: 255 }), // Email of designated admin for claiming
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
