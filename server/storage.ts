@@ -1,5 +1,6 @@
 import {
   users,
+  notifications,
   churches,
   events,
   eventRsvps,
@@ -317,6 +318,12 @@ export interface IStorage {
   // Event metrics
   getEventMetrics(eventId: number): Promise<EventMetric | undefined>;
   updateEventMetrics(eventId: number, metrics: Partial<InsertEventMetric>): Promise<EventMetric>;
+
+  // Notification operations
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(notificationId: number, userId: string): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
   
   // Discussion operations
   getDiscussions(churchId?: number): Promise<Discussion[]>;
