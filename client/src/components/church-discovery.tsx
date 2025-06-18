@@ -281,19 +281,18 @@ export default function ChurchDiscovery() {
                         </a>
                       )}
                       {church.website && (
-                        <a 
-                          href={church.website.startsWith('http') ? church.website : `https://${church.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
                           className="text-xs text-gray-500 dark:text-gray-300 hover:text-purple-400 flex items-center"
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
-                            window.open(church.website.startsWith('http') ? church.website : `https://${church.website}`, '_blank');
+                            const url = church.website.startsWith('http') ? church.website : `https://${church.website}`;
+                            window.open(url, '_blank', 'noopener,noreferrer');
                           }}
                         >
                           <Globe className="w-3 h-3 mr-1" />
                           Website
-                        </a>
+                        </button>
                       )}
                     </div>
                   )}

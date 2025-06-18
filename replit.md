@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 18, 2025: Successfully completed church discovery UI fixes with full functionality restoration
+  - Fixed "View More Churches" button to properly expand and show all available churches when clicked
+  - Resolved church website links opening "Page Not Found" within app by converting to button-based external navigation
+  - Enhanced website URL handling with automatic https:// prefix addition and proper external window opening
+  - Church discovery now fully operational with expandable church lists and working external website access
+  - All church interaction features confirmed working: joining churches, expanding lists, accessing external websites
 - June 18, 2025: Successfully completed church denomination verification system with intelligent detection and admin confirmation
   - Enhanced church claiming process to include denomination verification where admins can confirm or correct auto-detected denominations
   - Implemented intelligent denomination extraction from church names (e.g., "First Baptist Church" → Baptist, "Sacred Heart Catholic Church" → Catholic)

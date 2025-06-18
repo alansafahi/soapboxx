@@ -119,7 +119,15 @@ function AppRouter() {
     }
   }, [detectedUserRole]);
   
-  // Debug logging removed for performance optimization
+  // Debug current route and auth state
+  useEffect(() => {
+    console.log('Route Debug:', {
+      location,
+      isAuthenticated,
+      isLoading,
+      user: user ? 'present' : 'none'
+    });
+  }, [location, isAuthenticated, isLoading, user]);
 
   // Show loading spinner during initial auth check
   if (isLoading) {
