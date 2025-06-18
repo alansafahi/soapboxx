@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 export function useAuth() {
   const [demoUser, setDemoUser] = useState(null);
 
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading, refetch } = useQuery({
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
@@ -37,5 +37,6 @@ export function useAuth() {
     isLoading,
     isAuthenticated: !!currentUser,
     isDemoMode: !!demoUser && !user,
+    refetch,
   };
 }

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useLocation } from "wouter";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -56,9 +58,12 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Invalidate auth cache and redirect to home page
+        // Invalidate auth cache and force refetch
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-        window.location.href = '/';
+        // Wait a moment for the cache to clear
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // Force a hard refresh to ensure clean state
+        window.location.reload();
       }
     } catch (error: any) {
       toast({
