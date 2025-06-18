@@ -119,16 +119,23 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
+      console.log('Updating profile with data:', data);
       return apiRequest("/api/users/profile", {
         method: "PUT",
         body: data,
       });
     },
-    onSuccess: (_, updatedData) => {
+    onSuccess: (response, updatedData) => {
+      console.log('Profile update response:', response);
+      console.log('Profile update data:', updatedData);
+      
       // Optimistically update the user cache immediately
       queryClient.setQueryData(["/api/auth/user"], (oldUser: any) => {
+        console.log('Old user data:', oldUser);
         if (!oldUser) return oldUser;
-        return { ...oldUser, ...updatedData };
+        const newUser = { ...oldUser, ...updatedData };
+        console.log('New user data:', newUser);
+        return newUser;
       });
       
       toast({
@@ -136,11 +143,12 @@ export default function ProfilePage() {
         description: "Your profile has been successfully updated.",
       });
       
-      // Also invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       setIsEditing(false);
     },
     onError: (error) => {
+      console.error('Profile update error:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update profile. Please try again.",

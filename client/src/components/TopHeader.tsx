@@ -50,17 +50,21 @@ export default function TopHeader() {
     mutationFn: (notificationId: number) => 
       apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
     onSuccess: (_, notificationId) => {
+      console.log('Marking notification as read:', notificationId);
       // Optimistically update the cache immediately
       queryClient.setQueryData(["/api/notifications"], (oldData: Notification[] | undefined) => {
+        console.log('Old notification data:', oldData);
         if (!oldData) return oldData;
-        return oldData.map(notification => 
+        const newData = oldData.map(notification => 
           notification.id === notificationId 
             ? { ...notification, isRead: true }
             : notification
         );
+        console.log('New notification data:', newData);
+        return newData;
       });
-      // Also invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
     },
   });
 
@@ -69,13 +73,17 @@ export default function TopHeader() {
     mutationFn: () => 
       apiRequest("/api/notifications/mark-all-read", { method: "POST" }),
     onSuccess: () => {
+      console.log('Marking all notifications as read');
       // Optimistically update all notifications to read
       queryClient.setQueryData(["/api/notifications"], (oldData: Notification[] | undefined) => {
+        console.log('Old notification data (mark all):', oldData);
         if (!oldData) return oldData;
-        return oldData.map(notification => ({ ...notification, isRead: true }));
+        const newData = oldData.map(notification => ({ ...notification, isRead: true }));
+        console.log('New notification data (mark all):', newData);
+        return newData;
       });
-      // Also invalidate to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       toast({
         title: "All notifications marked as read",
       });
