@@ -39,18 +39,23 @@ export default function EnhancedChurchDiscovery() {
   });
   const [showFilters, setShowFilters] = useState(false);
   
-  // Separate state for location input to prevent reset while typing
-  const [locationInput, setLocationInput] = useState("");
+  // Use useRef to maintain input value independently of React state
+  const locationInputRef = useRef<HTMLInputElement>(null);
   const [debouncedLocation, setDebouncedLocation] = useState("");
+  const debounceTimerRef = useRef<NodeJS.Timeout>();
 
-  // Debounce location input to prevent constant API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedLocation(locationInput);
-    }, 300); // 300ms delay for responsive search
+  // Handle location input changes with immediate UI update and debounced search
+  const handleLocationChange = useCallback((value: string) => {
+    // Clear existing debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
-    return () => clearTimeout(timer);
-  }, [locationInput]);
+    // Set new debounce timer
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedLocation(value);
+    }, 300);
+  }, []);
 
   // Update filters when debounced location changes
   useEffect(() => {
@@ -347,17 +352,7 @@ export default function EnhancedChurchDiscovery() {
                     <Input
                       placeholder="Enter city, state, or zip code..."
                       value={locationInput}
-                      onChange={(e) => {
-                        console.log('🎥 RECORDING: Input onChange fired, new value:', e.target.value);
-                        console.log('🎥 RECORDING: Previous locationInput was:', locationInput);
-                        setLocationInput(e.target.value);
-                      }}
-                      onInput={(e) => {
-                        console.log('🎥 RECORDING: Input onInput fired, value:', e.currentTarget.value);
-                      }}
-                      onKeyDown={(e) => {
-                        console.log('🎥 RECORDING: Key pressed:', e.key, 'Current value:', e.currentTarget.value);
-                      }}
+                      onChange={(e) => setLocationInput(e.target.value)}
                       className="w-full"
                     />
                   </div>
