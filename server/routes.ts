@@ -4637,6 +4637,38 @@ Return JSON with this exact structure:
     }
   });
 
+  // Enhanced church search with filtering
+  app.get('/api/churches/search', async (req, res) => {
+    try {
+      const { denomination, location, size, proximity, limit } = req.query;
+      
+      const searchParams = {
+        denomination: denomination as string,
+        location: location as string,
+        size: size as string,
+        proximity: proximity ? parseInt(proximity as string) : 25,
+        limit: limit ? parseInt(limit as string) : 1000
+      };
+      
+      const churches = await storage.searchChurches(searchParams);
+      res.json(churches);
+    } catch (error) {
+      console.error("Error searching churches:", error);
+      res.status(500).json({ message: "Failed to search churches" });
+    }
+  });
+
+  // Get available denominations
+  app.get('/api/churches/denominations', async (req, res) => {
+    try {
+      const denominations = await storage.getChurchDenominations();
+      res.json(denominations);
+    } catch (error) {
+      console.error("Error fetching denominations:", error);
+      res.status(500).json({ message: "Failed to fetch denominations" });
+    }
+  });
+
   app.get('/api/churches/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);

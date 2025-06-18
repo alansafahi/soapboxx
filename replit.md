@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 18, 2025: Successfully resolved critical SPA routing issue affecting all pages
+  - Fixed "Page Not Found" error appearing on all authenticated pages by correcting wouter Route configuration
+  - Changed catch-all route from `<Route component={NotFound} />` to `<Route path="*" component={NotFound} />` 
+  - All application pages now properly load and display correct content for authenticated users
+  - Client-side routing now works correctly with proper route matching and component rendering
 - June 18, 2025: Successfully completed church discovery UI fixes with full functionality restoration
   - Fixed "View More Churches" button to properly expand and show all available churches when clicked
   - Resolved church website links opening "Page Not Found" within app by converting to button-based external navigation

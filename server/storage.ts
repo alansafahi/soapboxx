@@ -267,6 +267,8 @@ export interface IStorage {
   createChurch(church: InsertChurch): Promise<Church>;
   updateChurch(id: number, updates: Partial<Church>): Promise<Church>;
   getUserCreatedChurches(userId: string): Promise<Church[]>;
+  searchChurches(params: { denomination?: string; location?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]>;
+  getChurchDenominations(): Promise<string[]>;
   
   // Church team management
   getUserChurch(userId: string): Promise<UserChurch | undefined>;

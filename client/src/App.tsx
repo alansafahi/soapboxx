@@ -119,15 +119,7 @@ function AppRouter() {
     }
   }, [detectedUserRole]);
   
-  // Debug current route and auth state
-  useEffect(() => {
-    console.log('Route Debug:', {
-      location,
-      isAuthenticated,
-      isLoading,
-      user: user ? 'present' : 'none'
-    });
-  }, [location, isAuthenticated, isLoading, user]);
+  // Route debugging removed - routing issue fixed
 
   // Show loading spinner during initial auth check
   if (isLoading) {
@@ -185,7 +177,7 @@ function AppRouter() {
               <Route path="/communications" component={BulkCommunication} />
               <Route path="/click-test" component={ClickTest} />
               {/* Catch all unmatched routes */}
-              <Route component={NotFound} />
+              <Route path="*" component={NotFound} />
             </>
           )}
         </Switch>
