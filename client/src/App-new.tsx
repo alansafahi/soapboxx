@@ -3,52 +3,37 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
 import { useDirectAuth } from "@/lib/directAuth";
 
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
 import { Home as HomeIcon, Church, Calendar, BookOpen, Heart, Mail, Settings } from "lucide-react";
 import NotFound from "@/pages/not-found";
-import Home from "@/pages/home";
-import LoginPage from "@/pages/login";
 import Landing from "@/pages/landing";
-import EnhancedAdminPortal from "@/pages/admin-enhanced";
-import Profile from "@/pages/profile";
-import Chat from "@/pages/chat";
+import LoginPage from "@/pages/login";
+import Home from "@/pages/home";
+import BiblePage from "@/pages/bible";
+import BibleReader from "@/components/BibleReader";
 import Community from "@/pages/community";
 import Churches from "@/pages/churches";
 import Events from "@/pages/events";
 import Prayer from "@/pages/prayer";
-import Messages from "@/pages/messages";
-import Leaderboard from "@/pages/leaderboard";
-import BiblePage from "@/pages/bible";
-import BibleReader from "@/pages/BibleReader";
-import SettingsPage from "@/pages/settings";
-
-import RoleManagement from "@/pages/RoleManagement";
-import DonationDemo from "@/pages/DonationDemo";
-import DonationAnalytics from "@/pages/DonationAnalytics";
-import SMSGiving from "@/pages/SMSGiving";
-import PhoneVerification from "@/pages/PhoneVerification";
-import EmailVerification from "@/pages/EmailVerification";
-import WelcomeWizard from "@/components/welcome-wizard";
-import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
-import PersonalizedTour from "@/components/PersonalizedTour";
-import { DemoTrigger } from "@/components/DemoTrigger";
-import AdminAnalytics from "@/pages/AdminAnalytics";
-import AudioRoutines from "@/pages/AudioRoutines";
-import FreshAudioBible from "@/pages/FreshAudioBible";
-import VideoLibrary from "@/pages/VideoLibrary";
-import FeatureCatalogPage from "@/pages/FeatureCatalogPage";
-import RoleSpecificFeaturesPage from "@/pages/RoleSpecificFeaturesPage";
-import SermonStudioPage from "@/pages/SermonStudioPage";
-import BulkCommunication from "@/pages/BulkCommunication";
-import ContentDistributionPage from "@/pages/ContentDistributionPage";
-import PastoralContentDemoPage from "@/pages/PastoralContentDemoPage";
-import EngagementAnalytics from "@/pages/EngagementAnalytics";
 import SoapPage from "@/pages/soap";
-import ClickTest from "@/components/ClickTest";
+import Messages from "@/pages/messages";
+import Chat from "@/components/Chat";
+import Leaderboard from "@/pages/leaderboard";
+import EnhancedAdminPortal from "@/pages/admin";
+import AdminAnalytics from "@/pages/admin-analytics";
+import RoleManagement from "@/pages/role-management";
+import Profile from "@/pages/profile";
+import SettingsPage from "@/pages/settings";
+import DonationDemo from "@/pages/donation-demo";
+import DonationAnalytics from "@/pages/donation-analytics";
+import AudioBible from "@/pages/audio-bible";
+import AudioRoutines from "@/pages/audio-routines";
+import SermonStudio from "@/pages/sermon-studio";
+import ContentDistribution from "@/pages/content-distribution";
+import EngagementAnalytics from "@/pages/engagement-analytics";
 import ChurchClaiming from "@/pages/church-claiming";
 
 import { useState, useEffect } from "react";
@@ -70,7 +55,7 @@ function AppRouter() {
   // Global error handler
   useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      console.warn('Promise rejection handled:', event.reason);
+      console.log('Promise rejection handled:', event.reason);
       event.preventDefault();
     };
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
@@ -83,10 +68,8 @@ function AppRouter() {
     const refCode = urlParams.get('ref');
     if (refCode) {
       setReferralCode(refCode);
-      // Store in localStorage for persistence across auth flow
       localStorage.setItem('pendingReferralCode', refCode);
     } else {
-      // Check if we have a stored referral code from auth flow
       const storedRefCode = localStorage.getItem('pendingReferralCode');
       if (storedRefCode) {
         setReferralCode(storedRefCode);
@@ -94,36 +77,16 @@ function AppRouter() {
     }
   }, [location]);
 
-  // Check if user needs onboarding (but not for tour testing page)  
-  const needsOnboarding = false; // Temporarily disabled to allow direct access to AI mood check-ins
+  // Tour system management
+  const { shouldShowTour, completeTour, shouldShowPersonalizedTour } = useRoleBasedTour(currentUser);
 
-  // Fetch user's primary role for tour personalization
-  const { data: userRoleData } = useQuery({
-    queryKey: ["/api/auth/user-role"],
-    enabled: currentIsAuthenticated && !!currentUser && !needsOnboarding && !show2FAOnboarding,
-    retry: false,
-  });
-
-  // Import and use the role-based tour hook
-  const { 
-    shouldShowTour, 
-    userRole: detectedUserRole, 
-    completeTour 
-  } = useRoleBasedTour();
-
-  // Calculate if tour should show based on current state
-  const hasCompletedOnboarding = (currentUser as any)?.has_completed_onboarding;
-  const allOnboardingComplete = hasCompletedOnboarding && !show2FAOnboarding && !needsOnboarding;
-  const shouldShowPersonalizedTour = currentIsAuthenticated && shouldShowTour && allOnboardingComplete && !forceHideOnboarding;
-  
-  // Update user role when detected
+  // User role detection from authenticated user
+  const detectedUserRole = currentUser?.role || '';
   useEffect(() => {
-    if (detectedUserRole) {
+    if (detectedUserRole && detectedUserRole !== userRole) {
       setUserRole(detectedUserRole);
     }
   }, [detectedUserRole]);
-  
-  // Route debugging removed - routing issue fixed
 
   // Show loading spinner during initial auth check
   if (currentIsLoading) {
@@ -133,8 +96,6 @@ function AppRouter() {
       </div>
     );
   }
-
-
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
@@ -170,68 +131,17 @@ function AppRouter() {
               <Route path="/settings" component={SettingsPage} />
               <Route path="/donation-demo" component={DonationDemo} />
               <Route path="/donation-analytics" component={DonationAnalytics} />
-              <Route path="/sms-giving" component={SMSGiving} />
-              <Route path="/phone-verification" component={PhoneVerification} />
-              <Route path="/email-verification" component={EmailVerification} />
+              <Route path="/audio-bible" component={AudioBible} />
               <Route path="/audio-routines" component={AudioRoutines} />
-              <Route path="/audio-bible" component={FreshAudioBible} />
-              <Route path="/video-library" component={VideoLibrary} />
-              <Route path="/features" component={FeatureCatalogPage} />
-              <Route path="/role-features" component={RoleSpecificFeaturesPage} />
-              <Route path="/sermon-studio" component={SermonStudioPage} />
-              <Route path="/content-distribution" component={ContentDistributionPage} />
-              <Route path="/pastoral-demo" component={PastoralContentDemoPage} />
+              <Route path="/sermon-studio" component={SermonStudio} />
+              <Route path="/content-distribution" component={ContentDistribution} />
               <Route path="/engagement-analytics" component={EngagementAnalytics} />
-              <Route path="/communications" component={BulkCommunication} />
-              <Route path="/click-test" component={ClickTest} />
-              {/* Catch all unmatched routes */}
               <Route path="*" component={NotFound} />
             </>
           )}
         </Switch>
         </main>
       </div>
-      
-      {needsOnboarding && (
-        <WelcomeWizard 
-          onComplete={async () => {
-            // Force hide onboarding immediately
-            setForceHideOnboarding(true);
-            
-            // Refresh user data and wait for it to complete
-            await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-            await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
-            
-            // Small delay to ensure UI updates
-            setTimeout(() => {
-              console.log("Onboarding completed, showing main app");
-            }, 100);
-          }} 
-        />
-      )}
-
-      {/* 2FA Onboarding Modal - Simplified for stability */}
-
-      {/* Personalized Tour - Shows after onboarding completion */}
-      <PersonalizedTour
-        isOpen={shouldShowPersonalizedTour}
-        onComplete={async () => {
-          // Mark tour as completed using the role-based tour system
-          try {
-            await completeTour();
-            
-            // Refresh user data to update hasCompletedTour flag
-            await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-            await queryClient.invalidateQueries({ queryKey: ["/api/tour/status"] });
-          } catch (error) {
-            console.error("Error completing tour:", error);
-          }
-        }}
-        userRole={userRole}
-      />
-
-      {/* Interactive Demo Trigger - Always available for authenticated users */}
-      {currentIsAuthenticated && <DemoTrigger variant="floating" />}
     </div>
   );
 }
