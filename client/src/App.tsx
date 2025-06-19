@@ -28,6 +28,7 @@ import ChurchClaiming from "@/pages/church-claiming";
 import FreshAudioBible from "@/pages/FreshAudioBible";
 import AudioRoutines from "@/pages/AudioRoutines";
 import VideoLibrary from "@/pages/VideoLibrary";
+import ContactsPage from "@/pages/contacts";
 
 import { useState, useEffect } from "react";
 
@@ -111,9 +112,11 @@ function AppRouter() {
               <Route path="/prayer" component={Prayer} />
               <Route path="/prayer-wall" component={Prayer} />
               <Route path="/soap" component={SoapPage} />
+              <Route path="/soap-journal" component={SoapPage} />
               <Route path="/messages" component={Messages} />
               <Route path="/chat" component={Chat} />
               <Route path="/leaderboard" component={Leaderboard} />
+              <Route path="/contacts" component={ContactsPage} />
               {/* <Route path="/admin" component={EnhancedAdminPortal} /> */}
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
