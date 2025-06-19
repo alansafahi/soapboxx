@@ -7542,6 +7542,9 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(400).json({ message: 'Conversation ID is required' });
       }
 
+      // Ensure user is participant in conversation before sending message
+      await storage.ensureConversationParticipant(parseInt(conversationId), userId);
+
       // Create the message in database
       const newMessage = await storage.sendMessage({
         conversationId: parseInt(conversationId),
@@ -7570,59 +7573,28 @@ Please provide suggestions for the missing or incomplete sections.`
   });
 
   app.get('/api/messages/:conversationId', isAuthenticated, async (req: any, res) => {
-    const { conversationId } = req.params;
-    const userId = req.session.userId;
+    try {
+      const { conversationId } = req.params;
+      const userId = req.session.userId;
 
-    // Return sample messages for the conversation
-    const sampleMessages = [
-      {
-        id: 1,
-        conversationId: parseInt(conversationId),
-        senderId: '4771822',
-        content: 'Hey, how are you doing?',
-        messageType: 'text',
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-        isEdited: false,
-        sender: {
-          id: '4771822',
-          firstName: 'Alan',
-          lastName: 'Safahi',
-          profileImageUrl: null
-        }
-      },
-      {
-        id: 2,
-        conversationId: parseInt(conversationId),
-        senderId: userId,
-        content: 'Doing well, thanks for asking! How about you?',
-        messageType: 'text',
-        createdAt: new Date(Date.now() - 1800000).toISOString(),
-        isEdited: false,
-        sender: {
-          id: userId,
-          firstName: 'Message',
-          lastName: 'Tester',
-          profileImageUrl: null
-        }
-      },
-      {
-        id: 3,
-        conversationId: parseInt(conversationId),
-        senderId: '4771822',
-        content: 'Great! I wanted to check in and see if you need prayer for anything.',
-        messageType: 'text',
-        createdAt: new Date(Date.now() - 900000).toISOString(),
-        isEdited: false,
-        sender: {
-          id: '4771822',
-          firstName: 'Alan',
-          lastName: 'Safahi',
-          profileImageUrl: null
-        }
-      }
-    ];
+      console.log(`Fetching messages for conversation ${conversationId}, user ${userId}`);
 
-    res.json(sampleMessages);
+      // Ensure user is participant in conversation before retrieving messages
+      await storage.ensureConversationParticipant(parseInt(conversationId), userId);
+
+      // Get real messages from database
+      const messages = await storage.getConversationMessages(parseInt(conversationId), userId);
+      
+      console.log(`Retrieved ${messages.length} messages from database`);
+      
+      res.json(messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch messages',
+        error: error.message 
+      });
+    }
   });
 
   app.post('/api/messages', isAuthenticated, async (req: any, res) => {

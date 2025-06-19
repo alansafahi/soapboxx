@@ -401,6 +401,7 @@ export interface IStorage {
   getUserConversations(userId: string): Promise<any[]>;
   markConversationAsRead(conversationId: string, userId: string): Promise<void>;
   getUserContacts(userId: string): Promise<any[]>;
+  ensureConversationParticipant(conversationId: number, userId: string): Promise<void>;
   
   // Daily inspiration operations
   getDailyInspiration(userId: string): Promise<DailyInspiration | undefined>;
@@ -2543,6 +2544,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(conversations.id, message.conversationId));
 
     return newMessage;
+  }
+
+  async ensureConversationParticipant(conversationId: number, userId: string): Promise<void> {
+    // Check if user is already a participant
+    const existingParticipant = await db
+      .select({ id: conversationParticipants.id })
+      .from(conversationParticipants)
+      .where(
+        and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.userId, userId)
+        )
+      )
+      .limit(1);
+
+    // Add as participant if not already one
+    if (existingParticipant.length === 0) {
+      await db.insert(conversationParticipants).values({
+        conversationId,
+        userId,
+        isActive: true,
+        joinedAt: new Date()
+      });
+      console.log(`Added user ${userId} as participant in conversation ${conversationId}`);
+    }
   }
 
   async markMessagesAsRead(conversationId: number, userId: string): Promise<void> {
