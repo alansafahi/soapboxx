@@ -238,7 +238,7 @@ export default function UserPreferences() {
               <span>Offline</span>
             </TabsTrigger>
             <TabsTrigger value="sync" className="flex items-center space-x-2">
-              <Sync className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
               <span>Sync</span>
             </TabsTrigger>
             <TabsTrigger value="personalization" className="flex items-center space-x-2">
