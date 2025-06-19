@@ -13,27 +13,17 @@ import Landing from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import Home from "@/pages/home";
 import BiblePage from "@/pages/bible";
-import BibleReader from "@/components/BibleReader";
 import Community from "@/pages/community";
 import Churches from "@/pages/churches";
 import Events from "@/pages/events";
 import Prayer from "@/pages/prayer";
 import SoapPage from "@/pages/soap";
 import Messages from "@/pages/messages";
-import Chat from "@/components/Chat";
+import Chat from "@/pages/chat";
 import Leaderboard from "@/pages/leaderboard";
 import EnhancedAdminPortal from "@/pages/admin";
-import AdminAnalytics from "@/pages/admin-analytics";
-import RoleManagement from "@/pages/role-management";
 import Profile from "@/pages/profile";
 import SettingsPage from "@/pages/settings";
-import DonationDemo from "@/pages/donation-demo";
-import DonationAnalytics from "@/pages/donation-analytics";
-import AudioBible from "@/pages/audio-bible";
-import AudioRoutines from "@/pages/audio-routines";
-import SermonStudio from "@/pages/sermon-studio";
-import ContentDistribution from "@/pages/content-distribution";
-import EngagementAnalytics from "@/pages/engagement-analytics";
 import ChurchClaiming from "@/pages/church-claiming";
 
 import { useState, useEffect } from "react";
@@ -78,7 +68,7 @@ function AppRouter() {
   }, [location]);
 
   // Tour system management
-  const { shouldShowTour, completeTour, shouldShowPersonalizedTour } = useRoleBasedTour(currentUser);
+  const { shouldShowTour, completeTour } = useRoleBasedTour();
 
   // User role detection from authenticated user
   const detectedUserRole = currentUser?.role || '';
@@ -113,7 +103,6 @@ function AppRouter() {
             <>
               <Route path="/" component={() => <Home referralCode={referralCode} />} />
               <Route path="/bible" component={BiblePage} />
-              <Route path="/bible/read" component={BibleReader} />
               <Route path="/community" component={Community} />
               <Route path="/churches" component={Churches} />
               <Route path="/church-claiming" component={ChurchClaiming} />
@@ -125,17 +114,8 @@ function AppRouter() {
               <Route path="/chat" component={Chat} />
               <Route path="/leaderboard" component={Leaderboard} />
               <Route path="/admin" component={EnhancedAdminPortal} />
-              <Route path="/admin/analytics" component={AdminAnalytics} />
-              <Route path="/role-management" component={RoleManagement} />
               <Route path="/profile" component={Profile} />
               <Route path="/settings" component={SettingsPage} />
-              <Route path="/donation-demo" component={DonationDemo} />
-              <Route path="/donation-analytics" component={DonationAnalytics} />
-              <Route path="/audio-bible" component={AudioBible} />
-              <Route path="/audio-routines" component={AudioRoutines} />
-              <Route path="/sermon-studio" component={SermonStudio} />
-              <Route path="/content-distribution" component={ContentDistribution} />
-              <Route path="/engagement-analytics" component={EngagementAnalytics} />
               <Route path="*" component={NotFound} />
             </>
           )}
