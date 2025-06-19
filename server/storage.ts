@@ -235,6 +235,12 @@ import {
   type InsertVideoContentDB,
   type Notification,
   type InsertNotification,
+  contacts,
+  invitations,
+  type Contact,
+  type InsertContact,
+  type Invitation,
+  type InsertInvitation,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
@@ -4581,6 +4587,74 @@ export class DatabaseStorage implements IStorage {
       hoursThisMonth: hoursThisMonth[0]?.total || 0,
       completionRate: 85, // Calculate based on actual data
     };
+  }
+
+  // Contacts and Invitations Methods
+  async getUserContacts(userId: string): Promise<Contact[]> {
+    return await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.userId, userId))
+      .orderBy(desc(contacts.createdAt));
+  }
+
+  async addContact(contact: InsertContact): Promise<Contact> {
+    const [newContact] = await db
+      .insert(contacts)
+      .values(contact)
+      .returning();
+    return newContact;
+  }
+
+  async updateContactStatus(contactId: number, status: string): Promise<Contact> {
+    const [updatedContact] = await db
+      .update(contacts)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(contacts.id, contactId))
+      .returning();
+    return updatedContact;
+  }
+
+  async removeContact(contactId: number): Promise<void> {
+    await db
+      .delete(contacts)
+      .where(eq(contacts.id, contactId));
+  }
+
+  async createInvitation(invitation: InsertInvitation): Promise<Invitation> {
+    const [newInvitation] = await db
+      .insert(invitations)
+      .values(invitation)
+      .returning();
+    return newInvitation;
+  }
+
+  async getUserInvitations(userId: string): Promise<Invitation[]> {
+    return await db
+      .select()
+      .from(invitations)
+      .where(eq(invitations.inviterId, userId))
+      .orderBy(desc(invitations.createdAt));
+  }
+
+  async updateInvitationStatus(inviteCode: string, status: string): Promise<Invitation> {
+    const [updatedInvitation] = await db
+      .update(invitations)
+      .set({ status, acceptedAt: status === 'accepted' ? new Date() : null })
+      .where(eq(invitations.inviteCode, inviteCode))
+      .returning();
+    return updatedInvitation;
+  }
+
+  async getPendingInvitations(userId: string): Promise<Invitation[]> {
+    return await db
+      .select()
+      .from(invitations)
+      .where(and(
+        eq(invitations.inviterId, userId),
+        eq(invitations.status, 'pending')
+      ))
+      .orderBy(desc(invitations.createdAt));
   }
 
   // Messaging System Methods

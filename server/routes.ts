@@ -2100,6 +2100,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contacts and Invitations API endpoints
+  app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const contacts = await storage.getUserContacts(userId);
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      res.status(500).json({ message: 'Failed to fetch contacts' });
+    }
+  });
+
+  app.post('/api/contacts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { email, phone, name, contactType = 'friend' } = req.body;
+      
+      const contact = await storage.addContact({
+        userId,
+        email,
+        phone,
+        name,
+        contactType,
+        status: 'connected'
+      });
+
+      res.json(contact);
+    } catch (error) {
+      console.error('Error adding contact:', error);
+      res.status(500).json({ message: 'Failed to add contact' });
+    }
+  });
+
+  app.put('/api/contacts/:id/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      const contact = await storage.updateContactStatus(parseInt(id), status);
+      res.json(contact);
+    } catch (error) {
+      console.error('Error updating contact status:', error);
+      res.status(500).json({ message: 'Failed to update contact status' });
+    }
+  });
+
+  app.delete('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { id } = req.params;
+      await storage.removeContact(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error removing contact:', error);
+      res.status(500).json({ message: 'Failed to remove contact' });
+    }
+  });
+
+  app.post('/api/invitations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { email, message } = req.body;
+      const inviteCode = crypto.randomBytes(16).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days expiry
+
+      const invitation = await storage.createInvitation({
+        inviterId: userId,
+        email,
+        inviteCode,
+        message,
+        status: 'pending',
+        expiresAt
+      });
+
+      res.json(invitation);
+    } catch (error) {
+      console.error('Error creating invitation:', error);
+      res.status(500).json({ message: 'Failed to create invitation' });
+    }
+  });
+
+  app.get('/api/invitations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const invitations = await storage.getUserInvitations(userId);
+      res.json(invitations);
+    } catch (error) {
+      console.error('Error fetching invitations:', error);
+      res.status(500).json({ message: 'Failed to fetch invitations' });
+    }
+  });
+
+  app.get('/api/invitations/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const pendingInvitations = await storage.getPendingInvitations(userId);
+      res.json(pendingInvitations);
+    } catch (error) {
+      console.error('Error fetching pending invitations:', error);
+      res.status(500).json({ message: 'Failed to fetch pending invitations' });
+    }
+  });
+
+  app.put('/api/invitations/:code/status', async (req: any, res) => {
+    try {
+      const { code } = req.params;
+      const { status } = req.body;
+      
+      const invitation = await storage.updateInvitationStatus(code, status);
+      res.json(invitation);
+    } catch (error) {
+      console.error('Error updating invitation status:', error);
+      res.status(500).json({ message: 'Failed to update invitation status' });
+    }
+  });
+
   // Bible API endpoints
   app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
     try {
