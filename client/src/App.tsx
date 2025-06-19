@@ -55,11 +55,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
 
 function AppRouter() {
-  const { user: authUser, isAuthenticated, isLoading, refetch } = useAuth();
-  const directAuth = useDirectAuth();
+  // Direct authentication state management bypassing problematic useAuth hook
+  const [authState, setAuthState] = useState({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true
+  });
   const [location] = useLocation();
   
-  // Simplified authentication check on mount
+  // Direct authentication check replacing problematic useAuth hook
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -70,23 +74,37 @@ function AppRouter() {
         
         if (response.ok) {
           const userData = await response.json();
-          // Force re-render by updating location
-          if (!isAuthenticated) {
-            window.location.reload();
-          }
+          console.log('✅ Direct auth success:', userData.email);
+          setAuthState({
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false
+          });
+        } else {
+          console.log('❌ Direct auth failed:', response.status);
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
         }
       } catch (error) {
-        console.log('Auth check failed:', error);
+        console.log('💥 Direct auth error:', error);
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
       }
     };
     
     checkAuthStatus();
   }, []);
 
-  // Use original auth state for consistency
-  const currentUser = authUser;
-  const currentIsAuthenticated = isAuthenticated;
-  const currentIsLoading = isLoading;
+  // Use direct auth state
+  const currentUser = authState.user;
+  const currentIsAuthenticated = authState.isAuthenticated;
+  const currentIsLoading = authState.isLoading;
   
   // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);
@@ -259,7 +277,7 @@ function AppRouter() {
       />
 
       {/* Interactive Demo Trigger - Always available for authenticated users */}
-      {isAuthenticated && <DemoTrigger variant="floating" />}
+      {currentIsAuthenticated && <DemoTrigger variant="floating" />}
     </div>
   );
 }
