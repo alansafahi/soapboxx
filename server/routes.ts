@@ -7557,9 +7557,14 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/chat/send', isAuthenticated, async (req: any, res) => {
     try {
       const { conversationId, content } = req.body;
-      const userId = req.user?.claims?.sub || req.session?.userId;
+      const userId = req.session?.userId;
       
       console.log(`Chat send endpoint hit: conversation ${conversationId}, content: ${content}, user: ${userId}`);
+      
+      if (!userId) {
+        console.log('No userId found in session');
+        return res.status(401).json({ message: 'Authentication required' });
+      }
       
       if (!content?.trim()) {
         return res.status(400).json({ message: 'Message content is required' });

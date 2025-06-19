@@ -124,9 +124,10 @@ export default function MessagesPage() {
       });
     },
     onError: (error) => {
+      console.error("Message send error:", error);
       toast({
         title: "Failed to send message",
-        description: "Please try again.",
+        description: error.message || "Please try again.",
         variant: "destructive",
       });
     },
