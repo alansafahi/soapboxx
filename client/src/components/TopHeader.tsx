@@ -156,74 +156,125 @@ export default function TopHeader() {
   };
 
   return (
-    <header className="flex items-center justify-end gap-2 p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-      {/* Alert/Notifications */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
-          <div className="flex items-center justify-between p-3 border-b">
-            <h3 className="font-semibold">Notifications</h3>
-            {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => markAllAsReadMutation.mutate()}
-                disabled={markAllAsReadMutation.isPending}
-              >
-                Mark all read
-              </Button>
-            )}
-          </div>
-          
-          {notifications.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-              No notifications yet
-            </div>
-          ) : (
-            <div className="max-h-64 overflow-y-auto">
-              {notifications.slice(0, 10).map((notification) => (
-                <DropdownMenuItem
-                  key={notification.id}
-                  className={`p-3 cursor-pointer ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
-                  onClick={() => {
-                    if (!notification.isRead) {
-                      markAsReadMutation.mutate(notification.id);
-                    }
-                    if (notification.actionUrl) {
-                      window.location.href = notification.actionUrl;
-                    }
-                  }}
+    <header className="flex items-center justify-between gap-2 p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      {/* Mobile Navigation Menu */}
+      <div className="md:hidden">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <Link href="/">
+              <DropdownMenuItem className="cursor-pointer">
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/messages">
+              <DropdownMenuItem className="cursor-pointer">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Messages
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/community">
+              <DropdownMenuItem className="cursor-pointer">
+                <Users className="w-4 h-4 mr-2" />
+                Community
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/prayer">
+              <DropdownMenuItem className="cursor-pointer">
+                <Heart className="w-4 h-4 mr-2" />
+                Prayer Wall
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/bible">
+              <DropdownMenuItem className="cursor-pointer">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Bible
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/events">
+              <DropdownMenuItem className="cursor-pointer">
+                <Calendar className="w-4 h-4 mr-2" />
+                Events
+              </DropdownMenuItem>
+            </Link>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Right side navigation */}
+      <div className="flex items-center gap-2">
+        {/* Alert/Notifications */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between p-3 border-b">
+              <h3 className="font-semibold">Notifications</h3>
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => markAllAsReadMutation.mutate()}
+                  disabled={markAllAsReadMutation.isPending}
                 >
-                  <div className="flex items-start gap-3">
-                    {getNotificationIcon(notification.type)}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{notification.title}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {new Date(notification.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    {!notification.isRead && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
-                    )}
-                  </div>
-                </DropdownMenuItem>
-              ))}
+                  Mark all read
+                </Button>
+              )}
             </div>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            
+            {notifications.length === 0 ? (
+              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                No notifications yet
+              </div>
+            ) : (
+              <div className="max-h-64 overflow-y-auto">
+                {notifications.slice(0, 10).map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className={`p-3 cursor-pointer ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                    onClick={() => {
+                      if (!notification.isRead) {
+                        markAsReadMutation.mutate(notification.id);
+                      }
+                      if (notification.actionUrl) {
+                        window.location.href = notification.actionUrl;
+                      }
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      {getNotificationIcon(notification.type)}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{notification.title}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          {new Date(notification.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      {!notification.isRead && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
       {/* Theme Toggle */}
       <Button
@@ -281,6 +332,7 @@ export default function TopHeader() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
     </header>
   );
 }
