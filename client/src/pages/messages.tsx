@@ -109,16 +109,12 @@ export default function MessagesPage() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { conversationId: number; content: string }) => {
-      console.log("Sending message:", data);
-      const response = await apiRequest('/api/chat/send', {
+      return apiRequest('/api/chat/send', {
         method: 'POST',
         body: data,
       });
-      console.log("Message response:", response);
-      return response;
     },
     onSuccess: (data) => {
-      console.log("✅ Message sent successfully:", data);
       setNewMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
       queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
@@ -128,12 +124,7 @@ export default function MessagesPage() {
       });
     },
     onError: (error) => {
-      console.error("❌ Message send error:", error);
-      console.error("Error details:", {
-        message: error.message,
-        stack: error.stack,
-        cause: error.cause
-      });
+      console.error("Message send error:", error);
       toast({
         title: "Failed to send message",
         description: error.message || "Please try again.",
