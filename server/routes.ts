@@ -7475,18 +7475,25 @@ Please provide suggestions for the missing or incomplete sections.`
     try {
       const userId = req.session.userId;
       
-      // Get conversations for the user with participant details and last message
-      const userConversations = await db
+      // Get conversation IDs for the user
+      const userParticipations = await db
         .select({
-          conversationId: conversations.id,
-          type: conversations.type,
-          name: conversations.name,
-          createdAt: conversations.createdAt,
-          updatedAt: conversations.updatedAt
+          conversationId: conversationParticipants.conversationId
         })
-        .from(conversations)
-        .innerJoin(conversationParticipants, eq(conversationParticipants.conversationId, conversations.id))
+        .from(conversationParticipants)
         .where(eq(conversationParticipants.userId, userId));
+
+      const conversationIds = userParticipations.map(p => p.conversationId);
+      
+      if (conversationIds.length === 0) {
+        return res.json([]);
+      }
+
+      // Get conversation details
+      const userConversations = await db
+        .select()
+        .from(conversations)
+        .where(inArray(conversations.id, conversationIds));
 
       // Transform to display format with participant details
       const conversationDisplays = await Promise.all(
@@ -7502,7 +7509,7 @@ Please provide suggestions for the missing or incomplete sections.`
             .from(conversationParticipants)
             .innerJoin(users, eq(users.id, conversationParticipants.userId))
             .where(and(
-              eq(conversationParticipants.conversationId, conv.conversationId),
+              eq(conversationParticipants.conversationId, conv.id),
               ne(conversationParticipants.userId, userId)
             ));
 
@@ -7513,7 +7520,7 @@ Please provide suggestions for the missing or incomplete sections.`
               createdAt: messages.createdAt
             })
             .from(messages)
-            .where(eq(messages.conversationId, conv.conversationId))
+            .where(eq(messages.conversationId, conv.id))
             .orderBy(desc(messages.createdAt))
             .limit(1);
 
@@ -7522,14 +7529,14 @@ Please provide suggestions for the missing or incomplete sections.`
             .select({ count: sql<number>`count(*)` })
             .from(messages)
             .where(and(
-              eq(messages.conversationId, conv.conversationId),
+              eq(messages.conversationId, conv.id),
               ne(messages.senderId, userId),
               eq(messages.isRead, false)
             ));
 
           const otherParticipant = participants[0];
           return {
-            id: conv.conversationId,
+            id: conv.id,
             participantId: otherParticipant?.id || '',
             participantName: otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : 'Unknown',
             participantAvatar: otherParticipant?.profileImageUrl,
