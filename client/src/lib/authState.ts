@@ -1,5 +1,6 @@
 // Direct authentication state management to bypass React Query caching issues
 import { User } from "@shared/schema";
+import { sessionManager } from "./sessionManager";
 
 interface AuthState {
   user: User | null;
@@ -35,10 +36,12 @@ export const authManager = {
     
     try {
       const response = await fetch('/api/auth/user', {
+        method: 'GET',
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Pragma': 'no-cache',
+          'Accept': 'application/json'
         }
       });
       
@@ -49,17 +52,20 @@ export const authManager = {
           isAuthenticated: true, 
           isLoading: false 
         });
+        sessionManager.setAuthState(true, user.id);
         return user;
       } else {
+        console.log('Auth check failed with status:', response.status);
         this.setState({ 
           user: null, 
           isAuthenticated: false, 
           isLoading: false 
         });
+        sessionManager.clearAuthState();
         return null;
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('Auth check network error:', error);
       this.setState({ 
         user: null, 
         isAuthenticated: false, 
@@ -91,6 +97,7 @@ export const authManager = {
           isAuthenticated: true, 
           isLoading: false 
         });
+        sessionManager.setAuthState(true, user.id);
         return user;
       } else {
         this.setState({ 
@@ -98,6 +105,7 @@ export const authManager = {
           isAuthenticated: false, 
           isLoading: false 
         });
+        sessionManager.clearAuthState();
         return null;
       }
     } catch (error) {

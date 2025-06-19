@@ -59,16 +59,19 @@ function AppRouter() {
   const directAuth = useDirectAuth();
   const [location] = useLocation();
   
-  // Use direct authentication instead of React Query
+  // Force authentication check with delay to ensure session cookies are available
   useEffect(() => {
-    // Check authentication on app load using direct system
-    directAuth.checkAuth();
+    // Slight delay to ensure cookies are processed
+    const timer = setTimeout(() => {
+      directAuth.checkAuth();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Use direct auth state for rendering decisions
+  // Use direct auth state for rendering decisions with fallback
   const currentUser = directAuth.user || user;
-  const currentIsAuthenticated = directAuth.isAuthenticated || isAuthenticated;
-  const currentIsLoading = directAuth.isLoading || isLoading;
+  const currentIsAuthenticated = directAuth.isAuthenticated;
+  const currentIsLoading = directAuth.isLoading;
   
   // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);

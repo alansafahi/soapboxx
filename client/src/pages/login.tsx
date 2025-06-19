@@ -60,16 +60,35 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Use direct authentication to bypass React Query caching issues
-        const user = await directAuth.login(formData.email, formData.password);
-        if (user) {
-          // Clear React Query cache and force redirect
-          queryClient.clear();
-          window.location.href = '/';
-        } else {
+        // Direct API call with proper session handling
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include', // Critical for session cookies
+            body: JSON.stringify({
+              email: formData.email,
+              password: formData.password
+            })
+          });
+
+          if (response.ok) {
+            const user = await response.json();
+            // Force complete page reload to ensure session is recognized
+            window.location.replace('/');
+          } else {
+            toast({
+              title: "Login Failed",
+              description: "Invalid credentials. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
           toast({
-            title: "Login Failed",
-            description: "Invalid credentials. Please try again.",
+            title: "Login Error",
+            description: "Network error. Please try again.",
             variant: "destructive",
           });
         }

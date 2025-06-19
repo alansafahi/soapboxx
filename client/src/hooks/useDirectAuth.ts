@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { authManager } from '@/lib/authState';
+import { sessionManager } from '@/lib/sessionManager';
 import { User } from '@shared/schema';
 
 export function useDirectAuth() {
