@@ -29,19 +29,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface Message {
-  id: string;
+  id: number;
+  conversationId: number;
   senderId: string;
-  receiverId: string;
   content: string;
+  messageType: string;
   createdAt: string;
-  isRead: boolean;
+  isEdited: boolean;
   sender: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    profileImageUrl?: string;
-  };
-  receiver: {
     id: string;
     firstName: string;
     lastName: string;
@@ -50,7 +45,21 @@ interface Message {
 }
 
 interface Conversation {
-  id: string;
+  id: number;
+  type: string;
+  name?: string;
+  participants: Array<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    profileImageUrl?: string;
+  }>;
+  lastMessage?: Message;
+  unreadCount: number;
+}
+
+interface ConversationDisplay {
+  id: number;
   participantId: string;
   participantName: string;
   participantAvatar?: string;
@@ -73,7 +82,7 @@ interface Contact {
 export default function MessagesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [showNewMessageDialog, setShowNewMessageDialog] = useState(false);

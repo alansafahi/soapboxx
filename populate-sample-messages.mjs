@@ -35,17 +35,27 @@ async function populateMessages() {
 
     console.log('Creating conversations...');
     const conversations = [
-      { id: 1, participant1: 'msg_user_1', participant2: 'msg_user_2' },
-      { id: 2, participant1: 'msg_user_1', participant2: 'msg_user_3' },
-      { id: 3, participant1: 'msg_user_2', participant2: 'msg_user_3' }
+      { id: 1, createdBy: 'msg_user_1', participants: ['msg_user_1', 'msg_user_2'] },
+      { id: 2, createdBy: 'msg_user_1', participants: ['msg_user_1', 'msg_user_3'] },
+      { id: 3, createdBy: 'msg_user_2', participants: ['msg_user_2', 'msg_user_3'] }
     ];
 
     for (const conv of conversations) {
+      // Create conversation
       await client.query(`
-        INSERT INTO conversations (id, participant1_id, participant2_id, conversation_type, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, NOW(), NOW())
+        INSERT INTO conversations (id, type, created_by, created_at, updated_at)
+        VALUES ($1, $2, $3, NOW(), NOW())
         ON CONFLICT (id) DO NOTHING
-      `, [conv.id, conv.participant1, conv.participant2, 'direct']);
+      `, [conv.id, 'direct', conv.createdBy]);
+
+      // Add participants
+      for (const userId of conv.participants) {
+        await client.query(`
+          INSERT INTO conversation_participants (conversation_id, user_id, role, joined_at)
+          VALUES ($1, $2, $3, NOW())
+          ON CONFLICT DO NOTHING
+        `, [conv.id, userId, 'member']);
+      }
     }
 
     // Create sample messages between users
