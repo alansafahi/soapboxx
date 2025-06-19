@@ -7470,6 +7470,237 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Messages API endpoints
+  app.get('/api/messages/conversations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      // Get conversations for the user with participant details and last message
+      const userConversations = await db
+        .select({
+          conversationId: conversations.id,
+          type: conversations.type,
+          name: conversations.name,
+          createdAt: conversations.createdAt,
+          updatedAt: conversations.updatedAt
+        })
+        .from(conversations)
+        .innerJoin(conversationParticipants, eq(conversationParticipants.conversationId, conversations.id))
+        .where(eq(conversationParticipants.userId, userId));
+
+      // Transform to display format with participant details
+      const conversationDisplays = await Promise.all(
+        userConversations.map(async (conv) => {
+          // Get other participants
+          const participants = await db
+            .select({
+              id: users.id,
+              firstName: users.firstName,
+              lastName: users.lastName,
+              profileImageUrl: users.profileImageUrl
+            })
+            .from(conversationParticipants)
+            .innerJoin(users, eq(users.id, conversationParticipants.userId))
+            .where(and(
+              eq(conversationParticipants.conversationId, conv.conversationId),
+              ne(conversationParticipants.userId, userId)
+            ));
+
+          // Get last message
+          const lastMessage = await db
+            .select({
+              content: messages.content,
+              createdAt: messages.createdAt
+            })
+            .from(messages)
+            .where(eq(messages.conversationId, conv.conversationId))
+            .orderBy(desc(messages.createdAt))
+            .limit(1);
+
+          // Get unread count
+          const unreadCount = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(messages)
+            .where(and(
+              eq(messages.conversationId, conv.conversationId),
+              ne(messages.senderId, userId),
+              eq(messages.isRead, false)
+            ));
+
+          const otherParticipant = participants[0];
+          return {
+            id: conv.conversationId,
+            participantId: otherParticipant?.id || '',
+            participantName: otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : 'Unknown',
+            participantAvatar: otherParticipant?.profileImageUrl,
+            lastMessage: lastMessage[0]?.content || 'No messages yet',
+            lastMessageTime: lastMessage[0]?.createdAt?.toISOString() || conv.createdAt?.toISOString() || '',
+            unreadCount: unreadCount[0]?.count || 0,
+            isOnline: false
+          };
+        })
+      );
+
+      res.json(conversationDisplays);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      res.status(500).json({ message: 'Failed to fetch conversations' });
+    }
+  });
+
+  app.get('/api/messages/:conversationId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { conversationId } = req.params;
+      const userId = req.session.userId;
+
+      // Verify user is participant in conversation
+      const participation = await db
+        .select()
+        .from(conversationParticipants)
+        .where(and(
+          eq(conversationParticipants.conversationId, parseInt(conversationId)),
+          eq(conversationParticipants.userId, userId)
+        ))
+        .limit(1);
+
+      if (!participation.length) {
+        return res.status(403).json({ message: 'Access denied to this conversation' });
+      }
+
+      // Get messages with sender details
+      const conversationMessages = await db
+        .select({
+          id: messages.id,
+          conversationId: messages.conversationId,
+          senderId: messages.senderId,
+          content: messages.content,
+          messageType: messages.messageType,
+          createdAt: messages.createdAt,
+          isEdited: messages.isEdited,
+          senderFirstName: users.firstName,
+          senderLastName: users.lastName,
+          senderProfileImage: users.profileImageUrl
+        })
+        .from(messages)
+        .innerJoin(users, eq(users.id, messages.senderId))
+        .where(eq(messages.conversationId, parseInt(conversationId)))
+        .orderBy(asc(messages.createdAt));
+
+      // Transform to expected format
+      const formattedMessages = conversationMessages.map(msg => ({
+        id: msg.id,
+        conversationId: msg.conversationId,
+        senderId: msg.senderId,
+        content: msg.content,
+        messageType: msg.messageType,
+        createdAt: msg.createdAt?.toISOString() || '',
+        isEdited: msg.isEdited,
+        sender: {
+          id: msg.senderId,
+          firstName: msg.senderFirstName || '',
+          lastName: msg.senderLastName || '',
+          profileImageUrl: msg.senderProfileImage
+        }
+      }));
+
+      // Mark messages as read
+      await db
+        .update(messages)
+        .set({ isRead: true })
+        .where(and(
+          eq(messages.conversationId, parseInt(conversationId)),
+          ne(messages.senderId, userId),
+          eq(messages.isRead, false)
+        ));
+
+      res.json(formattedMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ message: 'Failed to fetch messages' });
+    }
+  });
+
+  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const { conversationId, content } = req.body;
+      const userId = req.session.userId;
+
+      // Verify user is participant in conversation
+      const participation = await db
+        .select()
+        .from(conversationParticipants)
+        .where(and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.userId, userId)
+        ))
+        .limit(1);
+
+      if (!participation.length) {
+        return res.status(403).json({ message: 'Access denied to this conversation' });
+      }
+
+      // Create new message
+      const [newMessage] = await db
+        .insert(messages)
+        .values({
+          conversationId,
+          senderId: userId,
+          content,
+          messageType: 'text',
+          isRead: false,
+          isEdited: false,
+          createdAt: new Date()
+        })
+        .returning();
+
+      // Update conversation timestamp
+      await db
+        .update(conversations)
+        .set({ updatedAt: new Date() })
+        .where(eq(conversations.id, conversationId));
+
+      res.json({ 
+        success: true, 
+        message: 'Message sent successfully',
+        messageId: newMessage.id 
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ message: 'Failed to send message' });
+    }
+  });
+
+  app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      // Get church members for contacts list
+      const contacts = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          role: users.role
+        })
+        .from(users)
+        .where(and(
+          ne(users.id, userId),
+          isNotNull(users.firstName)
+        ))
+        .limit(50);
+
+      res.json(contacts.map(contact => ({
+        ...contact,
+        churchName: 'SoapBox Community',
+        isOnline: Math.random() > 0.5 // Random online status for demo
+      })));
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      res.status(500).json({ message: 'Failed to fetch contacts' });
+    }
+  });
+
   // Test endpoint for donation receipt functionality
   app.get('/api/donations/:donationId/receipt-info', isAuthenticated, async (req: any, res) => {
     try {
