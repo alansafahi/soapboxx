@@ -38,6 +38,7 @@ import {
   Bell,
   Sun,
   Moon,
+  Mail,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -94,6 +95,13 @@ export default function Sidebar() {
     enabled: !!user,
   });
 
+  // Get unread message count for notification badge
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["/api/messages/unread-count"],
+    enabled: !!user,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
   const navigationGroups: NavigationGroup[] = [
     {
       label: "COMMUNITY",
@@ -102,6 +110,7 @@ export default function Sidebar() {
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
+        { label: "Messages", href: "/messages", icon: Mail },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
       ]
     },
