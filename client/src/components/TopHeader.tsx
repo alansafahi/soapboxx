@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,6 +39,12 @@ export default function TopHeader() {
   const { toast } = useToast();
   
   const typedUser = user as User | null;
+
+  // Get user role data for permission checking
+  const { data: userRole } = useQuery({
+    queryKey: ["/api/auth/user-role"],
+    enabled: !!user,
+  });
 
   // Local state for immediate UI feedback with notifications
   const [localNotifications, setLocalNotifications] = useState<Notification[]>([]);
@@ -165,7 +171,11 @@ export default function TopHeader() {
               <Menu className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuContent align="start" className="w-64 max-h-96 overflow-y-auto">
+            {/* Community Section */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Community
+            </div>
             <Link href="/">
               <DropdownMenuItem className="cursor-pointer">
                 <Home className="w-4 h-4 mr-2" />
@@ -190,16 +200,114 @@ export default function TopHeader() {
                 Prayer Wall
               </DropdownMenuItem>
             </Link>
-            <Link href="/bible">
-              <DropdownMenuItem className="cursor-pointer">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Bible
-              </DropdownMenuItem>
-            </Link>
             <Link href="/events">
               <DropdownMenuItem className="cursor-pointer">
                 <Calendar className="w-4 h-4 mr-2" />
                 Events
+              </DropdownMenuItem>
+            </Link>
+            
+            <DropdownMenuSeparator />
+            
+            {/* Spiritual Tools Section */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Spiritual Tools
+            </div>
+            <Link href="/bible">
+              <DropdownMenuItem className="cursor-pointer">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Today's Reading
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/audio-bible">
+              <DropdownMenuItem className="cursor-pointer">
+                <Play className="w-4 h-4 mr-2" />
+                Audio Bible
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/audio-routines">
+              <DropdownMenuItem className="cursor-pointer">
+                <Mic className="w-4 h-4 mr-2" />
+                Audio Routines
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/soap-journal">
+              <DropdownMenuItem className="cursor-pointer">
+                <BookOpen className="w-4 h-4 mr-2" />
+                S.O.A.P. Journal
+              </DropdownMenuItem>
+            </Link>
+            
+            <DropdownMenuSeparator />
+            
+            {/* Media Contents Section */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Media Contents
+            </div>
+            <Link href="/video-library">
+              <DropdownMenuItem className="cursor-pointer">
+                <Video className="w-4 h-4 mr-2" />
+                Video Library
+              </DropdownMenuItem>
+            </Link>
+            
+            {/* Admin Portal Section - Only show for admin users */}
+            {userRole && (userRole as any)?.roles && (
+              (userRole as any).roles.includes('admin') || 
+              (userRole as any).roles.includes('church-admin') || 
+              (userRole as any).roles.includes('system-admin') || 
+              (userRole as any).roles.includes('super-admin') || 
+              (userRole as any).roles.includes('pastor') || 
+              (userRole as any).roles.includes('lead-pastor')
+            ) && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Admin Portal
+                </div>
+                <Link href="/admin/dashboard">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Admin Dashboard
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/sermon-studio">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Sermon Studio
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/content-distribution">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Content Distribution
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/engagement-analytics">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Engagement Analytics
+                  </DropdownMenuItem>
+                </Link>
+              </>
+            )}
+            
+            <DropdownMenuSeparator />
+            
+            {/* Account Section */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Account
+            </div>
+            <Link href="/profile">
+              <DropdownMenuItem className="cursor-pointer">
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/settings">
+              <DropdownMenuItem className="cursor-pointer">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>
