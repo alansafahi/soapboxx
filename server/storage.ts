@@ -396,6 +396,12 @@ export interface IStorage {
   sendMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsRead(conversationId: number, userId: string): Promise<void>;
   
+  // Messaging system operations
+  getUnreadMessageCount(userId: string): Promise<number>;
+  getUserConversations(userId: string): Promise<any[]>;
+  markConversationAsRead(conversationId: string, userId: string): Promise<void>;
+  getUserContacts(userId: string): Promise<any[]>;
+  
   // Daily inspiration operations
   getDailyInspiration(userId: string): Promise<DailyInspiration | undefined>;
   getUserInspirationPreferences(userId: string): Promise<UserInspirationPreference | undefined>;
