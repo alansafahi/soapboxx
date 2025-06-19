@@ -7499,59 +7499,27 @@ Please provide suggestions for the missing or incomplete sections.`
     res.json(conversations);
   });
 
-  app.get('/api/chat/:conversationId', (req: any, res) => {
-    const { conversationId } = req.params;
-    console.log(`Chat messages endpoint hit for conversation ${conversationId}`);
-    
-    const sampleMessages = [
-      {
-        id: 1,
-        conversationId: parseInt(conversationId),
-        senderId: '4771822',
-        content: 'Hey, how are you doing?',
-        messageType: 'text',
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-        isEdited: false,
-        sender: {
-          id: '4771822',
-          firstName: 'Alan',
-          lastName: 'Safahi',
-          profileImageUrl: null
-        }
-      },
-      {
-        id: 2,
-        conversationId: parseInt(conversationId),
-        senderId: 'z43x41i89ct',
-        content: 'Doing well, thanks for asking! How about you?',
-        messageType: 'text',
-        createdAt: new Date(Date.now() - 1800000).toISOString(),
-        isEdited: false,
-        sender: {
-          id: 'z43x41i89ct',
-          firstName: 'Message',
-          lastName: 'Tester',
-          profileImageUrl: null
-        }
-      },
-      {
-        id: 3,
-        conversationId: parseInt(conversationId),
-        senderId: '4771822',
-        content: 'Great! I wanted to check in and see if you need prayer for anything.',
-        messageType: 'text',
-        createdAt: new Date(Date.now() - 900000).toISOString(),
-        isEdited: false,
-        sender: {
-          id: '4771822',
-          firstName: 'Alan',
-          lastName: 'Safahi',
-          profileImageUrl: null
-        }
+  app.get('/api/chat/:conversationId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { conversationId } = req.params;
+      const userId = req.session?.userId;
+      
+      console.log(`Chat messages endpoint hit for conversation ${conversationId}, user: ${userId}`);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
       }
-    ];
 
-    res.json(sampleMessages);
+      // Get messages from database for this conversation
+      const messages = await storage.getConversationMessages(parseInt(conversationId), userId);
+      
+      console.log(`Found ${messages.length} messages for conversation ${conversationId}`);
+      
+      res.json(messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ message: 'Failed to fetch messages' });
+    }
   });
 
   app.post('/api/chat/send', isAuthenticated, async (req: any, res) => {
