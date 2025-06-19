@@ -111,7 +111,7 @@ export default function MessagesPage() {
     mutationFn: async (data: { conversationId: number; content: string }) => {
       return apiRequest('/api/chat/send', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: data,
       });
     },
     onSuccess: () => {
@@ -168,6 +168,7 @@ export default function MessagesPage() {
 
   const handleSelectConversation = (conversationId: number) => {
     setSelectedConversation(conversationId);
+    setNewMessage(""); // Clear message input when switching conversations
   };
 
   const filteredConversations = conversations.filter((conv) =>
