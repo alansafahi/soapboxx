@@ -7554,15 +7554,46 @@ Please provide suggestions for the missing or incomplete sections.`
     res.json(sampleMessages);
   });
 
-  app.post('/api/chat/send', (req: any, res) => {
-    const { conversationId, content } = req.body;
-    console.log(`Chat send endpoint hit: conversation ${conversationId}, content: ${content}`);
-    
-    res.json({ 
-      success: true, 
-      message: 'Message sent successfully',
-      messageId: Math.floor(Math.random() * 10000) + 1000
-    });
+  app.post('/api/chat/send', isAuthenticated, async (req: any, res) => {
+    try {
+      const { conversationId, content } = req.body;
+      const userId = req.user?.claims?.sub || req.session?.userId;
+      
+      console.log(`Chat send endpoint hit: conversation ${conversationId}, content: ${content}, user: ${userId}`);
+      
+      if (!content?.trim()) {
+        return res.status(400).json({ message: 'Message content is required' });
+      }
+
+      if (!conversationId) {
+        return res.status(400).json({ message: 'Conversation ID is required' });
+      }
+
+      // Create the message in database
+      const newMessage = await storage.sendMessage({
+        conversationId: parseInt(conversationId),
+        senderId: userId,
+        content: content.trim(),
+        messageType: 'text',
+        createdAt: new Date(),
+        isEdited: false
+      });
+
+      console.log('Message sent successfully:', newMessage.id);
+      
+      res.json({ 
+        success: true, 
+        message: 'Message sent successfully',
+        messageId: newMessage.id,
+        data: newMessage
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ 
+        message: 'Failed to send message',
+        error: error.message 
+      });
+    }
   });
 
   app.get('/api/messages/:conversationId', isAuthenticated, async (req: any, res) => {
