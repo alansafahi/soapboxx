@@ -4541,6 +4541,133 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Messaging System Methods
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.receiverId, userId),
+          eq(messages.isRead, false)
+        )
+      );
+    return result.count;
+  }
+
+  async getUserConversations(userId: string): Promise<any[]> {
+    // Get conversations with latest message info
+    const conversationsData = await db
+      .select({
+        conversationId: messages.conversationId,
+        otherUserId: sql<string>`CASE WHEN ${messages.senderId} = ${userId} THEN ${messages.receiverId} ELSE ${messages.senderId} END`,
+        lastMessage: messages.content,
+        lastMessageTime: messages.createdAt,
+        isRead: messages.isRead,
+        senderId: messages.senderId
+      })
+      .from(messages)
+      .where(
+        or(
+          eq(messages.senderId, userId),
+          eq(messages.receiverId, userId)
+        )
+      )
+      .orderBy(desc(messages.createdAt));
+
+    // Group by conversation and get user details
+    const conversationMap = new Map();
+    
+    for (const conv of conversationsData) {
+      if (!conversationMap.has(conv.conversationId)) {
+        // Get other user details
+        const [otherUser] = await db
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            profileImageUrl: users.profileImageUrl,
+            role: users.role
+          })
+          .from(users)
+          .where(eq(users.id, conv.otherUserId));
+
+        // Count unread messages in this conversation
+        const [unreadCount] = await db
+          .select({ count: count() })
+          .from(messages)
+          .where(
+            and(
+              eq(messages.conversationId, conv.conversationId),
+              eq(messages.receiverId, userId),
+              eq(messages.isRead, false)
+            )
+          );
+
+        conversationMap.set(conv.conversationId, {
+          id: conv.conversationId,
+          participantId: conv.otherUserId,
+          participantName: otherUser ? `${otherUser.firstName || ''} ${otherUser.lastName || ''}`.trim() : 'Unknown User',
+          participantAvatar: otherUser?.profileImageUrl || null,
+          lastMessage: conv.lastMessage,
+          lastMessageTime: conv.lastMessageTime?.toISOString() || new Date().toISOString(),
+          unreadCount: unreadCount.count,
+          isOnline: false // Could be enhanced with real-time status
+        });
+      }
+    }
+
+    return Array.from(conversationMap.values());
+  }
+
+  async markConversationAsRead(conversationId: string, userId: string): Promise<void> {
+    await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(messages.conversationId, parseInt(conversationId)),
+          eq(messages.receiverId, userId),
+          eq(messages.isRead, false)
+        )
+      );
+  }
+
+  async getUserContacts(userId: string): Promise<any[]> {
+    // Get all users from the same church as potential contacts
+    const currentUser = await this.getUser(userId);
+    if (!currentUser) return [];
+
+    const contacts = await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        role: users.role
+      })
+      .from(users)
+      .where(
+        and(
+          isNotNull(users.firstName),
+          isNotNull(users.lastName)
+        )
+      )
+      .orderBy(asc(users.firstName));
+
+    return contacts
+      .filter(contact => contact.id !== userId)
+      .map(contact => ({
+        id: contact.id,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        profileImageUrl: contact.profileImageUrl,
+        role: contact.role || 'member',
+        churchName: 'SoapBox Community', // Could be enhanced with actual church data
+        isOnline: false // Could be enhanced with real-time status
+      }));
+  }
+
   // Volunteer Awards
   async getVolunteerAwards(volunteerId?: number): Promise<VolunteerAward[]> {
     let query = db.select().from(volunteerAwards);

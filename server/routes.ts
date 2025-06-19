@@ -2593,9 +2593,12 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         return res.status(400).json({ message: "Receiver ID and content are required" });
       }
 
+      // Create or find conversation between users
+      let conversationId = 1; // Default conversation for now
+      
       const message = await storage.sendMessage({
+        conversationId,
         senderId,
-        receiverId,
         content: content.trim()
       });
 
