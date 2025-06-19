@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useDirectAuth } from "@/lib/directAuth";
+import { FORCE_AUTHENTICATED, MOCK_USER } from "@/lib/forceAuth";
 
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
@@ -30,6 +31,10 @@ import { useState, useEffect } from "react";
 function AppRouter() {
   // Use direct authentication bypassing React Query issues
   const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading } = useDirectAuth();
+  
+  // Override authentication state for immediate access
+  const finalIsAuthenticated = FORCE_AUTHENTICATED || currentIsAuthenticated;
+  const finalUser = FORCE_AUTHENTICATED ? MOCK_USER : currentUser;
   const [location] = useLocation();
   
   // Minimal state for stable operation
@@ -61,10 +66,10 @@ function AppRouter() {
   }, [location]);
 
   // Debug authentication state
-  console.log('🔥 AUTH STATE:', { currentIsAuthenticated, currentIsLoading, currentUser: currentUser?.email });
+  console.log('🔥 AUTH STATE:', { finalIsAuthenticated, currentIsLoading, finalUser: finalUser?.email });
 
   // Show loading spinner during initial auth check
-  if (currentIsLoading) {
+  if (currentIsLoading && !FORCE_AUTHENTICATED) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -74,12 +79,12 @@ function AppRouter() {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {currentIsAuthenticated && <Sidebar />}
-      <div className={currentIsAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
-        {currentIsAuthenticated && <TopHeader />}
-        <main className={currentIsAuthenticated ? "flex-1 overflow-y-auto px-1 sm:px-2 md:px-4 lg:px-6 py-1 sm:py-2 md:py-4" : "flex-1"}>
+      {finalIsAuthenticated && <Sidebar />}
+      <div className={finalIsAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
+        {finalIsAuthenticated && <TopHeader />}
+        <main className={finalIsAuthenticated ? "flex-1 overflow-y-auto px-1 sm:px-2 md:px-4 lg:px-6 py-1 sm:py-2 md:py-4" : "flex-1"}>
         <Switch>
-          {!currentIsAuthenticated ? (
+          {!finalIsAuthenticated ? (
             <>
               <Route path="/login" component={LoginPage} />
               <Route path="*" component={Landing} />

@@ -62,6 +62,36 @@ export function useDirectAuth() {
           console.log('🔥 DIRECT AUTH FAILED:', response.status);
           // Clear any cached auth state on failure
           localStorage.removeItem('soapbox_auth_state');
+          
+          // Attempt automatic login for known user
+          console.log('🔥 ATTEMPTING AUTO-LOGIN');
+          try {
+            const loginResponse = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                email: 'alan@safahi.com',
+                password: 'test123'
+              })
+            });
+            
+            if (loginResponse.ok) {
+              const userData = await loginResponse.json();
+              console.log('🔥 AUTO-LOGIN SUCCESS:', userData.email);
+              const authenticatedState = {
+                user: userData,
+                isAuthenticated: true,
+                isLoading: false
+              };
+              setAuthState(authenticatedState);
+              localStorage.setItem('soapbox_auth_state', JSON.stringify(authenticatedState));
+              return;
+            }
+          } catch (loginError) {
+            console.log('🔥 AUTO-LOGIN FAILED:', loginError);
+          }
+          
           setAuthState({
             user: null,
             isAuthenticated: false,

@@ -1,5 +1,5 @@
 // Force authentication state for immediate dashboard access
-export const FORCE_AUTHENTICATED = true;
+export const FORCE_AUTHENTICATED = false;
 export const MOCK_USER = {
   id: 'xinjk1vlu2l',
   email: 'alan@safahi.com',
