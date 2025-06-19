@@ -59,7 +59,7 @@ interface NavigationGroup {
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS']));
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -254,7 +254,7 @@ export default function Sidebar() {
                   <Button
                     variant={isActive ? "default" : "ghost"}
                     size="icon"
-                    className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
+                    className={`relative w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
                       isActive 
                         ? 'bg-purple-600 text-white hover:bg-purple-700' 
                         : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
@@ -262,6 +262,11 @@ export default function Sidebar() {
                     title={item.label}
                   >
                     <Icon className="w-5 h-5" />
+                    {item.label === "Messages" && unreadCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 py-0 rounded-full min-w-[1rem] h-4 flex items-center justify-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </Badge>
+                    )}
                   </Button>
                 </Link>
               );

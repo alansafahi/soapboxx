@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight } from "lucide-react";
+import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, LogOut } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import soapboxLogo from "@/assets/soapbox-logo.jpeg";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
+  const { user, isAuthenticated } = useAuth();
   
   const handleStartJourney = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -21,6 +23,37 @@ export default function Landing() {
     
     // Navigate to login page using React Router
     setLocation('/login');
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Call backend logout endpoint to destroy session
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        // Clear any local storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Redirect to landing page
+        window.location.href = '/';
+      } else {
+        console.error('Logout failed:', await response.text());
+        // Force redirect even if logout call fails
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Force redirect even if there's an error
+      window.location.href = '/';
+    }
+  };
+
+  const handleDashboard = () => {
+    setLocation('/');
   };
 
   return (
