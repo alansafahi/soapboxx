@@ -59,19 +59,34 @@ function AppRouter() {
   const directAuth = useDirectAuth();
   const [location] = useLocation();
   
-  // Force authentication check with delay to ensure session cookies are available
+  // Simplified authentication check on mount
   useEffect(() => {
-    // Slight delay to ensure cookies are processed
-    const timer = setTimeout(() => {
-      directAuth.checkAuth();
-    }, 100);
-    return () => clearTimeout(timer);
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          // Force re-render by updating location
+          if (!isAuthenticated) {
+            window.location.reload();
+          }
+        }
+      } catch (error) {
+        console.log('Auth check failed:', error);
+      }
+    };
+    
+    checkAuthStatus();
   }, []);
 
-  // Use direct auth state for rendering decisions with fallback
-  const currentUser = directAuth.user || user;
-  const currentIsAuthenticated = directAuth.isAuthenticated;
-  const currentIsLoading = directAuth.isLoading;
+  // Use original auth state for consistency
+  const currentUser = user;
+  const currentIsAuthenticated = isAuthenticated;
+  const currentIsLoading = isLoading;
   
   // Minimal state for stable operation
   const [forceHideOnboarding, setForceHideOnboarding] = useState(false);

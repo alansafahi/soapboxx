@@ -25,14 +25,15 @@ export function getSession() {
   return session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
-    resave: true,
+    resave: false,
     saveUninitialized: false,
-    rolling: false, // Disable rolling sessions to prevent conflicts
+    rolling: false,
     cookie: {
       secure: false,
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript access for debugging
       maxAge: sessionTtl,
       sameSite: 'lax',
+      domain: undefined, // Ensure cookies work on localhost
     },
     name: 'connect.sid',
   });
@@ -180,14 +181,19 @@ export function setupAuth(app: Express): void {
   // Current user endpoint is handled in routes.ts with fresh database data
 }
 
-// Authentication middleware
+// Authentication middleware with enhanced debugging
 export function isAuthenticated(req: any, res: any, next: any) {
   const sessionUser = (req.session as any)?.user;
   const userId = (req.session as any)?.userId;
   
-
+  // Debug session state
+  console.log('Session ID:', req.sessionID);
+  console.log('Session data:', req.session);
+  console.log('Session user:', sessionUser);
+  console.log('User ID:', userId);
   
   if (!sessionUser || !userId) {
+    console.log('Authentication failed - no session user or userId');
     return res.status(401).json({ message: 'Unauthorized' });
   }
   

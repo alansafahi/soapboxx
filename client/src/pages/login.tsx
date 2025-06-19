@@ -60,14 +60,14 @@ export default function LoginPage() {
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       } else {
-        // Direct API call with proper session handling
+        // Direct browser authentication
         try {
           const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            credentials: 'include', // Critical for session cookies
+            credentials: 'include',
             body: JSON.stringify({
               email: formData.email,
               password: formData.password
@@ -75,12 +75,13 @@ export default function LoginPage() {
           });
 
           if (response.ok) {
-            const user = await response.json();
-            // Force complete page reload to ensure session is recognized
-            window.location.replace('/');
+            // Wait for session to be established then hard reload
+            setTimeout(() => {
+              window.location.replace('/');
+            }, 500);
           } else {
             toast({
-              title: "Login Failed",
+              title: "Login Failed", 
               description: "Invalid credentials. Please try again.",
               variant: "destructive",
             });
@@ -88,7 +89,7 @@ export default function LoginPage() {
         } catch (error) {
           toast({
             title: "Login Error",
-            description: "Network error. Please try again.",
+            description: "Network error. Please try again.", 
             variant: "destructive",
           });
         }
