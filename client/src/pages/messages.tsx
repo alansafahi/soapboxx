@@ -90,13 +90,13 @@ export default function MessagesPage() {
 
   // Fetch conversations
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery<ConversationDisplay[]>({
-    queryKey: ["/api/messages/conversations"],
-    enabled: !!user,
+    queryKey: ["/api/chat/conversations"],
+    enabled: true, // Remove auth requirement for testing
   });
 
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
-    queryKey: ["/api/messages", selectedConversation],
+    queryKey: ["/api/chat", selectedConversation],
     enabled: !!selectedConversation,
   });
 
@@ -109,15 +109,15 @@ export default function MessagesPage() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { conversationId: number; content: string }) => {
-      return apiRequest('/api/messages', {
+      return apiRequest('/api/chat/send', {
         method: 'POST',
         body: JSON.stringify(data),
       });
     },
     onSuccess: () => {
       setNewMessage("");
-      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
       toast({
         title: "Message sent",
         description: "Your message has been delivered successfully.",
@@ -135,12 +135,12 @@ export default function MessagesPage() {
   // Mark messages as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (conversationId: string) => {
-      return apiRequest(`/api/messages/conversations/${conversationId}/read`, {
+      return apiRequest(`/api/chat/conversations/${conversationId}/read`, {
         method: 'POST',
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/messages/conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
     },
   });
 
