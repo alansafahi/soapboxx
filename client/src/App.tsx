@@ -25,6 +25,9 @@ import Leaderboard from "@/pages/leaderboard";
 import Profile from "@/pages/profile";
 import SettingsPage from "@/pages/settings";
 import ChurchClaiming from "@/pages/church-claiming";
+import FreshAudioBible from "@/pages/FreshAudioBible";
+import AudioRoutines from "@/pages/AudioRoutines";
+import VideoLibrary from "@/pages/VideoLibrary";
 
 import { useState, useEffect } from "react";
 
@@ -97,7 +100,11 @@ function AppRouter() {
             <>
               <Route path="/" component={() => <Home referralCode={referralCode} />} />
               <Route path="/bible" component={BiblePage} />
+              <Route path="/audio-bible" component={FreshAudioBible} />
+              <Route path="/audio-routines" component={AudioRoutines} />
+              <Route path="/video-library" component={VideoLibrary} />
               <Route path="/community" component={Community} />
+              <Route path="/discussions" component={Community} />
               <Route path="/churches" component={Churches} />
               <Route path="/church-claiming" component={ChurchClaiming} />
               <Route path="/events" component={Events} />
