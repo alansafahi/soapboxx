@@ -364,7 +364,7 @@ export default function MessagesPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {(() => {
-                        const conversation = conversations.find((c: Conversation) => c.id === selectedConversation);
+                        const conversation = conversations.find(c => c.id === selectedConversation);
                         return conversation ? (
                           <>
                             <Avatar className="w-10 h-10">

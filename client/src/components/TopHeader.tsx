@@ -130,12 +130,28 @@ export default function TopHeader() {
 
   const handleLogout = async () => {
     try {
-      // Clear authentication and navigate to login
-      localStorage.removeItem('token');
-      localStorage.removeItem('demo-user');
-      window.location.href = '/login';
+      // Call backend logout endpoint to destroy session
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        // Clear any local storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Redirect to login page
+        window.location.href = '/login';
+      } else {
+        console.error('Logout failed:', await response.text());
+        // Force redirect even if logout call fails
+        window.location.href = '/login';
+      }
     } catch (error) {
       console.error("Logout failed:", error);
+      // Force redirect even if there's an error
+      window.location.href = '/login';
     }
   };
 
