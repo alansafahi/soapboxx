@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 19, 2025: LANDING PAGE LOGOUT FUNCTIONALITY FIXED - Added proper logout capability for authenticated users visiting soapboxapp.org
+  - Enhanced landing page header to detect authentication state and show appropriate buttons
+  - Added "Welcome back, [Name]!" message, Dashboard button, and Logout button for authenticated users  
+  - Implemented proper logout flow calling `/api/auth/logout` endpoint to destroy sessions
+  - Landing page now handles both authenticated and unauthenticated user states correctly
+  - Users can now successfully log out from the production landing page
 - June 19, 2025: AUTHENTICATION SYSTEM COMPLETELY RESOLVED - Successfully fixed all login redirect issues with comprehensive session management solution
   - CRITICAL FIX: Implemented automatic login mechanism that establishes proper browser sessions when authentication fails
   - Extended session duration from 7 days to 30 days with rolling refresh to prevent expiration during activity

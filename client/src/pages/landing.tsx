@@ -71,11 +71,33 @@ export default function Landing() {
               <span className="text-2xl font-bold text-gray-900">SoapBox Super App</span>
             </div>
             
-            <Link href="/login">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                Sign In
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">
+                  Welcome back, {user?.firstName || user?.email}!
+                </span>
+                <Button 
+                  onClick={handleDashboard}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Dashboard
+                </Button>
+                <Button 
+                  onClick={handleLogout}
+                  variant="outline" 
+                  className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Link href="/login">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
