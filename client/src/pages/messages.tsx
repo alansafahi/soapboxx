@@ -118,7 +118,7 @@ export default function MessagesPage() {
       return response;
     },
     onSuccess: (data) => {
-      console.log("Message sent successfully:", data);
+      console.log("✅ Message sent successfully:", data);
       setNewMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
       queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
@@ -128,7 +128,12 @@ export default function MessagesPage() {
       });
     },
     onError: (error) => {
-      console.error("Message send error:", error);
+      console.error("❌ Message send error:", error);
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause
+      });
       toast({
         title: "Failed to send message",
         description: error.message || "Please try again.",
