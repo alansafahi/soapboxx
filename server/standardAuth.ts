@@ -40,6 +40,8 @@ export function getSession() {
 }
 
 export function setupAuth(app: Express): void {
+  // Trust proxy for proper session handling
+  app.set('trust proxy', 1);
   app.use(getSession());
 
   // User registration endpoint
@@ -133,31 +135,47 @@ export function setupAuth(app: Express): void {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      // Set up session
-      (req.session as any).userId = user.id;
-      (req.session as any).user = {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-      };
-
-      // Force session save before responding
-      req.session.save((err: any) => {
-        if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ message: 'Session creation failed' });
-        }
-        
-        res.json({
+      // Set up session with explicit data structure
+      const sessionData = {
+        userId: user.id,
+        user: {
           id: user.id,
           email: user.email,
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role,
+        }
+      };
+
+      // Assign session data
+      Object.assign(req.session, sessionData);
+
+      // Force session save and regenerate ID for security
+      req.session.regenerate((err: any) => {
+        if (err) {
+          console.error('Session regenerate error:', err);
+          return res.status(500).json({ message: 'Session creation failed' });
+        }
+
+        // Re-assign data after regeneration
+        Object.assign(req.session, sessionData);
+
+        req.session.save((saveErr: any) => {
+          if (saveErr) {
+            console.error('Session save error:', saveErr);
+            return res.status(500).json({ message: 'Session save failed' });
+          }
+          
+          console.log('Session created successfully:', req.sessionID);
+          res.json({
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+          });
         });
       });
     } catch (error) {
