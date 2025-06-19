@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
