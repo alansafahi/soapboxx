@@ -41,7 +41,8 @@ import {
   Moon,
   Mail,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  UserPlus
 } from "lucide-react";
 
 interface NavigationItem {
@@ -112,6 +113,7 @@ export default function Sidebar() {
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
         { label: "Messages", href: "/messages", icon: Mail },
+        { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
       ]
     },
