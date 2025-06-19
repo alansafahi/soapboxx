@@ -881,6 +881,41 @@ export const eventBookmarks = pgTable("event_bookmarks", {
   userEventUnique: unique().on(table.userId, table.eventId),
 }));
 
+// Contacts system for user connections and invitations
+export const contacts = pgTable("contacts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  contactUserId: varchar("contact_user_id").references(() => users.id),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  name: varchar("name", { length: 255 }),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, connected, blocked
+  contactType: varchar("contact_type", { length: 20 }).default("friend"), // friend, family, church_member
+  isActive: boolean("is_active").default(true),
+  lastContactedAt: timestamp("last_contacted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userContactUnique: unique().on(table.userId, table.contactUserId),
+}));
+
+// Invitations system for user referrals
+export const invitations = pgTable("invitations", {
+  id: serial("id").primaryKey(),
+  inviterId: varchar("inviter_id").notNull().references(() => users.id),
+  email: varchar("email", { length: 255 }).notNull(),
+  inviteCode: varchar("invite_code", { length: 50 }).notNull(),
+  message: text("message"),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, accepted, expired
+  sentAt: timestamp("sent_at").defaultNow(),
+  acceptedAt: timestamp("accepted_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  inviteCodeUnique: unique().on(table.inviteCode),
+  emailInviterUnique: unique().on(table.email, table.inviterId),
+}));
+
 // Check-ins table for spiritual and event attendance tracking
 export const checkIns = pgTable("check_ins", {
   id: serial("id").primaryKey(),
@@ -1796,6 +1831,15 @@ export const bibleVerseShares = pgTable("bible_verse_shares", {
   reactions: integer("reactions").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Type definitions for contacts and invitations
+export type Contact = typeof contacts.$inferSelect;
+export type InsertContact = typeof contacts.$inferInsert;
+export type Invitation = typeof invitations.$inferSelect;
+export type InsertInvitation = typeof invitations.$inferInsert;
+
+export const insertContactSchema = createInsertSchema(contacts);
+export const insertInvitationSchema = createInsertSchema(invitations);
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

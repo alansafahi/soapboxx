@@ -48,6 +48,8 @@ import {
   bibleInADaySectionProgress,
   bibleInADayBadges,
   volunteers,
+  contacts,
+  invitations,
   volunteerRoles,
   volunteerOpportunities,
   bibleVerses,
@@ -92,6 +94,10 @@ import {
   type InsertVolunteerAward,
   type VolunteerCertification,
   type InsertVolunteerCertification,
+  type Contact,
+  type InsertContact,
+  type Invitation,
+  type InsertInvitation,
   type Church,
   type InsertChurch,
   type UserChurch,
@@ -490,6 +496,16 @@ export interface IStorage {
   updateQrCode(id: string, updates: Partial<QrCode>): Promise<QrCode>;
   deleteQrCode(id: string): Promise<void>;
   validateQrCode(id: string): Promise<{ valid: boolean; qrCode?: QrCode }>;
+  
+  // Contacts and invitations operations
+  getUserContacts(userId: string): Promise<Contact[]>;
+  addContact(contact: InsertContact): Promise<Contact>;
+  updateContactStatus(contactId: number, status: string): Promise<Contact>;
+  removeContact(contactId: number): Promise<void>;
+  createInvitation(invitation: InsertInvitation): Promise<Invitation>;
+  getUserInvitations(userId: string): Promise<Invitation[]>;
+  updateInvitationStatus(inviteCode: string, status: string): Promise<Invitation>;
+  getPendingInvitations(userId: string): Promise<Invitation[]>;
   
   // Social media credentials operations
   getSocialMediaCredentials(userId: string): Promise<any[]>;
