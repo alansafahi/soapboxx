@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/hooks/useTheme";
 import soapboxLogo from "@/assets/soapbox-logo.jpeg";
 import {
@@ -96,7 +97,7 @@ export default function Sidebar() {
   });
 
   // Get unread message count for notification badge
-  const { data: unreadCount = 0 } = useQuery({
+  const { data: unreadCount = 0 } = useQuery<number>({
     queryKey: ["/api/messages/unread-count"],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds
@@ -297,6 +298,11 @@ export default function Sidebar() {
                           >
                             <Icon className="h-4 w-4 mr-3" />
                             <span className="text-sm">{item.label}</span>
+                            {item.label === "Messages" && unreadCount > 0 && (
+                              <Badge className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[1.25rem] h-5">
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                              </Badge>
+                            )}
                           </Button>
                         </Link>
                       );

@@ -293,6 +293,35 @@ export const socialMediaCredentials = pgTable("social_media_credentials", {
   index("social_credentials_church_idx").on(table.churchId),
 ]);
 
+// Direct Messages and Conversations for one-on-one messaging
+export const directMessages = pgTable("direct_messages", {
+  id: serial("id").primaryKey(),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  receiverId: varchar("receiver_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("direct_messages_sender_idx").on(table.senderId),
+  index("direct_messages_receiver_idx").on(table.receiverId),
+  index("direct_messages_created_at_idx").on(table.createdAt),
+]);
+
+export const directConversations = pgTable("direct_conversations", {
+  id: serial("id").primaryKey(),
+  participantOneId: varchar("participant_one_id").notNull().references(() => users.id),
+  participantTwoId: varchar("participant_two_id").notNull().references(() => users.id),
+  lastMessageId: integer("last_message_id").references(() => directMessages.id),
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_direct_conversation").on(table.participantOneId, table.participantTwoId),
+  index("direct_conversations_participant_one_idx").on(table.participantOneId),
+  index("direct_conversations_participant_two_idx").on(table.participantTwoId),
+]);
+
 // Social Media Publishing History
 export const socialMediaPosts = pgTable("social_media_posts", {
   id: serial("id").primaryKey(),

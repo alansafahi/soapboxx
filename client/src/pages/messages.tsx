@@ -80,19 +80,19 @@ export default function MessagesPage() {
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
 
   // Fetch conversations
-  const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
+  const { data: conversations = [], isLoading: conversationsLoading } = useQuery<Conversation[]>({
     queryKey: ["/api/messages/conversations"],
     enabled: !!user,
   });
 
   // Fetch messages for selected conversation
-  const { data: messages = [], isLoading: messagesLoading } = useQuery({
+  const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
     queryKey: ["/api/messages", selectedConversation],
     enabled: !!selectedConversation,
   });
 
   // Fetch contacts for new message
-  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
     queryKey: ["/api/contacts"],
     enabled: !!user,
   });
@@ -161,11 +161,11 @@ export default function MessagesPage() {
     markAsReadMutation.mutate(conversationId);
   };
 
-  const filteredConversations = conversations.filter((conv: Conversation) =>
+  const filteredConversations = conversations.filter((conv) =>
     conv.participantName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredContacts = contacts.filter((contact: Contact) =>
+  const filteredContacts = contacts.filter((contact) =>
     `${contact.firstName} ${contact.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
