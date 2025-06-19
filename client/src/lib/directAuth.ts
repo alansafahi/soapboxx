@@ -60,6 +60,8 @@ export function useDirectAuth() {
           }, 100);
         } else {
           console.log('🔥 DIRECT AUTH FAILED:', response.status);
+          // Clear any cached auth state on failure
+          localStorage.removeItem('soapbox_auth_state');
           setAuthState({
             user: null,
             isAuthenticated: false,

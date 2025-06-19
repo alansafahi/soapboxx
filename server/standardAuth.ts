@@ -6,7 +6,7 @@ import { storage } from "./storage";
 import { emailService } from "./emailService";
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const sessionTtl = 30 * 24 * 60 * 60 * 1000; // 30 days for better persistence
   
   // Enhanced PostgreSQL session store with better error handling
   const pgStore = connectPg(session);
@@ -27,7 +27,7 @@ export function getSession() {
     secret: process.env.SESSION_SECRET || 'fallback-secret-for-development',
     resave: false,
     saveUninitialized: false,
-    rolling: false,
+    rolling: true, // Reset expiry on activity
     cookie: {
       secure: false,
       httpOnly: false, // Allow JavaScript access for debugging

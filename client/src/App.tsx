@@ -79,7 +79,7 @@ function AppRouter() {
         {currentIsAuthenticated && <TopHeader />}
         <main className={currentIsAuthenticated ? "flex-1 overflow-y-auto px-1 sm:px-2 md:px-4 lg:px-6 py-1 sm:py-2 md:py-4" : "flex-1"}>
         <Switch>
-          {!currentIsAuthenticated && !currentUser ? (
+          {!currentIsAuthenticated ? (
             <>
               <Route path="/login" component={LoginPage} />
               <Route path="*" component={Landing} />
