@@ -27,10 +27,25 @@ async function populateMessages() {
     console.log('Creating sample users...');
     for (const user of sampleUsers) {
       await client.query(`
-        INSERT INTO users (id, "firstName", "lastName", email, role, "createdAt", "updatedAt")
+        INSERT INTO users (id, first_name, last_name, email, role, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
         ON CONFLICT (id) DO NOTHING
       `, [user.id, user.firstName, user.lastName, user.email, user.role]);
+    }
+
+    console.log('Creating conversations...');
+    const conversations = [
+      { id: 1, participant1: 'msg_user_1', participant2: 'msg_user_2' },
+      { id: 2, participant1: 'msg_user_1', participant2: 'msg_user_3' },
+      { id: 3, participant1: 'msg_user_2', participant2: 'msg_user_3' }
+    ];
+
+    for (const conv of conversations) {
+      await client.query(`
+        INSERT INTO conversations (id, participant1_id, participant2_id, conversation_type, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, NOW(), NOW())
+        ON CONFLICT (id) DO NOTHING
+      `, [conv.id, conv.participant1, conv.participant2, 'direct']);
     }
 
     // Create sample messages between users
@@ -145,22 +160,18 @@ async function populateMessages() {
     for (const message of sampleMessages) {
       await client.query(`
         INSERT INTO messages (
-          "conversationId", 
-          "senderId", 
-          "receiverId", 
+          conversation_id, 
+          sender_id, 
           content, 
-          "isRead", 
-          "createdAt",
-          "updatedAt"
+          created_at,
+          updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT DO NOTHING
       `, [
         message.conversationId,
         message.senderId,
-        message.receiverId,
         message.content,
-        message.isRead,
         message.createdAt,
         message.createdAt
       ]);
