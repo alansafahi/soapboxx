@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 
 export function useAuth() {
-  const [demoUser, setDemoUser] = useState(null);
+  const [demoUser, setDemoUser] = useState<any>(null);
   const [authState, setAuthState] = useState({ 
-    user: null, 
+    user: null as any, 
     isLoading: true, 
     isAuthenticated: false 
   });

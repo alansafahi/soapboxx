@@ -55,7 +55,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
 
 function AppRouter() {
-  const { user, isAuthenticated, isLoading, refetch } = useAuth();
+  const { user: authUser, isAuthenticated, isLoading, refetch } = useAuth();
   const directAuth = useDirectAuth();
   const [location] = useLocation();
   
@@ -84,7 +84,7 @@ function AppRouter() {
   }, []);
 
   // Use original auth state for consistency
-  const currentUser = user;
+  const currentUser = authUser;
   const currentIsAuthenticated = isAuthenticated;
   const currentIsLoading = isLoading;
   
