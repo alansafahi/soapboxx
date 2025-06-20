@@ -633,6 +633,12 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       <SelectItem value="NLT">NLT - New Living Translation</SelectItem>
                       <SelectItem value="NASB">NASB - New American Standard</SelectItem>
                       <SelectItem value="CSB">CSB - Christian Standard Bible</SelectItem>
+                      <SelectItem value="MSG">MSG - The Message</SelectItem>
+                      <SelectItem value="AMP">AMP - Amplified Bible</SelectItem>
+                      <SelectItem value="CEV">CEV - Contemporary English Version</SelectItem>
+                      <SelectItem value="NET">NET - New English Translation</SelectItem>
+                      <SelectItem value="CEB">CEB - Common English Bible</SelectItem>
+                      <SelectItem value="GNT">GNT - Good News Translation</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>

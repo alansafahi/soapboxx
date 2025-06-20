@@ -3991,11 +3991,39 @@ Format your response as JSON with the following structure:
           'NASB': "You prepare a table before me in the presence of my enemies; You have anointed my head with oil; My cup overflows.",
           'CSB': "You prepare a table before me in the presence of my enemies; you anoint my head with oil; my cup overflows.",
           'MSG': "You serve me a six-course dinner right in front of my enemies. You revive my drooping head; my cup brims with blessing.",
-          'AMP': "You prepare a table before me in the presence of my enemies. You have anoinated and refreshed my head with oil; My cup overflows.",
+          'AMP': "You prepare a table before me in the presence of my enemies. You have anointed and refreshed my head with oil; My cup overflows.",
           'CEV': "You treat me to a feast, while my enemies watch. You honor me as your guest, and you fill my cup until it overflows.",
           'NET': "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full.",
           'CEB': "You set a table for me right in front of my enemies. You bathe my head in oil; my cup is so full it spills over!",
           'GNT': "You prepare a banquet for me, where all my enemies can see me; you welcome me as an honored guest and fill my cup to the brim."
+        },
+        'john 3:16': {
+          'KJV': "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+          'NIV': "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+          'NLT': "For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
+          'ESV': "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
+          'NASB': "For God so loved the world, that He gave His only Son, so that everyone who believes in Him will not perish, but have eternal life.",
+          'CSB': "For God loved the world in this way: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
+          'MSG': "This is how much God loved the world: He gave his Son, his one and only Son. And this is why: so that no one need be destroyed; by believing in him, anyone can have a whole and lasting life.",
+          'AMP': "For God so [greatly] loved and dearly prized the world, that He [even] gave His [One and] only begotten Son, so that whoever believes and trusts in Him [as Savior] shall not perish, but have eternal life.",
+          'CEV': "God loved the people of this world so much that he gave his only Son, so that everyone who has faith in him will have eternal life and never really die.",
+          'NET': "For this is the way God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
+          'CEB': "God so loved the world that he gave his only Son, so that everyone who believes in him won't perish but will have eternal life.",
+          'GNT': "For God loved the world so much that he gave his only Son, so that everyone who believes in him may not die but have eternal life."
+        },
+        'romans 8:28': {
+          'KJV': "And we know that all things work together for good to them that love God, to them who are the called according to his purpose.",
+          'NIV': "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.",
+          'NLT': "And we know that God causes everything to work together for the good of those who love God and are called according to his purpose for them.",
+          'ESV': "And we know that for those who love God all things work together for good, for those who are called according to his purpose.",
+          'NASB': "And we know that God causes all things to work together for good to those who love God, to those who are called according to His purpose.",
+          'CSB': "We know that all things work together for the good of those who love God, who are called according to his purpose.",
+          'MSG': "That's why we can be so sure that every detail in our lives of love for God is worked into something good.",
+          'AMP': "And we know [with great confidence] that God [who is deeply concerned about us] causes all things to work together [as a plan] for good for those who love God, to those who are called according to His plan and purpose.",
+          'CEV': "We know that God is always at work for the good of everyone who loves him. They are the ones God has chosen for his purpose.",
+          'NET': "And we know that all things work together for good for those who love God, who are called according to his purpose.",
+          'CEB': "We know that God works all things together for good for the ones who love God, for those who are called according to his purpose.",
+          'GNT': "We know that in all things God works for good with those who love him, those whom he has called according to his purpose."
         }
       };
 
