@@ -52,6 +52,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState('NIV');
+  const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
 
   const { toast } = useToast();
 
@@ -519,6 +521,55 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     return lookupVerseWithVersion(reference, selectedVersion, forceOverwrite);
   };
 
+  // Auto-lookup function with debounce for better UX
+  const autoLookupVerse = (reference: string) => {
+    // Clear existing timeout
+    if (autoLookupTimeout) {
+      clearTimeout(autoLookupTimeout);
+      setIsAutoLookingUp(false);
+    }
+    
+    // Simple regex to detect verse references like "John 3:16" or "1 John 3:16"
+    const versePattern = /^((?:1st?|2nd?|3rd?|I{1,3}|1|2|3)?\s*[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$/;
+    if (!versePattern.test(reference.trim())) {
+      setIsAutoLookingUp(false);
+      return;
+    }
+    
+    // Show auto-lookup indicator
+    setIsAutoLookingUp(true);
+    
+    // Set new timeout for auto-lookup (1.5 seconds after user stops typing)
+    const timeoutId = setTimeout(async () => {
+      // Only auto-lookup if there's no existing scripture text
+      const currentScripture = form.getValues('scripture');
+      if (!currentScripture?.trim()) {
+        try {
+          await lookupVerseWithVersion(reference, 'NIV', false);
+          toast({
+            title: "Auto-populated NIV",
+            description: `Loaded ${reference} in NIV. Change version above if needed.`,
+            variant: "default",
+          });
+        } catch (error) {
+          // Silent fail for auto-lookup
+        }
+      }
+      setIsAutoLookingUp(false);
+    }, 1500);
+    
+    setAutoLookupTimeout(timeoutId);
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (autoLookupTimeout) {
+        clearTimeout(autoLookupTimeout);
+      }
+    };
+  }, [autoLookupTimeout]);
+
   const handleSubmit = (data: FormData) => {
     console.log('=== FORM SUBMISSION DEBUG ===');
     console.log('Form submission triggered with data:', data);
@@ -589,9 +640,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                         <Input 
                           {...field} 
                           value={field.value || ''}
-                          placeholder="e.g., John 3:16, Psalm 23:1-3" 
+                          placeholder="e.g., John 3:16, Psalm 23:1-3 (auto-loads NIV)" 
+                          onChange={(e) => {
+                            field.onChange(e);
+                            // Trigger auto-lookup as user types
+                            if (e.target.value.trim()) {
+                              autoLookupVerse(e.target.value);
+                            }
+                          }}
                           onBlur={(e) => {
                             field.onBlur();
+                            // Still support manual lookup on blur
                             if (e.target.value.trim()) {
                               lookupVerse(e.target.value);
                             }
@@ -649,18 +708,35 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 name="scripture"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Scripture Text</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      Scripture Text
+                      {(isLookingUpVerse || isAutoLookingUp) && (
+                        <span className="text-xs text-purple-600 font-normal flex items-center gap-1">
+                          <div className="animate-spin h-3 w-3 border border-purple-600 border-t-transparent rounded-full"></div>
+                          {isAutoLookingUp ? "Auto-loading NIV..." : "Looking up..."}
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Textarea 
                         {...field}
                         value={field.value || ''}
-                        placeholder={isLookingUpVerse ? "Looking up verse..." : "Enter the Scripture passage you're reflecting on..."}
+                        placeholder={
+                          isLookingUpVerse ? "Looking up verse..." : 
+                          isAutoLookingUp ? "Auto-loading NIV text..." :
+                          "Enter the Scripture passage you're reflecting on..."
+                        }
                         rows={4}
                         disabled={isLookingUpVerse}
+                        className={isAutoLookingUp ? "border-purple-300 bg-purple-50/50" : ""}
                       />
                     </FormControl>
                     <p className="text-xs text-muted-foreground">
-                      Enter a reference above (like "John 3:16") and select a Bible version to auto-populate the verse text
+                      {isAutoLookingUp ? (
+                        <span className="text-purple-600">Auto-populating NIV text for your reference...</span>
+                      ) : (
+                        "Type a reference above (like \"John 3:16\") and NIV text will auto-load. Change version to switch translations."
+                      )}
                     </p>
                     <FormMessage />
                   </FormItem>
