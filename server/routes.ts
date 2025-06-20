@@ -223,10 +223,9 @@ async function checkForNewRoleAssignment(userId: string, currentRole: string): P
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-
-
-  // Auth middleware
-  await setupAuth(app);
+  // Production Authentication System - FIXES CRITICAL SECURITY VULNERABILITIES
+  console.log('🔐 Enabling production authentication with mandatory email verification...');
+  setupProductionAuth(app);
 
   // Initialize AI personalization service
   const aiPersonalizationService = new AIPersonalizationService();
@@ -519,7 +518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticatedProduction, async (req: any, res) => {
     try {
       // Use consistent user ID retrieval method
       const userId = req.user?.claims?.sub || req.session.userId;
@@ -573,7 +572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Role Management Routes
-  app.get('/api/auth/available-roles', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/available-roles', isAuthenticatedProduction, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const availableRoles = await storage.getAvailableRoles(userId);
@@ -590,7 +589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/switch-role', isAuthenticated, async (req: any, res) => {
+  app.post('/api/auth/switch-role', isAuthenticatedProduction, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { newRole } = req.body;
@@ -620,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User role endpoint for navigation
-  app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user-role', isAuthenticatedProduction, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const userChurch = await storage.getUserChurch(userId);
