@@ -3970,15 +3970,25 @@ Format your response as JSON with the following structure:
       if (matchingVerse) {
         console.log(`[Bible Lookup] Found verse in database: ${matchingVerse.reference} (${matchingVerse.translation})`);
         
-        return res.json({
+        const responseData: any = {
           success: true,
           verse: {
             reference: matchingVerse.reference,
             text: matchingVerse.text,
             version: matchingVerse.translation
           }
-        });
+        };
+
+        // Add notice if verse found in different translation than requested
+        if (matchingVerse.translation !== version.toUpperCase()) {
+          responseData.notice = `Verse found in ${matchingVerse.translation} translation (${version.toUpperCase()} not available for this verse)`;
+        }
+        
+        return res.json(responseData);
       }
+      
+      // STEP 2: Try flexible reference matching across all translations
+      const fallbackVerse = await storage.getBibleVerseByReferenceFlexible(reference.trim(), version.toUpperCase());
       
       if (fallbackVerse) {
         console.log(`[Bible Lookup] Found fallback verse: ${fallbackVerse.reference} (${fallbackVerse.translation})`);
@@ -3989,7 +3999,8 @@ Format your response as JSON with the following structure:
             reference: fallbackVerse.reference,
             text: fallbackVerse.text,
             version: fallbackVerse.translation
-          }
+          },
+          notice: `Verse found in ${fallbackVerse.translation} translation (${version.toUpperCase()} not available for this verse)`
         });
       }
 

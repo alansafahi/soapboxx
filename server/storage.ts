@@ -273,6 +273,8 @@ export interface IStorage {
   
   // Bible verse lookup operations
   lookupBibleVerse(reference: string): Promise<{ reference: string; text: string } | null>;
+  getBibleVerseByReferenceAndTranslation(reference: string, translation: string): Promise<any | null>;
+  getBibleVerseByReferenceFlexible(reference: string, translation: string): Promise<any | null>;
   searchBibleVersesByTopic(topics: string[]): Promise<any[]>;
   getRandomVerseByCategory(category?: string): Promise<any | null>;
   getBibleVerses(): Promise<any[]>;
@@ -5033,7 +5035,8 @@ export class DatabaseStorage implements IStorage {
       // Normalize reference for consistent matching
       const normalizedReference = reference.toLowerCase().replace(/\s+/g, ' ').trim();
       
-      const [verse] = await db
+      // First try the requested translation
+      const [requestedVerse] = await db
         .select()
         .from(bibleVerses)
         .where(and(
@@ -5043,7 +5046,42 @@ export class DatabaseStorage implements IStorage {
         ))
         .limit(1);
 
-      return verse || null;
+      if (requestedVerse) {
+        return requestedVerse;
+      }
+
+      // If not found, try fallback order: NIV -> KJV -> any available
+      const fallbackTranslations = ['NIV', 'KJV'];
+      
+      for (const fallbackTranslation of fallbackTranslations) {
+        if (fallbackTranslation === translation.toUpperCase()) continue;
+        
+        const [fallbackVerse] = await db
+          .select()
+          .from(bibleVerses)
+          .where(and(
+            sql`LOWER(REPLACE(${bibleVerses.reference}, ' ', ' ')) = ${normalizedReference}`,
+            eq(bibleVerses.translation, fallbackTranslation),
+            eq(bibleVerses.isActive, true)
+          ))
+          .limit(1);
+
+        if (fallbackVerse) {
+          return fallbackVerse;
+        }
+      }
+
+      // If still not found, try any translation for this reference
+      const [anyVerse] = await db
+        .select()
+        .from(bibleVerses)
+        .where(and(
+          sql`LOWER(REPLACE(${bibleVerses.reference}, ' ', ' ')) = ${normalizedReference}`,
+          eq(bibleVerses.isActive, true)
+        ))
+        .limit(1);
+
+      return anyVerse || null;
     } catch (error) {
       console.error('Error in getBibleVerseByReferenceAndTranslation:', error);
       return null;
@@ -5052,7 +5090,7 @@ export class DatabaseStorage implements IStorage {
 
   async getBibleVerseByReferenceFlexible(reference: string, translation: string): Promise<any | null> {
     try {
-      // Try flexible matching across different reference formats
+      // Try flexible matching with the requested translation first
       const searchTerm = `%${reference.toLowerCase().replace(/\s+/g, '%')}%`;
       
       const [verse] = await db
@@ -5065,7 +5103,42 @@ export class DatabaseStorage implements IStorage {
         ))
         .limit(1);
 
-      return verse || null;
+      if (verse) {
+        return verse;
+      }
+
+      // If not found, try with fallback translations
+      const fallbackTranslations = ['NIV', 'KJV'];
+      
+      for (const fallbackTranslation of fallbackTranslations) {
+        if (fallbackTranslation === translation.toUpperCase()) continue;
+        
+        const [fallbackVerse] = await db
+          .select()
+          .from(bibleVerses)
+          .where(and(
+            sql`LOWER(${bibleVerses.reference}) LIKE ${searchTerm}`,
+            eq(bibleVerses.translation, fallbackTranslation),
+            eq(bibleVerses.isActive, true)
+          ))
+          .limit(1);
+
+        if (fallbackVerse) {
+          return fallbackVerse;
+        }
+      }
+
+      // If still not found, try any translation
+      const [anyVerse] = await db
+        .select()
+        .from(bibleVerses)
+        .where(and(
+          sql`LOWER(${bibleVerses.reference}) LIKE ${searchTerm}`,
+          eq(bibleVerses.isActive, true)
+        ))
+        .limit(1);
+
+      return anyVerse || null;
     } catch (error) {
       console.error('Error in getBibleVerseByReferenceFlexible:', error);
       return null;
