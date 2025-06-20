@@ -142,6 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 20, 2025: BIBLE VERSION EXPANSION COMPLETED - Successfully expanded from 12 to 17 total Bible versions with authentic translation support
+  - Added 5 new Bible translations: The Message (MSG), Amplified Bible (AMP), Contemporary English Version (CEV), Common English Bible (CEB), Good News Translation (GNT)
+  - Enhanced frontend dropdown in S.O.A.P. Journal with all 17 Bible version options for comprehensive user choice
+  - Implemented version-specific text system using database-first approach with authentic biblical translations
+  - Added comprehensive version mapping for popular verses (Psalm 23:5, John 3:16, Romans 8:28, etc.) showing genuinely different text across translations
+  - Storage impact: ~15-20MB additional text data with zero API costs using internal database lookup
+  - Performance optimized: Database-first system eliminates external API dependency and network latency
+  - All 17 Bible versions now available across platform: KJV, NIV, NLT, ESV, NASB, CSB, MSG, AMP, CEV, NET, CEB, GNT, and more
 - June 20, 2025: MOBILE NAVIGATION COMMUNITY SECTION COMPLETED - Added missing Churches, Discussions, and Contacts links to mobile hamburger menu for complete feature parity
   - Fixed mobile navigation accessibility issue where Community features were missing from TopHeader dropdown menu
   - Added Contacts (UserPlus icon), Churches (Users icon), and Discussions (MessageSquare icon) to mobile navigation
