@@ -5028,6 +5028,50 @@ export class DatabaseStorage implements IStorage {
     return null;
   }
 
+  async getBibleVerseByReferenceAndTranslation(reference: string, translation: string): Promise<any | null> {
+    try {
+      // Normalize reference for consistent matching
+      const normalizedReference = reference.toLowerCase().replace(/\s+/g, ' ').trim();
+      
+      const [verse] = await db
+        .select()
+        .from(bibleVerses)
+        .where(and(
+          sql`LOWER(REPLACE(${bibleVerses.reference}, ' ', ' ')) = ${normalizedReference}`,
+          eq(bibleVerses.translation, translation.toUpperCase()),
+          eq(bibleVerses.isActive, true)
+        ))
+        .limit(1);
+
+      return verse || null;
+    } catch (error) {
+      console.error('Error in getBibleVerseByReferenceAndTranslation:', error);
+      return null;
+    }
+  }
+
+  async getBibleVerseByReferenceFlexible(reference: string, translation: string): Promise<any | null> {
+    try {
+      // Try flexible matching across different reference formats
+      const searchTerm = `%${reference.toLowerCase().replace(/\s+/g, '%')}%`;
+      
+      const [verse] = await db
+        .select()
+        .from(bibleVerses)
+        .where(and(
+          sql`LOWER(${bibleVerses.reference}) LIKE ${searchTerm}`,
+          eq(bibleVerses.translation, translation.toUpperCase()),
+          eq(bibleVerses.isActive, true)
+        ))
+        .limit(1);
+
+      return verse || null;
+    } catch (error) {
+      console.error('Error in getBibleVerseByReferenceFlexible:', error);
+      return null;
+    }
+  }
+
   async searchBibleVersesByTopic(topics: string[]): Promise<any[]> {
     if (topics.length === 0) return [];
 
