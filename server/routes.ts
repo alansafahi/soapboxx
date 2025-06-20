@@ -4072,13 +4072,31 @@ Format your response as JSON with the following structure:
       if (matchingVerse) {
         console.log(`[Bible Lookup] Found saved verse: ${matchingVerse.reference}`);
         
-        // Use the base text from database but allow version to be passed through
+        // Check if this verse has version-specific data
+        let finalText = matchingVerse.text; // Default to base text
+        
+        if (matchingVerse.versionData) {
+          try {
+            const versionData = JSON.parse(matchingVerse.versionData);
+            const requestedVersionText = versionData[version.toUpperCase()];
+            
+            if (requestedVersionText) {
+              finalText = requestedVersionText;
+              console.log(`[Bible Lookup] Using version-specific ${version.toUpperCase()} text from database`);
+            } else {
+              console.log(`[Bible Lookup] No ${version.toUpperCase()} text found, using base text`);
+            }
+          } catch (e) {
+            console.log(`[Bible Lookup] Invalid version data, using base text`);
+          }
+        }
+        
         return res.json({
           success: true,
           verse: {
             reference: matchingVerse.reference,
-            text: matchingVerse.text,
-            version: version.toUpperCase() // Use requested version
+            text: finalText,
+            version: version.toUpperCase()
           }
         });
       }
