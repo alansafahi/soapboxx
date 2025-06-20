@@ -472,7 +472,7 @@ export default function PrayerWall() {
           <div className="flex items-center justify-center space-x-6 mt-4 text-sm text-gray-500">
             <div className="flex items-center space-x-1">
               <Users className="w-4 h-4" />
-              <span>{prayerRequests.length} requests</span>
+              <span>{prayerRequests?.length || 0} requests</span>
             </div>
             <div className="flex items-center space-x-1">
               <Hand className="w-4 h-4" />

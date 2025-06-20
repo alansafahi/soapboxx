@@ -70,7 +70,7 @@ export function setupAuth(app: Express): void {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       // Generate email verification token
-      const verificationToken = require('crypto').randomBytes(32).toString('hex');
+      const verificationToken = crypto.randomBytes(32).toString('hex');
       const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
       // Create user
@@ -236,7 +236,7 @@ export function setupAuth(app: Express): void {
       }
 
       // Generate new verification token
-      const verificationToken = require('crypto').randomBytes(32).toString('hex');
+      const verificationToken = crypto.randomBytes(32).toString('hex');
       await storage.updateUserVerificationToken(user.id, verificationToken);
 
       // Send verification email
