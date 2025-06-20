@@ -418,7 +418,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         const verseRef = response.verse?.reference || response.reference || reference;
         const verseVersion = response.verse?.version || response.version || version;
         
-        if (verseText) {
+        if (verseText && !verseText.includes('[') && !verseText.includes('text for')) {
           setPendingVerse({ reference: verseRef, text: verseText, version: verseVersion });
           setShowReplaceDialog(true);
           setIsLookingUpVerse(false);
@@ -449,7 +449,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       const verseText = response.verse?.text || response.text;
       const verseRef = response.verse?.reference || response.reference || reference;
       
-      if (verseText) {
+      if (verseText && !verseText.includes('[') && !verseText.includes('text for')) {
         form.setValue('scripture', verseText);
         toast({
           title: "Scripture Found",
@@ -458,7 +458,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       } else {
         toast({
           title: "Scripture Lookup",
-          description: `"${reference}" not found. Please enter the verse text manually below.`,
+          description: `"${reference}" not found in ${version}. Please try a different version or enter manually.`,
           variant: "default",
         });
       }
@@ -541,19 +541,25 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     
     // Set new timeout for auto-lookup (1.5 seconds after user stops typing)
     const timeoutId = setTimeout(async () => {
-      // Only auto-lookup if there's no existing scripture text
-      const currentScripture = form.getValues('scripture');
-      if (!currentScripture?.trim()) {
-        try {
-          await lookupVerseWithVersion(reference, 'NIV', false);
+      try {
+        const response = await apiRequest('/api/bible/lookup-verse', {
+          method: 'POST',
+          body: { 
+            reference: reference.trim(),
+            version: selectedVersion 
+          },
+        });
+        
+        const verseText = response.verse?.text || response.text;
+        if (verseText && !verseText.includes('[') && !verseText.includes('text for')) {
+          form.setValue('scripture', verseText);
           toast({
-            title: "Auto-populated NIV",
-            description: `Loaded ${reference} in NIV. Change version above if needed.`,
-            variant: "default",
+            title: "Scripture Found",
+            description: `Loaded ${reference} (${selectedVersion})`,
           });
-        } catch (error) {
-          // Silent fail for auto-lookup
         }
+      } catch (error) {
+        console.log('Auto-lookup failed:', error);
       }
       setIsAutoLookingUp(false);
     }, 1500);
@@ -643,17 +649,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                           placeholder="e.g., John 3:16, Psalm 23:1-3 (auto-loads NIV)" 
                           onChange={(e) => {
                             field.onChange(e);
-                            // Trigger auto-lookup as user types
+                            // Immediately trigger lookup when reference changes
                             if (e.target.value.trim()) {
-                              autoLookupVerse(e.target.value);
+                              // Clear any existing timeout and start fresh lookup
+                              if (autoLookupTimeout) {
+                                clearTimeout(autoLookupTimeout);
+                              }
+                              lookupVerseWithVersion(e.target.value.trim(), selectedVersion, true);
                             }
                           }}
                           onBlur={(e) => {
                             field.onBlur();
-                            // Still support manual lookup on blur
-                            if (e.target.value.trim()) {
-                              lookupVerse(e.target.value);
-                            }
                           }}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
