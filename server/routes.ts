@@ -2249,25 +2249,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bible API endpoints
   app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
     try {
-      const { journeyType, devotionalPack } = req.query;
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
-      // Simple daily verse data for now
+      // Get daily verse that rotates based on the day of year
+      const today = new Date();
+      const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+      
+      // Get a random verse from the database based on the day of year
+      const verses = await storage.getBibleVersesPaginated({
+        limit: 1,
+        offset: dayOfYear % 100 // Rotate through different verses based on day
+      });
+      
+      if (verses.length === 0) {
+        // Fallback verse if database is empty
+        const fallbackVerse = {
+          id: 1,
+          date: today,
+          verseReference: "Philippians 4:13",
+          verseText: "I can do all this through him who gives me strength.",
+          theme: "Strength and Perseverance",
+          reflectionPrompt: "How can God's strength help you face today's challenges?",
+          guidedPrayer: "Lord, help me to rely on Your strength in all circumstances. Amen.",
+          backgroundImageUrl: null,
+          audioUrl: null
+        };
+        return res.json(fallbackVerse);
+      }
+      
+      const dbVerse = verses[0];
       const verse = {
-        id: 1,
-        date: new Date(),
-        verseReference: "Philippians 4:13",
-        verseText: "I can do all this through him who gives me strength.",
-        verseTextNiv: "I can do all this through him who gives me strength.",
-        verseTextKjv: "I can do all things through Christ which strengtheneth me.",
-        verseTextEsv: "I can do all things through him who strengthens me.",
-        verseTextNlt: "For I can do everything through Christ, who gives me strength.",
-        theme: "Strength and Perseverance",
-        reflectionPrompt: "How can God's strength help you face today's challenges?",
-        guidedPrayer: "Lord, help me to rely on Your strength in all circumstances. Amen.",
+        id: dbVerse.id,
+        date: today,
+        verseReference: dbVerse.reference,
+        verseText: dbVerse.text,
+        theme: dbVerse.category || "Daily Inspiration",
+        reflectionPrompt: `How does this verse from ${dbVerse.reference} speak to your heart today?`,
+        guidedPrayer: `Lord, thank You for Your word in ${dbVerse.reference}. Help me to live by this truth today. Amen.`,
         backgroundImageUrl: null,
-        audioUrl: null,
-        devotionalPack: devotionalPack || null
+        audioUrl: null
       };
       
       res.json(verse);

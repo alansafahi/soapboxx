@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +13,18 @@ export default function BiblePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [currentVerse, setCurrentVerse] = useState({
-    reference: "Philippians 4:13",
-    text: "I can do all this through him who gives me strength.",
-    theme: "Strength and Perseverance"
+
+  // Fetch daily verse from API
+  const { data: dailyVerse, isLoading: verseLoading } = useQuery({
+    queryKey: ["/api/bible/daily-verse"],
+    enabled: isAuthenticated,
   });
+
+  const currentVerse = dailyVerse || {
+    verseReference: "Loading...",
+    verseText: "Loading today's verse...",
+    theme: "Daily Inspiration"
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -73,15 +81,15 @@ export default function BiblePage() {
               <CardTitle className="text-xl text-gray-900">Daily Verse</CardTitle>
             </div>
             <Badge variant="secondary" className="mx-auto">
-              {currentVerse.theme}
+              {currentVerse?.theme || "Daily Inspiration"}
             </Badge>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <blockquote className="text-lg italic text-gray-700 leading-relaxed">
-              "{currentVerse.text}"
+              "{currentVerse?.verseText || "Loading today's verse..."}"
             </blockquote>
             <p className="font-semibold text-blue-600">
-              {currentVerse.reference}
+              {currentVerse?.verseReference || "Loading..."}
             </p>
             
             {/* Action Buttons */}
@@ -108,11 +116,11 @@ export default function BiblePage() {
                   if (navigator.share) {
                     navigator.share({
                       title: 'Daily Verse',
-                      text: `"${currentVerse.text}" - ${currentVerse.reference}`,
+                      text: `"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}`,
                       url: window.location.href
                     });
                   } else {
-                    navigator.clipboard.writeText(`"${currentVerse.text}" - ${currentVerse.reference}`);
+                    navigator.clipboard.writeText(`"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}"`);
                     toast({
                       title: "Copied to clipboard",
                       description: "The verse has been copied to your clipboard."
