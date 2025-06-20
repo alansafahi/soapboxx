@@ -224,12 +224,99 @@ async function checkForNewRoleAssignment(userId: string, currentRole: string): P
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize AI personalization service
+  const aiPersonalizationService = new AIPersonalizationService();
+
+  // PUBLIC BIBLE API ENDPOINTS - No authentication required for spiritual content access
+  // Must be registered BEFORE authentication setup to ensure public access
+  
+  // Public Bible verse lookup
+  app.get('/api/bible/verse/:book/:chapter/:verse', async (req, res) => {
+    try {
+      const { book, chapter, verse } = req.params;
+      const { translation = 'NIV' } = req.query;
+      
+      const result = await getVerseInstant(book, parseInt(chapter), parseInt(verse), translation);
+      
+      if (result.success) {
+        console.log(`✅ Public verse lookup: ${result.verse.reference} (${translation})`);
+        res.json(result.verse);
+      } else {
+        res.status(404).json({ message: "Verse not found", error: result.error });
+      }
+    } catch (error) {
+      console.error("Error fetching verse:", error);
+      res.status(500).json({ message: "Failed to fetch verse" });
+    }
+  });
+
+  // Public Bible verse search
+  app.get('/api/bible/search', async (req, res) => {
+    try {
+      const { q: query, translation = 'NIV', limit = 20 } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      
+      const result = await searchVerses(query, translation, parseInt(limit));
+      
+      if (result.success) {
+        console.log(`📚 Public Bible search "${query}" in ${translation}: ${result.count} verses found`);
+        res.json({
+          query: result.query,
+          translation: result.translation,
+          verses: result.verses,
+          count: result.count
+        });
+      } else {
+        res.status(404).json({ message: "No verses found", error: result.error });
+      }
+    } catch (error) {
+      console.error("Error searching verses:", error);
+      res.status(500).json({ message: "Failed to search verses" });
+    }
+  });
+
+  // Public random Bible verse
+  app.get('/api/bible/random', async (req, res) => {
+    try {
+      const { translation = 'NIV' } = req.query;
+      
+      const result = await getRandomVerse(translation);
+      
+      if (result.success) {
+        console.log(`🎲 Public random verse: ${result.verse.reference} (${translation})`);
+        res.json(result.verse);
+      } else {
+        res.status(404).json({ message: "No random verse found", error: result.error });
+      }
+    } catch (error) {
+      console.error("Error fetching random verse:", error);
+      res.status(500).json({ message: "Failed to fetch random verse" });
+    }
+  });
+
+  // Public Bible database statistics
+  app.get('/api/bible/stats', async (req, res) => {
+    try {
+      const stats = await storage.getBibleStats();
+      
+      res.json({
+        message: "SoapBox Bible Database Statistics",
+        ...stats,
+        source: "Internal SoapBox Bible Version Database",
+        accessibility: "Public API - No authentication required"
+      });
+    } catch (error) {
+      console.error("Error fetching Bible stats:", error);
+      res.status(500).json({ message: "Failed to fetch Bible statistics" });
+    }
+  });
+
   // Production Authentication System - FIXES CRITICAL SECURITY VULNERABILITIES
   console.log('🔐 Enabling production authentication with mandatory email verification...');
   setupProductionAuth(app);
-
-  // Initialize AI personalization service
-  const aiPersonalizationService = new AIPersonalizationService();
 
   // Basic test route
   app.get('/api/test', (req, res) => {
@@ -2649,26 +2736,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Comprehensive Bible verse lookup with instant access
-  // Public Bible verse lookup (no authentication required)
-  app.get('/api/bible/verse/:book/:chapter/:verse', async (req, res) => {
-    try {
-      const { book, chapter, verse } = req.params;
-      const { translation = 'NIV' } = req.query;
-      
-      const result = await getVerseInstant(book, parseInt(chapter), parseInt(verse), translation);
-      
-      if (result.success) {
-        console.log(`✅ Verse lookup: ${result.verse.reference} (${translation}) - Source: ${result.source}`);
-        res.json(result.verse);
-      } else {
-        res.status(404).json({ message: "Verse not found", error: result.error });
-      }
-    } catch (error) {
-      console.error("Error fetching specific verse:", error);
-      res.status(500).json({ message: "Failed to fetch verse" });
-    }
-  });
+  // Bible verse lookup endpoint already registered as public API above
 
   // Public Bible verse search across all translations  
   app.get('/api/bible/search', async (req, res) => {
