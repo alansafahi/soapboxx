@@ -391,6 +391,88 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     }
   };
 
+  const lookupVerseWithVersion = async (reference: string, version: string, forceOverwrite = false) => {
+    if (!reference.trim()) return;
+    
+    // Simple regex to detect verse references like "John 3:16" or "1 John 3:16"
+    const versePattern = /^((?:1st?|2nd?|3rd?|I{1,3}|1|2|3)?\s*[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$/;
+    if (!versePattern.test(reference.trim())) return;
+
+    // Check if there's existing text and user hasn't explicitly requested overwrite
+    const currentScripture = form.getValues('scripture');
+    if (currentScripture && !forceOverwrite) {
+      // Look up the verse first to show it in the dialog
+      setIsLookingUpVerse(true);
+      try {
+        const response = await apiRequest('/api/bible/lookup-verse', {
+          method: 'POST',
+          body: { 
+            reference: reference.trim(),
+            version: version 
+          },
+        });
+        
+        const verseText = response.verse?.text || response.text;
+        const verseRef = response.verse?.reference || response.reference || reference;
+        const verseVersion = response.verse?.version || response.version || version;
+        
+        if (verseText) {
+          setPendingVerse({ reference: verseRef, text: verseText, version: verseVersion });
+          setShowReplaceDialog(true);
+          setIsLookingUpVerse(false);
+          return;
+        }
+      } catch (error) {
+        setIsLookingUpVerse(false);
+        toast({
+          title: "Scripture Lookup",
+          description: `"${reference}" not found. Please enter the verse text manually.`,
+          variant: "default",
+        });
+        return;
+      }
+    }
+
+    setIsLookingUpVerse(true);
+    try {
+      const response = await apiRequest('/api/bible/lookup-verse', {
+        method: 'POST',
+        body: { 
+          reference: reference.trim(),
+          version: version 
+        },
+      });
+      
+      // Handle the correct response structure
+      const verseText = response.verse?.text || response.text;
+      const verseRef = response.verse?.reference || response.reference || reference;
+      
+      if (verseText) {
+        form.setValue('scripture', verseText);
+        toast({
+          title: "Scripture Found",
+          description: `Populated ${verseRef} (${version})`,
+        });
+      } else {
+        toast({
+          title: "Scripture Lookup",
+          description: `"${reference}" not found. Please enter the verse text manually below.`,
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      // Show helpful error message with suggestions
+      toast({
+        title: "Scripture Lookup",
+        description: `"${reference}" not found. Please enter the verse text manually below.`,
+        variant: "default",
+      });
+      console.log('Verse lookup failed:', error);
+    } finally {
+      setIsLookingUpVerse(false);
+    }
+  };
+
   const lookupVerse = async (reference: string, forceOverwrite = false) => {
     if (!reference.trim()) return;
     
@@ -433,44 +515,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       }
     }
 
-    setIsLookingUpVerse(true);
-    try {
-      const response = await apiRequest('/api/bible/lookup-verse', {
-        method: 'POST',
-        body: { 
-          reference: reference.trim(),
-          version: selectedVersion 
-        },
-      });
-      
-      // Handle the correct response structure
-      const verseText = response.verse?.text || response.text;
-      const verseRef = response.verse?.reference || response.reference || reference;
-      
-      if (verseText) {
-        form.setValue('scripture', verseText);
-        toast({
-          title: "Scripture Found",
-          description: `Populated ${verseRef} (${selectedVersion})`,
-        });
-      } else {
-        toast({
-          title: "Scripture Lookup",
-          description: `"${reference}" not found. Please enter the verse text manually below.`,
-          variant: "default",
-        });
-      }
-    } catch (error) {
-      // Show helpful error message with suggestions
-      toast({
-        title: "Scripture Lookup",
-        description: `"${reference}" not found. Please enter the verse text manually below.`,
-        variant: "default",
-      });
-      console.log('Verse lookup failed:', error);
-    } finally {
-      setIsLookingUpVerse(false);
-    }
+    // Just call the versioned function with current selected version
+    return lookupVerseWithVersion(reference, selectedVersion, forceOverwrite);
   };
 
   const handleSubmit = (data: FormData) => {
@@ -566,11 +612,15 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 <FormItem>
                   <FormLabel>Look Up With</FormLabel>
                   <Select value={selectedVersion} onValueChange={(value) => {
+                    console.log('Version changed from', selectedVersion, 'to', value);
                     setSelectedVersion(value);
-                    // Auto-lookup when version is changed if there's a reference
+                    // Force immediate lookup when version is changed if there's a reference
                     const reference = form.getValues('scriptureReference');
                     if (reference?.trim()) {
-                      lookupVerse(reference, true);
+                      // Use setTimeout to ensure state is updated before lookup
+                      setTimeout(() => {
+                        lookupVerseWithVersion(reference, value, true);
+                      }, 50);
                     }
                   }}>
                     <SelectTrigger>
