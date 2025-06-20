@@ -4123,6 +4123,66 @@ export class DatabaseStorage implements IStorage {
       .offset(options.offset);
   }
 
+  async getBibleStats(): Promise<any> {
+    try {
+      // Get total verse count
+      const [totalCount] = await db
+        .select({ count: count() })
+        .from(bibleVerses);
+
+      // Get unique references count
+      const [uniqueRefsResult] = await db
+        .select({ count: sql`COUNT(DISTINCT reference)` })
+        .from(bibleVerses);
+
+      // Get translation counts
+      const translationCounts = await db
+        .select({ 
+          translation: bibleVerses.translation, 
+          count: count() 
+        })
+        .from(bibleVerses)
+        .groupBy(bibleVerses.translation)
+        .orderBy(desc(count()));
+
+      // Get book counts
+      const bookCounts = await db
+        .select({ 
+          book: bibleVerses.book, 
+          verses: count() 
+        })
+        .from(bibleVerses)
+        .groupBy(bibleVerses.book)
+        .orderBy(desc(count()))
+        .limit(10);
+
+      // Fix type issues with proper null checks and type casting
+      const totalVersesCount = Number(totalCount.count) || 0;
+      const uniqueReferencesCount = Number(uniqueRefsResult.count) || 0;
+      
+      const translationBreakdown: Record<string, number> = {};
+      translationCounts.forEach(t => {
+        if (t.translation) {
+          translationBreakdown[t.translation] = Number(t.count) || 0;
+        }
+      });
+
+      return {
+        totalVerses: totalVersesCount,
+        uniqueReferences: uniqueReferencesCount,
+        translations: translationCounts.length,
+        books: bookCounts.length > 0 ? bookCounts.length : 67,
+        translationBreakdown,
+        topBooks: bookCounts,
+        coverage: `${((uniqueReferencesCount / 31102) * 100).toFixed(2)}%`,
+        lastUpdated: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error fetching Bible stats:', error);
+      throw error;
+    }
+  }
+
   async saveBibleVerseFromAI(verseData: {
     reference: string;
     text: string;

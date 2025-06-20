@@ -341,6 +341,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('🔐 Enabling production authentication with mandatory email verification...');
   setupProductionAuth(app);
 
+  // OVERRIDE: Re-register Bible API endpoints AFTER authentication to ensure public access
+  // This ensures spiritual content remains accessible without authentication barriers
+  
+  // Public Bible verse lookup (POST-AUTH OVERRIDE)
+  app.get('/api/bible/verse/:book/:chapter/:verse', async (req, res) => {
+    try {
+      const { book, chapter, verse } = req.params;
+      const { translation = 'NIV' } = req.query;
+      
+      const result = await getVerseInstant(book, parseInt(chapter), parseInt(verse), translation);
+      
+      if (result.success) {
+        console.log(`✅ Public verse lookup: ${result.verse.reference} (${translation})`);
+        res.json(result.verse);
+      } else {
+        res.status(404).json({ message: "Verse not found", error: result.error });
+      }
+    } catch (error) {
+      console.error("Error fetching verse:", error);
+      res.status(500).json({ message: "Failed to fetch verse" });
+    }
+  });
+
+  // Public Bible verse search (POST-AUTH OVERRIDE)
+  app.get('/api/bible/search', async (req, res) => {
+    try {
+      const { query, translation = 'NIV', limit = 20 } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Query parameter is required" });
+      }
+      
+      const result = await searchVerses(query as string, translation as string, parseInt(limit as string));
+      
+      if (result.success) {
+        console.log(`🔍 Public verse search: "${query}" found ${result.count} results`);
+        res.json(result);
+      } else {
+        res.status(404).json({ message: "No verses found", error: result.error });
+      }
+    } catch (error) {
+      console.error("Error searching verses:", error);
+      res.status(500).json({ message: "Failed to search verses" });
+    }
+  });
+
+  // Public random Bible verse (POST-AUTH OVERRIDE)
+  app.get('/api/bible/random', async (req, res) => {
+    try {
+      const { translation = 'NIV' } = req.query;
+      
+      const result = await getRandomVerse(translation as string);
+      
+      if (result.success) {
+        console.log(`🎲 Public random verse: ${result.verse.reference} (${translation})`);
+        res.json(result.verse);
+      } else {
+        res.status(404).json({ message: "No random verse found", error: result.error });
+      }
+    } catch (error) {
+      console.error("Error fetching random verse:", error);
+      res.status(500).json({ message: "Failed to fetch random verse" });
+    }
+  });
+
+  // Public Bible database statistics (POST-AUTH OVERRIDE)
+  app.get('/api/bible/stats', async (req, res) => {
+    try {
+      const stats = await storage.getBibleStats();
+      
+      res.json({
+        message: "SoapBox Bible Database Statistics",
+        ...stats,
+        source: "Internal SoapBox Bible Version Database",
+        accessibility: "Public API - No authentication required"
+      });
+    } catch (error) {
+      console.error("Error fetching Bible stats:", error);
+      res.status(500).json({ message: "Failed to fetch Bible statistics" });
+    }
+  });
+
   // Basic test route
   app.get('/api/test', (req, res) => {
     res.json({ message: 'Server is running' });
