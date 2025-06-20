@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 20, 2025: MOBILE NAVIGATION COMMUNITY SECTION COMPLETED - Added missing Churches, Discussions, and Contacts links to mobile hamburger menu for complete feature parity
+  - Fixed mobile navigation accessibility issue where Community features were missing from TopHeader dropdown menu
+  - Added Contacts (UserPlus icon), Churches (Users icon), and Discussions (MessageSquare icon) to mobile navigation
+  - Mobile users now have complete access to all Community features: Home, Messages, Contacts, Churches, Discussions, Prayer Wall, Events
+  - Achieved full navigation parity between desktop sidebar and mobile hamburger menu
 - June 19, 2025: CONTACTS SYSTEM NAVIGATION INTEGRATED - Added Contacts functionality to sidebar navigation for easy user access
   - Added "Contacts" button with UserPlus icon to COMMUNITY section in sidebar navigation
   - Positioned between Messages and Prayer Wall for logical grouping of social features

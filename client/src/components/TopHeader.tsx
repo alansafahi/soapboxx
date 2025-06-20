@@ -194,10 +194,16 @@ export default function TopHeader() {
                 Contacts
               </DropdownMenuItem>
             </Link>
-            <Link href="/community">
+            <Link href="/churches">
               <DropdownMenuItem className="cursor-pointer">
                 <Users className="w-4 h-4 mr-2" />
-                Community
+                Churches
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/discussions">
+              <DropdownMenuItem className="cursor-pointer">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Discussions
               </DropdownMenuItem>
             </Link>
             <Link href="/prayer">
