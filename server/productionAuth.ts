@@ -193,6 +193,12 @@ export function setupProductionAuth(app: Express): void {
     }
   });
 
+  // Login page (GET route)
+  app.get('/api/login', (req, res) => {
+    // Redirect to the frontend login page
+    res.redirect('/login');
+  });
+
   // Email/password login with MANDATORY email verification
   app.post('/api/auth/login', async (req, res) => {
     try {
