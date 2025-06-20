@@ -367,13 +367,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public Bible verse search (POST-AUTH OVERRIDE)
   app.get('/api/bible/search', async (req, res) => {
     try {
-      const { query, translation = 'NIV', limit = 20 } = req.query;
+      const { query, q, translation = 'NIV', limit = 20 } = req.query;
+      const searchQuery = query || q;
       
-      if (!query) {
-        return res.status(400).json({ message: "Query parameter is required" });
+      if (!searchQuery) {
+        return res.status(400).json({ message: "Search query is required" });
       }
       
-      const result = await searchVerses(query as string, translation as string, parseInt(limit as string));
+      const result = await searchVerses(searchQuery as string, translation as string, parseInt(limit as string));
       
       if (result.success) {
         console.log(`🔍 Public verse search: "${query}" found ${result.count} results`);
