@@ -7629,7 +7629,7 @@ Please provide suggestions for the missing or incomplete sections.`
     res.json(conversations);
   });
 
-  app.get('/api/chat/:conversationId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/chat/:conversationId', isAuthenticatedProduction, async (req: any, res) => {
     try {
       const { conversationId } = req.params;
       const userId = req.session?.userId;
