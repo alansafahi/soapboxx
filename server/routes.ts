@@ -3964,145 +3964,37 @@ Format your response as JSON with the following structure:
       console.log(`[Bible Lookup] Reference: "${reference}"`);
       console.log(`[Bible Lookup] Requested Version: "${version}"`);
 
-      const normalizedReference = reference.toLowerCase().replace(/\s+/g, ' ').trim();
-      console.log(`[Bible Lookup] Checking normalized reference: "${normalizedReference}"`);
+      // STEP 1: Query database directly for verse with specific translation
+      const matchingVerse = await storage.getBibleVerseByReferenceAndTranslation(reference.trim(), version.toUpperCase());
       
-      // Version-specific text data for authentic Bible translations
-      const VERSION_SPECIFIC_TEXTS = {
-        'psalm 23:5': {
-          'KJV': "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.",
-          'NIV': "You prepare a table before me in the presence of my enemies. You anoint my head with oil; my cup overflows.",
-          'NLT': "You prepare a feast for me in the presence of my enemies. You honor me by anointing my head with oil. My cup overflows with blessings.",
-          'ESV': "You prepare a table before me in the presence of my enemies; you anoint my head with oil; my cup overflows.",
-          'NASB': "You prepare a table before me in the presence of my enemies; You have anointed my head with oil; My cup overflows.",
-          'CSB': "You prepare a table before me in the presence of my enemies; you anoint my head with oil; my cup overflows.",
-          'MSG': "You serve me a six-course dinner right in front of my enemies. You revive my drooping head; my cup brims with blessing.",
-          'AMP': "You prepare a table before me in the presence of my enemies. You have anointed and refreshed my head with oil; My cup overflows.",
-          'CEV': "You treat me to a feast, while my enemies watch. You honor me as your guest, and you fill my cup until it overflows.",
-          'NET': "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full.",
-          'CEB': "You set a table for me right in front of my enemies. You bathe my head in oil; my cup is so full it spills over!",
-          'GNT': "You prepare a banquet for me, where all my enemies can see me; you welcome me as an honored guest and fill my cup to the brim."
-        },
-        'psalms 23:5': {
-          'KJV': "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.",
-          'NIV': "You prepare a table before me in the presence of my enemies. You anoint my head with oil; my cup overflows.",
-          'NLT': "You prepare a feast for me in the presence of my enemies. You honor me by anointing my head with oil. My cup overflows with blessings.",
-          'ESV': "You prepare a table before me in the presence of my enemies; you anoint my head with oil; my cup overflows.",
-          'NASB': "You prepare a table before me in the presence of my enemies; You have anointed my head with oil; My cup overflows.",
-          'CSB': "You prepare a table before me in the presence of my enemies; you anoint my head with oil; my cup overflows.",
-          'MSG': "You serve me a six-course dinner right in front of my enemies. You revive my drooping head; my cup brims with blessing.",
-          'AMP': "You prepare a table before me in the presence of my enemies. You have anointed and refreshed my head with oil; My cup overflows.",
-          'CEV': "You treat me to a feast, while my enemies watch. You honor me as your guest, and you fill my cup until it overflows.",
-          'NET': "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full.",
-          'CEB': "You set a table for me right in front of my enemies. You bathe my head in oil; my cup is so full it spills over!",
-          'GNT': "You prepare a banquet for me, where all my enemies can see me; you welcome me as an honored guest and fill my cup to the brim."
-        },
-        'john 3:16': {
-          'KJV': "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
-          'NIV': "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
-          'NLT': "For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
-          'ESV': "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",
-          'NASB': "For God so loved the world, that He gave His only Son, so that everyone who believes in Him will not perish, but have eternal life.",
-          'CSB': "For God loved the world in this way: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
-          'MSG': "This is how much God loved the world: He gave his Son, his one and only Son. And this is why: so that no one need be destroyed; by believing in him, anyone can have a whole and lasting life.",
-          'AMP': "For God so [greatly] loved and dearly prized the world, that He [even] gave His [One and] only begotten Son, so that whoever believes and trusts in Him [as Savior] shall not perish, but have eternal life.",
-          'CEV': "God loved the people of this world so much that he gave his only Son, so that everyone who has faith in him will have eternal life and never really die.",
-          'NET': "For this is the way God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.",
-          'CEB': "God so loved the world that he gave his only Son, so that everyone who believes in him won't perish but will have eternal life.",
-          'GNT': "For God loved the world so much that he gave his only Son, so that everyone who believes in him may not die but have eternal life."
-        },
-        'romans 8:28': {
-          'KJV': "And we know that all things work together for good to them that love God, to them who are the called according to his purpose.",
-          'NIV': "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.",
-          'NLT': "And we know that God causes everything to work together for the good of those who love God and are called according to his purpose for them.",
-          'ESV': "And we know that for those who love God all things work together for good, for those who are called according to his purpose.",
-          'NASB': "And we know that God causes all things to work together for good to those who love God, to those who are called according to His purpose.",
-          'CSB': "We know that all things work together for the good of those who love God, who are called according to his purpose.",
-          'MSG': "That's why we can be so sure that every detail in our lives of love for God is worked into something good.",
-          'AMP': "And we know [with great confidence] that God [who is deeply concerned about us] causes all things to work together [as a plan] for good for those who love God, to those who are called according to His plan and purpose.",
-          'CEV': "We know that God is always at work for the good of everyone who loves him. They are the ones God has chosen for his purpose.",
-          'NET': "And we know that all things work together for good for those who love God, who are called according to his purpose.",
-          'CEB': "We know that God works all things together for good for the ones who love God, for those who are called according to his purpose.",
-          'GNT': "We know that in all things God works for good with those who love him, those whom he has called according to his purpose."
-        }
-      };
-
-      // Check for version-specific authentic text first
-      const versionTexts = VERSION_SPECIFIC_TEXTS[normalizedReference];
-      if (versionTexts && versionTexts[version.toUpperCase()]) {
-        const authenticText = versionTexts[version.toUpperCase()];
-        console.log(`[Bible Lookup] Found authentic ${version} text for ${reference}`);
-        
-        return res.json({
-          success: true,
-          verse: {
-            reference: reference,
-            text: authenticText,
-            version: version.toUpperCase()
-          }
-        });
-      }
-      
-      // STEP 1: Search database with 42,000+ verses
-      const verses = await storage.getBibleVerses();
-      console.log(`[Bible Lookup] Searching ${verses.length} verses in database...`);
-      
-      // Try exact match first
-      let matchingVerse = verses.find(v => {
-        const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
-        return verseRef === normalizedReference;
-      });
-
-      // Try partial matches if exact match not found
-      if (!matchingVerse) {
-        matchingVerse = verses.find(v => {
-          const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
-          return verseRef.startsWith(normalizedReference) || normalizedReference.startsWith(verseRef);
-        });
-      }
-      
-      // Try broader search if still not found
-      if (!matchingVerse) {
-        matchingVerse = verses.find(v => {
-          const verseRef = v.reference.toLowerCase().replace(/\s+/g, ' ').trim();
-          return verseRef.includes(normalizedReference) || normalizedReference.includes(verseRef);
-        });
-      }
-
       if (matchingVerse) {
-        console.log(`[Bible Lookup] Found saved verse: ${matchingVerse.reference}`);
-        
-        // Check if this verse has version-specific data
-        let finalText = matchingVerse.text; // Default to base text
-        
-        if (matchingVerse.versionData) {
-          try {
-            const versionData = JSON.parse(matchingVerse.versionData);
-            const requestedVersionText = versionData[version.toUpperCase()];
-            
-            if (requestedVersionText) {
-              finalText = requestedVersionText;
-              console.log(`[Bible Lookup] Using version-specific ${version.toUpperCase()} text from database`);
-            } else {
-              console.log(`[Bible Lookup] No ${version.toUpperCase()} text found, using base text`);
-            }
-          } catch (e) {
-            console.log(`[Bible Lookup] Invalid version data, using base text`);
-          }
-        }
+        console.log(`[Bible Lookup] Found verse in database: ${matchingVerse.reference} (${matchingVerse.translation})`);
         
         return res.json({
           success: true,
           verse: {
             reference: matchingVerse.reference,
-            text: finalText,
-            version: version.toUpperCase()
+            text: matchingVerse.text,
+            version: matchingVerse.translation
+          }
+        });
+      }
+      
+      if (fallbackVerse) {
+        console.log(`[Bible Lookup] Found fallback verse: ${fallbackVerse.reference} (${fallbackVerse.translation})`);
+        
+        return res.json({
+          success: true,
+          verse: {
+            reference: fallbackVerse.reference,
+            text: fallbackVerse.text,
+            version: fallbackVerse.translation
           }
         });
       }
 
-      // STEP 2: If not found, provide helpful error message
-      console.log(`[Bible Lookup] No verse found for: "${reference}" in ${verses.length} verses`);
+      // STEP 3: If not found, provide helpful error message
+      console.log(`[Bible Lookup] No verse found for: "${reference}" with version ${version}`);
       res.status(404).json({ 
         message: `Verse not found: ${reference}. Please enter the verse text manually in the field below.`,
         suggestion: "You can copy and paste the verse text from your preferred Bible translation."
