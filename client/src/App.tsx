@@ -27,7 +27,7 @@ import SettingsPage from "@/pages/settings";
 import ChurchClaiming from "@/pages/church-claiming";
 import FreshAudioBible from "@/pages/FreshAudioBible";
 import AudioRoutines from "@/pages/AudioRoutines";
-import VideoLibrary from "@/pages/VideoLibrary";
+import VideoLibrary from "@/pages/video-library";
 import ContactsPage from "@/pages/contacts";
 
 import { useState, useEffect } from "react";
