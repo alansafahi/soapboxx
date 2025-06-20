@@ -36,6 +36,7 @@ export default function FreshAudioBible() {
   
   // State management
   const [selectedMood, setSelectedMood] = useState<string>("");
+  const [isResearchingScripture, setIsResearchingScripture] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState("warm-female");
   const [selectedOpenAIVoice, setSelectedOpenAIVoice] = useState("alloy");
   const [selectedMusicBed, setSelectedMusicBed] = useState("gentle-piano");
@@ -213,6 +214,17 @@ export default function FreshAudioBible() {
     }
   });
 
+  // Effect to handle completion of scripture research
+  useEffect(() => {
+    if (contextualVerses?.verses && isResearchingScripture) {
+      setIsResearchingScripture(false);
+      toast({
+        title: "Scripture Research Complete",
+        description: `Found ${contextualVerses.verses.length} personalized verses for your mood`,
+      });
+    }
+  }, [contextualVerses, isResearchingScripture]);
+
   // Get Bible verses for manual selection with search and filtering
   const { data: manualVersesData, isLoading: loadingManualVerses } = useQuery({
     queryKey: ["/api/bible/verses", currentPage, searchQuery, selectedCategory],
@@ -267,6 +279,13 @@ export default function FreshAudioBible() {
     setSelectedMood(mood);
     setSelectedVerses([]);
     setCurrentRoutine(null);
+    setIsResearchingScripture(true);
+    
+    // Show immediate feedback to user
+    toast({
+      title: "Scripture Research Started",
+      description: "Finding personalized verses for your current mood...",
+    });
   };
 
   // Create audio routine from selected verses
@@ -688,15 +707,24 @@ export default function FreshAudioBible() {
                             key={mood.id}
                             variant={selectedMood === mood.id ? "default" : "outline"}
                             className={`h-auto p-2 sm:p-3 flex flex-col gap-1 sm:gap-2 text-left ${mood.color} ${
-                              selectedMood === mood.id ? 'ring-2 ring-blue-500' : ''
-                            }`}
+                              selectedMood === mood.id ? 'ring-2 ring-purple-500 bg-purple-100 dark:bg-purple-900' : ''
+                            } ${isResearchingScripture && selectedMood === mood.id ? 'animate-pulse' : ''}`}
                             onClick={() => handleMoodSelection(mood.id)}
+                            disabled={isResearchingScripture}
                           >
                             <div className="flex items-center gap-2 w-full">
                               <span className="text-lg sm:text-xl">{mood.icon}</span>
                               <span className="text-xs sm:text-sm font-medium flex-1">{mood.label}</span>
+                              {selectedMood === mood.id && isResearchingScripture && (
+                                <RefreshCw className="h-3 w-3 animate-spin text-purple-600" />
+                              )}
                             </div>
-                            <p className="text-xs opacity-75 text-left leading-tight">{mood.theme}</p>
+                            <p className="text-xs opacity-75 text-left leading-tight">
+                              {selectedMood === mood.id && isResearchingScripture 
+                                ? "Researching scripture..." 
+                                : mood.theme
+                              }
+                            </p>
                           </Button>
                         ))}
                       </div>
