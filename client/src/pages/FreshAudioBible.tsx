@@ -218,12 +218,18 @@ export default function FreshAudioBible() {
   useEffect(() => {
     if (contextualVerses?.verses && isResearchingScripture) {
       setIsResearchingScripture(false);
+      
+      // Find the selected mood details for better messaging
+      const selectedMoodInfo = moodCategories
+        .flatMap(cat => cat.moods)
+        .find(mood => mood.id === selectedMood);
+      
       toast({
-        title: "Scripture Research Complete",
-        description: `Found ${contextualVerses.verses.length} personalized verses for your mood`,
+        title: "Perfect Scripture Match Found!",
+        description: `${contextualVerses.verses.length} verses selected for "${selectedMoodInfo?.label}" based on AI analysis of your spiritual needs`,
       });
     }
-  }, [contextualVerses, isResearchingScripture]);
+  }, [contextualVerses, isResearchingScripture, selectedMood, moodCategories]);
 
   // Get Bible verses for manual selection with search and filtering
   const { data: manualVersesData, isLoading: loadingManualVerses } = useQuery({
@@ -695,12 +701,21 @@ export default function FreshAudioBible() {
               </CardHeader>
               <CardContent className="p-3 sm:p-4 md:p-6">
                 <div className="space-y-4 sm:space-y-6">
-                  {moodCategories.map((category) => (
-                    <div key={category.title} className="space-y-2 sm:space-y-3">
-                      <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-600">
-                        <span className="text-base sm:text-lg">{category.icon}</span>
-                        <h3 className="font-semibold text-gray-800 dark:text-white text-sm sm:text-base">{category.title}</h3>
-                      </div>
+                  {moodCategories.map((category) => {
+                    const hasSelectedMood = category.moods.some(mood => mood.id === selectedMood);
+                    return (
+                      <div key={category.title} className="space-y-2 sm:space-y-3">
+                        <div className={`flex items-center gap-2 pb-2 border-b ${hasSelectedMood ? 'border-purple-300 dark:border-purple-600' : 'border-gray-200 dark:border-gray-600'}`}>
+                          <span className="text-base sm:text-lg">{category.icon}</span>
+                          <h3 className={`font-semibold text-sm sm:text-base ${hasSelectedMood ? 'text-purple-700 dark:text-purple-300' : 'text-gray-800 dark:text-white'}`}>
+                            {category.title}
+                            {hasSelectedMood && (
+                              <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
+                                Active
+                              </span>
+                            )}
+                          </h3>
+                        </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                         {category.moods.map((mood) => (
                           <Button
@@ -729,13 +744,36 @@ export default function FreshAudioBible() {
                         ))}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
 
+            {/* Scripture Research Status */}
+            {selectedMood && isResearchingScripture && (
+              <Card className="border-purple-200 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-800">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <RefreshCw className="h-6 w-6 animate-spin text-purple-600" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-purple-900 dark:text-purple-100">
+                        Researching Scripture for Your Mood
+                      </h3>
+                      <p className="text-sm text-purple-700 dark:text-purple-300">
+                        Our AI is analyzing thousands of verses to find the perfect spiritual guidance for how you're feeling right now...
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 w-full bg-purple-200 dark:bg-purple-800 rounded-full h-2">
+                    <div className="bg-purple-600 h-2 rounded-full animate-pulse" style={{width: '70%'}}></div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Contextual Verse Display */}
-            {selectedMood && (
+            {selectedMood && !isResearchingScripture && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
