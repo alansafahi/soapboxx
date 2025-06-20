@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
@@ -68,6 +69,10 @@ export function setupAuth(app: Express): void {
       const saltRounds = 12;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+      // Generate email verification token
+      const verificationToken = require('crypto').randomBytes(32).toString('hex');
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
       // Create user
       const newUser = await storage.createUser({
         id: Math.random().toString(36).substring(2, 15),
@@ -77,36 +82,30 @@ export function setupAuth(app: Express): void {
         lastName: lastName || '',
         password: hashedPassword,
         role: 'member',
-        isEmailVerified: false,
+        emailVerified: false,
+        emailVerificationToken: verificationToken,
+        emailVerificationSentAt: new Date(),
         churchId: null,
       });
 
-      // Set up session
-      (req.session as any).userId = newUser.id;
-      (req.session as any).user = {
-        id: newUser.id,
-        email: newUser.email,
-        username: newUser.username,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
-      };
-
-      // Force session save before responding
-      req.session.save((err: any) => {
-        if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ message: 'Session creation failed' });
-        }
-        
-        res.status(201).json({
-          id: newUser.id,
-          email: newUser.email,
-          username: newUser.username,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          role: newUser.role,
+      // Send verification email
+      try {
+        await emailService.sendVerificationEmail({
+          email,
+          firstName: firstName || '',
+          token: verificationToken
         });
+        console.log(`Verification email sent to ${email}`);
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError);
+        // Continue with registration even if email fails
+      }
+
+      // DO NOT create session for unverified users
+      res.status(201).json({
+        message: 'Registration successful. Please check your email to verify your account.',
+        email: newUser.email,
+        requiresVerification: true
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -133,6 +132,15 @@ export function setupAuth(app: Express): void {
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
         return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Check if email is verified
+      if (!user.emailVerified) {
+        return res.status(403).json({ 
+          message: 'Please verify your email before logging in. Check your inbox for verification link.',
+          requiresVerification: true,
+          email: user.email
+        });
       }
 
       // Set up session with explicit data structure
