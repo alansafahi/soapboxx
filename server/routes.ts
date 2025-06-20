@@ -227,8 +227,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize AI personalization service
   const aiPersonalizationService = new AIPersonalizationService();
 
+  // PUBLIC API EXEMPTION MIDDLEWARE - Allow specific endpoints to bypass authentication
+  const publicEndpoints = [
+    '/api/bible/verse/',
+    '/api/bible/search',
+    '/api/bible/random',
+    '/api/bible/stats',
+    '/api/test'
+  ];
+
+  // Custom middleware to bypass authentication for public Bible API endpoints
+  app.use((req, res, next) => {
+    const isPublicEndpoint = publicEndpoints.some(endpoint => 
+      req.path.startsWith(endpoint) || req.path === endpoint
+    );
+    
+    if (isPublicEndpoint) {
+      console.log(`📖 Public Bible API access: ${req.method} ${req.path}`);
+      return next(); // Skip authentication for Bible API endpoints
+    }
+    
+    // For all other endpoints, continue to authentication middleware
+    next();
+  });
+
   // PUBLIC BIBLE API ENDPOINTS - No authentication required for spiritual content access
-  // Must be registered BEFORE authentication setup to ensure public access
   
   // Public Bible verse lookup
   app.get('/api/bible/verse/:book/:chapter/:verse', async (req, res) => {
