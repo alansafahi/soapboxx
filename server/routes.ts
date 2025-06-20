@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./standardAuth";
+import { setupProductionAuth, isAuthenticatedProduction } from "./productionAuth";
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";

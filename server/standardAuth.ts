@@ -192,6 +192,67 @@ export function setupAuth(app: Express): void {
     }
   });
 
+  // Email verification endpoint
+  app.get('/api/auth/verify-email', async (req, res) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token) {
+        return res.status(400).json({ message: 'Verification token is required' });
+      }
+
+      // Find user by verification token
+      const user = await storage.getUserByVerificationToken(token as string);
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired verification token' });
+      }
+
+      // Update user as verified
+      await storage.verifyUserEmail(user.id);
+
+      res.json({ message: 'Email verified successfully. You can now log in.' });
+    } catch (error) {
+      console.error('Email verification error:', error);
+      res.status(500).json({ message: 'Email verification failed' });
+    }
+  });
+
+  // Resend verification email endpoint
+  app.post('/api/auth/resend-verification', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (user.emailVerified) {
+        return res.status(400).json({ message: 'Email is already verified' });
+      }
+
+      // Generate new verification token
+      const verificationToken = require('crypto').randomBytes(32).toString('hex');
+      await storage.updateUserVerificationToken(user.id, verificationToken);
+
+      // Send verification email
+      await emailService.sendVerificationEmail({
+        email,
+        firstName: user.firstName || '',
+        token: verificationToken
+      });
+
+      res.json({ message: 'Verification email sent' });
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      res.status(500).json({ message: 'Failed to resend verification email' });
+    }
+  });
+
   // Logout endpoint
   app.post('/api/auth/logout', (req, res) => {
     req.session.destroy((err) => {

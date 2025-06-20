@@ -261,6 +261,9 @@ export interface IStorage {
   getEmailVerificationToken(userId: string): Promise<string | null>;
   verifyEmailToken(token: string): Promise<User | null>;
   markEmailAsVerified(userId: string): Promise<void>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
+  verifyUserEmail(userId: string): Promise<void>;
+  updateUserVerificationToken(userId: string, token: string): Promise<void>;
   
   // Password reset operations
   storePasswordResetToken(userId: string, token: string, expires: Date): Promise<void>;
@@ -800,6 +803,37 @@ export class DatabaseStorage implements IStorage {
         emailVerified: true,
         emailVerificationToken: null,
         emailVerificationSentAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.emailVerificationToken, token));
+    return user;
+  }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationSentAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserVerificationToken(userId: string, token: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        emailVerificationToken: token,
+        emailVerificationSentAt: new Date(),
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));

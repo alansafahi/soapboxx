@@ -1,269 +1,336 @@
-import nodemailer from 'nodemailer';
-import sgMail from '@sendgrid/mail';
-import crypto from 'crypto';
+/**
+ * Production Email Service for SoapBox Super App
+ * Secure email verification and authentication communications
+ */
 
-export interface EmailVerificationData {
+import { MailService } from '@sendgrid/mail';
+
+interface EmailVerificationData {
   email: string;
-  firstName?: string;
+  firstName: string;
   token: string;
 }
 
-export class EmailService {
-  private transporter: nodemailer.Transporter;
-  private useSendGrid: boolean;
+interface PasswordResetData {
+  email: string;
+  firstName: string;
+  token: string;
+}
+
+class EmailService {
+  private mailService: MailService;
+  private isConfigured: boolean = false;
 
   constructor() {
-    this.useSendGrid = !!process.env.SENDGRID_API_KEY;
-    
-    if (this.useSendGrid) {
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
-      console.log('Email service initialized with SendGrid');
-    } else {
-      // Configure nodemailer with a generic SMTP setup
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      console.log('Email service initialized with SMTP');
-    }
+    this.mailService = new MailService();
+    this.configure();
   }
 
-  generateVerificationToken(): string {
-    // Generate a 6-digit numeric code for better user experience
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  }
-
-  async sendVerificationEmail(data: EmailVerificationData): Promise<boolean> {
-    try {
-      const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/api/auth/verify-email?token=${data.token}`;
-      
-      // Always log verification info in development for testing
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`\n=== EMAIL VERIFICATION DEBUG ===`);
-        console.log(`Email: ${data.email}`);
-        console.log(`Verification Token: ${data.token}`);
-        console.log(`Verification URL: ${verificationUrl}`);
-        console.log(`================================\n`);
-      }
-
-      if (this.useSendGrid) {
-        return this.sendWithSendGrid(data, verificationUrl);
-      } else {
-        return this.sendWithSMTP(data, verificationUrl);
-      }
-    } catch (error) {
-      console.error('Error sending verification email:', error);
-      return false;
-    }
-  }
-
-  private async sendWithSendGrid(data: EmailVerificationData, verificationUrl: string): Promise<boolean> {
-    try {
-      const msg = {
-        to: data.email,
-        from: 'support@soapboxsuperapp.com', // Use verified sender address from SendGrid
-        subject: 'Verify Your SoapBox Super App Account',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #5A2671; margin: 0;">SoapBox Super App</h1>
-              <p style="color: #666; margin: 5px 0;">Welcome to Your Spiritual Community</p>
-            </div>
-            
-            <div style="background: #f9f9f9; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-              <h2 style="color: #333; margin-top: 0;">Welcome${data.firstName ? `, ${data.firstName}` : ''}!</h2>
-              
-              <p style="color: #666; line-height: 1.6;">
-                Thank you for joining the SoapBox Super App community. To complete your registration and start connecting with your spiritual community, please verify your email address.
-              </p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <div style="background: #5A2671; color: white; padding: 20px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 24px; letter-spacing: 2px;">
-                  ${data.token}
-                </div>
-              </div>
-              
-              <p style="color: #666; line-height: 1.6; text-align: center;">
-                Enter this verification code in the app to complete your registration.
-              </p>
-              
-              <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
-                This code will expire in 10 minutes for security purposes.
-              </p>
-            </div>
-            
-            <div style="text-align: center; color: #999; font-size: 12px;">
-              <p>© 2025 SoapBox Super App. All rights reserved.</p>
-              <p>Building stronger spiritual communities through technology.</p>
-            </div>
-          </div>
-        `
-      };
-
-      const response = await sgMail.send(msg);
-      console.log('✅ Verification email sent successfully via SendGrid to:', data.email);
-      console.log('SendGrid Response Status:', response[0].statusCode);
-      if (response[0].headers['x-message-id']) {
-        console.log('Message ID:', response[0].headers['x-message-id']);
-      }
-      
-      // Gmail delivery tips for user
-      console.log('\n📧 Gmail Delivery Notes:');
-      console.log('   - Check spam/junk folder');
-      console.log('   - Look for emails from support@soapboxsuperapp.com');
-      console.log('   - Gmail may delay delivery by a few minutes');
-      console.log('   - Email subject: "Verify Your Email - SoapBox Super App"');
-      console.log('   - From: support@soapboxsuperapp.com');
-      
-      return true;
-    } catch (error: any) {
-      console.error('SendGrid email error:', error);
-      
-      // If SendGrid fails due to authentication, provide helpful guidance
-      if (error.code === 403) {
-        console.log('\n⚠️  SendGrid Authentication Error:');
-        console.log('   - Verify your SendGrid API key is valid');
-        console.log('   - Check that the sender email is verified in SendGrid');
-        console.log('   - For testing, the verification code is logged above: ' + data.token);
-        console.log('   - Email would be sent to: ' + data.email);
-        console.log('\n📧 Email Content Preview:');
-        console.log('   Subject: Verify Your SoapBox Super App Account');
-        console.log('   Verification Code: ' + data.token);
-        console.log('   Recipient: ' + data.email);
-      }
-      
-      return false;
-    }
-  }
-
-  private async sendWithSMTP(data: EmailVerificationData, verificationUrl: string): Promise<boolean> {
-    try {
-      // Check if SMTP is properly configured
-      if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.log('SMTP not configured, but token is logged above for testing');
-        return process.env.NODE_ENV === 'development'; // Return true in dev mode
-      }
-      
-      const mailOptions = {
-        from: process.env.SMTP_USER || 'noreply@soapboxsuperapp.com',
-        to: data.email,
-        subject: 'Verify Your SoapBox Super App Account',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #5A2671; margin: 0;">SoapBox Super App</h1>
-              <p style="color: #666; margin: 5px 0;">Welcome to Your Spiritual Community</p>
-            </div>
-            
-            <div style="background: #f9f9f9; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-              <h2 style="color: #333; margin-top: 0;">Welcome${data.firstName ? `, ${data.firstName}` : ''}!</h2>
-              
-              <p style="color: #666; line-height: 1.6;">
-                Thank you for joining the SoapBox Super App community. To complete your registration and start connecting with your spiritual community, please verify your email address.
-              </p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${verificationUrl}" 
-                   style="background: #5A2671; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-                  Verify My Email Address
-                </a>
-              </div>
-              
-              <p style="color: #666; font-size: 14px; line-height: 1.6;">
-                If the button above doesn't work, copy and paste this link into your browser:<br>
-                <a href="${verificationUrl}" style="color: #5A2671;">${verificationUrl}</a>
-              </p>
-            </div>
-            
-            <div style="text-align: center; color: #666; font-size: 12px;">
-              <p>This verification link will expire in 24 hours.</p>
-              <p>If you didn't create an account with SoapBox Super App, please ignore this email.</p>
-            </div>
-          </div>
-        `,
-      };
-
-      // First verify SMTP connection
+  private configure() {
+    if (process.env.SENDGRID_API_KEY) {
       try {
-        await this.transporter.verify();
-        console.log('SMTP connection verified successfully');
-      } catch (verifyError) {
-        console.log('SMTP verification failed:', verifyError.message);
-        // Continue anyway for development testing
+        this.mailService.setApiKey(process.env.SENDGRID_API_KEY);
+        this.isConfigured = true;
+        console.log('SendGrid email service configured successfully');
+      } catch (error) {
+        console.error('Failed to configure SendGrid:', error);
+        this.isConfigured = false;
       }
-      
-      // Send the email
-      const result = await this.transporter.sendMail(mailOptions);
-      console.log('Email sent successfully:', result.messageId);
-      return true;
-      
-    } catch (error) {
-      console.error('Failed to send verification email:', error.message);
-      
-      // In development, still return true since we log the token
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Email delivery failed but token is logged above for testing');
-        return true;
-      }
-      
-      return false;
+    } else {
+      console.warn('SENDGRID_API_KEY not found - email service disabled');
+      this.isConfigured = false;
     }
   }
 
-  async sendWelcomeEmail(email: string, firstName?: string): Promise<boolean> {
-    try {
-      const mailOptions = {
-        from: process.env.FROM_EMAIL || 'noreply@soapboxsuperapp.com',
-        to: email,
-        subject: 'Welcome to SoapBox Super App!',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #5A2671; margin: 0;">SoapBox Super App</h1>
-              <p style="color: #666; margin: 5px 0;">Your Spiritual Community Awaits</p>
+  async sendVerificationEmail(data: EmailVerificationData): Promise<void> {
+    if (!this.isConfigured) {
+      throw new Error('Email service not configured. Please check SENDGRID_API_KEY.');
+    }
+
+    const baseUrl = process.env.BASE_URL || 'https://www.soapboxapp.org';
+    const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${data.token}`;
+
+    const emailContent = {
+      to: data.email,
+      from: process.env.FROM_EMAIL || 'noreply@soapboxapp.org',
+      subject: 'Verify Your SoapBox Account',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verify Your SoapBox Account</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+            .container { max-width: 600px; margin: 0 auto; background-color: white; }
+            .header { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); padding: 40px 20px; text-align: center; }
+            .logo { color: white; font-size: 32px; font-weight: bold; margin-bottom: 10px; }
+            .tagline { color: #e9d5ff; font-size: 16px; }
+            .content { padding: 40px 20px; }
+            .greeting { font-size: 18px; color: #374151; margin-bottom: 20px; }
+            .message { color: #6b7280; line-height: 1.6; margin-bottom: 30px; }
+            .button { display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+            .button:hover { background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%); }
+            .footer { padding: 20px; text-align: center; color: #9ca3af; font-size: 14px; border-top: 1px solid #e5e7eb; }
+            .security { background-color: #fef3c7; border: 1px solid #fbbf24; border-radius: 6px; padding: 15px; margin: 20px 0; color: #92400e; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">SoapBox</div>
+              <div class="tagline">Faith Community Platform</div>
             </div>
             
-            <div style="background: #f9f9f9; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-              <h2 style="color: #333; margin-top: 0;">Welcome to the Community${firstName ? `, ${firstName}` : ''}!</h2>
+            <div class="content">
+              <div class="greeting">Welcome to SoapBox, ${data.firstName}!</div>
               
-              <p style="color: #666; line-height: 1.6;">
-                Your email has been successfully verified! You're now ready to explore all the features SoapBox Super App has to offer:
-              </p>
+              <div class="message">
+                Thank you for joining our faith community platform. To complete your registration and secure your account, please verify your email address by clicking the button below:
+              </div>
               
-              <ul style="color: #666; line-height: 1.8;">
-                <li>Connect with local churches and communities</li>
-                <li>Join prayer walls and share requests</li>
-                <li>Read daily Bible verses and devotionals</li>
-                <li>Participate in events and volunteer opportunities</li>
-                <li>Make secure donations to support ministries</li>
-              </ul>
+              <div style="text-align: center;">
+                <a href="${verificationUrl}" class="button">Verify Email Address</a>
+              </div>
               
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.BASE_URL || 'http://localhost:5000'}" 
-                   style="background: #5A2671; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-                  Explore SoapBox Super App
-                </a>
+              <div class="security">
+                <strong>Security Notice:</strong> This verification link will expire in 24 hours. If you didn't create a SoapBox account, you can safely ignore this email.
+              </div>
+              
+              <div class="message">
+                If the button doesn't work, you can copy and paste this link into your browser:<br>
+                <a href="${verificationUrl}" style="color: #7c3aed; word-break: break-all;">${verificationUrl}</a>
+              </div>
+              
+              <div class="message">
+                Once verified, you'll have access to:
+                <ul style="color: #6b7280; margin-top: 10px;">
+                  <li>Daily Bible readings and spiritual content</li>
+                  <li>Prayer wall and community discussions</li>
+                  <li>Church discovery and connection tools</li>
+                  <li>AI-powered spiritual guidance features</li>
+                </ul>
               </div>
             </div>
             
-            <div style="text-align: center; color: #666; font-size: 12px;">
-              <p>Need help getting started? Contact our support team anytime.</p>
+            <div class="footer">
+              <p>© 2025 SoapBox Super App - Connecting Faith Communities</p>
+              <p>If you have questions, contact us at support@soapboxapp.org</p>
             </div>
           </div>
-        `,
-      };
+        </body>
+        </html>
+      `,
+      text: `
+        Welcome to SoapBox, ${data.firstName}!
+        
+        Thank you for joining our faith community platform. To complete your registration and secure your account, please verify your email address by visiting:
+        
+        ${verificationUrl}
+        
+        This verification link will expire in 24 hours. If you didn't create a SoapBox account, you can safely ignore this email.
+        
+        Once verified, you'll have access to daily Bible readings, prayer wall, community discussions, church discovery tools, and AI-powered spiritual guidance features.
+        
+        © 2025 SoapBox Super App - Connecting Faith Communities
+        Questions? Contact us at support@soapboxapp.org
+      `
+    };
 
-      await this.transporter.sendMail(mailOptions);
-      return true;
+    try {
+      await this.mailService.send(emailContent);
+      console.log(`Verification email sent successfully to ${data.email}`);
+    } catch (error) {
+      console.error('Failed to send verification email:', error);
+      throw new Error('Failed to send verification email');
+    }
+  }
+
+  async sendPasswordResetEmail(data: PasswordResetData): Promise<void> {
+    if (!this.isConfigured) {
+      throw new Error('Email service not configured. Please check SENDGRID_API_KEY.');
+    }
+
+    const baseUrl = process.env.BASE_URL || 'https://www.soapboxapp.org';
+    const resetUrl = `${baseUrl}/reset-password?token=${data.token}`;
+
+    const emailContent = {
+      to: data.email,
+      from: process.env.FROM_EMAIL || 'noreply@soapboxapp.org',
+      subject: 'Reset Your SoapBox Password',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Reset Your SoapBox Password</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+            .container { max-width: 600px; margin: 0 auto; background-color: white; }
+            .header { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); padding: 40px 20px; text-align: center; }
+            .logo { color: white; font-size: 32px; font-weight: bold; margin-bottom: 10px; }
+            .tagline { color: #e9d5ff; font-size: 16px; }
+            .content { padding: 40px 20px; }
+            .greeting { font-size: 18px; color: #374151; margin-bottom: 20px; }
+            .message { color: #6b7280; line-height: 1.6; margin-bottom: 30px; }
+            .button { display: inline-block; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+            .footer { padding: 20px; text-align: center; color: #9ca3af; font-size: 14px; border-top: 1px solid #e5e7eb; }
+            .security { background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 15px; margin: 20px 0; color: #991b1b; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">SoapBox</div>
+              <div class="tagline">Faith Community Platform</div>
+            </div>
+            
+            <div class="content">
+              <div class="greeting">Password Reset Request</div>
+              
+              <div class="message">
+                Hello ${data.firstName}, we received a request to reset your SoapBox account password. Click the button below to create a new password:
+              </div>
+              
+              <div style="text-align: center;">
+                <a href="${resetUrl}" class="button">Reset Password</a>
+              </div>
+              
+              <div class="security">
+                <strong>Security Notice:</strong> This password reset link will expire in 1 hour. If you didn't request this reset, please ignore this email and your password will remain unchanged.
+              </div>
+              
+              <div class="message">
+                If the button doesn't work, you can copy and paste this link into your browser:<br>
+                <a href="${resetUrl}" style="color: #dc2626; word-break: break-all;">${resetUrl}</a>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p>© 2025 SoapBox Super App - Connecting Faith Communities</p>
+              <p>If you have questions, contact us at support@soapboxapp.org</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Password Reset Request
+        
+        Hello ${data.firstName}, we received a request to reset your SoapBox account password. Visit the following link to create a new password:
+        
+        ${resetUrl}
+        
+        This password reset link will expire in 1 hour. If you didn't request this reset, please ignore this email and your password will remain unchanged.
+        
+        © 2025 SoapBox Super App - Connecting Faith Communities
+        Questions? Contact us at support@soapboxapp.org
+      `
+    };
+
+    try {
+      await this.mailService.send(emailContent);
+      console.log(`Password reset email sent successfully to ${data.email}`);
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+      throw new Error('Failed to send password reset email');
+    }
+  }
+
+  async sendWelcomeEmail(email: string, firstName: string): Promise<void> {
+    if (!this.isConfigured) {
+      console.log('Email service not configured - skipping welcome email');
+      return;
+    }
+
+    const emailContent = {
+      to: email,
+      from: process.env.FROM_EMAIL || 'noreply@soapboxapp.org',
+      subject: 'Welcome to SoapBox - Your Spiritual Journey Begins!',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome to SoapBox</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+            .container { max-width: 600px; margin: 0 auto; background-color: white; }
+            .header { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); padding: 40px 20px; text-align: center; }
+            .logo { color: white; font-size: 32px; font-weight: bold; margin-bottom: 10px; }
+            .tagline { color: #e9d5ff; font-size: 16px; }
+            .content { padding: 40px 20px; }
+            .greeting { font-size: 18px; color: #374151; margin-bottom: 20px; }
+            .message { color: #6b7280; line-height: 1.6; margin-bottom: 30px; }
+            .feature { background-color: #f8fafc; border-radius: 8px; padding: 20px; margin: 15px 0; }
+            .feature-title { font-weight: 600; color: #374151; margin-bottom: 10px; }
+            .button { display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+            .footer { padding: 20px; text-align: center; color: #9ca3af; font-size: 14px; border-top: 1px solid #e5e7eb; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">SoapBox</div>
+              <div class="tagline">Faith Community Platform</div>
+            </div>
+            
+            <div class="content">
+              <div class="greeting">Welcome to SoapBox, ${firstName}! 🙏</div>
+              
+              <div class="message">
+                Your email has been verified and your spiritual journey with our community begins now. SoapBox is designed to strengthen your faith and connect you with fellow believers.
+              </div>
+              
+              <div class="feature">
+                <div class="feature-title">📖 Daily Bible Readings</div>
+                Start each day with guided scripture reading across 17 Bible translations with audio narration.
+              </div>
+              
+              <div class="feature">
+                <div class="feature-title">🙏 Prayer Wall</div>
+                Share prayer requests and support others in their spiritual needs with our caring community.
+              </div>
+              
+              <div class="feature">
+                <div class="feature-title">⛪ Church Discovery</div>
+                Find and connect with local churches that match your denomination and community preferences.
+              </div>
+              
+              <div class="feature">
+                <div class="feature-title">🤖 AI Spiritual Guidance</div>
+                Receive personalized spiritual content and prayer assistance powered by advanced AI technology.
+              </div>
+              
+              <div style="text-align: center;">
+                <a href="${process.env.BASE_URL || 'https://www.soapboxapp.org'}" class="button">Start Your Journey</a>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p>© 2025 SoapBox Super App - Connecting Faith Communities</p>
+              <p>Questions? We're here to help at support@soapboxapp.org</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    try {
+      await this.mailService.send(emailContent);
+      console.log(`Welcome email sent successfully to ${email}`);
     } catch (error) {
       console.error('Failed to send welcome email:', error);
-      return false;
+      // Don't throw error for welcome emails - not critical
     }
+  }
+
+  isEmailServiceConfigured(): boolean {
+    return this.isConfigured;
   }
 }
 
