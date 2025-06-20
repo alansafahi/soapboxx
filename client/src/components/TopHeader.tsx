@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
@@ -186,6 +186,12 @@ export default function TopHeader() {
               <DropdownMenuItem className="cursor-pointer">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Messages
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/contacts">
+              <DropdownMenuItem className="cursor-pointer">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Contacts
               </DropdownMenuItem>
             </Link>
             <Link href="/community">
