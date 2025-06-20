@@ -2650,7 +2650,8 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   });
 
   // Comprehensive Bible verse lookup with instant access
-  app.get('/api/bible/verse/:book/:chapter/:verse', isAuthenticated, async (req: any, res) => {
+  // Public Bible verse lookup (no authentication required)
+  app.get('/api/bible/verse/:book/:chapter/:verse', async (req, res) => {
     try {
       const { book, chapter, verse } = req.params;
       const { translation = 'NIV' } = req.query;
@@ -2669,8 +2670,8 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Advanced Bible verse search across all translations
-  app.get('/api/bible/search', isAuthenticated, async (req: any, res) => {
+  // Public Bible verse search across all translations  
+  app.get('/api/bible/search', async (req, res) => {
     try {
       const { q: query, translation = 'NIV', limit = 20 } = req.query;
       
@@ -2698,7 +2699,8 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   });
 
   // Random inspirational verse for daily reading
-  app.get('/api/bible/random', isAuthenticated, async (req: any, res) => {
+  // Public random Bible verse (no authentication required)
+  app.get('/api/bible/random', async (req, res) => {
     try {
       const { translation = 'NIV' } = req.query;
       
@@ -2717,7 +2719,8 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   });
 
   // Bible database statistics
-  app.get('/api/bible/stats', isAuthenticated, async (req: any, res) => {
+  // Public Bible database statistics (no authentication required)
+  app.get('/api/bible/stats', async (req, res) => {
     try {
       const stats = await storage.getBibleStats();
       
