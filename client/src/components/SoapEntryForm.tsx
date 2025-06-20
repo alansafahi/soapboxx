@@ -449,7 +449,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       const verseText = response.verse?.text || response.text;
       const verseRef = response.verse?.reference || response.reference || reference;
       
-      if (verseText && !verseText.includes('[') && !verseText.includes('text for')) {
+      // Check if verse text is authentic (not placeholder text)
+      const isAuthentic = verseText && 
+        !verseText.includes('[') && 
+        !verseText.includes('text for') &&
+        !verseText.includes('The word came according to') &&
+        !verseText.includes('Scripture from') &&
+        !verseText.includes('Biblical truth from') &&
+        verseText.length > 20; // Authentic verses are typically longer than placeholders
+      
+      if (isAuthentic) {
         form.setValue('scripture', verseText);
         toast({
           title: "Scripture Found",
