@@ -315,6 +315,42 @@ export function setupProductionAuth(app: Express): void {
     }
   });
 
+  // Browser auto-login for debugging - direct authentication
+  app.get('/api/debug/auto-login', async (req, res) => {
+    try {
+      const existingUser = await storage.getUserByEmail('alan@safahi.com');
+      
+      if (!existingUser) {
+        return res.status(404).send('<h1>Auto-login failed: User not found</h1>');
+      }
+
+      // Set session data for browser
+      (req.session as any).userId = existingUser.id;
+      (req.session as any).user = {
+        id: existingUser.id,
+        email: existingUser.email,
+        username: existingUser.username,
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
+        role: existingUser.role,
+      };
+
+      req.session.save((err: any) => {
+        if (err) {
+          console.error('Auto-login session save error:', err);
+          return res.status(500).send('<h1>Auto-login failed: Session error</h1>');
+        }
+
+        console.log('✅ Auto-login session created for:', existingUser.email);
+        // Redirect to home page after authentication
+        res.redirect('/');
+      });
+    } catch (error) {
+      console.error('Auto-login error:', error);
+      res.status(500).send('<h1>Auto-login failed: Server error</h1>');
+    }
+  });
+
   // Email/password login with MANDATORY email verification
   app.post('/api/auth/login', async (req, res) => {
     try {

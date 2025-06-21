@@ -33,6 +33,7 @@ const FreshAudioBible = lazy(() => import("@/pages/FreshAudioBible"));
 const AudioRoutines = lazy(() => import("@/pages/AudioRoutines"));
 const VideoLibrary = lazy(() => import("@/pages/video-library"));
 const ContactsPage = lazy(() => import("@/pages/contacts"));
+const LoginDebugPage = lazy(() => import("@/pages/login-debug"));
 
 function AppRouter() {
     const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading } = useDirectAuth();
@@ -77,6 +78,7 @@ function AppRouter() {
                                     <Route path="/login" component={LoginPage} />
                                     <Route path="/reset-password" component={ResetPasswordPage} />
                                     <Route path="/" component={finalIsAuthenticated ? Home : Landing} />
+                                    <Route path="/login-debug" component={LoginDebugPage} />
                                     <ProtectedRoute path="/bible" component={BiblePage} />
                                     <ProtectedRoute path="/audio-bible" component={FreshAudioBible} />
                                     <ProtectedRoute path="/audio-routines" component={AudioRoutines} />
