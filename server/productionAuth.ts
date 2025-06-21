@@ -256,9 +256,16 @@ export function setupProductionAuth(app: Express): void {
     res.redirect('/login');
   });
 
-  // GET route for /api/login - redirect to frontend login page
-  app.get('/api/login', (req, res) => {
-    res.redirect('/login');
+  // Debug endpoint to test session functionality
+  app.get('/api/debug/session', (req, res) => {
+    const session = req.session as any;
+    res.json({
+      hasSession: !!session,
+      sessionId: req.sessionID,
+      userId: session?.userId,
+      user: session?.user,
+      sessionData: session
+    });
   });
 
   // Email/password login with MANDATORY email verification
@@ -561,7 +568,15 @@ export function isAuthenticatedProduction(req: any, res: any, next: any) {
   const sessionUser = (req.session as any)?.user;
   const userId = (req.session as any)?.userId;
   
+  console.log('🔐 Authentication check:', {
+    hasSession: !!req.session,
+    sessionUser: !!sessionUser,
+    userId,
+    sessionId: req.sessionID
+  });
+  
   if (!sessionUser || !userId) {
+    console.log('❌ Authentication failed - no session data');
     return res.status(401).json({ 
       success: false,
       message: 'Unauthorized' 
@@ -575,5 +590,6 @@ export function isAuthenticatedProduction(req: any, res: any, next: any) {
     ...sessionUser
   };
   
+  console.log('✅ Authentication successful for user:', sessionUser.email);
   next();
 }
