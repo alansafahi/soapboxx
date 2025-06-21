@@ -19,7 +19,7 @@ Apple Sign-In returns "Invalid client" error because the Service ID configuratio
 2. Click "Configure" next to "Sign in with Apple"
 3. Under "Return URLs", add this exact URL:
    ```
-   https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/auth/apple/callback
+   https://soapboxsuperapp.com/auth/callback
    ```
 4. Click "Save" and then "Continue"
 5. Click "Save" again to confirm changes
