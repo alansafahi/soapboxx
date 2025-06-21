@@ -144,7 +144,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 ## Recent Changes
 - June 21, 2025: APPLE SIGN-IN AUTHENTICATION COMPLETELY FIXED - Successfully updated Apple authentication with correct Service ID and domain configuration
   - APPLE CLIENT ID CORRECTED: Updated to "com.soapboxsuperapp.signin" matching actual Apple Developer Console Service ID
-  - FRESH CLIENT SECRET GENERATED: New JWT token created for correct Service ID, expires December 18, 2025
+  - FRESH CLIENT SECRET REGENERATED: New JWT token created for SoapBox SignIn Key (A9J6FBJP8J), expires December 18, 2025
   - DOMAIN MISMATCH RESOLVED: Apple callback URL corrected to https://www.soapboxapp.org/auth/callback matching actual production domain
   - APPLE DEVELOPER CONSOLE SYNCHRONIZED: Configuration matches screenshots with callback URLs soapboxapp.org and https://www.soapboxapp.org/auth/callback
   - PRODUCTION READY: Apple Sign-In fully operational with correct Service ID, domain, and fresh authentication credentials
