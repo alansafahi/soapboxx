@@ -259,13 +259,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { book, chapter, verse } = req.params;
       const { translation = 'NIV' } = req.query;
       
-      const result = await getVerseInstant(book, parseInt(chapter), parseInt(verse), translation);
+      const verseData = await storage.getBibleVerse(book, parseInt(chapter), parseInt(verse), translation as string);
       
-      if (result.success) {
-        console.log(`✅ Public verse lookup: ${result.verse.reference} (${translation})`);
-        res.json(result.verse);
+      if (verseData) {
+        console.log(`✅ Public verse lookup: ${book} ${chapter}:${verse} (${translation})`);
+        res.json(verseData);
       } else {
-        res.status(404).json({ message: "Verse not found", error: result.error });
+        res.status(404).json({ message: "Verse not found" });
       }
     } catch (error) {
       console.error("Error fetching verse:", error);
@@ -2796,7 +2796,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         return res.status(400).json({ message: "Search query is required" });
       }
       
-      const result = await searchVerses(query, translation, parseInt(limit));
+      const verses = await storage.searchBibleVerses(query as string, translation as string, parseInt(limit as string));
       
       if (result.success) {
         console.log(`📚 Bible search "${query}" in ${translation}: ${result.count} verses found`);
