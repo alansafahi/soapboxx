@@ -18,7 +18,6 @@ import OpenAI from "openai";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import sgMail from "@sendgrid/mail";
 import bcrypt from "bcrypt";
