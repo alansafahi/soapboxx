@@ -73,7 +73,7 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
         /* Header styles */
         .header-section {
           background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-          padding: 24px 20px;
+          padding: 16px 20px;
           text-align: center;
         }
         .logo-container {
@@ -219,8 +219,7 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
                     <tr>
                       <td>
 
-                        <div class="brand-name">SoapBox Super App</div>
-                        <div class="tagline">Faith Community Platform</div>
+                        <div class="tagline">Email Verification</div>
                       </td>
                     </tr>
                   </table>
@@ -419,7 +418,6 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
               <tr>
                 <td class="header-section">
 
-                  <div class="brand-name">SoapBox Super App</div>
                   <div class="tagline">Password Reset Request</div>
                 </td>
               </tr>
