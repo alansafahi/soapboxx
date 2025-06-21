@@ -61,7 +61,7 @@ export function configurePassport() {
 
   // Google OAuth Strategy with production domain callback URL
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    // Use production domain for OAuth callback
+    // Use production domain for OAuth callback (updated for deployment)
     const baseUrl = 'https://www.soapboxapp.org';
     
     console.log(`🔗 Google OAuth callback URL: ${baseUrl}/api/auth/google/callback`);
