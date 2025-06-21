@@ -4,6 +4,7 @@
  */
 
 import { MailService } from '@sendgrid/mail';
+import { createVerificationEmailTemplate, createPasswordResetEmailTemplate } from './professional-email-template';
 
 interface EmailVerificationData {
   email: string;
@@ -123,7 +124,7 @@ class EmailService {
             
             <div class="footer">
               <p>© 2025 SoapBox Super App - Connecting Faith Communities</p>
-              <p>If you have questions, contact us at support@soapboxapp.org</p>
+              <p>If you have questions, contact us at support@soapboxsuperapp.com</p>
             </div>
           </div>
         </body>
@@ -141,7 +142,7 @@ class EmailService {
         Once verified, you'll have access to daily Bible readings, prayer wall, community discussions, church discovery tools, and AI-powered spiritual guidance features.
         
         © 2025 SoapBox Super App - Connecting Faith Communities
-        Questions? Contact us at support@soapboxapp.org
+        Questions? Contact us at support@soapboxsuperapp.com
       `
     };
 
@@ -228,7 +229,7 @@ class EmailService {
             
             <div class="footer">
               <p>© 2025 SoapBox Super App - Connecting Faith Communities</p>
-              <p>If you have questions, contact us at support@soapboxapp.org</p>
+              <p>If you have questions, contact us at support@soapboxsuperapp.com</p>
             </div>
           </div>
         </body>
@@ -244,7 +245,7 @@ class EmailService {
         This password reset link will expire in 1 hour. If you didn't request this reset, please ignore this email and your password will remain unchanged.
         
         © 2025 SoapBox Super App - Connecting Faith Communities
-        Questions? Contact us at support@soapboxapp.org
+        Questions? Contact us at support@soapboxsuperapp.com
       `
     };
 
@@ -330,7 +331,7 @@ class EmailService {
             
             <div class="footer">
               <p>© 2025 SoapBox Super App - Connecting Faith Communities</p>
-              <p>Questions? We're here to help at support@soapboxapp.org</p>
+              <p>Questions? We're here to help at support@soapboxsuperapp.com</p>
             </div>
           </div>
         </body>
