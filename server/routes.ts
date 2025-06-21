@@ -509,75 +509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Google OAuth routes
-  app.get("/api/auth/google", (req, res) => {
-    // Redirect to Google OAuth
-    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=${process.env.GOOGLE_CLIENT_ID}&` +
-      `redirect_uri=${encodeURIComponent(`${req.protocol}://${req.get('host')}/api/auth/google/callback`)}&` +
-      `response_type=code&` +
-      `scope=email profile&` +
-      `state=${crypto.randomUUID()}`;
-    
-    res.redirect(googleAuthUrl);
-  });
-
-  app.get("/api/auth/google/callback", async (req, res) => {
-    try {
-      const { code } = req.query;
-      
-      // Exchange code for tokens
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          client_id: process.env.GOOGLE_CLIENT_ID!,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-          code: code as string,
-          grant_type: 'authorization_code',
-          redirect_uri: `${req.protocol}://${req.get('host')}/api/auth/google/callback`,
-        }),
-      });
-
-      const tokens = await tokenResponse.json();
-      
-      // Get user info from Google
-      const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: {
-          Authorization: `Bearer ${tokens.access_token}`,
-        },
-      });
-
-      const googleUser = await userResponse.json();
-      
-      // Check if user exists or create new one
-      let user = await storage.getUserByEmail(googleUser.email);
-      if (!user) {
-        user = await storage.createUser({
-          id: crypto.randomUUID(),
-          email: googleUser.email,
-          username: googleUser.email.split('@')[0],
-          firstName: googleUser.given_name || '',
-          lastName: googleUser.family_name || '',
-          profileImageUrl: googleUser.picture || null,
-          role: "member",
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
-      }
-
-      // Set session
-      req.session.userId = user.id;
-      req.session.user = user;
-
-      res.redirect('/');
-    } catch (error) {
-      console.error("Google OAuth error:", error);
-      res.redirect('/login?error=oauth_failed');
-    }
-  });
+  // Google OAuth routes are handled by Passport.js in productionAuth.ts
 
   // Apple ID OAuth routes (Sign in with Apple)
   app.get("/api/auth/apple", (req, res) => {
