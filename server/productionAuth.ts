@@ -432,7 +432,7 @@ export function isAuthenticatedProduction(req: any, res: any, next: any) {
   if (!sessionUser || !userId) {
     return res.status(401).json({ 
       success: false,
-      message: 'Authentication required' 
+      message: 'Unauthorized' 
     });
   }
   

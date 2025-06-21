@@ -92,27 +92,7 @@ export default function LoginPage() {
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       }
     } catch (error: any) {
-      let userFriendlyMessage = isLogin ? "Unable to sign in" : "Unable to create account";
-      
-      if (!isLogin) {
-        if (error.message?.includes("already exists") || error.message?.includes("User already exists")) {
-          userFriendlyMessage = "An account with this email address already exists. Please try signing in instead.";
-        } else if (error.message?.includes("validation") || error.message?.includes("required")) {
-          userFriendlyMessage = "Please fill in all required fields with valid information.";
-        } else if (error.message?.includes("email")) {
-          userFriendlyMessage = "Please enter a valid email address.";
-        } else if (error.message?.includes("password")) {
-          userFriendlyMessage = "Please choose a stronger password with at least 8 characters.";
-        } else {
-          userFriendlyMessage = "We couldn't create your account right now. Please try again.";
-        }
-      }
-      
-      toast({
-        title: userFriendlyMessage,
-        description: isLogin ? "Please check your credentials and try again." : "If the problem continues, please contact support.",
-        variant: "destructive",
-      });
+      toast(formatErrorForToast(error, isLogin ? 'login' : 'registration'));
     } finally {
       setIsLoading(false);
     }
@@ -136,19 +116,7 @@ export default function LoginPage() {
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
     } catch (error: any) {
-      let errorMessage = "We couldn't send the reset email right now.";
-      
-      if (error.message?.includes("not found") || error.message?.includes("No user found")) {
-        errorMessage = "We couldn't find an account with that email address.";
-      } else if (error.message?.includes("email")) {
-        errorMessage = "Please enter a valid email address.";
-      }
-      
-      toast({
-        title: "Password reset failed",
-        description: errorMessage + " Please try again or contact support if the problem continues.",
-        variant: "destructive",
-      });
+      toast(formatErrorForToast(error, 'general'));
     } finally {
       setIsLoading(false);
     }
