@@ -295,42 +295,27 @@ export function setupProductionAuth(app: Express): void {
       const { token } = req.query;
       
       if (!token) {
-        return res.status(400).json({ 
-          success: false,
-          message: 'Verification token is required' 
-        });
+        return res.redirect('/email-verification?error=missing_token');
       }
 
       const user = await storage.getUserByVerificationToken(token as string);
       if (!user) {
-        return res.status(400).json({ 
-          success: false,
-          message: 'Invalid or expired verification token' 
-        });
+        return res.redirect('/email-verification?error=invalid_token');
       }
 
       // Check token age (24 hours max)
       const tokenAge = Date.now() - (user.emailVerificationSentAt?.getTime() || 0);
       if (tokenAge > 24 * 60 * 60 * 1000) {
-        return res.status(400).json({ 
-          success: false,
-          message: 'Verification token has expired. Please request a new one.' 
-        });
+        return res.redirect('/email-verification?error=expired_token');
       }
 
       // Verify user email
       await storage.verifyUserEmail(user.id);
 
-      res.json({ 
-        success: true,
-        message: 'Email verified successfully! You can now log in.' 
-      });
+      res.redirect('/email-verification?success=true');
     } catch (error) {
       console.error('Email verification error:', error);
-      res.status(500).json({ 
-        success: false,
-        message: 'Email verification failed. Please try again.' 
-      });
+      res.redirect('/email-verification?error=verification_failed');
     }
   });
 

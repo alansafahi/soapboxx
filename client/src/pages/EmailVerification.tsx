@@ -13,6 +13,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 export default function EmailVerification() {
   const [, navigate] = useLocation();
   const [token, setToken] = useState("");
+  const [verificationComplete, setVerificationComplete] = useState(false);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
   const { toast } = useToast();
 
   // Get email verification status
@@ -22,14 +24,60 @@ export default function EmailVerification() {
 
 
 
-  // Check for token in URL parameters
+  // Check for URL parameters from email verification links
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token');
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    
     if (urlToken) {
       setToken(urlToken);
     }
-  }, []);
+    
+    // Handle direct verification results from email links
+    if (success === 'true') {
+      setVerificationComplete(true);
+      setVerificationSuccess(true);
+      toast({
+        title: "Email Verified Successfully!",
+        description: "Your email has been verified. You can now log in to your account.",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
+      setTimeout(() => navigate("/login"), 3000);
+    } else if (error) {
+      setVerificationComplete(true);
+      setVerificationSuccess(false);
+      
+      let errorMessage = "Email verification failed. Please try again.";
+      let errorTitle = "Verification Failed";
+      
+      switch (error) {
+        case 'missing_token':
+          errorTitle = "Missing Verification Token";
+          errorMessage = "The verification link is missing a token. Please use the resend button below.";
+          break;
+        case 'invalid_token':
+          errorTitle = "Invalid Verification Token";
+          errorMessage = "This verification link is invalid or has already been used.";
+          break;
+        case 'expired_token':
+          errorTitle = "Verification Link Expired";
+          errorMessage = "This verification link has expired. Please request a new one.";
+          break;
+        case 'verification_failed':
+          errorTitle = "Verification Failed";
+          errorMessage = "Email verification failed due to a system error. Please try again.";
+          break;
+      }
+      
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  }, [navigate, toast]);
 
   // Verify email mutation
   const verifyEmailMutation = useMutation({
@@ -123,7 +171,59 @@ export default function EmailVerification() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {verifyEmailMutation.isSuccess ? (
+          {verificationComplete ? (
+            <div className="text-center space-y-6">
+              {verificationSuccess ? (
+                <div className="space-y-4">
+                  <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-12 w-12 text-green-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-green-800 dark:text-green-200 mb-2">
+                      Email Verified Successfully!
+                    </h2>
+                    <p className="text-green-700 dark:text-green-300 mb-4">
+                      Your email has been verified. You can now access your SoapBox account.
+                    </p>
+                    <Button 
+                      onClick={() => navigate("/login")}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      Continue to Login
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="mx-auto w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                    <AlertCircle className="h-12 w-12 text-red-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
+                      Verification Failed
+                    </h2>
+                    <p className="text-red-700 dark:text-red-300 mb-4">
+                      There was an issue verifying your email. Please try requesting a new verification link.
+                    </p>
+                    <Button 
+                      onClick={handleResendEmail}
+                      disabled={resendMutation.isPending}
+                      className="bg-[#5A2671] hover:bg-[#4A1F5A] text-white"
+                    >
+                      {resendMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        "Send New Verification Email"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : verifyEmailMutation.isSuccess ? (
             <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800 dark:text-green-200">
