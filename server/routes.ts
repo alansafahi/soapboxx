@@ -3,8 +3,10 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./standardAuth";
 import { setupProductionAuth, isAuthenticatedProduction } from "./productionAuth";
+
+// Use production authentication as the primary authentication system
+const isAuthenticated = isAuthenticatedProduction;
 // Bible verse functions integrated directly in storage layer
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
