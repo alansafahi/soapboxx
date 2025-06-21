@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -5,142 +6,116 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useDirectAuth } from "@/lib/directAuth";
 import { FORCE_AUTHENTICATED, MOCK_USER } from "@/lib/forceAuth";
+import { AnimatePresence, motion } from "framer-motion";
 
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
-import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import LoginPage from "@/pages/login";
-import Home from "@/pages/home";
-import BiblePage from "@/pages/bible";
-import Community from "@/pages/community";
-import Churches from "@/pages/churches";
-import Events from "@/pages/events";
-import Prayer from "@/pages/prayer";
-import SoapPage from "@/pages/soap";
-import Messages from "@/pages/messages";
-import Chat from "@/pages/chat";
-import Leaderboard from "@/pages/leaderboard";
-// import EnhancedAdminPortal from "@/pages/admin";
-import Profile from "@/pages/profile";
-import SettingsPage from "@/pages/settings";
-import ChurchClaiming from "@/pages/church-claiming";
-import FreshAudioBible from "@/pages/FreshAudioBible";
-import AudioRoutines from "@/pages/AudioRoutines";
-import VideoLibrary from "@/pages/video-library";
-import ContactsPage from "@/pages/contacts";
 
-import { useState, useEffect } from "react";
+// Lazy-loaded pages
+const NotFound = lazy(() => import("@/pages/not-found"));
+const Landing = lazy(() => import("@/pages/landing"));
+const LoginPage = lazy(() => import("@/pages/login"));
+const Home = lazy(() => import("@/pages/home"));
+const BiblePage = lazy(() => import("@/pages/bible"));
+const Community = lazy(() => import("@/pages/community"));
+const Churches = lazy(() => import("@/pages/churches"));
+const Events = lazy(() => import("@/pages/events"));
+const Prayer = lazy(() => import("@/pages/prayer"));
+const SoapPage = lazy(() => import("@/pages/soap"));
+const Messages = lazy(() => import("@/pages/messages"));
+const Chat = lazy(() => import("@/pages/chat"));
+const Leaderboard = lazy(() => import("@/pages/leaderboard"));
+const Profile = lazy(() => import("@/pages/profile"));
+const SettingsPage = lazy(() => import("@/pages/settings"));
+const ChurchClaiming = lazy(() => import("@/pages/church-claiming"));
+const FreshAudioBible = lazy(() => import("@/pages/FreshAudioBible"));
+const AudioRoutines = lazy(() => import("@/pages/AudioRoutines"));
+const VideoLibrary = lazy(() => import("@/pages/video-library"));
+const ContactsPage = lazy(() => import("@/pages/contacts"));
 
 function AppRouter() {
-  // Use direct authentication bypassing React Query issues
-  const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading } = useDirectAuth();
-  
-  // Override authentication state for immediate access
-  const finalIsAuthenticated = FORCE_AUTHENTICATED || currentIsAuthenticated;
-  const finalUser = FORCE_AUTHENTICATED ? MOCK_USER : currentUser;
-  const [location] = useLocation();
-  
-  // Minimal state for stable operation
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+    const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading } = useDirectAuth();
+    const finalIsAuthenticated = FORCE_AUTHENTICATED || currentIsAuthenticated;
+    const finalUser = FORCE_AUTHENTICATED ? MOCK_USER : currentUser;
+    const [location] = useLocation();
 
-  // Global error handler
-  useEffect(() => {
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      console.log('Promise rejection handled:', event.reason);
-      event.preventDefault();
-    };
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-  }, []);
-
-  // Extract referral code from URL parameters
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    if (refCode) {
-      setReferralCode(refCode);
-      localStorage.setItem('pendingReferralCode', refCode);
-    } else {
-      const storedRefCode = localStorage.getItem('pendingReferralCode');
-      if (storedRefCode) {
-        setReferralCode(storedRefCode);
-      }
+    if (currentIsLoading && !FORCE_AUTHENTICATED) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
     }
-  }, [location]);
 
-  // Debug authentication state
-  console.log('🔥 AUTH STATE:', { finalIsAuthenticated, currentIsLoading, finalUser: finalUser?.email });
-
-  // Show loading spinner during initial auth check
-  if (currentIsLoading && !FORCE_AUTHENTICATED) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+    const ProtectedRoute = ({ component: Component, ...rest }) => (
+        <Route {...rest}>
+            {finalIsAuthenticated ? <Component /> : <LoginPage />}
+        </Route>
     );
-  }
 
-  return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {finalIsAuthenticated && (
-        <div className="hidden md:block">
-          <Sidebar />
+    return (
+        <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+            {finalIsAuthenticated && (
+                <div className="hidden md:block">
+                    <Sidebar />
+                </div>
+            )}
+            <div className={finalIsAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
+                {finalIsAuthenticated && <TopHeader />}
+                <main className={finalIsAuthenticated ? "flex-1 overflow-y-auto px-2 sm:px-4 md:px-6 py-2 sm:py-4" : "flex-1"}>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={location}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <Suspense fallback={<div>Loading...</div>}>
+                                <Switch>
+                                    <Route path="/login" component={LoginPage} />
+                                    <Route path="/" component={finalIsAuthenticated ? Home : Landing} />
+                                    <ProtectedRoute path="/bible" component={BiblePage} />
+                                    <ProtectedRoute path="/audio-bible" component={FreshAudioBible} />
+                                    <ProtectedRoute path="/audio-routines" component={AudioRoutines} />
+                                    <ProtectedRoute path="/video-library" component={VideoLibrary} />
+                                    <ProtectedRoute path="/community" component={Community} />
+                                    <ProtectedRoute path="/discussions" component={Community} />
+                                    <ProtectedRoute path="/churches" component={Churches} />
+                                    <ProtectedRoute path="/church-claiming" component={ChurchClaiming} />
+                                    <ProtectedRoute path="/events" component={Events} />
+                                    <ProtectedRoute path="/prayer" component={Prayer} />
+                                    <ProtectedRoute path="/prayer-wall" component={Prayer} />
+                                    <ProtectedRoute path="/soap" component={SoapPage} />
+                                    <ProtectedRoute path="/soap-journal" component={SoapPage} />
+                                    <ProtectedRoute path="/messages" component={Messages} />
+                                    <ProtectedRoute path="/chat" component={Chat} />
+                                    <ProtectedRoute path="/leaderboard" component={Leaderboard} />
+                                    <ProtectedRoute path="/contacts" component={ContactsPage} />
+                                    <ProtectedRoute path="/profile" component={Profile} />
+                                    <ProtectedRoute path="/settings" component={SettingsPage} />
+                                    <Route path="*" component={NotFound} />
+                                </Switch>
+                            </Suspense>
+                        </motion.div>
+                    </AnimatePresence>
+                </main>
+            </div>
         </div>
-      )}
-      <div className={finalIsAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
-        {finalIsAuthenticated && <TopHeader />}
-        <main className={finalIsAuthenticated ? "flex-1 overflow-y-auto px-2 sm:px-4 md:px-6 py-2 sm:py-4" : "flex-1"}>
-        <Switch>
-          {!finalIsAuthenticated ? (
-            <>
-              <Route path="/login" component={LoginPage} />
-              <Route path="*" component={Landing} />
-            </>
-          ) : (
-            <>
-              <Route path="/" component={() => <Home referralCode={referralCode} />} />
-              <Route path="/bible" component={BiblePage} />
-              <Route path="/audio-bible" component={FreshAudioBible} />
-              <Route path="/audio-routines" component={AudioRoutines} />
-              <Route path="/video-library" component={VideoLibrary} />
-              <Route path="/community" component={Community} />
-              <Route path="/discussions" component={Community} />
-              <Route path="/churches" component={Churches} />
-              <Route path="/church-claiming" component={ChurchClaiming} />
-              <Route path="/events" component={Events} />
-              <Route path="/prayer" component={Prayer} />
-              <Route path="/prayer-wall" component={Prayer} />
-              <Route path="/soap" component={SoapPage} />
-              <Route path="/soap-journal" component={SoapPage} />
-              <Route path="/messages" component={Messages} />
-              <Route path="/chat" component={Chat} />
-              <Route path="/leaderboard" component={Leaderboard} />
-              <Route path="/contacts" component={ContactsPage} />
-              {/* <Route path="/admin" component={EnhancedAdminPortal} /> */}
-              <Route path="/profile" component={Profile} />
-              <Route path="/settings" component={SettingsPage} />
-              <Route path="*" component={NotFound} />
-            </>
-          )}
-        </Switch>
-        </main>
-      </div>
-    </div>
-  );
+    );
 }
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter>
-          <AppRouter />
-          <Toaster />
-        </WouterRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+    return (
+        <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+                <WouterRouter>
+                    <AppRouter />
+                    <Toaster />
+                </WouterRouter>
+            </TooltipProvider>
+        </QueryClientProvider>
+    );
 }
 
 export default App;
