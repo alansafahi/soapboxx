@@ -142,12 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 21, 2025: APPLE SIGN-IN PRODUCTION CONFIGURATION COMPLETED - Successfully updated Apple authentication to use production callback URL https://soapboxsuperapp.com/auth/callback
-  - PRODUCTION CALLBACK URL CONFIGURED: Updated Apple Strategy to use https://soapboxsuperapp.com/auth/callback instead of development Replit domain
-  - CALLBACK ROUTE ADDED: Created production callback route /auth/callback to handle Apple authentication responses
-  - APPLE DEVELOPER CONSOLE REQUIREMENT: Service ID "com.soapboxsuperapp.auth" needs callback URL https://soapboxsuperapp.com/auth/callback added to Return URLs
-  - TECHNICAL IMPLEMENTATION COMPLETE: Apple Client ID and JWT client secret properly configured for production domain
-  - AUTHENTICATION FLOW READY: System configured to handle Apple Sign-In on production soapboxsuperapp.com domain
+- June 21, 2025: APPLE SIGN-IN DOMAIN MISMATCH FIXED - Successfully corrected Apple authentication to use actual production domain www.soapboxapp.org
+  - DOMAIN CORRECTION: Updated Apple Strategy callback URL from soapboxsuperapp.com to correct domain www.soapboxapp.org/auth/callback
+  - PRODUCTION CALLBACK URL: Apple authentication now configured for https://www.soapboxapp.org/auth/callback to match actual deployment domain
+  - CALLBACK ROUTE OPERATIONAL: Production callback route /auth/callback ready to handle Apple authentication responses
+  - APPLE DEVELOPER CONSOLE UPDATE REQUIRED: Service ID "com.soapboxsuperapp.auth" needs callback URL https://www.soapboxapp.org/auth/callback
+  - TECHNICAL IMPLEMENTATION COMPLETE: Apple Client ID and JWT client secret properly configured for correct production domain
+  - AUTHENTICATION FLOW READY: System configured to handle Apple Sign-In on actual production www.soapboxapp.org domain
 - June 21, 2025: APPLE SIGN-IN TECHNICAL IMPLEMENTATION COMPLETED - Successfully configured correct Apple Client ID and generated matching client secret for Service ID "com.soapboxsuperapp.auth"
   - CREDENTIALS FIXED: Updated APPLE_CLIENT_ID to correct value "com.soapboxsuperapp.auth" (was incorrectly set to "app.soapboxsuperapp.signin")
   - JWT CLIENT SECRET GENERATED: Fresh token created with proper Service ID matching: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkE5SjZGQkpQOEoifQ...

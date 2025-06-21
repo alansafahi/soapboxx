@@ -104,7 +104,7 @@ export function configurePassport() {
 
   // Apple Sign-In Strategy
   if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET) {
-    const productionCallbackUrl = 'https://soapboxsuperapp.com/auth/callback';
+    const productionCallbackUrl = 'https://www.soapboxapp.org/auth/callback';
     
     console.log(`🍎 Apple OAuth callback URL: ${productionCallbackUrl}`);
     
