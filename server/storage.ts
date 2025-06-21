@@ -269,6 +269,8 @@ export interface IStorage {
   // Password reset operations
   storePasswordResetToken(userId: string, token: string, expires: Date): Promise<void>;
   verifyPasswordResetToken(token: string): Promise<User | undefined>;
+  updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
+  clearPasswordResetToken(userId: string): Promise<void>;
   
   // Tour completion operations
   getTourCompletion(userId: string, tourType: string): Promise<any>;

@@ -15,6 +15,7 @@ import TopHeader from "@/components/TopHeader";
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Landing = lazy(() => import("@/pages/landing"));
 const LoginPage = lazy(() => import("@/pages/login"));
+const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const Home = lazy(() => import("@/pages/home"));
 const BiblePage = lazy(() => import("@/pages/bible"));
 const Community = lazy(() => import("@/pages/community"));
@@ -74,6 +75,7 @@ function AppRouter() {
                             <Suspense fallback={<div>Loading...</div>}>
                                 <Switch>
                                     <Route path="/login" component={LoginPage} />
+                                    <Route path="/reset-password" component={ResetPasswordPage} />
                                     <Route path="/" component={finalIsAuthenticated ? Home : Landing} />
                                     <ProtectedRoute path="/bible" component={BiblePage} />
                                     <ProtectedRoute path="/audio-bible" component={FreshAudioBible} />

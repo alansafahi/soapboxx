@@ -509,6 +509,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset password endpoint
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token and password are required" });
+      }
+
+      // Validate password strength
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
+      // Verify reset token
+      let user;
+      try {
+        user = await storage.verifyPasswordResetToken(token);
+      } catch (dbError) {
+        console.error("Database error during token verification:", dbError);
+        return res.status(500).json({ message: "Service temporarily unavailable" });
+      }
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      // Hash new password
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Update password and clear reset token
+      try {
+        await storage.updateUserPassword(user.id, hashedPassword);
+        await storage.clearPasswordResetToken(user.id);
+      } catch (dbError) {
+        console.error("Database error updating password:", dbError);
+        return res.status(500).json({ message: "Failed to update password" });
+      }
+
+      console.log(`Password reset successful for user: ${user.email}`);
+      res.json({ message: "Password reset successful" });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ message: "Password reset failed" });
+    }
+  });
+
   // Google OAuth routes are handled by Passport.js in productionAuth.ts
 
   // Apple ID OAuth routes (Sign in with Apple)
