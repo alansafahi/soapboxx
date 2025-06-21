@@ -108,11 +108,13 @@ export function configurePassport() {
     
     console.log(`🍎 Apple OAuth redirect URI: ${appleRedirectUri}`);
     
+    console.log(`✅ Apple Client ID: ${process.env.APPLE_CLIENT_ID?.substring(0, 25)}...`);
+    
     passport.use(new AppleStrategy({
-      clientID: 'com.soapboxsuperapp.signin', // VERIFIED Service ID from Apple Developer Console
+      clientID: process.env.APPLE_CLIENT_ID, // Use environment variable
       teamID: 'CGQ7FW7J58', // Apple Team ID
       keyID: 'A9J6FBJP8J', // SoapBox SignIn Key ID
-      privateKeyString: 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkE5SjZGQkpQOEoifQ.eyJpc3MiOiJDR1E3Rlc3SjU4IiwiaWF0IjoxNzUwNTMzNjcxLCJleHAiOjE3NjYwODU2NzEsImF1ZCI6Imh0dHBzOi8vYXBwbGVpZC5hcHBsZS5jb20iLCJzdWIiOiJjb20uc29hcGJveHN1cGVyYXBwLnNpZ25pbiJ9.NOtpppz5EmsZWH2cjCSKdOAhFVxFNnFRAtZ7hGvI5XqpdlYzMyw-cGCJZrvhbInOaPJdrUINuGI2Zxb6zb1Gmw',
+      privateKeyString: process.env.APPLE_CLIENT_SECRET, // Use environment variable
       callbackURL: appleRedirectUri,
       scope: ['name', 'email'],
       passReqToCallback: false

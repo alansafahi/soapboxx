@@ -149,7 +149,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - SOLUTION REQUIRED: Fresh production deployment needed to clear cache and apply updated authentication configuration
   - CLIENT ID CONFIRMED: 435221033929-np303qnu8630q98u086bnt38uqckofph.apps.googleusercontent.com correctly configured
   - AWAITING DEPLOYMENT: Production deployment will resolve OAuth redirect mismatch once cache is cleared
-- June 21, 2025: APPLE SIGN-IN AUTHENTICATION COMPLETELY FIXED - Successfully synchronized with Apple Developer Console using confirmed Service ID from actual screenshots
+- June 21, 2025: APPLE AUTHENTICATION CONFIGURATION FIXED - Discovered mismatch between hardcoded server credentials and environment variables, updated server to use APPLE_CLIENT_ID and APPLE_REDIRECT_URI from secrets
   - APPLE DEVELOPER CONSOLE VERIFIED: Confirmed Service ID "com.soapboxsuperapp.signin" from actual Apple Developer Console screenshots
   - FRESH CLIENT SECRET REGENERATED: New JWT token created matching confirmed Service ID and SoapBox SignIn Key (A9J6FBJP8J)
   - CONFIGURATION SYNCHRONIZED: All Apple authentication parameters now match actual Apple Developer Console configuration
