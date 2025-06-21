@@ -79,6 +79,13 @@ class EmailService {
         <body>
           <div class="container">
             <div class="header">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 80px; height: 80px; background: white; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                  <div style="width: 60px; height: 60px; background: #4C1D95; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: white; font-size: 24px; font-weight: bold;">SB</span>
+                  </div>
+                </div>
+              </div>
               <div class="logo">SoapBox</div>
               <div class="tagline">Faith Community Platform</div>
             </div>
@@ -187,6 +194,13 @@ class EmailService {
         <body>
           <div class="container">
             <div class="header">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 80px; height: 80px; background: white; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                  <div style="width: 60px; height: 60px; background: #4C1D95; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: white; font-size: 24px; font-weight: bold;">SB</span>
+                  </div>
+                </div>
+              </div>
               <div class="logo">SoapBox</div>
               <div class="tagline">Faith Community Platform</div>
             </div>
