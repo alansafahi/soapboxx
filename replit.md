@@ -142,13 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 21, 2025: GOOGLE OAUTH DEPLOYMENT CACHE ISSUE RESOLVED - Updated Google credentials ready for deployment with new Client ID 7813973172-b3anmnq7s5e38079t18j8nsbclqsn1e6.apps.googleusercontent.com
-  - GOOGLE CLOUD CONSOLE VERIFIED: User successfully updated authorized redirect URIs to https://www.soapboxapp.org/api/auth/google/callback
-  - SERVER CONFIGURATION CORRECT: Local development server properly configured with production callback URL
-  - DEPLOYMENT CACHE ISSUE: Production environment still using old soapboxsuperapp.replit.app callback URL despite server restart
-  - SOLUTION REQUIRED: Fresh production deployment needed to clear cache and apply updated authentication configuration
-  - CLIENT ID CONFIRMED: 435221033929-np303qnu8630q98u086bnt38uqckofph.apps.googleusercontent.com correctly configured
-  - AWAITING DEPLOYMENT: Production deployment will resolve OAuth redirect mismatch once cache is cleared
+- June 21, 2025: APPLE SECRETS VERIFIED - All three Apple authentication secrets (APPLE_CLIENT_ID, APPLE_CLIENT_SECRET, APPLE_REDIRECT_URI) confirmed to exist in Replit environment
+  - CLIENT ID: com.soapboxsuperapp.signin correctly configured from secrets
+  - REDIRECT URI: https://www.soapboxapp.org/auth/callback properly set
+  - AUTHENTICATION ENDPOINTS WORKING: Both Apple and Google OAuth redirects responding correctly in development environment
+  - GOOGLE CREDENTIALS READY: New Client ID 7813973172-b3anmnq7s5e38079t18j8nsbclqsn1e6.apps.googleusercontent.com configured locally
+  - DEPLOYMENT SUGGESTED: Production deployment initiated to apply updated authentication configuration and resolve cache issues
 - June 21, 2025: APPLE AUTHENTICATION CONFIGURATION FIXED - Discovered mismatch between hardcoded server credentials and environment variables, updated server to use APPLE_CLIENT_ID and APPLE_REDIRECT_URI from secrets
   - APPLE DEVELOPER CONSOLE VERIFIED: Confirmed Service ID "com.soapboxsuperapp.signin" from actual Apple Developer Console screenshots
   - FRESH CLIENT SECRET REGENERATED: New JWT token created matching confirmed Service ID and SoapBox SignIn Key (A9J6FBJP8J)
