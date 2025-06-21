@@ -31,7 +31,7 @@ export function createVerificationEmailTemplate(data: { firstName: string }, ver
         }
         .header { 
           background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); 
-          padding: 60px 40px; 
+          padding: 40px 40px; 
           text-align: center; 
           position: relative;
         }
@@ -210,17 +210,17 @@ export function createVerificationEmailTemplate(data: { firstName: string }, ver
         <div class="header">
           <div class="logo-container">
             <div class="logo">
-              <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#7c3aed" stroke-width="5"/>
-                <circle cx="50" cy="50" r="30" fill="none" stroke="#7c3aed" stroke-width="3"/>
-                <rect x="46" y="30" width="8" height="40" fill="#7c3aed" rx="2"/>
-                <rect x="30" y="46" width="40" height="8" fill="#7c3aed" rx="2"/>
-                <circle cx="30" cy="35" r="5" fill="none" stroke="#7c3aed" stroke-width="2"/>
-                <circle cx="70" cy="35" r="5" fill="none" stroke="#7c3aed" stroke-width="2"/>
+              <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#7c3aed" stroke-width="6"/>
+                <circle cx="50" cy="50" r="28" fill="none" stroke="#7c3aed" stroke-width="4"/>
+                <rect x="46" y="32" width="8" height="36" fill="#7c3aed" rx="2"/>
+                <rect x="32" y="46" width="36" height="8" fill="#7c3aed" rx="2"/>
+                <circle cx="32" cy="36" r="4" fill="none" stroke="#7c3aed" stroke-width="3"/>
+                <circle cx="68" cy="36" r="4" fill="none" stroke="#7c3aed" stroke-width="3"/>
               </svg>
             </div>
           </div>
-          <div class="brand-name">SoapBox</div>
+          <div class="brand-name">SoapBox Super App</div>
           <div class="tagline">Faith Community Platform</div>
         </div>
         
