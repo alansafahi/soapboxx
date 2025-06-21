@@ -217,16 +217,12 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
                     <tr>
                       <td>
                         <div class="logo-container">
-                          <table role="presentation" style="margin: 0 auto; width: 60px; height: 60px; background: linear-gradient(135deg, #5B2C6F 0%, #A855F7 100%); border-radius: 50%; border: 3px solid rgba(255,255,255,0.3);">
+                          <table role="presentation" style="margin: 0 auto; width: 60px; height: 60px; background-color: #7c3aed; border-radius: 30px; border: 3px solid rgba(255,255,255,0.8);">
                             <tr>
-                              <td style="text-align: center; vertical-align: middle; padding: 0; width: 60px; height: 60px;">
-                                <table role="presentation" style="width: 40px; height: 40px; background: #ffffff; border-radius: 50%; margin: 0 auto;">
-                                  <tr>
-                                    <td style="text-align: center; vertical-align: middle; width: 40px; height: 40px; font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 18px; color: #5B2C6F; letter-spacing: -1px;">
-                                      SB
-                                    </td>
-                                  </tr>
-                                </table>
+                              <td style="text-align: center; vertical-align: middle; padding: 8px; width: 44px; height: 44px;">
+                                <div style="width: 44px; height: 44px; background-color: #ffffff; border-radius: 22px; line-height: 44px; text-align: center; font-family: Arial, sans-serif; font-weight: bold; font-size: 18px; color: #7c3aed;">
+                                  SB
+                                </div>
                               </td>
                             </tr>
                           </table>
@@ -431,11 +427,15 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
               <tr>
                 <td class="header-section">
                   <div class="logo-container">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #5B2C6F 0%, #A855F7 100%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.3);">
-                      <div style="width: 40px; height: 40px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <span style="font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 18px; color: #5B2C6F; letter-spacing: -1px;">SB</span>
-                      </div>
-                    </div>
+                    <table role="presentation" style="margin: 0 auto; width: 60px; height: 60px; background-color: #dc2626; border-radius: 30px; border: 3px solid rgba(255,255,255,0.8);">
+                      <tr>
+                        <td style="text-align: center; vertical-align: middle; padding: 8px; width: 44px; height: 44px;">
+                          <div style="width: 44px; height: 44px; background-color: #ffffff; border-radius: 22px; line-height: 44px; text-align: center; font-family: Arial, sans-serif; font-weight: bold; font-size: 18px; color: #dc2626;">
+                            SB
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
                   </div>
                   <div class="brand-name">SoapBox Super App</div>
                   <div class="tagline">Password Reset Request</div>
