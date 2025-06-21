@@ -104,16 +104,16 @@ export function configurePassport() {
 
   // Apple Sign-In Strategy
   if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET) {
-    const productionCallbackUrl = 'https://www.soapboxapp.org/auth/callback';
+    const appleRedirectUri = process.env.APPLE_REDIRECT_URI || 'https://www.soapboxapp.org/auth/callback';
     
-    console.log(`🍎 Apple OAuth callback URL: ${productionCallbackUrl}`);
+    console.log(`🍎 Apple OAuth redirect URI: ${appleRedirectUri}`);
     
     passport.use(new AppleStrategy({
       clientID: 'com.soapboxsuperapp.signin', // Corrected Service ID from Apple Developer Console
       teamID: 'CGQ7FW7J58', // Your Apple Team ID
       keyID: 'A9J6FBJP8J', // Your Apple Key ID
       privateKeyString: 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkE5SjZGQkpQOEoifQ.eyJpc3MiOiJDR1E3Rlc3SjU4IiwiaWF0IjoxNzUwNTMyMzE4LCJleHAiOjE3NjYwODQzMTgsImF1ZCI6Imh0dHBzOi8vYXBwbGVpZC5hcHBsZS5jb20iLCJzdWIiOiJjb20uc29hcGJveHN1cGVyYXBwLnNpZ25pbiJ9.q3xrvRudK5M6jhD9YASBJxBOZvRLpk37xIgIF7ksv1ojq_KNE2SBVeDvPxk0SgMnpa5LZk8wilw-mhKQVF_5nQ',
-      callbackURL: productionCallbackUrl,
+      callbackURL: appleRedirectUri,
       scope: ['name', 'email'],
       passReqToCallback: false
     },
