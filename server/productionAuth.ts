@@ -392,10 +392,26 @@ export function setupProductionAuth(app: Express): void {
   );
 
   app.get('/api/auth/google/callback',
-    passport.authenticate('google', { 
-      failureRedirect: '/login?error=oauth_failed',
-      successRedirect: '/'
-    })
+    passport.authenticate('google', { failureRedirect: '/login?error=oauth_failed' }),
+    async (req, res) => {
+      try {
+        // User is authenticated, establish session
+        const user = req.user as any;
+        
+        if (!user) {
+          return res.redirect('/login?error=oauth_failed');
+        }
+
+        // Update last login
+        await storage.updateUserLastLogin(user.id);
+        
+        // Successful authentication - redirect to home
+        res.redirect('/?oauth=success');
+      } catch (error) {
+        console.error('Google OAuth callback error:', error);
+        res.redirect('/login?error=oauth_failed');
+      }
+    }
   );
 
   // Apple OAuth placeholder (requires Apple Developer setup)
