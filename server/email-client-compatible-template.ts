@@ -219,7 +219,8 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
                     <tr>
                       <td>
 
-                        <div class="tagline">Email Verification</div>
+                        <div class="brand-name">SoapBox Super App</div>
+                        <div class="tagline">Faith Community Platform</div>
                       </td>
                     </tr>
                   </table>
@@ -417,8 +418,8 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
             <table role="presentation" class="email-container">
               <tr>
                 <td class="header-section">
-
-                  <div class="tagline">Password Reset Request</div>
+                  <div class="brand-name">SoapBox Super App</div>
+                  <div class="tagline">Faith Community Platform</div>
                 </td>
               </tr>
               

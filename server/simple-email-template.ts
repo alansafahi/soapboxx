@@ -18,7 +18,8 @@ export function createSimpleVerificationEmail(data: { firstName: string }, verif
         <table width="600" cellpadding="20" cellspacing="0" border="0" style="background-color: white; margin: 20px auto;">
           <tr>
             <td align="center">
-              <h1 style="color: #7c3aed; margin: 0; font-size: 28px;">Email Verification</h1>
+              <h1 style="color: #7c3aed; margin: 0; font-size: 28px;">SoapBox Super App</h1>
+              <p style="color: #666; margin: 5px 0;">Faith Community Platform</p>
             </td>
           </tr>
           <tr>
@@ -58,8 +59,8 @@ export function createSimplePasswordResetEmail(data: { firstName: string }, rese
         <table width="600" cellpadding="20" cellspacing="0" border="0" style="background-color: white; margin: 20px auto;">
           <tr>
             <td align="center">
-              <h1 style="color: #dc2626; margin: 0; font-size: 28px;">SoapBox</h1>
-              <p style="color: #666; margin: 5px 0;">Super App - Password Reset Request</p>
+              <h1 style="color: #7c3aed; margin: 0; font-size: 28px;">SoapBox Super App</h1>
+              <p style="color: #666; margin: 5px 0;">Faith Community Platform</p>
             </td>
           </tr>
           <tr>
