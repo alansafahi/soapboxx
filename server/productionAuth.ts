@@ -59,13 +59,12 @@ export function configurePassport() {
     }
   });
 
-  // Google OAuth Strategy with dynamic callback URL
+  // Google OAuth Strategy with production domain callback URL
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    // Use Replit domain for OAuth callback
-    const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
-    const baseUrl = replitDomain ? `https://${replitDomain}` : 'https://localhost:5000';
+    // Use production domain for OAuth callback
+    const baseUrl = 'https://www.soapboxapp.org';
     
-    console.log(`🔗 OAuth callback URL: ${baseUrl}/api/auth/google/callback`);
+    console.log(`🔗 Google OAuth callback URL: ${baseUrl}/api/auth/google/callback`);
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
