@@ -301,16 +301,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/bible/random', async (req, res) => {
     try {
       const { translation = 'NIV' } = req.query;
-      console.log(`📖 Random verse request for translation: ${translation}`);
       
       const verse = await storage.getRandomBibleVerse(translation as string);
-      console.log(`📖 Random verse result:`, verse);
       
       if (verse) {
         console.log(`🎲 Public random verse: ${verse.book} ${verse.chapter}:${verse.verse} (${translation})`);
         res.json(verse);
       } else {
-        console.log('📖 No random verse found');
         res.status(404).json({ message: "No random verse found" });
       }
     } catch (error) {
