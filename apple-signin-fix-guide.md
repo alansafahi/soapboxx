@@ -15,7 +15,7 @@ Apple Sign-In returns "Invalid client" error because the Service ID configuratio
 2. Sign in with your Apple Developer account
 
 ### Step 2: Edit Service ID Configuration
-1. Find and click on Service ID: `app.soapboxsuperapp.signin`
+1. Find and click on Service ID: `com.soapboxsuperapp.auth`
 2. Click "Configure" next to "Sign in with Apple"
 3. Under "Return URLs", add this exact URL:
    ```

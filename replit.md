@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 21, 2025: APPLE SIGN-IN TECHNICAL IMPLEMENTATION COMPLETED - Successfully configured correct Apple Client ID and generated matching client secret for Service ID "com.soapboxsuperapp.auth"
+  - CREDENTIALS FIXED: Updated APPLE_CLIENT_ID to correct value "com.soapboxsuperapp.auth" (was incorrectly set to "app.soapboxsuperapp.signin")
+  - JWT CLIENT SECRET GENERATED: Fresh token created with proper Service ID matching: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkE5SjZGQkpQOEoifQ...
+  - AUTHENTICATION FLOW VERIFIED: Apple redirect working correctly, sending proper client_id=com.soapboxsuperapp.auth in requests
+  - REMAINING STEP: Apple Developer Console needs callback URL configuration for current Replit domain
+  - CALLBACK URL REQUIRED: https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/auth/apple/callback must be added to Service ID configuration
+  - DOCUMENTATION CREATED: Complete fix guide available in apple-signin-fix-guide.md with exact Apple Developer Console steps
 - June 21, 2025: AUTHENTICATION SYSTEM COMPLETELY FIXED - Successfully resolved all session management issues and established working browser authentication
   - AUTO-LOGIN ROUTE CREATED: Added /auto-login frontend route that calls backend auto-login endpoint to establish authenticated browser sessions
   - SESSION ESTABLISHMENT VERIFIED: curl tests confirm auto-login endpoint creates proper session cookies and redirects to home page
