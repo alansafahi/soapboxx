@@ -91,7 +91,7 @@ class EmailService {
               </div>
               
               <div style="text-align: center;">
-                <a href="${verificationUrl}" class="button">Verify Email Address</a>
+                <a href="${verificationUrl}" class="button" style="background-color: #7c3aed !important; color: white !important; text-decoration: none !important; display: inline-block; padding: 16px 32px; border-radius: 8px; font-weight: 600; margin: 20px 0;">Verify Email Address</a>
               </div>
               
               <div class="security">
