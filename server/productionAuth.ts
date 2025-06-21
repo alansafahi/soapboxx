@@ -60,11 +60,11 @@ export function configurePassport() {
 
   // Google OAuth Strategy with dynamic callback URL
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    // Determine callback URL based on environment
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const baseUrl = isDevelopment 
-      ? 'http://localhost:5000' 
-      : process.env.REPL_URL || 'https://soapboxsuperapp.com';
+    // Use Replit domain for OAuth callback
+    const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+    const baseUrl = replitDomain ? `https://${replitDomain}` : 'https://localhost:5000';
+    
+    console.log(`🔗 OAuth callback URL: ${baseUrl}/api/auth/google/callback`);
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
