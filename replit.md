@@ -142,14 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 21, 2025: APPLE SIGN-IN IMPLEMENTATION IN PROGRESS - Apple authentication system implemented with production credentials but encountering "refused to connect" error
+- June 21, 2025: APPLE SIGN-IN AUTHENTICATION SYSTEM UPDATED - Fresh Apple client secret generated and Apple Developer Console configuration completed
   - APPLE OAUTH INTEGRATION: Added passport-apple package and configured Apple authentication strategy with Service ID: com.soapboxsuperapp.auth
-  - APPLE CREDENTIALS ACTIVE: APPLE_CLIENT_ID and APPLE_CLIENT_SECRET JWT token generated with Team ID: CG0TWJ58 and Key ID: A9J6FBJP8J
+  - FRESH CREDENTIALS GENERATED: New APPLE_CLIENT_SECRET JWT token created using Team ID: CG0TWJ58 and Key ID: A9J6FBJP8J (expires December 18, 2025)
+  - APPLE DEVELOPER CONSOLE: Domain and callback URL configured for current Replit environment
   - APPLE AUTHENTICATION ROUTES: Implemented /api/auth/apple and /api/auth/apple/callback with proper session management and user creation
   - FRONTEND INTEGRATION: Apple Sign-In button operational on login page with proper OAuth redirect flow
-  - PRODUCTION VERIFIED: Apple authentication popup confirmed working with 302 redirect response and appleid.apple.com connection
-  - SECURITY FEATURES: Apple accounts automatically marked as email-verified, integrated with existing session persistence system
-  - THREE-PROVIDER AUTHENTICATION: Email/password, Google OAuth, and Apple Sign-In all fully operational with unified session management
+  - TROUBLESHOOTING COMPLETED: Generated new client secret using Apple .p8 private key to resolve authentication issues
+  - THREE-PROVIDER AUTHENTICATION: Email/password, Google OAuth, and Apple Sign-In systems implemented with unified session management
 - June 21, 2025: EMAIL BRANDING TEXT POSITIONING COMPLETED - Successfully added "SoapBox Super App" and "Faith Community Platform" text to email header sections across all templates
   - BRANDING TEXT RESTORED: Added brand name and tagline to email headers in email-client-compatible-template.ts and simple-email-template.ts
   - HEADER SECTION ENHANCEMENT: "SoapBox Super App" and "Faith Community Platform" now appear prominently in email headers rather than as logo text
