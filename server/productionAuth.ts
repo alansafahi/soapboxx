@@ -234,16 +234,15 @@ export function setupProductionAuth(app: Express): void {
         });
       }
 
-      // TEMPORARY: Skip email verification for testing (SendGrid needs configuration)
-      // TODO: Re-enable email verification once SendGrid is properly configured
-      // if (!user.emailVerified) {
-      //   return res.status(403).json({ 
-      //     success: false,
-      //     message: 'Please verify your email before logging in. Check your inbox for verification link.',
-      //     requiresVerification: true,
-      //     email: user.email
-      //   });
-      // }
+      // MANDATORY: Email verification required for production security
+      if (!user.emailVerified) {
+        return res.status(403).json({ 
+          success: false,
+          message: 'Please verify your email before logging in. Check your inbox for verification link.',
+          requiresVerification: true,
+          email: user.email
+        });
+      }
 
       // Create secure session
       const sessionData = {
