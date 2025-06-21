@@ -52,7 +52,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: process.env.SENDGRID_VERIFIED_SENDER || 'support@soapboxapp.org',
+      from: 'support@soupboxsuperapp.com',
       subject: 'Verify Your SoapBox Account',
       html: `
         <!DOCTYPE html>
@@ -161,7 +161,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: process.env.SENDGRID_VERIFIED_SENDER || 'support@soapboxapp.org',
+      from: 'support@soupboxsuperapp.com',
       subject: 'Reset Your SoapBox Password',
       html: `
         <!DOCTYPE html>
