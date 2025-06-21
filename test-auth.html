@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authentication Test</title>
+</head>
+<body>
+    <h1>SoapBox Authentication Test</h1>
+    
+    <div>
+        <h2>1. Create Test Session</h2>
+        <button onclick="createTestSession()">Create Test Session</button>
+        <div id="sessionResult"></div>
+    </div>
+    
+    <div>
+        <h2>2. Check Auth Status</h2>
+        <button onclick="checkAuth()">Check Authentication</button>
+        <div id="authResult"></div>
+    </div>
+    
+    <div>
+        <h2>3. Check Session Debug</h2>
+        <button onclick="checkSessionDebug()">Check Session</button>
+        <div id="debugResult"></div>
+    </div>
+
+    <script>
+        async function createTestSession() {
+            try {
+                const response = await fetch('/api/debug/create-test-session', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('sessionResult').innerHTML = 
+                    '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('sessionResult').innerHTML = 
+                    '<div style="color: red;">Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/user', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('authResult').innerHTML = 
+                    '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('authResult').innerHTML = 
+                    '<div style="color: red;">Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function checkSessionDebug() {
+            try {
+                const response = await fetch('/api/debug/session', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('debugResult').innerHTML = 
+                    '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('debugResult').innerHTML = 
+                    '<div style="color: red;">Error: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>

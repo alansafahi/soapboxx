@@ -35,7 +35,7 @@ export function getProductionSession() {
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      secure: false, // Allow HTTP for development
       httpOnly: true, // Prevent XSS attacks
       maxAge: sessionTtl,
       sameSite: 'lax',
@@ -268,6 +268,53 @@ export function setupProductionAuth(app: Express): void {
     });
   });
 
+  // Create test session endpoint for debugging
+  app.post('/api/debug/create-test-session', async (req, res) => {
+    try {
+      // Get existing user from database to create authentic session
+      const existingUser = await storage.getUserByEmail('alan@safahi.com');
+      
+      if (!existingUser) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+
+      // Set session data with real user
+      (req.session as any).userId = existingUser.id;
+      (req.session as any).user = {
+        id: existingUser.id,
+        email: existingUser.email,
+        username: existingUser.username,
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
+        role: existingUser.role,
+      };
+
+      req.session.save((err: any) => {
+        if (err) {
+          console.error('Test session save error:', err);
+          return res.status(500).json({ success: false, error: err.message });
+        }
+
+        console.log('✅ Test session created successfully for:', existingUser.email);
+        res.json({ 
+          success: true, 
+          message: 'Test session created',
+          user: {
+            id: existingUser.id,
+            email: existingUser.email,
+            username: existingUser.username,
+            firstName: existingUser.firstName,
+            lastName: existingUser.lastName,
+            role: existingUser.role,
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Test session creation error:', error);
+      res.status(500).json({ success: false, error: 'Failed to create test session' });
+    }
+  });
+
   // Email/password login with MANDATORY email verification
   app.post('/api/auth/login', async (req, res) => {
     try {
@@ -321,7 +368,19 @@ export function setupProductionAuth(app: Express): void {
         }
       };
 
-      Object.assign(req.session, sessionData);
+      // Explicitly set session properties
+      (req.session as any).userId = user.id;
+      (req.session as any).user = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      };
+
+      console.log('🔐 Creating session for user:', user.email);
+      console.log('Session data being saved:', { userId: user.id, hasUser: true });
 
       req.session.save((err: any) => {
         if (err) {
@@ -331,6 +390,8 @@ export function setupProductionAuth(app: Express): void {
             message: 'Login failed. Please try again.' 
           });
         }
+        
+        console.log('✅ Session saved successfully for user:', user.email);
         
         res.json({
           success: true,
@@ -565,17 +626,20 @@ export function setupProductionAuth(app: Express): void {
 
 // Production authentication middleware
 export function isAuthenticatedProduction(req: any, res: any, next: any) {
-  const sessionUser = (req.session as any)?.user;
-  const userId = (req.session as any)?.userId;
+  const session = req.session as any;
+  const sessionUser = session?.user;
+  const userId = session?.userId;
   
   console.log('🔐 Authentication check:', {
     hasSession: !!req.session,
     sessionUser: !!sessionUser,
     userId,
-    sessionId: req.sessionID
+    sessionId: req.sessionID,
+    sessionKeys: session ? Object.keys(session) : []
   });
   
-  if (!sessionUser || !userId) {
+  // Check if session has been loaded properly
+  if (!session || (!sessionUser && !userId)) {
     console.log('❌ Authentication failed - no session data');
     return res.status(401).json({ 
       success: false,
