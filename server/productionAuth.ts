@@ -110,7 +110,7 @@ export function configurePassport() {
     console.log(`🍎 Apple OAuth callback URL: ${baseUrl}/api/auth/apple/callback`);
     
     passport.use(new AppleStrategy({
-      clientID: 'com.soapboxsuperapp.auth', // Your Apple Service ID
+      clientID: process.env.APPLE_CLIENT_ID, // Use environment variable
       teamID: 'CGQ7FW7J58', // Your Apple Team ID
       keyID: 'A9J6FBJP8J', // Your Apple Key ID
       privateKeyString: process.env.APPLE_CLIENT_SECRET,
