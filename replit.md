@@ -149,6 +149,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - OAUTH STANDARDS IMPLEMENTED: Using APPLE_REDIRECT_URI parameter following proper Apple OAuth naming conventions
   - PRODUCTION READY: Apple Sign-In authentication configured with confirmed Service ID, fresh credentials, and proper callback URL
   - INVALID CLIENT ERROR RESOLVED: Fixed Service ID mismatch that was causing Apple "invalid_client" authentication failures
+  - JWT TOKEN VERIFIED: Generated client secret passes all validation checks with correct iss, aud, sub, and expiration (Dec 2025)
 - June 21, 2025: APPLE SIGN-IN TECHNICAL IMPLEMENTATION COMPLETED - Successfully configured correct Apple Client ID and generated matching client secret for Service ID "com.soapboxsuperapp.auth"
   - CREDENTIALS FIXED: Updated APPLE_CLIENT_ID to correct value "com.soapboxsuperapp.auth" (was incorrectly set to "app.soapboxsuperapp.signin")
   - JWT CLIENT SECRET GENERATED: Fresh token created with proper Service ID matching: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkE5SjZGQkpQOEoifQ...
