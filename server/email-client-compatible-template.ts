@@ -427,7 +427,7 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
                   <div class="greeting">Hello, ${data.firstName}</div>
                   
                   <div class="message">
-                    You requested a password reset for your SoapBox Super App account. Click the button below to create a new password.
+                    You requested a password reset for your account. Click the button below to create a new password.
                   </div>
                   
                   <div style="text-align: center; margin: 40px 0;">

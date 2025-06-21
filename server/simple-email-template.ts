@@ -9,7 +9,7 @@ export function createSimpleVerificationEmail(data: { firstName: string }, verif
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Email Verification - SoapBox Super App</title>
+  <title>Email Verification</title>
 </head>
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -18,8 +18,7 @@ export function createSimpleVerificationEmail(data: { firstName: string }, verif
         <table width="600" cellpadding="20" cellspacing="0" border="0" style="background-color: white; margin: 20px auto;">
           <tr>
             <td align="center">
-              <h1 style="color: #7c3aed; margin: 0; font-size: 28px;">SoapBox</h1>
-              <p style="color: #666; margin: 5px 0;">Super App - Faith Community Platform</p>
+              <h1 style="color: #7c3aed; margin: 0; font-size: 28px;">Email Verification</h1>
             </td>
           </tr>
           <tr>
