@@ -58,12 +58,18 @@ export function configurePassport() {
     }
   });
 
-  // Google OAuth Strategy
+  // Google OAuth Strategy with dynamic callback URL
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    // Determine callback URL based on environment
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const baseUrl = isDevelopment 
+      ? 'http://localhost:5000' 
+      : process.env.REPL_URL || 'https://soapboxsuperapp.com';
+    
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/api/auth/google/callback'
+      callbackURL: `${baseUrl}/api/auth/google/callback`
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
