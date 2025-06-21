@@ -4,9 +4,9 @@
  * Run this script to generate your APPLE_CLIENT_SECRET
  */
 
-const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const readline = require('readline');
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import readline from 'readline';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -88,8 +88,8 @@ async function generateAppleClientSecret() {
 }
 
 // Run the generator
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   generateAppleClientSecret();
 }
 
-module.exports = { generateAppleClientSecret };
+export { generateAppleClientSecret };
