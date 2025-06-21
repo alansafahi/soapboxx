@@ -429,65 +429,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: 'Server is running' });
   });
 
-  // Registration endpoint
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const { email, password, username, firstName, lastName } = req.body;
-      
-      // Check if user already exists
-      const existingUser = await storage.getUserByEmail(email);
-      if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
-      }
-
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Create new user
-      const newUser = await storage.createUser({
-        id: crypto.randomUUID(),
-        email,
-        username,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        role: "member",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-
-      res.json({ message: "User created successfully", userId: newUser.id });
-    } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
-    }
-  });
-
-  // Login endpoint
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      const user = await storage.getUserByEmail(email);
-      if (!user || !user.password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      const isValid = await bcrypt.compare(password, user.password);
-      if (!isValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Set session
-      req.session.userId = user.id;
-      req.session.user = user;
-
-      res.json({ message: "Login successful", user: { id: user.id, email: user.email, role: user.role } });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed" });
-    }
-  });
+  // NOTE: Authentication endpoints are handled by setupProductionAuth() above
+  // Removed duplicate login/register routes to prevent conflicts
 
   // Forgot password endpoint
   app.post("/api/auth/forgot-password", async (req, res) => {

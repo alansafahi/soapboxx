@@ -199,6 +199,11 @@ export function setupProductionAuth(app: Express): void {
     res.redirect('/login');
   });
 
+  // GET route for /api/login - redirect to frontend login page
+  app.get('/api/login', (req, res) => {
+    res.redirect('/login');
+  });
+
   // Email/password login with MANDATORY email verification
   app.post('/api/auth/login', async (req, res) => {
     try {
