@@ -282,19 +282,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
       
-      const result = await searchVerses(query, translation, parseInt(limit));
+      const verses = await storage.searchBibleVerses(query as string, translation as string, parseInt(limit as string));
       
-      if (result.success) {
-        console.log(`📚 Public Bible search "${query}" in ${translation}: ${result.count} verses found`);
-        res.json({
-          query: result.query,
-          translation: result.translation,
-          verses: result.verses,
-          count: result.count
-        });
-      } else {
-        res.status(404).json({ message: "No verses found", error: result.error });
-      }
+      console.log(`📚 Public Bible search "${query}" in ${translation}: ${verses.length} verses found`);
+      res.json({
+        query: query,
+        translation: translation,
+        verses: verses,
+        count: verses.length
+      });
     } catch (error) {
       console.error("Error searching verses:", error);
       res.status(500).json({ message: "Failed to search verses" });
@@ -306,13 +302,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { translation = 'NIV' } = req.query;
       
-      const result = await getRandomVerse(translation);
+      const verse = await storage.getRandomBibleVerse(translation as string);
       
-      if (result.success) {
-        console.log(`🎲 Public random verse: ${result.verse.reference} (${translation})`);
-        res.json(result.verse);
+      if (verse) {
+        console.log(`🎲 Public random verse: ${verse.book} ${verse.chapter}:${verse.verse} (${translation})`);
+        res.json(verse);
       } else {
-        res.status(404).json({ message: "No random verse found", error: result.error });
+        res.status(404).json({ message: "No random verse found" });
       }
     } catch (error) {
       console.error("Error fetching random verse:", error);
@@ -350,13 +346,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { book, chapter, verse } = req.params;
       const { translation = 'NIV' } = req.query;
       
-      const result = await getVerseInstant(book, parseInt(chapter), parseInt(verse), translation);
+      const verseData = await storage.getBibleVerse(book, parseInt(chapter), parseInt(verse), translation as string);
       
-      if (result.success) {
-        console.log(`✅ Public verse lookup: ${result.verse.reference} (${translation})`);
-        res.json(result.verse);
+      if (verseData) {
+        console.log(`✅ Public verse lookup: ${book} ${chapter}:${verse} (${translation})`);
+        res.json(verseData);
       } else {
-        res.status(404).json({ message: "Verse not found", error: result.error });
+        res.status(404).json({ message: "Verse not found" });
       }
     } catch (error) {
       console.error("Error fetching verse:", error);
@@ -374,14 +370,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
       
-      const result = await searchVerses(searchQuery as string, translation as string, parseInt(limit as string));
+      const verses = await storage.searchBibleVerses(searchQuery as string, translation as string, parseInt(limit as string));
       
-      if (result.success) {
-        console.log(`🔍 Public verse search: "${query}" found ${result.count} results`);
-        res.json(result);
-      } else {
-        res.status(404).json({ message: "No verses found", error: result.error });
-      }
+      console.log(`🔍 Public verse search: "${searchQuery}" found ${verses.length} results`);
+      res.json({
+        query: searchQuery,
+        translation: translation,
+        verses: verses,
+        count: verses.length
+      });
     } catch (error) {
       console.error("Error searching verses:", error);
       res.status(500).json({ message: "Failed to search verses" });
@@ -393,13 +390,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { translation = 'NIV' } = req.query;
       
-      const result = await getRandomVerse(translation as string);
+      const verse = await storage.getRandomBibleVerse(translation as string);
       
-      if (result.success) {
-        console.log(`🎲 Public random verse: ${result.verse.reference} (${translation})`);
-        res.json(result.verse);
+      if (verse) {
+        console.log(`🎲 Public random verse: ${verse.book} ${verse.chapter}:${verse.verse} (${translation})`);
+        res.json(verse);
       } else {
-        res.status(404).json({ message: "No random verse found", error: result.error });
+        res.status(404).json({ message: "No random verse found" });
       }
     } catch (error) {
       console.error("Error fetching random verse:", error);
@@ -2821,13 +2818,13 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     try {
       const { translation = 'NIV' } = req.query;
       
-      const result = await getRandomVerse(translation);
+      const verse = await storage.getRandomBibleVerse(translation as string);
       
-      if (result.success) {
-        console.log(`🎲 Random verse: ${result.verse.reference} (${translation}) - Source: ${result.source}`);
-        res.json(result.verse);
+      if (verse) {
+        console.log(`🎲 Random verse: ${verse.book} ${verse.chapter}:${verse.verse} (${translation})`);
+        res.json(verse);
       } else {
-        res.status(500).json({ message: "Failed to get random verse", error: result.error });
+        res.status(500).json({ message: "Failed to get random verse" });
       }
     } catch (error) {
       console.error("Error fetching random verse:", error);
