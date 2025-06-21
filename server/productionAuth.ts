@@ -109,10 +109,10 @@ export function configurePassport() {
     console.log(`🍎 Apple OAuth redirect URI: ${appleRedirectUri}`);
     
     passport.use(new AppleStrategy({
-      clientID: 'com.soapboxsuperapp.signin', // Corrected Service ID from Apple Developer Console
+      clientID: 'com.soapboxsuperapp.auth', // Updated to correct Service ID
       teamID: 'CGQ7FW7J58', // Your Apple Team ID
       keyID: 'A9J6FBJP8J', // Your Apple Key ID
-      privateKeyString: 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkE5SjZGQkpQOEoifQ.eyJpc3MiOiJDR1E3Rlc3SjU4IiwiaWF0IjoxNzUwNTMyMzE4LCJleHAiOjE3NjYwODQzMTgsImF1ZCI6Imh0dHBzOi8vYXBwbGVpZC5hcHBsZS5jb20iLCJzdWIiOiJjb20uc29hcGJveHN1cGVyYXBwLnNpZ25pbiJ9.q3xrvRudK5M6jhD9YASBJxBOZvRLpk37xIgIF7ksv1ojq_KNE2SBVeDvPxk0SgMnpa5LZk8wilw-mhKQVF_5nQ',
+      privateKeyString: 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkE5SjZGQkpQOEoifQ.eyJpc3MiOiJDR1E3Rlc3SjU4IiwiaWF0IjoxNzUwNTMzMDY3LCJleHAiOjE3NjYwODUwNjcsImF1ZCI6Imh0dHBzOi8vYXBwbGVpZC5hcHBsZS5jb20iLCJzdWIiOiJjb20uc29hcGJveHN1cGVyYXBwLmF1dGgifQ.o-LTfRT01QQ7c75wrRi_sZnViN3uc_I-B2fqIBqXL-x5cHpp0ASTLkeh2EWdkPZ-R8IM1dY5-Inw1L4vL1fzTQ',
       callbackURL: appleRedirectUri,
       scope: ['name', 'email'],
       passReqToCallback: false
