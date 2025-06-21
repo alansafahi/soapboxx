@@ -4102,6 +4102,24 @@ export class DatabaseStorage implements IStorage {
     return verse;
   }
 
+  async searchBibleVerses(query: string, translation: string = 'NIV', limit: number = 20): Promise<any[]> {
+    try {
+      // Use raw SQL for reliable search functionality
+      const searchResults = await pool.query(`
+        SELECT * FROM bible_verses 
+        WHERE translation = $1 
+        AND (text ILIKE $2 OR reference ILIKE $2 OR book ILIKE $2)
+        ORDER BY popularity_score DESC 
+        LIMIT $3
+      `, [translation, `%${query}%`, limit]);
+      
+      return searchResults.rows;
+    } catch (error) {
+      console.error('Error searching Bible verses:', error);
+      return [];
+    }
+  }
+
   async getBibleVerses(): Promise<any[]> {
     return await db
       .select()
