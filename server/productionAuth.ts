@@ -378,6 +378,22 @@ export function setupProductionAuth(app: Express): void {
       });
     } catch (error) {
       console.error('Resend verification error:', error);
+      
+      // Log detailed SendGrid error information
+      if (error.response?.body?.errors) {
+        console.error('SendGrid detailed errors:', JSON.stringify(error.response.body.errors, null, 2));
+        
+        // Return more specific error message
+        const sendGridError = error.response.body.errors[0];
+        if (sendGridError) {
+          return res.status(500).json({ 
+            success: false,
+            message: `SendGrid error: ${sendGridError.message || 'Email service error'}`,
+            details: sendGridError.field ? `Field: ${sendGridError.field}` : undefined
+          });
+        }
+      }
+      
       res.status(500).json({ 
         success: false,
         message: 'Failed to resend verification email' 

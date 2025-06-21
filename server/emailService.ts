@@ -52,7 +52,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: process.env.FROM_EMAIL || 'alan@soapboxsuperapp.com',
+      from: process.env.SENDGRID_VERIFIED_SENDER || 'support@soapboxapp.org',
       subject: 'Verify Your SoapBox Account',
       html: `
         <!DOCTYPE html>
@@ -143,6 +143,10 @@ class EmailService {
       console.log(`Verification email sent successfully to ${data.email}`);
     } catch (error) {
       console.error('Failed to send verification email:', error);
+      // Log more details for debugging
+      if (error.response?.body?.errors) {
+        console.error('SendGrid error details:', JSON.stringify(error.response.body.errors, null, 2));
+      }
       throw new Error('Failed to send verification email');
     }
   }
@@ -157,7 +161,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: process.env.FROM_EMAIL || 'alan@soapboxsuperapp.com',
+      from: process.env.SENDGRID_VERIFIED_SENDER || 'support@soapboxapp.org',
       subject: 'Reset Your SoapBox Password',
       html: `
         <!DOCTYPE html>
