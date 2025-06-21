@@ -283,6 +283,9 @@ export interface IStorage {
   getBibleVerses(): Promise<any[]>;
   getBibleVersesCount(): Promise<number>;
   getBibleVersesPaginated(options: { search?: string; category?: string; limit: number; offset: number }): Promise<any[]>;
+  getBibleVerse(book: string, chapter: number, verse: number, translation?: string): Promise<any | undefined>;
+  searchBibleVerses(query: string, translation?: string, limit?: number): Promise<any[]>;
+  getRandomBibleVerse(translation?: string): Promise<any | undefined>;
   
   // Church operations
   getChurches(): Promise<Church[]>;
@@ -4117,6 +4120,23 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error searching Bible verses:', error);
       return [];
+    }
+  }
+
+  async getRandomBibleVerse(translation: string = 'NIV'): Promise<any | undefined> {
+    try {
+      // Use raw SQL for reliable random verse functionality
+      const randomResult = await pool.query(`
+        SELECT * FROM bible_verses 
+        WHERE translation = $1 
+        ORDER BY RANDOM() 
+        LIMIT 1
+      `, [translation]);
+      
+      return randomResult.rows[0];
+    } catch (error) {
+      console.error('Error fetching random Bible verse:', error);
+      return undefined;
     }
   }
 
