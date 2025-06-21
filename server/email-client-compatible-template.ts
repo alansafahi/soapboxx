@@ -71,25 +71,29 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
         /* Header styles */
         .header-section {
           background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-          padding: 40px 20px;
+          padding: 24px 20px;
           text-align: center;
         }
         .logo-container {
           text-align: center;
-          margin-bottom: 20px;
+          margin-bottom: 12px;
         }
         .logo-circle {
           display: inline-block;
-          width: 80px;
-          height: 80px;
-          background-color: #ffffff;
+          width: 60px;
+          height: 60px;
+          background-color: rgba(255, 255, 255, 0.2);
           border-radius: 50%;
           text-align: center;
-          line-height: 80px;
-          margin: 0 auto 20px;
+          line-height: 60px;
+          margin: 0 auto 12px;
+          padding: 8px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
         }
         .logo-svg {
           vertical-align: middle;
+          width: 44px;
+          height: 44px;
         }
         .brand-name {
           color: #ffffff !important;
@@ -214,13 +218,13 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
                       <td>
                         <div class="logo-container">
                           <div class="logo-circle">
-                            <svg class="logo-svg" width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                              <circle cx="50" cy="50" r="35" fill="none" stroke="#7c3aed" stroke-width="8"/>
-                              <circle cx="50" cy="50" r="20" fill="none" stroke="#7c3aed" stroke-width="6"/>
-                              <rect x="46" y="30" width="8" height="40" fill="#7c3aed" rx="2"/>
-                              <rect x="30" y="46" width="40" height="8" fill="#7c3aed" rx="2"/>
-                              <circle cx="30" cy="30" r="6" fill="none" stroke="#7c3aed" stroke-width="4"/>
-                              <circle cx="70" cy="30" r="6" fill="none" stroke="#7c3aed" stroke-width="4"/>
+                            <svg class="logo-svg" width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="50" cy="50" r="35" fill="none" stroke="#ffffff" stroke-width="8"/>
+                              <circle cx="50" cy="50" r="20" fill="none" stroke="#ffffff" stroke-width="6"/>
+                              <rect x="46" y="30" width="8" height="40" fill="#ffffff" rx="2"/>
+                              <rect x="30" y="46" width="40" height="8" fill="#ffffff" rx="2"/>
+                              <circle cx="30" cy="30" r="6" fill="none" stroke="#ffffff" stroke-width="4"/>
+                              <circle cx="70" cy="30" r="6" fill="none" stroke="#ffffff" stroke-width="4"/>
                             </svg>
                           </div>
                         </div>
@@ -335,22 +339,24 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
         /* Header with red gradient for password reset */
         .header-section {
           background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-          padding: 40px 20px;
+          padding: 24px 20px;
           text-align: center;
         }
         .logo-container {
           text-align: center;
-          margin-bottom: 20px;
+          margin-bottom: 12px;
         }
         .logo-circle {
           display: inline-block;
-          width: 80px;
-          height: 80px;
-          background-color: #ffffff;
+          width: 60px;
+          height: 60px;
+          background-color: rgba(255, 255, 255, 0.2);
           border-radius: 50%;
           text-align: center;
-          line-height: 80px;
-          margin: 0 auto 20px;
+          line-height: 60px;
+          margin: 0 auto 12px;
+          padding: 8px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
         }
         .brand-name {
           color: #ffffff !important;
@@ -423,11 +429,13 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
                 <td class="header-section">
                   <div class="logo-container">
                     <div class="logo-circle">
-                      <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="35" fill="none" stroke="#dc2626" stroke-width="8"/>
-                        <circle cx="50" cy="50" r="20" fill="none" stroke="#dc2626" stroke-width="6"/>
-                        <rect x="46" y="30" width="8" height="40" fill="#dc2626" rx="2"/>
-                        <rect x="30" y="46" width="40" height="8" fill="#dc2626" rx="2"/>
+                      <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="35" fill="none" stroke="#ffffff" stroke-width="8"/>
+                        <circle cx="50" cy="50" r="20" fill="none" stroke="#ffffff" stroke-width="6"/>
+                        <rect x="46" y="30" width="8" height="40" fill="#ffffff" rx="2"/>
+                        <rect x="30" y="46" width="40" height="8" fill="#ffffff" rx="2"/>
+                        <circle cx="30" cy="30" r="6" fill="none" stroke="#ffffff" stroke-width="4"/>
+                        <circle cx="70" cy="30" r="6" fill="none" stroke="#ffffff" stroke-width="4"/>
                       </svg>
                     </div>
                   </div>

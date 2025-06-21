@@ -142,6 +142,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 21, 2025: EMAIL LOGO MOBILE VISIBILITY FIXED - Successfully updated both verification and password reset email templates with white SVG logo colors for proper visibility on mobile devices against colored backgrounds
+- June 21, 2025: EMAIL HEADER HEIGHT OPTIMIZATION - Reduced email header padding from 40px to 24px and logo circle size from 80px to 60px for more compact, mobile-friendly email layout
 - June 21, 2025: EMAIL CLIENT COMPATIBILITY COMPLETELY FIXED - Successfully implemented table-based email templates ensuring proper display across all email clients including mobile devices
   - CRITICAL FIX: Created email-client-compatible-template.ts with table-based layout structure for maximum email client compatibility
   - MOBILE READABILITY RESOLVED: Enhanced templates with proper mobile responsive design and larger touch-friendly button sizing
