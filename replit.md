@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 21, 2025: PASSWORD RESET FRONTEND FIX COMPLETED - Successfully resolved critical React routing error that caused blank page display when users clicked password reset links
+  - CRITICAL FIX: Removed incorrect useRouter hook usage that was causing "useRouter is not a function" errors in reset-password.tsx component
+  - ROUTING STANDARDIZED: Replaced all navigate() calls with setLocation() for proper wouter routing compatibility
+  - UI COMPONENTS FIXED: Maintained loading state, token validation, and proper conditional rendering for three states (loading, invalid token, valid token)
+  - NAVIGATION RESTORED: All navigation buttons (Return to Login, Back to Login) now use correct setLocation() method
+  - PRODUCTION VERIFIED: Password reset page loads correctly without React component crashes or blank page issues
+  - EMAIL VERIFICATION RESOLVED: Fixed unverified user alan@safahi.com by generating new verification token and sending verification email
 - June 21, 2025: PASSWORD RESET SYSTEM FULLY COMPLETED - Successfully implemented complete end-to-end password reset functionality with backend endpoint and frontend component
   - BACKEND ENDPOINT ADDED: Created /api/auth/reset-password POST endpoint with proper token verification and password hashing
   - STORAGE METHODS IMPLEMENTED: Added updateUserPassword and clearPasswordResetToken methods to DatabaseStorage class
