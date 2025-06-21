@@ -103,7 +103,7 @@ export default function ResetPassword() {
         
         // Redirect to login page after success
         setTimeout(() => {
-          navigate('/login');
+          setLocation('/login');
         }, 2000);
       } else {
         setError(data.message || 'Failed to reset password');
@@ -258,7 +258,7 @@ export default function ResetPassword() {
           <div className="mt-6 text-center">
             <Button
               variant="link"
-              onClick={() => navigate('/login')}
+              onClick={() => setLocation('/login')}
               className="text-sm text-purple-600 hover:text-purple-700"
             >
               Back to Login
