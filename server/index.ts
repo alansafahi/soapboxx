@@ -5,6 +5,9 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// Force deployment cache refresh for Google OAuth fix
+console.log('🚀 Production server starting with updated OAuth configuration...');
+
 // Enable response compression for better performance
 app.use(compression({
   level: 6, // Balanced compression

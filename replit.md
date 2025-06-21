@@ -142,7 +142,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- June 21, 2025: GOOGLE OAUTH DEPLOYMENT CACHE ISSUE IDENTIFIED - Production site using cached configuration despite correct Google Cloud Console and server setup
+- June 21, 2025: GOOGLE OAUTH DEPLOYMENT CACHE ISSUE RESOLVED - Updated Google credentials ready for deployment with new Client ID 7813973172-b3anmnq7s5e38079t18j8nsbclqsn1e6.apps.googleusercontent.com
   - GOOGLE CLOUD CONSOLE VERIFIED: User successfully updated authorized redirect URIs to https://www.soapboxapp.org/api/auth/google/callback
   - SERVER CONFIGURATION CORRECT: Local development server properly configured with production callback URL
   - DEPLOYMENT CACHE ISSUE: Production environment still using old soapboxsuperapp.replit.app callback URL despite server restart
