@@ -115,7 +115,8 @@ export function configurePassport() {
       keyID: 'A9J6FBJP8J', // Your Apple Key ID
       privateKeyString: process.env.APPLE_CLIENT_SECRET,
       callbackURL: `${baseUrl}/api/auth/apple/callback`,
-      scope: ['name', 'email']
+      scope: ['name', 'email'],
+      passReqToCallback: false
     },
     async (accessToken, refreshToken, idToken, profile, done) => {
       try {
