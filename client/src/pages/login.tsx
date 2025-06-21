@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { formatErrorForToast } from "@/lib/errorUtils";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useLocation } from "wouter";
@@ -73,11 +74,7 @@ export default function LoginPage() {
           }, 500);
         } else {
           const errorData = await loginResponse.json();
-          toast({
-            title: "Login Failed", 
-            description: errorData.message || "Invalid credentials. Please try again.",
-            variant: "destructive",
-          });
+          toast(formatErrorForToast(errorData, 'login'));
         }
       } else {
         // Registration
@@ -87,17 +84,33 @@ export default function LoginPage() {
         });
 
         toast({
-          title: "Account created successfully!",
-          description: "Please log in with your new account.",
+          title: "Welcome to SoapBox!",
+          description: "Your account has been created. Please check your email to verify your account before signing in.",
         });
 
         setIsLogin(true);
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       }
     } catch (error: any) {
+      let userFriendlyMessage = isLogin ? "Unable to sign in" : "Unable to create account";
+      
+      if (!isLogin) {
+        if (error.message?.includes("already exists") || error.message?.includes("User already exists")) {
+          userFriendlyMessage = "An account with this email address already exists. Please try signing in instead.";
+        } else if (error.message?.includes("validation") || error.message?.includes("required")) {
+          userFriendlyMessage = "Please fill in all required fields with valid information.";
+        } else if (error.message?.includes("email")) {
+          userFriendlyMessage = "Please enter a valid email address.";
+        } else if (error.message?.includes("password")) {
+          userFriendlyMessage = "Please choose a stronger password with at least 8 characters.";
+        } else {
+          userFriendlyMessage = "We couldn't create your account right now. Please try again.";
+        }
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || (isLogin ? "Login failed" : "Registration failed"),
+        title: userFriendlyMessage,
+        description: isLogin ? "Please check your credentials and try again." : "If the problem continues, please contact support.",
         variant: "destructive",
       });
     } finally {
@@ -123,9 +136,17 @@ export default function LoginPage() {
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
     } catch (error: any) {
+      let errorMessage = "We couldn't send the reset email right now.";
+      
+      if (error.message?.includes("not found") || error.message?.includes("No user found")) {
+        errorMessage = "We couldn't find an account with that email address.";
+      } else if (error.message?.includes("email")) {
+        errorMessage = "Please enter a valid email address.";
+      }
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to send reset email",
+        title: "Password reset failed",
+        description: errorMessage + " Please try again or contact support if the problem continues.",
         variant: "destructive",
       });
     } finally {
@@ -140,8 +161,8 @@ export default function LoginPage() {
       window.location.href = '/api/auth/google';
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to initialize Google login",
+        title: "Google sign-in unavailable",
+        description: "We couldn't connect to Google right now. Please try email login or try again later.",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -155,8 +176,8 @@ export default function LoginPage() {
       window.location.href = '/api/auth/apple';
     } catch (error: any) {
       toast({
-        title: "Error", 
-        description: "Failed to initialize Apple login",
+        title: "Apple sign-in unavailable",
+        description: "We couldn't connect to Apple right now. Please try email login or try again later.",
         variant: "destructive",
       });
       setIsLoading(false);
