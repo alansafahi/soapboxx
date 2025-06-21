@@ -144,7 +144,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 ## Recent Changes
 - June 21, 2025: APPLE SIGN-IN AUTHENTICATION SYSTEM UPDATED - Fresh Apple client secret generated and Apple Developer Console configuration completed
   - APPLE OAUTH INTEGRATION: Added passport-apple package and configured Apple authentication strategy with Service ID: com.soapboxsuperapp.auth
-  - FRESH CREDENTIALS GENERATED: New APPLE_CLIENT_SECRET JWT token created using Team ID: CG0TWJ58 and Key ID: A9J6FBJP8J (expires December 18, 2025)
+  - FRESH CREDENTIALS GENERATED: New APPLE_CLIENT_SECRET JWT token created using Team ID: CGQ7FW7J58 and Key ID: A9J6FBJP8J (expires December 18, 2025)
   - APPLE DEVELOPER CONSOLE: Domain and callback URL configured for current Replit environment
   - APPLE AUTHENTICATION ROUTES: Implemented /api/auth/apple and /api/auth/apple/callback with proper session management and user creation
   - FRONTEND INTEGRATION: Apple Sign-In button operational on login page with proper OAuth redirect flow
