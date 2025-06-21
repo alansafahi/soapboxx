@@ -3,6 +3,8 @@
  * Uses table-based layout for maximum compatibility across email clients
  */
 
+import { SOAPBOX_EMAIL_LOGO_BASE64, SOAPBOX_EMAIL_LOGO_RED_BASE64 } from './email-logo';
+
 export function createCompatibleVerificationEmailTemplate(data: { firstName: string }, verificationUrl: string): string {
   return `
     <!DOCTYPE html>
@@ -217,15 +219,7 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
                     <tr>
                       <td>
                         <div class="logo-container">
-                          <table role="presentation" style="margin: 0 auto; width: 60px; height: 60px; background-color: #7c3aed; border-radius: 30px; border: 3px solid rgba(255,255,255,0.8);">
-                            <tr>
-                              <td style="text-align: center; vertical-align: middle; padding: 8px; width: 44px; height: 44px;">
-                                <div style="width: 44px; height: 44px; background-color: #ffffff; border-radius: 22px; line-height: 44px; text-align: center; font-family: Arial, sans-serif; font-weight: bold; font-size: 18px; color: #7c3aed;">
-                                  SB
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
+                          <img src="${SOAPBOX_EMAIL_LOGO_BASE64}" alt="SoapBox Logo" width="60" height="60" style="display: block; margin: 0 auto; border: none;" />
                         </div>
                         <div class="brand-name">SoapBox Super App</div>
                         <div class="tagline">Faith Community Platform</div>
@@ -427,15 +421,7 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
               <tr>
                 <td class="header-section">
                   <div class="logo-container">
-                    <table role="presentation" style="margin: 0 auto; width: 60px; height: 60px; background-color: #dc2626; border-radius: 30px; border: 3px solid rgba(255,255,255,0.8);">
-                      <tr>
-                        <td style="text-align: center; vertical-align: middle; padding: 8px; width: 44px; height: 44px;">
-                          <div style="width: 44px; height: 44px; background-color: #ffffff; border-radius: 22px; line-height: 44px; text-align: center; font-family: Arial, sans-serif; font-weight: bold; font-size: 18px; color: #dc2626;">
-                            SB
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
+                    <img src="${SOAPBOX_EMAIL_LOGO_RED_BASE64}" alt="SoapBox Logo" width="60" height="60" style="display: block; margin: 0 auto; border: none;" />
                   </div>
                   <div class="brand-name">SoapBox Super App</div>
                   <div class="tagline">Password Reset Request</div>
