@@ -4,7 +4,7 @@
  */
 
 import { MailService } from '@sendgrid/mail';
-import { createVerificationEmailTemplate, createPasswordResetEmailTemplate } from './professional-email-template';
+import { createCompatibleVerificationEmailTemplate, createCompatiblePasswordResetEmailTemplate } from './email-client-compatible-template';
 
 interface EmailVerificationData {
   email: string;
@@ -54,7 +54,7 @@ class EmailService {
         to: data.email,
         from: process.env.SENDGRID_VERIFIED_SENDER!,
         subject: 'Verify Your SoapBox Account',
-        html: createVerificationEmailTemplate(data, verificationUrl),
+        html: createCompatibleVerificationEmailTemplate(data, verificationUrl),
         text: `
         Welcome to SoapBox, ${data.firstName}!
         
@@ -93,7 +93,7 @@ class EmailService {
         to: data.email,
         from: process.env.SENDGRID_VERIFIED_SENDER!,
         subject: 'Reset Your SoapBox Password',
-        html: createPasswordResetEmailTemplate(data, resetUrl),
+        html: createCompatiblePasswordResetEmailTemplate(data, resetUrl),
         text: `
         Hello ${data.firstName},
         
