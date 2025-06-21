@@ -46,53 +46,53 @@ export default function LoginPage() {
         ? { email: formData.email, password: formData.password }
         : formData;
 
-      const response = await apiRequest(endpoint, {
-        method: 'POST',
-        body: data,
-      });
+      if (isLogin) {
+        // Direct login with session establishment
+        const loginResponse = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        });
 
-      toast({
-        title: isLogin ? "Welcome back!" : "Account created successfully!",
-        description: isLogin ? "You have been logged in." : "Please log in with your new account.",
-      });
-
-      if (!isLogin) {
-        setIsLogin(true);
-        setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
-      } else {
-        // Direct browser authentication
-        try {
-          const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              email: formData.email,
-              password: formData.password
-            })
-          });
-
-          if (response.ok) {
-            // Wait for session to be established then hard reload
-            setTimeout(() => {
-              window.location.replace('/');
-            }, 500);
-          } else {
-            toast({
-              title: "Login Failed", 
-              description: "Invalid credentials. Please try again.",
-              variant: "destructive",
-            });
-          }
-        } catch (error) {
+        if (loginResponse.ok) {
+          const userData = await loginResponse.json();
           toast({
-            title: "Login Error",
-            description: "Network error. Please try again.", 
+            title: "Welcome back!",
+            description: `Logged in as ${userData.user.firstName} ${userData.user.lastName}`,
+          });
+          
+          // Wait for session to be established then redirect
+          setTimeout(() => {
+            window.location.replace('/');
+          }, 500);
+        } else {
+          const errorData = await loginResponse.json();
+          toast({
+            title: "Login Failed", 
+            description: errorData.message || "Invalid credentials. Please try again.",
             variant: "destructive",
           });
         }
+      } else {
+        // Registration
+        const response = await apiRequest(endpoint, {
+          method: 'POST',
+          body: data,
+        });
+
+        toast({
+          title: "Account created successfully!",
+          description: "Please log in with your new account.",
+        });
+
+        setIsLogin(true);
+        setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       }
     } catch (error: any) {
       toast({
