@@ -10,7 +10,7 @@ function generateAppleClientSecret() {
   // Apple configuration
   const teamId = 'CGQ7FW7J58';
   const keyId = 'A9J6FBJP8J';
-  const clientId = 'com.soapboxsuperapp.auth';
+  const clientId = 'app.soapboxsuperapp.signin';
   
   // Read the private key
   const privateKey = `-----BEGIN PRIVATE KEY-----
