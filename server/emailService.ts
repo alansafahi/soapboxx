@@ -52,7 +52,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: process.env.FROM_EMAIL || 'noreply@soapboxapp.org',
+      from: process.env.FROM_EMAIL || 'alan@soapboxsuperapp.com',
       subject: 'Verify Your SoapBox Account',
       html: `
         <!DOCTYPE html>
@@ -157,7 +157,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: process.env.FROM_EMAIL || 'noreply@soapboxapp.org',
+      from: process.env.FROM_EMAIL || 'alan@soapboxsuperapp.com',
       subject: 'Reset Your SoapBox Password',
       html: `
         <!DOCTYPE html>
