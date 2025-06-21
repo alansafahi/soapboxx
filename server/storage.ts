@@ -4077,7 +4077,27 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(bibleBadges.id));
   }
 
-  async getBibleVerse(id: number): Promise<BibleVerse | undefined> {
+  async getBibleVerse(book: string, chapter: number, verse: number, translation: string = 'NIV'): Promise<any | undefined> {
+    try {
+      const [bibleVerse] = await db
+        .select()
+        .from(bibleVerses)
+        .where(
+          and(
+            eq(bibleVerses.book, book),
+            eq(bibleVerses.chapter, chapter),
+            eq(bibleVerses.verse, verse.toString()),
+            eq(bibleVerses.translation, translation)
+          )
+        );
+      return bibleVerse;
+    } catch (error) {
+      console.error('Error in getBibleVerse:', error);
+      return undefined;
+    }
+  }
+
+  async getBibleVerseById(id: number): Promise<any | undefined> {
     const [verse] = await db.select().from(bibleVerses).where(eq(bibleVerses.id, id));
     return verse;
   }
