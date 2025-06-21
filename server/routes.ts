@@ -477,7 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const msg = {
           to: email,
-          from: 'noreply@soapboxapp.com', // Use valid domain
+          from: 'support@soapboxsuperapp.com', // Use verified SendGrid sender
           subject: 'SoapBox - Password Reset Request',
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

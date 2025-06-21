@@ -52,7 +52,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: 'support@soupboxsuperapp.com',
+      from: 'support@soapboxsuperapp.com',
       subject: 'Verify Your SoapBox Account',
       html: `
         <!DOCTYPE html>
@@ -161,7 +161,7 @@ class EmailService {
 
     const emailContent = {
       to: data.email,
-      from: 'support@soupboxsuperapp.com',
+      from: 'support@soapboxsuperapp.com',
       subject: 'Reset Your SoapBox Password',
       html: `
         <!DOCTYPE html>
