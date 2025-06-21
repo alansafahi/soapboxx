@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useRouter } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ResetPassword() {
   const [, setLocation] = useLocation();
-  const [, navigate] = useRouter();
   const { toast } = useToast();
   
   const [password, setPassword] = useState("");
@@ -19,7 +18,8 @@ export default function ResetPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
-  const [isValidToken, setIsValidToken] = useState(false);
+  const [isValidToken, setIsValidToken] = useState(null); // null = loading, false = invalid, true = valid
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Extract token from URL
@@ -28,11 +28,14 @@ export default function ResetPassword() {
     
     if (!resetToken) {
       setError("Invalid or missing reset token");
+      setIsValidToken(false);
+      setIsLoading(false);
       return;
     }
     
     setToken(resetToken);
     setIsValidToken(true);
+    setIsLoading(false);
   }, []);
 
   const validatePassword = (pwd: string) => {
@@ -113,7 +116,22 @@ export default function ResetPassword() {
     }
   };
 
-  if (!isValidToken) {
+  // Show loading state while extracting token
+  if (isLoading || isValidToken === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading...</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error if token is invalid
+  if (isValidToken === false) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -125,7 +143,7 @@ export default function ResetPassword() {
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={() => navigate('/login')} 
+              onClick={() => setLocation('/login')} 
               className="w-full"
             >
               Return to Login
