@@ -13,6 +13,7 @@ import { storage } from "./storage";
 import { emailService } from "./emailService";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as AppleStrategy } from "passport-apple";
 import jwt from "jsonwebtoken";
 
 // Production session configuration
@@ -91,6 +92,55 @@ export function configurePassport() {
           });
         } else if (!user.emailVerified) {
           // Mark existing user as verified if they sign in with Google
+          await storage.verifyUserEmail(user.id);
+        }
+        
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
+      }
+    }));
+  }
+
+  // Apple Sign-In Strategy
+  if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET) {
+    const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+    const baseUrl = replitDomain ? `https://${replitDomain}` : 'https://localhost:5000';
+    
+    console.log(`🍎 Apple OAuth callback URL: ${baseUrl}/api/auth/apple/callback`);
+    
+    passport.use(new AppleStrategy({
+      clientID: process.env.APPLE_CLIENT_ID,
+      teamID: 'CG0TWJ58', // Your Apple Team ID
+      keyID: 'A9J6FBJP8J', // Your Apple Key ID
+      privateKeyString: process.env.APPLE_CLIENT_SECRET,
+      callbackURL: `${baseUrl}/api/auth/apple/callback`,
+      scope: ['name', 'email']
+    },
+    async (accessToken, refreshToken, idToken, profile, done) => {
+      try {
+        // Apple provides user info in idToken
+        const appleUser = idToken ? JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString()) : {};
+        const email = appleUser.email || profile.email;
+        
+        let user = await storage.getUserByEmail(email || '');
+        
+        if (!user) {
+          // Create new user from Apple profile
+          user = await storage.createUser({
+            id: crypto.randomUUID(),
+            email: email || '',
+            username: email?.split('@')[0] || `apple_${appleUser.sub}`,
+            firstName: profile.name?.firstName || '',
+            lastName: profile.name?.lastName || '',
+            profileImageUrl: null, // Apple doesn't provide profile photos
+            role: 'member',
+            emailVerified: true, // Apple accounts are pre-verified
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        } else if (!user.emailVerified) {
+          // Mark existing user as verified if they sign in with Apple
           await storage.verifyUserEmail(user.id);
         }
         
