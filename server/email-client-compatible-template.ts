@@ -217,11 +217,11 @@ export function createCompatibleVerificationEmailTemplate(data: { firstName: str
                     <tr>
                       <td>
                         <div class="logo-container">
-                          <img src="https://raw.githubusercontent.com/alan-safahi/soapbox-media/main/soapbox-logo.png" 
-                               alt="SoapBox Super App Logo" 
-                               width="60" 
-                               height="60" 
-                               style="display: block; border: 0; outline: none; text-decoration: none; border-radius: 8px; margin: 0 auto;">
+                          <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #5B2C6F 0%, #A855F7 100%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.3);">
+                            <div style="width: 40px; height: 40px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                              <span style="font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 18px; color: #5B2C6F; letter-spacing: -1px;">SB</span>
+                            </div>
+                          </div>
                         </div>
                         <div class="brand-name">SoapBox Super App</div>
                         <div class="tagline">Faith Community Platform</div>
@@ -423,15 +423,10 @@ export function createCompatiblePasswordResetEmailTemplate(data: { firstName: st
               <tr>
                 <td class="header-section">
                   <div class="logo-container">
-                    <div class="logo-circle">
-                      <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="35" fill="none" stroke="#ffffff" stroke-width="8"/>
-                        <circle cx="50" cy="50" r="20" fill="none" stroke="#ffffff" stroke-width="6"/>
-                        <rect x="46" y="30" width="8" height="40" fill="#ffffff" rx="2"/>
-                        <rect x="30" y="46" width="40" height="8" fill="#ffffff" rx="2"/>
-                        <circle cx="30" cy="30" r="6" fill="none" stroke="#ffffff" stroke-width="4"/>
-                        <circle cx="70" cy="30" r="6" fill="none" stroke="#ffffff" stroke-width="4"/>
-                      </svg>
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #5B2C6F 0%, #A855F7 100%); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.3);">
+                      <div style="width: 40px; height: 40px; background: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 18px; color: #5B2C6F; letter-spacing: -1px;">SB</span>
+                      </div>
                     </div>
                   </div>
                   <div class="brand-name">SoapBox Super App</div>
