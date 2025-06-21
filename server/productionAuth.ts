@@ -110,7 +110,7 @@ export function configurePassport() {
     console.log(`🍎 Apple OAuth callback URL: ${baseUrl}/api/auth/apple/callback`);
     
     passport.use(new AppleStrategy({
-      clientID: process.env.APPLE_CLIENT_ID,
+      clientID: 'com.soapboxsuperapp.auth', // Your Apple Service ID
       teamID: 'CG0TWJ58', // Your Apple Team ID
       keyID: 'A9J6FBJP8J', // Your Apple Key ID
       privateKeyString: process.env.APPLE_CLIENT_SECRET,
@@ -489,13 +489,52 @@ export function setupProductionAuth(app: Express): void {
     }
   );
 
-  // Apple OAuth placeholder (requires Apple Developer setup)
-  app.get('/api/auth/apple', (req, res) => {
-    res.status(501).json({ 
-      success: false,
-      message: 'Apple Sign-In is not yet configured. Please use email/password or Google sign-in.' 
-    });
-  });
+  // Apple OAuth routes
+  app.get('/api/auth/apple', 
+    passport.authenticate('apple', { scope: ['name', 'email'] })
+  );
+
+  app.get('/api/auth/apple/callback',
+    passport.authenticate('apple', { failureRedirect: '/login?error=oauth_failed' }),
+    async (req, res) => {
+      try {
+        // User is authenticated, establish session
+        const user = req.user as any;
+        
+        if (!user) {
+          return res.redirect('/login?error=oauth_failed');
+        }
+
+        // Create session manually to ensure it's properly established
+        (req.session as any).userId = user.id;
+        (req.session as any).user = {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          emailVerified: user.emailVerified
+        };
+
+        // Update last login
+        await storage.updateUserLastLogin(user.id);
+        
+        // Save session before redirect
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.redirect('/login?error=session_failed');
+          }
+          // Successful authentication - redirect to home
+          res.redirect('/?oauth=success');
+        });
+      } catch (error) {
+        console.error('Apple OAuth callback error:', error);
+        res.redirect('/login?error=oauth_failed');
+      }
+    }
+  );
 
   // Secure logout
   app.post('/api/auth/logout', (req, res) => {
