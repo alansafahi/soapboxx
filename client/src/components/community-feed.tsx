@@ -104,7 +104,8 @@ export default function CommunityFeed() {
       await apiRequest("POST", `/api/discussions/${discussionId}/like`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      // Don't invalidate immediately to preserve optimistic updates
+      // The frontend state already reflects the correct like status
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {

@@ -191,8 +191,8 @@ export default function SocialFeed() {
       });
     },
     onSuccess: () => {
-      // Only invalidate on success to sync with server state without undoing optimistic updates
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      // Don't invalidate immediately to preserve optimistic updates
+      // The optimistic update in onMutate already reflects the correct state
     }
   });
 
