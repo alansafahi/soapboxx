@@ -3,10 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
-import { setupProductionAuth, isAuthenticatedProduction } from "./productionAuth";
-
-// Use production authentication as the primary authentication system
-const isAuthenticated = isAuthenticatedProduction;
+import { setupAuth, isAuthenticated } from "./auth";
 // Bible verse functions integrated directly in storage layer
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
@@ -334,9 +331,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Production Authentication System - FIXES CRITICAL SECURITY VULNERABILITIES
-  console.log('🔐 Enabling production authentication with mandatory email verification...');
-  setupProductionAuth(app);
+  // Unified Authentication System - FIXES CRITICAL SECURITY VULNERABILITIES
+  console.log('🔐 Enabling unified authentication with mandatory email verification...');
+  setupAuth(app);
 
   // OVERRIDE: Re-register Bible API endpoints AFTER authentication to ensure public access
   // This ensures spiritual content remains accessible without authentication barriers
@@ -633,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes with secure authentication check
-  app.get('/api/auth/user', isAuthenticatedProduction, async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       
       // Use session data for user retrieval
