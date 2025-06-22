@@ -36,13 +36,14 @@ function ContactsPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+  const [isImportingContacts, setIsImportingContacts] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   // Fetch user's contacts and referral stats
-  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
+  const { data: contacts = [], isLoading: contactsLoading, refetch: refetchContacts } = useQuery({
     queryKey: ["/api/contacts"],
     queryFn: () => apiRequest("/api/contacts"),
   });
@@ -105,6 +106,32 @@ function ContactsPage() {
     },
   });
 
+  // Import device contacts mutation
+  const importContactsMutation = useMutation({
+    mutationFn: async (contacts: any[]) => {
+      return apiRequest("/api/contacts/import", {
+        method: "POST",
+        body: { contacts }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      setIsImportingContacts(false);
+      toast({
+        title: "Contacts Imported",
+        description: "Your device contacts have been imported successfully!",
+      });
+    },
+    onError: () => {
+      setIsImportingContacts(false);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import contacts. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSendInvite = () => {
     if (!inviteEmail.trim()) {
       toast({
@@ -121,6 +148,70 @@ function ContactsPage() {
       email: inviteEmail.trim(),
       message: inviteMessage.trim() || defaultMessage
     });
+  };
+
+  const importDeviceContacts = async () => {
+    try {
+      setIsImportingContacts(true);
+      
+      // Check if Contact Picker API is supported
+      if (!('contacts' in navigator && 'ContactsManager' in window)) {
+        // Fallback: Ask user to manually add contacts or import from other sources
+        toast({
+          title: "Contact Import Not Supported",
+          description: "Your browser doesn't support automatic contact import. Please add contacts manually using the invite feature.",
+          variant: "destructive",
+        });
+        setIsImportingContacts(false);
+        return;
+      }
+
+      // Request contacts with name and email
+      const props = ['name', 'email', 'tel'];
+      const opts = { multiple: true };
+      
+      // @ts-ignore - Contact Picker API types not fully supported yet
+      const contacts = await navigator.contacts.select(props, opts);
+      
+      if (contacts && contacts.length > 0) {
+        // Format contacts for our API
+        const formattedContacts = contacts.map((contact: any) => ({
+          name: contact.name?.[0] || 'Unknown Contact',
+          email: contact.email?.[0] || '',
+          phone: contact.tel?.[0] || '',
+          source: 'device'
+        })).filter((contact: any) => contact.email || contact.phone); // Only include contacts with email or phone
+        
+        if (formattedContacts.length > 0) {
+          importContactsMutation.mutate(formattedContacts);
+        } else {
+          toast({
+            title: "No Valid Contacts",
+            description: "Selected contacts don't have email addresses or phone numbers.",
+            variant: "destructive",
+          });
+          setIsImportingContacts(false);
+        }
+      } else {
+        setIsImportingContacts(false);
+      }
+    } catch (error: any) {
+      console.error('Contact import error:', error);
+      
+      if (error.name === 'AbortError') {
+        toast({
+          title: "Import Cancelled",
+          description: "Contact import was cancelled by user.",
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: "Failed to access device contacts. Please check permissions and try again.",
+          variant: "destructive",
+        });
+      }
+      setIsImportingContacts(false);
+    }
   };
 
   const copyReferralLink = async () => {
@@ -190,6 +281,16 @@ function ContactsPage() {
           </p>
         </div>
         <div className="flex space-x-2">
+          <Button 
+            onClick={importDeviceContacts}
+            disabled={isImportingContacts}
+            variant="outline" 
+            className="gap-2"
+          >
+            <Users className="h-4 w-4" />
+            {isImportingContacts ? "Importing..." : "Import Contacts"}
+          </Button>
+          
           <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
             <DialogTrigger asChild>
               <Button className="gap-2">
