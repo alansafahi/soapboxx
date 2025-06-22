@@ -47,8 +47,8 @@ export default function Landing() {
   };
 
   const handleDashboard = () => {
-    // Navigate to explicit dashboard route
-    window.location.href = '/dashboard';
+    // Navigate to dashboard using React Router
+    setLocation('/dashboard');
   };
 
   return (
