@@ -329,6 +329,7 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* TEMPORARILY HIDDEN - Google and Apple Sign-In (preserve code for future use)
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -384,6 +385,7 @@ export default function LoginPage() {
               </Button>
             </div>
           </div>
+          */}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-600 dark:text-slate-400">
