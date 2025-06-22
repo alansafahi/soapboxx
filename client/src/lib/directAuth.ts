@@ -15,6 +15,20 @@ export function useDirectAuth() {
   });
 
   useEffect(() => {
+    // Check if user just logged out - prevent cached auth restoration
+    const logoutFlag = localStorage.getItem('logout_flag');
+    if (logoutFlag) {
+      localStorage.removeItem('logout_flag');
+      localStorage.removeItem('soapbox_auth_state');
+      console.log('🚫 LOGOUT FLAG DETECTED - BLOCKING CACHED AUTH');
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+      return;
+    }
+
     // Check for cached auth state first
     const cachedAuth = localStorage.getItem('soapbox_auth_state');
     if (cachedAuth) {
@@ -86,8 +100,13 @@ export function useDirectAuth() {
 
   const logout = async () => {
     try {
-      // Clear localStorage immediately
+      // Clear ALL localStorage items related to auth
       localStorage.removeItem('soapbox_auth_state');
+      localStorage.removeItem('auth_cache');
+      localStorage.removeItem('user_cache');
+      
+      // Set logout flag to prevent cached auth restoration
+      localStorage.setItem('logout_flag', 'true');
       
       // Set unauthenticated state immediately
       setAuthState({
@@ -102,18 +121,19 @@ export function useDirectAuth() {
         credentials: 'include'
       });
       
-      // Force page reload to ensure clean state
-      window.location.href = '/';
+      // Force complete page reload to login page
+      window.location.replace('/login');
     } catch (error) {
       console.log('Logout error:', error);
       // Even if backend fails, clear frontend state
-      localStorage.removeItem('soapbox_auth_state');
+      localStorage.clear(); // Clear everything
+      localStorage.setItem('logout_flag', 'true');
       setAuthState({
         user: null,
         isAuthenticated: false,
         isLoading: false
       });
-      window.location.href = '/';
+      window.location.replace('/login');
     }
   };
 

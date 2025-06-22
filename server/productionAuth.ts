@@ -568,6 +568,8 @@ export function setupProductionAuth(app: Express): void {
   // Secure logout endpoint
   app.post('/api/auth/logout', (req, res) => {
     try {
+      console.log('🚪 Logout request received, destroying session...');
+      
       // Destroy the session completely
       req.session.destroy((err: any) => {
         if (err) {
@@ -578,11 +580,23 @@ export function setupProductionAuth(app: Express): void {
           });
         }
         
-        // Clear all session cookies
-        res.clearCookie('connect.sid');
-        res.clearCookie('soapbox_session');
+        // Clear ALL possible session cookies with matching configuration
+        const cookieOptions = [
+          { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
+          { path: '/', httpOnly: true, secure: true, sameSite: 'lax' as const },
+          { path: '/' },
+          {}
+        ];
         
-        console.log('✅ Session destroyed successfully');
+        const cookieNames = ['connect.sid', 'soapbox_session', 'session'];
+        
+        cookieNames.forEach(name => {
+          cookieOptions.forEach(options => {
+            res.clearCookie(name, options);
+          });
+        });
+        
+        console.log('✅ Session destroyed and all cookies cleared');
         
         res.json({ 
           success: true,
@@ -590,7 +604,7 @@ export function setupProductionAuth(app: Express): void {
         });
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout endpoint error:', error);
       res.status(500).json({ 
         success: false,
         message: 'Logout failed' 
@@ -735,23 +749,7 @@ export function setupProductionAuth(app: Express): void {
     }
   );
 
-  // Secure logout
-  app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Logout error:', err);
-        return res.status(500).json({ 
-          success: false,
-          message: 'Logout failed' 
-        });
-      }
-      res.clearCookie('soapbox_session');
-      res.json({ 
-        success: true,
-        message: 'Logged out successfully' 
-      });
-    });
-  });
+
 }
 
 // Production authentication middleware with fallback user creation
