@@ -35,6 +35,7 @@ const VideoLibrary = lazy(() => import("@/pages/video-library"));
 const ContactsPage = lazy(() => import("@/pages/contacts"));
 const LoginDebugPage = lazy(() => import("@/pages/login-debug"));
 const AutoLoginPage = lazy(() => import("@/pages/auto-login"));
+const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
 function AppRouter() {
     const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading } = useDirectAuth();
@@ -78,6 +79,7 @@ function AppRouter() {
                                 <Switch>
                                     <Route path="/login" component={LoginPage} />
                                     <Route path="/reset-password" component={ResetPasswordPage} />
+                                    <Route path="/email-verification" component={EmailVerificationPage} />
                                     <Route path="/" component={finalIsAuthenticated ? Home : Landing} />
                                     <Route path="/login-debug" component={LoginDebugPage} />
                                     <Route path="/auto-login" component={AutoLoginPage} />
