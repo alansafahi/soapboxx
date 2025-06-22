@@ -52,34 +52,10 @@ export default function ProductionLoginPage() {
     }
   };
 
+  // SECURITY VULNERABILITY ELIMINATED: Auto-login functionality removed
   const handleAutoLogin = async () => {
-    setIsLoading(true);
-    setMessage('');
-
-    try {
-      const response = await fetch('/api/debug/auto-login', {
-        method: 'GET',
-        credentials: 'include'
-      });
-
-      if (response.ok || response.redirected) {
-        setMessageType('success');
-        setMessage('Auto-login successful! Redirecting...');
-        
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
-      } else {
-        setMessageType('error');
-        setMessage('Auto-login failed. Please use manual login.');
-      }
-    } catch (error) {
-      console.error('Auto-login error:', error);
-      setMessageType('error');
-      setMessage('Auto-login failed. Please use manual login.');
-    } finally {
-      setIsLoading(false);
-    }
+    setMessageType('error');
+    setMessage('Auto-login has been disabled for security reasons. Please use manual login.');
   };
 
   return (
