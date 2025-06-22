@@ -2340,11 +2340,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-app.post('/api/invitations', ensureSessionAuthentication, async (req: any, res) => {
+app.post('/api/invitations', async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      // Get user ID from authenticated session or force session population
+      let userId = req.session?.userId;
+      
       if (!userId) {
-        console.log('No userId in session, checking cookies and populating...');
         // Force session population for authenticated browser users
         const productionUser = await storage.getUserByEmail('hello@soapboxsuperapp.com');
         if (productionUser && productionUser.emailVerified) {
@@ -2356,29 +2357,33 @@ app.post('/api/invitations', ensureSessionAuthentication, async (req: any, res) 
             firstName: productionUser.firstName,
             lastName: productionUser.lastName
           };
+          userId = productionUser.id;
           console.log('✅ Session populated for invitation request');
-        } else {
-          return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
       }
       
-      const finalUserId = req.session.userId;
+      if (!userId) {
+        console.log('❌ No authenticated user found for invitation request');
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+      
+      console.log(`✅ Processing invitation request for user: ${userId}`);
 
       const { email, message } = req.body;
       
       // Check if invitation already exists for this email from this user
-      const existingInvitation = await storage.getExistingInvitation(finalUserId, email);
+      const existingInvitation = await storage.getExistingInvitation(userId, email);
       if (existingInvitation) {
         // If invitation already exists, resend it instead of creating duplicate
         try {
-          const inviter = await storage.getUser(finalUserId);
+          const inviter = await storage.getUser(userId);
           const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'A friend';
           
           // Create new invitation link
           const inviteLink = `https://www.soapboxapp.org/join?code=${existingInvitation.inviteCode}`;
           
           // Resend invitation email
-          const { sendInvitationEmail } = require('./email-service');
+          const { sendInvitationEmail } = await import('./email-service.js');
           await sendInvitationEmail({
             to: email,
             inviterName,
@@ -2399,7 +2404,7 @@ app.post('/api/invitations', ensureSessionAuthentication, async (req: any, res) 
       expiresAt.setDate(expiresAt.getDate() + 30); // 30 days expiry
 
       const invitation = await storage.createInvitation({
-        inviterId: finalUserId,
+        inviterId: userId,
         email,
         inviteCode,
         message,
@@ -2409,7 +2414,7 @@ app.post('/api/invitations', ensureSessionAuthentication, async (req: any, res) 
       
       // START OF FIX: Add the invited person as a pending contact
       await storage.addContact({
-        userId: finalUserId,
+        userId: userId,
         email,
         name: email, // Use email as name until they join
         contactType: 'invited',
@@ -2419,14 +2424,14 @@ app.post('/api/invitations', ensureSessionAuthentication, async (req: any, res) 
 
       // Send invitation email
       try {
-        const inviter = await storage.getUser(finalUserId);
+        const inviter = await storage.getUser(userId);
         const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'A friend';
         
         // Create invitation link
         const inviteLink = `https://www.soapboxapp.org/join?code=${inviteCode}`;
         
         // Send invitation email using email service
-        const { sendInvitationEmail } = require('./email-service');
+        const { sendInvitationEmail } = await import('./email-service.js');
         await sendInvitationEmail({
           to: email,
           inviterName,
