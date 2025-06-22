@@ -269,105 +269,9 @@ export function setupProductionAuth(app: Express): void {
     });
   });
 
-  // Create test session endpoint for debugging
-  app.post('/api/debug/create-test-session', async (req, res) => {
-    try {
-      // Get existing user from database to create authentic session
-      const existingUser = await storage.getUserByEmail('alan@safahi.com');
-      
-      if (!existingUser) {
-        return res.status(404).json({ success: false, error: 'User not found' });
-      }
+  // REMOVED: Test session endpoint eliminated for security - prevents unauthorized session creation
 
-      // Set session data with real user
-      (req.session as any).userId = existingUser.id;
-      (req.session as any).user = {
-        id: existingUser.id,
-        email: existingUser.email,
-        username: existingUser.username,
-        firstName: existingUser.firstName,
-        lastName: existingUser.lastName,
-        role: existingUser.role,
-      };
-
-      req.session.save((err: any) => {
-        if (err) {
-          console.error('Test session save error:', err);
-          return res.status(500).json({ success: false, error: err.message });
-        }
-
-        console.log('✅ Test session created successfully for:', existingUser.email);
-        res.json({ 
-          success: true, 
-          message: 'Test session created',
-          user: {
-            id: existingUser.id,
-            email: existingUser.email,
-            username: existingUser.username,
-            firstName: existingUser.firstName,
-            lastName: existingUser.lastName,
-            role: existingUser.role,
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Test session creation error:', error);
-      res.status(500).json({ success: false, error: 'Failed to create test session' });
-    }
-  });
-
-  // Browser auto-login for production user - direct authentication
-  app.get('/api/debug/auto-login', async (req, res) => {
-    try {
-      // Try production user first
-      let existingUser = await storage.getUserByEmail('hello@soapboxsuperapp.com');
-      
-      // Fallback to development user
-      if (!existingUser) {
-        existingUser = await storage.getUserByEmail('alan@safahi.com');
-      }
-      
-      if (!existingUser) {
-        return res.status(404).send('<h1>Auto-login failed: User not found</h1>');
-      }
-
-      // Set comprehensive session data directly
-      (req.session as any).userId = existingUser.id;
-      (req.session as any).user = {
-        id: existingUser.id,
-        email: existingUser.email,
-        username: existingUser.username || existingUser.email.split('@')[0],
-        firstName: existingUser.firstName || 'Production',
-        lastName: existingUser.lastName || 'User',
-        role: existingUser.role || 'member',
-        isVerified: true,
-        profileImageUrl: existingUser.profileImageUrl,
-      };
-      (req.session as any).authenticated = true;
-      (req.session as any).loginTime = new Date().toISOString();
-      (req.session as any).isProduction = true;
-
-      req.session.save((saveErr: any) => {
-        if (saveErr) {
-          console.error('Auto-login session save error:', saveErr);
-          return res.status(500).send('<h1>Auto-login failed: Session save error</h1>');
-        }
-
-        console.log('✅ Auto-login session created for:', existingUser.email);
-        console.log('Session data:', {
-          userId: (req.session as any).userId,
-          user: (req.session as any).user,
-          authenticated: (req.session as any).authenticated
-        });
-        
-        // Redirect to home page after authentication
-        res.redirect('/');
-      });
-    } catch (error) {
-      console.error('Auto-login error:', error);
-      res.status(500).send('<h1>Auto-login failed: Server error</h1>');
-    }
-  });
+  // REMOVED: Auto-login endpoint eliminated for security - prevents session recreation after logout
 
   // Email/password login with MANDATORY email verification
   app.post('/api/auth/login', async (req, res) => {
@@ -569,21 +473,39 @@ export function setupProductionAuth(app: Express): void {
   app.post('/api/auth/logout', (req, res) => {
     try {
       console.log('🚪 Logout request received, destroying session...');
+      console.log('🔍 Current session before logout:', {
+        sessionId: req.sessionID,
+        hasSession: !!req.session,
+        sessionKeys: req.session ? Object.keys(req.session) : [],
+        userId: req.session?.userId,
+        authenticated: req.session?.authenticated
+      });
+      
+      // Clear all session data immediately
+      if (req.session) {
+        req.session.user = null;
+        req.session.userId = null;
+        req.session.authenticated = false;
+        req.session.autoLogin = false;
+        req.session.populatedAt = null;
+      }
+      
+      // Clear req.user as well
+      req.user = null;
       
       // Destroy the session completely
       req.session.destroy((err: any) => {
         if (err) {
           console.error('Session destruction error:', err);
-          return res.status(500).json({ 
-            success: false,
-            message: 'Logout failed' 
-          });
+          // Even if destroy fails, clear cookies manually
         }
         
-        // Clear ALL possible session cookies with matching configuration
+        // Clear ALL possible session cookies with comprehensive options
         const cookieOptions = [
           { path: '/', httpOnly: true, secure: false, sameSite: 'lax' as const },
           { path: '/', httpOnly: true, secure: true, sameSite: 'lax' as const },
+          { path: '/', secure: false },
+          { path: '/', secure: true },
           { path: '/' },
           {}
         ];
@@ -592,7 +514,11 @@ export function setupProductionAuth(app: Express): void {
         
         cookieNames.forEach(name => {
           cookieOptions.forEach(options => {
-            res.clearCookie(name, options);
+            try {
+              res.clearCookie(name, options);
+            } catch (e) {
+              // Continue if cookie clearing fails
+            }
           });
         });
         
@@ -767,14 +693,32 @@ export async function isAuthenticatedProduction(req: any, res: any, next: any) {
     authenticated: session?.authenticated
   });
   
+  // Strict check: if session exists but authenticated is explicitly false, reject
+  if (session && session.authenticated === false) {
+    console.log('❌ Authentication failed - session marked as not authenticated');
+    return res.status(401).json({ 
+      success: false,
+      message: 'Unauthorized' 
+    });
+  }
+  
   // Check if req.user was populated by ensureSessionAuthentication middleware
   if (req.user && req.user.claims && req.user.claims.sub) {
     console.log('✅ User authenticated via middleware:', req.user.claims.sub);
     return next();
   }
   
-  // Check existing session authentication
-  if (session && session.authenticated && (sessionUser || userId)) {
+  // Check existing session authentication - require all three conditions
+  if (session && session.authenticated === true && sessionUser && userId) {
+    // Additional validation: ensure user data is not null/cleared
+    if (sessionUser === null || userId === null) {
+      console.log('❌ Authentication failed - session data was cleared');
+      return res.status(401).json({ 
+        success: false,
+        message: 'Unauthorized' 
+      });
+    }
+    
     // Ensure req.user is populated for compatibility
     if (!req.user) {
       req.user = {
@@ -789,7 +733,7 @@ export async function isAuthenticatedProduction(req: any, res: any, next: any) {
   
   // No auto-authentication in production - require proper login
   
-  console.log('❌ Authentication failed - no session data');
+  console.log('❌ Authentication failed - no valid session data');
   return res.status(401).json({ 
     success: false,
     message: 'Unauthorized' 
