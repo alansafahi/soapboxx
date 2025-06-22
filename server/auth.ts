@@ -11,7 +11,7 @@ import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { storage } from "./storage";
-// Email service will be imported as needed
+import { sendVerificationEmail } from "./email-service";
 
 // Session configuration
 export function getSession() {
@@ -270,7 +270,6 @@ export function setupAuth(app: Express): void {
 
       // Send verification email
       try {
-        const { sendVerificationEmail } = await import('./email-service');
         await sendVerificationEmail({
           email,
           firstName,
@@ -445,7 +444,6 @@ export function setupAuth(app: Express): void {
       await storage.updateUserVerificationToken(user.id, verificationToken);
 
       // Send verification email
-      const { sendVerificationEmail } = await import('./email-service');
       await sendVerificationEmail({
         email,
         firstName: user.firstName || '',
