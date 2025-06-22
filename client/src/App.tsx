@@ -53,7 +53,15 @@ function AppRouter() {
 
     const ProtectedRoute = ({ component: Component, ...rest }) => (
         <Route {...rest}>
-            {finalIsAuthenticated ? <Component /> : <LoginPage />}
+            {currentIsLoading && !FORCE_AUTHENTICATED ? (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+            ) : finalIsAuthenticated ? (
+                <Component />
+            ) : (
+                <LoginPage />
+            )}
         </Route>
     );
 
@@ -80,7 +88,17 @@ function AppRouter() {
                                     <Route path="/login" component={LoginPage} />
                                     <Route path="/reset-password" component={ResetPasswordPage} />
                                     <Route path="/email-verification" component={EmailVerificationPage} />
-                                    <Route path="/" component={finalIsAuthenticated ? Home : Landing} />
+                                    <Route path="/">
+                                        {currentIsLoading && !FORCE_AUTHENTICATED ? (
+                                            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                            </div>
+                                        ) : finalIsAuthenticated ? (
+                                            <Home />
+                                        ) : (
+                                            <Landing />
+                                        )}
+                                    </Route>
                                     <Route path="/login-debug" component={LoginDebugPage} />
                                     <Route path="/auto-login" component={AutoLoginPage} />
                                     <ProtectedRoute path="/bible" component={BiblePage} />

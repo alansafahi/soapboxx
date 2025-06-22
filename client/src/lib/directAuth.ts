@@ -8,10 +8,32 @@ interface AuthState {
 }
 
 export function useDirectAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    isAuthenticated: false,
-    isLoading: true
+  const [authState, setAuthState] = useState<AuthState>(() => {
+    // Initialize with cached state if available to prevent loading flicker
+    const cachedState = localStorage.getItem('auth_state');
+    if (cachedState) {
+      try {
+        const parsed = JSON.parse(cachedState);
+        const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+        
+        if (parsed.timestamp > fiveMinutesAgo && parsed.isAuthenticated && parsed.user) {
+          console.log('📦 Initializing with cached auth state:', parsed.user.email);
+          return {
+            user: parsed.user,
+            isAuthenticated: parsed.isAuthenticated,
+            isLoading: false
+          };
+        }
+      } catch (error) {
+        localStorage.removeItem('auth_state');
+      }
+    }
+    
+    return {
+      user: null,
+      isAuthenticated: false,
+      isLoading: true
+    };
   });
 
   useEffect(() => {
@@ -60,33 +82,14 @@ export function useDirectAuth() {
       } catch (error) {
         console.log('🚨 Auth check error:', error);
         
-        // Try to use cached state if available and recent (< 5 minutes)
-        const cachedState = localStorage.getItem('auth_state');
-        if (cachedState) {
-          try {
-            const parsed = JSON.parse(cachedState);
-            const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
-            
-            if (parsed.timestamp > fiveMinutesAgo && parsed.isAuthenticated) {
-              console.log('📦 Using cached auth state');
-              setAuthState({
-                user: parsed.user,
-                isAuthenticated: parsed.isAuthenticated,
-                isLoading: false
-              });
-              return;
-            }
-          } catch (parseError) {
-            console.log('❌ Failed to parse cached auth state');
-            localStorage.removeItem('auth_state');
-          }
+        // If we already have cached state loaded, don't clear it on network error
+        if (!authState.isAuthenticated) {
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
         }
-        
-        setAuthState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false
-        });
       }
     };
 
@@ -104,26 +107,7 @@ export function useDirectAuth() {
       return;
     }
 
-    // Load cached state immediately if available
-    const cachedState = localStorage.getItem('auth_state');
-    if (cachedState) {
-      try {
-        const parsed = JSON.parse(cachedState);
-        if (parsed.isAuthenticated && parsed.user) {
-          console.log('📦 Restoring cached auth state:', parsed.user.email);
-          setAuthState({
-            user: parsed.user,
-            isAuthenticated: parsed.isAuthenticated,
-            isLoading: false
-          });
-        }
-      } catch (error) {
-        console.log('❌ Failed to parse cached state');
-        localStorage.removeItem('auth_state');
-      }
-    }
-
-    // Always validate with server
+    // Always validate with server (but don't clear cached state on error)
     checkAuth();
   }, []);
 
