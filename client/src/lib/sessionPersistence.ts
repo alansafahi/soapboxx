@@ -12,7 +12,7 @@ interface PersistedSession {
 
 export class SessionPersistenceManager {
   private static instance: SessionPersistenceManager;
-  private sessionKey = 'soapbox_session';
+  private sessionKey = 'supabase.auth.token'; // Use Supabase-style key
   private verificationKey = 'session_verified';
   private heartbeatKey = 'session_heartbeat';
   private sessionTimeout = 30 * 60 * 1000; // 30 minutes
@@ -37,7 +37,12 @@ export class SessionPersistenceManager {
       localStorage.setItem(this.sessionKey, JSON.stringify(sessionData));
       sessionStorage.setItem(this.verificationKey, 'true');
       sessionStorage.setItem(this.heartbeatKey, Date.now().toString());
+      
+      // Debug: Log what's actually in localStorage
       console.log('💾 Session persisted for:', user.email);
+      console.log('🔍 DEBUG: localStorage keys:', Object.keys(localStorage));
+      console.log('🔍 DEBUG: supabase.auth.token exists:', !!localStorage.getItem('supabase.auth.token'));
+      console.log('🔍 DEBUG: sessionStorage keys:', Object.keys(sessionStorage));
     } catch (error) {
       console.warn('Failed to persist session:', error);
     }

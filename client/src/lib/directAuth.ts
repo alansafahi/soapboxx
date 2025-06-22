@@ -1,6 +1,7 @@
 // Direct authentication manager with session persistence
 import { useState, useEffect } from 'react';
 import { sessionManager } from './sessionPersistence';
+import { debugStorage } from './storageDebugger';
 import { authRecovery } from './authStateRecovery';
 
 interface AuthState {
@@ -12,10 +13,26 @@ interface AuthState {
 
 let authCheckInProgress = false;
 
+// Debug function to inspect storage
+function inspectStorage() {
+  console.log('🔍 STORAGE INSPECTION:');
+  console.log('localStorage keys:', Object.keys(localStorage));
+  console.log('sessionStorage keys:', Object.keys(sessionStorage));
+  console.log('supabase.auth.token:', localStorage.getItem('supabase.auth.token'));
+  console.log('auth_state:', localStorage.getItem('auth_state'));
+  console.log('logout_flag:', localStorage.getItem('logout_flag'));
+  console.log('session_verified:', sessionStorage.getItem('session_verified'));
+  console.log('session_heartbeat:', sessionStorage.getItem('session_heartbeat'));
+}
+
 export function useDirectAuth() {
   const [authState, setAuthState] = useState<AuthState>(() => {
+    // Debug storage on initialization
+    inspectStorage();
+    
     // Check for logout flag first
     if (sessionManager.hasLogoutFlag()) {
+      console.log('🚫 Logout flag detected during initialization');
       sessionManager.clearLogoutFlag();
       sessionManager.clearSession();
       return {
@@ -28,6 +45,9 @@ export function useDirectAuth() {
 
     // Check for persisted session
     const persistedSession = sessionManager.getSession();
+    console.log('📦 Persisted session found:', !!persistedSession);
+    console.log('📦 Session verified:', sessionManager.isSessionVerified());
+    
     if (persistedSession && sessionManager.isSessionVerified()) {
       console.log('📦 Initializing with persisted session:', persistedSession.user.email);
       return {
@@ -38,6 +58,7 @@ export function useDirectAuth() {
       };
     }
     
+    console.log('📦 No valid persisted session, will check with server');
     return {
       user: null,
       isAuthenticated: false,
