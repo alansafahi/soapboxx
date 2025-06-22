@@ -1,6 +1,55 @@
 import { db } from './db';
 import { bibleVerses } from '@shared/schema';
 import { eq, and, like, ilike, or, sql } from 'drizzle-orm';
+import OpenAI from "openai";
+
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+});
+
+// OpenAI fallback for missing verses
+async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      console.log('[Bible AI] OpenAI API key not available, skipping fallback');
+      return null;
+    }
+
+    console.log(`[Bible AI] Fetching ${reference} (${version}) from OpenAI as fallback`);
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: `You are a Biblical scholar. Provide the exact, authentic Bible verse text for the requested reference and translation. Return only the verse text without commentary or additional information. Be precise and accurate.`
+        },
+        {
+          role: "user", 
+          content: `Please provide the exact text of ${reference} from the ${version} translation of the Bible.`
+        }
+      ],
+      max_tokens: 300,
+      temperature: 0.1
+    });
+
+    const verseText = response.choices[0]?.message?.content?.trim();
+    
+    if (verseText && verseText.length > 10) {
+      console.log(`[Bible AI] Successfully retrieved ${reference} from OpenAI`);
+      return {
+        reference: reference,
+        text: verseText,
+        version: version
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('[Bible AI] Error fetching verse from OpenAI:', error);
+    return null;
+  }
+}
 
 interface BibleVerseResponse {
   reference: string;
@@ -98,9 +147,29 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
     }
 
     console.log(`[Bible DB] No verse found for "${reference}" in any available translation`);
+    
+    // Try OpenAI fallback for authentic scripture
+    const aiResult = await fetchVerseFromOpenAI(reference, version);
+    if (aiResult) {
+      console.log(`[Bible DB] Retrieved ${reference} from OpenAI fallback`);
+      return aiResult;
+    }
+    
     return null;
   } catch (error) {
     console.error('[Bible DB] Database lookup error:', error);
+    
+    // Try OpenAI fallback when database fails
+    try {
+      const aiResult = await fetchVerseFromOpenAI(reference, version);
+      if (aiResult) {
+        console.log(`[Bible DB] Retrieved ${reference} from OpenAI fallback after DB error`);
+        return aiResult;
+      }
+    } catch (aiError) {
+      console.error('[Bible AI] Fallback error:', aiError);
+    }
+    
     return null;
   }
 }
