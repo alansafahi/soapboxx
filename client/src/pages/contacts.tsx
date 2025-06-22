@@ -61,10 +61,18 @@ function ContactsPage() {
   // Send invitation mutation
   const inviteMutation = useMutation({
     mutationFn: async (data: { email: string; message?: string }) => {
-      return apiRequest("/api/invitations", {
-        method: "POST",
-        body: data
-      });
+      console.log('🚀 Sending invitation request:', data);
+      try {
+        const response = await apiRequest("/api/invitations", {
+          method: "POST",
+          body: data
+        });
+        console.log('✅ Invitation response received:', response);
+        return response;
+      } catch (error) {
+        console.error('❌ Invitation request failed:', error);
+        throw error;
+      }
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/invitations/pending"] });
@@ -96,11 +104,36 @@ function ContactsPage() {
     },
     onError: (error: any) => {
       console.error('Invitation error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send invitation. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Check if it's a network or session issue
+      if (error.message && error.message.includes('500')) {
+        toast({
+          title: "Server Error",
+          description: "The server is working but your browser session may be out of sync. Please refresh the page and try again.",
+          variant: "destructive",
+          action: (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </Button>
+          ),
+        });
+      } else if (error.message && error.message.includes('401')) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in again and retry sending the invitation.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to send invitation. Please refresh and try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
