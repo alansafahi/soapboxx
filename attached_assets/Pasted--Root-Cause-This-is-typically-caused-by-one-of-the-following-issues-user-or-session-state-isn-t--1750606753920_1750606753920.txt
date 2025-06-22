@@ -1,0 +1,119 @@
+🔍 Root Cause
+This is typically caused by one of the following issues:
+
+user or session state isn't persisted across page reloads.
+
+Auth state isn't being checked globally on page load.
+
+Redirect logic is flawed, assuming the user is unauthenticated before session is fully loaded.
+
+Supabase/NextAuth is not restoring session correctly, due to misconfigured cookie, domain, or storage logic.
+
+✅ Fix Checklist
+1. Ensure Session Is Being Set Globally
+If using Supabase:
+
+ts
+Copy
+Edit
+const [session, setSession] = useState(null);
+
+useEffect(() => {
+  const currentSession = supabase.auth.getSession().then(({ data }) => {
+    setSession(data?.session ?? null);
+  });
+
+  const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    setSession(session);
+  });
+
+  return () => listener.subscription.unsubscribe();
+}, []);
+🧠 If you're not waiting for the session to load before rendering a redirect, the app will assume the user is logged out.
+
+2. Guard Routes with Session-Check
+Make sure your page checks session or user before redirecting.
+
+Incorrect (problematic):
+
+tsx
+Copy
+Edit
+if (!user) {
+  navigate('/login'); // will run before session is restored
+}
+Correct:
+
+tsx
+Copy
+Edit
+if (isLoading) return <LoadingSpinner />;
+if (!session) return <Navigate to="/login" />;
+You must distinguish between "loading" and "not logged in".
+
+3. Persist Session with localStorage or Cookies
+Ensure you aren't clearing session accidentally during:
+
+Page reload
+
+Navigation
+
+If you're using Supabase + Replit:
+
+ts
+Copy
+Edit
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    detectSessionInUrl: true,
+    storage: localStorage,
+  },
+});
+🔐 persistSession: true is critical
+
+4. Make Sure the Login Redirect Logic Works
+When logging in:
+
+ts
+Copy
+Edit
+const { data, error } = await supabase.auth.signInWithPassword({
+  email,
+  password,
+});
+
+if (data.session) {
+  router.push("/dashboard"); // Or wherever your app should go
+}
+Or if using OAuth:
+
+ts
+Copy
+Edit
+supabase.auth.signInWithOAuth({
+  provider: "google",
+  options: {
+    redirectTo: "https://soapboxapp.org/callback", // must match Supabase settings
+  },
+});
+5. Inspect Console for Session Debugging
+Add this after page load:
+
+ts
+Copy
+Edit
+useEffect(() => {
+  supabase.auth.getSession().then(({ data }) => {
+    console.log("Loaded session:", data);
+  });
+}, []);
+If session is null even after login, then Supabase isn't persisting it correctly.
+
+✅ Summary of Action Steps
+Task	Code/Fix
+Ensure session loads on app start	supabase.auth.getSession()
+Guard routes with session loading state	Avoid early redirects
+Set persistSession: true	When initializing Supabase client
+Redirect after login	Only after session is received
+Debug auth state in localStorage	DevTools → Application → Storage

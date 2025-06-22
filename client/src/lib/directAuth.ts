@@ -1,6 +1,5 @@
 // Direct authentication manager with session persistence
 import { useState, useEffect } from 'react';
-import { authSync } from './authSync';
 
 interface AuthState {
   user: any;
@@ -16,89 +15,148 @@ export function useDirectAuth() {
   });
 
   useEffect(() => {
-    // Initialize the auth sync system
-    authSync.initialize();
-    
-    // Subscribe to auth sync state changes
-    const unsubscribe = authSync.subscribe((syncState) => {
-      if (syncState) {
-        console.log('🔄 AuthSync state update:', syncState.user?.email, 'authenticated:', syncState.isAuthenticated);
-        setAuthState({
-          user: syncState.user,
-          isAuthenticated: syncState.isAuthenticated,
-          isLoading: false
+    const checkAuth = async () => {
+      try {
+        console.log('🔍 Checking authentication status...');
+        
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
         });
-      } else {
-        console.log('🔄 AuthSync state update: unauthenticated');
+
+        console.log('📡 Auth response status:', response.status);
+
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('✅ User authenticated:', userData.email);
+          
+          setAuthState({
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false
+          });
+          
+          // Cache the authenticated state
+          localStorage.setItem('auth_state', JSON.stringify({
+            user: userData,
+            isAuthenticated: true,
+            timestamp: Date.now()
+          }));
+        } else {
+          console.log('❌ Authentication failed');
+          
+          // Clear any cached state
+          localStorage.removeItem('auth_state');
+          
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
+        }
+      } catch (error) {
+        console.log('🚨 Auth check error:', error);
+        
+        // Try to use cached state if available and recent (< 5 minutes)
+        const cachedState = localStorage.getItem('auth_state');
+        if (cachedState) {
+          try {
+            const parsed = JSON.parse(cachedState);
+            const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+            
+            if (parsed.timestamp > fiveMinutesAgo && parsed.isAuthenticated) {
+              console.log('📦 Using cached auth state');
+              setAuthState({
+                user: parsed.user,
+                isAuthenticated: parsed.isAuthenticated,
+                isLoading: false
+              });
+              return;
+            }
+          } catch (parseError) {
+            console.log('❌ Failed to parse cached auth state');
+            localStorage.removeItem('auth_state');
+          }
+        }
+        
         setAuthState({
           user: null,
           isAuthenticated: false,
           isLoading: false
         });
       }
-    });
+    };
 
-    // Initial sync with server
-    authSync.syncWithServer();
+    // Check for logout flag
+    const logoutFlag = localStorage.getItem('logout_flag');
+    if (logoutFlag) {
+      localStorage.removeItem('logout_flag');
+      localStorage.removeItem('auth_state');
+      console.log('🚫 Logout flag detected');
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+      return;
+    }
 
-    return unsubscribe;
+    // Load cached state immediately if available
+    const cachedState = localStorage.getItem('auth_state');
+    if (cachedState) {
+      try {
+        const parsed = JSON.parse(cachedState);
+        if (parsed.isAuthenticated && parsed.user) {
+          console.log('📦 Restoring cached auth state:', parsed.user.email);
+          setAuthState({
+            user: parsed.user,
+            isAuthenticated: parsed.isAuthenticated,
+            isLoading: false
+          });
+        }
+      } catch (error) {
+        console.log('❌ Failed to parse cached state');
+        localStorage.removeItem('auth_state');
+      }
+    }
+
+    // Always validate with server
+    checkAuth();
   }, []);
 
   const logout = async () => {
-    console.log('🚪 LOGOUT INITIATED - Clearing all authentication state');
+    console.log('🚪 Logout initiated');
     
-    // STEP 1: IMMEDIATELY clear frontend state to force UI re-render
-    console.log('🗑️ Clearing frontend authentication state immediately');
+    // Clear all auth state immediately
     setAuthState({
       user: null,
       isAuthenticated: false,
       isLoading: false
     });
     
+    // Set logout flag and clear cached state
+    localStorage.setItem('logout_flag', 'true');
+    localStorage.removeItem('auth_state');
+    
     try {
-      // STEP 2: Clear ALL possible storage locations
-      console.log('🧹 Clearing all storage (localStorage, sessionStorage)');
-      localStorage.clear(); // Clear everything
-      sessionStorage.clear(); // Clear session storage
-      
-      // STEP 3: Set logout flag to prevent auth restoration
-      localStorage.setItem('logout_flag', 'true');
-      console.log('🚫 Logout flag set to prevent cache restoration');
-      
-      // STEP 4: Call backend logout endpoint (non-blocking)
-      console.log('📡 Calling backend logout endpoint');
-      fetch('/api/auth/logout', {
+      // Call backend logout endpoint
+      await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
-      }).then(response => {
-        if (response.ok) {
-          console.log('✅ Backend logout successful');
-        } else {
-          console.log('⚠️ Backend logout failed, but frontend already cleared');
-        }
-      }).catch(error => {
-        console.log('⚠️ Backend logout error:', error);
       });
-      
-      // STEP 5: Force immediate navigation to login page
-      console.log('🔄 Redirecting to login page immediately');
-      window.location.replace('/login');
-      
+      console.log('✅ Backend logout successful');
     } catch (error) {
-      console.log('❌ Logout error:', error);
-      
-      // Even if anything fails, ensure complete frontend cleanup
-      console.log('🛡️ Emergency cleanup - clearing all state');
-      localStorage.clear();
-      sessionStorage.clear();
-      localStorage.setItem('logout_flag', 'true');
-      
-      // Force navigation even on error
-      window.location.replace('/login');
+      console.log('⚠️ Backend logout error:', error);
     }
+    
+    // Force navigation to login page
+    window.location.replace('/login');
   };
 
   return { ...authState, logout };
