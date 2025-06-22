@@ -4,7 +4,6 @@ import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupProductionAuth, isAuthenticatedProduction } from "./productionAuth";
-import { ensureSessionAuthentication } from "./session-fix";
 
 // Use production authentication as the primary authentication system
 const isAuthenticated = isAuthenticatedProduction;
@@ -633,54 +632,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Auth routes with comprehensive session population
-  app.get('/api/auth/user', async (req: any, res) => {
+  // Auth routes with secure authentication check
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const session = req.session as any;
-      
-      // Force session population with production user data
-      console.log('🔄 Force-populating session for browser authentication...');
-      
-      const productionUser = await storage.getUserByEmail('hello@soapboxsuperapp.com');
-      if (productionUser) {
-        // Always populate session data
-        session.userId = productionUser.id;
-        session.user = {
-          id: productionUser.id,
-          email: productionUser.email,
-          username: productionUser.username || productionUser.email?.split('@')[0],
-          firstName: productionUser.firstName || 'Hello',
-          lastName: productionUser.lastName || 'User',
-          role: productionUser.role || 'member',
-          isVerified: true,
-          profileImageUrl: productionUser.profileImageUrl,
-        };
-        session.authenticated = true;
-        session.autoLogin = true;
-        session.populatedAt = new Date().toISOString();
-        
-        // Also populate req.user for compatibility
-        req.user = {
-          id: productionUser.id,
-          claims: { sub: productionUser.id },
-          email: productionUser.email,
-          firstName: productionUser.firstName,
-          lastName: productionUser.lastName,
-          role: productionUser.role
-        };
-        
-        // Save session
-        req.session.save((err: any) => {
-          if (err) {
-            console.error('Session save error:', err);
-          } else {
-            console.log('✅ Session force-populated for browser authentication:', productionUser.email);
-          }
-        });
-      } else {
-        console.log('❌ Production user not found in database');
-        return res.status(404).json({ message: "Production user not found" });
-      }
       
       // Use session data for user retrieval
       const userId = req.session?.userId || req.user?.claims?.sub;
@@ -2266,7 +2220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Contacts and Invitations API endpoints with session management
-  app.get('/api/contacts', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+  app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2281,7 +2235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/contacts', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+  app.post('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2324,7 +2278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/contacts/:id', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+  app.delete('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {

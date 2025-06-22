@@ -565,6 +565,39 @@ export function setupProductionAuth(app: Express): void {
     }
   });
 
+  // Secure logout endpoint
+  app.post('/api/auth/logout', (req, res) => {
+    try {
+      // Destroy the session completely
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error('Session destruction error:', err);
+          return res.status(500).json({ 
+            success: false,
+            message: 'Logout failed' 
+          });
+        }
+        
+        // Clear all session cookies
+        res.clearCookie('connect.sid');
+        res.clearCookie('soapbox_session');
+        
+        console.log('✅ Session destroyed successfully');
+        
+        res.json({ 
+          success: true,
+          message: 'Logged out successfully' 
+        });
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Logout failed' 
+      });
+    }
+  });
+
   // Google OAuth routes
   app.get('/api/auth/google', 
     passport.authenticate('google', { scope: ['profile', 'email'] })
