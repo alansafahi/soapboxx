@@ -35,7 +35,7 @@ interface Notification {
 
 export default function TopHeader() {
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
   
   const typedUser = user as User | null;

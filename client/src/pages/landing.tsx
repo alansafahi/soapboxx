@@ -7,7 +7,7 @@ import soapboxLogo from "@/assets/soapbox-logo.jpeg";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   
   const handleStartJourney = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -33,21 +33,15 @@ export default function Landing() {
         credentials: 'include'
       });
       
-      if (response.ok) {
-        // Clear any local storage
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Redirect to landing page
-        window.location.href = '/';
-      } else {
-        console.error('Logout failed:', await response.text());
-        // Force redirect even if logout call fails
-        window.location.href = '/';
-      }
+      // Always trigger frontend logout regardless of backend response
+      logout();
+      
+      // Redirect to landing page
+      window.location.href = '/';
     } catch (error) {
       console.error("Logout failed:", error);
-      // Force redirect even if there's an error
+      // Force logout and redirect even if there's an error
+      logout();
       window.location.href = '/';
     }
   };
