@@ -5714,8 +5714,12 @@ Return JSON with this exact structure:
   // Discussion interaction endpoints
   app.post("/api/discussions/:id/like", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const discussionId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       
       const result = await storage.toggleDiscussionLike(userId, discussionId);
       res.json(result);

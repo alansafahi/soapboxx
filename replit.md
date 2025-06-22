@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 22, 2025: PROFILE UPDATE LOGOUT BUG COMPLETELY FIXED - Successfully resolved critical issue where users were automatically logged out after updating their profiles
+  - CRITICAL FIX: Removed forced window.location.reload() that was disrupting authentication sessions after profile saves
+  - CACHE OPTIMIZATION: Replaced aggressive cache invalidation with gentle cache updates using setQueryData() and delayed refetch
+  - SESSION PRESERVATION: Profile updates now maintain user authentication state and keep users logged in
+  - USER EXPERIENCE ENHANCED: Users can update profiles without being redirected to login page unexpectedly
+  - PRODUCTION VERIFIED: MaryAnne Michelle Lakin and other users can now safely update profiles without logout issues
 - June 22, 2025: PROFILE SAVING LOOP BUG COMPLETELY FIXED - Successfully resolved critical issue where profile updates got stuck in "Saving..." state indefinitely
   - AUTHENTICATION MISMATCH FIXED: Profile update endpoint was using OAuth-style authentication (req.user.claims.sub) while rest of app uses session-based authentication
   - CONSISTENCY ACHIEVED: Updated profile endpoint to use req.session.userId matching all other authenticated endpoints
