@@ -109,6 +109,10 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
         verse.text.includes('Scripture according to') ||
         verse.text.includes('GOD\'s Word according to') ||
         verse.text.includes('GOD\'s Message according to') ||
+        verse.text.includes('Jesus said to them as recorded in') ||
+        verse.text.includes('In those days it happened as recorded in') ||
+        verse.text.includes('The LORD spoke as written in') ||
+        verse.text.includes('As it is written in') ||
         verse.text.length < 20
       );
       
