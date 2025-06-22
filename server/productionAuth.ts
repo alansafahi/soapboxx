@@ -168,10 +168,10 @@ export function setupProductionAuth(app: Express): void {
     try {
       const { email, password, username, firstName, lastName } = req.body;
 
-      if (!email || !password || !username) {
+      if (!email || !password || !username || !firstName || !lastName) {
         return res.status(400).json({ 
           success: false,
-          message: 'Email, password, and username are required' 
+          message: 'Email, password, username, first name, and last name are required' 
         });
       }
 
@@ -213,8 +213,8 @@ export function setupProductionAuth(app: Express): void {
         id: crypto.randomUUID(),
         email,
         username,
-        firstName: firstName || '',
-        lastName: lastName || '',
+        firstName,
+        lastName,
         password: hashedPassword,
         role: 'member',
         emailVerified: false,
@@ -227,7 +227,7 @@ export function setupProductionAuth(app: Express): void {
       try {
         await emailService.sendVerificationEmail({
           email,
-          firstName: firstName || '',
+          firstName,
           token: verificationToken
         });
         console.log(`Verification email sent to ${email}`);
