@@ -2421,6 +2421,50 @@ app.post('/api/invitations', ensureSessionAuthentication, isAuthenticated, async
     }
   });
 
+  app.post('/api/contacts/import', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { contacts } = req.body;
+      if (!contacts || !Array.isArray(contacts)) {
+        return res.status(400).json({ message: 'Invalid contacts data' });
+      }
+
+      // Import each contact, avoiding duplicates
+      const importResults = [];
+      for (const contact of contacts) {
+        try {
+          // Create contact record in our system
+          const newContact = await storage.addContact({
+            userId,
+            name: contact.name || 'Unknown Contact',
+            email: contact.email || null,
+            phone: contact.phone || null,
+            contactType: 'device',
+            status: 'imported',
+            source: contact.source || 'device'
+          });
+          importResults.push(newContact);
+        } catch (contactError) {
+          console.error('Error importing individual contact:', contactError);
+          // Continue with other contacts even if one fails
+        }
+      }
+
+      res.json({
+        imported: importResults.length,
+        total: contacts.length,
+        contacts: importResults
+      });
+    } catch (error) {
+      console.error('Error importing contacts:', error);
+      res.status(500).json({ message: 'Failed to import contacts' });
+    }
+  });
+
   // Bible API endpoints
   app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
     try {
