@@ -2417,7 +2417,7 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
-  app.get('/api/invitations', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+  app.get('/api/invitations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2460,7 +2460,7 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
-  app.post('/api/contacts/import', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+  app.post('/api/contacts/import', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
