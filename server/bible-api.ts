@@ -103,6 +103,33 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
     if (exactMatch.length > 0) {
       const verse = exactMatch[0];
       console.log(`[Bible DB] Found exact match: ${verse.reference} (${verse.translation})`);
+      
+      // Check if the text is a placeholder and needs replacement
+      const isPlaceholder = verse.text && (
+        verse.text.includes('Scripture according to') ||
+        verse.text.includes('GOD\'s Word according to') ||
+        verse.text.includes('GOD\'s Message according to') ||
+        verse.text.length < 20
+      );
+      
+      if (isPlaceholder) {
+        console.log(`[Bible DB] Placeholder detected for ${verse.reference}, fetching authentic text from OpenAI`);
+        const authenticVerse = await fetchVerseFromOpenAI(cleanRef, upperVersion);
+        if (authenticVerse) {
+          // Update database with authentic verse
+          await db
+            .update(bibleVerses)
+            .set({ 
+              text: authenticVerse.text,
+              updatedAt: new Date()
+            })
+            .where(eq(bibleVerses.id, verse.id));
+          
+          console.log(`[Bible DB] Updated ${verse.reference} with authentic text`);
+          return authenticVerse;
+        }
+      }
+      
       return {
         reference: verse.reference,
         text: verse.text || '',
@@ -274,8 +301,40 @@ export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<
       .limit(1);
 
     if (randomVerse.length > 0) {
-      console.log(`[Bible DB] Random verse: ${randomVerse[0].reference}`);
-      return randomVerse[0];
+      const verse = randomVerse[0];
+      console.log(`[Bible DB] Random verse: ${verse.reference}`);
+      
+      // Check if the text is a placeholder and needs replacement
+      const isPlaceholder = verse.text && (
+        verse.text.includes('Scripture according to') ||
+        verse.text.includes('GOD\'s Word according to') ||
+        verse.text.includes('GOD\'s Message according to') ||
+        verse.text.includes('Jesus said to them as recorded in') ||
+        verse.text.length < 20
+      );
+      
+      if (isPlaceholder) {
+        console.log(`[Bible DB] Placeholder detected in random verse ${verse.reference}, fetching authentic text`);
+        const authenticVerse = await fetchVerseFromOpenAI(verse.reference, verse.translation || 'NIV');
+        if (authenticVerse) {
+          // Update database with authentic verse
+          await db
+            .update(bibleVerses)
+            .set({ 
+              text: authenticVerse.text,
+              updatedAt: new Date()
+            })
+            .where(eq(bibleVerses.id, verse.id));
+          
+          console.log(`[Bible DB] Updated random verse ${verse.reference} with authentic text`);
+          return {
+            ...verse,
+            text: authenticVerse.text
+          };
+        }
+      }
+      
+      return verse;
     }
 
     return null;
