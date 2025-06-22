@@ -56,6 +56,22 @@ export function getUserFriendlyError(error: any, context: 'login' | 'registratio
   }
   
   if (context === 'registration') {
+    if (message.includes('User already exists') || message.includes('already exists')) {
+      return {
+        title: 'Account already exists',
+        description: 'An account with this email address already exists.',
+        actionable: 'Please try signing in instead or use a different email address.'
+      };
+    }
+    
+    if (message.includes('Username already taken')) {
+      return {
+        title: 'Username not available',
+        description: 'This username is already taken.',
+        actionable: 'Please choose a different username and try again.'
+      };
+    }
+    
     if (message.includes('validation') || message.includes('required')) {
       return {
         title: 'Please complete all fields',
@@ -64,7 +80,7 @@ export function getUserFriendlyError(error: any, context: 'login' | 'registratio
       };
     }
     
-    if (message.includes('email')) {
+    if (message.includes('email') && !message.includes('already exists')) {
       return {
         title: 'Invalid email address',
         description: 'Please enter a valid email address.',
