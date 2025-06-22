@@ -45,9 +45,7 @@ class EmailService {
       throw new Error('Email service not configured. SENDGRID_API_KEY and SENDGRID_VERIFIED_SENDER are required.');
     }
 
-    const verificationUrl = `${process.env.NODE_ENV === 'production' 
-      ? 'https://www.soapboxapp.org' 
-      : 'http://localhost:5000'}/api/auth/verify-email?token=${data.token}`;
+    const verificationUrl = `https://www.soapboxapp.org/api/auth/verify-email?token=${data.token}`;
 
     try {
       await this.mailService.send({
@@ -84,9 +82,7 @@ class EmailService {
       throw new Error('Email service not configured. SENDGRID_API_KEY and SENDGRID_VERIFIED_SENDER are required.');
     }
 
-    const resetUrl = `${process.env.NODE_ENV === 'production' 
-      ? 'https://www.soapboxapp.org' 
-      : 'http://localhost:5000'}/reset-password?token=${data.token}`;
+    const resetUrl = `https://www.soapboxapp.org/reset-password?token=${data.token}`;
 
     try {
       await this.mailService.send({
