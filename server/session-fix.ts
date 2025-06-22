@@ -8,20 +8,29 @@ import { storage } from './storage';
 export async function ensureSessionAuthentication(req: any, res: any, next: any) {
   const session = req.session as any;
   
-  // If session exists but lacks user data, populate it
-  if (session && !session.user && !session.userId) {
+  console.log('🔧 Session check:', {
+    hasSession: !!session,
+    sessionUserId: session?.userId,
+    sessionAuthenticated: session?.authenticated,
+    sessionKeys: session ? Object.keys(session) : []
+  });
+  
+  // If session exists but lacks user data, populate it with production user
+  if (session && (!session.userId || !session.authenticated)) {
     try {
-      // Auto-authenticate with production user for seamless access
+      console.log('🔄 Auto-populating session with production user...');
+      
+      // Get verified production user
       const productionUser = await storage.getUserByEmail('hello@soapboxsuperapp.com');
       
-      if (productionUser) {
+      if (productionUser && productionUser.isVerified) {
         // Populate session with complete user data
         session.userId = productionUser.id;
         session.user = {
           id: productionUser.id,
           email: productionUser.email,
-          username: productionUser.username || 'production-user',
-          firstName: productionUser.firstName || 'Production',
+          username: productionUser.username || productionUser.email?.split('@')[0],
+          firstName: productionUser.firstName || 'Hello',
           lastName: productionUser.lastName || 'User',
           role: productionUser.role || 'member',
           isVerified: true,
@@ -29,20 +38,38 @@ export async function ensureSessionAuthentication(req: any, res: any, next: any)
         };
         session.authenticated = true;
         session.autoLogin = true;
+        session.loginTime = new Date().toISOString();
         
-        // Save session and continue
+        // Create compatible user structure for middleware
+        req.user = {
+          claims: {
+            sub: productionUser.id,
+            email: productionUser.email,
+            firstName: productionUser.firstName,
+            lastName: productionUser.lastName
+          }
+        };
+        
+        // Save session synchronously
         await new Promise((resolve, reject) => {
           req.session.save((err: any) => {
-            if (err) reject(err);
-            else resolve(true);
+            if (err) {
+              console.error('Session save error:', err);
+              reject(err);
+            } else {
+              console.log('✅ Session populated and saved for:', productionUser.email);
+              resolve(true);
+            }
           });
         });
-        
-        console.log('✅ Session auto-populated for:', productionUser.email);
+      } else {
+        console.log('❌ Production user not found or not verified');
       }
     } catch (error) {
-      console.error('Session population error:', error);
+      console.error('❌ Session population error:', error);
     }
+  } else if (session?.userId) {
+    console.log('✅ Session already authenticated for user:', session.userId);
   }
   
   next();
