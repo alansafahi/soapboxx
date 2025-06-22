@@ -91,40 +91,58 @@ export function useDirectAuth() {
   }, []);
 
   const logout = async () => {
+    console.log('🚪 LOGOUT INITIATED - Clearing all authentication state');
+    
+    // STEP 1: IMMEDIATELY clear frontend state to force UI re-render
+    console.log('🗑️ Clearing frontend authentication state immediately');
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false
+    });
+    
     try {
-      // Clear ALL localStorage items related to auth
-      localStorage.removeItem('soapbox_auth_state');
-      localStorage.removeItem('auth_cache');
-      localStorage.removeItem('user_cache');
-      
-      // Set logout flag to prevent cached auth restoration
-      localStorage.setItem('logout_flag', 'true');
-      
-      // Set unauthenticated state immediately
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false
-      });
-      
-      // Call backend logout endpoint
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      
-      // Force complete page reload to login page
-      window.location.replace('/login');
-    } catch (error) {
-      console.log('Logout error:', error);
-      // Even if backend fails, clear frontend state
+      // STEP 2: Clear ALL possible storage locations
+      console.log('🧹 Clearing all storage (localStorage, sessionStorage)');
       localStorage.clear(); // Clear everything
+      sessionStorage.clear(); // Clear session storage
+      
+      // STEP 3: Set logout flag to prevent auth restoration
       localStorage.setItem('logout_flag', 'true');
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false
+      console.log('🚫 Logout flag set to prevent cache restoration');
+      
+      // STEP 4: Call backend logout endpoint (non-blocking)
+      console.log('📡 Calling backend logout endpoint');
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
+        if (response.ok) {
+          console.log('✅ Backend logout successful');
+        } else {
+          console.log('⚠️ Backend logout failed, but frontend already cleared');
+        }
+      }).catch(error => {
+        console.log('⚠️ Backend logout error:', error);
       });
+      
+      // STEP 5: Force immediate navigation to login page
+      console.log('🔄 Redirecting to login page immediately');
+      window.location.replace('/login');
+      
+    } catch (error) {
+      console.log('❌ Logout error:', error);
+      
+      // Even if anything fails, ensure complete frontend cleanup
+      console.log('🛡️ Emergency cleanup - clearing all state');
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('logout_flag', 'true');
+      
+      // Force navigation even on error
       window.location.replace('/login');
     }
   };
