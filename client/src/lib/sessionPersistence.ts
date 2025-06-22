@@ -78,6 +78,7 @@ export class SessionPersistenceManager {
   // Clear all session data
   clearSession(): void {
     localStorage.removeItem(this.sessionKey);
+    localStorage.removeItem('supabase.auth.token'); // Clear Supabase-style token
     localStorage.removeItem('auth_state'); // Legacy cleanup
     sessionStorage.removeItem(this.verificationKey);
     sessionStorage.removeItem(this.heartbeatKey);

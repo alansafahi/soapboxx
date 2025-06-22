@@ -25,22 +25,22 @@ function inspectStorage() {
   console.log('session_heartbeat:', sessionStorage.getItem('session_heartbeat'));
 }
 
+// Function to clear logout flag and restore authentication
+function clearLogoutFlag() {
+  localStorage.removeItem('logout_flag');
+  console.log('🧹 Logout flag cleared - authentication restored');
+}
+
 export function useDirectAuth() {
   const [authState, setAuthState] = useState<AuthState>(() => {
     // Debug storage on initialization
     inspectStorage();
     
-    // Check for logout flag first
+    // Clear logout flag if it exists - allow re-authentication
     if (sessionManager.hasLogoutFlag()) {
-      console.log('🚫 Logout flag detected during initialization');
+      console.log('🚫 Logout flag detected - clearing to allow re-authentication');
       sessionManager.clearLogoutFlag();
-      sessionManager.clearSession();
-      return {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        initialized: true
-      };
+      clearLogoutFlag(); // Also clear direct localStorage flag
     }
 
     // Check for persisted session
@@ -108,6 +108,18 @@ export function useDirectAuth() {
           
           // Use session manager for robust persistence
           sessionManager.setSession(userData, true);
+          
+          // Create Supabase-style session for compatibility
+          const supabaseSession = {
+            access_token: 'soapbox-session-token',
+            refresh_token: 'soapbox-refresh-token',
+            expires_in: 3600,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            token_type: 'bearer',
+            user: userData
+          };
+          localStorage.setItem('supabase.auth.token', JSON.stringify(supabaseSession));
+          console.log('🔄 Created Supabase-style session token');
         } else {
           console.log('❌ Authentication failed');
           
