@@ -22,19 +22,24 @@ async function fixPlaceholderVerses() {
   console.log('🔍 Starting placeholder verse detection and replacement...');
   
   try {
-    // Find verses with placeholder patterns
+    // Find verses with placeholder patterns, prioritizing the most common patterns
     const placeholderQuery = `
       SELECT id, reference, text, translation
       FROM bible_verses 
-      WHERE text LIKE '%Scripture according to%'
-         OR text LIKE '%GOD''s Word according to%'  
-         OR text LIKE '%GOD''s Message according to%'
+      WHERE text LIKE '%In those days it happened as recorded in%'
          OR text LIKE '%Jesus said to them as recorded in%'
-         OR text LIKE '%In those days it happened as recorded in%'
          OR text LIKE '%The LORD spoke as written in%'
          OR text LIKE '%As it is written in%'
+         OR text LIKE '%Scripture according to%'
+         OR text LIKE '%GOD''s Word according to%'  
+         OR text LIKE '%GOD''s Message according to%'
          OR length(text) < 20
-      LIMIT 25
+      ORDER BY CASE 
+        WHEN text LIKE '%In those days it happened as recorded in%' THEN 1
+        WHEN text LIKE '%Jesus said to them as recorded in%' THEN 2
+        ELSE 3
+      END
+      LIMIT 20
     `;
     
     const result = await pool.query(placeholderQuery);
