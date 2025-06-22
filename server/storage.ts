@@ -3072,7 +3072,7 @@ export class DatabaseStorage implements IStorage {
       const feedPosts = await Promise.all(discussionsResult.rows.map(async row => {
         const authorName = row.first_name && row.last_name 
           ? `${row.first_name} ${row.last_name}`
-          : row.email || 'Unknown User';
+          : row.first_name || 'Anonymous User';
 
         // Fetch comments for this discussion
         const commentsResult = await pool.query(`
@@ -3098,7 +3098,7 @@ export class DatabaseStorage implements IStorage {
           author: {
             name: commentRow.first_name && commentRow.last_name 
               ? `${commentRow.first_name} ${commentRow.last_name}`
-              : commentRow.email || 'Anonymous',
+              : commentRow.first_name || 'Anonymous',
             profileImage: commentRow.profile_image_url || null
           }
         }));
