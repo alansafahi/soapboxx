@@ -725,8 +725,8 @@ export async function isAuthenticatedProduction(req: any, res: any, next: any) {
     return next();
   }
   
-  // Check existing session authentication - require all three conditions
-  if (session && session.authenticated === true && sessionUser && userId) {
+  // Check existing session authentication - more flexible check
+  if (session && sessionUser && userId) {
     // Additional validation: ensure user data is not null/cleared
     if (sessionUser === null || userId === null) {
       console.log('❌ Authentication failed - session data was cleared');
@@ -734,6 +734,12 @@ export async function isAuthenticatedProduction(req: any, res: any, next: any) {
         success: false,
         message: 'Unauthorized' 
       });
+    }
+    
+    // Set authenticated flag if missing but session data exists
+    if (session.authenticated !== true) {
+      session.authenticated = true;
+      console.log('🔧 Setting session as authenticated for existing session');
     }
     
     // Ensure req.user is populated for compatibility

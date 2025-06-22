@@ -279,17 +279,22 @@ export function isAuthenticated(req: any, res: any, next: any) {
   console.log('Session user:', sessionUser);
   console.log('User ID:', userId);
   
-  if (!sessionUser || !userId) {
+  // Check if we have either sessionUser OR userId (more flexible)
+  if (!sessionUser && !userId) {
     console.log('Authentication failed - no session user or userId');
     return res.status(401).json({ message: 'Unauthorized' });
   }
   
+  // If we have userId but no sessionUser, create a minimal user object
+  const userForRequest = sessionUser || { id: userId };
+  
   // Attach user to request for compatibility
   req.user = {
-    id: sessionUser.id,
-    claims: { sub: sessionUser.id },
-    ...sessionUser
+    id: userForRequest.id || userId,
+    claims: { sub: userForRequest.id || userId },
+    ...userForRequest
   };
   
+  console.log('✅ Authentication successful for user:', req.user.id);
   next();
 }

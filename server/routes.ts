@@ -632,8 +632,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to fix session authentication
+  app.post('/api/debug/fix-session', async (req: any, res) => {
+    try {
+      const session = req.session as any;
+      
+      if (session && session.userId && session.user) {
+        // Set the authenticated flag to true
+        session.authenticated = true;
+        console.log('🔧 Fixed session authentication for user:', session.userId);
+        res.json({ success: true, message: 'Session authentication fixed' });
+      } else {
+        res.status(400).json({ success: false, message: 'No valid session to fix' });
+      }
+    } catch (error) {
+      console.error('Error fixing session:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  });
+
   // Auth routes with secure authentication check
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticatedProduction, async (req: any, res) => {
     try {
       
       // Use session data for user retrieval
