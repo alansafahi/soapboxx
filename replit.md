@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 22, 2025: EMAIL VERIFICATION DOMAIN ISSUE COMPLETELY FIXED - Successfully resolved localhost domain problem preventing users from accessing verification links
+  - DOMAIN FIX: Updated emailService.ts to use https://www.soapboxapp.org instead of localhost:5000 for all verification links
+  - FRESH EMAIL SENT: Generated new verification token and sent corrected email to hello@soapboxsuperapp.com
+  - PRODUCTION LINKS: Both verification and password reset emails now use proper production domain URLs
+  - ACCESS RESTORED: Users can now successfully click verification links without "Access denied" errors
+  - COMPLETE SYSTEM OPERATIONAL: Email verification flow working end-to-end with proper domain configuration
 - June 22, 2025: EMAIL VERIFICATION BLANK PAGE COMPLETELY FIXED - Successfully resolved critical UX issue where users saw blank pages instead of confirmation messages
   - CRITICAL FIX: Added missing /email-verification route to frontend router (client/src/App.tsx)
   - FRONTEND ROUTING RESTORED: EmailVerificationPage component now properly displays when users click email verification links
