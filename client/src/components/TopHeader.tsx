@@ -57,13 +57,15 @@ export default function TopHeader() {
 
   // Update local state when server data changes
   useEffect(() => {
-    if (serverNotifications.length > 0) {
+    if (Array.isArray(serverNotifications) && serverNotifications.length > 0) {
       setLocalNotifications(serverNotifications);
     }
   }, [serverNotifications]);
 
-  // Use local notifications for display, fallback to server data
-  const notifications = localNotifications.length > 0 ? localNotifications : serverNotifications;
+  // Use local notifications for display, fallback to server data with null safety
+  const notifications = Array.isArray(localNotifications) && localNotifications.length > 0 
+    ? localNotifications 
+    : Array.isArray(serverNotifications) ? serverNotifications : [];
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
