@@ -29,20 +29,9 @@ export function useDirectAuth() {
       return;
     }
 
-    // Check for cached auth state first
-    const cachedAuth = localStorage.getItem('soapbox_auth_state');
-    if (cachedAuth) {
-      try {
-        const parsedAuth = JSON.parse(cachedAuth);
-        console.log('🔥 CACHED AUTH FOUND:', parsedAuth.user?.email);
-        setAuthState(parsedAuth);
-        return;
-      } catch (e) {
-        localStorage.removeItem('soapbox_auth_state');
-      }
-    }
-
     const checkAuth = async () => {
+      // CRITICAL SECURITY FIX: Always validate with server first, ignore cached state
+      console.log('🔍 Checking authentication status...');
       try {
         const response = await fetch('/api/auth/user', {
           credentials: 'include',
@@ -73,11 +62,14 @@ export function useDirectAuth() {
             window.location.hash = '';
           }, 100);
         } else {
-          console.log('🔥 DIRECT AUTH FAILED:', response.status);
-          // Clear any cached auth state on failure
-          localStorage.removeItem('soapbox_auth_state');
+          console.log('📡 Auth response status:', response.status);
+          console.log('❌ Auth failed with status:', response.status);
           
-          // Do not auto-login - require proper authentication
+          // CRITICAL SECURITY FIX: Clear ALL cached authentication data immediately
+          localStorage.removeItem('soapbox_auth_state');
+          localStorage.removeItem('auth_cache');
+          localStorage.removeItem('user_cache');
+          sessionStorage.clear(); // Clear session storage too
           
           setAuthState({
             user: null,

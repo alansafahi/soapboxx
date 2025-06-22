@@ -1,0 +1,100 @@
+You're running into a **frontend logout bug**—even after logging out, the **authenticated state and navigation UI** remain active, and reloading the page restores the session.
+
+This usually means **one or both** of the following are happening:
+
+---
+
+### 🚨 Problem Summary
+
+1. **Auth token/session is not being cleared properly**
+   → Likely still exists in `localStorage`, `sessionStorage`, or cookies.
+
+2. **App UI state is not being reset on logout**
+   → You’re still rendering protected components (like the sidebar) after logout.
+
+---
+
+### ✅ Fix Strategy
+
+#### 1. **Ensure logout clears session/token**
+
+Depending on your auth provider (Supabase, Firebase, etc.), make sure you're calling the logout function and also:
+
+```js
+// Example for Supabase
+await supabase.auth.signOut();
+localStorage.clear(); // or remove specific keys
+sessionStorage.clear();
+```
+
+If using cookies (e.g., `authToken` cookie):
+
+```js
+document.cookie = 'authToken=; Max-Age=0; path=/;';
+```
+
+---
+
+#### 2. **Force a state/UI reset**
+
+After logging out, you need to trigger:
+
+* A redirect to `/login`
+* A UI re-render where the user is set to `null`
+
+Example:
+
+```ts
+setUser(null);
+navigate('/login');
+```
+
+And in your `App` or `Layout`:
+
+```tsx
+{user ? <Sidebar /> : null}
+```
+
+---
+
+#### 3. **Check if auth state is persisted**
+
+Your screenshot shows `auth response: 200` and user still recognized (`hello@soapboxsuperapp.com`) **even after logout**.
+
+Make sure you're not calling an automatic `getSession()` or similar from a persisted token without checking for expiration.
+
+---
+
+### 🔧 Additional Safeguard
+
+If using Supabase:
+
+```ts
+useEffect(() => {
+  const { data: authListener } = supabase.auth.onAuthStateChange(
+    (event, session) => {
+      if (!session) {
+        setUser(null);
+        navigate('/login');
+      } else {
+        setUser(session.user);
+      }
+    }
+  );
+
+  return () => authListener.subscription.unsubscribe();
+}, []);
+```
+
+---
+
+### ✅ Summary of Action Items
+
+| Task                          | Fix                                                                    |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| ❌ Logout not clearing session | Add full token/session clearing logic                                  |
+| ❌ Sidebar still visible       | Conditionally render it only if `user` is present                      |
+| 🔁 Reload brings back session | Prevent persisted session unless authenticated                         |
+| 🧼 Best Practice              | Use a central `authContext` or `useAuth()` hook with cleanup on logout |
+
+Let me know what auth provider you're using and I can tailor the exact logout code.
