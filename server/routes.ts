@@ -2340,7 +2340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/invitations', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+app.post('/api/invitations', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2360,6 +2360,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending',
         expiresAt
       });
+      
+      // START OF FIX: Add the invited person as a pending contact
+      await storage.addContact({
+        userId,
+        email,
+        name: email, // Use email as name until they join
+        contactType: 'invited',
+        status: 'pending'
+      });
+      // END OF FIX
 
       res.json(invitation);
     } catch (error) {
