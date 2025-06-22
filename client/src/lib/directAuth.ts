@@ -1,5 +1,6 @@
-// Direct authentication manager bypassing React Query issues
+// Direct authentication manager with session persistence
 import { useState, useEffect } from 'react';
+import { authSync } from './authSync';
 
 interface AuthState {
   user: any;
@@ -15,79 +16,32 @@ export function useDirectAuth() {
   });
 
   useEffect(() => {
-    // Check if user just logged out - prevent cached auth restoration
-    const logoutFlag = localStorage.getItem('logout_flag');
-    if (logoutFlag) {
-      localStorage.removeItem('logout_flag');
-      localStorage.removeItem('soapbox_auth_state');
-      console.log('🚫 LOGOUT FLAG DETECTED - BLOCKING CACHED AUTH');
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false
-      });
-      return;
-    }
-
-    const checkAuth = async () => {
-      // CRITICAL SECURITY FIX: Always validate with server first, ignore cached state
-      console.log('🔍 Checking authentication status...');
-      try {
-        const response = await fetch('/api/auth/user', {
-          credentials: 'include',
-          headers: { 'Cache-Control': 'no-cache' }
+    // Initialize the auth sync system
+    authSync.initialize();
+    
+    // Subscribe to auth sync state changes
+    const unsubscribe = authSync.subscribe((syncState) => {
+      if (syncState) {
+        console.log('🔄 AuthSync state update:', syncState.user?.email, 'authenticated:', syncState.isAuthenticated);
+        setAuthState({
+          user: syncState.user,
+          isAuthenticated: syncState.isAuthenticated,
+          isLoading: false
         });
-        
-        if (response.ok) {
-          const userData = await response.json();
-          console.log('🔥 DIRECT AUTH SUCCESS:', userData.email);
-          console.log('🔥 SETTING AUTHENTICATED STATE TO TRUE');
-          
-          // Force authenticated state immediately
-          const authenticatedState = {
-            user: userData,
-            isAuthenticated: true,
-            isLoading: false
-          };
-          
-          setAuthState(authenticatedState);
-          
-          // Also store in localStorage for persistence
-          localStorage.setItem('soapbox_auth_state', JSON.stringify(authenticatedState));
-          
-          // Force immediate UI update by triggering a re-render
-          setTimeout(() => {
-            console.log('🔥 FORCING UI REFRESH FOR AUTHENTICATED STATE');
-            window.location.hash = '#authenticated';
-            window.location.hash = '';
-          }, 100);
-        } else {
-          console.log('📡 Auth response status:', response.status);
-          console.log('❌ Auth failed with status:', response.status);
-          
-          // CRITICAL SECURITY FIX: Clear ALL cached authentication data immediately
-          localStorage.removeItem('soapbox_auth_state');
-          localStorage.removeItem('auth_cache');
-          localStorage.removeItem('user_cache');
-          sessionStorage.clear(); // Clear session storage too
-          
-          setAuthState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false
-          });
-        }
-      } catch (error) {
-        console.log('🔥 DIRECT AUTH ERROR:', error);
+      } else {
+        console.log('🔄 AuthSync state update: unauthenticated');
         setAuthState({
           user: null,
           isAuthenticated: false,
           isLoading: false
         });
       }
-    };
+    });
 
-    checkAuth();
+    // Initial sync with server
+    authSync.syncWithServer();
+
+    return unsubscribe;
   }, []);
 
   const logout = async () => {
