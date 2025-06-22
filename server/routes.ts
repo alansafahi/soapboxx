@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupProductionAuth, isAuthenticatedProduction } from "./productionAuth";
+import { ensureSessionAuthentication } from "./session-fix";
 
 // Use production authentication as the primary authentication system
 const isAuthenticated = isAuthenticatedProduction;

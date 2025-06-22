@@ -331,52 +331,37 @@ export function setupProductionAuth(app: Express): void {
         return res.status(404).send('<h1>Auto-login failed: User not found</h1>');
       }
 
-      // Clear any existing session data first
-      req.session.destroy((destroyErr: any) => {
-        if (destroyErr) {
-          console.error('Session destroy error:', destroyErr);
+      // Set comprehensive session data directly
+      (req.session as any).userId = existingUser.id;
+      (req.session as any).user = {
+        id: existingUser.id,
+        email: existingUser.email,
+        username: existingUser.username || existingUser.email.split('@')[0],
+        firstName: existingUser.firstName || 'Production',
+        lastName: existingUser.lastName || 'User',
+        role: existingUser.role || 'member',
+        isVerified: true,
+        profileImageUrl: existingUser.profileImageUrl,
+      };
+      (req.session as any).authenticated = true;
+      (req.session as any).loginTime = new Date().toISOString();
+      (req.session as any).isProduction = true;
+
+      req.session.save((saveErr: any) => {
+        if (saveErr) {
+          console.error('Auto-login session save error:', saveErr);
+          return res.status(500).send('<h1>Auto-login failed: Session save error</h1>');
         }
-        
-        // Create new session with proper user data
-        req.session.regenerate((regenErr: any) => {
-          if (regenErr) {
-            console.error('Session regenerate error:', regenErr);
-            return res.status(500).send('<h1>Auto-login failed: Session regeneration error</h1>');
-          }
-          
-          // Set comprehensive session data for browser
-          (req.session as any).userId = existingUser.id;
-          (req.session as any).user = {
-            id: existingUser.id,
-            email: existingUser.email,
-            username: existingUser.username || existingUser.email.split('@')[0],
-            firstName: existingUser.firstName || 'Production',
-            lastName: existingUser.lastName || 'User',
-            role: existingUser.role || 'member',
-            isVerified: existingUser.isVerified || true,
-            profileImageUrl: existingUser.profileImageUrl,
-          };
-          (req.session as any).authenticated = true;
-          (req.session as any).loginTime = new Date().toISOString();
-          (req.session as any).isProduction = true;
 
-          req.session.save((saveErr: any) => {
-            if (saveErr) {
-              console.error('Auto-login session save error:', saveErr);
-              return res.status(500).send('<h1>Auto-login failed: Session save error</h1>');
-            }
-
-            console.log('✅ Auto-login session created for:', existingUser.email);
-            console.log('Session data:', {
-              userId: (req.session as any).userId,
-              user: (req.session as any).user,
-              authenticated: (req.session as any).authenticated
-            });
-            
-            // Redirect to home page after authentication
-            res.redirect('/');
-          });
+        console.log('✅ Auto-login session created for:', existingUser.email);
+        console.log('Session data:', {
+          userId: (req.session as any).userId,
+          user: (req.session as any).user,
+          authenticated: (req.session as any).authenticated
         });
+        
+        // Redirect to home page after authentication
+        res.redirect('/');
       });
     } catch (error) {
       console.error('Auto-login error:', error);
