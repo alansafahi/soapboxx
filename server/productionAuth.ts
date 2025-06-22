@@ -756,41 +756,7 @@ export async function isAuthenticatedProduction(req: any, res: any, next: any) {
     return next();
   }
   
-  // Auto-authenticate with production user to resolve contacts page issue
-  try {
-    const productionUser = await storage.getUserByEmail('hello@soapboxsuperapp.com');
-    if (productionUser && productionUser.isVerified) {
-      // Establish complete session
-      session.userId = productionUser.id;
-      session.user = {
-        id: productionUser.id,
-        email: productionUser.email,
-        username: productionUser.username || productionUser.email?.split('@')[0],
-        firstName: productionUser.firstName || 'Hello',
-        lastName: productionUser.lastName || 'User',
-        role: productionUser.role || 'member',
-        isVerified: true,
-        profileImageUrl: productionUser.profileImageUrl,
-      };
-      session.authenticated = true;
-      session.autoLogin = true;
-      
-      // Populate req.user for middleware compatibility
-      req.user = {
-        id: productionUser.id,
-        claims: { sub: productionUser.id },
-        email: productionUser.email,
-        firstName: productionUser.firstName,
-        lastName: productionUser.lastName,
-        role: productionUser.role
-      };
-      
-      console.log('✅ Auto-authentication successful for contacts access:', productionUser.email);
-      return next();
-    }
-  } catch (error) {
-    console.error('Auto-authentication error:', error);
-  }
+  // No auto-authentication in production - require proper login
   
   console.log('❌ Authentication failed - no session data');
   return res.status(401).json({ 
