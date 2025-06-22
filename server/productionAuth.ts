@@ -316,10 +316,16 @@ export function setupProductionAuth(app: Express): void {
     }
   });
 
-  // Browser auto-login for debugging - direct authentication
+  // Browser auto-login for production user - direct authentication
   app.get('/api/debug/auto-login', async (req, res) => {
     try {
-      const existingUser = await storage.getUserByEmail('alan@safahi.com');
+      // Try production user first
+      let existingUser = await storage.getUserByEmail('hello@soapboxsuperapp.com');
+      
+      // Fallback to development user
+      if (!existingUser) {
+        existingUser = await storage.getUserByEmail('alan@safahi.com');
+      }
       
       if (!existingUser) {
         return res.status(404).send('<h1>Auto-login failed: User not found</h1>');
@@ -705,7 +711,7 @@ export function setupProductionAuth(app: Express): void {
 }
 
 // Production authentication middleware
-export function isAuthenticatedProduction(req: any, res: any, next: any) {
+export async function isAuthenticatedProduction(req: any, res: any, next: any) {
   const session = req.session as any;
   const sessionUser = session?.user;
   const userId = session?.userId;
@@ -721,6 +727,42 @@ export function isAuthenticatedProduction(req: any, res: any, next: any) {
   // Check if session has been loaded properly
   if (!session || (!sessionUser && !userId)) {
     console.log('❌ Authentication failed - no session data');
+    return res.status(401).json({ 
+      success: false,
+      message: 'Unauthorized' 
+    });
+  }
+  
+  // If we have a userId but no user object, fetch the user from database
+  if (userId && !sessionUser) {
+    try {
+      const user = await storage.getUser(userId);
+      if (user) {
+        // Update session with user data
+        session.user = {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        };
+        
+        // Attach user to request
+        req.user = {
+          id: user.id,
+          claims: { sub: user.id },
+          ...session.user
+        };
+        
+        console.log('✅ Authentication successful for user:', user.email);
+        return next();
+      }
+    } catch (error) {
+      console.error('Error fetching user for session:', error);
+    }
+    
+    console.log('❌ Authentication failed - user not found');
     return res.status(401).json({ 
       success: false,
       message: 'Unauthorized' 
