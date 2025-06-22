@@ -88,6 +88,13 @@ function AppRouter() {
                                     <Route path="/login" component={LoginPage} />
                                     <Route path="/reset-password" component={ResetPasswordPage} />
                                     <Route path="/email-verification" component={EmailVerificationPage} />
+                                    <Route path="/dashboard">
+                                        {finalIsAuthenticated ? (
+                                            <Home />
+                                        ) : (
+                                            <LoginPage />
+                                        )}
+                                    </Route>
                                     <Route path="/">
                                         {currentIsLoading && !FORCE_AUTHENTICATED ? (
                                             <div className="min-h-screen bg-gray-50 flex items-center justify-center">

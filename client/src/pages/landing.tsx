@@ -47,7 +47,8 @@ export default function Landing() {
   };
 
   const handleDashboard = () => {
-    setLocation('/');
+    // Force navigation to authenticated home/dashboard
+    window.location.href = '/';
   };
 
   return (
