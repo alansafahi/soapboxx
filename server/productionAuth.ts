@@ -493,11 +493,28 @@ export function setupProductionAuth(app: Express): void {
       // Clear req.user as well
       req.user = null;
       
+      const sessionId = req.sessionID;
+      
       // Destroy the session completely
-      req.session.destroy((err: any) => {
+      req.session.destroy(async (err: any) => {
         if (err) {
           console.error('Session destruction error:', err);
-          // Even if destroy fails, clear cookies manually
+        }
+        
+        // CRITICAL SECURITY FIX: Delete session from database manually
+        try {
+          const { pool } = await import('./db');
+          // Delete the specific session by ID
+          const result = await pool.query('DELETE FROM sessions WHERE sid = $1', [sessionId]);
+          console.log('🗑️ Session deleted from database:', sessionId, 'Rows affected:', result.rowCount);
+          
+          // Also delete any session containing this user's data to ensure complete cleanup
+          const userCleanup = await pool.query(
+            `DELETE FROM sessions WHERE sess::text LIKE '%"userId":"${req.session?.userId}"%'`
+          );
+          console.log('🗑️ User sessions cleaned:', userCleanup.rowCount);
+        } catch (dbError) {
+          console.error('Database session cleanup error:', dbError);
         }
         
         // Clear ALL possible session cookies with comprehensive options
