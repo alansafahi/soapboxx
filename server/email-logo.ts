@@ -8,7 +8,8 @@ export const SOAPBOX_EMAIL_LOGO_BASE64 = `data:image/svg+xml;base64,${Buffer.fro
 <svg width="60" height="60" xmlns="http://www.w3.org/2000/svg">
   <circle cx="30" cy="30" r="27" fill="#7c3aed" stroke="#ffffff" stroke-width="6"/>
   <circle cx="30" cy="30" r="18" fill="#ffffff"/>
-  <text x="30" y="38" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#7c3aed" text-anchor="middle">SB</text>
+  <path d="M30 15L21 20V25C21 29.5 24.5 33 30 35C35.5 33 39 29.5 39 25V20L30 15Z" fill="#7c3aed"/>
+  <path d="M26 25L28 27L34 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `).toString('base64')}`;
 
@@ -17,6 +18,7 @@ export const SOAPBOX_EMAIL_LOGO_RED_BASE64 = `data:image/svg+xml;base64,${Buffer
 <svg width="60" height="60" xmlns="http://www.w3.org/2000/svg">
   <circle cx="30" cy="30" r="27" fill="#dc2626" stroke="#ffffff" stroke-width="6"/>
   <circle cx="30" cy="30" r="18" fill="#ffffff"/>
-  <text x="30" y="38" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#dc2626" text-anchor="middle">SB</text>
+  <path d="M30 15L21 20V25C21 29.5 24.5 33 30 35C35.5 33 39 29.5 39 25V20L30 15Z" fill="#dc2626"/>
+  <path d="M26 25L28 27L34 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `).toString('base64')}`;

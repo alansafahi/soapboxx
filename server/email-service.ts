@@ -62,7 +62,12 @@ export async function sendInvitationEmail(options: InvitationEmailOptions): Prom
       <div style="background-color: white; padding: 30px; border-radius: 10px; text-align: center;">
         <div style="margin-bottom: 30px;">
           <div style="display: inline-block; width: 60px; height: 60px; background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 50%; margin-bottom: 20px; position: relative;">
-            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 24px;">SB</span>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7V10C2 16 6 20.5 12 22C18 20.5 22 16 22 10V7L12 2Z" fill="#7c3aed"/>
+                <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
           <h1 style="color: #7c3aed; margin: 0; font-size: 28px;">SoapBox Super App</h1>
           <p style="color: #6b7280; margin: 5px 0 0 0; font-size: 14px;">Faith Community Platform</p>
