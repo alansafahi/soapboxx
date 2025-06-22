@@ -47,8 +47,8 @@ export default function Landing() {
   };
 
   const handleDashboard = () => {
-    // Navigate to dashboard using React Router
-    setLocation('/dashboard');
+    // Force full page navigation to ensure authentication state is properly loaded
+    window.location.href = '/';
   };
 
   return (

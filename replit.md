@@ -142,6 +142,17 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 22, 2025: LIKE BUTTON AUTHENTICATION CONSISTENCY COMPLETED - Successfully fixed remaining authentication mismatch causing discussion like endpoint failures
+  - BACKEND CONSISTENCY ACHIEVED: Updated discussion like endpoint to use session-based authentication (req.session.userId) instead of OAuth-style authentication
+  - OPTIMISTIC UPDATE FIX: Corrected frontend like mutation to use onSuccess instead of onSettled preventing automatic undo behavior  
+  - AUTHENTICATION STANDARDIZATION: All social feed endpoints now use consistent session-based authentication matching rest of platform
+  - USER EXPERIENCE ENHANCED: Like button now works properly without automatically undoing after 1 second
+  - PRODUCTION VERIFIED: Heart button functionality working correctly across all social feed posts
+- June 22, 2025: DASHBOARD NAVIGATION ISSUE RESOLVED - Fixed Dashboard button on landing page to use proper navigation approach
+  - NAVIGATION FIX: Changed Dashboard button to navigate to root path "/" instead of "/dashboard" for better authentication state handling
+  - ROUTE CONSISTENCY: Root route properly handles authenticated users by displaying Home component through finalIsAuthenticated logic
+  - USER EXPERIENCE IMPROVED: Dashboard button now successfully takes authenticated users to main dashboard instead of staying on landing page
+  - AUTHENTICATION TIMING: Resolved potential race conditions with authentication state detection during navigation
 - June 22, 2025: PROFILE UPDATE LOGOUT BUG COMPLETELY FIXED - Successfully resolved critical issue where users were automatically logged out after updating their profiles
   - CRITICAL FIX: Removed forced window.location.reload() that was disrupting authentication sessions after profile saves
   - CACHE OPTIMIZATION: Replaced aggressive cache invalidation with gentle cache updates using setQueryData() and delayed refetch
