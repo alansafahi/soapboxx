@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login - SoapBox Super App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #7c3aed; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
+        button:hover { background: #6d28d9; }
+        .success { color: green; margin: 10px 0; }
+        .error { color: red; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h2>Test Login - SoapBox Super App</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="email" value="hello@soapboxsuperapp.com" required>
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" value="Family0022$$" required>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="success">Login successful! User: ${data.user.email}<br>Redirecting to home page...</div>`;
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Login failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
