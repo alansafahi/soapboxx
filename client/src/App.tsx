@@ -38,7 +38,7 @@ const AutoLoginPage = lazy(() => import("@/pages/auto-login"));
 const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
 function AppRouter() {
-    const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading } = useDirectAuth();
+    const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading, logout } = useDirectAuth();
     const finalIsAuthenticated = FORCE_AUTHENTICATED || currentIsAuthenticated;
     const finalUser = FORCE_AUTHENTICATED ? MOCK_USER : currentUser;
     const [location] = useLocation();

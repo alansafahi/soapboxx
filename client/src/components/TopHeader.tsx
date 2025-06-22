@@ -1,7 +1,7 @@
 import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
-import { useAuth } from "@/hooks/useAuth";
+import { useDirectAuth } from "@/lib/directAuth";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -134,26 +134,7 @@ export default function TopHeader() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      // Call backend logout endpoint to destroy session
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      
-      // Always trigger frontend logout regardless of backend response
-      logout();
-      
-      // Redirect to login page
-      window.location.href = '/login';
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Force logout and redirect even if there's an error
-      logout();
-      window.location.href = '/login';
-    }
-  };
+
 
   return (
     <header className="flex items-center justify-between gap-2 p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
@@ -441,7 +422,7 @@ export default function TopHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={logout}>
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

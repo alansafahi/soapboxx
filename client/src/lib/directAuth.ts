@@ -84,5 +84,38 @@ export function useDirectAuth() {
     checkAuth();
   }, []);
 
-  return authState;
+  const logout = async () => {
+    try {
+      // Clear localStorage immediately
+      localStorage.removeItem('soapbox_auth_state');
+      
+      // Set unauthenticated state immediately
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+      
+      // Call backend logout endpoint
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      // Force page reload to ensure clean state
+      window.location.href = '/';
+    } catch (error) {
+      console.log('Logout error:', error);
+      // Even if backend fails, clear frontend state
+      localStorage.removeItem('soapbox_auth_state');
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+      window.location.href = '/';
+    }
+  };
+
+  return { ...authState, logout };
 }
