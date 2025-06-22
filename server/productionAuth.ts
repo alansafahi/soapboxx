@@ -344,7 +344,7 @@ export function setupProductionAuth(app: Express): void {
             return res.status(500).send('<h1>Auto-login failed: Session regeneration error</h1>');
           }
           
-          // Set session data for browser with all required fields
+          // Set comprehensive session data for browser
           (req.session as any).userId = existingUser.id;
           (req.session as any).user = {
             id: existingUser.id,
@@ -353,9 +353,12 @@ export function setupProductionAuth(app: Express): void {
             firstName: existingUser.firstName || 'Production',
             lastName: existingUser.lastName || 'User',
             role: existingUser.role || 'member',
+            isVerified: existingUser.isVerified || true,
+            profileImageUrl: existingUser.profileImageUrl,
           };
           (req.session as any).authenticated = true;
           (req.session as any).loginTime = new Date().toISOString();
+          (req.session as any).isProduction = true;
 
           req.session.save((saveErr: any) => {
             if (saveErr) {
@@ -733,7 +736,7 @@ export function setupProductionAuth(app: Express): void {
   });
 }
 
-// Production authentication middleware
+// Production authentication middleware with fallback user creation
 export async function isAuthenticatedProduction(req: any, res: any, next: any) {
   const session = req.session as any;
   const sessionUser = session?.user;
@@ -744,10 +747,11 @@ export async function isAuthenticatedProduction(req: any, res: any, next: any) {
     sessionUser: !!sessionUser,
     userId,
     sessionId: req.sessionID,
-    sessionKeys: session ? Object.keys(session) : []
+    sessionKeys: session ? Object.keys(session) : [],
+    authenticated: session?.authenticated
   });
   
-  // Check if session has been loaded properly
+  // For production environment - create session for authenticated access
   if (!session || (!sessionUser && !userId && !session.authenticated)) {
     console.log('❌ Authentication failed - no session data');
     return res.status(401).json({ 
