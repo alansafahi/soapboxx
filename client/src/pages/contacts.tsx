@@ -105,8 +105,14 @@ function ContactsPage() {
     onError: (error: any) => {
       console.error('Invitation error:', error);
       
-      // Check if it's a network or session issue
-      if (error.message && error.message.includes('500')) {
+      // Check if user is already a member
+      if (error.message && error.message.includes('already a member')) {
+        toast({
+          title: "Already a Member",
+          description: "This person is already a member of SoapBox Super App. You can connect with them through the app instead.",
+          variant: "destructive",
+        });
+      } else if (error.message && error.message.includes('500')) {
         toast({
           title: "Server Error",
           description: "The server is working but your browser session may be out of sync. Please refresh the page and try again.",

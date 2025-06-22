@@ -2371,6 +2371,17 @@ app.post('/api/invitations', async (req: any, res) => {
 
       const { email, message } = req.body;
       
+      // Check if the email is already a registered user
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        console.log(`❌ User with email ${email} is already a member`);
+        return res.status(400).json({ 
+          success: false, 
+          message: 'This person is already a member of SoapBox Super App.',
+          type: 'already_member'
+        });
+      }
+      
       // Check if invitation already exists for this email from this user
       const existingInvitation = await storage.getExistingInvitation(userId, email);
       if (existingInvitation) {
