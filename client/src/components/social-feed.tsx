@@ -554,7 +554,13 @@ export default function SocialFeed() {
             <div className="flex items-center space-x-3">
               <Avatar className="w-10 h-10">
                 <AvatarFallback className="bg-purple-600 text-white">
-                  {user && typeof user === 'object' && 'firstName' in user && 'lastName' in user ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : user && typeof user === 'object' && 'firstName' in user ? (user as any).firstName[0] : 'U'}
+                  {user && typeof user === 'object' && 'firstName' in user && user.firstName && 'lastName' in user && user.lastName 
+                    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+                    : user && typeof user === 'object' && 'firstName' in user && user.firstName 
+                    ? user.firstName[0].toUpperCase()
+                    : user && typeof user === 'object' && 'email' in user && user.email
+                    ? user.email[0].toUpperCase()
+                    : 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -1036,7 +1042,13 @@ export default function SocialFeed() {
                     <div className="flex items-start space-x-3">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="bg-purple-600 text-white text-sm">
-                          {user && typeof user === 'object' && 'firstName' in user && 'lastName' in user ? `${(user as any).firstName[0]}${(user as any).lastName[0]}` : user && typeof user === 'object' && 'firstName' in user ? (user as any).firstName[0] : 'U'}
+                          {user && typeof user === 'object' && 'firstName' in user && user.firstName && 'lastName' in user && user.lastName 
+                            ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+                            : user && typeof user === 'object' && 'firstName' in user && user.firstName 
+                            ? user.firstName[0].toUpperCase()
+                            : user && typeof user === 'object' && 'email' in user && user.email
+                            ? user.email[0].toUpperCase()
+                            : 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
