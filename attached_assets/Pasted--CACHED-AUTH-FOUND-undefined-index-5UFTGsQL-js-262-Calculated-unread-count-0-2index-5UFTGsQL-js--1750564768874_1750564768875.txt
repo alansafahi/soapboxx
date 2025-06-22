@@ -1,0 +1,123 @@
+🔥 CACHED AUTH FOUND: undefined
+index-5UFTGsQL.js:262 Calculated unread count: 0
+2index-5UFTGsQL.js:222 🔍 Checking authentication status...
+index-5UFTGsQL.js:262 Calculated unread count: 0
+index-5UFTGsQL.js:222 📡 Auth response status: 200
+index-5UFTGsQL.js:222 ✅ User authenticated: hello@soapboxsuperapp.com
+index-5UFTGsQL.js:222 🔍 Checking authentication status...
+index-5UFTGsQL.js:222 🔍 Checking authentication status...
+index-5UFTGsQL.js:222 📡 Auth response status: 200
+index-5UFTGsQL.js:222 ✅ User authenticated: hello@soapboxsuperapp.com
+index-5UFTGsQL.js:262 Calculated unread count: 0
+index-5UFTGsQL.js:222 🔍 Checking authentication status...
+index-5UFTGsQL.js:262 Calculated unread count: 0
+index-5UFTGsQL.js:262 Calculated unread count: 0
+index-5UFTGsQL.js:222 📡 Auth response status: 200
+index-5UFTGsQL.js:222 ✅ User authenticated: hello@soapboxsuperapp.com
+index-5UFTGsQL.js:262 Calculated unread count: 0
+index-5UFTGsQL.js:222 📡 Auth response status: 200
+index-5UFTGsQL.js:222 ✅ User authenticated: hello@soapboxsuperapp.com
+2index-5UFTGsQL.js:262 Calculated unread count: 0
+index-5UFTGsQL.js:222 📡 Auth response status: 200
+index-5UFTGsQL.js:222 ✅ User authenticated: hello@soapboxsuperapp.com
+index-5UFTGsQL.js:222 🔍 Checking authentication status...
+index-5UFTGsQL.js:41 TypeError: Cannot read properties of undefined (reading 'split')
+    at W (contacts-BKRBKgFB.js:8:49)
+    at contacts-BKRBKgFB.js:8:5570
+    at Array.map (<anonymous>)
+    at Se (contacts-BKRBKgFB.js:8:5303)
+    at _f (index-5UFTGsQL.js:39:16997)
+    at $c (index-5UFTGsQL.js:41:3139)
+    at Q0 (index-5UFTGsQL.js:41:44705)
+    at H0 (index-5UFTGsQL.js:41:39703)
+    at XP (index-5UFTGsQL.js:41:39631)
+    at rl (index-5UFTGsQL.js:41:39485)
+Uc @ index-5UFTGsQL.js:41
+n.callback @ index-5UFTGsQL.js:41
+Qp @ index-5UFTGsQL.js:39
+cm @ index-5UFTGsQL.js:41
+B0 @ index-5UFTGsQL.js:41
+GP @ index-5UFTGsQL.js:41
+ZP @ index-5UFTGsQL.js:41
+yr @ index-5UFTGsQL.js:41
+hm @ index-5UFTGsQL.js:41
+pr @ index-5UFTGsQL.js:39
+(anonymous) @ index-5UFTGsQL.js:41
+setTimeout
+o @ index-5UFTGsQL.js:49
+i @ index-5UFTGsQL.js:49
+batch @ index-5UFTGsQL.js:49
+on @ index-5UFTGsQL.js:49
+setData @ index-5UFTGsQL.js:49
+onSuccess @ index-5UFTGsQL.js:49
+d @ index-5UFTGsQL.js:49
+Promise.then
+x @ index-5UFTGsQL.js:49
+start @ index-5UFTGsQL.js:49
+fetch @ index-5UFTGsQL.js:49
+ks @ index-5UFTGsQL.js:49
+onSubscribe @ index-5UFTGsQL.js:49
+subscribe @ index-5UFTGsQL.js:49
+(anonymous) @ index-5UFTGsQL.js:49
+c0 @ index-5UFTGsQL.js:39
+Ml @ index-5UFTGsQL.js:41
+Po @ index-5UFTGsQL.js:41
+hm @ index-5UFTGsQL.js:41
+pr @ index-5UFTGsQL.js:39
+ZP @ index-5UFTGsQL.js:41
+yr @ index-5UFTGsQL.js:41
+U0 @ index-5UFTGsQL.js:41
+E @ index-5UFTGsQL.js:26
+j @ index-5UFTGsQL.js:26Understand this error
+index-5UFTGsQL.js:39 Uncaught TypeError: Cannot read properties of undefined (reading 'split')
+    at W (contacts-BKRBKgFB.js:8:49)
+    at contacts-BKRBKgFB.js:8:5570
+    at Array.map (<anonymous>)
+    at Se (contacts-BKRBKgFB.js:8:5303)
+    at _f (index-5UFTGsQL.js:39:16997)
+    at $c (index-5UFTGsQL.js:41:3139)
+    at Q0 (index-5UFTGsQL.js:41:44705)
+    at H0 (index-5UFTGsQL.js:41:39703)
+    at XP (index-5UFTGsQL.js:41:39631)
+    at rl (index-5UFTGsQL.js:41:39485)
+W @ contacts-BKRBKgFB.js:8
+(anonymous) @ contacts-BKRBKgFB.js:8
+Se @ contacts-BKRBKgFB.js:8
+_f @ index-5UFTGsQL.js:39
+$c @ index-5UFTGsQL.js:41
+Q0 @ index-5UFTGsQL.js:41
+H0 @ index-5UFTGsQL.js:41
+XP @ index-5UFTGsQL.js:41
+rl @ index-5UFTGsQL.js:41
+ed @ index-5UFTGsQL.js:41
+hm @ index-5UFTGsQL.js:41
+pr @ index-5UFTGsQL.js:39
+(anonymous) @ index-5UFTGsQL.js:41
+setTimeout
+o @ index-5UFTGsQL.js:49
+i @ index-5UFTGsQL.js:49
+batch @ index-5UFTGsQL.js:49
+on @ index-5UFTGsQL.js:49
+setData @ index-5UFTGsQL.js:49
+onSuccess @ index-5UFTGsQL.js:49
+d @ index-5UFTGsQL.js:49
+Promise.then
+x @ index-5UFTGsQL.js:49
+start @ index-5UFTGsQL.js:49
+fetch @ index-5UFTGsQL.js:49
+ks @ index-5UFTGsQL.js:49
+onSubscribe @ index-5UFTGsQL.js:49
+subscribe @ index-5UFTGsQL.js:49
+(anonymous) @ index-5UFTGsQL.js:49
+c0 @ index-5UFTGsQL.js:39
+Ml @ index-5UFTGsQL.js:41
+Po @ index-5UFTGsQL.js:41
+hm @ index-5UFTGsQL.js:41
+pr @ index-5UFTGsQL.js:39
+ZP @ index-5UFTGsQL.js:41
+yr @ index-5UFTGsQL.js:41
+U0 @ index-5UFTGsQL.js:41
+E @ index-5UFTGsQL.js:26
+j @ index-5UFTGsQL.js:26Understand this error
+index-5UFTGsQL.js:222 📡 Auth response status: 200
+index-5UFTGsQL.js:222 ✅ User authenticated: hello@soapboxsuperapp.com

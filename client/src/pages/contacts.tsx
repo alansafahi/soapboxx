@@ -167,13 +167,16 @@ function ContactsPage() {
     }
   };
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined | null) => {
+    if (!name || typeof name !== 'string') {
+      return 'UN'; // Unknown user fallback
+    }
     return name
       .split(" ")
-      .map(n => n[0])
+      .map(n => n && n[0] ? n[0] : '')
       .join("")
       .toUpperCase()
-      .slice(0, 2);
+      .slice(0, 2) || 'UN';
   };
 
   return (
@@ -391,12 +394,12 @@ function ContactsPage() {
                       <div className="flex items-center space-x-3">
                         <Avatar>
                           <AvatarImage src={contact.profileImageUrl} />
-                          <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
+                          <AvatarFallback>{getInitials(contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User')}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="font-semibold">{contact.name}</h3>
-                          <p className="text-sm text-muted-foreground">{contact.email}</p>
-                          {contact.church && (
+                          <h3 className="font-semibold">{contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User'}</h3>
+                          <p className="text-sm text-muted-foreground">{contact.email || 'No email'}</p>
+                          {contact.church && contact.church.name && (
                             <p className="text-xs text-muted-foreground">
                               {contact.church.name}
                             </p>
