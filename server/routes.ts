@@ -2371,6 +2371,29 @@ app.post('/api/invitations', ensureSessionAuthentication, isAuthenticated, async
       });
       // END OF FIX
 
+      // Send invitation email
+      try {
+        const inviter = await storage.getUser(userId);
+        const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'A friend';
+        
+        // Create invitation link
+        const inviteLink = `https://www.soapboxapp.org/join?code=${inviteCode}`;
+        
+        // Send invitation email using email service
+        const { sendInvitationEmail } = require('./email-service');
+        await sendInvitationEmail({
+          to: email,
+          inviterName,
+          message: message || `Hi! I've been using SoapBox Super App for my spiritual journey and thought you might enjoy it too. It has daily Bible readings, prayer walls, and an amazing community of believers. Join me!`,
+          inviteLink
+        });
+
+        console.log(`Invitation email sent successfully to ${email}`);
+      } catch (emailError) {
+        console.error('Error sending invitation email:', emailError);
+        // Don't fail the entire request if email fails
+      }
+
       res.json(invitation);
     } catch (error) {
       console.error('Error creating invitation:', error);
