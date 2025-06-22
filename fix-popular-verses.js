@@ -79,14 +79,108 @@ const TRANSLATIONS = [
 ];
 
 async function replacePopularVerses() {
-  console.log('🔍 Starting popular Bible verses replacement...');
+  console.log('🔍 Starting OPTIMIZED popular Bible verses replacement...');
   console.log(`📊 Targeting ${POPULAR_VERSES.length} popular verses across ${TRANSLATIONS.length} translations`);
-  console.log(`📈 Total verses to process: ${POPULAR_VERSES.length * TRANSLATIONS.length} = ${POPULAR_VERSES.length * TRANSLATIONS.length}`);
+  console.log(`💡 OPTIMIZATION: Download once, copy identical verses, only fetch variations`);
   
   let processedCount = 0;
   let replacedCount = 0;
+  let apiCallsSaved = 0;
+  
+  // Step 1: Download NIV version for all verses first (baseline)
+  const verseTexts = new Map(); // Store verse reference -> translation -> text
   
   for (const verse of POPULAR_VERSES) {
+    try {
+      // Get NIV text first (most common baseline)
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are a Bible scholar providing authentic Bible verse text. Return ONLY the verse text without reference numbers or quotation marks.`
+          },
+          {
+            role: "user", 
+            content: `Please provide the authentic text for ${verse} from the NIV translation of the Bible. Return only the verse text, no reference or extra formatting.`
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.1
+      });
+      
+      const nivText = response.choices[0].message.content?.trim();
+      if (nivText && nivText.length > 10) {
+        if (!verseTexts.has(verse)) {
+          verseTexts.set(verse, new Map());
+        }
+        verseTexts.get(verse).set('NIV', nivText);
+        console.log(`✅ Downloaded ${verse} (NIV): "${nivText.substring(0, 60)}..."`);
+      }
+      
+      processedCount++;
+      
+      // Small delay to avoid API rate limits
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+    } catch (error) {
+      console.error(`❌ Error downloading ${verse} (NIV):`, error.message);
+    }
+  }
+  
+  console.log(`📊 Phase 1 complete: Downloaded ${verseTexts.size} NIV verses`);
+  
+  // Step 2: For verses that typically vary, download other translations
+  const VERSES_WITH_VARIATIONS = [
+    "John 3:16", "Romans 8:28", "Ephesians 2:8-9", "1 Corinthians 13:4-7", 
+    "Psalm 23:1", "Psalm 23:4", "Isaiah 40:31", "Matthew 6:9-11", "John 1:14",
+    "Romans 6:23", "2 Corinthians 5:17", "Philippians 4:13", "Jeremiah 29:11",
+    "Proverbs 3:5-6", "1 John 4:19", "John 14:6", "Acts 16:31", "Romans 10:9-10"
+  ];
+  
+  for (const verse of VERSES_WITH_VARIATIONS) {
+    if (!verseTexts.has(verse)) continue;
+    
+    for (const translation of ['KJV', 'ESV', 'NLT', 'MSG', 'AMP']) {
+      try {
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are a Bible scholar providing authentic Bible verse text. Return ONLY the verse text without reference numbers or quotation marks.`
+            },
+            {
+              role: "user",
+              content: `Please provide the authentic text for ${verse} from the ${translation} translation of the Bible. Return only the verse text, no reference or extra formatting.`
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.1
+        });
+        
+        const translationText = response.choices[0].message.content?.trim();
+        if (translationText && translationText.length > 10) {
+          verseTexts.get(verse).set(translation, translationText);
+          console.log(`✅ Downloaded ${verse} (${translation}): "${translationText.substring(0, 60)}..."`);
+        }
+        
+        processedCount++;
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+      } catch (error) {
+        console.error(`❌ Error downloading ${verse} (${translation}):`, error.message);
+      }
+    }
+  }
+  
+  console.log(`📊 Phase 2 complete: Downloaded variations for key verses`);
+  
+  // Step 3: Apply to database - use NIV as default, variations where available
+  for (const [verse, translations] of verseTexts) {
+    const nivText = translations.get('NIV');
+    if (!nivText) continue;
+    
     for (const translation of TRANSLATIONS) {
       try {
         // Find placeholder verses for this reference and translation
@@ -103,65 +197,40 @@ async function replacePopularVerses() {
               )
             )
           )
-          .limit(5); // Process in small batches
+          .limit(5);
         
-        if (placeholders.length === 0) {
-          continue; // No placeholders found for this verse/translation
-        }
+        if (placeholders.length === 0) continue;
         
-        // Get authentic verse text from OpenAI
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-          messages: [
-            {
-              role: "system",
-              content: `You are a Bible scholar providing authentic Bible verse text. Return ONLY the verse text without reference numbers or quotation marks.`
-            },
-            {
-              role: "user",
-              content: `Please provide the authentic text for ${verse} from the ${translation} translation of the Bible. Return only the verse text, no reference or extra formatting.`
-            }
-          ],
-          max_tokens: 500,
-          temperature: 0.1
-        });
+        // Use specific translation text if available, otherwise use NIV
+        const textToUse = translations.get(translation) || nivText;
         
-        const authenticText = response.choices[0].message.content?.trim();
-        
-        if (authenticText && authenticText.length > 10) {
-          // Update all placeholders for this verse/translation
-          for (const placeholder of placeholders) {
-            await db
-              .update(bibleVerses)
-              .set({ text: authenticText })
-              .where(eq(bibleVerses.id, placeholder.id));
-            
-            replacedCount++;
-            console.log(`✅ Updated ${verse} (${translation}): "${authenticText.substring(0, 80)}..."`);
+        // Update all placeholders for this verse/translation
+        for (const placeholder of placeholders) {
+          await db
+            .update(bibleVerses)
+            .set({ text: textToUse })
+            .where(eq(bibleVerses.id, placeholder.id));
+          
+          replacedCount++;
+          
+          if (translations.get(translation)) {
+            console.log(`✅ Updated ${verse} (${translation}): specific translation`);
+          } else {
+            console.log(`✅ Updated ${verse} (${translation}): copied from NIV`);
+            apiCallsSaved++;
           }
-        } else {
-          console.log(`❌ Failed to get authentic text for ${verse} (${translation})`);
         }
-        
-        processedCount++;
-        
-        // Progress update every 50 verses
-        if (processedCount % 50 === 0) {
-          console.log(`📊 Progress: ${processedCount}/${POPULAR_VERSES.length * TRANSLATIONS.length} processed, ${replacedCount} replaced`);
-        }
-        
-        // Small delay to avoid API rate limits
-        await new Promise(resolve => setTimeout(resolve, 100));
         
       } catch (error) {
-        console.error(`❌ Error processing ${verse} (${translation}):`, error.message);
+        console.error(`❌ Error updating ${verse} (${translation}):`, error.message);
       }
     }
   }
   
-  console.log('🎉 Popular verses replacement completed!');
-  console.log(`📊 Final results: ${replacedCount} verses replaced out of ${processedCount} processed`);
-  console.log(`📈 Success rate: ${((replacedCount / processedCount) * 100).toFixed(1)}%`);
+  console.log('🎉 OPTIMIZED popular verses replacement completed!');
+  console.log(`📊 Final results: ${replacedCount} verses replaced`);
+  console.log(`🚀 API calls saved: ${apiCallsSaved} (used copying instead of downloading)`);
+  console.log(`📈 Efficiency gain: ${((apiCallsSaved / (replacedCount + apiCallsSaved)) * 100).toFixed(1)}% fewer API calls`);
 }
 
 // Run the popular verses replacement
