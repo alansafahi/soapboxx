@@ -72,7 +72,7 @@ export default function TopHeader() {
     onMutate: (notificationId) => {
       // Immediate local state update for instant UI feedback
       setLocalNotifications(prev => {
-        const updated = prev.map(notification => 
+        const updated = (prev || []).map(notification => 
           notification.id === notificationId 
             ? { ...notification, isRead: true }
             : notification
@@ -100,7 +100,7 @@ export default function TopHeader() {
     onMutate: () => {
       // Immediate local state update for instant UI feedback
       setLocalNotifications(prev => {
-        const updated = prev.map(notification => ({ ...notification, isRead: true }));
+        const updated = (prev || []).map(notification => ({ ...notification, isRead: true }));
         return updated;
       });
     },
@@ -117,8 +117,8 @@ export default function TopHeader() {
     },
   });
 
-  // Calculate unread count from current notifications
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  // Calculate unread count from current notifications with null safety
+  const unreadCount = (notifications || []).filter(n => !n.isRead).length;
   console.log('Calculated unread count:', unreadCount);
 
   const getNotificationIcon = (type: string) => {
