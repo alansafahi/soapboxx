@@ -163,9 +163,28 @@ export default function ProfilePage() {
       // Clear local updates on successful save
       setLocalProfileUpdates({});
       
-      // Force immediate cache refresh to get latest data from server
-      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      // Gentle cache refresh without invalidating auth state
+      try {
+        console.log('🔄 Updating profile cache...');
+        
+        // Update the cache data directly instead of invalidating
+        queryClient.setQueryData(["/api/auth/user"], (oldData: any) => {
+          if (!oldData) return oldData;
+          return { ...oldData, ...data.user };
+        });
+        
+        // Refresh only if needed, without forcing re-authentication
+        setTimeout(async () => {
+          await queryClient.refetchQueries({ 
+            queryKey: ["/api/auth/user"],
+            exact: true 
+          });
+        }, 500);
+        
+        console.log('✅ Profile cache updated successfully');
+      } catch (error) {
+        console.error('Cache update error:', error);
+      }
       
       toast({
         title: "Profile Updated", 
