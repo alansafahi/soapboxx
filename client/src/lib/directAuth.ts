@@ -1,6 +1,7 @@
 // Direct authentication manager with session persistence
 import { useState, useEffect } from 'react';
 import { sessionManager } from './sessionPersistence';
+import { authRecovery } from './authStateRecovery';
 
 interface AuthState {
   user: any;
@@ -84,22 +85,12 @@ export function useDirectAuth() {
             initialized: true
           });
           
-          // Cache the authenticated state with session verification
-          localStorage.setItem('auth_state', JSON.stringify({
-            user: userData,
-            isAuthenticated: true,
-            timestamp: Date.now()
-          }));
-          
-          // Mark session as verified and set heartbeat
-          sessionStorage.setItem('session_verified', 'true');
-          sessionStorage.setItem('session_heartbeat', Date.now().toString());
+          // Use session manager for robust persistence
+          sessionManager.setSession(userData, true);
         } else {
           console.log('❌ Authentication failed');
           
-          localStorage.removeItem('auth_state');
-          sessionStorage.removeItem('session_verified');
-          sessionStorage.removeItem('session_heartbeat');
+          sessionManager.clearSession();
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -144,13 +135,11 @@ export function useDirectAuth() {
 
         if (response.ok) {
           // Update heartbeat timestamp
-          sessionStorage.setItem('session_heartbeat', Date.now().toString());
+          sessionManager.updateHeartbeat();
         } else {
           // Session expired, clear state
           console.log('🔄 Session expired, clearing authentication');
-          localStorage.removeItem('auth_state');
-          sessionStorage.removeItem('session_verified');
-          sessionStorage.removeItem('session_heartbeat');
+          sessionManager.clearSession();
           setAuthState({
             user: null,
             isAuthenticated: false,
@@ -177,11 +166,8 @@ export function useDirectAuth() {
       initialized: true
     });
     
-    // Set logout flag and clear all cached state
-    localStorage.setItem('logout_flag', 'true');
-    localStorage.removeItem('auth_state');
-    sessionStorage.removeItem('session_verified');
-    sessionStorage.removeItem('session_heartbeat');
+    // Clear all authentication state using session manager
+    sessionManager.clearSession();
     
     try {
       // Call backend logout endpoint
