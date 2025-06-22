@@ -173,11 +173,6 @@ export default function ProfilePage() {
       });
       
       setIsEditing(false);
-      
-      // Force page refresh to ensure latest data displays
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
     },
   });
 
