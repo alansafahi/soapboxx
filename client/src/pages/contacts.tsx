@@ -60,7 +60,8 @@ function ContactsPage() {
   // Send invitation mutation
   const inviteMutation = useMutation({
     mutationFn: async (data: { email: string; message?: string }) => {
-      return apiRequest("/api/invitations/send", {
+      // FIX: Corrected the endpoint from /api/invitations/send to /api/invitations
+      return apiRequest("/api/invitations", {
         method: "POST",
         body: data
       });
@@ -68,6 +69,8 @@ function ContactsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invitations/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/referrals/stats"] });
+      // FIX: Invalidate contacts to show newly invited contacts
+      queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
       setInviteEmail("");
       setInviteMessage("");
       setShowInviteDialog(false);
