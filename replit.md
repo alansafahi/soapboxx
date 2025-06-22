@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 22, 2025: DEMO CONTACTS REMOVED FROM PRODUCTION - Successfully eliminated all hardcoded demo contact data from production app
+  - CONTACTS CLEANED: Removed fake "SoapBox Community" contacts with random online status that were showing all users as demo contacts
+  - PRODUCTION READY: Contacts page now only displays actual user contacts from real invitation/import data
+  - ENDPOINT FIXED: /api/contacts endpoint updated to use storage.getUserContacts() instead of fake demo data
+  - USER EXPERIENCE ENHANCED: Production users no longer see confusing demo contact entries in their contacts list
 - June 22, 2025: PROFILE UPDATE LOGOUT BUG COMPLETELY FIXED - Successfully resolved critical issue where users were automatically logged out after updating their profiles
   - CRITICAL FIX: Removed forced window.location.reload() that was disrupting authentication sessions after profile saves
   - CACHE OPTIMIZATION: Replaced aggressive cache invalidation with gentle cache updates using setQueryData() and delayed refetch

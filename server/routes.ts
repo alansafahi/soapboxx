@@ -8068,27 +8068,9 @@ Please provide suggestions for the missing or incomplete sections.`
     try {
       const userId = req.session.userId;
       
-      // Get church members for contacts list
-      const contacts = await db
-        .select({
-          id: users.id,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-          role: users.role
-        })
-        .from(users)
-        .where(and(
-          ne(users.id, userId),
-          isNotNull(users.firstName)
-        ))
-        .limit(50);
-
-      res.json(contacts.map(contact => ({
-        ...contact,
-        churchName: 'SoapBox Community',
-        isOnline: Math.random() > 0.5 // Random online status for demo
-      })));
+      // Get user's actual contacts only
+      const contacts = await storage.getUserContacts(userId);
+      res.json(contacts);
     } catch (error) {
       console.error('Error fetching contacts:', error);
       res.status(500).json({ message: 'Failed to fetch contacts' });
