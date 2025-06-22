@@ -5,23 +5,40 @@ interface AuthState {
   user: any;
   isAuthenticated: boolean;
   isLoading: boolean;
+  initialized: boolean;
 }
+
+let authCheckInProgress = false;
 
 export function useDirectAuth() {
   const [authState, setAuthState] = useState<AuthState>(() => {
+    // Check for logout flag first
+    const logoutFlag = localStorage.getItem('logout_flag');
+    if (logoutFlag) {
+      localStorage.removeItem('logout_flag');
+      localStorage.removeItem('auth_state');
+      return {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        initialized: true
+      };
+    }
+
     // Initialize with cached state if available to prevent loading flicker
     const cachedState = localStorage.getItem('auth_state');
     if (cachedState) {
       try {
         const parsed = JSON.parse(cachedState);
-        const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+        const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
         
-        if (parsed.timestamp > fiveMinutesAgo && parsed.isAuthenticated && parsed.user) {
+        if (parsed.timestamp > tenMinutesAgo && parsed.isAuthenticated && parsed.user) {
           console.log('📦 Initializing with cached auth state:', parsed.user.email);
           return {
             user: parsed.user,
             isAuthenticated: parsed.isAuthenticated,
-            isLoading: false
+            isLoading: false,
+            initialized: true
           };
         }
       } catch (error) {
@@ -32,12 +49,26 @@ export function useDirectAuth() {
     return {
       user: null,
       isAuthenticated: false,
-      isLoading: true
+      isLoading: true,
+      initialized: false
     };
   });
 
   useEffect(() => {
     const checkAuth = async () => {
+      // Prevent multiple simultaneous auth checks
+      if (authCheckInProgress) {
+        return;
+      }
+
+      // Skip if already initialized with authenticated state
+      if (authState.initialized && authState.isAuthenticated && authState.user) {
+        console.log('📦 Using cached authentication for:', authState.user.email);
+        return;
+      }
+
+      authCheckInProgress = true;
+
       try {
         console.log('🔍 Checking authentication status...');
         
@@ -58,7 +89,8 @@ export function useDirectAuth() {
           setAuthState({
             user: userData,
             isAuthenticated: true,
-            isLoading: false
+            isLoading: false,
+            initialized: true
           });
           
           // Cache the authenticated state
@@ -70,46 +102,33 @@ export function useDirectAuth() {
         } else {
           console.log('❌ Authentication failed');
           
-          // Clear any cached state
           localStorage.removeItem('auth_state');
-          
           setAuthState({
             user: null,
             isAuthenticated: false,
-            isLoading: false
+            isLoading: false,
+            initialized: true
           });
         }
       } catch (error) {
         console.log('🚨 Auth check error:', error);
         
-        // If we already have cached state loaded, don't clear it on network error
-        if (!authState.isAuthenticated) {
-          setAuthState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false
-          });
-        }
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          initialized: true
+        });
+      } finally {
+        authCheckInProgress = false;
       }
     };
 
-    // Check for logout flag
-    const logoutFlag = localStorage.getItem('logout_flag');
-    if (logoutFlag) {
-      localStorage.removeItem('logout_flag');
-      localStorage.removeItem('auth_state');
-      console.log('🚫 Logout flag detected');
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false
-      });
-      return;
+    // Only check auth if not yet initialized
+    if (!authState.initialized) {
+      checkAuth();
     }
-
-    // Always validate with server (but don't clear cached state on error)
-    checkAuth();
-  }, []);
+  }, [authState.initialized]);
 
   const logout = async () => {
     console.log('🚪 Logout initiated');
@@ -118,7 +137,8 @@ export function useDirectAuth() {
     setAuthState({
       user: null,
       isAuthenticated: false,
-      isLoading: false
+      isLoading: false,
+      initialized: true
     });
     
     // Set logout flag and clear cached state
