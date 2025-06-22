@@ -2216,8 +2216,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Contacts and Invitations API endpoints
-  app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
+  // Contacts and Invitations API endpoints with session management
+  app.get('/api/contacts', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2232,7 +2232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/contacts', isAuthenticated, async (req: any, res) => {
+  app.post('/api/contacts', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2275,7 +2275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/contacts/:id', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2291,7 +2291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/invitations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/invitations', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -2319,7 +2319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/invitations', isAuthenticated, async (req: any, res) => {
+  app.get('/api/invitations', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
