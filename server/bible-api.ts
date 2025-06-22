@@ -1,4 +1,6 @@
-import fetch from 'node-fetch';
+import { db } from './db';
+import { bibleVerses } from '@shared/schema';
+import { eq, and, like, ilike, or, sql } from 'drizzle-orm';
 
 interface BibleVerseResponse {
   reference: string;
@@ -6,206 +8,212 @@ interface BibleVerseResponse {
   version: string;
 }
 
-// Bible.com API fallback data for common translations
+// Complete Bible translation mapping with full names
 const BIBLE_VERSIONS = {
-  'NIV': 'New International Version',
-  'ESV': 'English Standard Version',
   'KJV': 'King James Version',
+  'NIV': 'New International Version', 
+  'ESV': 'English Standard Version',
   'NLT': 'New Living Translation',
   'NASB': 'New American Standard Bible',
-  'CSB': 'Christian Standard Bible'
+  'CSB': 'Christian Standard Bible',
+  'MSG': 'The Message',
+  'AMP': 'Amplified Bible',
+  'CEV': 'Contemporary English Version',
+  'NET': 'New English Translation',
+  'CEB': 'Common English Bible',
+  'GNT': 'Good News Translation',
+  'NKJV': 'New King James Version',
+  'RSV': 'Revised Standard Version',
+  'NRSV': 'New Revised Standard Version',
+  'HCSB': 'Holman Christian Standard Bible',
+  'NCV': 'New Century Version'
 };
 
-// Version-specific Bible verse data for Psalm 23:5
-const PSALM_23_5_VERSIONS = {
-  'KJV': "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.",
-  'NIV': "You prepare a table before me in the presence of my enemies. You anoint my head with oil; my cup overflows.",
-  'NLT': "You prepare a feast for me in the presence of my enemies. You honor me by anointing my head with oil. My cup overflows with blessings.",
-  'MSG': "You serve me a six-course dinner right in front of my enemies. You revive my drooping head; my cup brims with blessing.",
-  'AMP': "You prepare a table before me in the presence of my enemies. You have anointed and refreshed my head with oil; My cup overflows.",
-  'ESV': "You prepare a table before me in the presence of my enemies; you anoint my head with oil; my cup overflows.",
-  'CEV': "You treat me to a feast, while my enemies watch. You honor me as your guest, and you fill my cup until it overflows.",
-  'NET': "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full.",
-  'CEB': "You set a table for me right in front of my enemies. You bathe my head in oil; my cup is so full it spills over!",
-  'GNT': "You prepare a banquet for me, where all my enemies can see me; you welcome me as an honored guest and fill my cup to the brim.",
-  'NASB': "You prepare a table before me in the presence of my enemies; You have anointed my head with oil; My cup overflows.",
-  'CSB': "You prepare a table before me in the presence of my enemies; you anoint my head with oil; my cup overflows."
-};
-
-// Free Bible API service using bible-api.com with proper version handling
-async function fetchFromBibleAPI(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
+// Database-first Bible verse lookup with zero external dependencies
+async function lookupVerseFromDatabase(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
-    // Clean and format the reference properly
-    const cleanRef = reference.trim();
+    console.log(`[Bible DB] Looking up "${reference}" in ${version} translation`);
     
-    // Special handling for Psalm 23:5 with authentic version-specific texts
-    const normalizedRef = cleanRef.toLowerCase().replace(/\s+/g, ' ');
-    if (normalizedRef === 'psalm 23:5' || normalizedRef === 'psalms 23:5') {
-      const versionText = PSALM_23_5_VERSIONS[version.toUpperCase()];
-      if (versionText) {
-        console.log(`[Bible API] Using authentic ${version} text for Psalm 23:5`);
+    // Clean and normalize the reference
+    const cleanRef = reference.trim();
+    const upperVersion = version.toUpperCase();
+    
+    // First try exact reference match
+    const exactMatch = await db
+      .select()
+      .from(bibleVerses)
+      .where(
+        and(
+          eq(bibleVerses.reference, cleanRef),
+          eq(bibleVerses.translation, upperVersion),
+          eq(bibleVerses.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (exactMatch.length > 0) {
+      const verse = exactMatch[0];
+      console.log(`[Bible DB] Found exact match: ${verse.reference} (${verse.translation})`);
+      return {
+        reference: verse.reference,
+        text: verse.text || '',
+        version: verse.translation || ''
+      };
+    }
+
+    // Try flexible matching with different reference formats
+    const referenceVariations = generateReferenceVariations(cleanRef);
+    
+    for (const refVariation of referenceVariations) {
+      const flexibleMatch = await db
+        .select()
+        .from(bibleVerses)
+        .where(
+          and(
+            or(
+              eq(bibleVerses.reference, refVariation),
+              ilike(bibleVerses.reference, `${refVariation}%`)
+            ),
+            eq(bibleVerses.translation, upperVersion),
+            eq(bibleVerses.isActive, true)
+          )
+        )
+        .limit(1);
+
+      if (flexibleMatch.length > 0) {
+        const verse = flexibleMatch[0];
+        console.log(`[Bible DB] Found flexible match: ${verse.reference} (${verse.translation})`);
         return {
-          reference: 'Psalm 23:5',
-          text: versionText,
-          version: version.toUpperCase()
+          reference: verse.reference,
+          text: verse.text,
+          version: verse.translation
         };
       }
     }
-    
-    // Map versions to bible-api.com translation codes
-    const versionMap: { [key: string]: string } = {
-      'KJV': 'kjv',
-      'NIV': 'web', // World English Bible as NIV alternative
-      'ESV': 'web',
-      'NLT': 'web', 
-      'NASB': 'web',
-      'CSB': 'web'
-    };
-    
-    const translation = versionMap[version.toUpperCase()] || 'web';
-    const url = `https://bible-api.com/${encodeURIComponent(cleanRef)}?translation=${translation}`;
 
-    console.log(`[Bible API] Attempting to fetch: ${url}`);
-    console.log(`[Bible API] Requested version: ${version}, Using translation: ${translation}`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-    
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'SoapBox-Bible-App/1.0',
-        'Accept': 'application/json'
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    console.log(`[Bible API] Response received - Status: ${response.status}, OK: ${response.ok}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log(`[Bible API] Error response body: ${errorText}`);
-      return null;
+    // If requested version not found, try fallback to NIV
+    if (upperVersion !== 'NIV') {
+      console.log(`[Bible DB] ${upperVersion} not found, trying NIV fallback`);
+      return await lookupVerseFromDatabase(reference, 'NIV');
     }
 
-    const responseText = await response.text();
-    console.log(`[Bible API] Response body length: ${responseText.length}`);
-    console.log(`[Bible API] Response preview: ${responseText.substring(0, 300)}`);
-    
-    if (!responseText.trim()) {
-      console.log(`[Bible API] Empty response received`);
-      return null;
-    }
-    
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error(`[Bible API] JSON parse error:`, parseError);
-      console.log(`[Bible API] Failed to parse response: ${responseText}`);
-      return null;
-    }
-    
-    console.log(`[Bible API] Parsed JSON structure:`, Object.keys(data));
-    
-    // Check if we have valid verse data
-    if (data && data.reference && data.text) {
-      const cleanText = data.text
-        .replace(/\n+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      
-      const result = {
-        reference: data.reference,
-        text: cleanText,
-        version: data.translation_name || (useKJV ? 'King James Version' : 'World English Bible')
-      };
-      
-      console.log(`[Bible API] SUCCESS! Returning formatted verse:`, result);
-      return result;
-    } else {
-      console.log(`[Bible API] Missing required fields - reference: ${!!data?.reference}, text: ${!!data?.text}`);
-      console.log(`[Bible API] Full data object:`, data);
-    }
-
+    console.log(`[Bible DB] No verse found for "${reference}" in any available translation`);
     return null;
   } catch (error) {
-    if (error.name === 'AbortError') {
-      console.error('[Bible API] Request timeout after 15 seconds');
-    } else {
-      console.error('[Bible API] Fetch error:', error);
-    }
+    console.error('[Bible DB] Database lookup error:', error);
     return null;
   }
 }
 
-// ESV API service (requires API key but more reliable)
-async function fetchFromESVAPI(reference: string): Promise<BibleVerseResponse | null> {
-  try {
-    const apiKey = process.env.ESV_API_KEY;
-    if (!apiKey) {
-      return null;
-    }
-
-    const response = await fetch(`https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(reference)}`, {
-      headers: {
-        'Authorization': `Token ${apiKey}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json() as any;
-    
-    if (data && data.passages && data.passages.length > 0) {
-      return {
-        reference: data.canonical || reference,
-        text: data.passages[0].replace(/\s+/g, ' ').trim(),
-        version: 'ESV'
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('ESV API error:', error);
-    return null;
-  }
-}
-
-// Main Bible lookup function with fallbacks
-export async function lookupBibleVerse(reference: string, preferredVersion: string = 'NIV'): Promise<BibleVerseResponse | null> {
-  console.log(`[Bible API] Looking up verse: "${reference}" (${preferredVersion})`);
-
-  // First, normalize the reference to proper case format
-  const normalizedRefs = normalizeReference(reference);
-  console.log(`[Bible API] Normalized references to try:`, normalizedRefs);
+// Generate reference variations for flexible matching
+function generateReferenceVariations(reference: string): string[] {
+  const variations = [reference];
   
-  // Try each normalized reference format
-  for (const normalizedRef of normalizedRefs) {
-    console.log(`[Bible API] Trying reference: "${normalizedRef}"`);
-    
-    // Strategy 1: Try free Bible API
-    let result = await fetchFromBibleAPI(normalizedRef, preferredVersion);
-    if (result) {
-      console.log(`[Bible API] SUCCESS: Found verse via Bible API: ${result.reference}`);
-      return result;
-    }
+  // Handle book name variations
+  const bookAbbreviations: Record<string, string[]> = {
+    'Gen': ['Genesis'],
+    'Genesis': ['Gen'],
+    'Exod': ['Exodus', 'Ex'],
+    'Exodus': ['Exod', 'Ex'],
+    'Ps': ['Psalm', 'Psalms'],
+    'Psalm': ['Ps', 'Psalms'],
+    'Psalms': ['Ps', 'Psalm'],
+    'Matt': ['Matthew', 'Mt'],
+    'Matthew': ['Matt', 'Mt'],
+    'John': ['Jn', 'Jhn'],
+    'Rom': ['Romans', 'Rm'],
+    'Romans': ['Rom', 'Rm']
+  };
 
-    // Strategy 2: Try ESV API if available and version is ESV
-    if (preferredVersion === 'ESV') {
-      result = await fetchFromESVAPI(normalizedRef);
-      if (result) {
-        console.log(`[Bible API] SUCCESS: Found verse via ESV API: ${result.reference}`);
-        return result;
+  const referenceWords = reference.split(' ');
+  if (referenceWords.length > 0) {
+    const firstWord = referenceWords[0];
+    const alternatives = bookAbbreviations[firstWord];
+    
+    if (alternatives) {
+      for (const alt of alternatives) {
+        const newRef = [alt, ...referenceWords.slice(1)].join(' ');
+        variations.push(newRef);
       }
     }
   }
 
-  console.log(`[Bible API] FINAL FAILURE: No verse found for any format of: "${reference}"`);
+  return Array.from(new Set(variations));
+}
+
+// Main Bible lookup function - database-first with comprehensive coverage
+export async function lookupBibleVerse(reference: string, preferredVersion: string = 'NIV'): Promise<BibleVerseResponse | null> {
+  console.log(`[Bible DB] Looking up verse: "${reference}" (${preferredVersion})`);
+  
+  // Use database-first approach with your licensed Bible content
+  const result = await lookupVerseFromDatabase(reference, preferredVersion);
+  
+  if (result) {
+    console.log(`[Bible DB] SUCCESS: Found verse in licensed database: ${result.reference} (${result.version})`);
+    return result;
+  }
+
+  console.log(`[Bible DB] Verse not found: "${reference}" in ${preferredVersion}`);
   return null;
+}
+
+// Search Bible verses across all translations
+export async function searchBibleVerses(query: string, translation: string = 'NIV', limit: number = 20): Promise<any[]> {
+  try {
+    console.log(`[Bible DB] Searching for "${query}" in ${translation} translation`);
+    
+    const searchResults = await db
+      .select()
+      .from(bibleVerses)
+      .where(
+        and(
+          eq(bibleVerses.translation, translation.toUpperCase()),
+          or(
+            ilike(bibleVerses.text, `%${query}%`),
+            ilike(bibleVerses.reference, `%${query}%`),
+            ilike(bibleVerses.book, `%${query}%`)
+          ),
+          eq(bibleVerses.isActive, true)
+        )
+      )
+      .orderBy(bibleVerses.popularityScore)
+      .limit(limit);
+
+    console.log(`[Bible DB] Found ${searchResults.length} verses matching "${query}"`);
+    return searchResults;
+  } catch (error) {
+    console.error('[Bible DB] Search error:', error);
+    return [];
+  }
+}
+
+// Get random Bible verse from licensed database
+export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<any | null> {
+  try {
+    console.log(`[Bible DB] Getting random verse in ${translation}`);
+    
+    const randomVerse = await db
+      .select()
+      .from(bibleVerses)
+      .where(
+        and(
+          eq(bibleVerses.translation, translation.toUpperCase()),
+          eq(bibleVerses.isActive, true)
+        )
+      )
+      .orderBy(sql`RANDOM()`)
+      .limit(1);
+
+    if (randomVerse.length > 0) {
+      console.log(`[Bible DB] Random verse: ${randomVerse[0].reference}`);
+      return randomVerse[0];
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[Bible DB] Random verse error:', error);
+    return null;
+  }
 }
 
 // Helper function to normalize Bible references
