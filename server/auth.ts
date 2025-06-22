@@ -382,7 +382,7 @@ export function setupAuth(app: Express): void {
     }
   });
 
-  // Email verification endpoint
+  // Email verification endpoint (GET for email links)
   app.get('/api/auth/verify-email', async (req, res) => {
     try {
       const { token } = req.query;
@@ -409,6 +409,51 @@ export function setupAuth(app: Express): void {
     } catch (error) {
       console.error('Email verification error:', error);
       res.redirect('/email-verification?error=verification_failed');
+    }
+  });
+
+  // Email verification endpoint (POST for frontend requests)
+  app.post('/api/auth/verify-email', async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Verification token is required' 
+        });
+      }
+
+      const user = await storage.getUserByVerificationToken(token);
+      if (!user) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Invalid verification token' 
+        });
+      }
+
+      // Check token age (24 hours max)
+      const tokenAge = Date.now() - (user.emailVerificationSentAt?.getTime() || 0);
+      if (tokenAge > 24 * 60 * 60 * 1000) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Verification token has expired' 
+        });
+      }
+
+      // Verify user email
+      await storage.verifyUserEmail(user.id);
+
+      res.json({ 
+        success: true, 
+        message: 'Email verified successfully' 
+      });
+    } catch (error) {
+      console.error('Email verification error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Email verification failed' 
+      });
     }
   });
 

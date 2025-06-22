@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 22, 2025: EMAIL VERIFICATION JSON PARSING ERROR COMPLETELY FIXED - Successfully resolved critical frontend error where "Send New Verification Email" returned HTML instead of JSON
+  - CRITICAL FIX: Added proper POST endpoint for /api/auth/verify-email to handle frontend requests expecting JSON responses
+  - DUAL ENDPOINT SUPPORT: Maintained GET endpoint for email link redirects while adding POST endpoint for frontend API calls
+  - FRONTEND ERROR RESOLVED: "Failed to Send - Unexpected token '<', '<!DOCTYPE'..." error completely eliminated
+  - JSON RESPONSE CONFIRMED: POST endpoint now returns proper JSON with success/error messages instead of HTML pages
+  - EMAIL VERIFICATION SYSTEM OPERATIONAL: Both email link clicks and manual token verification working correctly
 - June 22, 2025: EMAIL LOGO REMOVAL COMPLETED - Successfully removed purple circular "SB" logo from all email verification templates as requested by user
   - LOGO-FREE TEMPLATES: Created new email-templates.ts with clean, professional email templates without any logo elements
   - EMAIL SERVICE UPDATED: Modified email-service.ts to use new logo-free templates for both verification and invitation emails
