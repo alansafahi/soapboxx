@@ -5355,7 +5355,7 @@ Return JSON with this exact structure:
   // User profile update endpoint
   app.put('/api/users/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
