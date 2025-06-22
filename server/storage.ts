@@ -4831,6 +4831,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contacts.id, contactId));
   }
 
+  async getExistingInvitation(inviterId: string, email: string): Promise<Invitation | undefined> {
+    const [existing] = await db
+      .select()
+      .from(invitations)
+      .where(and(eq(invitations.inviterId, inviterId), eq(invitations.email, email)))
+      .limit(1);
+    return existing;
+  }
+
   async createInvitation(invitation: InsertInvitation): Promise<Invitation> {
     const [newInvitation] = await db
       .insert(invitations)

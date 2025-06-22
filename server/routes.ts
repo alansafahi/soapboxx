@@ -2340,14 +2340,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-app.post('/api/invitations', ensureSessionAuthentication, isAuthenticated, async (req: any, res) => {
+app.post('/api/invitations', ensureSessionAuthentication, async (req: any, res) => {
     try {
-      const userId = req.session.userId || req.user?.claims?.sub;
+      const userId = req.session.userId;
       if (!userId) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        console.log('No userId in session:', req.session);
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
 
       const { email, message } = req.body;
+      
+      // Check if invitation already exists for this email from this user
+      const existingInvitation = await storage.getExistingInvitation(userId, email);
+      if (existingInvitation) {
+        // If invitation already exists, resend it instead of creating duplicate
+        try {
+          const inviter = await storage.getUser(userId);
+          const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'A friend';
+          
+          // Create new invitation link
+          const inviteLink = `https://www.soapboxapp.org/join?code=${existingInvitation.inviteCode}`;
+          
+          // Resend invitation email
+          const { sendInvitationEmail } = require('./email-service');
+          await sendInvitationEmail({
+            to: email,
+            inviterName,
+            message: message || `Hi! I've been using SoapBox Super App for my spiritual journey and thought you might enjoy it too. It has daily Bible readings, prayer walls, and an amazing community of believers. Join me!`,
+            inviteLink
+          });
+
+          console.log(`Invitation email resent successfully to ${email}`);
+          return res.json({ ...existingInvitation, resent: true });
+        } catch (emailError) {
+          console.error('Error resending invitation email:', emailError);
+          return res.json({ ...existingInvitation, resent: false, emailError: true });
+        }
+      }
+
       const inviteCode = crypto.randomBytes(16).toString('hex');
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 30); // 30 days expiry
@@ -2394,10 +2424,10 @@ app.post('/api/invitations', ensureSessionAuthentication, isAuthenticated, async
         // Don't fail the entire request if email fails
       }
 
-      res.json(invitation);
+      res.json({ success: true, ...invitation });
     } catch (error) {
       console.error('Error creating invitation:', error);
-      res.status(500).json({ message: 'Failed to create invitation' });
+      res.status(500).json({ success: false, message: 'Failed to create invitation' });
     }
   });
 

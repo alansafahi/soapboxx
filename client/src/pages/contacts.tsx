@@ -61,29 +61,44 @@ function ContactsPage() {
   // Send invitation mutation
   const inviteMutation = useMutation({
     mutationFn: async (data: { email: string; message?: string }) => {
-      // FIX: Corrected the endpoint from /api/invitations/send to /api/invitations
       return apiRequest("/api/invitations", {
         method: "POST",
         body: data
       });
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/invitations/pending"] });
       queryClient.invalidateQueries({ queryKey: ["/api/referrals/stats"] });
-      // FIX: Invalidate contacts to show newly invited contacts
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
+      
       setInviteEmail("");
       setInviteMessage("");
       setShowInviteDialog(false);
-      toast({
-        title: "Invitation Sent",
-        description: "Your invitation has been sent successfully!",
-      });
+      
+      // Handle different response types
+      if (data.resent) {
+        toast({
+          title: "Invitation Resent",
+          description: "Your invitation has been resent successfully!",
+        });
+      } else if (data.emailError) {
+        toast({
+          title: "Invitation Created",
+          description: "Invitation saved but email delivery failed. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Invitation Sent",
+          description: "Your invitation has been sent successfully!",
+        });
+      }
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Invitation error:', error);
       toast({
         title: "Error",
-        description: "Failed to send invitation. Please try again.",
+        description: error.message || "Failed to send invitation. Please try again.",
         variant: "destructive",
       });
     },
