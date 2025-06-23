@@ -99,6 +99,7 @@ export function SoapEntryCard({
   };
 
   const handleShare = async () => {
+    const productionUrl = `https://www.soapboxapp.org/soap-journal`;
     const shareText = `Check out this S.O.A.P. entry: "${entry.scriptureReference || 'Scripture Reflection'}"\n\nScripture: ${entry.scripture.substring(0, 100)}${entry.scripture.length > 100 ? '...' : ''}\n\nShared from SoapBox Super App`;
     
     try {
@@ -106,7 +107,7 @@ export function SoapEntryCard({
         await navigator.share({
           title: `S.O.A.P. Entry - ${entry.scriptureReference || 'Scripture Reflection'}`,
           text: shareText,
-          url: window.location.href
+          url: productionUrl
         });
         toast({
           title: "Shared successfully",
@@ -114,7 +115,7 @@ export function SoapEntryCard({
         });
       } else {
         // Fallback to clipboard
-        await navigator.clipboard.writeText(shareText);
+        await navigator.clipboard.writeText(`${shareText}\n\n${productionUrl}`);
         toast({
           title: "Copied to clipboard",
           description: "S.O.A.P. entry content copied and ready to share."

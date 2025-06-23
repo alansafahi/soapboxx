@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 23, 2025: SOAP SHARING URL GENERATION COMPLETELY FIXED - Successfully resolved issue where shared SOAP links redirected to development URL instead of production domain
+  - PRODUCTION URL FIX: Updated SOAP sharing functionality to generate production links (https://www.soapboxapp.org/soap-journal) instead of development URLs
+  - SHARED LINK ACCESS: Recipients of shared SOAP links now properly reach production login page instead of broken development environment
+  - CSRF PROTECTION RESOLVED: Added required "X-Requested-With" and "Referer" headers to all API requests for backend authentication
+  - SHARING WORKFLOW OPERATIONAL: SOAP entries can now be successfully shared to social feed and external platforms with correct production URLs
+  - END-TO-END SHARING COMPLETE: Full SOAP sharing pipeline working from entry creation to community sharing to external link sharing
 - June 23, 2025: SOAP SHARING FUNCTIONALITY COMPLETELY FIXED - Successfully resolved broken share button and "Unknown Date" display issues in SOAP entries
   - SHARE BUTTON FIXED: Added proper click handler to Share button in SoapEntryCard dropdown menu with native sharing API support
   - DATE FORMATTING ENHANCED: Implemented robust date parsing with parseISO and isValid checks to handle null/invalid dates gracefully
