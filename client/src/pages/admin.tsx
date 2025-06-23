@@ -2929,6 +2929,9 @@ export default function AdminPortal() {
                   </Form>
                 </DialogContent>
               </Dialog>
+            
+            <CardHeader>
+              <CardTitle>Select Church</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {churches.map((church: any) => (
