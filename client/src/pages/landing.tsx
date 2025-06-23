@@ -48,7 +48,7 @@ export default function Landing() {
 
   const handleDashboard = () => {
     // Navigate to dashboard using router for authenticated users
-    setLocation('/');
+    setLocation('/dashboard');
   };
 
   return (
