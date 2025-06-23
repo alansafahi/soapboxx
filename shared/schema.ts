@@ -133,6 +133,10 @@ export const churches = pgTable("churches", {
   isClaimed: boolean("is_claimed").default(false), // Track if church has been claimed by admin
   adminEmail: varchar("admin_email", { length: 255 }), // Email of designated admin for claiming
   isDemo: boolean("is_demo").default(true), // Mark as demo church unless imported from production CSV
+  verificationStatus: varchar("verification_status", { length: 20 }).default("pending"), // pending, approved, rejected
+  verifiedAt: timestamp("verified_at"),
+  verifiedBy: varchar("verified_by").references(() => users.id), // ID of admin who verified
+  rejectionReason: text("rejection_reason"), // Reason for rejection if status is rejected
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

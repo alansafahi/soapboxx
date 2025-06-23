@@ -8139,7 +8139,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
       
       // Approve the church
-      await storage.approveChurch(churchId);
+      await storage.approveChurch(churchId, userId);
       
       res.json({ success: true, message: 'Church approved successfully' });
     } catch (error) {
@@ -8160,7 +8160,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
       
       // Reject the church with reason
-      await storage.rejectChurch(churchId, reason);
+      await storage.rejectChurch(churchId, reason, userId);
       
       res.json({ success: true, message: 'Church rejected successfully' });
     } catch (error) {
