@@ -304,10 +304,7 @@ export default function Sidebar() {
           visibleGroups.map((group) => {
             const isExpanded = expandedGroups.has(group.label);
             
-            // Debug expanded state
-            if (group.label === "ADMIN PORTAL") {
-              console.log(`Rendering Admin Portal: isExpanded=${isExpanded}, expandedGroups=`, Array.from(expandedGroups));
-            }
+
             
             return (
               <div key={group.label}>
