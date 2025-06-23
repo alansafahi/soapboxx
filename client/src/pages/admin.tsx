@@ -506,7 +506,7 @@ function MembersPage() {
                 Platform-wide administration tools for SoapBox Owners
               </p>
             </div>
-            <ChurchVerificationTab />
+            <ChurchManagementTab />
           </TabsContent>
 
           <TabsContent value="members" className="space-y-6">
