@@ -1215,6 +1215,16 @@ export default function AudioRoutines() {
 
   const startFullMeditationSession = async (routine: AudioRoutine) => {
     try {
+      // Clear any previous session termination flags
+      (window as any).sessionTerminated = false;
+      
+      // Stop any existing session first
+      if (playingRoutine) {
+        stopAudioRoutine();
+        // Wait a moment for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
       setPlayingRoutine(routine.id);
       
       // Create audio context for background music
@@ -1501,6 +1511,11 @@ export default function AudioRoutines() {
               
               // Wait for pause duration then continue
               const pauseTimeout = setTimeout(() => {
+                // Check if session was terminated during pause
+                if ((window as any).sessionTerminated) {
+                  console.log('Session terminated during pause, stopping continuation');
+                  return;
+                }
                 console.log(`Pause complete for segment ${currentSegmentIndex}, continuing session`);
                 setIsInSilencePeriod(false);
                 playNextSegment();
@@ -1549,9 +1564,21 @@ export default function AudioRoutines() {
   };
 
   const pauseAudioRoutine = () => {
+    // Check if session was terminated
+    if ((window as any).sessionTerminated) {
+      console.log('Session already terminated, ignoring pause request');
+      return;
+    }
+    
     if (currentAudio && !isPaused) {
       currentAudio.pause();
       setIsPaused(true);
+      
+      // Pause any ongoing timeouts
+      if ((window as any).currentPauseTimeout) {
+        clearTimeout((window as any).currentPauseTimeout);
+        (window as any).currentPauseTimeout = null;
+      }
       
       toast({
         title: "Session Paused",
@@ -1562,6 +1589,14 @@ export default function AudioRoutines() {
   };
 
   const resumeAudioRoutine = () => {
+    // Check if session was terminated
+    if ((window as any).sessionTerminated) {
+      console.log('Session was terminated, cannot resume');
+      setIsPaused(false);
+      setPlayingRoutine(null);
+      return;
+    }
+    
     if (currentAudio && isPaused) {
       currentAudio.play();
       setIsPaused(false);
@@ -1679,6 +1714,9 @@ export default function AudioRoutines() {
   const stopAudioRoutine = () => {
     console.log('Stop button pressed - initiating complete session cleanup');
     
+    // Immediate session termination flag
+    (window as any).sessionTerminated = true;
+    
     // Clear all timeout references
     if (autoPauseTimeout) {
       clearTimeout(autoPauseTimeout);
@@ -1696,38 +1734,53 @@ export default function AudioRoutines() {
       (window as any).progressInterval = null;
     }
     
+    // Clear all global timeouts for meditation sessions
+    const highestTimeoutId = setTimeout(() => {}, 0);
+    for (let i = 0; i < highestTimeoutId; i++) {
+      try {
+        clearTimeout(i);
+      } catch (e) { /* ignore */ }
+    }
+    
     // Stop and cleanup meditation audio
     if (currentAudio) {
       try {
         currentAudio.pause();
         currentAudio.currentTime = 0;
         currentAudio.src = '';
-        currentAudio.removeEventListener('ended', () => {});
-        currentAudio.removeEventListener('canplay', () => {});
+        currentAudio.load(); // Force reset
+        // Remove all event listeners
+        const newAudio = currentAudio.cloneNode() as HTMLAudioElement;
+        currentAudio.parentNode?.replaceChild(newAudio, currentAudio);
       } catch (e) {
         console.log('Audio cleanup completed');
       }
       setCurrentAudio(null);
     }
     
-    // Force stop all oscillators and close audio context
+    // Force stop all Web Audio API contexts and nodes
     if (currentAudioContext) {
       try {
-        // Stop all nodes
-        const allNodes = (currentAudioContext as any)._nodes || [];
-        allNodes.forEach((node: any) => {
-          try {
-            if (node.stop) node.stop();
-            if (node.disconnect) node.disconnect();
-          } catch (e) { /* Node already stopped */ }
-        });
+        // Stop all active audio nodes
+        const context = currentAudioContext;
         
-        // Close the audio context
-        currentAudioContext.close().then(() => {
+        // Disconnect and stop all nodes created in this context
+        const destination = context.destination;
+        if (destination) {
+          try {
+            destination.disconnect();
+          } catch (e) { /* already disconnected */ }
+        }
+        
+        // Suspend and close the audio context immediately
+        context.suspend().then(() => {
+          return context.close();
+        }).then(() => {
           console.log('Audio context closed successfully');
         }).catch((e) => {
           console.log('Audio context cleanup completed');
         });
+        
       } catch (e) {
         console.log('Audio context force cleanup');
       }
@@ -1745,10 +1798,14 @@ export default function AudioRoutines() {
     }
     
     // Force cleanup of any running routine
-    const currentRoutine = playingRoutine;
-    if (currentRoutine && (currentRoutine as any).cleanup) {
+    const currentRoutineId = playingRoutine;
+    if (currentRoutineId) {
+      // Clear any routine-specific cleanup
       try {
-        (currentRoutine as any).cleanup();
+        const routineElement = document.querySelector(`[data-routine-id="${currentRoutineId}"]`);
+        if (routineElement && (routineElement as any).cleanup) {
+          (routineElement as any).cleanup();
+        }
       } catch (e) {
         console.log('Routine cleanup completed');
       }
@@ -1761,10 +1818,10 @@ export default function AudioRoutines() {
     setCurrentSegment(0);
     setIsInSilencePeriod(false);
     
-    // Force garbage collection hint
-    if ((window as any).gc) {
-      (window as any).gc();
-    }
+    // Clear session termination flag after cleanup
+    setTimeout(() => {
+      (window as any).sessionTerminated = false;
+    }, 1000);
     
     toast({
       title: "Session Stopped",
