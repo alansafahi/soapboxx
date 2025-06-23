@@ -60,8 +60,8 @@ interface NavigationGroup {
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL']));
-  const [isCollapsed, setIsCollapsed] = useState(false); // FORCE EXPANDED FOR TESTING
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS']));
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
@@ -73,22 +73,16 @@ export default function Sidebar() {
       
       setIsMobile(isMobileScreen);
       
-      // TEMPORARILY DISABLED - Auto-collapse on small screens, expand on large screens
-      // if (isMobileScreen) {
-      //   setIsCollapsed(true);
-      // } else if (isLargeScreen) {
-      //   setIsCollapsed(false);
-      // }
-      
-      console.log(`Screen width: ${window.innerWidth}, isMobile: ${isMobileScreen}, isLarge: ${isLargeScreen}, FORCED EXPANDED FOR TESTING`);
+      // Auto-collapse on small screens, expand on large screens
+      if (isMobileScreen) {
+        setIsCollapsed(true);
+      } else if (isLargeScreen) {
+        setIsCollapsed(false);
+      }
     };
 
     // Set initial state
     handleResize();
-    
-    // FORCE EXPANDED MODE FOR TESTING - Override any responsive logic
-    setIsCollapsed(false);
-    console.log("FORCED setIsCollapsed(false) - sidebar should now be expanded");
     
     // Listen for window resize
     window.addEventListener('resize', handleResize);
@@ -111,19 +105,6 @@ export default function Sidebar() {
   });
 
   const navigationGroups: NavigationGroup[] = [
-    {
-      label: "ADMIN PORTAL",
-      items: [
-        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-      ]
-    },
     {
       label: "COMMUNITY",
       items: [
@@ -150,6 +131,26 @@ export default function Sidebar() {
       items: [
         { label: "Video Library", href: "/video-library", icon: Video },
       ]
+    },
+    {
+      label: "ADMIN PORTAL",
+      items: [
+        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+      ]
+    },
+    {
+      label: "ACCOUNT",
+      items: [
+        { label: "Profile", href: "/profile", icon: User },
+        { label: "Settings", href: "/settings", icon: Settings },
+      ]
     }
   ];
 
@@ -167,16 +168,12 @@ export default function Sidebar() {
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
       
-
-      
       return hasAccess;
     })
   })).filter(group => {
     const hasItems = group.items.length > 0;
     return hasItems;
   });
-
-
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
