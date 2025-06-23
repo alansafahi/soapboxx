@@ -315,16 +315,16 @@ function MembersPage() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="churches">Churches</TabsTrigger>
+            <TabsTrigger value="churches" className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">Church Verification</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="media">Media</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="volunteers">Volunteers</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="media" className="hidden lg:block">Media</TabsTrigger>
+            <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
+            <TabsTrigger value="volunteers" className="hidden lg:block">Volunteers</TabsTrigger>
+            <TabsTrigger value="settings" className="hidden lg:block">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
