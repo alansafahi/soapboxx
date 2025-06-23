@@ -48,6 +48,7 @@ import {
   BellOff,
   Eye,
   EyeOff,
+  Filter,
   ThumbsUp,
   CalendarPlus,
   ChevronDown,
@@ -404,95 +405,142 @@ export default function EventsList() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header and Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-6 h-6" />
-            Upcoming Events
+    <div className="space-y-8">
+      {/* Enhanced Header and Filters */}
+      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
+            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Upcoming Events
+            </span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+        <CardContent className="space-y-6">
+          {/* Enhanced Search and Filters */}
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl space-y-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
+                <Input
+                  placeholder="Search events by name, location, or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 h-12 bg-white/80 border-purple-200 focus:border-purple-400 focus:ring-purple-200 rounded-lg shadow-sm"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 border-purple-200 focus:border-purple-400 rounded-lg shadow-sm">
+                    <Filter className="w-4 h-4 mr-2 text-purple-400" />
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="service">🙏 Service</SelectItem>
+                    <SelectItem value="bible_study">📖 Bible Study</SelectItem>
+                    <SelectItem value="community_service">🤝 Community Service</SelectItem>
+                    <SelectItem value="social">🎉 Social</SelectItem>
+                    <SelectItem value="youth">👨‍👩‍👧‍👦 Youth</SelectItem>
+                    <SelectItem value="music">🎵 Music</SelectItem>
+                    <SelectItem value="outreach">🌍 Outreach</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={timeFilter} onValueChange={setTimeFilter}>
+                  <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 border-purple-200 focus:border-purple-400 rounded-lg shadow-sm">
+                    <Clock className="w-4 h-4 mr-2 text-purple-400" />
+                    <SelectValue placeholder="Time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="service">Service</SelectItem>
-                <SelectItem value="bible_study">Bible Study</SelectItem>
-                <SelectItem value="community_service">Community Service</SelectItem>
-                <SelectItem value="social">Social</SelectItem>
-                <SelectItem value="youth">Youth</SelectItem>
-                <SelectItem value="music">Music</SelectItem>
-                <SelectItem value="outreach">Outreach</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={timeFilter} onValueChange={setTimeFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="this_week">This Week</SelectItem>
-                <SelectItem value="this_month">This Month</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "calendar" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("calendar")}
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center justify-between">
+              <div className="flex gap-3">
+                <Button
+                  variant={viewMode === "list" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={viewMode === "list" ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg" : "bg-white/80 hover:bg-white border-purple-200"}
+                >
+                  <List className="w-4 h-4 mr-2" />
+                  List
+                </Button>
+                <Button
+                  variant={viewMode === "calendar" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("calendar")}
+                  className={viewMode === "calendar" ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg" : "bg-white/80 hover:bg-white border-purple-200"}
+                >
+                  <Grid className="w-4 h-4 mr-2" />
+                  Calendar
+                </Button>
+              </div>
+              {(searchTerm || categoryFilter !== "all" || timeFilter !== "all") && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setCategoryFilter("all");
+                    setTimeFilter("all");
+                  }}
+                  className="text-purple-600 hover:text-purple-800 hover:bg-purple-100"
+                >
+                  Clear Filters
+                </Button>
+              )}
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="flex gap-4 text-sm text-gray-600">
-            <span>{filteredEvents.length} events found</span>
-            {searchTerm && <span>• Searching for "{searchTerm}"</span>}
-            {categoryFilter !== "all" && <span>• {categoryFilter.replace('_', ' ')} category</span>}
+          {/* Enhanced Quick Stats */}
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+            <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span className="font-medium text-gray-700">{filteredEvents.length} events found</span>
+              </div>
+              {searchTerm && (
+                <div className="flex items-center gap-2">
+                  <Search className="w-4 h-4 text-purple-500" />
+                  <span className="text-gray-600">Searching for "{searchTerm}"</span>
+                </div>
+              )}
+              {categoryFilter !== "all" && (
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-purple-500" />
+                  <span className="text-gray-600">{categoryFilter.replace('_', ' ')} category</span>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Events Display */}
-      <Card>
+      {/* Enhanced Events Display */}
+      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
         <CardContent className="p-0">
           {filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-gray-900 mb-2">
+            <div className="text-center py-16 px-8">
+              <div className="w-24 h-24 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Calendar className="w-12 h-12 text-purple-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
                 {searchTerm || categoryFilter !== "all" || timeFilter !== "all" 
-                  ? "No events match your filters" 
-                  : "No upcoming events"}
+                  ? "No Events Match Your Filters" 
+                  : "No Upcoming Events"}
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-6 max-w-md mx-auto text-lg">
                 {searchTerm || categoryFilter !== "all" || timeFilter !== "all"
-                  ? "Try adjusting your search or filters"
-                  : "Check back soon for community events and activities!"}
+                  ? "Try adjusting your search criteria or filters to find more events"
+                  : "Check back soon for exciting community events and spiritual activities!"}
               </p>
               {(searchTerm || categoryFilter !== "all" || timeFilter !== "all") && (
                 <Button 
@@ -502,13 +550,14 @@ export default function EventsList() {
                     setCategoryFilter("all");
                     setTimeFilter("all");
                   }}
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 hover:from-purple-600 hover:to-blue-600 shadow-lg px-8 py-3"
                 >
-                  Clear Filters
+                  Clear All Filters
                 </Button>
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="space-y-4 p-6">
               <AnimatePresence>
                 {filteredEvents.map((event: Event, index: number) => {
                   const dateInfo = formatEventDate(event.eventDate);
@@ -523,51 +572,53 @@ export default function EventsList() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="p-6 hover:bg-gray-50 transition-colors group"
+                      className="bg-gradient-to-r from-white to-purple-50/30 border border-purple-100 rounded-xl p-6 hover:shadow-lg hover:border-purple-200 transition-all duration-300 group"
                     >
-                      <div className="flex items-start space-x-4">
-                        {/* Date Display */}
+                      <div className="flex items-start space-x-6">
+                        {/* Enhanced Date Display */}
                         <div className="flex-shrink-0">
-                          <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex flex-col items-center justify-center border border-blue-200 relative">
-                            <span className="text-xs text-blue-600 font-medium uppercase tracking-wide">
+                          <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg relative">
+                            <span className="text-xs font-medium uppercase tracking-wide opacity-90">
                               {dateInfo.month}
                             </span>
-                            <span className="text-xl font-bold text-blue-800">
+                            <span className="text-2xl font-bold">
                               {dateInfo.day}
                             </span>
-                            <span className="text-xs text-blue-600">
+                            <span className="text-xs opacity-90">
                               {getDateLabel(eventDate)}
                             </span>
                             {isToday(eventDate) && (
-                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
+                                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                              </div>
                             )}
                           </div>
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          {/* Event Header */}
-                          <div className="flex items-start justify-between mb-3">
+                          {/* Enhanced Event Header */}
+                          <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-semibold text-gray-900 text-lg">{event.title}</h3>
+                              <div className="flex items-center gap-3 mb-3">
+                                <h3 className="font-bold text-gray-900 text-xl group-hover:text-purple-700 transition-colors">{event.title}</h3>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => toggleFavorite(event.id)}
-                                  className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="p-2 h-auto opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-100"
                                 >
-                                  <Heart className={`w-4 h-4 ${isFavorite ? "fill-current text-red-500" : "text-gray-400"}`} />
+                                  <Heart className={`w-5 h-5 ${isFavorite ? "fill-current text-red-500" : "text-gray-400 hover:text-red-400"}`} />
                                 </Button>
                               </div>
                               
-                              <div className="flex flex-wrap gap-2 mb-3">
+                              <div className="flex flex-wrap gap-2 mb-4">
                                 {event.category && (
-                                  <Badge className={getCategoryColor(event.category)}>
+                                  <Badge className={`${getCategoryColor(event.category)} shadow-sm`}>
                                     {event.category.replace('_', ' ')}
                                   </Badge>
                                 )}
                                 {event.priority === 'high' && (
-                                  <Badge variant="destructive">High Priority</Badge>
+                                  <Badge variant="destructive" className="shadow-sm">High Priority</Badge>
                                 )}
                                 {userRsvp && (
                                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">

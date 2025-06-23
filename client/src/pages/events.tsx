@@ -38,15 +38,30 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Church Events</h1>
-          <p className="text-gray-600 mt-1">Discover upcoming events and activities in your community</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 pb-20 md:pb-0">
+      {/* Enhanced Header */}
+      <div className="bg-white/90 backdrop-blur-sm shadow-lg border-b border-purple-100">
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Community Events
+              </h1>
+              <p className="text-gray-600 mt-2 text-lg">
+                Discover upcoming events and connect with your faith community
+              </p>
+            </div>
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Today</p>
+                <p className="font-semibold text-gray-900">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         <EventsList />
       </div>
 

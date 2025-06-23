@@ -623,45 +623,68 @@ function ContactsPage() {
             )}
           </TabsContent>
 
-        {/* Pending Invites Tab */}
-        <TabsContent value="pending" className="space-y-4">
-          {pendingInvites.length === 0 ? (
-            <Card className="p-12 text-center">
-              <div className="space-y-4">
-                <Mail className="h-12 w-12 mx-auto text-muted-foreground" />
-                <div>
-                  <h3 className="text-lg font-semibold">No Pending Invitations</h3>
-                  <p className="text-muted-foreground">
-                    All your invitations have been responded to!
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {pendingInvites.map((invite: any) => (
-                <Card key={invite.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold">{invite.email}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Invited on {new Date(invite.createdAt).toLocaleDateString()}
-                        </p>
-                        {invite.message && (
-                          <p className="text-xs text-muted-foreground mt-1 italic">
-                            "{invite.message.substring(0, 100)}..."
-                          </p>
-                        )}
-                      </div>
-                      <Badge variant="outline">Pending</Badge>
+          {/* Enhanced Pending Invites Tab */}
+          <TabsContent value="pending" className="space-y-6">
+            {pendingInvites.length === 0 ? (
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-16 text-center">
+                  <div className="space-y-6">
+                    <div className="w-20 h-20 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-full flex items-center justify-center mx-auto">
+                      <Mail className="h-10 w-10 text-orange-600" />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+                    <div className="space-y-2">
+                      <h3 className="text-2xl font-bold text-gray-900">All Caught Up!</h3>
+                      <p className="text-gray-600 max-w-md mx-auto">
+                        Great job! All your invitations have been responded to. Keep growing your community by sending more invitations.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => setShowInviteDialog(true)} 
+                      className="gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg px-8 py-3"
+                    >
+                      <UserPlus className="h-5 w-5" />
+                      Send More Invitations
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {pendingInvites.map((invite: any) => (
+                  <Card key={invite.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center">
+                              <Mail className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-lg">{invite.email}</h3>
+                              <p className="text-sm text-gray-600">
+                                Invited on {new Date(invite.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          {invite.message && (
+                            <p className="text-sm text-gray-700 ml-13 italic bg-gray-50 p-3 rounded-lg border-l-4 border-orange-400">
+                              "{invite.message.length > 150 ? invite.message.substring(0, 150) + '...' : invite.message}"
+                            </p>
+                          )}
+                        </div>
+                        <Badge 
+                          variant="outline"
+                          className="bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100"
+                        >
+                          ⏳ Pending
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
         {/* Referral Program Tab */}
         <TabsContent value="referrals" className="space-y-6">
