@@ -3876,8 +3876,29 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
         selectedVerses = availableVerses.slice(0, parseInt(count.toString()));
       }
 
+      // Final deduplication pass to ensure absolutely no duplicate references
+      const finalUniqueVerses = [];
+      const seenReferences = new Set();
+      
+      for (const verse of selectedVerses) {
+        if (!seenReferences.has(verse.reference)) {
+          seenReferences.add(verse.reference);
+          finalUniqueVerses.push(verse);
+        }
+      }
+      
+      // If we lost verses due to deduplication, fill with unique alternatives
+      if (finalUniqueVerses.length < parseInt(count.toString()) && availableVerses.length > finalUniqueVerses.length) {
+        const additionalVerses = availableVerses.filter(v => 
+          !seenReferences.has(v.reference) && 
+          !finalUniqueVerses.some(fv => fv.id === v.id)
+        ).slice(0, parseInt(count.toString()) - finalUniqueVerses.length);
+        
+        finalUniqueVerses.push(...additionalVerses);
+      }
+
       res.json({
-        verses: selectedVerses,
+        verses: finalUniqueVerses,
         context: {
           mood: mood || 'seeking guidance',
           liturgicalSeason: liturgicalContext.season,
