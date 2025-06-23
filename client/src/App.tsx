@@ -5,7 +5,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useImmediateAuth } from "@/lib/immediateAuth";
-import { FORCE_AUTHENTICATED, MOCK_USER } from "@/lib/forceAuth";
 import { AnimatePresence, motion } from "framer-motion";
 
 import Sidebar from "@/components/Sidebar";
@@ -49,7 +48,7 @@ function AppRouter() {
         );
     }
 
-    const ProtectedRoute = ({ component: Component, ...rest }) => (
+    const ProtectedRoute = ({ component: Component, ...rest }: { component: any, [key: string]: any }) => (
         <Route {...rest}>
             {isAuthenticated ? (
                 <Component />

@@ -55,7 +55,6 @@ import {
   Download,
   Video,
   Search,
-  Filter,
   Grid,
   List,
   Sun,
