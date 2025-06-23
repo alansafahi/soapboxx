@@ -8105,5 +8105,69 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Church Admin/Verification API endpoints
+  app.get('/api/admin/churches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const status = req.query.status as string;
+      
+      // Check if user has church management permissions
+      const user = await storage.getUserById(userId);
+      if (!user || user.role !== 'soapbox_owner') {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+      
+      // Get churches based on status filter
+      const churches = await storage.getChurchesByStatus(status);
+      
+      res.json(churches);
+    } catch (error) {
+      console.error('Error fetching admin churches:', error);
+      res.status(500).json({ message: 'Failed to fetch churches' });
+    }
+  });
+
+  app.post('/api/admin/churches/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { churchId } = req.body;
+      
+      // Check if user has church management permissions
+      const user = await storage.getUserById(userId);
+      if (!user || user.role !== 'soapbox_owner') {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+      
+      // Approve the church
+      await storage.approveChurch(churchId);
+      
+      res.json({ success: true, message: 'Church approved successfully' });
+    } catch (error) {
+      console.error('Error approving church:', error);
+      res.status(500).json({ message: 'Failed to approve church' });
+    }
+  });
+
+  app.post('/api/admin/churches/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { churchId, reason } = req.body;
+      
+      // Check if user has church management permissions
+      const user = await storage.getUserById(userId);
+      if (!user || user.role !== 'soapbox_owner') {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+      
+      // Reject the church with reason
+      await storage.rejectChurch(churchId, reason);
+      
+      res.json({ success: true, message: 'Church rejected successfully' });
+    } catch (error) {
+      console.error('Error rejecting church:', error);
+      res.status(500).json({ message: 'Failed to reject church' });
+    }
+  });
+
   return httpServer;
 }
