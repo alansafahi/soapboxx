@@ -328,7 +328,6 @@ export default function EnhancedCommunityFeed() {
           </div>
         </div>
       </Card>
-      </Card>
 
       {/* Posts Feed */}
       <div className="space-y-4">
