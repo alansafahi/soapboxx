@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState, useEffect } from 'react';
 import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -52,7 +52,21 @@ function AppRouter() {
     
 
 
-    if (isLoading) {
+    // Force render after 3 seconds if stuck in loading state
+    const [forceRender, setForceRender] = useState(false);
+    
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (isLoading) {
+                console.log('🔄 Forcing render due to extended loading state');
+                setForceRender(true);
+            }
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+    }, [isLoading]);
+
+    if (isLoading && !forceRender) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

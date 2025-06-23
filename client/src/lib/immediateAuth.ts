@@ -10,7 +10,7 @@ interface AuthState {
 let globalAuthState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: true
+  isLoading: false // Start with false to prevent infinite loading
 };
 
 let authListeners: Array<(state: AuthState) => void> = [];
@@ -51,7 +51,8 @@ export function useImmediateAuth() {
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Pragma': 'no-cache',
+          'X-Requested-With': 'XMLHttpRequest'
         }
       });
 
@@ -70,13 +71,19 @@ export function useImmediateAuth() {
         console.log('📋 Immediately setting auth state:', newState);
         notifyListeners(newState);
         
+        // Force render update
+        setTimeout(() => {
+          const event = new CustomEvent('authStateChanged', { detail: newState });
+          window.dispatchEvent(event);
+        }, 100);
+        
         // Immediate redirect if on login page
         if (window.location.pathname === '/login') {
           console.log('🔄 User authenticated on login page, immediate redirect to dashboard');
           window.location.replace('/');
         }
       } else {
-        console.log('❌ Authentication failed');
+        console.log('❌ Authentication failed, status:', response.status);
         const newState = {
           user: null,
           isAuthenticated: false,

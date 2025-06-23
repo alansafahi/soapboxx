@@ -70,28 +70,25 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "returnNull" }),
+      queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 0, // Always fresh queries for auth reliability
-      gcTime: 0, // No caching for immediate auth state updates
+      staleTime: 5 * 60 * 1000, // 5 minutes cache for performance
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
       retry: (failureCount, error: any) => {
         // Don't retry on auth errors or client errors
         if (error?.message?.includes('401') || error?.message?.includes('40')) {
           return false;
         }
-        return failureCount < 1; // Single retry for performance
+        return failureCount < 2; // Allow more retries for network issues
       },
-      retryDelay: (attemptIndex) => Math.min(750 * 2 ** attemptIndex, 3000), // Faster retries
-      networkMode: 'online', // Only fetch when online
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+      networkMode: 'online',
     },
     mutations: {
-      retry: 1, // Single retry for mutations
+      retry: 1,
       retryDelay: 1000,
       networkMode: 'online',
-      onError: (error) => {
-        console.warn('Mutation error handled:', error);
-      },
     },
   },
 });
