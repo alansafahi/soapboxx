@@ -35,6 +35,7 @@ const ContactsPage = lazy(() => import("@/pages/contacts"));
 const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
 // Admin Portal Pages
+const AdminPage = lazy(() => import("@/pages/admin"));
 const MembersPage = lazy(() => import("@/pages/admin"));
 const SMSGivingPage = lazy(() => import("@/pages/SMSGiving_fixed"));
 const DonationAnalyticsPage = lazy(() => import("@/pages/DonationAnalytics"));
@@ -121,6 +122,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
                                     
                                     {/* Admin Portal Routes */}
+                                    <ProtectedRoute path="/admin" component={AdminPage} />
                                     <ProtectedRoute path="/members" component={MembersPage} />
                                     <ProtectedRoute path="/sms-giving" component={SMSGivingPage} />
                                     <ProtectedRoute path="/donation-analytics" component={DonationAnalyticsPage} />
