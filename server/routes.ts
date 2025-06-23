@@ -593,7 +593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tokens = await tokenResponse.json();
       
       // Decode ID token to get user info
-      const jwt = require('jsonwebtoken');
+      // JWT already imported at top of file
       const decoded = jwt.decode(tokens.id_token);
       
       let userData = decoded;
@@ -1670,7 +1670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(exportData);
         
       } else if (format === 'pdf') {
-        const pdf = require('html-pdf-node');
+        // html-pdf-node already imported as htmlPdf at top of file
         
         const htmlContent = `
           <html>
@@ -1794,7 +1794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.send(pdfBuffer);
         
       } else if (format === 'docx') {
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = require('docx');
+        // DOCX generation temporarily disabled for production
         
         const doc = new Document({
           sections: [{
