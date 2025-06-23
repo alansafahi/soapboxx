@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import { format } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -11,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SmartScriptureTextarea from './SmartScriptureTextarea';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { 
   Heart, 
   MessageCircle, 
@@ -229,25 +232,43 @@ export default function EnhancedCommunityFeed() {
   }
 
   return (
-    <div className="space-y-3 sm:space-y-4 md:space-y-6">
-      {/* Enhanced Filter Bar */}
-      <Card>
-        <CardContent className="p-2 sm:p-3 md:p-4">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-              <div className="flex-1 min-w-0 sm:min-w-48 md:min-w-64">
-                <div className="relative">
-                  <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search posts, authors, or topics..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-8 sm:pl-10 text-sm sm:text-base py-2"
-                  />
-                </div>
-              </div>
-              
-              <Dialog>
+    <div className="space-y-6">
+      {/* Enhanced Actions Bar */}
+      <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          {/* Search */}
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-400" />
+              <Input
+                placeholder="Search discussions, authors, or topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-11 border-purple-200 focus:border-purple-400 focus:ring-purple-400/20 bg-white/80"
+              />
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-md">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Start Discussion
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Start a New Discussion
+                  </DialogTitle>
+                </DialogHeader>
+                <CreateDiscussionForm onSuccess={() => setShowCreateDialog(false)} />
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Filter className="h-4 w-4 mr-2" />
@@ -453,21 +474,252 @@ export default function EnhancedCommunityFeed() {
         </AnimatePresence>
 
         {posts.length === 0 && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <div className="space-y-4">
-                <div className="text-6xl">💬</div>
-                <h3 className="text-lg font-semibold text-gray-900">No posts found</h3>
-                <p className="text-gray-600">
-                  {searchQuery || Object.values(filters).some(f => f !== 'all' && f !== false)
-                    ? "Try adjusting your filters or search query"
-                    : "Be the first to share something with the community!"}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="border-0 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 shadow-xl">
+              <CardContent className="p-12 text-center">
+                <div className="space-y-6">
+                  {/* Gradient Icon Background */}
+                  <div className="mx-auto w-24 h-24 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center shadow-lg">
+                    <MessageCircle className="w-12 h-12 text-purple-600" />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      {searchQuery || Object.values(filters).some(f => f !== 'all' && f !== false)
+                        ? "No discussions match your criteria"
+                        : "Start the Conversation"}
+                    </h3>
+                    <p className="text-gray-600 text-lg max-w-md mx-auto leading-relaxed">
+                      {searchQuery || Object.values(filters).some(f => f !== 'all' && f !== false)
+                        ? "Try adjusting your filters or search terms to find more discussions"
+                        : "Share your thoughts, ask questions, or start a meaningful conversation with fellow believers"}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                    <Button 
+                      onClick={() => setShowCreateDialog(true)}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg px-8 py-3 text-base"
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      Start First Discussion
+                    </Button>
+                    
+                    {(searchQuery || Object.values(filters).some(f => f !== 'all' && f !== false)) && (
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setSearchQuery('');
+                          setFilters({
+                            type: 'all',
+                            category: 'all',
+                            timeRange: 'all',
+                            visibility: 'all',
+                            hasReactions: false,
+                            sortBy: 'recent'
+                          });
+                        }}
+                        className="border-purple-200 text-purple-600 hover:bg-purple-50 px-6 py-3"
+                      >
+                        Clear Filters
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Inspiring Quote */}
+                  {!searchQuery && !Object.values(filters).some(f => f !== 'all' && f !== false) && (
+                    <div className="pt-6 border-t border-purple-100">
+                      <p className="text-sm text-gray-500 italic">
+                        "As iron sharpens iron, so one person sharpens another." - Proverbs 27:17
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
       </div>
     </div>
+  );
+}
+
+// Create Discussion Form Component
+function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    category: 'general',
+    isPublic: true,
+    tags: ''
+  });
+
+  const createDiscussionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('POST', '/api/discussions', data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/community/enhanced-feed'] });
+      toast({
+        title: "Discussion created",
+        description: "Your discussion has been shared with the community",
+      });
+      onSuccess();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create discussion. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.title.trim() || !formData.content.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both a title and content for your discussion",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const tagsArray = formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+      
+      await createDiscussionMutation.mutateAsync({
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        category: formData.category,
+        isPublic: formData.isPublic,
+        tags: tagsArray
+      });
+      
+      // Reset form
+      setFormData({
+        title: '',
+        content: '',
+        category: 'general',
+        isPublic: true,
+        tags: ''
+      });
+    } catch (error) {
+      console.error('Error creating discussion:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Title */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">Discussion Title</label>
+        <Input
+          placeholder="What would you like to discuss?"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          className="border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      {/* Content */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">Your Message</label>
+        <SmartScriptureTextarea
+          placeholder="Share your thoughts, ask questions, or start a meaningful conversation..."
+          value={formData.content}
+          onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+          className="min-h-32 border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
+          disabled={isSubmitting}
+        />
+        <p className="text-xs text-gray-500">
+          Tip: Type Bible references (like "John 3:16") and they'll be automatically highlighted
+        </p>
+      </div>
+
+      {/* Category & Settings */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Category</label>
+          <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+            <SelectTrigger className="border-purple-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="general">General Discussion</SelectItem>
+              <SelectItem value="prayer">Prayer Request</SelectItem>
+              <SelectItem value="bible_study">Bible Study</SelectItem>
+              <SelectItem value="testimony">Testimony</SelectItem>
+              <SelectItem value="question">Question</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Visibility</label>
+          <Select value={formData.isPublic ? "public" : "private"} onValueChange={(value) => setFormData(prev => ({ ...prev, isPublic: value === "public" }))}>
+            <SelectTrigger className="border-purple-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="public">Public - Everyone can see</SelectItem>
+              <SelectItem value="private">Private - Only your church</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Tags */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">Tags (optional)</label>
+        <Input
+          placeholder="Add tags separated by commas (e.g., faith, prayer, hope)"
+          value={formData.tags}
+          onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+          className="border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      {/* Submit Button */}
+      <div className="flex justify-end gap-3 pt-4">
+        <Button type="button" variant="outline" onClick={onSuccess} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Posting...
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4 mr-2" />
+              Share Discussion
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
   );
 }
