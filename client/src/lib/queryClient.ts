@@ -21,6 +21,8 @@ export async function apiRequest(
     method,
     headers: {
       ...(body ? { "Content-Type": "application/json" } : {}),
+      "X-Requested-With": "XMLHttpRequest",
+      "Referer": window.location.href,
       ...headers,
     },
     body: body ? JSON.stringify(body) : undefined,
