@@ -161,9 +161,23 @@ export default function Sidebar() {
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
       
+      // Debug for Admin Portal
+      if (group.label === "ADMIN PORTAL") {
+        console.log(`Admin Portal Item: ${item.label}, Has Access: ${hasAccess}, User Role: ${user?.role}`);
+      }
+      
       return hasAccess;
     })
-  })).filter(group => group.items.length > 0);
+  })).filter(group => {
+    const hasItems = group.items.length > 0;
+    if (group.label === "ADMIN PORTAL") {
+      console.log(`Admin Portal Group: ${group.items.length} items, Will Show: ${hasItems}`);
+    }
+    return hasItems;
+  });
+
+  // Debug final visible groups
+  console.log("Final Visible Groups:", visibleGroups.map(g => g.label));
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
