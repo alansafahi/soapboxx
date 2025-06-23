@@ -3054,7 +3054,12 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Get unread message count for notification badge
   app.get('/api/messages/unread-count', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const unreadCount = await storage.getUnreadMessageCount(userId);
       res.json(unreadCount);
     } catch (error) {
@@ -3066,7 +3071,12 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Get user conversations
   app.get('/api/messages/conversations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const conversations = await storage.getUserConversations(userId);
       res.json(conversations);
     } catch (error) {
@@ -3078,8 +3088,13 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Get messages for a specific conversation
   app.get('/api/messages/:conversationId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const { conversationId } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const messages = await storage.getConversationMessages(conversationId, userId);
       res.json(messages);
     } catch (error) {
@@ -3091,8 +3106,12 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Send a new message
   app.post('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const senderId = req.user.claims.sub;
+      const senderId = req.session.userId;
       const { receiverId, content } = req.body;
+
+      if (!senderId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
 
       if (!receiverId || !content?.trim()) {
         return res.status(400).json({ message: "Receiver ID and content are required" });
