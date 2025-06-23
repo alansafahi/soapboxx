@@ -1971,9 +1971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prayerIntent,
         isPhysicalAttendance,
         qrCodeId,
-        location,
-        streakCount: 1, // Will be calculated properly
-        pointsEarned: 10 // Base points
+        location
       });
 
       console.log('✅ Virtual check-in created:', checkIn.id);

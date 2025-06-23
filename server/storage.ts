@@ -243,7 +243,7 @@ import {
   type InsertInvitation,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -3839,6 +3839,28 @@ export class DatabaseStorage implements IStorage {
     }
 
     return streak;
+  }
+
+  async createCheckIn(checkInData: InsertCheckIn): Promise<CheckIn> {
+    // Calculate streak and points
+    const streak = await this.getUserCheckInStreak(checkInData.userId);
+    const pointsEarned = 10; // Base points
+
+    const [checkIn] = await db
+      .insert(checkIns)
+      .values({
+        ...checkInData,
+        streakCount: streak + 1,
+        pointsEarned,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+
+    // Update user score
+    await this.updateUserScore(checkInData.userId, pointsEarned, "check_in", checkIn.id);
+
+    return checkIn;
   }
 
 
