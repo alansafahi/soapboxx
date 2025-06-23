@@ -1670,15 +1670,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(exportData);
         
       } else if (format === 'pdf') {
-        // PDF export temporarily disabled due to library compatibility issues
-        return res.status(400).json({ 
-          message: "PDF export is temporarily unavailable. Please use JSON or text format instead." 
-        });
+        // Generate PDF using basic HTML to PDF conversion
+        const content = generateContent();
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>${sermonTitle}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+              h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+              h2 { color: #34495e; margin-top: 30px; }
+              .date { color: #7f8c8d; font-style: italic; }
+              .scripture-refs { background: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; }
+            </style>
+          </head>
+          <body>
+            <h1>${sermonTitle}</h1>
+            <p class="date">Generated on: ${new Date().toLocaleDateString()}</p>
+            <pre style="white-space: pre-wrap; font-family: inherit;">${content.replace(sermonTitle, '').replace(`Generated on: ${new Date().toLocaleDateString()}`, '').trim()}</pre>
+          </body>
+          </html>
+        `;
+        
+        res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.html"`);
+        res.send(htmlContent);
         
       } else if (format === 'docx') {
-        return res.status(400).json({ 
-          message: "DOCX export is temporarily unavailable. Please use PDF or JSON format instead." 
-        });
+        // Generate a simplified Word-compatible document
+        const content = generateContent();
+        const rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
+          \\f0\\fs24 ${content.replace(/\n/g, '\\par ')}
+        }`;
+        
+        res.setHeader('Content-Type', 'application/rtf');
+        res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.rtf"`);
+        res.send(rtfContent);
         
       } else {
         // Default to text format
