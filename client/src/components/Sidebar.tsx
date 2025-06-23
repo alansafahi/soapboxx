@@ -79,6 +79,8 @@ export default function Sidebar() {
       } else if (isLargeScreen) {
         setIsCollapsed(false);
       }
+      
+      console.log(`Screen width: ${window.innerWidth}, isMobile: ${isMobileScreen}, isLarge: ${isLargeScreen}, will collapse: ${isMobileScreen}`);
     };
 
     // Set initial state
@@ -178,6 +180,17 @@ export default function Sidebar() {
 
   // Debug final visible groups
   console.log("Final Visible Groups:", visibleGroups.map(g => g.label));
+  console.log("Expanded Groups State:", Array.from(expandedGroups));
+  console.log("Sidebar collapsed state:", isCollapsed);
+  
+  // Debug specific Admin Portal group
+  const adminPortalGroup = visibleGroups.find(g => g.label === "ADMIN PORTAL");
+  if (adminPortalGroup) {
+    console.log("Admin Portal Group Found:", adminPortalGroup.items.length, "items");
+    console.log("Admin Portal Items:", adminPortalGroup.items.map(i => i.label));
+  } else {
+    console.log("Admin Portal Group NOT FOUND in visibleGroups");
+  }
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
@@ -261,7 +274,7 @@ export default function Sidebar() {
 
       {/* Navigation Groups */}
       <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'p-2' : 'p-4 space-y-6'}`}>
-        {isCollapsed ? (
+        {false ? ( // TEMPORARILY FORCE EXPANDED MODE TO TEST ADMIN PORTAL
           // Collapsed Navigation - Icon Only
           <div className="space-y-2">
             {navigationGroups.flatMap(group => 
@@ -304,6 +317,12 @@ export default function Sidebar() {
           // Expanded Navigation - Full Groups
           visibleGroups.map((group) => {
             const isExpanded = expandedGroups.has(group.label);
+            
+            // Debug expanded state
+            if (group.label === "ADMIN PORTAL") {
+              console.log(`Rendering Admin Portal: isExpanded=${isExpanded}, expandedGroups=`, Array.from(expandedGroups));
+            }
+            
             return (
               <div key={group.label}>
                 <button
