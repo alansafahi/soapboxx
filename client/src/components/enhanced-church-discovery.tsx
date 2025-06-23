@@ -55,6 +55,8 @@ export default function EnhancedChurchDiscovery() {
   
   // Add Church Modal State
   const [showAddChurchModal, setShowAddChurchModal] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>('');
   const [newChurchData, setNewChurchData] = useState({
     name: '',
     denomination: '',
@@ -229,6 +231,44 @@ export default function EnhancedChurchDiscovery() {
   });
 
   // Add Church Mutation
+  // Handle logo file upload and convert to base64
+  const handleLogoFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a JPG, PNG, or SVG file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please upload a file smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLogoFile(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setLogoPreview(result);
+        setNewChurchData(prev => ({ ...prev, logoUrl: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const addChurchMutation = useMutation({
     mutationFn: async (churchData: typeof newChurchData) => {
       const response = await apiRequest('/api/churches', {
@@ -328,7 +368,7 @@ export default function EnhancedChurchDiscovery() {
     }
     
     if (!newChurchData.size?.trim()) {
-      errors.push("Church size is required");
+      errors.push("Weekly attendance is required");
     }
 
     // Validate email format if provided
@@ -1110,18 +1150,48 @@ export default function EnhancedChurchDiscovery() {
               />
             </div>
 
-            {/* Church Logo */}
+            {/* Church Logo Upload */}
             <div className="grid gap-2">
-              <Label htmlFor="logoUrl">Church Logo URL</Label>
-              <Input
-                id="logoUrl"
-                value={newChurchData.logoUrl}
-                onChange={(e) => setNewChurchData(prev => ({ ...prev, logoUrl: e.target.value }))}
-                placeholder="https://example.com/logo.jpg"
-              />
-              <p className="text-xs text-gray-500">
-                Optional: URL to your church's logo image
-              </p>
+              <Label htmlFor="logoFile">Church Logo</Label>
+              <div className="space-y-3">
+                <Input
+                  id="logoFile"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/svg+xml"
+                  onChange={handleLogoFileChange}
+                  className="cursor-pointer"
+                />
+                {logoPreview && (
+                  <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <img 
+                      src={logoPreview} 
+                      alt="Logo preview" 
+                      className="w-12 h-12 object-cover rounded border"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{logoFile?.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {logoFile ? Math.round(logoFile.size / 1024) : 0}KB
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setLogoFile(null);
+                        setLogoPreview('');
+                        setNewChurchData(prev => ({ ...prev, logoUrl: '' }));
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+                <p className="text-xs text-gray-500">
+                  Optional: Upload JPG, PNG, or SVG file (max 5MB)
+                </p>
+              </div>
             </div>
 
             {/* Church Size */}
