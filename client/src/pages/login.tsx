@@ -42,11 +42,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const data = isLogin 
-        ? { email: formData.email, password: formData.password }
-        : formData;
-
       if (isLogin) {
         // Direct login with session establishment
         const loginResponse = await fetch('/api/auth/login', {
@@ -59,10 +54,17 @@ export default function LoginPage() {
             email: formData.email,
             password: formData.password
           })
+        }).catch(err => {
+          console.error('Login fetch error:', err);
+          throw new Error('Network error during login. Please check your connection.');
         });
 
         if (loginResponse.ok) {
-          const userData = await loginResponse.json();
+          const userData = await loginResponse.json().catch(err => {
+            console.error('JSON parse error:', err);
+            throw new Error('Invalid response from server');
+          });
+          
           toast({
             title: "Welcome back!",
             description: `Logged in as ${userData.user.firstName} ${userData.user.lastName}`,
@@ -73,14 +75,28 @@ export default function LoginPage() {
             window.location.replace('/dashboard');
           }, 500);
         } else {
-          const errorData = await loginResponse.json();
-          toast(formatErrorForToast(errorData, 'login'));
+          let errorMessage = 'Login failed';
+          try {
+            const errorData = await loginResponse.json();
+            errorMessage = errorData.message || errorData.error || errorMessage;
+          } catch (parseError) {
+            console.error('Error parsing error response:', parseError);
+          }
+          
+          toast({
+            title: "Login Failed",
+            description: errorMessage,
+            variant: "destructive"
+          });
         }
       } else {
         // Registration
-        const response = await apiRequest(endpoint, {
+        const response = await apiRequest('/api/auth/register', {
           method: 'POST',
-          body: data,
+          body: formData,
+        }).catch(err => {
+          console.error('Registration error:', err);
+          throw new Error('Registration failed. Please try again.');
         });
 
         toast({
@@ -92,7 +108,12 @@ export default function LoginPage() {
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       }
     } catch (error: any) {
-      toast(formatErrorForToast(error, isLogin ? 'login' : 'registration'));
+      console.error('Form submission error:', error);
+      toast({
+        title: isLogin ? "Login Error" : "Registration Error",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

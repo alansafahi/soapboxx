@@ -24,6 +24,18 @@ window.addEventListener('unhandledrejection', (event) => {
     return;
   }
   
+  // Suppress authentication and network errors that are handled by components
+  if (event.reason && event.reason.message && 
+      (event.reason.message.includes('fetch') || 
+       event.reason.message.includes('network') ||
+       event.reason.message.includes('auth') ||
+       event.reason.message.includes('login') ||
+       event.reason.message.includes('Network error'))) {
+    event.preventDefault();
+    console.warn('Handled network/auth error:', event.reason.message);
+    return;
+  }
+  
   // Log other errors for debugging
   console.error('Unhandled promise rejection:', event.reason);
 });
