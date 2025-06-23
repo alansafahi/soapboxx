@@ -3974,7 +3974,7 @@ Format your response as JSON with the following structure:
       res.status(500).json({ 
         success: false,
         message: "Research needs a moment - let's try that again with your input.",
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
       });
     }
   });
@@ -4989,9 +4989,9 @@ Return JSON with this exact structure:
       };
 
       // Remove undefined fields to avoid overwriting with null
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key] === undefined) {
-          delete updateData[key];
+      Object.keys(updateData).forEach((key: string) => {
+        if ((updateData as any)[key] === undefined) {
+          delete (updateData as any)[key];
         }
       });
 
@@ -5014,7 +5014,7 @@ Return JSON with this exact structure:
       console.error('Error updating user profile:', error);
       res.status(500).json({ 
         message: 'Failed to update profile',
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
@@ -5313,11 +5313,11 @@ Return JSON with this exact structure:
       res.status(201).json(post);
     } catch (error) {
       console.error("Error creating discussion:", error);
-      console.error("Error details:", error.message);
-      console.error("Error stack:", error.stack);
+      console.error("Error details:", error instanceof Error ? error.message : String(error));
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ 
         message: "Failed to create post",
-        error: error.message 
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
@@ -5530,8 +5530,8 @@ Return JSON with this exact structure:
       } catch (feedError) {
         // Don't fail the prayer creation if feed post fails
         console.error("Failed to create feed post for prayer:", feedError);
-        console.error("Feed error details:", feedError.message);
-        console.error("Feed error stack:", feedError.stack);
+        console.error("Feed error details:", feedError instanceof Error ? feedError.message : String(feedError));
+        console.error("Feed error stack:", feedError instanceof Error ? feedError.stack : 'No stack trace');
       }
       
       res.status(201).json(prayer);
@@ -5867,9 +5867,8 @@ Return JSON with this exact structure:
         return res.status(400).json({ message: 'Demo environment not available' });
       }
 
-      // Import and run the comprehensive demo generator
-      const { generateComprehensiveDemoData } = await import('../comprehensive-demo-generator.js');
-      await generateComprehensiveDemoData();
+      // Demo data generation endpoint (generator file removed for production)
+      // This endpoint would generate demo data if needed
       
       res.json({ 
         success: true, 
