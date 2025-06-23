@@ -4976,38 +4976,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserContacts(userId: string): Promise<any[]> {
-    // Get all users from the same church as potential contacts
-    const currentUser = await this.getUser(userId);
-    if (!currentUser) return [];
-
-    const contacts = await db
+    // Get actual contacts from the contacts table, not all users
+    const userContacts = await db
       .select({
-        id: users.id,
+        id: contacts.id,
+        contactUserId: contacts.contactUserId,
+        name: contacts.name,
+        email: contacts.email,
+        phone: contacts.phone,
+        status: contacts.status,
+        contactType: contacts.contactType,
+        createdAt: contacts.createdAt,
+        // Join with users table for contact user details if they're registered
         firstName: users.firstName,
         lastName: users.lastName,
         profileImageUrl: users.profileImageUrl,
         role: users.role
       })
-      .from(users)
-      .where(
-        and(
-          isNotNull(users.firstName),
-          isNotNull(users.lastName)
-        )
-      )
-      .orderBy(asc(users.firstName));
+      .from(contacts)
+      .leftJoin(users, eq(contacts.contactUserId, users.id))
+      .where(eq(contacts.userId, userId))
+      .orderBy(desc(contacts.createdAt));
 
-    return contacts
-      .filter(contact => contact.id !== userId)
-      .map(contact => ({
-        id: contact.id,
-        firstName: contact.firstName,
-        lastName: contact.lastName,
-        profileImageUrl: contact.profileImageUrl,
-        role: contact.role || 'member',
-        churchName: 'SoapBox Community', // Could be enhanced with actual church data
-        isOnline: false // Could be enhanced with real-time status
-      }));
+    return userContacts.map(contact => ({
+      id: contact.contactUserId || contact.id,
+      firstName: contact.firstName || contact.name?.split(' ')[0] || 'Unknown',
+      lastName: contact.firstName ? contact.lastName : contact.name?.split(' ').slice(1).join(' ') || '',
+      profileImageUrl: contact.profileImageUrl,
+      role: contact.role || 'contact',
+      email: contact.email,
+      phone: contact.phone,
+      status: contact.status,
+      contactType: contact.contactType,
+      isOnline: false // Could be enhanced with real-time status
+    }));
   }
 
   // Volunteer Awards
