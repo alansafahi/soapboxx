@@ -1952,6 +1952,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mark personalized content as viewed
+  app.post('/api/personalized-content/:id/viewed', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const contentId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      await storage.markPersonalizedContentAsViewed(contentId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking content as viewed:', error);
+      res.status(500).json({ error: 'Failed to mark content as viewed' });
+    }
+  });
+
   // Virtual check-in API endpoint
   app.post('/api/checkins', isAuthenticated, async (req: any, res) => {
     try {

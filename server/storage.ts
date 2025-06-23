@@ -5980,6 +5980,18 @@ export class DatabaseStorage implements IStorage {
     return content;
   }
 
+  async markPersonalizedContentAsViewed(contentId: number, userId: string): Promise<void> {
+    await db
+      .update(personalizedContent)
+      .set({ viewed: true })
+      .where(
+        and(
+          eq(personalizedContent.id, contentId),
+          eq(personalizedContent.userId, userId)
+        )
+      );
+  }
+
   async leaveCommunityGroup(userId: string, groupId: number): Promise<void> {
     await db
       .delete(communityGroupMembers)
