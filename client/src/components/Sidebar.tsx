@@ -150,16 +150,48 @@ export default function Sidebar() {
   // Filter groups based on user role
   const visibleGroups = navigationGroups.map(group => ({
     ...group,
-    items: group.items.filter(item => 
-      !item.roles || item.roles.some(role => 
+    items: group.items.filter(item => {
+      if (!item.roles) return true;
+      
+      // Debug logging for Admin Portal
+      if (group.label === "ADMIN PORTAL") {
+        console.log("🔍 Admin Portal Debug:", {
+          itemLabel: item.label,
+          itemRoles: item.roles,
+          userRole: user?.role,
+          userRoleObject: userRole,
+          hasDirectRole: item.roles.includes(user?.role || ''),
+          isSoapboxOwner: user?.role === 'soapbox_owner'
+        });
+      }
+      
+      const hasAccess = item.roles.some(role => 
         // Check if user has the role directly or in roles array
         user?.role === role || 
         (userRole as any)?.roles?.includes(role) || 
         (userRole as any)?.roles?.includes('super-admin') ||
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
-      )
-    )
-  })).filter(group => group.items.length > 0);
+      );
+      
+      if (group.label === "ADMIN PORTAL") {
+        console.log("🔍 Admin Portal Access Result:", {
+          itemLabel: item.label,
+          hasAccess: hasAccess
+        });
+      }
+      
+      return hasAccess;
+    })
+  })).filter(group => {
+    if (group.label === "ADMIN PORTAL") {
+      console.log("🔍 Admin Portal Group Filter:", {
+        groupLabel: group.label,
+        itemsLength: group.items.length,
+        items: group.items.map(item => item.label)
+      });
+    }
+    return group.items.length > 0;
+  });
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
