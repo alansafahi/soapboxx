@@ -2771,16 +2771,25 @@ export default function AdminPortal() {
               </div>
             </div>
           )}
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Create New Church</DialogTitle>
-                    <DialogDescription>
-                      Add a new church to the platform
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...churchForm}>
-                    <form onSubmit={churchForm.handleSubmit(handleCreateChurch)} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Church Management</CardTitle>
+              <CardDescription>Manage church settings and information</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Church content will go here */}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AdminPage() {
+  return <MembersPage />;
+}
                         <FormField
                           control={churchForm.control}
                           name="name"
