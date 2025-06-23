@@ -260,17 +260,7 @@ export default function Sidebar() {
         {isCollapsed ? (
           // Collapsed Navigation - Icon Only
           <div className="space-y-2">
-            {navigationGroups.flatMap(group => 
-              group.items.filter(item => 
-                !item.roles || item.roles.some(role => 
-                  // Check if user has the role directly or in roles array
-                  user?.role === role || 
-                  (userRole as any)?.roles?.includes(role) || 
-                  (userRole as any)?.roles?.includes('super-admin') ||
-                  user?.role === 'soapbox_owner' // Always show for soapbox_owner
-                )
-              )
-            ).map((item) => {
+            {visibleGroups.flatMap(group => group.items).map((item) => {
               const Icon = item.icon;
               const isActive = location === item.href;
               return (

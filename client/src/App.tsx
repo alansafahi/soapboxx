@@ -34,6 +34,16 @@ const VideoLibrary = lazy(() => import("@/pages/video-library"));
 const ContactsPage = lazy(() => import("@/pages/contacts"));
 const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
+// Admin Portal Pages
+const MembersPage = lazy(() => import("@/pages/admin"));
+const SMSGivingPage = lazy(() => import("@/pages/SMSGiving"));
+const DonationAnalyticsPage = lazy(() => import("@/pages/DonationAnalytics"));
+const CommunicationPage = lazy(() => import("@/pages/BulkCommunication"));
+const SermonStudioPage = lazy(() => import("@/pages/SermonStudioPage"));
+const ContentDistributionPage = lazy(() => import("@/pages/ContentDistributionPage"));
+const EngagementAnalyticsPage = lazy(() => import("@/pages/EngagementAnalyticsPage"));
+const AIContentDemoPage = lazy(() => import("@/pages/PastoralContentDemoPage"));
+
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
     const [location] = useLocation();
@@ -109,6 +119,17 @@ function AppRouter() {
                                     <ProtectedRoute path="/contacts" component={ContactsPage} />
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
+                                    
+                                    {/* Admin Portal Routes */}
+                                    <ProtectedRoute path="/members" component={MembersPage} />
+                                    <ProtectedRoute path="/sms-giving" component={SMSGivingPage} />
+                                    <ProtectedRoute path="/donation-analytics" component={DonationAnalyticsPage} />
+                                    <ProtectedRoute path="/communication" component={CommunicationPage} />
+                                    <ProtectedRoute path="/sermon-studio" component={SermonStudioPage} />
+                                    <ProtectedRoute path="/content-distribution" component={ContentDistributionPage} />
+                                    <ProtectedRoute path="/engagement-analytics" component={EngagementAnalyticsPage} />
+                                    <ProtectedRoute path="/ai-content-demo" component={AIContentDemoPage} />
+                                    
                                     <Route path="*" component={NotFound} />
                                 </Switch>
                             </Suspense>
