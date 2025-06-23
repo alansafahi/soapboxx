@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 23, 2025: ADMIN PORTAL ROLE ACCESS COMPLETELY EXPANDED - Successfully added comprehensive administrative roles to sidebar navigation access control
+  - ROLE EXPANSION: Added soapbox-support, platform-admin, and regional-admin roles to all Admin Portal navigation items
+  - COMPREHENSIVE ACCESS: System Admin, SoapBox Support, and all high-level administrative roles now have full Admin Portal visibility
+  - ROLE CHECKING LOGIC ENHANCED: Updated sidebar role filtering to handle both string roles (user.role) and array roles (userRole.roles) formats
+  - SOAPBOX_OWNER RECOGNITION: Fixed role checking to properly recognize "soapbox_owner" role for admin features access
+  - HIERARCHICAL PERMISSIONS: Established clear administrative role hierarchy for platform governance and support operations
 - June 23, 2025: AUTOMATED TESTING SYSTEM COMPLETELY IMPLEMENTED - Successfully created comprehensive testing infrastructure with Vitest framework for regression prevention
   - TESTING FRAMEWORK INSTALLED: Added Vitest with c8 coverage reporting and comprehensive test configuration
   - TEST SUITES CREATED: Implemented three critical test files covering authentication (auth.test.js), SOAP functionality (soap.test.js), and social feed features (social-feed.test.js)
