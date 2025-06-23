@@ -5707,11 +5707,18 @@ Return JSON with this exact structure:
       const userId = req.session?.userId || req.user?.claims?.sub;
       const { type, content, mood, audience, linkedVerse, attachedMedia, title } = req.body;
       
+      console.log("Creating discussion for user:", userId);
+      console.log("Request body:", { type, mood, audience, title, contentLength: content?.length });
+      
+      if (!userId) {
+        console.error("No user ID found in session");
+        return res.status(401).json({ message: "User authentication required" });
+      }
+      
       if (!content || !content.trim()) {
+        console.error("Content validation failed:", { content });
         return res.status(400).json({ message: "Content is required" });
       }
-
-
 
       // Set default type if not provided
       const postType = type || 'discussion';
@@ -5728,7 +5735,7 @@ Return JSON with this exact structure:
         }
       }
       
-      const post = await storage.createDiscussion({
+      const discussionData = {
         title: title || defaultTitle,
         content: content.trim(),
         authorId: userId,
@@ -5739,13 +5746,22 @@ Return JSON with this exact structure:
         mood: mood || null,
         attachedMedia: attachedMedia || null,
         linkedVerse: linkedVerse || null
-      });
+      };
       
-      console.log("Created post with ID:", post.id);
+      console.log("Creating discussion with data:", discussionData);
+      
+      const post = await storage.createDiscussion(discussionData);
+      
+      console.log("Successfully created post with ID:", post.id);
       res.status(201).json(post);
     } catch (error) {
       console.error("Error creating discussion:", error);
-      res.status(500).json({ message: "Failed to create post" });
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ 
+        message: "Failed to create post",
+        error: error.message 
+      });
     }
   });
 
