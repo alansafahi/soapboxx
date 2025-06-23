@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import supertest from 'supertest';
 import { createTestUser, cleanupTestData, testDb } from './setup.js';
-import { users } from '../shared/schema.js';
+import { users } from '../shared/schema.ts';
 import bcrypt from 'bcrypt';
 
 const API_BASE = process.env.VITE_API_URL || 'http://localhost:5000';

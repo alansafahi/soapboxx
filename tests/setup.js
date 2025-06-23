@@ -6,7 +6,7 @@
 import { beforeAll, afterAll, beforeEach } from 'vitest';
 import { Pool } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
-import * as schema from '../shared/schema.js';
+import * as schema from '../shared/schema.ts';
 
 // Test database configuration
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
