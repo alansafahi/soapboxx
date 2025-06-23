@@ -1618,8 +1618,11 @@ export default function AudioRoutines() {
 
   const playDevotionalRoutine = async (routine: DevotionalRoutine) => {
     try {
-      // Clear any previous session termination flags
-      (window as any).sessionTerminated = false;
+      // Check if session was terminated - don't start if so
+      if ((window as any).sessionTerminated) {
+        console.log('Session terminated, cannot start devotional');
+        return;
+      }
       
       // Stop any existing meditation session first
       if (playingRoutine) {
@@ -1663,12 +1666,31 @@ export default function AudioRoutines() {
         }),
       });
 
+      // Check if session was terminated during audio generation
+      if ((window as any).sessionTerminated) {
+        console.log('Session terminated during audio generation, aborting devotional');
+        setPlayingDevotional(null);
+        setDevotionalProgress(0);
+        setCurrentDevotionalSegment(0);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to generate devotional audio');
       }
 
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Final check before creating audio element
+      if ((window as any).sessionTerminated) {
+        console.log('Session terminated before audio creation, aborting devotional');
+        URL.revokeObjectURL(audioUrl);
+        setPlayingDevotional(null);
+        setDevotionalProgress(0);
+        setCurrentDevotionalSegment(0);
+        return;
+      }
       
       // Create and play audio with preloading
       const audio = new Audio(audioUrl);
@@ -1677,6 +1699,17 @@ export default function AudioRoutines() {
       
       // Optimized progress tracking - less frequent updates
       const updateProgress = () => {
+        // Check if session was terminated
+        if ((window as any).sessionTerminated) {
+          console.log('Session terminated, stopping devotional audio');
+          audio.pause();
+          audio.currentTime = 0;
+          setPlayingDevotional(null);
+          setDevotionalProgress(0);
+          setCurrentDevotionalSegment(0);
+          return;
+        }
+        
         if (audio.duration > 0) {
           const progress = (audio.currentTime / audio.duration) * 100;
           setDevotionalProgress(progress);
