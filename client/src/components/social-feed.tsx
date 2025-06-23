@@ -936,7 +936,86 @@ export default function SocialFeed() {
                       {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300 mt-2">{post.content}</p>
+                  <div className="text-gray-700 dark:text-gray-300 mt-2">
+                    {post.title?.includes('S.O.A.P. Reflection') ? (
+                      <div className="space-y-3">
+                        {post.content.split('\n\n').map((section, index) => {
+                          if (!section.trim()) return null;
+                          
+                          // Handle Scripture section
+                          if (section.includes('📖') && section.includes('<strong>Scripture</strong>')) {
+                            const scriptureText = section.replace('📖 <strong>Scripture</strong>: ', '').trim();
+                            return (
+                              <div key={index} className="border-l-4 border-purple-500 pl-4">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-lg">📖</span>
+                                  <div>
+                                    <p className="font-semibold text-purple-700 dark:text-purple-300">Scripture</p>
+                                    <p className="text-gray-700 dark:text-gray-300 mt-1">{scriptureText}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Handle Observation section
+                          if (section.includes('🔍') && section.includes('<strong>Observation</strong>')) {
+                            const observationText = section.replace('🔍 <strong>Observation</strong>: ', '').trim();
+                            return (
+                              <div key={index} className="border-l-4 border-blue-500 pl-4">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-lg">🔍</span>
+                                  <div>
+                                    <p className="font-semibold text-blue-700 dark:text-blue-300">Observation</p>
+                                    <p className="text-gray-700 dark:text-gray-300 mt-1">{observationText}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Handle Application section
+                          if (section.includes('💡') && section.includes('<strong>Application</strong>')) {
+                            const applicationText = section.replace('💡 <strong>Application</strong>: ', '').trim();
+                            return (
+                              <div key={index} className="border-l-4 border-green-500 pl-4">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-lg">💡</span>
+                                  <div>
+                                    <p className="font-semibold text-green-700 dark:text-green-300">Application</p>
+                                    <p className="text-gray-700 dark:text-gray-300 mt-1">{applicationText}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Handle Prayer section
+                          if (section.includes('🙏') && section.includes('<strong>Prayer</strong>')) {
+                            const prayerText = section.replace('🙏 <strong>Prayer</strong>: ', '').trim();
+                            return (
+                              <div key={index} className="border-l-4 border-orange-500 pl-4">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-lg">🙏</span>
+                                  <div>
+                                    <p className="font-semibold text-orange-700 dark:text-orange-300">Prayer</p>
+                                    <p className="text-gray-700 dark:text-gray-300 mt-1">{prayerText}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Fallback for any other content
+                          return (
+                            <p key={index} className="whitespace-pre-wrap">{section}</p>
+                          );
+                        }).filter(Boolean)}
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{post.content}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
