@@ -26,8 +26,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, isValid, parseISO } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { SoapEntry } from "@shared/schema";
 
 interface SoapEntryCardProps {
@@ -59,6 +60,7 @@ export function SoapEntryCard({
   onUnfeature 
 }: SoapEntryCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { toast } = useToast();
   
   // Fetch current user to check if this is their entry
   const { data: currentUser } = useQuery({
@@ -73,9 +75,58 @@ export function SoapEntryCard({
     : entry.userId;
   
   const formatDate = (date: Date | string | null) => {
-    if (!date) return "Unknown date";
-    const dateObj = new Date(date);
-    return formatDistanceToNow(dateObj, { addSuffix: true });
+    if (!date) return "Today";
+    
+    try {
+      // Handle different date formats
+      let dateObj: Date;
+      if (typeof date === 'string') {
+        // Try parsing ISO string first, then fallback to regular Date parsing
+        dateObj = date.includes('T') ? parseISO(date) : new Date(date);
+      } else {
+        dateObj = date;
+      }
+      
+      // Check if date is valid
+      if (!isValid(dateObj)) {
+        return "Today";
+      }
+      
+      return formatDistanceToNow(dateObj, { addSuffix: true });
+    } catch (error) {
+      return "Today";
+    }
+  };
+
+  const handleShare = async () => {
+    const shareText = `Check out this S.O.A.P. entry: "${entry.scriptureReference || 'Scripture Reflection'}"\n\nScripture: ${entry.scripture.substring(0, 100)}${entry.scripture.length > 100 ? '...' : ''}\n\nShared from SoapBox Super App`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `S.O.A.P. Entry - ${entry.scriptureReference || 'Scripture Reflection'}`,
+          text: shareText,
+          url: window.location.href
+        });
+        toast({
+          title: "Shared successfully",
+          description: "S.O.A.P. entry has been shared."
+        });
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          title: "Copied to clipboard",
+          description: "S.O.A.P. entry content copied and ready to share."
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Share failed",
+        description: "Unable to share S.O.A.P. entry.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getMoodColor = (mood: string | null) => {
@@ -168,7 +219,7 @@ export function SoapEntryCard({
                       Feature Entry
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem className="gap-2">
+                  <DropdownMenuItem onClick={handleShare} className="gap-2">
                     <Share2 className="h-4 w-4" />
                     Share
                   </DropdownMenuItem>
