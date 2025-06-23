@@ -38,6 +38,7 @@ import {
   LogOut,
   Bell,
   Sun,
+  Shield,
   Moon,
   Mail,
   ChevronLeft,
@@ -143,6 +144,12 @@ export default function Sidebar() {
         { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+      ]
+    },
+    {
+      label: "SOAPBOX ADMIN",
+      items: [
+        { label: "Admin Portal", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
       ]
     },
     {

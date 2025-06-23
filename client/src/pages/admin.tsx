@@ -315,15 +315,14 @@ function MembersPage() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="churches" className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">Church Verification</TabsTrigger>
+            <TabsTrigger value="soapbox-admin" className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">SoapBox Admin</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="content" className="hidden lg:block">Content</TabsTrigger>
             <TabsTrigger value="media" className="hidden lg:block">Media</TabsTrigger>
             <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
-            <TabsTrigger value="volunteers" className="hidden lg:block">Volunteers</TabsTrigger>
             <TabsTrigger value="settings" className="hidden lg:block">Settings</TabsTrigger>
           </TabsList>
 
@@ -406,7 +405,13 @@ function MembersPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="churches" className="space-y-6">
+          <TabsContent value="soapbox-admin" className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">SoapBox Admin</h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Platform-wide administration tools for SoapBox Owners
+              </p>
+            </div>
             <ChurchVerificationTab />
           </TabsContent>
 
