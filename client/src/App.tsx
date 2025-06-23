@@ -36,7 +36,7 @@ const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
 // Admin Portal Pages
 const MembersPage = lazy(() => import("@/pages/admin"));
-const SMSGivingPage = lazy(() => import("@/pages/SMSGiving"));
+const SMSGivingPage = lazy(() => import("@/pages/SMSGiving_fixed"));
 const DonationAnalyticsPage = lazy(() => import("@/pages/DonationAnalytics"));
 const CommunicationPage = lazy(() => import("@/pages/BulkCommunication"));
 const SermonStudioPage = lazy(() => import("@/pages/SermonStudioPage"));

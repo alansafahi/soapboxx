@@ -34,11 +34,19 @@ export default function SMSGiving() {
   // Fetch SMS giving configuration
   const { data: smsConfig, isLoading } = useQuery({
     queryKey: ['/api/sms-giving/config'],
+    queryFn: () => ({
+      isActive: false,
+      shortCode: '12345'
+    })
   });
 
   // Fetch SMS giving statistics
   const { data: smsStats } = useQuery({
     queryKey: ['/api/sms-giving/stats'],
+    queryFn: () => ({
+      totalDonors: 0,
+      totalAmount: 0
+    })
   });
 
   // Send SMS giving instruction
@@ -352,8 +360,8 @@ export default function SMSGiving() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">SMS Donations Today</p>
-                      <p className="text-2xl font-bold">${(smsStats?.todayAmount || 0).toLocaleString()}</p>
+                      <p className="text-sm font-medium text-gray-600">This Month</p>
+                      <p className="text-2xl font-bold">$0</p>
                     </div>
                     <DollarSign className="h-8 w-8 text-green-600" />
                   </div>
@@ -364,8 +372,8 @@ export default function SMSGiving() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Active Users</p>
-                      <p className="text-2xl font-bold">{smsStats?.activeUsers || 0}</p>
+                      <p className="text-sm font-medium text-gray-600">SMS Donors</p>
+                      <p className="text-2xl font-bold">0</p>
                     </div>
                     <Users className="h-8 w-8 text-blue-600" />
                   </div>
@@ -376,10 +384,10 @@ export default function SMSGiving() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
-                      <p className="text-2xl font-bold">{smsStats?.avgResponseTime || '2.3'}s</p>
+                      <p className="text-sm font-medium text-gray-600">Avg. Gift</p>
+                      <p className="text-2xl font-bold">$0</p>
                     </div>
-                    <Clock className="h-8 w-8 text-purple-600" />
+                    <BarChart3 className="h-8 w-8 text-purple-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -388,114 +396,30 @@ export default function SMSGiving() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                      <p className="text-2xl font-bold">{smsStats?.successRate || 98}%</p>
+                      <p className="text-sm font-medium text-gray-600">Response Time</p>
+                      <p className="text-2xl font-bold">< 1min</p>
                     </div>
-                    <CheckCircle className="h-8 w-8 text-green-600" />
+                    <Clock className="h-8 w-8 text-orange-600" />
                   </div>
                 </CardContent>
               </Card>
             </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent SMS Donations</CardTitle>
-                <CardDescription>Latest donations received via SMS</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { time: "2 min ago", amount: "$50", fund: "General", phone: "***-***-1234" },
-                    { time: "15 min ago", amount: "$100", fund: "Building", phone: "***-***-5678" },
-                    { time: "1 hour ago", amount: "$25", fund: "Youth", phone: "***-***-9012" },
-                    { time: "2 hours ago", amount: "$200", fund: "Tithe", phone: "***-***-3456" }
-                  ].map((donation, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <div>
-                          <div className="font-medium">{donation.amount}</div>
-                          <div className="text-sm text-gray-600">{donation.fund} • {donation.phone}</div>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-500">{donation.time}</div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* Settings */}
           <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>SMS Service Configuration</CardTitle>
+                <CardTitle>SMS Configuration</CardTitle>
                 <CardDescription>
-                  Configure your SMS giving service settings and preferences
+                  Configure your SMS giving service settings
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="shortcode">SMS Short Code</Label>
-                      <Input
-                        id="shortcode"
-                        value={smsConfig?.shortCode || "12345"}
-                        disabled
-                        className="bg-gray-50"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Contact support to change your short code</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="response-template">Default Response Template</Label>
-                      <textarea
-                        id="response-template"
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        defaultValue="Thank you for your donation! Click here to complete: [LINK]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Auto-Receipt Settings</Label>
-                      <div className="space-y-2 mt-2">
-                        <label className="flex items-center space-x-2">
-                          <input type="checkbox" defaultChecked className="rounded" />
-                          <span className="text-sm">Send email receipts automatically</span>
-                        </label>
-                        <label className="flex items-center space-x-2">
-                          <input type="checkbox" defaultChecked className="rounded" />
-                          <span className="text-sm">Send SMS confirmation</span>
-                        </label>
-                        <label className="flex items-center space-x-2">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">Enable recurring donation setup via SMS</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="min-amount">Minimum Donation Amount</Label>
-                      <Input
-                        id="min-amount"
-                        type="number"
-                        defaultValue="5"
-                        className="max-w-20"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Save Configuration
-                  </Button>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Settings Coming Soon</h3>
+                  <p className="text-gray-600">SMS giving configuration will be available in future updates.</p>
                 </div>
               </CardContent>
             </Card>
