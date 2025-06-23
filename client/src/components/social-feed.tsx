@@ -1270,6 +1270,80 @@ export default function SocialFeed() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* SOAP Sharing Dialog */}
+      <Dialog open={showSoapDialog} onOpenChange={setShowSoapDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share SOAP Entry</DialogTitle>
+            <DialogDescription>
+              Choose a SOAP journal entry to share with the community
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {soapEntries.length > 0 ? (
+              soapEntries.map((entry: any) => (
+                <Card 
+                  key={entry.id} 
+                  className={`cursor-pointer border-2 transition-colors ${
+                    selectedSoapEntry?.id === entry.id 
+                      ? 'border-purple-500 bg-purple-50' 
+                      : 'border-gray-200 hover:border-purple-300'
+                  }`}
+                  onClick={() => setSelectedSoapEntry(entry)}
+                >
+                  <CardContent className="p-3">
+                    <div className="text-sm font-medium text-purple-700 mb-1">
+                      {entry.scriptureReference || 'Scripture Study'}
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">
+                      {entry.devotionalDate ? new Date(entry.devotionalDate).toLocaleDateString() : 'Today'}
+                    </div>
+                    <div className="text-sm text-gray-700 line-clamp-2">
+                      {entry.observation || entry.application || 'SOAP Journal Entry'}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                <BookText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                <p>No SOAP entries found</p>
+                <p className="text-sm">Create a SOAP entry first to share</p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowSoapDialog(false);
+                setSelectedSoapEntry(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (selectedSoapEntry) {
+                  // Set the post content to include SOAP entry
+                  setNewPost(`Sharing my SOAP journal reflection:\n\n📖 ${selectedSoapEntry.scriptureReference || 'Scripture Study'}\n\n💭 Observation: ${selectedSoapEntry.observation}\n\n🎯 Application: ${selectedSoapEntry.application}\n\n🙏 Prayer: ${selectedSoapEntry.prayer}`);
+                  setShowSoapDialog(false);
+                  setSelectedSoapEntry(null);
+                  toast({
+                    title: "SOAP Entry Added",
+                    description: "Your SOAP reflection has been added to your post",
+                  });
+                }
+              }}
+              disabled={!selectedSoapEntry}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Share Entry
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
