@@ -153,13 +153,14 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const sessionUser = session?.user;
   const userId = session?.userId;
   
-  console.log('🔐 Authentication check:', {
+  console.log('🔐 Authentication check for', req.method, req.path, ':', {
     hasSession: !!req.session,
     sessionUser: !!sessionUser,
     userId,
     sessionId: req.sessionID,
     sessionKeys: session ? Object.keys(session) : [],
-    authenticated: session?.authenticated
+    authenticated: session?.authenticated,
+    cookies: req.headers.cookie ? req.headers.cookie.substring(0, 100) + '...' : 'none'
   });
   
   // Check existing session authentication

@@ -35,20 +35,43 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
       if (!selectedMood) throw new Error("Please select a mood");
       
       try {
-        const response = await apiRequest("POST", "/api/mood-checkins", {
-          mood: selectedMood.value,
-          moodScore: selectedMood.score,
-          moodEmoji: selectedMood.emoji,
-          notes: notes.trim() || null,
-          shareWithStaff,
-          generatePersonalizedContent: true
+        const response = await fetch("/api/mood-checkins", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": window.location.href,
+          },
+          body: JSON.stringify({
+            mood: selectedMood.value,
+            moodScore: selectedMood.score,
+            moodEmoji: selectedMood.emoji,
+            notes: notes.trim() || null,
+            shareWithStaff,
+            generatePersonalizedContent: true
+          }),
+          credentials: "include",
         });
         
-        // Check if response is ok
+        console.log('Mood check-in response status:', response.status);
+        console.log('Mood check-in response headers:', response.headers.get('content-type'));
+        
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Mood check-in error:', response.status, errorText);
-          throw new Error(`Server error: ${response.status}`);
+          console.error('Mood check-in error response:', errorText);
+          
+          if (response.status === 401) {
+            throw new Error("Authentication required. Please refresh the page and try again.");
+          }
+          
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error("Expected JSON but got:", contentType, text);
+          throw new Error("Server returned unexpected response format");
         }
         
         return await response.json();
