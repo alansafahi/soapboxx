@@ -64,13 +64,24 @@ export function useSimpleAuth() {
     checkAuth();
   }, []);
 
-  // Check for force refresh flag
+  // Check for force refresh flag and listen for storage changes
   useEffect(() => {
     if (sessionStorage.getItem('force_auth_refresh')) {
       sessionStorage.removeItem('force_auth_refresh');
       console.log('🔄 Force refresh detected, re-checking auth...');
       refreshAuth();
     }
+
+    // Listen for storage changes to detect login from other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'supabase.auth.token' && e.newValue && !e.oldValue) {
+        console.log('🔄 New authentication detected, refreshing...');
+        refreshAuth();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const logout = async () => {

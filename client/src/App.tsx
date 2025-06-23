@@ -38,14 +38,12 @@ const AutoLoginPage = lazy(() => import("@/pages/auto-login"));
 const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
 function AppRouter() {
-    const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading, logout } = useSimpleAuth();
-    const finalIsAuthenticated = FORCE_AUTHENTICATED || currentIsAuthenticated;
-    const finalUser = FORCE_AUTHENTICATED ? MOCK_USER : currentUser;
+    const { user, isAuthenticated, isLoading, logout } = useSimpleAuth();
     const [location] = useLocation();
 
-    if (currentIsLoading && !FORCE_AUTHENTICATED) {
+    if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
         );
@@ -53,11 +51,7 @@ function AppRouter() {
 
     const ProtectedRoute = ({ component: Component, ...rest }) => (
         <Route {...rest}>
-            {currentIsLoading && !FORCE_AUTHENTICATED ? (
-                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                </div>
-            ) : finalIsAuthenticated ? (
+            {isAuthenticated ? (
                 <Component />
             ) : (
                 <LoginPage />
@@ -67,14 +61,14 @@ function AppRouter() {
 
     return (
         <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-            {finalIsAuthenticated && (
+            {isAuthenticated && (
                 <div className="hidden md:block">
                     <Sidebar />
                 </div>
             )}
-            <div className={finalIsAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
-                {finalIsAuthenticated && <TopHeader />}
-                <main className={finalIsAuthenticated ? "flex-1 overflow-y-auto px-2 sm:px-4 md:px-6 py-2 sm:py-4" : "flex-1"}>
+            <div className={isAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
+                {isAuthenticated && <TopHeader />}
+                <main className={isAuthenticated ? "flex-1 overflow-y-auto px-2 sm:px-4 md:px-6 py-2 sm:py-4" : "flex-1"}>
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={location}
@@ -90,11 +84,7 @@ function AppRouter() {
                                     <Route path="/email-verification" component={EmailVerificationPage} />
                                     <ProtectedRoute path="/dashboard" component={Home} />
                                     <Route path="/">
-                                        {currentIsLoading && !FORCE_AUTHENTICATED ? (
-                                            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                                            </div>
-                                        ) : finalIsAuthenticated ? (
+                                        {isAuthenticated ? (
                                             <Home />
                                         ) : (
                                             <LoginPage />
