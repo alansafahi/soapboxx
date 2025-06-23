@@ -1893,7 +1893,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (personalizedContent) {
             await storage.savePersonalizedContent({
               userId,
-              checkInId: moodCheckin.id,
+              moodCheckinId: moodCheckin.id,
               contentType: 'mood_based',
               title: 'AI-Generated Spiritual Guidance',
               content: JSON.stringify(personalizedContent)
