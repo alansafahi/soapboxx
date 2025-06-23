@@ -1,7 +1,7 @@
 import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
-import { useDirectAuth } from "@/lib/directAuth";
+import { useImmediateAuth } from "@/lib/immediateAuth";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -35,7 +35,7 @@ interface Notification {
 
 export default function TopHeader() {
   const { theme, toggleTheme } = useTheme();
-  const { user, logout } = useDirectAuth();
+  const { user, logout } = useImmediateAuth();
   const { toast } = useToast();
   
   const typedUser = user as User | null;
