@@ -112,6 +112,19 @@ export default function Sidebar() {
 
   const navigationGroups: NavigationGroup[] = [
     {
+      label: "ADMIN PORTAL",
+      items: [
+        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+      ]
+    },
+    {
       label: "COMMUNITY",
       items: [
         { label: "Home", href: "/", icon: Home },
@@ -136,19 +149,6 @@ export default function Sidebar() {
       label: "MEDIA CONTENTS",
       items: [
         { label: "Video Library", href: "/video-library", icon: Video },
-      ]
-    },
-    {
-      label: "ADMIN PORTAL",
-      items: [
-        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
       ]
     }
   ];
@@ -218,7 +218,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'}`}>
+    <div className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'}`}>
       {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         {/* Logo and Toggle */}
@@ -278,7 +278,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Groups */}
-      <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'p-2' : 'p-4 space-y-6'}`}>
+      <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${isCollapsed ? 'p-2' : 'p-4 space-y-6'} min-h-0`}>
         {false ? ( // TEMPORARILY FORCE EXPANDED MODE TO TEST ADMIN PORTAL
           // Collapsed Navigation - Icon Only
           <div className="space-y-2">
