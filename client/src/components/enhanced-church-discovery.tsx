@@ -1132,12 +1132,14 @@ export default function EnhancedChurchDiscovery() {
                   <SelectValue placeholder="Select weekly attendance" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Under 100">Under 100 (House church)</SelectItem>
-                  <SelectItem value="100-299">100-299 (Close-knit community)</SelectItem>
-                  <SelectItem value="300-499">300-499 (Community church)</SelectItem>
-                  <SelectItem value="500-999">500-999 (Multi-ministry)</SelectItem>
-                  <SelectItem value="1000-2999">1000-2999 (Multi-staff)</SelectItem>
-                  <SelectItem value="3000+">3000+ (Mega church)</SelectItem>
+                  <SelectItem value="1-50">1-50 (Micro - House church)</SelectItem>
+                  <SelectItem value="51-100">51-100 (Small - Close-knit)</SelectItem>
+                  <SelectItem value="101-250">101-250 (Medium - Community)</SelectItem>
+                  <SelectItem value="251-500">251-500 (Large - Multi-ministry)</SelectItem>
+                  <SelectItem value="501-1000">501-1000 (Very Large - Multi-staff)</SelectItem>
+                  <SelectItem value="1001-2000">1001-2000 (Mega - Extensive programming)</SelectItem>
+                  <SelectItem value="2001-10000">2001-10000 (Giga - High tech)</SelectItem>
+                  <SelectItem value="10000+">10000+ (Meta - National reach)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
