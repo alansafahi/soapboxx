@@ -397,7 +397,7 @@ export default function SMSGiving() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">Response Time</p>
-                      <p className="text-2xl font-bold">< 1min</p>
+                      <p className="text-2xl font-bold">&lt; 1min</p>
                     </div>
                     <Clock className="h-8 w-8 text-orange-600" />
                   </div>
