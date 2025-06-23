@@ -28,6 +28,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 
 function ContactsPage() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -41,6 +42,7 @@ function ContactsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
 
   // Fetch user's contacts and referral stats
   const { data: contacts = [], isLoading: contactsLoading, refetch: refetchContacts } = useQuery({
@@ -565,7 +567,17 @@ function ContactsPage() {
                         <Badge variant={contact.isActive ? "default" : "secondary"}>
                           {contact.isActive ? "Active" : "Inactive"}
                         </Badge>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setLocation('/messages');
+                            toast({
+                              title: "Opening Messages",
+                              description: `Starting conversation with ${contact.name || contact.firstName || 'contact'}`,
+                            });
+                          }}
+                        >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
                       </div>
