@@ -5562,7 +5562,12 @@ Return JSON with this exact structure:
   // Feed routes
   app.get("/api/feed", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const feedPosts = await storage.getFeedPosts(userId);
       res.json(feedPosts);
     } catch (error) {

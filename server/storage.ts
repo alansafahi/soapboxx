@@ -3103,7 +3103,22 @@ export class DatabaseStorage implements IStorage {
           }
         }));
 
+        // Fetch like count for this discussion
+        const likeCountResult = await pool.query(`
+          SELECT COUNT(*) as like_count
+          FROM discussion_likes
+          WHERE discussion_id = $1
+        `, [row.id]);
 
+        // Check if current user liked this discussion
+        const userLikeResult = await pool.query(`
+          SELECT COUNT(*) as user_liked
+          FROM discussion_likes
+          WHERE discussion_id = $1 AND user_id = $2
+        `, [row.id, userId]);
+
+        const likeCount = parseInt(likeCountResult.rows[0]?.like_count || 0);
+        const isLiked = parseInt(userLikeResult.rows[0]?.user_liked || 0) > 0;
 
       return {
           id: row.id,
@@ -3122,10 +3137,10 @@ export class DatabaseStorage implements IStorage {
           },
           church: null,
           createdAt: row.created_at,
-          likeCount: 0,
+          likeCount: likeCount,
           commentCount: comments.length,
           shareCount: 0,
-          isLiked: false,
+          isLiked: isLiked,
           isBookmarked: false,
           tags: ['discussion'],
           comments: comments
