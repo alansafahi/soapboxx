@@ -70,11 +70,8 @@ export default function LoginPage() {
             description: `Logged in as ${userData.user.firstName} ${userData.user.lastName}`,
           });
           
-          // Set force refresh flag and redirect immediately
-          sessionStorage.setItem('force_auth_refresh', 'true');
-          
-          // Immediate redirect to trigger authentication check
-          window.location.href = '/';
+          // Force a complete page reload to trigger fresh authentication check
+          window.location.reload();
         } else {
           let errorMessage = 'Login failed';
           try {

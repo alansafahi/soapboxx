@@ -4,7 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useDirectAuth } from "@/lib/directAuth";
+import { useSimpleAuth } from "@/lib/simpleAuth";
 import { FORCE_AUTHENTICATED, MOCK_USER } from "@/lib/forceAuth";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -38,7 +38,7 @@ const AutoLoginPage = lazy(() => import("@/pages/auto-login"));
 const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
 function AppRouter() {
-    const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading, logout } = useDirectAuth();
+    const { user: currentUser, isAuthenticated: currentIsAuthenticated, isLoading: currentIsLoading, logout } = useSimpleAuth();
     const finalIsAuthenticated = FORCE_AUTHENTICATED || currentIsAuthenticated;
     const finalUser = FORCE_AUTHENTICATED ? MOCK_USER : currentUser;
     const [location] = useLocation();
