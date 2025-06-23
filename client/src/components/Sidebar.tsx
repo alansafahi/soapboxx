@@ -61,7 +61,7 @@ export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL']));
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false); // FORCE EXPANDED FOR TESTING
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
@@ -73,18 +73,22 @@ export default function Sidebar() {
       
       setIsMobile(isMobileScreen);
       
-      // Auto-collapse on small screens, expand on large screens
-      if (isMobileScreen) {
-        setIsCollapsed(true);
-      } else if (isLargeScreen) {
-        setIsCollapsed(false);
-      }
+      // TEMPORARILY DISABLED - Auto-collapse on small screens, expand on large screens
+      // if (isMobileScreen) {
+      //   setIsCollapsed(true);
+      // } else if (isLargeScreen) {
+      //   setIsCollapsed(false);
+      // }
       
-      console.log(`Screen width: ${window.innerWidth}, isMobile: ${isMobileScreen}, isLarge: ${isLargeScreen}, will collapse: ${isMobileScreen}`);
+      console.log(`Screen width: ${window.innerWidth}, isMobile: ${isMobileScreen}, isLarge: ${isLargeScreen}, FORCED EXPANDED FOR TESTING`);
     };
 
     // Set initial state
     handleResize();
+    
+    // FORCE EXPANDED MODE FOR TESTING - Override any responsive logic
+    setIsCollapsed(false);
+    console.log("FORCED setIsCollapsed(false) - sidebar should now be expanded");
     
     // Listen for window resize
     window.addEventListener('resize', handleResize);
@@ -182,6 +186,7 @@ export default function Sidebar() {
   console.log("Final Visible Groups:", visibleGroups.map(g => g.label));
   console.log("Expanded Groups State:", Array.from(expandedGroups));
   console.log("Sidebar collapsed state:", isCollapsed);
+  console.log("ACTUAL RENDER STATE - isCollapsed value being used:", isCollapsed);
   
   // Debug specific Admin Portal group
   const adminPortalGroup = visibleGroups.find(g => g.label === "ADMIN PORTAL");
