@@ -29,13 +29,13 @@ import ChurchAdminDashboard from "@/components/ChurchAdminDashboard";
 import ContentManagementSystem from "@/components/ContentManagementSystem";
 import { AnalyticsTab } from "@/components/AnalyticsTab";
 
-// Church Verification Component
-function ChurchVerificationTab() {
+// Church Management Component
+function ChurchManagementTab() {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   
-  // Query for churches pending verification
-  const { data: pendingChurches, isLoading, refetch } = useQuery({
+  // Query for churches by status
+  const { data: churches, isLoading, refetch } = useQuery({
     queryKey: ['/api/admin/churches', statusFilter],
     queryFn: () => fetch(`/api/admin/churches?status=${statusFilter}`).then(res => res.json())
   });
@@ -90,12 +90,41 @@ function ChurchVerificationTab() {
     }
   });
 
+  // Mutation for suspending churches
+  const suspendChurchMutation = useMutation({
+    mutationFn: async ({ churchId, reason }: { churchId: number; reason: string }) => {
+      const response = await apiRequest('/api/admin/churches/suspend', {
+        method: 'POST',
+        body: JSON.stringify({ churchId, reason })
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Church Suspended",
+        description: "Church has been suspended.",
+      });
+      refetch();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Suspension Failed",
+        description: error.message || "Failed to suspend church",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleApprove = (churchId: number) => {
     approveChurchMutation.mutate(churchId);
   };
 
   const handleReject = (churchId: number, reason: string) => {
     rejectChurchMutation.mutate({ churchId, reason });
+  };
+
+  const handleSuspend = (churchId: number, reason: string) => {
+    suspendChurchMutation.mutate({ churchId, reason });
   };
 
   if (isLoading) {
@@ -109,16 +138,17 @@ function ChurchVerificationTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Church Verification</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Church Management</h2>
         <div className="flex items-center gap-4">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="pending">Pending Verification</SelectItem>
+              <SelectItem value="pending">Pending Churches</SelectItem>
               <SelectItem value="approved">Approved Churches</SelectItem>
               <SelectItem value="rejected">Rejected Churches</SelectItem>
+              <SelectItem value="suspended">Suspended Churches</SelectItem>
               <SelectItem value="all">All Churches</SelectItem>
             </SelectContent>
           </Select>
@@ -208,40 +238,87 @@ function ChurchVerificationTab() {
                 )}
               </div>
 
-              {/* Action Buttons - Only show for pending churches */}
-              {church.status === 'pending' && (
-                <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button
-                    onClick={() => handleApprove(church.id)}
-                    disabled={approveChurchMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Approve Church
-                  </Button>
-                  
+              {/* Action Buttons - Show different buttons based on church status */}
+              <div className="flex items-center gap-3 pt-4 border-t">
+                {church.status === 'pending' && (
+                  <>
+                    <Button
+                      onClick={() => handleApprove(church.id)}
+                      disabled={approveChurchMutation.isPending}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Approve
+                    </Button>
+                    
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline"
+                          disabled={rejectChurchMutation.isPending}
+                          className="border-red-200 text-red-600 hover:bg-red-50"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Decline
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Decline Church Submission</DialogTitle>
+                          <DialogDescription>
+                            Provide a reason for declining "{church.name}". This will be communicated to the submitter.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Textarea 
+                            placeholder="Enter decline reason..."
+                            id={`decline-reason-${church.id}`}
+                            rows={3}
+                          />
+                          <div className="flex justify-end gap-3">
+                            <DialogTrigger asChild>
+                              <Button variant="outline">Cancel</Button>
+                            </DialogTrigger>
+                            <Button 
+                              onClick={() => {
+                                const textarea = document.getElementById(`decline-reason-${church.id}`) as HTMLTextAreaElement;
+                                const reason = textarea?.value || "No reason provided";
+                                handleReject(church.id, reason);
+                              }}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                              Confirm Decline
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </>
+                )}
+
+                {church.status === 'approved' && (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        disabled={rejectChurchMutation.isPending}
-                        className="border-red-200 text-red-600 hover:bg-red-50"
+                        disabled={suspendChurchMutation.isPending}
+                        className="border-orange-200 text-orange-600 hover:bg-orange-50"
                       >
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Reject
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                        Suspend
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Reject Church Submission</DialogTitle>
+                        <DialogTitle>Suspend Church</DialogTitle>
                         <DialogDescription>
-                          Provide a reason for rejecting "{church.name}". This will be communicated to the submitter.
+                          Provide a reason for suspending "{church.name}". This will temporarily disable their access.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <Textarea 
-                          placeholder="Enter rejection reason..."
-                          id={`rejection-reason-${church.id}`}
+                          placeholder="Enter suspension reason..."
+                          id={`suspend-reason-${church.id}`}
                           rows={3}
                         />
                         <div className="flex justify-end gap-3">
@@ -250,20 +327,20 @@ function ChurchVerificationTab() {
                           </DialogTrigger>
                           <Button 
                             onClick={() => {
-                              const textarea = document.getElementById(`rejection-reason-${church.id}`) as HTMLTextAreaElement;
+                              const textarea = document.getElementById(`suspend-reason-${church.id}`) as HTMLTextAreaElement;
                               const reason = textarea?.value || "No reason provided";
-                              handleReject(church.id, reason);
+                              handleSuspend(church.id, reason);
                             }}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
                           >
-                            Confirm Rejection
+                            Confirm Suspension
                           </Button>
                         </div>
                       </div>
                     </DialogContent>
                   </Dialog>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Additional Details for approved/rejected */}
               {church.status !== 'pending' && (

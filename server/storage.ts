@@ -1123,6 +1123,76 @@ export class DatabaseStorage implements IStorage {
       .filter(denomination => denomination !== null && denomination.trim() !== '') as string[];
   }
 
+  // Church verification operations
+  async getChurchesByStatus(status?: string): Promise<Church[]> {
+    let whereCondition;
+    
+    if (status === 'pending') {
+      whereCondition = eq(churches.verificationStatus, 'pending');
+    } else if (status === 'approved') {
+      whereCondition = eq(churches.verificationStatus, 'approved');
+    } else if (status === 'rejected') {
+      whereCondition = eq(churches.verificationStatus, 'rejected');
+    } else if (status === 'suspended') {
+      whereCondition = eq(churches.verificationStatus, 'suspended');
+    } else {
+      // Return all churches if no status filter
+      whereCondition = undefined;
+    }
+    
+    const query = db
+      .select()
+      .from(churches)
+      .orderBy(desc(churches.createdAt));
+    
+    if (whereCondition) {
+      query.where(whereCondition);
+    }
+    
+    return await query;
+  }
+
+  async approveChurch(churchId: number, approvedBy: string): Promise<void> {
+    await db
+      .update(churches)
+      .set({
+        verificationStatus: 'approved',
+        verifiedBy: approvedBy,
+        verifiedAt: new Date(),
+        isActive: true,
+        updatedAt: new Date()
+      })
+      .where(eq(churches.id, churchId));
+  }
+
+  async rejectChurch(churchId: number, reason: string, rejectedBy: string): Promise<void> {
+    await db
+      .update(churches)
+      .set({
+        verificationStatus: 'rejected',
+        rejectedBy: rejectedBy,
+        rejectionReason: reason,
+        rejectedAt: new Date(),
+        isActive: false,
+        updatedAt: new Date()
+      })
+      .where(eq(churches.id, churchId));
+  }
+
+  async suspendChurch(churchId: number, reason: string, suspendedBy: string): Promise<void> {
+    await db
+      .update(churches)
+      .set({
+        verificationStatus: 'suspended',
+        rejectedBy: suspendedBy,
+        rejectionReason: reason,
+        rejectedAt: new Date(),
+        isActive: false,
+        updatedAt: new Date()
+      })
+      .where(eq(churches.id, churchId));
+  }
+
   async getChurch(id: number): Promise<Church | undefined> {
     const [church] = await db.select().from(churches).where(eq(churches.id, id));
     return church;
