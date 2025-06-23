@@ -60,7 +60,7 @@ interface NavigationGroup {
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL']));
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -153,18 +153,6 @@ export default function Sidebar() {
     items: group.items.filter(item => {
       if (!item.roles) return true;
       
-      // Debug logging for Admin Portal
-      if (group.label === "ADMIN PORTAL") {
-        console.log("🔍 Admin Portal Debug:", {
-          itemLabel: item.label,
-          itemRoles: item.roles,
-          userRole: user?.role,
-          userRoleObject: userRole,
-          hasDirectRole: item.roles.includes(user?.role || ''),
-          isSoapboxOwner: user?.role === 'soapbox_owner'
-        });
-      }
-      
       const hasAccess = item.roles.some(role => 
         // Check if user has the role directly or in roles array
         user?.role === role || 
@@ -173,25 +161,9 @@ export default function Sidebar() {
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
       
-      if (group.label === "ADMIN PORTAL") {
-        console.log("🔍 Admin Portal Access Result:", {
-          itemLabel: item.label,
-          hasAccess: hasAccess
-        });
-      }
-      
       return hasAccess;
     })
-  })).filter(group => {
-    if (group.label === "ADMIN PORTAL") {
-      console.log("🔍 Admin Portal Group Filter:", {
-        groupLabel: group.label,
-        itemsLength: group.items.length,
-        items: group.items.map(item => item.label)
-      });
-    }
-    return group.items.length > 0;
-  });
+  })).filter(group => group.items.length > 0);
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
