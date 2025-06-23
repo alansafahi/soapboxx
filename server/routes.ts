@@ -1787,224 +1787,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         const file = { content: htmlContent };
-        const pdfBuffer = await pdf.generatePdf(file, options);
+        const pdfBuffer = await htmlPdf.generatePdf(file, options);
         
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.pdf"`);
         res.send(pdfBuffer);
         
       } else if (format === 'docx') {
-        // DOCX generation temporarily disabled for production
-        
-        const doc = new Document({
-          sections: [{
-            properties: {},
-            children: [
-              new Paragraph({
-                text: sermonTitle,
-                heading: HeadingLevel.TITLE,
-                alignment: AlignmentType.CENTER,
-              }),
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: `Generated on: ${new Date().toLocaleDateString()}`,
-                    italics: true,
-                  }),
-                ],
-                spacing: { after: 400 },
-              }),
-              
-              ...(outline ? [
-                new Paragraph({
-                  text: "Theme",
-                  heading: HeadingLevel.HEADING_1,
-                }),
-                new Paragraph({
-                  text: outline.theme || 'N/A',
-                  spacing: { after: 200 },
-                }),
-                
-                new Paragraph({
-                  text: "Introduction",
-                  heading: HeadingLevel.HEADING_1,
-                }),
-                new Paragraph({
-                  text: outline.introduction || 'N/A',
-                  spacing: { after: 200 },
-                }),
-                
-                ...(outline.mainPoints && outline.mainPoints.length > 0 ? [
-                  new Paragraph({
-                    text: "Main Points",
-                    heading: HeadingLevel.HEADING_1,
-                  }),
-                  ...outline.mainPoints.map((point: any, index: any) => 
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: `${index + 1}. `,
-                          bold: true,
-                        }),
-                        new TextRun({
-                          text: point,
-                        }),
-                      ],
-                      spacing: { after: 100 },
-                    })
-                  ),
-                ] : []),
-                
-                new Paragraph({
-                  text: "Conclusion",
-                  heading: HeadingLevel.HEADING_1,
-                }),
-                new Paragraph({
-                  text: outline.conclusion || 'N/A',
-                  spacing: { after: 200 },
-                }),
-                
-                new Paragraph({
-                  text: "Call to Action",
-                  heading: HeadingLevel.HEADING_1,
-                }),
-                new Paragraph({
-                  text: outline.callToAction || 'N/A',
-                  spacing: { after: 200 },
-                }),
-                
-                ...(outline.scriptureReferences && outline.scriptureReferences.length > 0 ? [
-                  new Paragraph({
-                    text: "Scripture References",
-                    heading: HeadingLevel.HEADING_1,
-                  }),
-                  ...outline.scriptureReferences.map((ref: any) => 
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: `• ${ref}`,
-                        }),
-                      ],
-                      spacing: { after: 100 },
-                    })
-                  ),
-                ] : []),
-                
-                ...(outline.closingPrayer ? [
-                  new Paragraph({
-                    text: "Closing Prayer",
-                    heading: HeadingLevel.HEADING_1,
-                  }),
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: outline.closingPrayer,
-                        italics: true,
-                      }),
-                    ],
-                    spacing: { after: 200 },
-                  }),
-                ] : []),
-              ] : []),
-              
-              ...(research ? [
-                new Paragraph({
-                  text: "Biblical Research",
-                  heading: HeadingLevel.HEADING_1,
-                }),
-                new Paragraph({
-                  text: "Commentary",
-                  heading: HeadingLevel.HEADING_2,
-                }),
-                new Paragraph({
-                  text: research.commentary || 'N/A',
-                  spacing: { after: 200 },
-                }),
-                new Paragraph({
-                  text: "Historical Context",
-                  heading: HeadingLevel.HEADING_2,
-                }),
-                new Paragraph({
-                  text: research.historicalContext || 'N/A',
-                  spacing: { after: 200 },
-                }),
-                ...(research.keyThemes && research.keyThemes.length > 0 ? [
-                  new Paragraph({
-                    text: "Key Themes",
-                    heading: HeadingLevel.HEADING_2,
-                  }),
-                  ...research.keyThemes.map((theme: any) => 
-                    new Paragraph({
-                      children: [
-                        new TextRun({
-                          text: `• ${theme}`,
-                        }),
-                      ],
-                      spacing: { after: 100 },
-                    })
-                  ),
-                ] : []),
-              ] : []),
-              
-              ...(illustrations && illustrations.length > 0 ? [
-                new Paragraph({
-                  text: "Stories & Illustrations",
-                  heading: HeadingLevel.HEADING_1,
-                }),
-                ...illustrations.flatMap((ill: any, index: any) => [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: `${index + 1}. ${ill.title}`,
-                        bold: true,
-                      }),
-                    ],
-                    spacing: { after: 100 },
-                  }),
-                  new Paragraph({
-                    text: ill.story,
-                    spacing: { after: 100 },
-                  }),
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: "Application: ",
-                        bold: true,
-                      }),
-                      new TextRun({
-                        text: ill.application,
-                      }),
-                    ],
-                    spacing: { after: 200 },
-                  }),
-                ]),
-              ] : []),
-              
-              ...(enhancement && enhancement.recommendations && enhancement.recommendations.length > 0 ? [
-                new Paragraph({
-                  text: "Enhancement Recommendations",
-                  heading: HeadingLevel.HEADING_1,
-                }),
-                ...enhancement.recommendations.map((rec: any) => 
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: `• ${rec}`,
-                      }),
-                    ],
-                    spacing: { after: 100 },
-                  })
-                ),
-              ] : []),
-            ],
-          }],
+        return res.status(400).json({ 
+          message: "DOCX export is temporarily unavailable. Please use PDF or JSON format instead." 
         });
-
-        const buffer = await Packer.toBuffer(doc);
-        
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        res.setHeader('Content-Disposition', `attachment; filename="${sanitizedTitle}.docx"`);
-        res.send(buffer);
         
       } else {
         // Default to text format
@@ -2576,7 +2368,7 @@ app.post('/api/invitations', async (req: any, res) => {
         return res.status(500).json({ message: "AI service not configured" });
       }
 
-      const OpenAI = require('openai');
+      // OpenAI already imported at top of file
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       const prompt = `As a thoughtful spiritual guide, create personalized reflection questions for this Bible verse:
