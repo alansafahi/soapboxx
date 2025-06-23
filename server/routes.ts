@@ -1935,6 +1935,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get AI-generated personalized content for user
+  app.get('/api/personalized-content', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const personalizedContent = await storage.getUserPersonalizedContent(userId);
+      res.json(personalizedContent);
+    } catch (error) {
+      console.error('Error fetching personalized content:', error);
+      res.status(500).json({ message: 'Failed to fetch personalized content' });
+    }
+  });
+
   // Virtual check-in API endpoint
   app.post('/api/checkins', isAuthenticated, async (req: any, res) => {
     try {

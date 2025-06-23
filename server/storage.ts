@@ -5962,6 +5962,15 @@ export class DatabaseStorage implements IStorage {
     return newContent;
   }
 
+  async getUserPersonalizedContent(userId: string): Promise<PersonalizedContent[]> {
+    return await db
+      .select()
+      .from(personalizedContent)
+      .where(eq(personalizedContent.userId, userId))
+      .orderBy(desc(personalizedContent.createdAt))
+      .limit(50);
+  }
+
   async getPersonalizedContent(contentId: string): Promise<PersonalizedContent | undefined> {
     const [content] = await db
       .select()
