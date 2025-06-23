@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 23, 2025: COMPREHENSIVE ADD CHURCH FORM ENHANCEMENT COMPLETED - Successfully implemented enhanced Add Church form with Church Logo, Size dropdown with weekly attendance categories, Hours of Operations for all 7 days, and comprehensive Social Media Links section (Facebook, Instagram, Twitter, YouTube, TikTok, LinkedIn)
+  - BUTTON ORDER CORRECTED: Updated church discovery page button layout to display Filters, Add Church, Claim Church from left to right as requested
+  - DATABASE SCHEMA ENHANCED: Added size (VARCHAR) and hours_of_operation (JSONB) columns to churches table via SQL ALTER commands
+  - BACKEND INTEGRATION COMPLETED: Enhanced church creation endpoint to handle logoUrl, size, hoursOfOperation, and socialMedia data with proper validation
+  - COMPREHENSIVE FORM FIELDS: Church Logo URL, Size dropdown with 6 attendance categories, Hours of Operations with 7-day input fields, Social Media Links with 6 platform support
+  - DATA FLOW VERIFIED: Full data persistence from frontend form submission to backend storage working correctly
 - June 23, 2025: SERMON EXPORT FUNCTIONALITY COMPLETELY RESTORED - Successfully replaced problematic PDF/DOCX libraries with reliable export alternatives that work without server crashes
   - EXPORT FUNCTIONALITY FULLY OPERATIONAL: All export formats now working - JSON, text, HTML (PDF replacement), and RTF (Word replacement)
   - PDF ALTERNATIVE IMPLEMENTED: HTML export with professional styling that can be converted to PDF by browsers

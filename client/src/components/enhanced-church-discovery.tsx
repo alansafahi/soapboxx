@@ -528,11 +528,12 @@ export default function EnhancedChurchDiscovery() {
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                onClick={() => window.open('/church-claiming', '_blank')}
-                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2"
               >
-                <Building className="w-4 h-4" />
-                Claim Church
+                <Filter className="w-4 h-4" />
+                Filters
+                <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
               </Button>
               <Button
                 onClick={() => setShowAddChurchModal(true)}
@@ -543,12 +544,11 @@ export default function EnhancedChurchDiscovery() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2"
+                onClick={() => window.open('/church-claiming', '_blank')}
+                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
               >
-                <Filter className="w-4 h-4" />
-                Filters
-                <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                <Building className="w-4 h-4" />
+                Claim Church
               </Button>
             </div>
           </div>
