@@ -2177,7 +2177,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/mood-checkins/recent', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const limit = parseInt(req.query.limit as string) || 10;
       
       const recentCheckins = await storage.getRecentMoodCheckins(userId, limit);
@@ -2190,7 +2195,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/mood-checkins/insights', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const days = parseInt(req.query.days as string) || 30;
       
       const insights = await storage.getMoodInsights(userId, days);
