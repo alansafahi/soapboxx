@@ -33,9 +33,6 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { format } from 'date-fns';
 
 interface EnhancedPost {
   id: number;
