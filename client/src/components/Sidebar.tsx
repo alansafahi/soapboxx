@@ -329,7 +329,7 @@ export default function Sidebar() {
             }
             
             return (
-              <div key={group.label}>
+              <div key={group.label} className={group.label === "ADMIN PORTAL" ? "bg-red-100 p-2 border-2 border-red-500" : ""}>
                 <button
                   onClick={() => toggleGroup(group.label)}
                   className="flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400"
