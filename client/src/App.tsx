@@ -97,7 +97,7 @@ function AppRouter() {
                                         ) : finalIsAuthenticated ? (
                                             <Home />
                                         ) : (
-                                            <Landing />
+                                            <LoginPage />
                                         )}
                                     </Route>
                                     <Route path="/login-debug" component={LoginDebugPage} />
