@@ -43,7 +43,8 @@ import {
   Mail,
   ChevronLeft,
   ChevronRight,
-  UserPlus
+  UserPlus,
+  Sparkles
 } from "lucide-react";
 
 interface NavigationItem {
@@ -125,6 +126,7 @@ export default function Sidebar() {
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+        { label: "AI Guidance", href: "/ai-guidance", icon: Sparkles },
       ]
     },
     {
