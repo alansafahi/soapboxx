@@ -179,9 +179,11 @@ function ChurchManagementTab() {
                     </h3>
                     <Badge 
                       variant={church.status === 'pending' ? 'default' : 
-                              church.status === 'approved' ? 'secondary' : 'destructive'}
+                              church.status === 'approved' ? 'secondary' : 
+                              church.status === 'suspended' ? 'outline' : 'destructive'}
+                      className={church.status === 'suspended' ? 'border-orange-500 text-orange-600' : ''}
                     >
-                      {church.status}
+                      {church.status?.charAt(0).toUpperCase() + church.status?.slice(1)}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
@@ -342,16 +344,31 @@ function ChurchManagementTab() {
                 )}
               </div>
 
-              {/* Additional Details for approved/rejected */}
+              {/* Additional Details for non-pending churches */}
               {church.status !== 'pending' && (
                 <div className="pt-4 border-t text-sm text-gray-500">
                   <span>
-                    {church.status === 'approved' ? 'Approved' : 'Rejected'} on: {new Date(church.updatedAt).toLocaleDateString()}
+                    {church.status === 'approved' ? 'Approved' : 
+                     church.status === 'suspended' ? 'Suspended' : 'Declined'} on: {new Date(church.updatedAt).toLocaleDateString()}
                   </span>
                   {church.rejectionReason && (
-                    <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
-                      <span className="font-medium text-red-800 dark:text-red-400">Rejection Reason: </span>
-                      <span className="text-red-700 dark:text-red-300">{church.rejectionReason}</span>
+                    <div className={`mt-2 p-3 rounded border ${
+                      church.status === 'suspended' 
+                        ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                        : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                    }`}>
+                      <span className={`font-medium ${
+                        church.status === 'suspended'
+                          ? 'text-orange-800 dark:text-orange-400'
+                          : 'text-red-800 dark:text-red-400'
+                      }`}>
+                        {church.status === 'suspended' ? 'Suspension' : 'Decline'} Reason: 
+                      </span>
+                      <span className={
+                        church.status === 'suspended'
+                          ? 'text-orange-700 dark:text-orange-300'
+                          : 'text-red-700 dark:text-red-300'
+                      }>{church.rejectionReason}</span>
                     </div>
                   )}
                 </div>
