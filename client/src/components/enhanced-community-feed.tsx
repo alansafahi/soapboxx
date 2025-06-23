@@ -231,7 +231,7 @@ export default function EnhancedCommunityFeed() {
   return (
     <div className="space-y-6">
       {/* Enhanced Actions Bar */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
+      <Card className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           {/* Search */}
           <div className="flex-1 max-w-md">
