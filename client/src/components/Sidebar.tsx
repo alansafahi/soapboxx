@@ -329,10 +329,13 @@ export default function Sidebar() {
             }
             
             return (
-              <div key={group.label} className={group.label === "ADMIN PORTAL" ? "bg-red-100 p-2 border-2 border-red-500" : ""}>
+              <div key={group.label} className={group.label === "ADMIN PORTAL" ? "bg-yellow-300 p-4 border-4 border-black min-h-[200px]" : ""}>
                 <button
                   onClick={() => toggleGroup(group.label)}
-                  className="flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400"
+                  className={group.label === "ADMIN PORTAL" ? 
+                    "flex items-center justify-between w-full text-2xl font-bold text-black uppercase tracking-wide mb-3 bg-red-500 p-4" :
+                    "flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400"
+                  }
                 >
                   <span>{group.label}</span>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
