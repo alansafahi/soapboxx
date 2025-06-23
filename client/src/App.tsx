@@ -33,8 +33,6 @@ const FreshAudioBible = lazy(() => import("@/pages/FreshAudioBible"));
 const AudioRoutines = lazy(() => import("@/pages/AudioRoutines"));
 const VideoLibrary = lazy(() => import("@/pages/video-library"));
 const ContactsPage = lazy(() => import("@/pages/contacts"));
-const LoginDebugPage = lazy(() => import("@/pages/login-debug"));
-const AutoLoginPage = lazy(() => import("@/pages/auto-login"));
 const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 
 function AppRouter() {
@@ -98,8 +96,7 @@ function AppRouter() {
                                             <LoginPage />
                                         )}
                                     </Route>
-                                    <Route path="/login-debug" component={LoginDebugPage} />
-                                    <Route path="/auto-login" component={AutoLoginPage} />
+
                                     <ProtectedRoute path="/bible" component={BiblePage} />
                                     <ProtectedRoute path="/audio-bible" component={FreshAudioBible} />
                                     <ProtectedRoute path="/audio-routines" component={AudioRoutines} />

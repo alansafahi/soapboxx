@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useDirectAuth } from "@/hooks/useDirectAuth";
 import { useImmediateAuth } from "@/lib/immediateAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,13 +15,11 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading: authLoading } = useImmediateAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const directAuth = useDirectAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      console.log('🔄 User already authenticated on login page, redirecting to dashboard...');
-      setLocation('/');
+      window.location.replace('/');
     }
   }, [isAuthenticated, authLoading, setLocation]);
 
@@ -81,8 +77,8 @@ export default function LoginPage() {
             description: `Logged in as ${userData.user.firstName} ${userData.user.lastName}`,
           });
           
-          // Force a complete page reload to trigger fresh authentication check
-          window.location.reload();
+          // Redirect to dashboard
+          setLocation('/');
         } else {
           let errorMessage = 'Login failed';
           try {
