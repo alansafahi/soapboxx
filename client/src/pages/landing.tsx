@@ -47,8 +47,8 @@ export default function Landing() {
   };
 
   const handleDashboard = () => {
-    // Force full page navigation to ensure authentication state is properly loaded
-    window.location.href = '/';
+    // Navigate to dashboard using router for authenticated users
+    setLocation('/');
   };
 
   return (

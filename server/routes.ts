@@ -2122,7 +2122,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mood check-in API endpoints
   app.post('/api/mood-checkins', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       const { mood, moodScore, moodEmoji, notes, shareWithStaff, generatePersonalizedContent } = req.body;
 
       // Create mood check-in record
@@ -5731,8 +5735,12 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/bookmark", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const discussionId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       
       const result = await storage.toggleDiscussionBookmark(userId, discussionId);
       res.json(result);
@@ -5744,8 +5752,12 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/share", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const discussionId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       
       // Get the discussion details
       const discussion = await storage.getDiscussion(discussionId);
@@ -5784,8 +5796,12 @@ Return JSON with this exact structure:
   // Delete discussion endpoint - users can delete their own posts
   app.delete("/api/discussions/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const discussionId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       
       // Get the discussion to check ownership
       const discussion = await storage.getDiscussion(discussionId);
@@ -5817,9 +5833,13 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const discussionId = parseInt(req.params.id);
       const { content } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       
       if (!content || !content.trim()) {
         return res.status(400).json({ message: "Comment content is required" });
