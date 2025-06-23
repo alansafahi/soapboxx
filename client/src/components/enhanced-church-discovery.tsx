@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, MapPin, Phone, Globe, Users, Search, Filter, ChevronDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Star, MapPin, Phone, Globe, Users, Search, Filter, ChevronDown, Building, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Church } from "@shared/schema";
 
@@ -49,6 +52,21 @@ export default function EnhancedChurchDiscovery() {
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
+  
+  // Add Church Modal State
+  const [showAddChurchModal, setShowAddChurchModal] = useState(false);
+  const [newChurchData, setNewChurchData] = useState({
+    name: '',
+    denomination: '',
+    description: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    phone: '',
+    email: '',
+    website: ''
+  });
 
   // Auto-detect user location on component mount (only if user hasn't interacted)
   useEffect(() => {
@@ -190,6 +208,64 @@ export default function EnhancedChurchDiscovery() {
       });
     },
   });
+
+  // Add Church Mutation
+  const addChurchMutation = useMutation({
+    mutationFn: async (churchData: typeof newChurchData) => {
+      const response = await apiRequest('/api/churches', {
+        method: 'POST',
+        body: JSON.stringify(churchData),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Church Added Successfully",
+        description: "Your church has been added and is pending verification.",
+      });
+      setShowAddChurchModal(false);
+      setNewChurchData({
+        name: '',
+        denomination: '',
+        description: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        phone: '',
+        email: '',
+        website: ''
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/churches'] });
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to add a church.",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to add church. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddChurch = () => {
+    if (!newChurchData.name || !newChurchData.denomination || !newChurchData.city) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in church name, denomination, and city.",
+        variant: "destructive",
+      });
+      return;
+    }
+    addChurchMutation.mutate(newChurchData);
+  };
 
   const handleJoinChurch = (churchId: number) => {
     setAnimatingButtons(prev => new Set([...Array.from(prev), churchId]));
@@ -357,15 +433,32 @@ export default function EnhancedChurchDiscovery() {
                 Find churches by denomination, location, or size - showing top 10 by proximity
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-            >
-              <Filter className="w-4 h-4" />
-              Filters
-              <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                onClick={() => window.open('/church-claiming', '_blank')}
+                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              >
+                <Building className="w-4 h-4" />
+                Claim Church
+              </Button>
+              <Button
+                onClick={() => setShowAddChurchModal(true)}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Plus className="w-4 h-4" />
+                Add Church
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+                <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+              </Button>
+            </div>
           </div>
         </CardHeader>
         
@@ -793,6 +886,153 @@ export default function EnhancedChurchDiscovery() {
           )}
         </CardContent>
       </Card>
+
+      {/* Add Church Modal */}
+      <Dialog open={showAddChurchModal} onOpenChange={setShowAddChurchModal}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building className="w-5 h-5 text-purple-600" />
+              Add New Church
+            </DialogTitle>
+            <DialogDescription>
+              Add a new church to our directory. All submissions are reviewed before being published.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            {/* Church Name */}
+            <div className="grid gap-2">
+              <Label htmlFor="churchName">Church Name *</Label>
+              <Input
+                id="churchName"
+                value={newChurchData.name}
+                onChange={(e) => setNewChurchData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="First Baptist Church"
+              />
+            </div>
+
+            {/* Denomination */}
+            <div className="grid gap-2">
+              <Label htmlFor="denomination">Denomination *</Label>
+              <Select value={newChurchData.denomination} onValueChange={(value) => setNewChurchData(prev => ({ ...prev, denomination: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select denomination" />
+                </SelectTrigger>
+                <SelectContent>
+                  {denominations.map((denom) => (
+                    <SelectItem key={denom} value={denom}>
+                      {denom}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Description */}
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={newChurchData.description}
+                onChange={(e) => setNewChurchData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Brief description of the church's mission and values..."
+                rows={3}
+              />
+            </div>
+
+            {/* Address */}
+            <div className="grid gap-2">
+              <Label htmlFor="address">Street Address</Label>
+              <Input
+                id="address"
+                value={newChurchData.address}
+                onChange={(e) => setNewChurchData(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="123 Main Street"
+              />
+            </div>
+
+            {/* City, State, ZIP */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  value={newChurchData.city}
+                  onChange={(e) => setNewChurchData(prev => ({ ...prev, city: e.target.value }))}
+                  placeholder="San Francisco"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={newChurchData.state}
+                  onChange={(e) => setNewChurchData(prev => ({ ...prev, state: e.target.value }))}
+                  placeholder="CA"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="zipCode">ZIP Code</Label>
+              <Input
+                id="zipCode"
+                value={newChurchData.zipCode}
+                onChange={(e) => setNewChurchData(prev => ({ ...prev, zipCode: e.target.value }))}
+                placeholder="94102"
+              />
+            </div>
+
+            {/* Contact Information */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={newChurchData.phone}
+                  onChange={(e) => setNewChurchData(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newChurchData.email}
+                  onChange={(e) => setNewChurchData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="info@church.org"
+                />
+              </div>
+            </div>
+
+            {/* Website */}
+            <div className="grid gap-2">
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                value={newChurchData.website}
+                onChange={(e) => setNewChurchData(prev => ({ ...prev, website: e.target.value }))}
+                placeholder="https://www.church.org"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowAddChurchModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddChurch}
+              disabled={addChurchMutation.isPending}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {addChurchMutation.isPending ? "Adding..." : "Add Church"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
