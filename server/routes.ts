@@ -4885,10 +4885,72 @@ Return JSON with this exact structure:
 
   // Video generation endpoints removed for production cleanup
 
+  // Create new church endpoint
+  app.post('/api/churches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const {
+        name,
+        denomination,
+        description,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        email,
+        website
+      } = req.body;
+
+      // Validate required fields
+      if (!name || !city || !state) {
+        return res.status(400).json({ message: 'Church name, city, and state are required' });
+      }
+
+      // Create church using storage method
+      const newChurch = await storage.createChurch({
+        name,
+        denomination: denomination || 'Non-denominational',
+        description,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        email,
+        website,
+        isActive: true,
+        isClaimed: true, // Immediately claimed by creator
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      // Make user the church admin by joining with admin role
+      await storage.joinChurch(newChurch.id, userId, 'church_admin');
+
+      res.json({
+        success: true,
+        message: 'Church created successfully',
+        church: newChurch
+      });
+
+    } catch (error) {
+      console.error('Error creating church:', error);
+      res.status(500).json({ message: 'Failed to create church' });
+    }
+  });
+
   // Church claiming API endpoints
   app.get('/api/churches/claimable', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
       const user = await storage.getUser(userId);
       
       if (!user || !user.email) {
