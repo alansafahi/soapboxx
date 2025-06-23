@@ -327,21 +327,28 @@ function ContactsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Contacts & Invitations</h1>
-          <p className="text-muted-foreground">
-            Connect with friends and share your faith journey
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="container mx-auto py-8 px-4 space-y-8">
+        {/* Enhanced Header */}
+        <div className="text-center space-y-4 mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-4">
+            <Users className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            Community Connections
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Build meaningful relationships and share your faith journey with friends and family
           </p>
         </div>
-        <div className="flex space-x-2">
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
           <Button 
             onClick={importDeviceContacts}
             disabled={isImportingContacts}
             variant="outline" 
-            className="gap-2"
+            className="gap-2 bg-white/80 backdrop-blur-sm hover:bg-white/90 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800"
           >
             <Users className="h-4 w-4" />
             {isImportingContacts ? "Importing..." : "Import Contacts"}
@@ -349,7 +356,7 @@ function ContactsPage() {
           
           <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg">
                 <UserPlus className="h-4 w-4" />
                 Invite Friends
               </Button>
@@ -392,7 +399,7 @@ function ContactsPage() {
 
           <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 bg-white/80 backdrop-blur-sm hover:bg-white/90 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800">
                 <Share2 className="h-4 w-4" />
                 Share SoapBox
               </Button>
@@ -452,142 +459,169 @@ function ContactsPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Contacts</p>
-                <p className="text-2xl font-bold">{contacts.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <Gift className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Successful Referrals</p>
-                <p className="text-2xl font-bold">{referralStats?.successful || 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <Mail className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending Invites</p>
-                <p className="text-2xl font-bold">{pendingInvites.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <Star className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Referral Points</p>
-                <p className="text-2xl font-bold">{referralStats?.points || 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <Tabs defaultValue="contacts" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="contacts" className="gap-2">
-            <Users className="h-4 w-4" />
-            My Contacts
-          </TabsTrigger>
-          <TabsTrigger value="pending" className="gap-2">
-            <Clock className="h-4 w-4" />
-            Pending Invites
-          </TabsTrigger>
-          <TabsTrigger value="referrals" className="gap-2">
-            <Crown className="h-4 w-4" />
-            Referral Program
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Contacts Tab */}
-        <TabsContent value="contacts" className="space-y-4">
-          {contactsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : contacts.length === 0 ? (
-            <Card className="p-12 text-center">
-              <div className="space-y-4">
-                <Users className="h-12 w-12 mx-auto text-muted-foreground" />
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold">No Contacts Yet</h3>
-                  <p className="text-muted-foreground">
-                    Start inviting friends to build your spiritual community!
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">Total Contacts</p>
+                  <p className="text-3xl font-bold text-gray-900">{contacts.length}</p>
                 </div>
-                <Button onClick={() => setShowInviteDialog(true)} className="gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  Invite Your First Friend
-                </Button>
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
               </div>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {contacts.map((contact: any) => (
-                <Card key={contact.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar>
-                          <AvatarImage src={contact.profileImageUrl} />
-                          <AvatarFallback>{getInitials(contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-semibold">{contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User'}</h3>
-                          <p className="text-sm text-muted-foreground">{contact.email || 'No email'}</p>
-                          {contact.church && contact.church.name && (
-                            <p className="text-xs text-muted-foreground">
-                              {contact.church.name}
-                            </p>
-                          )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Successful Referrals</p>
+                  <p className="text-3xl font-bold text-gray-900">{referralStats?.successful || 0}</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                  <Gift className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Pending Invites</p>
+                  <p className="text-3xl font-bold text-gray-900">{pendingInvites.length}</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <Mail className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Referral Points</p>
+                  <p className="text-3xl font-bold text-gray-900">{referralStats?.points || 0}</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+                  <Star className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Enhanced Main Content */}
+        <Tabs defaultValue="contacts" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border-0 p-1 h-14">
+            <TabsTrigger value="contacts" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
+              <Users className="h-4 w-4" />
+              My Contacts
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
+              <Clock className="h-4 w-4" />
+              Pending Invites
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
+              <Crown className="h-4 w-4" />
+              Referral Program
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Enhanced Contacts Tab */}
+          <TabsContent value="contacts" className="space-y-6">
+            {contactsLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center space-y-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600 mx-auto"></div>
+                  <p className="text-gray-600">Loading your connections...</p>
+                </div>
+              </div>
+            ) : contacts.length === 0 ? (
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-16 text-center">
+                  <div className="space-y-6">
+                    <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto">
+                      <Users className="h-10 w-10 text-purple-600" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-2xl font-bold text-gray-900">Start Building Your Community</h3>
+                      <p className="text-gray-600 max-w-md mx-auto">
+                        Connect with friends, family, and fellow believers to share your spiritual journey together
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => setShowInviteDialog(true)} 
+                      className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg px-8 py-3"
+                    >
+                      <UserPlus className="h-5 w-5" />
+                      Send Your First Invitation
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {contacts.map((contact: any) => (
+                  <Card key={contact.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <Avatar className="w-12 h-12 border-2 border-purple-200">
+                            <AvatarImage src={contact.profileImageUrl} />
+                            <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold">
+                              {getInitials(contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="space-y-1">
+                            <h3 className="font-semibold text-gray-900 text-lg">
+                              {contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User'}
+                            </h3>
+                            <p className="text-sm text-gray-600">{contact.email || 'No email'}</p>
+                            {contact.church && contact.church.name && (
+                              <p className="text-xs text-purple-600 font-medium">
+                                📍 {contact.church.name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Badge 
+                            variant={contact.isActive ? "default" : "secondary"}
+                            className={contact.isActive ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-gray-100 text-gray-600"}
+                          >
+                            {contact.isActive ? "✅ Active" : "⏸️ Inactive"}
+                          </Badge>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="gap-2 bg-white/50 hover:bg-purple-50 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800"
+                            onClick={() => {
+                              setLocation('/messages');
+                              toast({
+                                title: "Opening Messages",
+                                description: `Starting conversation with ${contact.name || contact.firstName || 'contact'}`,
+                              });
+                            }}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                            Message
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={contact.isActive ? "default" : "secondary"}>
-                          {contact.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => {
-                            setLocation('/messages');
-                            toast({
-                              title: "Opening Messages",
-                              description: `Starting conversation with ${contact.name || contact.firstName || 'contact'}`,
-                            });
-                          }}
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
         {/* Pending Invites Tab */}
         <TabsContent value="pending" className="space-y-4">
