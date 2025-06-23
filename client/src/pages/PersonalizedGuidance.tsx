@@ -105,7 +105,7 @@ export default function PersonalizedGuidance() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">AI Spiritual Guidance</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Spiritual Guidance</h1>
           <p className="text-muted-foreground">
             Personalized biblical guidance based on your mood check-ins
           </p>

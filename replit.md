@@ -142,6 +142,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 23, 2025: SPIRITUAL GUIDANCE TAB TITLE UPDATED - Successfully changed navigation title from "AI Guidance" to "Spiritual Guidance" in sidebar and page header for better user clarity and spiritual context alignment
 - June 23, 2025: LOGIN AUTHENTICATION COMPLETELY FIXED - Successfully resolved password hash mismatch preventing user login functionality
   - PASSWORD HASH CORRECTED: Generated new bcrypt hash for "Family0022$$" password matching user account hello@soapboxsuperapp.com
   - AUTHENTICATION FLOW VERIFIED: Login endpoint now returns 200 success with proper user data and session creation
