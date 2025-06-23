@@ -1847,13 +1847,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mood check-in API endpoints
   app.post('/api/mood-checkins', isAuthenticated, async (req: any, res) => {
+    console.log('🔷 Mood check-in request received:', {
+      body: req.body,
+      userId: req.session?.userId,
+      sessionId: req.sessionID
+    });
+    
     try {
       const userId = req.session.userId;
       
       if (!userId) {
+        console.log('❌ No userId in session for mood check-in');
         return res.status(401).json({ message: 'User authentication required' });
       }
+      
       const { mood, moodScore, moodEmoji, notes, shareWithStaff, generatePersonalizedContent } = req.body;
+      console.log('📝 Creating mood check-in for user:', userId);
 
       // Create mood check-in record
       const moodCheckin = await storage.createMoodCheckin({
@@ -1863,10 +1872,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         moodEmoji,
         notes
       });
+      
+      console.log('✅ Mood check-in created:', moodCheckin.id);
 
       // Generate personalized content if requested
       let personalizedContent = null;
       if (generatePersonalizedContent) {
+        console.log('🤖 Generating personalized content...');
         try {
           personalizedContent = await aiPersonalizationService.generateMoodBasedContent(
             userId,
@@ -1874,6 +1886,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             moodScore,
             notes
           );
+          
+          console.log('✅ Personalized content generated');
           
           // Store personalized content for future reference
           if (personalizedContent) {
@@ -1884,20 +1898,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: 'AI-Generated Spiritual Guidance',
               content: JSON.stringify(personalizedContent)
             });
+            console.log('💾 Personalized content saved');
           }
         } catch (aiError) {
-          console.error('Error generating personalized content:', aiError);
+          console.error('⚠️ Error generating personalized content:', aiError);
           // Continue without personalized content rather than failing the whole request
         }
       }
 
+      console.log('📤 Sending mood check-in response');
       res.json({
         moodCheckin,
         personalizedContent
       });
     } catch (error) {
-      console.error('Error creating mood check-in:', error);
-      res.status(500).json({ message: 'Failed to create mood check-in' });
+      console.error('💥 Error creating mood check-in:', error);
+      res.status(500).json({ message: 'Failed to create mood check-in', error: error.message });
     }
   });
 
