@@ -3732,9 +3732,9 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         diverseVerses.push(...fallbackVerses.slice(0, 15));
       }
       
-      // Remove duplicates
+      // Remove duplicates by reference to ensure different verses
       diverseVerses = diverseVerses.filter((verse, index, self) => 
-        index === self.findIndex(v => v.id === verse.id)
+        index === self.findIndex(v => v.reference === verse.reference)
       );
       
       let availableVerses = diverseVerses;
@@ -3797,16 +3797,26 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       let selectedVerses = [];
       
       if (aiSelection.selectedVerseIds && Array.isArray(aiSelection.selectedVerseIds)) {
-        selectedVerses = aiSelection.selectedVerseIds
+        const foundVerses = aiSelection.selectedVerseIds
           .map((id: number) => availableVerses.find(v => v.id === id))
-          .filter(Boolean)
-          .slice(0, parseInt(count.toString()));
+          .filter(Boolean);
+        
+        // Ensure unique references in AI selection
+        const uniqueRefs = new Set();
+        selectedVerses = foundVerses.filter(verse => {
+          if (uniqueRefs.has(verse.reference)) {
+            return false;
+          }
+          uniqueRefs.add(verse.reference);
+          return true;
+        }).slice(0, parseInt(count.toString()));
       }
 
       // If AI didn't provide enough verses or none were found, use category-based fallback
       if (selectedVerses.length < parseInt(count.toString())) {
         const remainingCount = parseInt(count.toString()) - selectedVerses.length;
         const usedIds = selectedVerses.map(v => v.id);
+        const usedReferences = selectedVerses.map(v => v.reference);
         
         // Comprehensive mood-appropriate categories for fallback
         const moodCategoryMap = {
@@ -3853,6 +3863,7 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
         const fallbackVerses = availableVerses
           .filter(v => 
             !usedIds.includes(v.id) && 
+            !usedReferences.includes(v.reference) &&
             (moodCategories.includes(v.category) || ['Core', 'Faith', 'Hope'].includes(v.category))
           )
           .slice(0, remainingCount);
