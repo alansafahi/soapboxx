@@ -40,6 +40,14 @@ const EmailVerificationPage = lazy(() => import("@/pages/EmailVerification"));
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useSimpleAuth();
     const [location] = useLocation();
+    
+    // Debug authentication state
+    console.log('🏠 App Router - Auth State:', { 
+        isAuthenticated, 
+        isLoading, 
+        userEmail: user?.email,
+        location 
+    });
 
     if (isLoading) {
         return (

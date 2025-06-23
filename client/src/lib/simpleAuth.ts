@@ -1,5 +1,5 @@
 // Simple authentication hook without complex session management
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface AuthState {
   user: any;
@@ -14,7 +14,7 @@ export function useSimpleAuth() {
     isLoading: true
   });
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       console.log('🔍 Checking authentication...');
       const response = await fetch('/api/auth/user', {
@@ -30,29 +30,37 @@ export function useSimpleAuth() {
       if (response.ok) {
         const userData = await response.json();
         console.log('✅ User authenticated:', userData.email);
+        console.log('🔄 Setting authenticated state to true...');
         
-        setAuthState({
-          user: userData,
-          isAuthenticated: true,
-          isLoading: false
+        // Force state update with functional setter
+        setAuthState(prevState => {
+          const newState = {
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false
+          };
+          console.log('📋 State transition:', { from: prevState, to: newState });
+          return newState;
         });
       } else {
-        console.log('❌ Authentication failed');
-        setAuthState({
+        console.log('❌ Authentication failed, status:', response.status);
+        const errorText = await response.text();
+        console.log('❌ Error response:', errorText);
+        setAuthState(prevState => ({
           user: null,
           isAuthenticated: false,
           isLoading: false
-        });
+        }));
       }
     } catch (error) {
       console.log('🚨 Auth check error:', error);
-      setAuthState({
+      setAuthState(prevState => ({
         user: null,
         isAuthenticated: false,
         isLoading: false
-      });
+      }));
     }
-  };
+  }, []);
 
   const refreshAuth = () => {
     console.log('🔄 Refreshing authentication...');
