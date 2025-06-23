@@ -167,35 +167,16 @@ export default function Sidebar() {
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
       
-      // Debug for Admin Portal
-      if (group.label === "ADMIN PORTAL") {
-        console.log(`Admin Portal Item: ${item.label}, Has Access: ${hasAccess}, User Role: ${user?.role}`);
-      }
+
       
       return hasAccess;
     })
   })).filter(group => {
     const hasItems = group.items.length > 0;
-    if (group.label === "ADMIN PORTAL") {
-      console.log(`Admin Portal Group: ${group.items.length} items, Will Show: ${hasItems}`);
-    }
     return hasItems;
   });
 
-  // Debug final visible groups
-  console.log("Final Visible Groups:", visibleGroups.map(g => g.label));
-  console.log("Expanded Groups State:", Array.from(expandedGroups));
-  console.log("Sidebar collapsed state:", isCollapsed);
-  console.log("ACTUAL RENDER STATE - isCollapsed value being used:", isCollapsed);
-  
-  // Debug specific Admin Portal group
-  const adminPortalGroup = visibleGroups.find(g => g.label === "ADMIN PORTAL");
-  if (adminPortalGroup) {
-    console.log("Admin Portal Group Found:", adminPortalGroup.items.length, "items");
-    console.log("Admin Portal Items:", adminPortalGroup.items.map(i => i.label));
-  } else {
-    console.log("Admin Portal Group NOT FOUND in visibleGroups");
-  }
+
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
@@ -218,7 +199,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'}`}>
+    <div className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'} overflow-hidden`}>
       {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         {/* Logo and Toggle */}
@@ -279,7 +260,7 @@ export default function Sidebar() {
 
       {/* Navigation Groups */}
       <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${isCollapsed ? 'p-2' : 'p-4 space-y-6'} min-h-0`}>
-        {false ? ( // TEMPORARILY FORCE EXPANDED MODE TO TEST ADMIN PORTAL
+        {isCollapsed ? (
           // Collapsed Navigation - Icon Only
           <div className="space-y-2">
             {navigationGroups.flatMap(group => 
@@ -329,13 +310,10 @@ export default function Sidebar() {
             }
             
             return (
-              <div key={group.label} className={group.label === "ADMIN PORTAL" ? "bg-yellow-300 p-4 border-4 border-black min-h-[200px]" : ""}>
+              <div key={group.label}>
                 <button
                   onClick={() => toggleGroup(group.label)}
-                  className={group.label === "ADMIN PORTAL" ? 
-                    "flex items-center justify-between w-full text-2xl font-bold text-black uppercase tracking-wide mb-3 bg-red-500 p-4" :
-                    "flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400"
-                  }
+                  className="flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400"
                 >
                   <span>{group.label}</span>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
