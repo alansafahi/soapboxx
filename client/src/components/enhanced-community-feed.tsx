@@ -325,8 +325,8 @@ export default function EnhancedCommunityFeed() {
                   </div>
                 </DialogContent>
               </Dialog>
-            </div>
           </div>
+        </div>
         </CardContent>
       </Card>
 

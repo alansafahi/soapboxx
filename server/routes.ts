@@ -4,6 +4,20 @@ import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
+import { db } from "./db";
+import { 
+  users, 
+  churches, 
+  soapEntries, 
+  discussions, 
+  bibleVerses,
+  events,
+  prayers,
+  notifications,
+  contacts,
+  invitations
+} from "../shared/schema";
+import { eq, and, or, gte, lte, desc, asc, like, sql, count } from "drizzle-orm";
 // Bible verse functions integrated directly in storage layer
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
@@ -600,22 +614,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (appleUserData) {
         // First time sign in - Apple provides user data
         const parsedUserData = typeof appleUserData === 'string' ? JSON.parse(appleUserData) : appleUserData;
-        userData = { ...decoded, ...parsedUserData };
+        userData = Object.assign({}, decoded, parsedUserData);
       }
 
       // Check if user exists or create new one
-      let user = await storage.getUserByEmail(userData.email);
-      if (!user) {
-        user = await storage.createUser({
-          id: crypto.randomUUID(),
-          email: userData.email,
-          username: userData.email.split('@')[0],
-          firstName: userData.name?.firstName || '',
-          lastName: userData.name?.lastName || '',
-          role: "member",
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+      if (userData && typeof userData === 'object' && 'email' in userData && userData.email) {
+        let user = await storage.getUserByEmail(userData.email as string);
+        if (!user) {
+          const emailStr = userData.email as string;
+          user = await storage.createUser({
+            id: crypto.randomUUID(),
+            email: emailStr,
+            username: emailStr.split('@')[0],
+            firstName: (userData as any).name?.firstName || '',
+            lastName: (userData as any).name?.lastName || '',
+            role: "member",
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+        
+        // Establish session
+        req.session.userId = user.id;
+        req.session.authenticated = true;
+        
+        res.redirect('/');
+      } else {
+        res.status(400).json({ message: 'Invalid Apple ID token data' });
       }
 
       // Set session
