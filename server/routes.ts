@@ -5002,8 +5002,8 @@ Return JSON with this exact structure:
         updatedAt: new Date()
       });
 
-      // Make user the church admin by joining with admin role
-      await storage.joinChurch(newChurch.id, userId, 'church_admin');
+      // Make user a member of the church they created
+      await storage.joinChurch(req.session.userId, newChurch.id);
 
       res.json({
         success: true,

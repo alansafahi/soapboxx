@@ -2311,6 +2311,16 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
+  async updateUserChurchRole(userId: string, churchId: number, role: string): Promise<void> {
+    await db
+      .update(userChurches)
+      .set({ role })
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.churchId, churchId)
+      ));
+  }
+
   // Friend operations
   async getFriends(userId: string): Promise<User[]> {
     const friendsList = await db
