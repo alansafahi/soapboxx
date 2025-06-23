@@ -1935,6 +1935,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Virtual check-in API endpoint
+  app.post('/api/checkins', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      console.log('🔷 Virtual check-in request received:', {
+        body: req.body,
+        userId: userId,
+        sessionId: req.sessionID
+      });
+
+      const { 
+        checkInType, 
+        mood, 
+        moodEmoji, 
+        notes, 
+        prayerIntent, 
+        isPhysicalAttendance = false,
+        qrCodeId,
+        location 
+      } = req.body;
+
+      // Create the check-in record
+      const checkIn = await storage.createCheckIn({
+        userId,
+        checkInType,
+        mood,
+        moodEmoji,
+        notes,
+        prayerIntent,
+        isPhysicalAttendance,
+        qrCodeId,
+        location,
+        streakCount: 1, // Will be calculated properly
+        pointsEarned: 10 // Base points
+      });
+
+      console.log('✅ Virtual check-in created:', checkIn.id);
+
+      res.json({
+        ...checkIn,
+        streakCount: checkIn.streakCount,
+        pointsEarned: checkIn.pointsEarned
+      });
+    } catch (error) {
+      console.error('💥 Error creating virtual check-in:', error);
+      res.status(500).json({ message: 'Failed to create check-in', error: error.message });
+    }
+  });
+
+  app.get('/api/checkins/today', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const todayCheckIn = await storage.getUserDailyCheckIn(userId);
+      res.json(todayCheckIn);
+    } catch (error) {
+      console.error('Error fetching today check-in:', error);
+      res.status(500).json({ message: 'Failed to fetch today check-in' });
+    }
+  });
+
+  app.get('/api/checkins/streak', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const streak = await storage.getUserCheckInStreak(userId);
+      res.json({ streak });
+    } catch (error) {
+      console.error('Error fetching user streak:', error);
+      res.status(500).json({ message: 'Failed to fetch streak' });
+    }
+  });
+
+  app.get('/api/checkins/recent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 10;
+      const recentCheckIns = await storage.getUserCheckIns(userId, limit);
+      res.json(recentCheckIns);
+    } catch (error) {
+      console.error('Error fetching recent check-ins:', error);
+      res.status(500).json({ message: 'Failed to fetch recent check-ins' });
+    }
+  });
+
   app.get('/api/mood-checkins/insights', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;

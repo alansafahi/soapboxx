@@ -3841,6 +3841,8 @@ export class DatabaseStorage implements IStorage {
     return streak;
   }
 
+
+
   async getChurchCheckIns(churchId: number, date = new Date()): Promise<(CheckIn & { user: User })[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
