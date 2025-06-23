@@ -68,9 +68,9 @@ export default function LoginPage() {
             description: `Logged in as ${userData.user.firstName} ${userData.user.lastName}`,
           });
           
-          // Wait for session to be established then redirect
+          // Wait for session to be established then redirect to dashboard
           setTimeout(() => {
-            window.location.replace('/');
+            window.location.replace('/dashboard');
           }, 500);
         } else {
           const errorData = await loginResponse.json();

@@ -46,9 +46,29 @@ export default function Landing() {
     }
   };
 
-  const handleDashboard = () => {
-    // Navigate to dashboard using router for authenticated users
-    setLocation('/dashboard');
+  const handleDashboard = async () => {
+    // Force authentication check before navigation to ensure proper state
+    try {
+      const response = await fetch('/api/auth/user', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (response.ok) {
+        // Authentication confirmed, navigate to dashboard
+        setLocation('/dashboard');
+      } else {
+        // Authentication failed, redirect to login
+        setLocation('/login');
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setLocation('/login');
+    }
   };
 
   return (
