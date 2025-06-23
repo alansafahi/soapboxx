@@ -34,15 +34,28 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
     mutationFn: async () => {
       if (!selectedMood) throw new Error("Please select a mood");
       
-      const response = await apiRequest("POST", "/api/mood-checkins", {
-        mood: selectedMood.value,
-        moodScore: selectedMood.score,
-        moodEmoji: selectedMood.emoji,
-        notes: notes.trim() || null,
-        shareWithStaff,
-        generatePersonalizedContent: true
-      });
-      return await response.json();
+      try {
+        const response = await apiRequest("POST", "/api/mood-checkins", {
+          mood: selectedMood.value,
+          moodScore: selectedMood.score,
+          moodEmoji: selectedMood.emoji,
+          notes: notes.trim() || null,
+          shareWithStaff,
+          generatePersonalizedContent: true
+        });
+        
+        // Check if response is ok
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Mood check-in error:', response.status, errorText);
+          throw new Error(`Server error: ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Mood check-in request failed:', error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setPersonalizedContent(data.personalizedContent);
@@ -54,9 +67,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
       if (onComplete) onComplete();
     },
     onError: (error) => {
+      console.error('Mood check-in mutation error:', error);
       toast({
-        title: "Error",
-        description: "Failed to record mood check-in. Please try again.",
+        title: "Check-in Failed",
+        description: error.message || "Failed to record mood check-in. Please try again.",
         variant: "destructive"
       });
     }

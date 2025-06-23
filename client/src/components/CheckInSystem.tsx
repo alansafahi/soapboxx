@@ -553,6 +553,12 @@ export default function CheckInSystem() {
       {showMoodCheckIn && (
         <Dialog open={showMoodCheckIn} onOpenChange={setShowMoodCheckIn}>
           <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>AI Mood Check-In</DialogTitle>
+              <DialogDescription>
+                Share how you're feeling to receive personalized spiritual guidance
+              </DialogDescription>
+            </DialogHeader>
             <MoodCheckIn 
               onComplete={() => {
                 setShowMoodCheckIn(false);
