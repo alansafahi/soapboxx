@@ -346,7 +346,7 @@ export function setupAuth(app: Express): void {
         lastName: user.lastName,
         role: user.role,
       };
-      (req.session as any).authenticated = true;
+      (req.session as any).authenticated = true;ated = true;
 
       console.log('🔐 Creating session for user:', user.email);
 
