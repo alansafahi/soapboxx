@@ -52,17 +52,22 @@ export default function CommunityPage() {
     : 'Connect with fellow believers and share your faith journey';
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 pb-20 md:pb-0">
+      {/* Enhanced Header */}
+      <div className="bg-white/90 backdrop-blur-sm shadow-lg border-b border-purple-100">
+        <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
-              <p className="text-gray-600 mt-1">{pageDescription}</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                {pageTitle}
+              </h1>
+              <p className="text-gray-600 mt-2 text-lg">
+                {pageDescription}
+              </p>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Users className="h-4 w-4 mr-2" />
+            <div className="hidden md:flex items-center space-x-4">
+              <Button variant="outline" size="sm" className="border-purple-200 hover:bg-purple-50">
+                <Users className="h-4 w-4 mr-2 text-purple-600" />
                 Groups
               </Button>
             </div>
@@ -70,7 +75,7 @@ export default function CommunityPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         <Tabs defaultValue="enhanced" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="enhanced" className="flex items-center space-x-2">
