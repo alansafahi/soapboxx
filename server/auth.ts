@@ -312,12 +312,7 @@ export function setupAuth(app: Express): void {
 
       // Find user by email
       const user = await storage.getUserByEmail(email);
-      console.log('🔍 Login attempt for:', email);
-      console.log('🔍 User found:', !!user);
-      console.log('🔍 User has password:', !!user?.password);
-      
       if (!user || !user.password) {
-        console.log('❌ User not found or no password');
         return res.status(401).json({ 
           success: false,
           message: 'Invalid email or password' 
@@ -325,12 +320,8 @@ export function setupAuth(app: Express): void {
       }
 
       // Verify password
-      console.log('🔍 Comparing password with hash...');
       const isValidPassword = await bcrypt.compare(password, user.password);
-      console.log('🔍 Password valid:', isValidPassword);
-      
       if (!isValidPassword) {
-        console.log('❌ Password verification failed');
         return res.status(401).json({ 
           success: false,
           message: 'Invalid email or password' 
