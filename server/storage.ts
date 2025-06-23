@@ -235,12 +235,6 @@ import {
   type InsertVideoContentDB,
   type Notification,
   type InsertNotification,
-  contacts,
-  invitations,
-  type Contact,
-  type InsertContact,
-  type Invitation,
-  type InsertInvitation,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray } from "drizzle-orm";
@@ -3808,20 +3802,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserCheckInStreak(userId: string): Promise<number> {
-    const checkIns = await db
+    const userCheckIns = await db
       .select()
       .from(checkIns)
       .where(eq(checkIns.userId, userId))
       .orderBy(desc(checkIns.createdAt))
       .limit(365); // Look back up to a year
 
-    if (checkIns.length === 0) return 0;
+    if (userCheckIns.length === 0) return 0;
 
     let streak = 0;
     let currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
-    for (const checkIn of checkIns) {
+    for (const checkIn of userCheckIns) {
       const checkInDate = new Date(checkIn.createdAt);
       checkInDate.setHours(0, 0, 0, 0);
       
