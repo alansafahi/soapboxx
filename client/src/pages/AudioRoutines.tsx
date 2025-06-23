@@ -1218,11 +1218,18 @@ export default function AudioRoutines() {
       // Clear any previous session termination flags
       (window as any).sessionTerminated = false;
       
-      // Stop any existing session first
+      // Stop any existing meditation session first
       if (playingRoutine) {
         stopAudioRoutine();
         // Wait a moment for cleanup to complete
         await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Stop any existing devotional session
+      if (playingDevotional) {
+        stopDevotionalRoutine();
+        // Wait a moment for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
       
       setPlayingRoutine(routine.id);
@@ -1611,6 +1618,23 @@ export default function AudioRoutines() {
 
   const playDevotionalRoutine = async (routine: DevotionalRoutine) => {
     try {
+      // Clear any previous session termination flags
+      (window as any).sessionTerminated = false;
+      
+      // Stop any existing meditation session first
+      if (playingRoutine) {
+        stopAudioRoutine();
+        // Wait a moment for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Stop any existing devotional session
+      if (playingDevotional) {
+        stopDevotionalRoutine();
+        // Wait a moment for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
       setPlayingDevotional(routine.id);
       setCurrentDevotionalSegment(0);
       setDevotionalProgress(0);
@@ -1695,14 +1719,35 @@ export default function AudioRoutines() {
   };
 
   const stopDevotionalRoutine = () => {
+    console.log('Stop devotional button pressed - initiating cleanup');
+    
+    // Immediate session termination flag
+    (window as any).sessionTerminated = true;
+    
+    // Stop and cleanup devotional audio
     if (devotionalAudio) {
       devotionalAudio.pause();
       devotionalAudio.currentTime = 0;
+      devotionalAudio.removeEventListener('timeupdate', () => {});
+      devotionalAudio.removeEventListener('ended', () => {});
+      devotionalAudio.removeEventListener('loadeddata', () => {});
       setDevotionalAudio(null);
     }
+    
+    // Reset all devotional states
     setPlayingDevotional(null);
     setDevotionalProgress(0);
     setCurrentDevotionalSegment(0);
+    
+    // Cancel any speech synthesis
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    
+    // Small delay to ensure cleanup completes
+    setTimeout(() => {
+      console.log('Devotional cleanup completed');
+    }, 500);
     
     toast({
       title: "Devotional Stopped",
@@ -1716,6 +1761,18 @@ export default function AudioRoutines() {
     
     // Immediate session termination flag
     (window as any).sessionTerminated = true;
+    
+    // Also stop any running devotional session
+    if (playingDevotional) {
+      if (devotionalAudio) {
+        devotionalAudio.pause();
+        devotionalAudio.currentTime = 0;
+        setDevotionalAudio(null);
+      }
+      setPlayingDevotional(null);
+      setDevotionalProgress(0);
+      setCurrentDevotionalSegment(0);
+    }
     
     // Clear all timeout references
     if (autoPauseTimeout) {
