@@ -77,8 +77,12 @@ export default function LoginPage() {
             description: `Logged in as ${userData.user.firstName} ${userData.user.lastName}`,
           });
           
-          // Redirect to dashboard
-          setLocation('/');
+          // Force authentication state refresh
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+          
+          // Immediate redirect with authentication state refresh
+          window.location.replace('/');
+          return;
         } else {
           let errorMessage = 'Login failed';
           try {
