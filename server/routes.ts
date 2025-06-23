@@ -4903,7 +4903,11 @@ Return JSON with this exact structure:
         zipCode,
         phone,
         email,
-        website
+        website,
+        logoUrl,
+        size,
+        hoursOfOperation,
+        socialMedia
       } = req.body;
 
       // Enhanced validation with specific error messages
@@ -4987,8 +4991,13 @@ Return JSON with this exact structure:
         phone: phone?.trim() || null,
         email: email?.trim() || null,
         website: website?.trim() || null,
+        logoUrl: logoUrl?.trim() || null,
+        size: size?.trim() || null,
+        hoursOfOperation: hoursOfOperation || null,
+        socialLinks: socialMedia || null,
         isActive: true,
         isClaimed: true, // Immediately claimed by creator
+        isDemo: false, // New churches are not demo data
         createdAt: new Date(),
         updatedAt: new Date()
       });

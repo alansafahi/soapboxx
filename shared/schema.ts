@@ -121,6 +121,8 @@ export const churches = pgTable("churches", {
   email: varchar("email", { length: 255 }),
   website: varchar("website", { length: 255 }),
   logoUrl: varchar("logo_url"), // Changed from imageUrl for clarity
+  size: varchar("size", { length: 50 }), // Weekly attendance category
+  hoursOfOperation: jsonb("hours_of_operation"), // Operating hours for each day of the week
   socialLinks: jsonb("social_links"), // Facebook, Instagram, Twitter, YouTube, etc.
   communityTags: text("community_tags").array(), // Custom tags for community categorization
   latitude: real("latitude"),
