@@ -3738,6 +3738,16 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       );
       
       let availableVerses = diverseVerses;
+      
+      // Additional aggressive deduplication to prevent any reference duplicates
+      const uniqueByReference = new Map();
+      availableVerses = availableVerses.filter(verse => {
+        if (uniqueByReference.has(verse.reference)) {
+          return false;
+        }
+        uniqueByReference.set(verse.reference, verse);
+        return true;
+      });
       if (categories && categories.length > 0) {
         const categoryList = Array.isArray(categories) ? categories : [categories];
         availableVerses = diverseVerses.filter(verse => 
@@ -3801,7 +3811,7 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
           .map((id: number) => availableVerses.find(v => v.id === id))
           .filter(Boolean);
         
-        // Ensure unique references in AI selection
+        // Ensure unique references in AI selection - only allow completely unique Bible references
         const uniqueRefs = new Set();
         selectedVerses = foundVerses.filter(verse => {
           if (uniqueRefs.has(verse.reference)) {
@@ -3809,7 +3819,7 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
           }
           uniqueRefs.add(verse.reference);
           return true;
-        }).slice(0, parseInt(count.toString()));
+        });
       }
 
       // If AI didn't provide enough verses or none were found, use category-based fallback
@@ -3860,23 +3870,34 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
           'anxious': ['Peace', 'Comfort', 'Strength']
         };
         const moodCategories = moodCategoryMap[mood] || ['Faith', 'Hope', 'Love'];
+        // Filter fallback verses to ensure no duplicate references
         const fallbackVerses = availableVerses
-          .filter(v => 
-            !usedIds.includes(v.id) && 
-            !usedReferences.includes(v.reference) &&
-            (moodCategories.includes(v.category) || ['Core', 'Faith', 'Hope'].includes(v.category))
-          )
+          .filter(v => !usedReferences.includes(v.reference) && !usedIds.includes(v.id))
+          .filter(v => moodCategories.includes(v.category) || ['Core', 'Faith', 'Hope'].includes(v.category))
           .slice(0, remainingCount);
         
-        selectedVerses.push(...fallbackVerses);
+        // Only add fallback verses that maintain unique references
+        for (const verse of fallbackVerses) {
+          if (!usedReferences.includes(verse.reference)) {
+            selectedVerses.push(verse);
+            usedReferences.push(verse.reference);
+          }
+        }
       }
 
-      // Final safety check - if still no verses, use any available verses
+      // Final safety check - if still no verses, use any available verses with unique references
       if (selectedVerses.length === 0 && availableVerses.length > 0) {
-        selectedVerses = availableVerses.slice(0, parseInt(count.toString()));
+        const uniqueRefsSet = new Set();
+        selectedVerses = availableVerses.filter(verse => {
+          if (uniqueRefsSet.has(verse.reference)) {
+            return false;
+          }
+          uniqueRefsSet.add(verse.reference);
+          return true;
+        }).slice(0, parseInt(count.toString()));
       }
 
-      // Final deduplication pass to ensure absolutely no duplicate references
+      // Final aggressive deduplication - only show completely unique Bible references
       const finalUniqueVerses = [];
       const seenReferences = new Set();
       
@@ -3887,14 +3908,24 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
         }
       }
       
-      // If we lost verses due to deduplication, fill with unique alternatives
-      if (finalUniqueVerses.length < parseInt(count.toString()) && availableVerses.length > finalUniqueVerses.length) {
+      // If we need more verses and have unique alternatives available
+      if (finalUniqueVerses.length < parseInt(count.toString())) {
         const additionalVerses = availableVerses.filter(v => 
           !seenReferences.has(v.reference) && 
           !finalUniqueVerses.some(fv => fv.id === v.id)
-        ).slice(0, parseInt(count.toString()) - finalUniqueVerses.length);
+        );
         
-        finalUniqueVerses.push(...additionalVerses);
+        // Add only as many unique verses as we have available
+        const neededCount = parseInt(count.toString()) - finalUniqueVerses.length;
+        const availableUniqueCount = Math.min(neededCount, additionalVerses.length);
+        
+        for (let i = 0; i < availableUniqueCount; i++) {
+          const verse = additionalVerses[i];
+          if (!seenReferences.has(verse.reference)) {
+            finalUniqueVerses.push(verse);
+            seenReferences.add(verse.reference);
+          }
+        }
       }
 
       res.json({
