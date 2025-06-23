@@ -135,14 +135,14 @@ export default function Sidebar() {
     {
       label: "ADMIN PORTAL",
       items: [
-        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
-        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
-        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
-        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
-        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
-        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
-        { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor'] },
+        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
+        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
+        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
+        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
+        { label: "AI Content Showcase", href: "/ai-content-demo", icon: Mic, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'] },
       ]
     }
   ];
@@ -152,7 +152,11 @@ export default function Sidebar() {
     ...group,
     items: group.items.filter(item => 
       !item.roles || item.roles.some(role => 
-        (userRole as any)?.roles?.includes(role) || (userRole as any)?.roles?.includes('super-admin')
+        // Check if user has the role directly or in roles array
+        user?.role === role || 
+        (userRole as any)?.roles?.includes(role) || 
+        (userRole as any)?.roles?.includes('super-admin') ||
+        user?.role === 'soapbox_owner' // Always show for soapbox_owner
       )
     )
   })).filter(group => group.items.length > 0);
@@ -245,7 +249,11 @@ export default function Sidebar() {
             {navigationGroups.flatMap(group => 
               group.items.filter(item => 
                 !item.roles || item.roles.some(role => 
-                  (userRole as any)?.roles?.includes(role) || (userRole as any)?.roles?.includes('super-admin')
+                  // Check if user has the role directly or in roles array
+                  user?.role === role || 
+                  (userRole as any)?.roles?.includes(role) || 
+                  (userRole as any)?.roles?.includes('super-admin') ||
+                  user?.role === 'soapbox_owner' // Always show for soapbox_owner
                 )
               )
             ).map((item) => {
