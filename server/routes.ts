@@ -12,12 +12,12 @@ import {
   discussions, 
   bibleVerses,
   events,
-  prayers,
+  prayerRequests,
   notifications,
   contacts,
   invitations
 } from "../shared/schema";
-import { eq, and, or, gte, lte, desc, asc, like, sql, count } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, asc, like, sql, count, ilike, isNotNull, inArray } from "drizzle-orm";
 // Bible verse functions integrated directly in storage layer
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
@@ -84,8 +84,6 @@ const openai = new OpenAI({
 });
 import * as schema from "@shared/schema";
 import { userChurches } from "@shared/schema";
-import { db } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
 // Donation receipts functionality removed for production cleanup
 
 // AI-powered post categorization
@@ -644,8 +642,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Set session
-      (req.session as any).userId = user.id;
-      (req.session as any).user = user;
+      req.session.userId = user.id;
+      req.session.authenticated = true;
 
       res.redirect('/');
     } catch (error) {

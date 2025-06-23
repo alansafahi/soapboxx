@@ -327,7 +327,7 @@ export default function EnhancedCommunityFeed() {
               </Dialog>
           </div>
         </div>
-        </CardContent>
+      </Card>
       </Card>
 
       {/* Posts Feed */}
