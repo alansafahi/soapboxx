@@ -300,6 +300,11 @@ export interface IStorage {
   searchChurches(params: { denomination?: string; location?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]>;
   getChurchDenominations(): Promise<string[]>;
   
+  // Church verification operations
+  getChurchesByStatus(status?: string): Promise<Church[]>;
+  approveChurch(churchId: number, approvedBy: string): Promise<void>;
+  rejectChurch(churchId: number, reason: string, rejectedBy: string): Promise<void>;
+  
   // Church team management
   getUserChurch(userId: string): Promise<UserChurch | undefined>;
   getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]>;

@@ -8112,7 +8112,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const status = req.query.status as string;
       
       // Check if user has church management permissions
-      const user = await storage.getUserById(userId);
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'soapbox_owner') {
         return res.status(403).json({ message: 'Insufficient permissions' });
       }
@@ -8133,7 +8133,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const { churchId } = req.body;
       
       // Check if user has church management permissions
-      const user = await storage.getUserById(userId);
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'soapbox_owner') {
         return res.status(403).json({ message: 'Insufficient permissions' });
       }
@@ -8154,7 +8154,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const { churchId, reason } = req.body;
       
       // Check if user has church management permissions
-      const user = await storage.getUserById(userId);
+      const user = await storage.getUser(userId);
       if (!user || user.role !== 'soapbox_owner') {
         return res.status(403).json({ message: 'Insufficient permissions' });
       }
