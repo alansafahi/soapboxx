@@ -65,7 +65,26 @@ export default function EnhancedChurchDiscovery() {
     zipCode: '',
     phone: '',
     email: '',
-    website: ''
+    website: '',
+    logoUrl: '',
+    size: '',
+    hoursOfOperation: {
+      monday: '',
+      tuesday: '',
+      wednesday: '',
+      thursday: '',
+      friday: '',
+      saturday: '',
+      sunday: ''
+    },
+    socialMedia: {
+      facebook: '',
+      twitter: '',
+      instagram: '',
+      youtube: '',
+      tiktok: '',
+      linkedin: ''
+    }
   });
 
   // Auto-detect user location on component mount (only if user hasn't interacted)
@@ -234,7 +253,26 @@ export default function EnhancedChurchDiscovery() {
         zipCode: '',
         phone: '',
         email: '',
-        website: ''
+        website: '',
+        logoUrl: '',
+        size: '',
+        hoursOfOperation: {
+          monday: '',
+          tuesday: '',
+          wednesday: '',
+          thursday: '',
+          friday: '',
+          saturday: '',
+          sunday: ''
+        },
+        socialMedia: {
+          facebook: '',
+          twitter: '',
+          instagram: '',
+          youtube: '',
+          tiktok: '',
+          linkedin: ''
+        }
       });
       queryClient.invalidateQueries({ queryKey: ['/api/churches'] });
     },
@@ -287,6 +325,10 @@ export default function EnhancedChurchDiscovery() {
     
     if (!newChurchData.city?.trim()) {
       errors.push("City is required");
+    }
+    
+    if (!newChurchData.size?.trim()) {
+      errors.push("Church size is required");
     }
 
     // Validate email format if provided
@@ -1066,6 +1108,150 @@ export default function EnhancedChurchDiscovery() {
                 onChange={(e) => setNewChurchData(prev => ({ ...prev, website: e.target.value }))}
                 placeholder="https://www.church.org"
               />
+            </div>
+
+            {/* Church Logo */}
+            <div className="grid gap-2">
+              <Label htmlFor="logoUrl">Church Logo URL</Label>
+              <Input
+                id="logoUrl"
+                value={newChurchData.logoUrl}
+                onChange={(e) => setNewChurchData(prev => ({ ...prev, logoUrl: e.target.value }))}
+                placeholder="https://example.com/logo.jpg"
+              />
+              <p className="text-xs text-gray-500">
+                Optional: URL to your church's logo image
+              </p>
+            </div>
+
+            {/* Church Size */}
+            <div className="grid gap-2">
+              <Label htmlFor="churchSize">Weekly Attendance *</Label>
+              <Select value={newChurchData.size} onValueChange={(value) => setNewChurchData(prev => ({ ...prev, size: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select weekly attendance" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Under 100">Under 100 (House church)</SelectItem>
+                  <SelectItem value="100-299">100-299 (Close-knit community)</SelectItem>
+                  <SelectItem value="300-499">300-499 (Community church)</SelectItem>
+                  <SelectItem value="500-999">500-999 (Multi-ministry)</SelectItem>
+                  <SelectItem value="1000-2999">1000-2999 (Multi-staff)</SelectItem>
+                  <SelectItem value="3000+">3000+ (Mega church)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Hours of Operation */}
+            <div className="grid gap-3">
+              <Label className="text-sm font-medium">Hours of Operation</Label>
+              <div className="space-y-2">
+                {Object.entries(newChurchData.hoursOfOperation).map(([day, hours]) => (
+                  <div key={day} className="flex items-center gap-3">
+                    <div className="w-20 text-sm capitalize">{day}:</div>
+                    <Input
+                      value={hours}
+                      onChange={(e) => setNewChurchData(prev => ({
+                        ...prev,
+                        hoursOfOperation: {
+                          ...prev.hoursOfOperation,
+                          [day]: e.target.value
+                        }
+                      }))}
+                      placeholder="9:00 AM - 5:00 PM"
+                      className="flex-1 text-sm"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500">
+                Enter service times and office hours for each day
+              </p>
+            </div>
+
+            {/* Social Media Links */}
+            <div className="grid gap-3">
+              <Label className="text-sm font-medium">Social Media Links</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="facebook" className="text-xs">Facebook</Label>
+                  <Input
+                    id="facebook"
+                    value={newChurchData.socialMedia.facebook}
+                    onChange={(e) => setNewChurchData(prev => ({
+                      ...prev,
+                      socialMedia: { ...prev.socialMedia, facebook: e.target.value }
+                    }))}
+                    placeholder="https://facebook.com/church"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="instagram" className="text-xs">Instagram</Label>
+                  <Input
+                    id="instagram"
+                    value={newChurchData.socialMedia.instagram}
+                    onChange={(e) => setNewChurchData(prev => ({
+                      ...prev,
+                      socialMedia: { ...prev.socialMedia, instagram: e.target.value }
+                    }))}
+                    placeholder="https://instagram.com/church"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="twitter" className="text-xs">Twitter</Label>
+                  <Input
+                    id="twitter"
+                    value={newChurchData.socialMedia.twitter}
+                    onChange={(e) => setNewChurchData(prev => ({
+                      ...prev,
+                      socialMedia: { ...prev.socialMedia, twitter: e.target.value }
+                    }))}
+                    placeholder="https://twitter.com/church"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="youtube" className="text-xs">YouTube</Label>
+                  <Input
+                    id="youtube"
+                    value={newChurchData.socialMedia.youtube}
+                    onChange={(e) => setNewChurchData(prev => ({
+                      ...prev,
+                      socialMedia: { ...prev.socialMedia, youtube: e.target.value }
+                    }))}
+                    placeholder="https://youtube.com/church"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="tiktok" className="text-xs">TikTok</Label>
+                  <Input
+                    id="tiktok"
+                    value={newChurchData.socialMedia.tiktok}
+                    onChange={(e) => setNewChurchData(prev => ({
+                      ...prev,
+                      socialMedia: { ...prev.socialMedia, tiktok: e.target.value }
+                    }))}
+                    placeholder="https://tiktok.com/@church"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="linkedin" className="text-xs">LinkedIn</Label>
+                  <Input
+                    id="linkedin"
+                    value={newChurchData.socialMedia.linkedin}
+                    onChange={(e) => setNewChurchData(prev => ({
+                      ...prev,
+                      socialMedia: { ...prev.socialMedia, linkedin: e.target.value }
+                    }))}
+                    placeholder="https://linkedin.com/company/church"
+                    className="text-sm"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
