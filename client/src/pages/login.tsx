@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useDirectAuth } from "@/hooks/useDirectAuth";
+import { useImmediateAuth } from "@/lib/immediateAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +14,24 @@ import { Separator } from "@/components/ui/separator";
 import { useLocation } from "wouter";
 
 export default function LoginPage() {
+  const { isAuthenticated, isLoading: authLoading } = useImmediateAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const directAuth = useDirectAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      console.log('🔄 User already authenticated on login page, redirecting to dashboard...');
+      setLocation('/');
+    }
+  }, [isAuthenticated, authLoading, setLocation]);
+
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
-  const { toast } = useToast();
-  const [, setLocation] = useLocation();
-  const directAuth = useDirectAuth();
   
   const [formData, setFormData] = useState({
     email: "",

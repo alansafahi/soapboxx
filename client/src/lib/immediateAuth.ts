@@ -27,6 +27,13 @@ export function useImmediateAuth() {
     const listener = (newState: AuthState) => {
       console.log('🔄 Auth state updated:', newState);
       setAuthState(newState);
+      
+      // Redirect to dashboard if user becomes authenticated while on login page
+      if (newState.isAuthenticated && window.location.pathname === '/login') {
+        console.log('🔄 Authenticated user on login page, forcing page refresh to dashboard...');
+        // Use window.location.href for immediate redirection
+        window.location.href = '/';
+      }
     };
     
     authListeners.push(listener);
@@ -62,6 +69,12 @@ export function useImmediateAuth() {
         
         console.log('📋 Immediately setting auth state:', newState);
         notifyListeners(newState);
+        
+        // Immediate redirect if on login page
+        if (window.location.pathname === '/login') {
+          console.log('🔄 User authenticated on login page, immediate redirect to dashboard');
+          window.location.replace('/');
+        }
       } else {
         console.log('❌ Authentication failed');
         const newState = {
