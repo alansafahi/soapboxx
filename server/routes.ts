@@ -4906,23 +4906,87 @@ Return JSON with this exact structure:
         website
       } = req.body;
 
-      // Validate required fields
-      if (!name || !city || !state) {
-        return res.status(400).json({ message: 'Church name, city, and state are required' });
+      // Enhanced validation with specific error messages
+      const errors = [];
+
+      if (!name?.trim()) {
+        errors.push('Church name is required');
+      }
+
+      if (!city?.trim()) {
+        errors.push('City is required');
+      }
+
+      if (!denomination?.trim()) {
+        errors.push('Denomination is required');
+      }
+
+      // Validate email format if provided
+      if (email?.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+          errors.push('Please enter a valid email address');
+        }
+      }
+
+      // Validate website format if provided
+      if (website?.trim()) {
+        const websiteRegex = /^https?:\/\/.+\..+/;
+        if (!websiteRegex.test(website.trim())) {
+          errors.push('Website must start with http:// or https://');
+        }
+      }
+
+      // Validate phone format if provided
+      if (phone?.trim()) {
+        const phoneRegex = /^[\+]?[\d\s\-\(\)\.]{10,}$/;
+        if (!phoneRegex.test(phone.trim())) {
+          errors.push('Please enter a valid phone number');
+        }
+      }
+
+      if (errors.length > 0) {
+        return res.status(400).json({ 
+          message: errors.join('. '),
+          errors: errors
+        });
+      }
+
+      // Check for duplicate church names in the same city
+      try {
+        const existingChurches = await storage.searchChurches({
+          churchName: name.trim(),
+          location: city.trim(),
+          limit: 5
+        });
+
+        const duplicateChurch = existingChurches.find(church => 
+          church.name.toLowerCase().trim() === name.toLowerCase().trim() &&
+          church.city?.toLowerCase().trim() === city.toLowerCase().trim()
+        );
+
+        if (duplicateChurch) {
+          return res.status(409).json({ 
+            message: 'A church with this name already exists in this city'
+          });
+        }
+      } catch (searchError) {
+        console.warn('Could not check for duplicate churches:', searchError);
+        // Continue with creation if search fails
       }
 
       // Create church using storage method
       const newChurch = await storage.createChurch({
-        name,
-        denomination: denomination || 'Non-denominational',
-        description,
-        address,
-        city,
-        state,
-        zipCode,
-        phone,
-        email,
-        website,
+        name: name.trim(),
+        denomination: denomination?.trim() || 'Non-denominational',
+        description: description?.trim() || null,
+        address: address?.trim() || null,
+        city: city.trim(),
+        state: state?.trim() || null,
+        zipCode: zipCode?.trim() || null,
+        phone: phone?.trim() || null,
+        email: email?.trim() || null,
+        website: website?.trim() || null,
         isActive: true,
         isClaimed: true, // Immediately claimed by creator
         createdAt: new Date(),
@@ -4938,9 +5002,25 @@ Return JSON with this exact structure:
         church: newChurch
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating church:', error);
-      res.status(500).json({ message: 'Failed to create church' });
+      
+      // Handle specific database errors
+      let errorMessage = 'Failed to create church. Please try again.';
+      
+      if (error?.code === '23505') { // PostgreSQL unique constraint violation
+        errorMessage = 'A church with this information already exists';
+      } else if (error?.code === '23502') { // PostgreSQL not null violation
+        errorMessage = 'Missing required information. Please check all fields.';
+      } else if (error?.code === '23514') { // PostgreSQL check constraint violation
+        errorMessage = 'Invalid data format. Please check your entries.';
+      } else if (error?.message?.includes('network')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else if (error?.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. Please try again.';
+      }
+
+      res.status(500).json({ message: errorMessage });
     }
   });
 

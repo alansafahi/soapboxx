@@ -214,7 +214,7 @@ export default function EnhancedChurchDiscovery() {
     mutationFn: async (churchData: typeof newChurchData) => {
       const response = await apiRequest('/api/churches', {
         method: 'POST',
-        body: JSON.stringify(churchData),
+        body: churchData, // apiRequest already handles JSON.stringify
       });
       return response;
     },
@@ -239,6 +239,8 @@ export default function EnhancedChurchDiscovery() {
       queryClient.invalidateQueries({ queryKey: ['/api/churches'] });
     },
     onError: (error: any) => {
+      console.error('Add church error:', error);
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Authentication Required",
@@ -247,23 +249,71 @@ export default function EnhancedChurchDiscovery() {
         });
         return;
       }
+
+      // Handle specific error messages from the server
+      let errorMessage = "Failed to add church. Please try again.";
+      
+      if (error?.message) {
+        if (error.message.includes('already exists')) {
+          errorMessage = "A church with this name already exists in this location.";
+        } else if (error.message.includes('validation')) {
+          errorMessage = "Please check all required fields and try again.";
+        } else if (error.message.includes('network')) {
+          errorMessage = "Network error. Please check your connection and try again.";
+        } else if (error.message.includes('server')) {
+          errorMessage = "Server error. Please try again in a few moments.";
+        }
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to add church. Please try again.",
+        title: "Unable to Add Church",
+        description: errorMessage,
         variant: "destructive",
       });
     },
   });
 
   const handleAddChurch = () => {
-    if (!newChurchData.name || !newChurchData.denomination || !newChurchData.city) {
+    // Enhanced validation with specific field feedback
+    const errors = [];
+    
+    if (!newChurchData.name?.trim()) {
+      errors.push("Church name is required");
+    }
+    
+    if (!newChurchData.denomination?.trim()) {
+      errors.push("Denomination is required");
+    }
+    
+    if (!newChurchData.city?.trim()) {
+      errors.push("City is required");
+    }
+
+    // Validate email format if provided
+    if (newChurchData.email?.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newChurchData.email)) {
+        errors.push("Please enter a valid email address");
+      }
+    }
+
+    // Validate website format if provided
+    if (newChurchData.website?.trim()) {
+      const websiteRegex = /^https?:\/\/.+\..+/;
+      if (!websiteRegex.test(newChurchData.website)) {
+        errors.push("Website must start with http:// or https://");
+      }
+    }
+
+    if (errors.length > 0) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in church name, denomination, and city.",
+        title: "Please Check Your Information",
+        description: errors.join(". "),
         variant: "destructive",
       });
       return;
     }
+
     addChurchMutation.mutate(newChurchData);
   };
 
