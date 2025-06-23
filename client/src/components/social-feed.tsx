@@ -52,7 +52,7 @@ import { formatDistanceToNow } from "date-fns";
 
 interface FeedPost {
   id: number;
-  type: 'discussion' | 'prayer' | 'event' | 'inspiration' | 'announcement' | 'share';
+  type: 'discussion' | 'prayer' | 'event' | 'inspiration' | 'announcement' | 'share' | 'soap';
   title?: string;
   content: string;
   author: {
@@ -84,6 +84,18 @@ interface FeedPost {
   attachedMedia?: Array<{name: string; type: string; size: number; url: string; filename: string}>;
   linkedVerse?: {reference: string; text: string};
   comments?: Array<{id: number; content: string; author: {name: string; profileImageUrl?: string}; createdAt: Date}>;
+  // SOAP-specific fields
+  soapEntry?: {
+    id: number;
+    scripture: string;
+    scriptureReference?: string;
+    observation: string;
+    application: string;
+    prayer: string;
+    devotionalDate?: Date;
+    streakDay?: number;
+    bibleVersion?: string;
+  };
 }
 
 export default function SocialFeed() {
@@ -114,6 +126,8 @@ export default function SocialFeed() {
   const [commentSort, setCommentSort] = useState<'newest' | 'most_liked'>('newest');
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [visibleCommentsCount, setVisibleCommentsCount] = useState<{[key: number]: number}>({});
+  const [showSoapDialog, setShowSoapDialog] = useState(false);
+  const [selectedSoapEntry, setSelectedSoapEntry] = useState<any>(null);
   
   // Refs for click-outside functionality
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -148,6 +162,12 @@ export default function SocialFeed() {
   const { data: verseSearchResults, isLoading: isSearchingVerses } = useQuery<Array<{id: string; reference: string; text: string}>>({
     queryKey: ['/api/bible-verses/search', verseQuery],
     enabled: verseQuery.length >= 2,
+  });
+
+  // Fetch user's SOAP entries
+  const { data: soapEntries = [] } = useQuery({
+    queryKey: ['/api/soap'],
+    enabled: showSoapDialog,
   });
 
   // Like post mutation
@@ -822,6 +842,17 @@ export default function SocialFeed() {
                     </div>
                   )}
                 </div>
+
+                {/* Share SOAP Entry */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSoapDialog(true)}
+                  className="text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 p-1.5 h-8 w-8"
+                  title="Share SOAP journal entry"
+                >
+                  <BookText className="w-4 h-4" />
+                </Button>
 
                 {/* Audience Selector */}
                 <div className="relative" ref={audienceDropdownRef}>
