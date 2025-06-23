@@ -114,7 +114,7 @@ async function generateMoodBasedVerses(moodId: string) {
       'anxious': ['peace', 'trust', 'calm', 'rest']
     };
 
-    const themes = moodToThemes[moodId] || ['comfort', 'peace', 'hope', 'strength'];
+    const themes = (moodId && moodId in moodToThemes) ? moodToThemes[moodId as keyof typeof moodToThemes] : ['comfort', 'peace', 'hope', 'strength'];
     
     // Use AI to find relevant verses from our database
     const verses = await storage.searchBibleVersesByTopic(themes);
@@ -619,8 +619,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Set session
-      req.session.userId = user.id;
-      req.session.user = user;
+      (req.session as any).userId = user.id;
+      (req.session as any).user = user;
 
       res.redirect('/');
     } catch (error) {
@@ -676,8 +676,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Debug: Check if profile image is being mapped correctly
-      if (user.profileImageUrl || user.profile_image_url) {
-        console.log('Profile image found, length:', (user.profileImageUrl || user.profile_image_url)?.length);
+      if (user.profileImageUrl) {
+        console.log('Profile image found, length:', user.profileImageUrl?.length);
       }
       
       res.json(mappedUser);
@@ -2036,7 +2036,7 @@ app.post('/api/invitations', async (req: any, res) => {
           const { sendInvitationEmail } = await import('./email-service.js');
           await sendInvitationEmail({
             to: email,
-            inviterName,
+            inviterName: inviterName || 'A friend',
             message: message || `Hi! I've been using SoapBox Super App for my spiritual journey and thought you might enjoy it too. It has daily Bible readings, prayer walls, and an amazing community of believers. Join me!`,
             inviteLink
           });
@@ -2084,7 +2084,7 @@ app.post('/api/invitations', async (req: any, res) => {
         const { sendInvitationEmail } = await import('./email-service.js');
         await sendInvitationEmail({
           to: email,
-          inviterName,
+          inviterName: inviterName || 'A friend',
           message: message || `Hi! I've been using SoapBox Super App for my spiritual journey and thought you might enjoy it too. It has daily Bible readings, prayer walls, and an amazing community of believers. Join me!`,
           inviteLink
         });
