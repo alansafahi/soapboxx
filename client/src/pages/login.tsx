@@ -70,10 +70,11 @@ export default function LoginPage() {
             description: `Logged in as ${userData.user.firstName} ${userData.user.lastName}`,
           });
           
-          // Wait for session to be established then redirect to dashboard
-          setTimeout(() => {
-            window.location.replace('/dashboard');
-          }, 500);
+          // Set force refresh flag and redirect immediately
+          sessionStorage.setItem('force_auth_refresh', 'true');
+          
+          // Immediate redirect to trigger authentication check
+          window.location.href = '/';
         } else {
           let errorMessage = 'Login failed';
           try {

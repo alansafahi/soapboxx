@@ -67,22 +67,37 @@ export function useDirectAuth() {
     };
   });
 
+  // Function to force authentication refresh
+  const refreshAuth = async () => {
+    console.log('🔄 Forcing authentication refresh...');
+    authCheckInProgress = false; // Reset the flag
+    setAuthState(prev => ({ ...prev, isLoading: true, initialized: false }));
+    
+    // Trigger the effect to re-check auth
+    setTimeout(() => {
+      checkAuth();
+    }, 100);
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
-      // Prevent multiple simultaneous auth checks
-      if (authCheckInProgress) {
-        return;
-      }
+    // Prevent multiple simultaneous auth checks
+    if (authCheckInProgress) {
+      return;
+    }
 
-      // Skip if already initialized with authenticated state
-      if (authState.initialized && authState.isAuthenticated && authState.user) {
-        console.log('📦 Using cached authentication for:', authState.user.email);
-        return;
-      }
+    // Skip if already initialized with authenticated state (but allow refresh)
+    if (authState.initialized && authState.isAuthenticated && authState.user && !sessionStorage.getItem('force_auth_refresh')) {
+      console.log('📦 Using cached authentication for:', authState.user.email);
+      return;
+    }
 
-      authCheckInProgress = true;
+    // Clear the force refresh flag if it exists
+    sessionStorage.removeItem('force_auth_refresh');
+    
+    authCheckInProgress = true;
 
-      try {
+    try {
         console.log('🔍 Checking authentication status...');
         
         const response = await fetch('/api/auth/user', {
