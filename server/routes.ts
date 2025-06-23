@@ -654,7 +654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl || user.profile_image_url, // Handle both field name formats
+        profileImageUrl: user.profileImageUrl, // Use consistent field name
         bio: user.bio,
         mobileNumber: user.mobileNumber,
         address: user.address,
