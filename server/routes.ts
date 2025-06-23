@@ -5537,8 +5537,11 @@ Return JSON with this exact structure:
       res.status(201).json(prayer);
     } catch (error) {
       console.error("Error creating prayer request:", error);
-      console.error("Error details:", error.message);
-      res.status(500).json({ message: "Failed to create prayer request", error: error.message });
+      console.error("Error details:", error instanceof Error ? error.message : String(error));
+      res.status(500).json({ 
+        message: "Failed to create prayer request", 
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 
@@ -6230,7 +6233,7 @@ Return JSON with this exact structure:
         } catch (feedError) {
           // Don't fail the S.O.A.P. creation if feed post fails
           console.error('Failed to create feed post for S.O.A.P. entry:', feedError);
-          console.error('Feed error details:', feedError.message);
+          console.error('Feed error details:', feedError instanceof Error ? feedError.message : String(feedError));
         }
       }
       
