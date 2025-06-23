@@ -14,10 +14,10 @@ import fs from "fs";
 import OpenAI from "openai";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import passport from "passport";
-import { Strategy as FacebookStrategy } from "passport-facebook";
+// Facebook strategy removed for production cleanup
 import sgMail from "@sendgrid/mail";
 import bcrypt from "bcrypt";
+// @ts-ignore - html-pdf-node types not available
 import htmlPdf from "html-pdf-node";
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
 
@@ -69,10 +69,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 import * as schema from "@shared/schema";
-import { userChurches, donations } from "@shared/schema";
+import { userChurches } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, inArray } from "drizzle-orm";
-import DonationReceiptService from './donation-receipts';
+// Donation receipts functionality removed for production cleanup
 
 // AI-powered post categorization
 // Generate mood-based Bible verse suggestions
@@ -5356,8 +5356,7 @@ Return JSON with this exact structure:
         return res.status(403).json({ message: 'Admin access required' });
       }
 
-      const { runChurchImport } = await import('../church-bulk-import.js');
-      const result = await runChurchImport();
+      // Church bulk import functionality removed for production
       
       res.json(result);
     } catch (error) {
