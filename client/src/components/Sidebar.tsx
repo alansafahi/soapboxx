@@ -149,7 +149,7 @@ export default function Sidebar() {
     {
       label: "SOAPBOX ADMIN",
       items: [
-        { label: "Admin Portal", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
+        { label: "Church Verification", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
       ]
     },
     {
