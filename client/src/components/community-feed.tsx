@@ -67,15 +67,18 @@ export default function CommunityFeed() {
   // Create discussion mutation
   const createDiscussionMutation = useMutation({
     mutationFn: async (data: DiscussionFormData) => {
-      await apiRequest("POST", "/api/discussions", data);
+      return await apiRequest("/api/discussions", {
+        method: "POST",
+        body: data
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       setIsCreateDialogOpen(false);
       form.reset();
       toast({
-        title: "Discussion Created",
-        description: "Your discussion has been posted successfully.",
+        title: "Discussion created",
+        description: "Your discussion has been posted",
       });
     },
     onError: (error) => {
@@ -92,7 +95,7 @@ export default function CommunityFeed() {
       }
       toast({
         title: "Error",
-        description: "Failed to create discussion. Please try again.",
+        description: "Failed to create discussion",
         variant: "destructive",
       });
     },
@@ -101,7 +104,9 @@ export default function CommunityFeed() {
   // Like discussion mutation
   const likeDiscussionMutation = useMutation({
     mutationFn: async (discussionId: number) => {
-      await apiRequest("POST", `/api/discussions/${discussionId}/like`);
+      return await apiRequest(`/api/discussions/${discussionId}/like`, {
+        method: "POST"
+      });
     },
     onSuccess: () => {
       // Don't invalidate immediately to preserve optimistic updates
@@ -121,7 +126,7 @@ export default function CommunityFeed() {
       }
       toast({
         title: "Error",
-        description: "Failed to like discussion.",
+        description: "Failed to like discussion",
         variant: "destructive",
       });
     },
@@ -130,7 +135,10 @@ export default function CommunityFeed() {
   // Create comment mutation
   const createCommentMutation = useMutation({
     mutationFn: async ({ discussionId, content }: { discussionId: number; content: string }) => {
-      await apiRequest("POST", `/api/discussions/${discussionId}/comments`, { content });
+      return await apiRequest(`/api/discussions/${discussionId}/comments`, {
+        method: "POST",
+        body: { content }
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
@@ -139,8 +147,8 @@ export default function CommunityFeed() {
       setCommentDialogOpen(null);
       setViewCommentsDialogOpen(null);
       toast({
-        title: "Comment Posted",
-        description: "Your comment has been added to the discussion.",
+        title: "Comment added",
+        description: "Your comment has been posted",
       });
     },
     onError: (error) => {
@@ -157,7 +165,38 @@ export default function CommunityFeed() {
       }
       toast({
         title: "Error",
-        description: "Failed to post comment.",
+        description: "Failed to add comment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Reaction mutation
+  const reactionMutation = useMutation({
+    mutationFn: async ({ targetType, targetId, reactionType, emoji }: { targetType: string; targetId: number; reactionType: string; emoji: string }) => {
+      return await apiRequest('/api/community/reactions', {
+        method: "POST",
+        body: {
+          targetType,
+          targetId,
+          reactionType,
+          emoji,
+          intensity: 1
+        }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      toast({
+        title: "Reaction added",
+        description: "Your reaction was shared",
+      });
+    },
+    onError: (error) => {
+      console.error("Reaction error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add reaction",
         variant: "destructive",
       });
     },
@@ -309,6 +348,20 @@ export default function CommunityFeed() {
                     <h3 className="font-medium text-gray-900 dark:text-white dark:font-bold mb-2">{discussion.title}</h3>
                     <p className="text-gray-600 dark:text-gray-100 dark:font-semibold text-sm line-clamp-2 mb-3">{discussion.content}</p>
                     <div className="flex items-center space-x-4">
+                      {/* Reaction Emojis */}
+                      <div className="flex items-center space-x-1">
+                        {['🙏', '✝️', '🕊️', '❤️'].map((emoji) => (
+                          <Button
+                            key={emoji}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleReaction(discussion.id, emoji)}
+                            className="p-1 h-auto text-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                          >
+                            {emoji}
+                          </Button>
+                        ))}
+                      </div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
