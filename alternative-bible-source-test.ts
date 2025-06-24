@@ -137,6 +137,4 @@ async function main() {
   console.log('='.repeat(60));
 }
 
-if (require.main === module) {
-  main().catch(console.error);
-}
+main().catch(console.error);
