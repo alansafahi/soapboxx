@@ -134,13 +134,39 @@ export default function CheckInSystem() {
 
   const checkInMutation = useMutation({
     mutationFn: async (checkInData: any) => {
-      const response = await apiRequest("POST", "/api/checkins", checkInData);
-      return await response.json();
+      console.log("🔷 Sending check-in request:", checkInData);
+      try {
+        const response = await fetch("/api/checkins", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": window.location.href,
+          },
+          body: JSON.stringify(checkInData),
+          credentials: "include",
+        });
+
+        console.log("📡 Check-in response status:", response.status);
+        
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("❌ Check-in failed:", text);
+          throw new Error(`HTTP ${response.status}: ${text}`);
+        }
+
+        const data = await response.json();
+        console.log("✅ Check-in success:", data);
+        return data;
+      } catch (error) {
+        console.error("💥 Check-in error:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       toast({
-        title: "Check-in Successful! 🎉",
-        description: `You've earned ${data.pointsEarned} points! Streak: ${data.streakCount} days`,
+        title: "Check-in Complete!",
+        description: `Earned ${data.pointsEarned} points! Streak: ${data.streakCount} days`,
       });
       setShowCheckInDialog(false);
       setNotes("");
@@ -150,10 +176,11 @@ export default function CheckInSystem() {
       queryClient.invalidateQueries({ queryKey: ["/api/checkins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/score"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Check-in mutation error:", error);
       toast({
         title: "Check-in Failed",
-        description: error.message,
+        description: error.message || "Unable to complete check-in",
         variant: "destructive",
       });
     },

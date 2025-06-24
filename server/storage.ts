@@ -3828,30 +3828,6 @@ export class DatabaseStorage implements IStorage {
     return streak;
   }
 
-  async createCheckIn(checkInData: InsertCheckIn): Promise<CheckIn> {
-    // Calculate streak and points
-    const streak = await this.getUserCheckInStreak(checkInData.userId);
-    const pointsEarned = 10; // Base points
-
-    const [checkIn] = await db
-      .insert(checkIns)
-      .values({
-        ...checkInData,
-        streakCount: streak + 1,
-        pointsEarned,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-      .returning();
-
-    // Update user score
-    await this.updateUserScore(checkInData.userId, pointsEarned, "check_in", checkIn.id);
-
-    return checkIn;
-  }
-
-
-
   async getChurchCheckIns(churchId: number, date = new Date()): Promise<(CheckIn & { user: User })[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
