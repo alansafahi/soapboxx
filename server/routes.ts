@@ -2235,15 +2235,20 @@ app.post('/api/invitations', async (req: any, res) => {
           
           // Resend invitation email
           const { sendInvitationEmail } = await import('./email-service.js');
-          await sendInvitationEmail({
+          const emailResult = await sendInvitationEmail({
             to: email,
             inviterName: inviterName || 'A friend',
             message: message || `Hi! I've been using SoapBox Super App for my spiritual journey and thought you might enjoy it too. It has daily Bible readings, prayer walls, and an amazing community of believers. Join me!`,
             inviteLink
           });
 
-          console.log(`Invitation email resent successfully to ${email}`);
-          return res.json({ ...existingInvitation, resent: true });
+          if (emailResult.success) {
+            console.log(`✅ Invitation email resent successfully to ${email} (ID: ${emailResult.messageId})`);
+            return res.json({ ...existingInvitation, resent: true, emailDelivered: true });
+          } else {
+            console.log(`❌ Failed to resend invitation email to ${email}: ${emailResult.error}`);
+            return res.json({ ...existingInvitation, resent: false, emailError: emailResult.error });
+          }
         } catch (emailError) {
           console.error('Error resending invitation email:', emailError);
           return res.json({ ...existingInvitation, resent: false, emailError: true });

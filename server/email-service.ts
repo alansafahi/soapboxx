@@ -19,7 +19,7 @@ export interface EmailOptions {
   attachments?: EmailAttachment[];
 }
 
-export async function sendEmail(options: EmailOptions): Promise<void> {
+export async function sendEmail(options: EmailOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const msg = {
       to: options.to,
@@ -35,18 +35,34 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     };
 
     if (process.env.SENDGRID_API_KEY) {
-      await sgMail.send(msg);
-      console.log(`Email sent successfully to ${options.to}`);
+      const response = await sgMail.send(msg);
+      const messageId = response[0]?.headers?.['x-message-id'] || 'unknown';
+      console.log(`✅ Email sent successfully to ${options.to} (Message ID: ${messageId})`);
+      return { success: true, messageId };
     } else {
-      console.log('Email would be sent:', {
+      console.log('📧 Email would be sent (development mode):', {
         to: options.to,
         subject: options.subject,
         hasAttachments: !!options.attachments?.length
       });
+      return { success: true, messageId: 'dev-mode' };
     }
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error('Failed to send email');
+  } catch (error: any) {
+    console.error('❌ Email delivery failed:', error);
+    
+    // Provide specific error messages for common issues
+    let errorMessage = 'Failed to send email';
+    if (error.code === 403) {
+      errorMessage = 'Email service authentication failed';
+    } else if (error.code === 429) {
+      errorMessage = 'Email rate limit exceeded, please try again later';
+    } else if (error.message?.includes('quota')) {
+      errorMessage = 'Email quota exceeded';
+    } else if (error.message?.includes('Invalid email')) {
+      errorMessage = 'Invalid email address';
+    }
+    
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -57,14 +73,14 @@ export interface InvitationEmailOptions {
   inviteLink: string;
 }
 
-export async function sendInvitationEmail(options: InvitationEmailOptions): Promise<void> {
+export async function sendInvitationEmail(options: InvitationEmailOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const invitationTemplate = createInvitationEmailTemplate({
     inviterName: options.inviterName,
     message: options.message,
     inviteLink: options.inviteLink
   });
 
-  await sendEmail({
+  return await sendEmail({
     to: options.to,
     subject: `${options.inviterName} invited you to join SoapBox Super App`,
     html: invitationTemplate
@@ -77,13 +93,13 @@ export interface VerificationEmailOptions {
   token: string;
 }
 
-export async function sendVerificationEmail(options: VerificationEmailOptions): Promise<void> {
+export async function sendVerificationEmail(options: VerificationEmailOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const verificationTemplate = createVerificationEmailTemplate({
     firstName: options.firstName,
     token: options.token
   });
 
-  await sendEmail({
+  return await sendEmail({
     to: options.email,
     subject: 'Verify your SoapBox Super App account',
     html: verificationTemplate
