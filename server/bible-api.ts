@@ -2,6 +2,7 @@ import { db } from './db';
 import { bibleVerses } from '@shared/schema';
 import { eq, and, like, ilike, or, sql } from 'drizzle-orm';
 import OpenAI from "openai";
+import { BIBLE_VERSIONS } from './bible-import-system.js';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 

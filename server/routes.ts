@@ -21,6 +21,7 @@ import { eq, and, or, gte, lte, desc, asc, like, sql, count, ilike, isNotNull, i
 // Bible verse functions integrated directly in storage layer
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
+import { bibleImportSystem, BIBLE_VERSIONS } from './bible-import-system.js';
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import multer from "multer";
 import path from "path";
@@ -8404,6 +8405,144 @@ Please provide suggestions for the missing or incomplete sections.`
     } catch (error) {
       console.error('Error rejecting church:', error);
       res.status(500).json({ message: 'Failed to reject church' });
+    }
+  });
+
+  // Bible Import Management API Endpoints
+  
+  // Get available Bible versions configuration
+  app.get('/api/bible/versions', isAuthenticated, async (req: any, res) => {
+    try {
+      const versions = await bibleImportSystem.getAvailableVersions();
+      
+      // Filter out licensed versions from UI (Phase 3) unless user has admin access
+      const userRole = req.session?.user?.role || 'member';
+      const isAdmin = userRole === 'soapbox_owner' || userRole === 'admin';
+      
+      const filteredVersions = versions.filter(v => {
+        if (v.phase === 3 && !isAdmin) {
+          return false; // Hide licensed versions from regular users
+        }
+        return true;
+      });
+      
+      res.json({
+        versions: filteredVersions,
+        attribution: filteredVersions.reduce((acc, v) => {
+          acc[v.code] = {
+            name: v.name,
+            attribution: v.attribution,
+            license: v.license,
+            source: v.source
+          };
+          return acc;
+        }, {} as any)
+      });
+    } catch (error) {
+      console.error('Error fetching Bible versions:', error);
+      res.status(500).json({ message: 'Failed to fetch Bible versions' });
+    }
+  });
+
+  // Get import status for all versions
+  app.get('/api/bible/import-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const status = await bibleImportSystem.getImportStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('Error fetching import status:', error);
+      res.status(500).json({ message: 'Failed to fetch import status' });
+    }
+  });
+
+  // Start Phase 1 import (Public Domain versions)
+  app.post('/api/bible/import/phase-1', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.session?.user?.role || 'member';
+      if (userRole !== 'soapbox_owner' && userRole !== 'admin') {
+        return res.status(403).json({ message: 'Insufficient permissions for Bible import' });
+      }
+
+      console.log('🚀 Starting Phase 1 Bible import (Public Domain versions)');
+      
+      // Start import in background
+      bibleImportSystem.importPhase1Versions().catch(error => {
+        console.error('Phase 1 import failed:', error);
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Phase 1 Bible import started',
+        versions: ['KJV', 'ASV', 'WEB']
+      });
+    } catch (error) {
+      console.error('Error starting Phase 1 import:', error);
+      res.status(500).json({ message: 'Failed to start Phase 1 import' });
+    }
+  });
+
+  // Start Phase 2 import (Free/Open versions)
+  app.post('/api/bible/import/phase-2', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.session?.user?.role || 'member';
+      if (userRole !== 'soapbox_owner' && userRole !== 'admin') {
+        return res.status(403).json({ message: 'Insufficient permissions for Bible import' });
+      }
+
+      console.log('🚀 Starting Phase 2 Bible import (Free/Open versions)');
+      
+      // Start import in background
+      bibleImportSystem.importPhase2Versions().catch(error => {
+        console.error('Phase 2 import failed:', error);
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Phase 2 Bible import started',
+        versions: ['NET']
+      });
+    } catch (error) {
+      console.error('Error starting Phase 2 import:', error);
+      res.status(500).json({ message: 'Failed to start Phase 2 import' });
+    }
+  });
+
+  // Check specific version availability
+  app.get('/api/bible/version/:code/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const { code } = req.params;
+      const exists = await bibleImportSystem.checkVersionExists(code);
+      
+      const versionConfig = BIBLE_VERSIONS.find(v => v.code === code);
+      
+      res.json({
+        code,
+        exists,
+        config: versionConfig || null
+      });
+    } catch (error) {
+      console.error('Error checking version status:', error);
+      res.status(500).json({ message: 'Failed to check version status' });
+    }
+  });
+
+  // Source Attribution page data
+  app.get('/api/bible/attribution', async (req: any, res) => {
+    try {
+      const versions = await bibleImportSystem.getAvailableVersions();
+      
+      const attributionData = {
+        publicDomain: versions.filter(v => v.source === 'public_domain'),
+        freeOpen: versions.filter(v => v.source === 'free_open'),
+        licensed: versions.filter(v => v.source === 'licensed'),
+        lastUpdated: new Date().toISOString(),
+        disclaimer: 'Bible text content is used in accordance with publisher licensing terms and fair use provisions.'
+      };
+      
+      res.json(attributionData);
+    } catch (error) {
+      console.error('Error fetching attribution data:', error);
+      res.status(500).json({ message: 'Failed to fetch attribution data' });
     }
   });
 
