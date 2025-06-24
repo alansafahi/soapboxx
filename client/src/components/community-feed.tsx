@@ -377,7 +377,12 @@ export default function CommunityFeed() {
                             key={emoji}
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleReaction(discussion.id, emoji)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Reaction button clicked:', emoji, discussion.id);
+                              handleReaction(discussion.id, emoji);
+                            }}
                             className="p-1 h-auto text-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
                           >
                             {emoji}
@@ -431,7 +436,12 @@ export default function CommunityFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => handleCommentClick(discussion.id)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Comment button clicked:', discussion.id);
+                            handleCommentClick(discussion.id);
+                          }}
                           className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
                         >
                           <motion.div
@@ -452,7 +462,12 @@ export default function CommunityFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => handleShareDiscussion(discussion.id)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Share button clicked:', discussion.id);
+                            handleShareDiscussion(discussion.id);
+                          }}
                           className="text-gray-500 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
                         >
                           <motion.div
