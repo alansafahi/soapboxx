@@ -21,7 +21,7 @@ import { eq, and, or, gte, lte, desc, asc, like, sql, count, ilike, isNotNull, i
 // Bible verse functions integrated directly in storage layer
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
-import { bibleImportSystem, BIBLE_VERSIONS } from './bible-import-system.js';
+
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import multer from "multer";
 import path from "path";
@@ -1976,11 +1976,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      console.log('🔷 Virtual check-in request received:', {
-        body: req.body,
-        userId: userId,
-        sessionId: req.sessionID
-      });
+
 
       const { 
         checkInType, 
@@ -2006,7 +2002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         location
       });
 
-      console.log('✅ Virtual check-in created:', checkIn.id);
+
 
       res.json({
         ...checkIn,
@@ -2014,7 +2010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pointsEarned: checkIn.pointsEarned
       });
     } catch (error) {
-      console.error('💥 Error creating virtual check-in:', error);
+
       res.status(500).json({ message: 'Failed to create check-in', error: error.message });
     }
   });
