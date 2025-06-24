@@ -229,10 +229,10 @@ export default function CommunityFeed() {
   }
 
   return (
-    <Card>
+    <Card className="dark:bg-gray-800 dark:border-gray-700">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Community Discussions</CardTitle>
+          <CardTitle className="dark:text-white dark:font-bold">Community Discussions</CardTitle>
           <Button variant="ghost" size="sm">
             View All
           </Button>
@@ -243,13 +243,13 @@ export default function CommunityFeed() {
         {discussions.length === 0 ? (
           <div className="text-center py-8">
             <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No discussions yet</h3>
-            <p className="text-gray-600 mb-4">Be the first to start a conversation in your community!</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white dark:font-bold mb-2">No discussions yet</h3>
+            <p className="text-gray-600 dark:text-gray-300 dark:font-medium mb-4">Be the first to start a conversation in your community!</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
             {discussions.map((discussion) => (
-              <div key={discussion.id} className="py-6 first:pt-0 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-4 -mx-4">
+              <div key={discussion.id} className="py-6 first:pt-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer rounded-lg px-4 -mx-4">
                 <div className="flex items-start space-x-4">
                   <Avatar className="w-10 h-10">
                     <AvatarFallback>
@@ -258,13 +258,13 @@ export default function CommunityFeed() {
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium text-gray-900">Community Member</span>
-                      <span className="text-gray-400 text-sm">
+                      <span className="font-medium text-gray-900 dark:text-white dark:font-bold">Community Member</span>
+                      <span className="text-gray-400 dark:text-gray-300 dark:font-medium text-sm">
                         {formatTimeAgo(discussion.createdAt?.toString() || new Date().toISOString())}
                       </span>
                     </div>
-                    <h3 className="font-medium text-gray-900 mb-2">{discussion.title}</h3>
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-3">{discussion.content}</p>
+                    <h3 className="font-medium text-gray-900 dark:text-white dark:font-bold mb-2">{discussion.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-100 dark:font-semibold text-sm line-clamp-2 mb-3">{discussion.content}</p>
                     <div className="flex items-center space-x-4">
                       <motion.div
                         whileHover={{ scale: 1.05 }}

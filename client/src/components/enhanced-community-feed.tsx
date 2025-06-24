@@ -367,7 +367,7 @@ export default function EnhancedCommunityFeed() {
                             </span>
                             <span className="text-xl">💬</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                          <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-300 dark:font-medium">
                             <Calendar className="h-3 w-3" />
                             <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                             <span>•</span>
