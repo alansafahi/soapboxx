@@ -852,9 +852,11 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                     }`}
                                     title={mood.subtitle} // Keep subtitle as tooltip for context
                                   >
-                                    <div className="flex items-center w-full">
-                                      <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
-                                      <span className="text-sm font-medium truncate">{mood.label}</span>
+                                    <div className="flex flex-col items-start w-full min-h-[2.5rem]">
+                                      <div className="flex items-center w-full">
+                                        <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
+                                        <span className="text-sm font-medium leading-tight break-words">{mood.label}</span>
+                                      </div>
                                     </div>
                                   </Button>
                                 ))}
