@@ -3701,21 +3701,21 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       const relevantCategories = moodCategoryMap[mood] || ['Faith', 'Hope', 'Love', 'Peace'];
       
-      // Get verses from our phased Bible version system
+      // Get verses from fully populated translations only to ensure diversity
       let allVerses;
       
-      // Check if the requested version is available in our database
-      const availableVersions = await bibleImportSystem.getAvailableVersions();
-      const requestedVersion = availableVersions.find(v => v.code === version);
+      // Check translation completeness to avoid sparse datasets
+      const translationCounts = await storage.getBibleStats();
+      const fullyPopulatedTranslations = ['KJV', 'NET', 'NIV', 'ESV', 'NLT', 'NASB']; // Known complete translations
       
-      if (requestedVersion && !requestedVersion.useOpenAI) {
-        // Use database verses for available versions (Phase 1 & 2)
-        allVerses = await storage.getBibleVersesByTranslation(version);
-        console.log(`Using database verses for ${version}, found: ${allVerses.length}`);
+      // Use only fully populated translations for consistent verse diversity
+      if (fullyPopulatedTranslations.includes(version.toUpperCase())) {
+        allVerses = await storage.getBibleVersesByTranslation(version.toUpperCase());
+        console.log(`Using complete ${version} translation: ${allVerses.length} verses`);
       } else {
-        // For licensed versions or unavailable versions, fall back to default
-        allVerses = await storage.getBibleVerses();
-        console.log(`Using default verses (will enhance with OpenAI for ${version} if needed), found: ${allVerses.length}`);
+        // Use KJV as reliable fallback for consistent diversity
+        allVerses = await storage.getBibleVersesByTranslation('KJV');
+        console.log(`Using KJV fallback for ${version} (${allVerses.length} verses available)`);
       }
       
       // Create a diverse selection from relevant categories
