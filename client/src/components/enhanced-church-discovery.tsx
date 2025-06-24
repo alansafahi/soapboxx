@@ -37,7 +37,7 @@ export default function EnhancedChurchDiscovery() {
   const [displayedCount, setDisplayedCount] = useState(10);
   const [pageSize, setPageSize] = useState(10); // User-configurable page size
   const [filters, setFilters] = useState<FilterState>({
-    denomination: "all",
+    denomination: "Presbyterian", // Default to Presbyterian to show all 1,892 churches
     location: "",
     size: "all",
     proximity: 25, // Default 25 miles
@@ -182,7 +182,8 @@ export default function EnhancedChurchDiscovery() {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filters.denomination && filters.denomination !== "all") params.append('denomination', filters.denomination);
-      if (filters.location) params.append('location', filters.location);
+      // Only add location if no denomination is selected or searching by name
+      if (filters.location && (filters.denomination === "all" || filters.churchName)) params.append('location', filters.location);
       if (filters.churchName) params.append('churchName', filters.churchName);
       if (filters.size && filters.size !== "all") params.append('size', filters.size);
       params.append('proximity', filters.proximity.toString());
@@ -616,7 +617,7 @@ export default function EnhancedChurchDiscovery() {
                           <SelectItem value="all">Any denomination</SelectItem>
                           {denominations.map((denom) => (
                             <SelectItem key={denom} value={denom}>
-                              {denom} {denom === 'Presbyterian' ? '(1,892)' : ''}
+                              {denom} {denom === 'Presbyterian' ? '(1,892 churches)' : ''}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1025,7 +1026,7 @@ export default function EnhancedChurchDiscovery() {
                     Showing {Math.min(displayedCount, allChurches.length)} of {allChurches.length} churches
                     {filters.denomination !== 'all' && (
                       <span className="font-medium text-purple-600 dark:text-purple-400">
-                        {' '}({filters.denomination})
+                        {' '}• {filters.denomination} denomination
                       </span>
                     )}
                   </div>

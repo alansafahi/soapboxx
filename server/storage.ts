@@ -1003,8 +1003,8 @@ export class DatabaseStorage implements IStorage {
         );
       }
       
-      // Filter by location (search in city, state, or zip code)
-      if (params.location && params.location.trim()) {
+      // Filter by location (search in city, state, or zip code) - only if no denomination filter
+      if (params.location && params.location.trim() && !params.denomination) {
         const locationTerm = `%${params.location.trim()}%`;
         whereConditions.push(
           sql`(${churches.city} ILIKE ${locationTerm} OR ${churches.state} ILIKE ${locationTerm} OR ${churches.zipCode} ILIKE ${locationTerm})`
@@ -1049,7 +1049,8 @@ export class DatabaseStorage implements IStorage {
         ))
         .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
         .groupBy(churches.id)
-        .limit(params.limit || 1000);
+        .orderBy(asc(churches.name))
+        .limit(params.limit || 2000);
       
       // Filter by size if specified (exclude "all" value)
       let filteredResults = results;
