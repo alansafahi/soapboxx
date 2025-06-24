@@ -36,36 +36,40 @@ import {
 
 interface EnhancedPost {
   id: number;
-  type: 'discussion' | 'prayer' | 'verse_share' | 'reflection';
+  authorId: string;
+  churchId?: number;
   title: string;
   content: string;
-  author: {
+  category: string;
+  isPublic: boolean;
+  audience: string;
+  mood?: string;
+  suggestedVerses?: any;
+  attachedMedia?: any;
+  linkedVerse?: any;
+  isPinned: boolean;
+  pinnedBy?: string;
+  pinnedAt?: string;
+  pinnedUntil?: string;
+  pinCategory?: string;
+  likeCount: number;
+  commentCount: number;
+  createdAt: string;
+  updatedAt: string;
+  author?: {
     id: string;
     firstName: string;
     lastName: string;
     profileImageUrl?: string;
   };
-  church?: {
-    id: number;
-    name: string;
-  };
-  group?: {
-    id: number;
-    name: string;
-    category: string;
-  };
-  reactions: {
+  reactions?: {
     type: string;
     emoji: string;
     count: number;
     userReacted: boolean;
   }[];
-  commentCount: number;
-  isPublic: boolean;
   tags?: string[];
-  visibility: 'public' | 'friends' | 'group';
-  createdAt: string;
-  updatedAt: string;
+  visibility?: 'public' | 'friends' | 'group';
 }
 
 interface ReactionType {
@@ -342,34 +346,25 @@ export default function EnhancedCommunityFeed() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {post.author.firstName?.charAt(0)}{post.author.lastName?.charAt(0)}
+                          {post.author?.firstName?.charAt(0) || 'A'}{post.author?.lastName?.charAt(0) || 'U'}
                         </div>
                         <div>
                           <div className="flex items-center space-x-2">
                             <span className="font-semibold text-gray-900">
-                              {post.author.firstName} {post.author.lastName}
+                              {post.author?.firstName && post.author?.lastName 
+                                ? `${post.author.firstName} ${post.author.lastName}`
+                                : 'Anonymous User'
+                              }
                             </span>
-                            <span className="text-xl">{getPostTypeIcon(post.type)}</span>
-                            {getVisibilityIcon(post.visibility)}
+                            <span className="text-xl">💬</span>
                           </div>
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <Calendar className="h-3 w-3" />
-                            <span>{format(new Date(post.createdAt), 'MMM d, h:mm a')}</span>
-                            {post.church && (
-                              <>
-                                <span>•</span>
-                                <MapPin className="h-3 w-3" />
-                                <span>{post.church.name}</span>
-                              </>
-                            )}
-                            {post.group && (
-                              <>
-                                <span>•</span>
-                                <Badge variant="secondary" className="text-xs">
-                                  {post.group.name}
-                                </Badge>
-                              </>
-                            )}
+                            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                            <span>•</span>
+                            <span className="capitalize">{post.audience || 'public'}</span>
+                            <span>•</span>
+                            <span className="capitalize">{post.category || 'general'}</span>
                           </div>
                         </div>
                       </div>

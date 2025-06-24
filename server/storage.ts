@@ -1643,10 +1643,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Discussion operations
-  async getDiscussions(churchId?: number): Promise<Discussion[]> {
+  async getDiscussions(churchId?: number): Promise<any[]> {
     const query = db
-      .select()
+      .select({
+        id: discussions.id,
+        authorId: discussions.authorId,
+        churchId: discussions.churchId,
+        title: discussions.title,
+        content: discussions.content,
+        category: discussions.category,
+        isPublic: discussions.isPublic,
+        audience: discussions.audience,
+        mood: discussions.mood,
+        suggestedVerses: discussions.suggestedVerses,
+        attachedMedia: discussions.attachedMedia,
+        linkedVerse: discussions.linkedVerse,
+        isPinned: discussions.isPinned,
+        pinnedBy: discussions.pinnedBy,
+        pinnedAt: discussions.pinnedAt,
+        pinnedUntil: discussions.pinnedUntil,
+        pinCategory: discussions.pinCategory,
+        likeCount: discussions.likeCount,
+        commentCount: discussions.commentCount,
+        createdAt: discussions.createdAt,
+        updatedAt: discussions.updatedAt,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
       .from(discussions)
+      .leftJoin(users, eq(discussions.authorId, users.id))
       .where(
         and(
           eq(discussions.isPublic, true),
