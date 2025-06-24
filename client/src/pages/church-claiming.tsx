@@ -121,9 +121,9 @@ export default function ChurchClaiming() {
     },
     onError: (error: Error) => {
       toast({
-        title: 'Claiming Failed',
+        title: 'Church Claiming Information',
         description: error.message,
-        variant: 'destructive',
+        variant: 'default',
       });
     }
   });

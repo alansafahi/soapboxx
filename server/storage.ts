@@ -2509,13 +2509,13 @@ export class DatabaseStorage implements IStorage {
 
   async claimChurch(churchId: number, userId: string, verifiedDenomination?: string): Promise<{ success: boolean; church?: Church; error?: string }> {
     try {
-      // Get user email
+      // Get user email for claiming verification
       const user = await this.getUser(userId);
       if (!user || !user.email) {
-        return { success: false, error: 'User email required for claiming' };
+        return { success: false, error: 'User email required for claiming verification' };
       }
 
-      // Verify church is claimable by this user
+      // Verify church is claimable by this user (email must match)
       const church = await db
         .select()
         .from(churches)
@@ -2528,7 +2528,10 @@ export class DatabaseStorage implements IStorage {
         .limit(1);
 
       if (church.length === 0) {
-        return { success: false, error: 'Church not found or not claimable by this user' };
+        return { 
+          success: false, 
+          error: 'Church claiming requires email verification. Please contact admin@soapboxsuperapp.com with your church details to process your claim request.' 
+        };
       }
 
       // Get church_admin role
@@ -2547,7 +2550,7 @@ export class DatabaseStorage implements IStorage {
         // Prepare update data
         const updateData: any = {
           isClaimed: true, 
-          adminEmail: null,
+          adminEmail: null, // Clear admin email after claiming
           updatedAt: new Date()
         };
 
