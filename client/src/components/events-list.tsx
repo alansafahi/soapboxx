@@ -432,7 +432,7 @@ export default function EventsList() {
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 border-purple-200 focus:border-purple-400 rounded-lg shadow-sm">
+                  <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 rounded-lg shadow-sm dark:text-white">
                     <Filter className="w-4 h-4 mr-2 text-purple-400" />
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
@@ -448,7 +448,7 @@ export default function EventsList() {
                   </SelectContent>
                 </Select>
                 <Select value={timeFilter} onValueChange={setTimeFilter}>
-                  <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 border-purple-200 focus:border-purple-400 rounded-lg shadow-sm">
+                  <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 rounded-lg shadow-sm dark:text-white">
                     <Clock className="w-4 h-4 mr-2 text-purple-400" />
                     <SelectValue placeholder="Time" />
                   </SelectTrigger>
@@ -500,22 +500,22 @@ export default function EventsList() {
           </div>
 
           {/* Enhanced Quick Stats */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-lg">
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="font-medium text-gray-700">{filteredEvents.length} events found</span>
+                <span className="font-medium text-gray-700 dark:text-gray-300">{filteredEvents.length} events found</span>
               </div>
               {searchTerm && (
                 <div className="flex items-center gap-2">
                   <Search className="w-4 h-4 text-purple-500" />
-                  <span className="text-gray-600">Searching for "{searchTerm}"</span>
+                  <span className="text-gray-600 dark:text-gray-400">Searching for "{searchTerm}"</span>
                 </div>
               )}
               {categoryFilter !== "all" && (
                 <div className="flex items-center gap-2">
                   <Filter className="w-4 h-4 text-purple-500" />
-                  <span className="text-gray-600">{categoryFilter.replace('_', ' ')} category</span>
+                  <span className="text-gray-600 dark:text-gray-400">{categoryFilter.replace('_', ' ')} category</span>
                 </div>
               )}
             </div>
