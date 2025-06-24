@@ -381,8 +381,8 @@ export default function EnhancedCommunityFeed() {
 
                     {/* Post Content */}
                     <div className="space-y-3">
-                      <h3 className="font-semibold text-base sm:text-lg text-gray-900 break-words hyphens-auto leading-tight">{post.title}</h3>
-                      <p className="text-gray-700 whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
+                      <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white dark:font-bold break-words hyphens-auto leading-tight">{post.title}</h3>
+                      <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
                       
                       {/* Tags */}
                       {post.tags && post.tags.length > 0 && (
