@@ -104,7 +104,8 @@ export default function SocialFeed() {
   const queryClient = useQueryClient();
   
   const [newPost, setNewPost] = useState("");
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [recentMoods, setRecentMoods] = useState<any[]>([]);
   const [showComposer, setShowComposer] = useState(true);
   const [showMoodDropdown, setShowMoodDropdown] = useState(false);
   const [showVerseSearch, setShowVerseSearch] = useState(false);
@@ -276,7 +277,7 @@ export default function SocialFeed() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       setNewPost('');
-      setSelectedMood(null);
+      setSelectedMoods([]);
       setLinkedVerse(null);
       setAttachedMedia([]);
       toast({
@@ -359,7 +360,7 @@ export default function SocialFeed() {
     const postData = {
       type: 'discussion',
       content: newPost,
-      mood: selectedMood,
+      mood: selectedMoods.length > 0 ? selectedMoods.join(',') : null,
       audience: selectedAudience,
       linkedVerse: linkedVerse ? {
         reference: linkedVerse.reference,
@@ -652,21 +653,36 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            {/* Selected Mood Display */}
-            {selectedMood && (
-              <div className="mb-3 flex items-center gap-2">
-                <Badge className={`${getSelectedMoodData()?.color} border-0`}>
-                  <span className="mr-1">{getSelectedMoodData()?.icon}</span>
-                  {getSelectedMoodData()?.label}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearMood}
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
+            {/* Selected Moods Display */}
+            {selectedMoods.length > 0 && (
+              <div className="mb-3 space-y-2">
+                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Current feelings:</div>
+                <div className="flex flex-wrap gap-1">
+                  {getSelectedMoodsData().map((mood, index) => (
+                    <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
+                      <span className="text-sm">{mood.icon}</span>
+                      <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{mood.label}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleMoodSelection(mood.id)}
+                        className="h-4 w-4 p-0 text-purple-400 hover:text-purple-600 ml-1"
+                      >
+                        <X className="h-2 w-2" />
+                      </Button>
+                    </div>
+                  ))}
+                  {selectedMoods.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearMoods}
+                      className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+                    >
+                      Clear all
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 
