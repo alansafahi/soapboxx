@@ -171,32 +171,6 @@ export default function CommunityFeed() {
     },
   });
 
-  // Remove broken mutation - use direct fetch in handleReaction instead
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
-      toast({
-        title: "Reaction added",
-        description: "Your reaction was shared",
-      });
-    },
-    onError: (error) => {
-      console.error("Reaction API error:", error);
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized", 
-          description: "Please log in",
-          variant: "destructive",
-        });
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to add reaction. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleCreateDiscussion = (data: DiscussionFormData) => {
     createDiscussionMutation.mutate(data);
   };
