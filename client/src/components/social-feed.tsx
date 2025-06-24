@@ -803,10 +803,10 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     <Smile className="w-4 h-4" />
                   </Button>
 
-                  {/* Enhanced Mood Dropdown */}
+                  {/* Enhanced Mood Dropdown - Mobile Responsive */}
                   {showMoodDropdown && (
-                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-96 max-h-96 overflow-y-auto">
-                      <div className="p-4">
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-[480px] max-w-[95vw] max-h-[70vh] overflow-y-auto">
+                      <div className="p-3 sm:p-4">
                         <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
                         
                         {/* Recently Used Section */}
@@ -820,10 +820,11 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                   variant={selectedMoods.includes(mood.id) ? "default" : "outline"}
                                   size="sm"
                                   onClick={() => toggleMoodSelection(mood.id)}
-                                  className={`h-8 px-2 text-xs ${selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+                                  className={`h-7 px-2 text-xs ${selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
                                 >
                                   <span className="mr-1">{mood.icon}</span>
-                                  <span>{mood.label}</span>
+                                  <span className="hidden sm:inline">{mood.label}</span>
+                                  <span className="sm:hidden">{mood.label.length > 8 ? mood.label.substring(0, 8) + '...' : mood.label}</span>
                                 </Button>
                               ))}
                             </div>
@@ -837,9 +838,9 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                             <div key={category.title}>
                               <div className="mb-2">
                                 <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{category.title}</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 italic">{category.description}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 italic hidden sm:block">{category.description}</p>
                               </div>
-                              <div className="grid grid-cols-2 gap-1">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
                                 {category.moods.map((mood) => (
                                   <Button
                                     key={mood.id}
@@ -849,13 +850,11 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                     className={`h-auto p-2 justify-start text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
                                       selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''
                                     }`}
+                                    title={mood.subtitle} // Keep subtitle as tooltip for context
                                   >
-                                    <div className="flex flex-col items-start w-full">
-                                      <div className="flex items-center mb-1">
-                                        <span className="mr-2 text-base">{mood.icon}</span>
-                                        <span className="text-sm font-medium">{mood.label}</span>
-                                      </div>
-                                      <span className="text-xs opacity-75 leading-tight">{mood.subtitle}</span>
+                                    <div className="flex items-center w-full">
+                                      <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
+                                      <span className="text-sm font-medium truncate">{mood.label}</span>
                                     </div>
                                   </Button>
                                 ))}
@@ -870,14 +869,14 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                             variant="ghost"
                             size="sm"
                             onClick={() => setSelectedMoods([])}
-                            className="text-gray-500 hover:text-gray-700"
+                            className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
                           >
                             Clear All
                           </Button>
                           <Button
                             size="sm"
                             onClick={() => setShowMoodDropdown(false)}
-                            className="bg-purple-600 hover:bg-purple-700"
+                            className="bg-purple-600 hover:bg-purple-700 text-xs sm:text-sm"
                           >
                             Done ({selectedMoods.length})
                           </Button>
