@@ -1753,7 +1753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId || req.user?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
