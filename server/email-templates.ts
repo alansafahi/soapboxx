@@ -52,7 +52,7 @@ export function createInvitationEmailTemplate(options: { inviterName: string; me
         <h2 style="color: #1f2937; margin-bottom: 20px;">You're Invited to Join SoapBox!</h2>
         
         <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          <strong>${options.inviterName}</strong> has invited you to join their faith community on SoapBox Super App.
+          <strong>${options.inviterName}</strong> invited you to join SoapBox!
         </p>
         
         <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
@@ -62,7 +62,7 @@ export function createInvitationEmailTemplate(options: { inviterName: string; me
         </div>
         
         <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-          Join thousands of believers in daily Bible reading, prayer sharing, community discussions, and spiritual growth.
+          Daily verses, prayer wall, faith community. Join us!
         </p>
         
         <a href="${options.inviteLink}" style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; margin-bottom: 20px;">

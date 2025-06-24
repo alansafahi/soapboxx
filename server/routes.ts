@@ -2217,7 +2217,7 @@ app.post('/api/invitations', async (req: any, res) => {
         console.log(`❌ User with email ${email} is already a member`);
         return res.status(400).json({ 
           success: false, 
-          message: 'This person is already a member of SoapBox Super App.',
+          message: 'Already a member.',
           type: 'already_member'
         });
       }
@@ -2238,7 +2238,7 @@ app.post('/api/invitations', async (req: any, res) => {
           const emailResult = await sendInvitationEmail({
             to: email,
             inviterName: inviterName || 'A friend',
-            message: message || `Hi! I've been using SoapBox Super App for my spiritual journey and thought you might enjoy it too. It has daily Bible readings, prayer walls, and an amazing community of believers. Join me!`,
+            message: message || `Join me on SoapBox! Daily verses, prayer community, spiritual growth. You'll love it!`,
             inviteLink
           });
 
@@ -2288,14 +2288,14 @@ app.post('/api/invitations', async (req: any, res) => {
         
         // Send invitation email using email service
         const { sendInvitationEmail } = await import('./email-service.js');
-        await sendInvitationEmail({
+        const emailResult = await sendInvitationEmail({
           to: email,
           inviterName: inviterName || 'A friend',
-          message: message || `Hi! I've been using SoapBox Super App for my spiritual journey and thought you might enjoy it too. It has daily Bible readings, prayer walls, and an amazing community of believers. Join me!`,
+          message: message || `Join me on SoapBox! Daily verses, prayer community, spiritual growth. You'll love it!`,
           inviteLink
         });
 
-        console.log(`Invitation email sent successfully to ${email}`);
+        console.log(`Invitation sent to ${email}`);
       } catch (emailError) {
         console.error('Error sending invitation email:', emailError);
         // Don't fail the entire request if email fails

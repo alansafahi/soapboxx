@@ -89,18 +89,18 @@ function ContactsPage() {
       if (data.resent) {
         toast({
           title: "Invitation Resent",
-          description: "Your invitation has been resent successfully!",
+          description: "Invitation resent!",
         });
       } else if (data.emailError) {
         toast({
           title: "Invitation Created",
-          description: "Invitation saved but email delivery failed. Please try again.",
+          description: "Saved but email failed. Try again.",
           variant: "destructive",
         });
       } else {
         toast({
           title: "Invitation Sent",
-          description: "Your invitation has been sent successfully!",
+          description: "Invitation sent!",
         });
       }
     },
@@ -380,7 +380,7 @@ function ContactsPage() {
                   <Label htmlFor="message">Personal Message (Optional)</Label>
                   <Textarea
                     id="message"
-                    placeholder="Add a personal message to your invitation..."
+                    placeholder="Add a message..."
                     value={inviteMessage}
                     onChange={(e) => setInviteMessage(e.target.value)}
                     rows={3}

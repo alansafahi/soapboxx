@@ -230,7 +230,7 @@ export default function SocialFeed() {
       setCommentDialogOpen(null);
       toast({
         title: "Success",
-        description: "Comment added successfully"
+        description: "Comment added"
       });
     },
     onError: () => {
@@ -281,7 +281,7 @@ export default function SocialFeed() {
       setAttachedMedia([]);
       toast({
         title: "Success",
-        description: "Post shared successfully!",
+        description: "Post shared!",
       });
     },
     onError: (error: any) => {
@@ -323,7 +323,7 @@ export default function SocialFeed() {
         setTimeout(() => {
           toast({
             title: "Success",
-            description: "Post deleted successfully!",
+            description: "Post deleted!",
           });
         }, 100);
         
@@ -1328,7 +1328,7 @@ export default function SocialFeed() {
           <DialogHeader>
             <DialogTitle>Delete Post</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this post? This action cannot be undone.
+              Delete this post? This can't be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end space-x-2 mt-4">
