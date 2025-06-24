@@ -254,11 +254,13 @@ export default function CommunityFeed() {
   // Share discussion mutation
   const shareDiscussionMutation = useMutation({
     mutationFn: async (discussionId: number) => {
+      console.log('Sending share API request:', discussionId);
       return await apiRequest(`/api/discussions/${discussionId}/share`, {
         method: "POST"
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Share API success:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       toast({
         title: "Discussion shared",
@@ -266,6 +268,7 @@ export default function CommunityFeed() {
       });
     },
     onError: (error) => {
+      console.error('Share API error:', error);
       // Fallback to clipboard sharing
       const discussion = discussions.find(d => d.id === discussionId);
       if (discussion) {

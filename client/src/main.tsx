@@ -4,11 +4,18 @@ import "./index.css";
 
 // Handle unhandled promise rejections to prevent console errors
 window.addEventListener('unhandledrejection', (event) => {
-  // Suppress WebSocket connection errors from Vite HMR
+  // Log WebSocket errors to identify the source
   if (event.reason && event.reason.message && 
       (event.reason.message.includes('WebSocket') || 
-       event.reason.message.includes('websocket') ||
-       event.reason.message.includes('vite') ||
+       event.reason.message.includes('websocket'))) {
+    console.warn('WebSocket error intercepted:', event.reason.message);
+    event.preventDefault();
+    return;
+  }
+  
+  // Suppress Vite HMR connection errors
+  if (event.reason && event.reason.message && 
+      (event.reason.message.includes('vite') ||
        event.reason.message.includes('connecting'))) {
     event.preventDefault();
     return;
@@ -35,6 +42,7 @@ window.addEventListener('unhandledrejection', (event) => {
   }
   
   // Log other errors for debugging
+  console.warn('Unhandled rejection:', event.reason);
 });
 
 createRoot(document.getElementById("root")!).render(
