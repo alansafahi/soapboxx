@@ -94,7 +94,6 @@ export default function EnhancedAudioPlayer({
       const voices = speechSynthesis.getVoices();
       if (voices.length > 0) {
         setVoicesLoaded(true);
-        console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
       }
     };
 
@@ -109,7 +108,6 @@ export default function EnhancedAudioPlayer({
   // Initialize background music with simpler approach
   useEffect(() => {
     if (routine.audioConfig?.musicBed?.baseTrack) {
-      console.log('Initializing background music system');
       
       // Create a simple audio element approach for background music
       const createBackgroundAudio = () => {
@@ -264,9 +262,7 @@ export default function EnhancedAudioPlayer({
                 mainLFO.start();
                 tremoloLFO.start();
                 
-                console.log('Enhanced background music started');
               } catch (e) {
-                console.log('Background music unavailable:', e);
               }
             },
             
@@ -283,15 +279,12 @@ export default function EnhancedAudioPlayer({
                   });
                   backgroundAudioRef.current.oscillators = null;
                   backgroundAudioRef.current.isPlaying = false;
-                  console.log('Enhanced background music stopped');
                 }
               } catch (e) {
-                console.log('Background music stop error:', e);
               }
             }
           };
         } catch (e) {
-          console.log('Web Audio API not supported:', e);
           backgroundAudioRef.current = null;
         }
       };
@@ -321,8 +314,6 @@ export default function EnhancedAudioPlayer({
     const voiceType = routine.audioConfig?.voice?.type || 'female';
     const voiceName = routine.audioConfig?.voice?.name || 'Sarah';
     
-    console.log('Voice selection - Type:', voiceType, 'Name:', voiceName);
-    console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
     
     // Priority order for voice selection
     let selectedVoice = null;
@@ -382,7 +373,6 @@ export default function EnhancedAudioPlayer({
           voice.name === voiceName && voice.lang.startsWith('en')
         );
         if (selectedVoice) {
-          console.log('Selected premium voice (exact):', selectedVoice.name);
           break;
         }
       }
@@ -395,7 +385,6 @@ export default function EnhancedAudioPlayer({
             voice.lang.startsWith('en')
           );
           if (selectedVoice) {
-            console.log('Selected premium voice (partial):', selectedVoice.name);
             break;
           }
         }
@@ -410,7 +399,6 @@ export default function EnhancedAudioPlayer({
         enhancedKeywords.some(keyword => voice.name.toLowerCase().includes(keyword))
       );
       if (selectedVoice) {
-        console.log('Selected enhanced voice:', selectedVoice.name);
       }
     }
     
@@ -419,7 +407,6 @@ export default function EnhancedAudioPlayer({
       selectedVoice = voices.find(voice => voice.lang.startsWith('en'));
     }
     
-    console.log('Selected voice:', selectedVoice?.name, 'for requested:', voiceType, voiceName);
     return selectedVoice;
   };
 
@@ -436,15 +423,12 @@ export default function EnhancedAudioPlayer({
       
       if (voice) {
         utterance.voice = voice;
-        console.log('Voice applied:', voice.name, 'for step:', currentStep?.title);
       } else {
-        console.log('No voice selected, using browser default');
         // Force a specific voice if available
         const voices = speechSynthesis.getVoices();
         const fallbackVoice = voices.find(v => v.lang.startsWith('en'));
         if (fallbackVoice) {
           utterance.voice = fallbackVoice;
-          console.log('Using fallback voice:', fallbackVoice.name);
         }
       }
       
@@ -461,7 +445,6 @@ export default function EnhancedAudioPlayer({
         utterance.volume = Math.min(utterance.volume * 1.1, 1.0);
       }
       
-      console.log('Voice settings applied - Rate:', utterance.rate, 'Pitch:', utterance.pitch, 'Volume:', utterance.volume);
       
       // Style-based adjustments
       const style = stepVoiceSettings?.style || routine.audioConfig?.voice?.style;
@@ -477,7 +460,6 @@ export default function EnhancedAudioPlayer({
         
         // Start background music
         if (backgroundAudioRef.current) {
-          backgroundAudioRef.current.play().catch((e: any) => console.log('Background audio not available:', e));
         }
       };
       
@@ -520,7 +502,6 @@ export default function EnhancedAudioPlayer({
         } else if (currentStepIndex >= routine.steps.length - 1) {
           // Reached the end of the routine
           setIsPlaying(false);
-          console.log('Audio routine completed');
           onComplete?.();
         } else {
           // Not auto-advancing, just stop
@@ -529,8 +510,6 @@ export default function EnhancedAudioPlayer({
       };
       
       utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event);
-        console.log('Error details:', {
           error: event.error,
           utterance: {
             text: utterance.text.substring(0, 50) + '...',
@@ -548,21 +527,18 @@ export default function EnhancedAudioPlayer({
           try {
             backgroundAudioRef.current.pause();
           } catch (e) {
-            console.log('Background music stop error:', e);
           }
         }
         
         // Handle different error types
         if (event.error === 'interrupted') {
           // Speech was interrupted, don't auto-advance
-          console.log('Speech interrupted - pausing routine');
           setIsPlaying(false);
           return;
         }
         
         // For other errors, try to continue gracefully
         if (routine.autoAdvance && currentStepIndex < routine.steps.length - 1) {
-          console.log('Advancing to next step after error');
           setTimeout(() => {
             const nextIndex = currentStepIndex + 1;
             setCurrentStepIndex(nextIndex);
@@ -584,7 +560,6 @@ export default function EnhancedAudioPlayer({
       utteranceRef.current = utterance;
       speechSynthesis.speak(utterance);
     } else {
-      console.error('Speech synthesis not supported');
     }
   };
 
@@ -671,7 +646,6 @@ export default function EnhancedAudioPlayer({
       const utterance = new SpeechSynthesisUtterance(sampleText);
       if (voice) {
         utterance.voice = voice;
-        console.log('Voice preview using:', voice.name);
       }
       
       utterance.rate = audioSettings.rate || 0.9;

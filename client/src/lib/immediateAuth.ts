@@ -25,12 +25,10 @@ export function useImmediateAuth() {
 
   useEffect(() => {
     const listener = (newState: AuthState) => {
-      console.log('🔄 Auth state updated:', newState);
       setAuthState(newState);
       
       // Redirect to dashboard if user becomes authenticated while on login page
       if (newState.isAuthenticated && window.location.pathname === '/login') {
-        console.log('🔄 Authenticated user on login page, forcing page refresh to dashboard...');
         // Use window.location.href for immediate redirection
         window.location.href = '/';
       }
@@ -45,7 +43,6 @@ export function useImmediateAuth() {
 
   const checkAuth = async () => {
     try {
-      console.log('🔍 Immediate auth check starting...');
       
       const response = await fetch('/api/auth/user', {
         credentials: 'include',
@@ -56,11 +53,9 @@ export function useImmediateAuth() {
         }
       });
 
-      console.log('📡 Auth response status:', response.status);
 
       if (response.ok) {
         const userData = await response.json();
-        console.log('✅ User authenticated:', userData.email);
         
         const newState = {
           user: userData,
@@ -68,7 +63,6 @@ export function useImmediateAuth() {
           isLoading: false
         };
         
-        console.log('📋 Immediately setting auth state:', newState);
         notifyListeners(newState);
         
         // Force render update
@@ -79,11 +73,9 @@ export function useImmediateAuth() {
         
         // Immediate redirect if on login page
         if (window.location.pathname === '/login') {
-          console.log('🔄 User authenticated on login page, immediate redirect to dashboard');
           window.location.replace('/');
         }
       } else {
-        console.log('❌ Authentication failed, status:', response.status);
         const newState = {
           user: null,
           isAuthenticated: false,
@@ -92,7 +84,6 @@ export function useImmediateAuth() {
         notifyListeners(newState);
       }
     } catch (error) {
-      console.log('🚨 Auth check error:', error);
       const newState = {
         user: null,
         isAuthenticated: false,
@@ -108,7 +99,6 @@ export function useImmediateAuth() {
 
   const logout = async () => {
     try {
-      console.log('🚪 Logging out...');
       
       // Clear state immediately
       const newState = {
@@ -131,7 +121,6 @@ export function useImmediateAuth() {
       // Redirect
       window.location.href = '/';
     } catch (error) {
-      console.log('Logout error:', error);
       window.location.href = '/';
     }
   };

@@ -18,7 +18,6 @@ export default function Landing() {
       localStorage.clear();
       sessionStorage.clear();
     } catch (error) {
-      console.log('Storage clear failed:', error);
     }
     
     // Navigate to login page using React Router
@@ -39,7 +38,6 @@ export default function Landing() {
       // Redirect to landing page
       window.location.href = '/';
     } catch (error) {
-      console.error("Logout failed:", error);
       // Force logout and redirect even if there's an error
       logout();
       window.location.href = '/';
@@ -66,7 +64,6 @@ export default function Landing() {
         setLocation('/login');
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
       setLocation('/login');
     }
   };

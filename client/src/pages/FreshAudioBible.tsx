@@ -63,7 +63,6 @@ export default function FreshAudioBible() {
       // Apply changes instantly to existing audio without restart
       audioPlayer.playbackRate = playbackSpeed;
       audioPlayer.volume = volume[0] || 0.8;
-      console.log('Real-time adjustment:', { speed: playbackSpeed, volume: volume[0] });
       return;
     }
     
@@ -118,7 +117,6 @@ export default function FreshAudioBible() {
     const handleSpeechEnd = () => {
       if (window.speechSynthesis.speaking === false && !isPaused) {
         // Speech ended unexpectedly, might be due to settings change
-        console.log('Speech ended, checking state');
       }
     };
 
@@ -364,7 +362,6 @@ export default function FreshAudioBible() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Audio API error:', errorText);
         throw new Error(`Audio generation failed: ${response.status}`);
       }
 
@@ -403,7 +400,6 @@ export default function FreshAudioBible() {
       
       return audio;
     } catch (error) {
-      console.error('OpenAI audio generation failed:', error);
       setIsGenerating(false);
       toast({
         title: "Premium voice unavailable",

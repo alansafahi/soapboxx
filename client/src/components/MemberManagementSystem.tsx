@@ -47,13 +47,11 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
       const url = effectiveSelectedChurch === "all" 
         ? "/api/members" 
         : `/api/members?churchId=${effectiveSelectedChurch}`;
-      console.log('Fetching members from:', url);
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch members: ${response.statusText}`);
       }
       const data = await response.json();
-      console.log('Members data received:', data);
       return data;
     },
     staleTime: 0, // Always refetch to avoid cache issues
@@ -445,13 +443,11 @@ function CounselingScheduling({ selectedChurch }: { selectedChurch?: number | nu
       const url = selectedChurch 
         ? `/api/members?churchId=${selectedChurch}`
         : "/api/members";
-      console.log('Fetching members from:', url);
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result = await response.json();
-      console.log('Members result:', result);
       return result;
     },
     enabled: !!selectedChurch,

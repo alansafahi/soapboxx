@@ -285,7 +285,6 @@ export default function SocialFeed() {
       });
     },
     onError: (error: any) => {
-      console.error("Post creation error:", error);
       toast({
         title: "Error",
         description: `Failed to share post: ${error.message || 'Please try again.'}`,
@@ -303,7 +302,6 @@ export default function SocialFeed() {
         });
         return response;
       } catch (error) {
-        console.error('Delete post error:', error);
         throw error;
       }
     },
@@ -328,13 +326,11 @@ export default function SocialFeed() {
         }, 100);
         
       } catch (error) {
-        console.error('Post-deletion update error:', error);
         // Fallback: refresh the feed data if cache update fails
         queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       }
     },
     onError: (error: any) => {
-      console.error('Delete mutation error:', error);
       setDeleteDialogOpen(false);
       setPostToDelete(null);
       toast({
@@ -425,7 +421,6 @@ export default function SocialFeed() {
       recorder.onstop = () => {
         // Use ref for current chunks to avoid stale state
         const currentChunks = audioChunksRef.current;
-        console.log('Audio chunks count:', currentChunks.length);
         
         if (currentChunks.length === 0) {
           toast({
@@ -437,12 +432,10 @@ export default function SocialFeed() {
         }
         
         const audioBlob = new Blob(currentChunks, { type: 'audio/webm' });
-        console.log('Audio blob size:', audioBlob.size);
         
         const reader = new FileReader();
         reader.onload = (e) => {
           const result = e.target?.result as string;
-          console.log('Audio data URL length:', result?.length || 0);
           
           const audioData = {
             name: `voice-recording-${recordingDuration}s.webm`,
@@ -1049,8 +1042,6 @@ export default function SocialFeed() {
                               className="w-full mt-3"
                               style={{ height: '40px' }}
                               onError={(e) => {
-                                console.error('Audio playback error:', e);
-                                console.log('Audio URL:', media.url);
                               }}
                             >
                               <source src={media.url} type={media.type} />

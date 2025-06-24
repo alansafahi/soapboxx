@@ -289,7 +289,6 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
       // Force refetch to ensure immediate update
       queryClient.refetchQueries({ queryKey: ['/api/tour/status'] });
     } catch (error) {
-      console.error('Failed to mark tour as completed:', error);
     }
     
     toast({
@@ -347,7 +346,6 @@ export function InteractiveDemo({ isOpen, onClose, userRole, forceTour }: Intera
         }
       });
     } catch (error) {
-      console.error('Error tracking demo progress:', error);
     }
   };
 

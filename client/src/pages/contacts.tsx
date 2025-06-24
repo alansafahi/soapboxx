@@ -63,16 +63,13 @@ function ContactsPage() {
   // Send invitation mutation
   const inviteMutation = useMutation({
     mutationFn: async (data: { email: string; message?: string }) => {
-      console.log('🚀 Sending invitation request:', data);
       try {
         const response = await apiRequest("/api/invitations", {
           method: "POST",
           body: data
         });
-        console.log('✅ Invitation response received:', response);
         return response;
       } catch (error) {
-        console.error('❌ Invitation request failed:', error);
         throw error;
       }
     },
@@ -105,7 +102,6 @@ function ContactsPage() {
       }
     },
     onError: (error: any) => {
-      console.error('Invitation error:', error);
       
       // Check if user is already a member
       if (error.message && error.message.includes('already a member')) {
@@ -252,7 +248,6 @@ function ContactsPage() {
         setIsImportingContacts(false);
       }
     } catch (error: any) {
-      console.error('Contact import error:', error);
       
       if (error.name === 'AbortError') {
         toast({

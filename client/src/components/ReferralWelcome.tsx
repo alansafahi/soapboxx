@@ -42,7 +42,6 @@ export function ReferralWelcome({ referralCode }: ReferralWelcomeProps) {
       });
     },
     onError: (error) => {
-      console.error('Error processing referral:', error);
       toast({
         title: "Welcome to SoapBox Super App!",
         description: "You've joined our spiritual community. Start your journey today!",

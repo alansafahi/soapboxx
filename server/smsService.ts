@@ -44,7 +44,6 @@ export class SMSService {
         to: data.phoneNumber,
       });
 
-      console.log('✅ Verification SMS sent successfully to:', data.phoneNumber);
       return true;
     } catch (error: any) {
       console.error('Twilio SMS error:', error);

@@ -18,7 +18,7 @@ import {
   invitations
 } from "../shared/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, ilike, isNotNull, inArray } from "drizzle-orm";
-// Bible verse functions integrated directly in storage layer
+
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 
@@ -29,12 +29,10 @@ import fs from "fs";
 import OpenAI from "openai";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-// Facebook strategy removed for production cleanup
+
 import sgMail from "@sendgrid/mail";
 import bcrypt from "bcrypt";
-// @ts-ignore - html-pdf-node types not available
-import htmlPdf from "html-pdf-node";
-// DOCX generation removed for production cleanup
+
 
 // Configure file upload directories
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -83,9 +81,8 @@ const getFileType = (mimeType: string): string => {
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-import * as schema from "@shared/schema";
 import { userChurches } from "@shared/schema";
-// Donation receipts functionality removed for production cleanup
+
 
 // AI-powered post categorization
 // Generate mood-based Bible verse suggestions
@@ -273,7 +270,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const verseData = await storage.getBibleVerse(book, parseInt(chapter), parseInt(verse), translation as string);
       
       if (verseData) {
-        console.log(`✅ Public verse lookup: ${book} ${chapter}:${verse} (${translation})`);
         res.json(verseData);
       } else {
         res.status(404).json({ message: "Verse not found" });
@@ -345,7 +341,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Unified Authentication System - FIXES CRITICAL SECURITY VULNERABILITIES
-  console.log('🔐 Enabling unified authentication with mandatory email verification...');
   setupAuth(app);
 
   // OVERRIDE: Re-register Bible API endpoints AFTER authentication to ensure public access
@@ -360,7 +355,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const verseData = await storage.getBibleVerse(book, parseInt(chapter), parseInt(verse), translation as string);
       
       if (verseData) {
-        console.log(`✅ Public verse lookup: ${book} ${chapter}:${verse} (${translation})`);
         res.json(verseData);
       } else {
         res.status(404).json({ message: "Verse not found" });
@@ -656,13 +650,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use session data for user retrieval
       const userId = req.session?.userId || req.user?.claims?.sub;
       if (!userId) {
-        console.log('❌ No user ID found after session population');
         return res.status(401).json({ message: "Unauthorized" });
       }
       
       const user = await storage.getUser(userId);
       if (!user) {
-        console.log('❌ User not found in database:', userId);
         return res.status(404).json({ message: "User not found" });
       }
       
@@ -1854,7 +1846,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId;
       
       if (!userId) {
-        console.log('❌ No userId in session for mood check-in');
         return res.status(401).json({ message: 'User authentication required' });
       }
       
@@ -1870,7 +1861,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes
       });
       
-      console.log('✅ Mood check-in created:', moodCheckin.id);
 
       // Generate personalized content if requested
       let personalizedContent = null;
@@ -1884,7 +1874,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             notes
           );
           
-          console.log('✅ Personalized content generated');
           
           // Store personalized content for future reference
           if (personalizedContent) {
@@ -1909,7 +1898,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         personalizedContent
       });
     } catch (error) {
-      console.error('💥 Error creating mood check-in:', error);
       res.status(500).json({ message: 'Failed to create mood check-in', error: error.message });
     }
   });
@@ -2194,23 +2182,19 @@ app.post('/api/invitations', async (req: any, res) => {
             lastName: productionUser.lastName
           };
           userId = productionUser.id;
-          console.log('✅ Session populated for invitation request');
         }
       }
       
       if (!userId) {
-        console.log('❌ No authenticated user found for invitation request');
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
-      console.log(`✅ Processing invitation request for user: ${userId}`);
 
       const { email, message } = req.body;
       
       // Check if the email is already a registered user
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        console.log(`❌ User with email ${email} is already a member`);
         return res.status(400).json({ 
           success: false, 
           message: 'Already a member.',
@@ -2239,10 +2223,8 @@ app.post('/api/invitations', async (req: any, res) => {
           });
 
           if (emailResult.success) {
-            console.log(`✅ Invitation email resent successfully to ${email} (ID: ${emailResult.messageId})`);
             return res.json({ ...existingInvitation, resent: true, emailDelivered: true });
           } else {
-            console.log(`❌ Failed to resend invitation email to ${email}: ${emailResult.error}`);
             return res.json({ ...existingInvitation, resent: false, emailError: emailResult.error });
           }
         } catch (emailError) {

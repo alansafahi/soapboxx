@@ -59,7 +59,6 @@ function AppRouter() {
     useEffect(() => {
         const timer = setTimeout(() => {
             if (isLoading) {
-                console.log('🔄 Forcing render due to extended loading state');
                 setForceRender(true);
             }
         }, 3000);

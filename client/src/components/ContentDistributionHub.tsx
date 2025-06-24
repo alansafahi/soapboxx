@@ -78,7 +78,6 @@ export default function ContentDistributionHub() {
         // Don't auto-generate to avoid timeout issues
         // User can manually click generate when ready
       } catch (error) {
-        console.error("Error loading sermon data:", error);
       }
     }
   }, []);
@@ -105,7 +104,6 @@ export default function ContentDistributionHub() {
       });
     },
     onError: (error: any) => {
-      console.error("Content generation error:", error);
       
       // Handle specific role-based error messages
       if (error?.response?.data?.action === "upgrade_role") {

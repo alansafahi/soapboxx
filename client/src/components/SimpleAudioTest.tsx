@@ -37,7 +37,6 @@ export default function SimpleAudioTest() {
       utterance.onstart = () => setIsPlaying(true);
       utterance.onend = () => setIsPlaying(false);
       utterance.onerror = (event) => {
-        console.error('Speech error:', event);
         setIsPlaying(false);
       };
 

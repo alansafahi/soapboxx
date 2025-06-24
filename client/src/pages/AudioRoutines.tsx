@@ -967,7 +967,6 @@ export default function AudioRoutines() {
       const audioSources: AudioBufferSourceNode[] = [];
       const previewDuration = 3; // 3 seconds preview
       
-      console.log(`Previewing sound: ${soundType}`);
       
       switch (soundType) {
         case 'gentle-chords':
@@ -1119,7 +1118,6 @@ export default function AudioRoutines() {
       }, previewDuration * 1000);
       
     } catch (error) {
-      console.error('Sound preview error:', error);
     }
   };
 
@@ -1255,7 +1253,6 @@ export default function AudioRoutines() {
       const audioSources: AudioBufferSourceNode[] = [];
       
       if (backgroundMusicType !== 'off') {
-        console.log(`Starting background music: ${backgroundMusicType}`);
         switch (backgroundMusicType) {
           case 'gentle-chords':
             createGentleChords(audioContext, masterGain, oscillators, sessionDuration);
@@ -1418,7 +1415,6 @@ export default function AudioRoutines() {
       const meditationSegments = getRoutineScript(routine.name);
 
       // Generate complete meditation audio with proper segmentation
-      console.log('Starting segmented meditation session...');
       
       let currentSegmentIndex = 0;
       let sessionStartTime = Date.now();
@@ -1465,7 +1461,6 @@ export default function AudioRoutines() {
         }
         
         const segment = meditationSegments[currentSegmentIndex];
-        console.log(`Playing segment ${currentSegmentIndex + 1}/${meditationSegments.length}`);
         
         // Generate audio for this segment
         const response = await fetch('/api/meditation/audio', {
@@ -1508,7 +1503,6 @@ export default function AudioRoutines() {
             if (segment.pauseAfter > 0) {
               // Show pause notification and update silence period state
               setIsInSilencePeriod(true);
-              console.log(`Starting ${segment.pauseAfter}s pause after segment ${currentSegmentIndex}`);
               
               toast({
                 title: "Brief Pause",
@@ -1520,10 +1514,8 @@ export default function AudioRoutines() {
               const pauseTimeout = setTimeout(() => {
                 // Check if session was terminated during pause
                 if ((window as any).sessionTerminated) {
-                  console.log('Session terminated during pause, stopping continuation');
                   return;
                 }
-                console.log(`Pause complete for segment ${currentSegmentIndex}, continuing session`);
                 setIsInSilencePeriod(false);
                 playNextSegment();
               }, segment.pauseAfter * 1000);
@@ -1548,7 +1540,6 @@ export default function AudioRoutines() {
       (routine as any).sessionId = sessionRoutineId;
       
     } catch (error) {
-      console.error('Meditation session error:', error);
       
       let errorMessage = "Please tap to enable audio for your meditation routine.";
       if (isIOS) {
@@ -1573,7 +1564,6 @@ export default function AudioRoutines() {
   const pauseAudioRoutine = () => {
     // Check if session was terminated
     if ((window as any).sessionTerminated) {
-      console.log('Session already terminated, ignoring pause request');
       return;
     }
     
@@ -1598,7 +1588,6 @@ export default function AudioRoutines() {
   const resumeAudioRoutine = () => {
     // Check if session was terminated
     if ((window as any).sessionTerminated) {
-      console.log('Session was terminated, cannot resume');
       setIsPaused(false);
       setPlayingRoutine(null);
       return;
@@ -1620,7 +1609,6 @@ export default function AudioRoutines() {
     try {
       // Check if session was terminated - don't start if so
       if ((window as any).sessionTerminated) {
-        console.log('Session terminated, cannot start devotional');
         return;
       }
       
@@ -1668,7 +1656,6 @@ export default function AudioRoutines() {
 
       // Check if session was terminated during audio generation
       if ((window as any).sessionTerminated) {
-        console.log('Session terminated during audio generation, aborting devotional');
         setPlayingDevotional(null);
         setDevotionalProgress(0);
         setCurrentDevotionalSegment(0);
@@ -1684,7 +1671,6 @@ export default function AudioRoutines() {
       
       // Final check before creating audio element
       if ((window as any).sessionTerminated) {
-        console.log('Session terminated before audio creation, aborting devotional');
         URL.revokeObjectURL(audioUrl);
         setPlayingDevotional(null);
         setDevotionalProgress(0);
@@ -1701,7 +1687,6 @@ export default function AudioRoutines() {
       const updateProgress = () => {
         // Check if session was terminated
         if ((window as any).sessionTerminated) {
-          console.log('Session terminated, stopping devotional audio');
           audio.pause();
           audio.currentTime = 0;
           setPlayingDevotional(null);
@@ -1740,7 +1725,6 @@ export default function AudioRoutines() {
       await audio.play();
 
     } catch (error) {
-      console.error('Devotional audio error:', error);
       setPlayingDevotional(null);
       
       toast({
@@ -1752,7 +1736,6 @@ export default function AudioRoutines() {
   };
 
   const stopDevotionalRoutine = () => {
-    console.log('Stop devotional button pressed - initiating cleanup');
     
     // Immediate session termination flag
     (window as any).sessionTerminated = true;
@@ -1779,7 +1762,6 @@ export default function AudioRoutines() {
     
     // Small delay to ensure cleanup completes
     setTimeout(() => {
-      console.log('Devotional cleanup completed');
     }, 500);
     
     toast({
@@ -1790,7 +1772,6 @@ export default function AudioRoutines() {
   };
 
   const stopAudioRoutine = () => {
-    console.log('Stop button pressed - initiating complete session cleanup');
     
     // Immediate session termination flag
     (window as any).sessionTerminated = true;
@@ -1843,7 +1824,6 @@ export default function AudioRoutines() {
         const newAudio = currentAudio.cloneNode() as HTMLAudioElement;
         currentAudio.parentNode?.replaceChild(newAudio, currentAudio);
       } catch (e) {
-        console.log('Audio cleanup completed');
       }
       setCurrentAudio(null);
     }
@@ -1866,13 +1846,10 @@ export default function AudioRoutines() {
         context.suspend().then(() => {
           return context.close();
         }).then(() => {
-          console.log('Audio context closed successfully');
         }).catch((e) => {
-          console.log('Audio context cleanup completed');
         });
         
       } catch (e) {
-        console.log('Audio context force cleanup');
       }
       setCurrentAudioContext(null);
     }
@@ -1883,7 +1860,6 @@ export default function AudioRoutines() {
         speechSynthesis.cancel();
         speechSynthesis.pause();
       } catch (e) {
-        console.log('Speech synthesis cleanup completed');
       }
     }
     
@@ -1897,7 +1873,6 @@ export default function AudioRoutines() {
           (routineElement as any).cleanup();
         }
       } catch (e) {
-        console.log('Routine cleanup completed');
       }
     }
     
@@ -1919,7 +1894,6 @@ export default function AudioRoutines() {
       duration: 2000,
     });
     
-    console.log('Stop button - all cleanup completed');
   };
 
   const handleRoutineClick = (routine: AudioRoutine) => {

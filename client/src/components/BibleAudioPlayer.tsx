@@ -79,7 +79,6 @@ export default function BibleAudioPlayer({
         setIsPlaying(true);
       }
     } catch (error) {
-      console.error("Error generating audio:", error);
     }
   };
 

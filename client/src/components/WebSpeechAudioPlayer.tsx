@@ -73,7 +73,6 @@ export default function WebSpeechAudioPlayer({
 
   const handlePlay = () => {
     if (!isSupported) {
-      console.warn('Web Speech API not supported');
       return;
     }
 
@@ -130,7 +129,6 @@ export default function WebSpeechAudioPlayer({
       };
 
       utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event);
         setIsPlaying(false);
         stopProgressTracking();
       };

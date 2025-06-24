@@ -118,14 +118,12 @@ export default function EnhancedChurchDiscovery() {
                   return;
                 }
               } catch (error) {
-                console.log('Reverse geocoding failed, trying IP location...');
               }
               
               // Skip IP fallback to prevent interference with manual typing
               setIsDetectingLocation(false);
             },
             (error) => {
-              console.log('Browser geolocation denied');
               setIsDetectingLocation(false);
             }
           );
@@ -134,7 +132,6 @@ export default function EnhancedChurchDiscovery() {
           setIsDetectingLocation(false);
         }
       } catch (error) {
-        console.log('All location detection failed');
         toast({
           title: "Location Detection Failed",
           description: "Please enter your location manually",
@@ -317,7 +314,6 @@ export default function EnhancedChurchDiscovery() {
       queryClient.invalidateQueries({ queryKey: ['/api/churches'] });
     },
     onError: (error: any) => {
-      console.error('Add church error:', error);
       
       if (isUnauthorizedError(error)) {
         toast({
@@ -733,10 +729,8 @@ export default function EnhancedChurchDiscovery() {
                                       return;
                                     }
                                   } catch (geocodeError) {
-                                    console.log('Geocoding service failed, falling back to IP location');
                                   }
                                 } catch (gpsError: any) {
-                                  console.log('GPS location failed:', gpsError?.message || gpsError);
                                   
                                   // Show specific error message for GPS denial
                                   if (gpsError?.code === 1) { // PERMISSION_DENIED
@@ -772,7 +766,6 @@ export default function EnhancedChurchDiscovery() {
                                     throw new Error('Invalid location data received');
                                   }
                                 } catch (ipError) {
-                                  console.error('IP location failed:', ipError);
                                   toast({
                                     title: "Location Detection Failed",
                                     description: "Unable to detect location. Please enter your city manually.",
@@ -780,7 +773,6 @@ export default function EnhancedChurchDiscovery() {
                                   });
                                 }
                               } catch (error) {
-                                console.error('Location detection error:', error);
                                 toast({
                                   title: "Location Error",
                                   description: "Something went wrong. Please enter your location manually.",

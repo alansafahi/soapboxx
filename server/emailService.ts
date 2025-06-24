@@ -70,7 +70,6 @@ class EmailService {
       `
       });
 
-      console.log(`✅ Verification email sent successfully to ${data.email}`);
     } catch (error) {
       console.error('❌ Failed to send verification email:', error);
       throw error;
@@ -105,7 +104,6 @@ class EmailService {
       `
       });
 
-      console.log(`✅ Password reset email sent successfully to ${data.email}`);
     } catch (error) {
       console.error('❌ Failed to send password reset email:', error);
       throw error;
@@ -134,7 +132,6 @@ class EmailService {
         text: `Welcome to SoapBox, ${firstName}! Your account is now active. Start exploring our faith community platform.`
       });
 
-      console.log(`✅ Welcome email sent successfully to ${email}`);
     } catch (error) {
       console.error('❌ Failed to send welcome email:', error);
     }

@@ -139,7 +139,6 @@ function initializeDispatch() {
       try {
         listener(memoryState)
       } catch (error) {
-        console.error('Toast listener error:', error)
       }
     })
   }

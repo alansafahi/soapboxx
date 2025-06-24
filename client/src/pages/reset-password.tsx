@@ -109,7 +109,6 @@ export default function ResetPassword() {
         setError(data.message || 'Failed to reset password');
       }
     } catch (error) {
-      console.error('Password reset error:', error);
       setError('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);

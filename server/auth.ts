@@ -154,7 +154,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const sessionUser = session?.user;
   const userId = session?.userId;
   
-  console.log('🔐 Authentication check for', req.method, req.path, ':', {
     hasSession: !!req.session,
     sessionUser: !!sessionUser,
     userId,
@@ -168,7 +167,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (session && sessionUser && userId) {
     // Validate user data is not null/cleared
     if (sessionUser === null || userId === null) {
-      console.log('❌ Authentication failed - session data was cleared');
       return res.status(401).json({ 
         success: false,
         message: 'Unauthorized' 
@@ -189,11 +187,9 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         ...(sessionUser || {})
       };
     }
-    console.log('✅ User authenticated via session:', sessionUser?.email || userId);
     return next();
   }
   
-  console.log('❌ Authentication failed - no valid session data');
   return res.status(401).json({ 
     success: false,
     message: 'Unauthorized' 
@@ -350,7 +346,6 @@ export function setupAuth(app: Express): void {
       };
       (req.session as any).authenticated = true;
 
-      console.log('🔐 Creating session for user:', user.email);
 
       req.session.save((err: any) => {
         if (err) {
@@ -361,7 +356,6 @@ export function setupAuth(app: Express): void {
           });
         }
         
-        console.log('✅ Session saved successfully for user:', user.email);
         
         res.json({
           success: true,
@@ -622,7 +616,6 @@ export function setupAuth(app: Express): void {
         // Clear session cookies
         res.clearCookie('connect.sid', { path: '/' });
         
-        console.log('✅ Session destroyed and cookies cleared');
         
         res.json({ 
           success: true,

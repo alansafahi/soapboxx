@@ -53,14 +53,12 @@ export default function AudioRoutines() {
   };
 
   const handleStartRoutine = (routine: AudioRoutine) => {
-    console.log('Starting routine:', routine.name);
     setPlayingRoutine(routine.id);
     startFullMeditationSession(routine);
   };
 
   const startFullMeditationSession = async (routine: AudioRoutine) => {
     try {
-      console.log('Device detected:', { isIOS, isAndroid, isSafari, isKindle, isAppleWatch, isMobile });
       
       // Cross-platform AudioContext creation
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -257,14 +255,12 @@ export default function AudioRoutines() {
                 };
               }
             } catch (error) {
-              console.error(`Segment ${index + 1} failed:`, error);
             }
           }
         }, segment.delay * 1000);
       });
       
     } catch (error) {
-      console.error('Meditation session error:', error);
       
       let errorMessage = "Please tap to enable audio for your meditation routine.";
       if (isIOS) {

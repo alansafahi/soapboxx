@@ -121,7 +121,6 @@ export default function TopHeader() {
 
   // Calculate unread count from current notifications with null safety
   const unreadCount = (notifications || []).filter(n => !n.isRead).length;
-  console.log('Calculated unread count:', unreadCount);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {

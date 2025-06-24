@@ -75,7 +75,6 @@ export default function Navigation() {
   }, [notifications]);
 
   const handleNotificationClick = (notification: any) => {
-    console.log('Notification clicked:', notification);
     
     // Close dropdown immediately
     setDropdownOpen(false);

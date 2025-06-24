@@ -125,7 +125,6 @@ export default function PrayerWall() {
       });
       
       if (!response.ok) {
-        console.error(`Failed to fetch support messages: ${response.status}`);
         return;
       }
       
@@ -136,7 +135,6 @@ export default function PrayerWall() {
         return newMap;
       });
     } catch (error) {
-      console.error("Error fetching support messages:", error);
     }
   };
 
@@ -227,7 +225,6 @@ export default function PrayerWall() {
   // Create prayer request mutation
   const createPrayerMutation = useMutation({
     mutationFn: async (data: PrayerRequestFormData) => {
-      console.log('Submitting prayer data:', data);
       const response = await fetch('/api/prayers', {
         method: 'POST',
         headers: {
@@ -243,7 +240,6 @@ export default function PrayerWall() {
       }
       
       const result = await response.json();
-      console.log('Prayer submission result:', result);
       return result;
     },
     onSuccess: () => {
@@ -362,7 +358,6 @@ export default function PrayerWall() {
         });
       }
     } catch (error) {
-      console.error('AI assistance error:', error);
       toast({
         title: "AI assistance unavailable",
         description: "Please write your prayer manually or try again later",
@@ -429,9 +424,6 @@ export default function PrayerWall() {
   };
 
   const handleCreatePrayer = (data: PrayerRequestFormData) => {
-    console.log('handleCreatePrayer called with data:', data);
-    console.log('Form validation state:', form.formState);
-    console.log('Form errors:', form.formState.errors);
     createPrayerMutation.mutate(data);
   };
 

@@ -34,7 +34,6 @@ export function useRoleBasedTour() {
       });
       setTourCompleted(true);
     } catch (error) {
-      console.error("Failed to mark tour as completed:", error);
     }
   };
 

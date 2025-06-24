@@ -256,20 +256,11 @@ export function EventManagement() {
 
   // Debug: Log current user churches to verify Grace Community Church is included
   useEffect(() => {
-    console.log("User churches:", userChurchesData);
-    console.log("Default church ID:", defaultChurchId);
   }, [userChurchesData, defaultChurchId]);
 
   const onCreateSubmit = (data: EventForm) => {
-    console.log("=== FORM SUBMISSION DEBUG ===");
-    console.log("Form data received:", data);
-    console.log("Form validation errors:", form.formState.errors);
-    console.log("Form is valid:", form.formState.isValid);
-    console.log("endDate value:", `'${data.endDate}'`);
-    console.log("endDate length:", data.endDate?.length);
     
     // This should never be reached if validation is working
-    console.log("WARNING: Form submission function was called despite potential validation issues");
     
     // Convert datetime-local strings to ISO strings
     const formattedData = {
@@ -277,7 +268,6 @@ export function EventManagement() {
       eventDate: new Date(data.eventDate).toISOString(),
       endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
     };
-    console.log("Formatted data for submission:", formattedData);
     createEventMutation.mutate(formattedData);
   };
 

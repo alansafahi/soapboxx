@@ -20,7 +20,6 @@ window.addEventListener('unhandledrejection', (event) => {
        event.reason.message.includes('Not Found') ||
        event.reason.message.includes('not found'))) {
     event.preventDefault();
-    console.warn('API request failed:', event.reason.message);
     return;
   }
   
@@ -32,12 +31,10 @@ window.addEventListener('unhandledrejection', (event) => {
        event.reason.message.includes('login') ||
        event.reason.message.includes('Network error'))) {
     event.preventDefault();
-    console.warn('Handled network/auth error:', event.reason.message);
     return;
   }
   
   // Log other errors for debugging
-  console.error('Unhandled promise rejection:', event.reason);
 });
 
 createRoot(document.getElementById("root")!).render(

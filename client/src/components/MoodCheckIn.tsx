@@ -53,12 +53,9 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
           credentials: "include",
         });
         
-        console.log('Mood check-in response status:', response.status);
-        console.log('Mood check-in response headers:', response.headers.get('content-type'));
         
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Mood check-in error response:', errorText);
           
           if (response.status === 401) {
             throw new Error("Authentication required. Please refresh the page and try again.");
@@ -70,13 +67,11 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
           const text = await response.text();
-          console.error("Expected JSON but got:", contentType, text);
           throw new Error("Server returned unexpected response format");
         }
         
         return await response.json();
       } catch (error) {
-        console.error('Mood check-in request failed:', error);
         throw error;
       }
     },
@@ -90,7 +85,6 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
       if (onComplete) onComplete();
     },
     onError: (error) => {
-      console.error('Mood check-in mutation error:', error);
       toast({
         title: "Check-in Failed",
         description: error.message || "Failed to record mood check-in. Please try again.",

@@ -68,7 +68,6 @@ export default function DemoPage() {
       setStats(response);
       setDataGenerated(response.users > 0);
     } catch (error) {
-      console.error('Failed to load demo stats:', error);
     }
   };
 
@@ -80,7 +79,6 @@ export default function DemoPage() {
       await loadAvailableUsers();
       setDataGenerated(true);
     } catch (error) {
-      console.error('Failed to generate demo data:', error);
     } finally {
       setIsGenerating(false);
     }
@@ -91,7 +89,6 @@ export default function DemoPage() {
       const users = await apiRequest('/api/demo/users');
       setAvailableUsers(users);
     } catch (error) {
-      console.error('Failed to load demo users:', error);
     }
   };
 
@@ -102,7 +99,6 @@ export default function DemoPage() {
       setDataGenerated(false);
       setAvailableUsers([]);
     } catch (error) {
-      console.error('Failed to clear demo data:', error);
     }
   };
 
@@ -114,7 +110,6 @@ export default function DemoPage() {
       });
       window.location.href = '/';
     } catch (error) {
-      console.error('Failed to login as demo user:', error);
     }
   };
 

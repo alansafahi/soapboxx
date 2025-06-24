@@ -50,7 +50,6 @@ export class BatchBibleImporter {
         totalImported += batchResult.imported;
         totalErrors.push(...batchResult.errors);
         
-        console.log(`✅ Batch ${batchNum} completed: ${batchResult.imported} verses imported`);
         
         // Brief pause between batches to prevent overwhelming the API
         await new Promise(resolve => setTimeout(resolve, 1000));

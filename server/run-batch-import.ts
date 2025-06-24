@@ -25,7 +25,6 @@ async function runBatchImport() {
       const asvResult = await batchBibleImporter.importInBatches('ASV', 8);
       results.push(asvResult);
     } else {
-      console.log('✅ ASV already complete');
     }
     
     // Import WEB if not complete
@@ -34,7 +33,6 @@ async function runBatchImport() {
       const webResult = await batchBibleImporter.importInBatches('WEB', 8);
       results.push(webResult);
     } else {
-      console.log('✅ WEB already complete');
     }
     
     // Final status
@@ -45,7 +43,6 @@ async function runBatchImport() {
     console.log(`📊 Final status: ASV=${finalAsvCount} verses, WEB=${finalWebCount} verses`);
     
     results.forEach(result => {
-      console.log(`✅ ${result.translation}: ${result.imported} verses imported, ${result.errors.length} errors`);
     });
     
     if (finalAsvCount >= 31000 && finalWebCount >= 31000) {

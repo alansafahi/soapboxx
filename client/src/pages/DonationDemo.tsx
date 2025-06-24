@@ -326,7 +326,6 @@ export default function DonationDemo() {
         
         return await response.json();
       } catch (error) {
-        console.error("Payment intent error:", error);
         throw error;
       }
     },
@@ -336,7 +335,6 @@ export default function DonationDemo() {
       setShowPaymentForm(true);
     },
     onError: (error: any) => {
-      console.error("Payment intent failed:", error);
       toast({
         title: "API Connection Issue",
         description: "The donation system requires API connectivity. For demonstration purposes, the interface will show the complete Stripe integration flow.",

@@ -21,7 +21,6 @@ export function useAuth() {
       return null;
     }
 
-    console.log('🔍 Checking authentication status...');
     try {
       const response = await fetch('/api/auth/user', {
         credentials: 'include',
@@ -31,11 +30,9 @@ export function useAuth() {
         }
       });
       
-      console.log('📡 Auth response status:', response.status);
       
       if (response.ok) {
         const userData = await response.json();
-        console.log('✅ User authenticated:', userData.email);
         setAuthState({ 
           user: userData, 
           isLoading: false, 
@@ -43,7 +40,6 @@ export function useAuth() {
         });
         return userData;
       } else {
-        console.log('❌ Auth failed with status:', response.status);
         setAuthState({ 
           user: null, 
           isLoading: false, 
@@ -52,7 +48,6 @@ export function useAuth() {
         return null;
       }
     } catch (error) {
-      console.log('💥 Auth error:', error);
       setAuthState({ 
         user: null, 
         isLoading: false, 

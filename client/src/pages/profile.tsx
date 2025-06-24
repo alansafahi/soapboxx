@@ -120,12 +120,10 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
-      console.log('Sending profile update:', data);
       const response = await apiRequest("/api/users/profile", {
         method: "PUT",
         body: data,
       });
-      console.log('Profile update response:', response);
       return response;
     },
     onMutate: async (updatedData) => {
@@ -150,7 +148,6 @@ export default function ProfilePage() {
         queryClient.setQueryData(["/api/auth/user"], context.previousProfile);
       }
       
-      console.error('Profile update error:', error);
       toast({
         title: "Update Failed",
         description: "Failed to update profile. Please try again.",
@@ -158,14 +155,12 @@ export default function ProfilePage() {
       });
     },
     onSuccess: async (data) => {
-      console.log('Profile update response:', data);
       
       // Clear local updates on successful save
       setLocalProfileUpdates({});
       
       // Gentle cache refresh without invalidating auth state
       try {
-        console.log('🔄 Updating profile cache...');
         
         // Update the cache data directly instead of invalidating
         queryClient.setQueryData(["/api/auth/user"], (oldData: any) => {
@@ -181,9 +176,7 @@ export default function ProfilePage() {
           });
         }, 500);
         
-        console.log('✅ Profile cache updated successfully');
       } catch (error) {
-        console.error('Cache update error:', error);
       }
       
       toast({

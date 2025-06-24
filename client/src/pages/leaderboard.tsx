@@ -50,7 +50,6 @@ export default function LeaderboardPage() {
       });
       setIsAnonymous(checked);
     } catch (error) {
-      console.error("Failed to update anonymous setting:", error);
     }
   };
 

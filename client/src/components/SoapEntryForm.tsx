@@ -120,10 +120,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   const saveMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      console.log('=== SAVE MUTATION START ===');
-      console.log('Save mutation triggered with data:', data);
-      console.log('User context:', user);
-      console.log('Church ID from user:', user?.churchId);
       
       const payload = {
         ...data,
@@ -132,30 +128,22 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         tags: data.tags || [],
       };
 
-      console.log('Final payload being sent:', payload);
-      console.log('Entry mode:', entry ? 'UPDATE' : 'CREATE');
 
       try {
         let result;
         if (entry) {
-          console.log('Making PUT request to:', `/api/soap/${entry.id}`);
           result = await apiRequest(`/api/soap/${entry.id}`, {
             method: 'PUT',
             body: payload,
           });
         } else {
-          console.log('Making POST request to: /api/soap');
           result = await apiRequest('/api/soap', {
             method: 'POST',
             body: payload,
           });
         }
-        console.log('=== SAVE MUTATION SUCCESS ===');
-        console.log('Server response:', result);
         return result;
       } catch (error) {
-        console.log('=== SAVE MUTATION ERROR ===');
-        console.error('Save mutation error:', error);
         throw error;
       }
     },
@@ -173,18 +161,11 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       onSuccess();
     },
     onError: (error) => {
-      console.log('=== SAVE MUTATION ERROR HANDLER ===');
-      console.error('S.O.A.P. save error:', error);
-      console.log('Error details:', JSON.stringify(error, null, 2));
-      console.log('User context:', user);
-      console.log('Error type:', typeof error);
-      console.log('Error constructor:', error?.constructor?.name);
       
       let errorMessage = "Failed to save S.O.A.P. entry. Please try again.";
       
       if (error && typeof error === 'object' && 'message' in error) {
         const errorMsg = error.message as string;
-        console.log('Parsed error message:', errorMsg);
         
         if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
           errorMessage = "Your session has expired. Please refresh the page to continue.";
@@ -478,7 +459,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         description: `"${reference}" not found. Please enter the verse text manually below.`,
         variant: "default",
       });
-      console.log('Verse lookup failed:', error);
     } finally {
       setIsLookingUpVerse(false);
     }
@@ -568,7 +548,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
           });
         }
       } catch (error) {
-        console.log('Auto-lookup failed:', error);
       }
       setIsAutoLookingUp(false);
     }, 1500);
@@ -586,9 +565,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   }, [autoLookupTimeout]);
 
   const handleSubmit = (data: FormData) => {
-    console.log('=== FORM SUBMISSION DEBUG ===');
-    console.log('Form submission triggered with data:', data);
-    console.log('Form validation errors:', form.formState.errors);
     
     // Check if all required fields are filled
     if (!data.scripture || !data.observation || !data.application || !data.prayer) {
@@ -606,8 +582,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       devotionalDate: new Date(data.devotionalDate)
     };
     
-    console.log('Processed submission data:', submissionData);
-    console.log('About to call saveMutation.mutate...');
     saveMutation.mutate(submissionData);
   };
 
@@ -686,7 +660,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 <FormItem>
                   <FormLabel>Look Up With</FormLabel>
                   <Select value={selectedVersion} onValueChange={(value) => {
-                    console.log('Version changed from', selectedVersion, 'to', value);
                     setSelectedVersion(value);
                     // Force immediate lookup when version is changed if there's a reference
                     const reference = form.getValues('scriptureReference');
@@ -1139,28 +1112,18 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               disabled={saveMutation.isPending}
               className="flex items-center gap-2"
               onClick={(e) => {
-                console.log('=== SAVE BUTTON CLICKED ===');
-                console.log('Button event:', e);
-                console.log('Form values:', form.getValues());
-                console.log('Form errors:', form.formState.errors);
-                console.log('Form is valid:', form.formState.isValid);
-                console.log('Form state:', form.formState);
                 
                 // Manually trigger form submission if validation passes
                 const values = form.getValues();
-                console.log('Raw form values:', values);
                 
                 if (values.scripture && values.observation && values.application && values.prayer) {
-                  console.log('Manual form submission triggered');
                   
                   // Try direct handleSubmit call to bypass form wrapper
                   try {
                     handleSubmit(values);
                   } catch (error) {
-                    console.error('Direct handleSubmit error:', error);
                   }
                 } else {
-                  console.log('Required fields missing, cannot submit');
                 }
               }}
             >

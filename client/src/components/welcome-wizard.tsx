@@ -395,12 +395,10 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
 
   const joinChurch = useMutation({
     mutationFn: async (churchId: number) => {
-      console.log("Joining church with ID:", churchId);
       setJoiningChurchId(churchId);
       return await apiRequest("POST", `/api/churches/${churchId}/join`);
     },
     onSuccess: (_, churchId) => {
-      console.log("Successfully joined church:", churchId);
       setJoiningChurchId(null);
       toast({
         title: "Church Joined Successfully!",
@@ -409,7 +407,6 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       // Don't auto-complete onboarding - let user choose to add more churches or finish
     },
     onError: (error) => {
-      console.error("Error joining church:", error);
       setJoiningChurchId(null);
       toast({
         title: "Error Joining Church",
@@ -1156,13 +1153,11 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
               ) : (
                 <Button 
                   onClick={async () => {
-                    console.log("Complete Setup clicked - forcing refresh");
                     // Force invalidate all user-related queries to sync state
                     await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
                     await queryClient.invalidateQueries({ queryKey: ["/api/auth/2fa/onboarding-status"] });
                     // Add a small delay to ensure queries refresh
                     setTimeout(() => {
-                      console.log("Calling onComplete after delay");
                       onComplete();
                     }, 500);
                   }} 

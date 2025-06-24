@@ -614,7 +614,6 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
         tags: ''
       });
     } catch (error) {
-      console.error('Error creating discussion:', error);
     } finally {
       setIsSubmitting(false);
     }

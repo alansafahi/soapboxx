@@ -18,10 +18,8 @@ async function runBibleImport() {
     
     for (const result of results) {
       console.log(`\n${result.translation} (${result.source}):`);
-      console.log(`✅ Success: ${result.success}`);
       console.log(`📥 Imported: ${result.imported} verses`);
       console.log(`⏭️ Skipped: ${result.skipped} verses`);
-      console.log(`❌ Errors: ${result.errors.length}`);
       
       if (result.errors.length > 0) {
         console.log('Error details:');
@@ -43,7 +41,6 @@ async function runBibleImport() {
     
     if ((asvCount[0]?.count || 0) > 30000 && (webCount[0]?.count || 0) > 30000) {
       console.log('🎉 Bible import completed successfully!');
-      console.log('✅ Both ASV and WEB translations now have complete verse counts');
     } else {
       console.log('⚠️ Import completed but verse counts may be lower than expected');
       console.log('💡 This could be due to API limitations or data source issues');
@@ -60,6 +57,5 @@ runBibleImport().then(() => {
   console.log('🏁 Bible import process finished');
   process.exit(0);
 }).catch(error => {
-  console.error('💥 Fatal error:', error);
   process.exit(1);
 });

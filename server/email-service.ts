@@ -37,7 +37,6 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
     if (process.env.SENDGRID_API_KEY) {
       const response = await sgMail.send(msg);
       const messageId = response[0]?.headers?.['x-message-id'] || 'unknown';
-      console.log(`✅ Email sent successfully to ${options.to} (Message ID: ${messageId})`);
       return { success: true, messageId };
     } else {
       console.log('📧 Email would be sent (development mode):', {

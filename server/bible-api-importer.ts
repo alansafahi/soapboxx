@@ -153,9 +153,7 @@ class BibleAPIImporter {
         totalBooks++;
         totalChapters += result.chapters;
         totalVerses += result.verses;
-        console.log(`✅ ${book}: ${result.chapters} chapters, ${result.verses} verses`);
       } else {
-        console.log(`❌ ${book}: No verses found`);
       }
       
       allErrors.push(...result.errors);
@@ -226,7 +224,6 @@ class BibleAPIImporter {
       console.log(`  📄 Chapters: ${result.totalChapters}`);
       console.log(`  📝 Verses: ${result.totalVerses}`);
       console.log(`  ⏱️ Duration: ${Math.round(result.duration / 1000)}s`);
-      console.log(`  ❌ Errors: ${result.errors.length}`);
       
       if (result.errors.length > 0 && result.errors.length < 10) {
         console.log(`  First few errors:`);
@@ -239,8 +236,6 @@ class BibleAPIImporter {
     const finalWebStatus = await this.getTranslationStatus('WEB');
     
     console.log(`\n📊 Final Status:`);
-    console.log(`   ASV: ${finalAsvStatus.verseCount} verses (${finalAsvStatus.isComplete ? 'Complete ✅' : 'Incomplete ❌'})`);
-    console.log(`   WEB: ${finalWebStatus.verseCount} verses (${finalWebStatus.isComplete ? 'Complete ✅' : 'Incomplete ❌'})`);
     
     if (finalAsvStatus.isComplete && finalWebStatus.isComplete) {
       console.log('\n🎯 SUCCESS: Both ASV and WEB translations are now complete!');

@@ -85,7 +85,6 @@ export default function PersonalizedGuidance() {
       });
       refetch();
     } catch (error) {
-      console.error('Failed to mark as viewed:', error);
     }
   };
 

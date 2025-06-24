@@ -62,13 +62,11 @@ export default function LoginPage() {
             password: formData.password
           })
         }).catch(err => {
-          console.error('Login fetch error:', err);
           throw new Error('Network error during login. Please check your connection.');
         });
 
         if (loginResponse.ok) {
           const userData = await loginResponse.json().catch(err => {
-            console.error('JSON parse error:', err);
             throw new Error('Invalid response from server');
           });
           
@@ -89,7 +87,6 @@ export default function LoginPage() {
             const errorData = await loginResponse.json();
             errorMessage = errorData.message || errorData.error || errorMessage;
           } catch (parseError) {
-            console.error('Error parsing error response:', parseError);
           }
           
           toast({
@@ -104,7 +101,6 @@ export default function LoginPage() {
           method: 'POST',
           body: formData,
         }).catch(err => {
-          console.error('Registration error:', err);
           throw new Error('Registration failed. Please try again.');
         });
 
@@ -117,7 +113,6 @@ export default function LoginPage() {
         setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
       }
     } catch (error: any) {
-      console.error('Form submission error:', error);
       toast({
         title: isLogin ? "Login Error" : "Registration Error",
         description: error.message || "An unexpected error occurred. Please try again.",
