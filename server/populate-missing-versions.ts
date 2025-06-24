@@ -105,14 +105,26 @@ export class BibleVersionPopulator {
   private async populateVersion(version: string): Promise<void> {
     const versionName = version === 'ASV' ? 'American Standard Version' : 'World English Bible';
     
+    // Process books in batches for better performance
+    const batchSize = 3; // Process 3 chapters concurrently
+    
     for (const book of BIBLE_BOOKS) {
       console.log(`  📚 Processing ${book.name} (${book.chapters} chapters)...`);
       
-      for (let chapter = 1; chapter <= book.chapters; chapter++) {
-        await this.populateChapter(version, versionName, book.name, chapter);
+      // Process chapters in batches
+      for (let startChapter = 1; startChapter <= book.chapters; startChapter += batchSize) {
+        const endChapter = Math.min(startChapter + batchSize - 1, book.chapters);
+        const chapterPromises = [];
         
-        // Add delay to respect OpenAI rate limits
-        await new Promise(resolve => setTimeout(resolve, 100));
+        for (let chapter = startChapter; chapter <= endChapter; chapter++) {
+          chapterPromises.push(this.populateChapter(version, versionName, book.name, chapter));
+        }
+        
+        // Wait for batch to complete
+        await Promise.all(chapterPromises);
+        
+        // Add small delay between batches to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
   }
