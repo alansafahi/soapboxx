@@ -193,10 +193,18 @@ export default function CommunityFeed() {
       });
     },
     onError: (error) => {
-      console.error("Reaction error:", error);
+      console.error("Reaction API error:", error);
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized", 
+          description: "Please log in",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "Error",
-        description: "Failed to add reaction",
+        description: "Failed to add reaction. Please try again.",
         variant: "destructive",
       });
     },
