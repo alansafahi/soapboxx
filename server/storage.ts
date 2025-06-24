@@ -4352,6 +4352,16 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(bibleVerses.reference));
   }
 
+  async getVerseCount(translation: string): Promise<number> {
+    try {
+      const verses = await this.getBibleVersesByTranslation(translation);
+      return verses.length;
+    } catch (error) {
+      console.error(`Error getting verse count for ${translation}:`, error);
+      return 0;
+    }
+  }
+
   async getBibleVersesCount(): Promise<number> {
     const [result] = await db
       .select({ count: count() })
