@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format } from 'date-fns';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -407,7 +407,7 @@ export default function EnhancedCommunityFeed() {
                             ))}
                           </div>
                           <span>
-                            {post.reactions.reduce((sum, r) => sum + r.count, 0)} reactions
+                            {post.reactions?.reduce((sum, r) => sum + r.count, 0) || 0} reactions
                           </span>
                           {post.commentCount > 0 && (
                             <>
@@ -422,7 +422,7 @@ export default function EnhancedCommunityFeed() {
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                         <div className="flex items-center flex-wrap gap-1">
                           {REACTION_TYPES.slice(0, 4).map((reactionType) => {
-                            const postReaction = post.reactions.find(r => r.type === reactionType.type);
+                            const postReaction = post.reactions?.find(r => r.type === reactionType.type);
                             const isActive = postReaction?.userReacted;
                             
                             return (
