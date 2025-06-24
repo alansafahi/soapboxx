@@ -235,6 +235,9 @@ import {
   type InsertVideoContentDB,
   type Notification,
   type InsertNotification,
+  reactions,
+  type Reaction,
+  type InsertReaction,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray } from "drizzle-orm";
@@ -5805,7 +5808,6 @@ export class DatabaseStorage implements IStorage {
         .set({
           emoji: reactionData.emoji,
           intensity: reactionData.intensity,
-          updatedAt: new Date(),
         })
         .where(eq(reactions.id, existing[0].id))
         .returning();
@@ -5842,17 +5844,7 @@ export class DatabaseStorage implements IStorage {
     return { success: true, deleted: deleted.length > 0 };
   }
 
-  async removeReaction(userId: string, targetId: number, reactionType: string): Promise<void> {
-    await db
-      .delete(reactions)
-      .where(
-        and(
-          eq(reactions.userId, userId),
-          eq(reactions.targetId, targetId),
-          eq(reactions.reactionType, reactionType)
-        )
-      );
-  }
+  // Removed duplicate removeReaction method
 
   async getCommunityGroups(userId: string): Promise<any[]> {
     const userGroups = await db
