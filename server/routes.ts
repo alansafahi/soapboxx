@@ -689,7 +689,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Debug: Check if profile image is being mapped correctly
       if (user.profileImageUrl) {
-        console.log('Profile image found, length:', user.profileImageUrl?.length);
       }
       
       res.json(mappedUser);
@@ -1998,7 +1997,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pointsEarned: checkIn.pointsEarned
       });
     } catch (error) {
-
       res.status(500).json({ message: 'Failed to create check-in', error: error.message });
     }
   });
