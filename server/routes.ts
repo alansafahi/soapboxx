@@ -5197,7 +5197,7 @@ Return JSON with this exact structure:
 
   app.post('/api/churches/:churchId/claim', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       const { verifiedDenomination } = req.body; // Admin-verified denomination
 
