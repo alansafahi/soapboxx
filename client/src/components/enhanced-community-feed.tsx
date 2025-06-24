@@ -465,7 +465,7 @@ export default function EnhancedCommunityFeed() {
           ))}
         </AnimatePresence>
 
-        {safePost.length === 0 && (
+        {safePosts.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
