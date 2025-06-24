@@ -7,22 +7,79 @@ import { Badge } from "@/components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, BookOpen, Brain } from "lucide-react";
+import { Heart, BookOpen, Brain, X } from "lucide-react";
 
 interface MoodCheckInProps {
   onComplete?: () => void;
 }
 
-const moodOptions = [
-  { emoji: "😇", label: "Blessed", value: "blessed", score: 5 },
-  { emoji: "😊", label: "Joyful", value: "joyful", score: 4 },
-  { emoji: "😐", label: "Neutral", value: "neutral", score: 3 },
-  { emoji: "😔", label: "Struggling", value: "struggling", score: 2 },
-  { emoji: "😭", label: "Overwhelmed", value: "overwhelmed", score: 1 }
+// Enhanced 4-Pillar Feelings Selector System
+const moodCategories = [
+  {
+    title: "Emotional & Spiritual Support",
+    icon: "💙",
+    moods: [
+      { id: "anxious", label: "Anxious", icon: "😰", subtitle: "peace, comfort" },
+      { id: "depressed", label: "Depressed", icon: "😞", subtitle: "hope, light" },
+      { id: "lonely", label: "Lonely", icon: "😔", subtitle: "fellowship, connection" },
+      { id: "grieving", label: "Grieving", icon: "💔", subtitle: "comfort, healing" },
+      { id: "fearful", label: "Fearful", icon: "😨", subtitle: "courage, protection" },
+      { id: "overwhelmed", label: "Overwhelmed", icon: "😵", subtitle: "rest, peace" },
+      { id: "doubtful", label: "Doubtful", icon: "🤔", subtitle: "faith, assurance" },
+      { id: "angry", label: "Angry", icon: "😠", subtitle: "patience, forgiveness" },
+    ]
+  },
+  {
+    title: "Growth & Transformation",
+    icon: "🌱",
+    moods: [
+      { id: "seeking", label: "Seeking Direction", icon: "🧭", subtitle: "guidance, wisdom" },
+      { id: "repentant", label: "Repentant", icon: "🙏", subtitle: "forgiveness, renewal" },
+      { id: "motivated", label: "Motivated", icon: "🔥", subtitle: "purpose, strength" },
+      { id: "curious", label: "Curious", icon: "🤓", subtitle: "knowledge, understanding" },
+      { id: "determined", label: "Determined", icon: "💪", subtitle: "perseverance, victory" },
+      { id: "reflective", label: "Reflective", icon: "🤲", subtitle: "wisdom, insight" },
+      { id: "inspired", label: "Inspired", icon: "✨", subtitle: "creativity, vision" },
+      { id: "focused", label: "Focused", icon: "🎯", subtitle: "clarity, purpose" },
+    ]
+  },
+  {
+    title: "Life Situations",
+    icon: "🏠",
+    moods: [
+      { id: "celebrating", label: "Celebrating", icon: "🎉", subtitle: "gratitude, praise" },
+      { id: "transitioning", label: "In Transition", icon: "🚪", subtitle: "guidance, stability" },
+      { id: "healing", label: "Healing", icon: "🩹", subtitle: "restoration, wholeness" },
+      { id: "parenting", label: "Parenting Challenges", icon: "👨‍👩‍👧‍👦", subtitle: "wisdom, patience" },
+      { id: "working", label: "Work Stress", icon: "💼", subtitle: "balance, provision" },
+      { id: "relationship", label: "Relationship Issues", icon: "💕", subtitle: "love, reconciliation" },
+      { id: "financial", label: "Financial Concerns", icon: "💰", subtitle: "provision, trust" },
+      { id: "health", label: "Health Concerns", icon: "🏥", subtitle: "healing, strength" },
+    ]
+  },
+  {
+    title: "Faith & Worship",
+    icon: "⛪",
+    moods: [
+      { id: "grateful", label: "Grateful", icon: "🙌", subtitle: "thanksgiving, praise" },
+      { id: "peaceful", label: "Peaceful", icon: "🕊️", subtitle: "rest, serenity" },
+      { id: "joyful", label: "Joyful", icon: "😊", subtitle: "celebration, praise" },
+      { id: "blessed", label: "Blessed", icon: "😇", subtitle: "gratitude, testimony" },
+      { id: "prayerful", label: "Prayerful", icon: "🙏", subtitle: "communion, intercession" },
+      { id: "worshipful", label: "Worshipful", icon: "🎵", subtitle: "adoration, praise" },
+      { id: "hopeful", label: "Hopeful", icon: "🌅", subtitle: "faith, expectation" },
+      { id: "content", label: "Content", icon: "😌", subtitle: "satisfaction, peace" },
+    ]
+  }
 ];
 
+// Flatten all moods for easy lookup
+const allMoods = moodCategories.flatMap(category => 
+  category.moods.map(mood => ({ ...mood, category: category.title }))
+);
+
 export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
-  const [selectedMood, setSelectedMood] = useState<typeof moodOptions[0] | null>(null);
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [shareWithStaff, setShareWithStaff] = useState(false);
   const [personalizedContent, setPersonalizedContent] = useState<any>(null);
@@ -30,9 +87,38 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const toggleMoodSelection = (moodId: string) => {
+    setSelectedMoods(prev => 
+      prev.includes(moodId) 
+        ? prev.filter(id => id !== moodId)
+        : [...prev, moodId]
+    );
+  };
+
+  const clearMoods = () => {
+    setSelectedMoods([]);
+  };
+
+  const getSelectedMoodsData = () => {
+    return allMoods.filter(mood => selectedMoods.includes(mood.id));
+  };
+
   const submitMoodMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedMood) throw new Error("Please select a mood");
+      if (selectedMoods.length === 0) throw new Error("Please select at least one feeling");
+      
+      const selectedMoodsData = getSelectedMoodsData();
+      const primaryMood = selectedMoodsData[0];
+      const averageScore = selectedMoodsData.length > 0 ? 
+        Math.round(selectedMoodsData.reduce((sum, mood) => {
+          // Assign scores based on category and mood type
+          let score = 3; // neutral default
+          if (mood.category === "Faith & Worship") score = 4;
+          if (mood.category === "Growth & Transformation") score = 3;
+          if (mood.category === "Life Situations") score = 3;
+          if (mood.category === "Emotional & Spiritual Support") score = 2;
+          return sum + score;
+        }, 0) / selectedMoodsData.length) : 3;
       
       try {
         const response = await fetch("/api/mood-checkins", {
@@ -43,12 +129,18 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
             "Referer": window.location.href,
           },
           body: JSON.stringify({
-            mood: selectedMood.value,
-            moodScore: selectedMood.score,
-            moodEmoji: selectedMood.emoji,
+            mood: selectedMoods.join(", "),
+            moodScore: averageScore,
+            moodEmoji: primaryMood?.icon || "😊",
             notes: notes.trim() || null,
             shareWithStaff,
-            generatePersonalizedContent: true
+            generatePersonalizedContent: true,
+            selectedMoods: selectedMoodsData.map(mood => ({
+              id: mood.id,
+              label: mood.label,
+              category: mood.category,
+              subtitle: mood.subtitle
+            }))
           }),
           credentials: "include",
         });
@@ -143,11 +235,16 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
             </Card>
           ))}
           <Button 
-            onClick={() => setPersonalizedContent(null)} 
+            onClick={() => {
+              setPersonalizedContent(null);
+              setSelectedMoods([]);
+              setNotes("");
+              setShareWithStaff(false);
+            }} 
             variant="outline" 
             className="w-full"
           >
-            Back to Mood Check-in
+            New Mood Check-in
           </Button>
         </CardContent>
       </Card>
@@ -155,7 +252,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <Heart className="h-5 w-5 text-purple-600" />
@@ -166,22 +263,83 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-5 gap-2">
-          {moodOptions.map((mood) => (
-            <Button
-              key={mood.value}
-              variant={selectedMood?.value === mood.value ? "default" : "outline"}
-              className={`h-16 flex flex-col items-center gap-1 text-xs ${
-                selectedMood?.value === mood.value 
-                  ? "bg-purple-600 hover:bg-purple-700" 
-                  : "hover:bg-purple-50"
-              }`}
-              onClick={() => setSelectedMood(mood)}
-            >
-              <span className="text-2xl">{mood.emoji}</span>
-              <span className="text-xs">{mood.label}</span>
-            </Button>
-          ))}
+        {/* Selected Moods Display */}
+        {selectedMoods.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Selected feelings:</div>
+            <div className="flex flex-wrap gap-2">
+              {getSelectedMoodsData().map((mood) => (
+                <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
+                  <span className="text-sm">{mood.icon}</span>
+                  <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{mood.label}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleMoodSelection(mood.id)}
+                    className="h-4 w-4 p-0 text-purple-400 hover:text-purple-600 ml-1"
+                  >
+                    <X className="h-2 w-2" />
+                  </Button>
+                </div>
+              ))}
+              {selectedMoods.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearMoods}
+                  className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+                >
+                  Clear all
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 4-Pillar Feelings Selector */}
+        <div className="space-y-4 max-h-64 overflow-y-auto">
+          {moodCategories.map((category) => {
+            const hasSelectedMood = category.moods.some(mood => selectedMoods.includes(mood.id));
+            return (
+              <div key={category.title} className="space-y-2">
+                <div className={`flex items-center gap-2 pb-2 border-b ${hasSelectedMood ? 'border-purple-300 dark:border-purple-600' : 'border-gray-200 dark:border-gray-600'}`}>
+                  <span className="text-lg">{category.icon}</span>
+                  <h3 className={`font-semibold text-sm ${hasSelectedMood ? 'text-purple-700 dark:text-purple-300' : 'text-gray-800 dark:text-white'}`}>
+                    {category.title}
+                    {hasSelectedMood && (
+                      <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
+                        Selected
+                      </span>
+                    )}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {category.moods.map((mood) => {
+                    const isSelected = selectedMoods.includes(mood.id);
+                    return (
+                      <Button
+                        key={mood.id}
+                        variant={isSelected ? "default" : "outline"}
+                        size="sm"
+                        className={`h-auto p-2 flex flex-col items-center gap-1 text-xs ${
+                          isSelected 
+                            ? "bg-purple-600 hover:bg-purple-700 text-white border-purple-600" 
+                            : "hover:bg-purple-50 dark:hover:bg-purple-900/20 border-gray-200 dark:border-gray-600"
+                        }`}
+                        onClick={() => toggleMoodSelection(mood.id)}
+                        title={mood.subtitle}
+                      >
+                        <span className="text-lg">{mood.icon}</span>
+                        <span className="text-xs font-medium leading-tight text-center">
+                          {mood.label}
+                        </span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="space-y-2">
@@ -212,7 +370,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
 
         <Button
           onClick={handleSubmit}
-          disabled={!selectedMood || submitMoodMutation.isPending}
+          disabled={selectedMoods.length === 0 || submitMoodMutation.isPending}
           className="w-full bg-purple-600 hover:bg-purple-700"
         >
           {submitMoodMutation.isPending ? "Recording..." : "Get Personalized Content"}
