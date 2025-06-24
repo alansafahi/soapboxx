@@ -121,7 +121,13 @@ export default function EnhancedCommunityFeed() {
     queryFn: async () => {
       const response = await fetch('/api/discussions');
       if (!response.ok) throw new Error('Failed to fetch discussions');
-      return response.json();
+      const data = await response.json();
+      // Ensure each post has proper structure with default values
+      return Array.isArray(data) ? data.map(post => ({
+        ...post,
+        reactions: post.reactions || [],
+        author: post.author || { id: '', firstName: 'Anonymous', lastName: 'User' }
+      })) : [];
     },
   });
 
@@ -331,7 +337,7 @@ export default function EnhancedCommunityFeed() {
       {/* Posts Feed */}
       <div className="space-y-4">
         <AnimatePresence>
-          {posts.map((post) => (
+          {safePosts.map((post) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
@@ -393,10 +399,10 @@ export default function EnhancedCommunityFeed() {
                     {/* Enhanced Reactions */}
                     <div className="space-y-3 border-t pt-4">
                       {/* Reaction Summary */}
-                      {post.reactions.length > 0 && (
+                      {post.reactions && post.reactions.length > 0 && (
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                           <div className="flex -space-x-1">
-                            {post.reactions.slice(0, 3).map((reaction, index) => (
+                            {(post.reactions || []).slice(0, 3).map((reaction, index) => (
                               <span 
                                 key={index}
                                 className="text-lg z-10 bg-white rounded-full border"
@@ -459,7 +465,7 @@ export default function EnhancedCommunityFeed() {
           ))}
         </AnimatePresence>
 
-        {posts.length === 0 && (
+        {safePost.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
