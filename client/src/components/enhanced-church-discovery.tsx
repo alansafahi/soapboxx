@@ -35,6 +35,7 @@ export default function EnhancedChurchDiscovery() {
   const [joinedChurches, setJoinedChurches] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
   const [displayedCount, setDisplayedCount] = useState(10);
+  const [pageSize, setPageSize] = useState(10); // User-configurable page size
   const [filters, setFilters] = useState<FilterState>({
     denomination: "all",
     location: "",
@@ -185,7 +186,7 @@ export default function EnhancedChurchDiscovery() {
       if (filters.churchName) params.append('churchName', filters.churchName);
       if (filters.size && filters.size !== "all") params.append('size', filters.size);
       params.append('proximity', filters.proximity.toString());
-      params.append('limit', '1000'); // Get all for client-side pagination
+      params.append('limit', '2000'); // Get all churches for client-side pagination
       
       const response = await apiRequest(`/api/churches/search?${params}`);
       return response as ChurchWithDistance[];
