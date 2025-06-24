@@ -634,17 +634,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Establish session
-        req.session.userId = user.id;
-        req.session.authenticated = true;
+        (req.session as any).userId = user.id;
+        (req.session as any).authenticated = true;
         
         res.redirect('/');
       } else {
         res.status(400).json({ message: 'Invalid Apple ID token data' });
       }
-
-      // Set session
-      req.session.userId = user.id;
-      req.session.authenticated = true;
 
       res.redirect('/');
     } catch (error) {
