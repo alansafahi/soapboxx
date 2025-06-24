@@ -119,6 +119,7 @@ function AppRouter() {
 
                                     <ProtectedRoute path="/bible" component={BiblePage} />
                                     <ProtectedRoute path="/audio-bible" component={FreshAudioBible} />
+                                    <ProtectedRoute path="/fresh-audio-bible" component={FreshAudioBible} />
                                     <ProtectedRoute path="/audio-routines" component={AudioRoutines} />
                                     <ProtectedRoute path="/video-library" component={VideoLibrary} />
                                     <ProtectedRoute path="/community" component={Community} />
