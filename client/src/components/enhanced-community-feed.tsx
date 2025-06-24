@@ -111,17 +111,12 @@ export default function EnhancedCommunityFeed() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState<{ postId: number; reactionType: string } | null>(null);
 
-  // Fetch enhanced community feed with filters
+  // Fetch discussions
   const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
-    queryKey: ['/api/community/enhanced-feed', filters, searchQuery],
+    queryKey: ['/api/discussions', filters, searchQuery],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        ...filters,
-        search: searchQuery,
-        hasReactions: filters.hasReactions.toString()
-      });
-      const response = await fetch(`/api/community/enhanced-feed?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch enhanced feed');
+      const response = await fetch('/api/discussions');
+      if (!response.ok) throw new Error('Failed to fetch discussions');
       return response.json();
     },
   });
@@ -138,7 +133,7 @@ export default function EnhancedCommunityFeed() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/community/enhanced-feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       toast({
         title: "Reaction added",
         description: "Your reaction has been shared with the community",
@@ -159,7 +154,7 @@ export default function EnhancedCommunityFeed() {
       return await apiRequest('DELETE', `/api/community/reactions/${postId}/${reactionType}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/community/enhanced-feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
     },
   });
 
@@ -564,7 +559,7 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
       return await apiRequest('POST', '/api/discussions', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/community/enhanced-feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       toast({
         title: "Discussion created",
         description: "Your discussion has been shared with the community",
