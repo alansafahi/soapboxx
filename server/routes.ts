@@ -5668,6 +5668,24 @@ Return JSON with this exact structure:
     }
   });
 
+  // Get discussions endpoint
+  app.get("/api/discussions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User authentication required" });
+      }
+
+      console.log("Fetching discussions for authenticated user:", userId);
+      const discussions = await storage.getDiscussions();
+      console.log("Found discussions:", discussions.length);
+      res.json(discussions);
+    } catch (error) {
+      console.error("Error fetching discussions:", error);
+      res.status(500).json({ message: "Failed to fetch discussions" });
+    }
+  });
+
   // Create discussion endpoint
   app.post("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {
