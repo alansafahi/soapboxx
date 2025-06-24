@@ -189,6 +189,9 @@ export default function EnhancedCommunityFeed() {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  // Ensure posts is always an array for rendering
+  const renderPosts = Array.isArray(posts) ? posts : [];
+
   const getPostTypeIcon = (type: string) => {
     switch (type) {
       case 'prayer': return '🙏';
@@ -337,7 +340,7 @@ export default function EnhancedCommunityFeed() {
       {/* Posts Feed */}
       <div className="space-y-4">
         <AnimatePresence>
-          {safePosts.map((post) => (
+          {renderPosts.map((post) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
@@ -465,7 +468,7 @@ export default function EnhancedCommunityFeed() {
           ))}
         </AnimatePresence>
 
-        {safePosts.length === 0 && (
+        {renderPosts.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
