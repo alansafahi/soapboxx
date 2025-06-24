@@ -3675,7 +3675,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.get('/api/bible/contextual-selection', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { mood, count = 10, categories } = req.query;
+      const { mood, count = 10, categories, version = 'NIV' } = req.query;
       
       if (!process.env.OPENAI_API_KEY) {
         return res.status(500).json({ error: "AI service not configured" });
@@ -3701,8 +3701,22 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       const relevantCategories = moodCategoryMap[mood] || ['Faith', 'Hope', 'Love', 'Peace'];
       
-      // Get diverse verses from multiple categories and books
-      const allVerses = await storage.getBibleVerses();
+      // Get verses from our phased Bible version system
+      let allVerses;
+      
+      // Check if the requested version is available in our database
+      const availableVersions = await bibleImportSystem.getAvailableVersions();
+      const requestedVersion = availableVersions.find(v => v.code === version);
+      
+      if (requestedVersion && !requestedVersion.useOpenAI) {
+        // Use database verses for available versions (Phase 1 & 2)
+        allVerses = await storage.getBibleVersesByTranslation(version);
+        console.log(`Using database verses for ${version}, found: ${allVerses.length}`);
+      } else {
+        // For licensed versions or unavailable versions, fall back to default
+        allVerses = await storage.getBibleVerses();
+        console.log(`Using default verses (will enhance with OpenAI for ${version} if needed), found: ${allVerses.length}`);
+      }
       
       // Create a diverse selection from relevant categories
       let diverseVerses = [];

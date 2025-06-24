@@ -51,6 +51,12 @@ export default function FreshAudioBible() {
   const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
   const [selectedBibleVersion, setSelectedBibleVersion] = useState("NIV"); // Default to NIV
 
+  // Fetch available Bible versions
+  const { data: bibleVersions = [] } = useQuery({
+    queryKey: ['/api/bible/versions'],
+    select: (data: any) => data.versions || []
+  });
+
   // Real-time audio controls for premium voices (no restart needed)
   useEffect(() => {
     if (audioPlayer && useOpenAIVoice) {
@@ -207,10 +213,10 @@ export default function FreshAudioBible() {
 
   // Get contextual verse selection based on mood
   const { data: contextualVerses, isLoading: loadingVerses, refetch: refetchVerses } = useQuery({
-    queryKey: ["/api/bible/contextual-selection", selectedMood, customVerseCount],
+    queryKey: ["/api/bible/contextual-selection", selectedMood, customVerseCount, selectedBibleVersion],
     enabled: !!selectedMood,
     queryFn: async () => {
-      const response = await apiRequest(`/api/bible/contextual-selection?mood=${selectedMood}&count=${customVerseCount}`);
+      const response = await apiRequest(`/api/bible/contextual-selection?mood=${selectedMood}&count=${customVerseCount}&version=${selectedBibleVersion}`);
       return response;
     }
   });
@@ -692,6 +698,46 @@ export default function FreshAudioBible() {
           </TabsList>
 
           <TabsContent value="mood-selection" className="space-y-3 sm:space-y-4 md:space-y-6">
+            {/* Bible Version Selection */}
+            <Card>
+              <CardHeader className="p-3 sm:p-4 md:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Bible Translation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 md:p-6">
+                <div className="space-y-3">
+                  <Label htmlFor="bible-version">Choose your preferred Bible version</Label>
+                  <Select value={selectedBibleVersion} onValueChange={setSelectedBibleVersion}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Bible Version" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {bibleVersions.map((version: any) => (
+                        <SelectItem key={version.code} value={version.code}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{version.name} ({version.code})</span>
+                            {version.source === 'licensed' && (
+                              <Badge variant="secondary" className="ml-2 text-xs">Premium</Badge>
+                            )}
+                            {version.source === 'public_domain' && (
+                              <Badge variant="outline" className="ml-2 text-xs">Free</Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {bibleVersions.find((v: any) => v.code === selectedBibleVersion)?.attribution && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {bibleVersions.find((v: any) => v.code === selectedBibleVersion)?.attribution}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Mood Selection */}
             <Card>
               <CardHeader className="p-3 sm:p-4 md:p-6">
