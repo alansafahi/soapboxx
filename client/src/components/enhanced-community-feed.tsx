@@ -623,7 +623,7 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Discussion Title</label>
+        <label className="text-sm font-medium text-gray-300 dark:text-gray-300">Discussion Title</label>
         <Input
           placeholder="What would you like to discuss?"
           value={formData.title}
@@ -635,11 +635,11 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
 
       {/* Content */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Your Message</label>
+        <label className="text-sm font-medium text-gray-300 dark:text-gray-300">Your Message</label>
         <SmartScriptureTextarea
           placeholder="Share your thoughts, ask questions, or start a meaningful conversation..."
           value={formData.content}
-          onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+          onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
           className="min-h-32 border-purple-200 focus:border-purple-400 focus:ring-purple-400/20"
           disabled={isSubmitting}
         />
@@ -651,7 +651,7 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
       {/* Category & Settings */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Category</label>
+          <label className="text-sm font-medium text-gray-300 dark:text-gray-300">Category</label>
           <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
             <SelectTrigger className="border-purple-200">
               <SelectValue />
@@ -667,7 +667,7 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Visibility</label>
+          <label className="text-sm font-medium text-gray-300 dark:text-gray-300">Visibility</label>
           <Select value={formData.isPublic ? "public" : "private"} onValueChange={(value) => setFormData(prev => ({ ...prev, isPublic: value === "public" }))}>
             <SelectTrigger className="border-purple-200">
               <SelectValue />
@@ -682,7 +682,7 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
 
       {/* Tags */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Tags (optional)</label>
+        <label className="text-sm font-medium text-gray-300 dark:text-gray-300">Tags (optional)</label>
         <Input
           placeholder="Add tags separated by commas (e.g., faith, prayer, hope)"
           value={formData.tags}
