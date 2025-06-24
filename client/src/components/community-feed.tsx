@@ -269,6 +269,8 @@ export default function CommunityFeed() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Referer': window.location.href,
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -302,7 +304,7 @@ export default function CommunityFeed() {
       console.error('Reaction error:', error);
       toast({
         title: "Error",
-        description: "Failed to add reaction",
+        description: "Failed to add reaction. Please try again.",
         variant: "destructive",
       });
     }
