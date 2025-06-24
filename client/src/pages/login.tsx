@@ -10,6 +10,7 @@ import { formatErrorForToast } from "@/lib/errorUtils";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useLocation } from "wouter";
+import AutomatedChurchClaiming from "@/components/AutomatedChurchClaiming";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading: authLoading } = useImmediateAuth();
@@ -28,6 +29,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [claimableChurch, setClaimableChurch] = useState(null);
+  const [showChurchClaiming, setShowChurchClaiming] = useState(false);
   
   const [formData, setFormData] = useState({
     email: "",
@@ -97,20 +100,40 @@ export default function LoginPage() {
         }
       } else {
         // Registration
-        const response = await apiRequest('/api/auth/register', {
+        const registerResponse = await fetch('/api/auth/register', {
           method: 'POST',
-          body: formData,
-        }).catch(err => {
-          throw new Error('Registration failed. Please try again.');
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            username: formData.username,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+          })
         });
 
-        toast({
-          title: "Welcome to SoapBox!",
-          description: "Your account has been created. Please check your email to verify your account before signing in.",
-        });
+        const registerData = await registerResponse.json();
+        
+        if (registerResponse.ok) {
+          toast({
+            title: "Welcome to SoapBox!",
+            description: "Your account has been created. Please check your email to verify your account before signing in.",
+          });
 
-        setIsLogin(true);
-        setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
+          // Check if there's a claimable church
+          if (registerData.claimableChurch) {
+            setClaimableChurch(registerData.claimableChurch);
+            setShowChurchClaiming(true);
+          } else {
+            setIsLogin(true);
+            setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
+          }
+        } else {
+          throw new Error(registerData.message || 'Registration failed. Please try again.');
+        }
       }
     } catch (error: any) {
       toast({
@@ -176,6 +199,37 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  const handleChurchClaimed = () => {
+    setShowChurchClaiming(false);
+    setClaimableChurch(null);
+    setIsLogin(true);
+    setFormData({
+      email: "",
+      password: "",
+      username: "",
+      firstName: "",
+      lastName: "",
+    });
+  };
+
+  const handleSkipClaiming = () => {
+    setShowChurchClaiming(false);
+    setClaimableChurch(null);
+    setIsLogin(true);
+    setFormData(prev => ({ ...prev, password: "", username: "", firstName: "", lastName: "" }));
+  };
+
+  if (showChurchClaiming && claimableChurch) {
+    return (
+      <AutomatedChurchClaiming
+        claimableChurch={claimableChurch}
+        userEmail={formData.email}
+        onChurchClaimed={handleChurchClaimed}
+        onSkip={handleSkipClaiming}
+      />
+    );
+  }
 
   if (showForgotPassword) {
     return (
