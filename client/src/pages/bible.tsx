@@ -15,9 +15,11 @@ export default function BiblePage() {
   const [, setLocation] = useLocation();
 
   // Fetch daily verse from API
-  const { data: dailyVerse, isLoading: verseLoading } = useQuery({
+  const { data: dailyVerse, isLoading: verseLoading, error: verseError } = useQuery({
     queryKey: ["/api/bible/daily-verse"],
     enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour since verse changes daily
+    cacheTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
   });
 
   const currentVerse = dailyVerse || {
@@ -91,6 +93,15 @@ export default function BiblePage() {
             <p className="font-semibold text-blue-600">
               {currentVerse?.verseReference || "Loading..."}
             </p>
+            
+            {/* Personalization indicator */}
+            {dailyVerse?.isPersonalized && (
+              <div className="mt-2">
+                <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                  Personalized for your {dailyVerse.personalizedFor} mood
+                </Badge>
+              </div>
+            )}
             
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-3 sm:pt-4">
@@ -178,8 +189,8 @@ export default function BiblePage() {
                 className="w-full mt-4"
                 onClick={() => {
                   toast({
-                    title: "Reading Plan Continued",
-                    description: "Your daily devotional reading plan is now active. Check back tomorrow for your next reading."
+                    title: "Reading Plan Active",
+                    description: "Daily content personalized to your mood and activities. Return tomorrow for new verse!"
                   });
                 }}
               >
