@@ -840,23 +840,21 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                 <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{category.title}</h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 italic hidden sm:block">{category.description}</p>
                               </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 {category.moods.map((mood) => (
                                   <Button
                                     key={mood.id}
                                     variant={selectedMoods.includes(mood.id) ? "default" : "ghost"}
                                     size="sm"
                                     onClick={() => toggleMoodSelection(mood.id)}
-                                    className={`h-auto p-2 justify-start text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                                    className={`h-auto min-h-[3rem] p-2 justify-start text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
                                       selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''
                                     }`}
                                     title={mood.subtitle} // Keep subtitle as tooltip for context
                                   >
-                                    <div className="flex flex-col items-start w-full min-h-[2.5rem]">
-                                      <div className="flex items-center w-full">
-                                        <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
-                                        <span className="text-sm font-medium leading-tight break-words">{mood.label}</span>
-                                      </div>
+                                    <div className="flex items-center w-full">
+                                      <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
+                                      <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.label}</span>
                                     </div>
                                   </Button>
                                 ))}
