@@ -348,7 +348,7 @@ export default function EnhancedCommunityFeed() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="hover:shadow-md transition-shadow">
+              <Card className="hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     {/* Post Header */}
@@ -359,7 +359,7 @@ export default function EnhancedCommunityFeed() {
                         </div>
                         <div>
                           <div className="flex items-center space-x-2">
-                            <span className="font-semibold text-gray-900">
+                            <span className="font-semibold text-gray-900 dark:text-white dark:font-bold">
                               {post.author?.firstName && post.author?.lastName 
                                 ? `${post.author.firstName} ${post.author.lastName}`
                                 : 'Anonymous User'
