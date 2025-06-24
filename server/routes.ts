@@ -5429,7 +5429,7 @@ Return JSON with this exact structure:
   app.post('/api/churches/:id/join', isAuthenticated, async (req: any, res) => {
     try {
       const churchId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
       console.log(`Church join request: User ${userId} joining church ${churchId}`);
       
