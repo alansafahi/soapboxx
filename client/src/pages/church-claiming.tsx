@@ -174,6 +174,23 @@ export default function ChurchClaiming() {
             </span>
           )}
         </p>
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                Church Claiming Requirements
+              </h4>
+              <p className="text-blue-700 dark:text-blue-300 mb-2">
+                To claim a church, your email address must be registered with that church in our system. 
+                If you don't see your church or cannot claim it, please contact our admin team.
+              </p>
+              <p className="text-blue-700 dark:text-blue-300 font-medium">
+                Contact: <a href="mailto:admin@soapboxsuperapp.com" className="underline hover:no-underline">admin@soapboxsuperapp.com</a>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {!claimableChurches || claimableChurches.length === 0 ? (
