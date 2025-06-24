@@ -242,20 +242,50 @@ function generateReferenceVariations(reference: string): string[] {
   return Array.from(new Set(variations));
 }
 
-// Main Bible lookup function - database-first with comprehensive coverage
+// Main Bible lookup function - phased approach with import system integration
 export async function lookupBibleVerse(reference: string, preferredVersion: string = 'NIV'): Promise<BibleVerseResponse | null> {
-  console.log(`[Bible DB] Looking up verse: "${reference}" (${preferredVersion})`);
-  
-  // Use database-first approach with your licensed Bible content
-  const result = await lookupVerseFromDatabase(reference, preferredVersion);
-  
-  if (result) {
-    console.log(`[Bible DB] SUCCESS: Found verse in licensed database: ${result.reference} (${result.version})`);
-    return result;
+  try {
+    console.log(`[Bible API] Looking up ${reference} in ${preferredVersion}`);
+    
+    // Check version configuration to determine lookup strategy
+    const versionConfig = BIBLE_VERSIONS.find(v => v.code === preferredVersion);
+    
+    if (!versionConfig) {
+      console.log(`[Bible API] Unknown version ${preferredVersion}, using OpenAI fallback`);
+      return await fetchVerseFromOpenAI(reference, preferredVersion);
+    }
+    
+    // For Phase 3 (licensed) versions, use OpenAI directly unless locally available
+    if (versionConfig.phase === 3 && versionConfig.useOpenAI) {
+      console.log(`[Bible API] Using OpenAI for licensed version ${preferredVersion}`);
+      const openaiResult = await fetchVerseFromOpenAI(reference, preferredVersion);
+      if (openaiResult) return openaiResult;
+    }
+    
+    // For Phase 1 & 2 versions, try local database first
+    let result = await lookupVerseFromDatabase(reference, preferredVersion);
+    
+    if (result) {
+      console.log(`[Bible API] Found ${reference} in local database`);
+      return result;
+    }
+    
+    // If not found locally and OpenAI is configured as fallback, try it
+    if (versionConfig.useOpenAI) {
+      result = await fetchVerseFromOpenAI(reference, preferredVersion);
+      
+      if (result) {
+        console.log(`[Bible API] Retrieved ${reference} from OpenAI fallback`);
+        return result;
+      }
+    }
+    
+    console.log(`[Bible API] Could not find ${reference} in ${preferredVersion}`);
+    return null;
+  } catch (error) {
+    console.error('[Bible API] Error in lookupBibleVerse:', error);
+    return null;
   }
-
-  console.log(`[Bible DB] Verse not found: "${reference}" in ${preferredVersion}`);
-  return null;
 }
 
 // Search Bible verses across all translations
