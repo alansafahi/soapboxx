@@ -278,6 +278,7 @@ export interface IStorage {
   searchBibleVersesByTopic(topics: string[]): Promise<any[]>;
   getRandomVerseByCategory(category?: string): Promise<any | null>;
   getBibleVerses(): Promise<any[]>;
+  getBibleVersesByTranslation(translation: string): Promise<any[]>;
   getBibleVersesCount(): Promise<number>;
   getBibleVersesPaginated(options: { search?: string; category?: string; limit: number; offset: number }): Promise<any[]>;
   getBibleVerse(book: string, chapter: number, verse: number, translation?: string): Promise<any | undefined>;
@@ -4345,6 +4346,17 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(bibleVerses)
       .where(eq(bibleVerses.isActive, true))
+      .orderBy(asc(bibleVerses.reference));
+  }
+
+  async getBibleVersesByTranslation(translation: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(bibleVerses)
+      .where(and(
+        eq(bibleVerses.isActive, true),
+        eq(bibleVerses.translation, translation)
+      ))
       .orderBy(asc(bibleVerses.reference));
   }
 
