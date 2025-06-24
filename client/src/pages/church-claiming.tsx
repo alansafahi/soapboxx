@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertCircle, Building, MapPin, Phone, Mail, Globe, User } from 'lucide-react';
+import { CheckCircle, AlertCircle, Building, MapPin, Phone, Mail, Globe, User, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Church {
@@ -50,14 +50,45 @@ export default function ChurchClaiming() {
   const [selectedChurch, setSelectedChurch] = useState<Church | null>(null);
   const [verifiedDenomination, setVerifiedDenomination] = useState('');
   const [showClaimForm, setShowClaimForm] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(25);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch claimable churches for current user
+  // Fetch all Presbyterian churches for claiming
   const { data: claimableChurches, isLoading } = useQuery({
-    queryKey: ['/api/churches/claimable'],
+    queryKey: ['/api/churches/search', { denomination: 'Presbyterian' }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('denomination', 'Presbyterian');
+      params.append('limit', '2000');
+      
+      const response = await fetch(`/api/churches/search?${params}`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch churches');
+      }
+      
+      return response.json();
+    },
     enabled: true
   });
+
+  // Filter churches based on search term
+  const filteredChurches = claimableChurches?.filter((church: Church) => {
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      church.name.toLowerCase().includes(searchLower) ||
+      church.city?.toLowerCase().includes(searchLower) ||
+      church.state?.toLowerCase().includes(searchLower) ||
+      church.address?.toLowerCase().includes(searchLower)
+    );
+  }) || [];
+
+  const remainingCount = filteredChurches.length - displayedCount;
 
   // Church claiming mutation
   const claimChurchMutation = useMutation({
@@ -83,7 +114,7 @@ export default function ChurchClaiming() {
         title: 'Church Claimed Successfully!',
         description: `You are now the administrator of ${data.church?.name}. You can manage members, events, and church settings.`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/churches/claimable'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/churches/search'] });
       setSelectedChurch(null);
       setShowClaimForm(false);
       setVerifiedDenomination('');
@@ -137,6 +168,11 @@ export default function ChurchClaiming() {
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Find and claim administrative access to your church in the SoapBox platform.
+          {claimableChurches && claimableChurches.length > 0 && (
+            <span className="block mt-1 text-sm font-medium text-purple-600 dark:text-purple-400">
+              {claimableChurches.length} Presbyterian churches available for claiming
+            </span>
+          )}
         </p>
       </div>
 
@@ -146,21 +182,39 @@ export default function ChurchClaiming() {
             <div className="text-center">
               <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No Claimable Churches Found
+                No Churches Available
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                We couldn't find any churches associated with your email address.
+                No Presbyterian churches are currently available for claiming.
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-500">
-                If you believe this is an error, please contact support or ensure you're using the correct email address.
+                Please check back later or contact support if you believe your church should be listed.
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
         <>
+          {/* Search and Pagination Controls */}
+          <div className="mb-6 space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search churches by name or location..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Showing {Math.min(displayedCount, filteredChurches.length)} of {filteredChurches.length} churches
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-6 mb-8">
-            {claimableChurches.map((church: Church) => (
+            {filteredChurches.slice(0, displayedCount).map((church: Church) => (
               <Card key={church.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -218,6 +272,21 @@ export default function ChurchClaiming() {
               </Card>
             ))}
           </div>
+
+          {/* Load More Button */}
+          {remainingCount > 0 && (
+            <div className="text-center mb-8">
+              <Button
+                onClick={() => setDisplayedCount(prev => prev + 25)}
+                variant="outline"
+                size="lg"
+                className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-purple-200 dark:border-purple-700 hover:from-purple-100 hover:to-blue-100 dark:hover:from-purple-800/30 dark:hover:to-blue-800/30"
+              >
+                <Building className="h-4 w-4 mr-2 text-purple-600 dark:text-purple-400" />
+                Load Next 25 Churches ({remainingCount} remaining)
+              </Button>
+            </div>
+          )}
 
           {/* Denomination Verification Modal */}
           {showClaimForm && selectedChurch && (
