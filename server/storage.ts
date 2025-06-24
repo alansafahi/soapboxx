@@ -5827,6 +5827,21 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async removeReaction(userId: string, targetId: number, reactionType: string): Promise<any> {
+    const deleted = await db
+      .delete(reactions)
+      .where(
+        and(
+          eq(reactions.userId, userId),
+          eq(reactions.targetId, targetId),
+          eq(reactions.reactionType, reactionType)
+        )
+      )
+      .returning();
+    
+    return { success: true, deleted: deleted.length > 0 };
+  }
+
   async removeReaction(userId: string, targetId: number, reactionType: string): Promise<void> {
     await db
       .delete(reactions)

@@ -5768,6 +5768,51 @@ Return JSON with this exact structure:
     }
   });
 
+  // Add reaction to discussion
+  app.post("/api/community/reactions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { targetType, targetId, reactionType, emoji, intensity } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const reactionData = {
+        userId,
+        targetType,
+        targetId,
+        reactionType,
+        emoji,
+        intensity: intensity || 1
+      };
+      
+      const result = await storage.addReaction(reactionData);
+      res.json(result);
+    } catch (error) {
+      console.error("Error adding reaction:", error);
+      res.status(500).json({ message: "Failed to add reaction" });
+    }
+  });
+
+  // Remove reaction from discussion
+  app.delete("/api/community/reactions/:targetId/:reactionType", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { targetId, reactionType } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const result = await storage.removeReaction(userId, parseInt(targetId), reactionType);
+      res.json(result);
+    } catch (error) {
+      console.error("Error removing reaction:", error);
+      res.status(500).json({ message: "Failed to remove reaction" });
+    }
+  });
+
   app.post("/api/discussions/:id/bookmark", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;

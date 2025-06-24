@@ -195,6 +195,49 @@ export default function CommunityFeed() {
     likeDiscussionMutation.mutate(discussionId);
   };
 
+  const handleCommentClick = (discussionId: number) => {
+    setCommentDialogOpen(discussionId);
+  };
+
+  const handleShareDiscussion = (discussionId: number) => {
+    const discussion = discussions.find(d => d.id === discussionId);
+    if (!discussion) return;
+
+    const shareUrl = `${window.location.origin}/discussions/${discussionId}`;
+    const shareText = `Check out this discussion: "${discussion.title}"`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: discussion.title,
+        text: shareText,
+        url: shareUrl,
+      }).catch(() => {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        toast({
+          title: "Copied!",
+          description: "Discussion link copied",
+        });
+      });
+    } else {
+      // Fallback to clipboard
+      navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      toast({
+        title: "Copied!",
+        description: "Discussion link copied",
+      });
+    }
+  };
+
+  const handleReaction = (discussionId: number, emoji: string) => {
+    reactionMutation.mutate({
+      targetType: 'discussion',
+      targetId: discussionId,
+      reactionType: emoji,
+      emoji: emoji
+    });
+  };
+
   const formatTimeAgo = (date: string) => {
     const now = new Date();
     const past = new Date(date);
@@ -313,7 +356,7 @@ export default function CommunityFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => setViewCommentsDialogOpen(discussion.id)}
+                          onClick={() => handleCommentClick(discussion.id)}
                           className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
                         >
                           <motion.div
@@ -334,7 +377,7 @@ export default function CommunityFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => setUploadDialogOpen(true)}
+                          onClick={() => handleShareDiscussion(discussion.id)}
                           className="text-gray-500 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
                         >
                           <motion.div
