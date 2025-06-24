@@ -171,29 +171,7 @@ export default function CommunityFeed() {
     },
   });
 
-  // Reaction mutation - REST only
-  const reactionMutation = useMutation({
-    mutationFn: async ({ targetType, targetId, reactionType, emoji }: { 
-      targetType: string; 
-      targetId: number; 
-      reactionType: string; 
-      emoji: string; 
-    }) => {
-      console.log('Adding reaction:', { targetType, targetId, reactionType, emoji });
-      
-      const response = await apiRequest('/api/community/reactions', {
-        method: 'POST',
-        body: { 
-          targetType, 
-          targetId, 
-          reactionType, 
-          emoji, 
-          intensity: 1 
-        }
-      });
-      
-      return response;
-    },
+  // Remove broken mutation - use direct fetch in handleReaction instead
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       toast({
