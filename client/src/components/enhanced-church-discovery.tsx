@@ -616,7 +616,7 @@ export default function EnhancedChurchDiscovery() {
                           <SelectItem value="all">Any denomination</SelectItem>
                           {denominations.map((denom) => (
                             <SelectItem key={denom} value={denom}>
-                              {denom}
+                              {denom} {denom === 'Presbyterian' ? '(1,892)' : ''}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -994,17 +994,54 @@ export default function EnhancedChurchDiscovery() {
                 ))}
               </AnimatePresence>
 
-              {/* Load More Button */}
-              {remainingCount > 0 && (
-                <div className="text-center pt-6">
-                  <Button
-                    onClick={handleViewMoreChurches}
-                    variant="outline"
-                    size="lg"
-                    className="w-full max-w-md"
-                  >
-                    View 10 More Churches ({remainingCount} remaining)
-                  </Button>
+              {/* Enhanced Pagination Controls */}
+              {allChurches.length > pageSize && (
+                <div className="text-center py-8 space-y-4">
+                  {/* Page Size Selector */}
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Show per page:
+                    </label>
+                    <Select value={pageSize.toString()} onValueChange={(value) => {
+                      const newPageSize = parseInt(value);
+                      setPageSize(newPageSize);
+                      setDisplayedCount(newPageSize);
+                    }}>
+                      <SelectTrigger className="w-20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                        <SelectItem value="250">250</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Current Results Info */}
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Showing {Math.min(displayedCount, allChurches.length)} of {allChurches.length} churches
+                    {filters.denomination !== 'all' && (
+                      <span className="font-medium text-purple-600 dark:text-purple-400">
+                        {' '}({filters.denomination})
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Load More Button */}
+                  {remainingCount > 0 && (
+                    <Button
+                      onClick={() => setDisplayedCount(prev => prev + pageSize)}
+                      variant="outline"
+                      size="lg"
+                      className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-purple-200 dark:border-purple-700 hover:from-purple-100 hover:to-blue-100 dark:hover:from-purple-800/30 dark:hover:to-blue-800/30"
+                    >
+                      <Building className="h-4 w-4 mr-2 text-purple-600 dark:text-purple-400" />
+                      Load Next {Math.min(remainingCount, pageSize)} Churches
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
