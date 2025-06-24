@@ -104,9 +104,21 @@ export default function CommunityFeed() {
   // Like discussion mutation
   const likeDiscussionMutation = useMutation({
     mutationFn: async (discussionId: number) => {
-      return await apiRequest(`/api/discussions/${discussionId}/like`, {
-        method: "POST"
+      const response = await fetch(`/api/discussions/${discussionId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "Referer": window.location.href,
+        },
+        credentials: "include"
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to like discussion: ${response.status}`);
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       // Don't invalidate immediately to preserve optimistic updates
@@ -135,10 +147,22 @@ export default function CommunityFeed() {
   // Create comment mutation
   const createCommentMutation = useMutation({
     mutationFn: async ({ discussionId, content }: { discussionId: number; content: string }) => {
-      return await apiRequest(`/api/discussions/${discussionId}/comments`, {
+      const response = await fetch(`/api/discussions/${discussionId}/comments`, {
         method: "POST",
-        body: { content }
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "Referer": window.location.href,
+        },
+        credentials: "include",
+        body: JSON.stringify({ content })
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to add comment: ${response.status}`);
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
@@ -224,9 +248,21 @@ export default function CommunityFeed() {
   const shareDiscussionMutation = useMutation({
     mutationFn: async (discussionId: number) => {
       console.log('Sending share API request:', discussionId);
-      return await apiRequest(`/api/discussions/${discussionId}/share`, {
-        method: "POST"
+      const response = await fetch(`/api/discussions/${discussionId}/share`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "Referer": window.location.href,
+        },
+        credentials: "include"
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to share discussion: ${response.status}`);
+      }
+      
+      return await response.json();
     },
     onSuccess: (data) => {
       console.log('Share API success:', data);
