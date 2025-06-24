@@ -206,7 +206,7 @@ export default function SocialFeed() {
       queryClient.setQueryData(['/api/feed'], context?.previousFeed);
       toast({
         title: "Error",
-        description: "Failed to like post",
+        description: "Failed to like",
         variant: "destructive"
       });
     },
@@ -236,7 +236,7 @@ export default function SocialFeed() {
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to add comment",
+        description: "Failed to comment",
         variant: "destructive"
       });
     }
@@ -259,7 +259,7 @@ export default function SocialFeed() {
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to share post",
+        description: "Failed to share",
         variant: "destructive"
       });
     }

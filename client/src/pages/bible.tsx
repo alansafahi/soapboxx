@@ -30,7 +30,7 @@ export default function BiblePage() {
     if (!isLoading && !isAuthenticated) {
       toast({
         title: "Welcome! Please sign in",
-        description: "Sign in to access your personalized Bible reading experience.",
+        description: "Sign in for personalized Bible reading.",
         variant: "default",
       });
       setTimeout(() => {
