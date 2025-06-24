@@ -150,41 +150,24 @@ function configurePassport() {
 
 // Unified authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const session = req.session as any;
-  const sessionUser = session?.user;
-  const userId = session?.userId;
-  
-  // Check existing session authentication
-  if (session && sessionUser && userId) {
-    // Validate user data is not null/cleared
-    if (sessionUser === null || userId === null) {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Unauthorized' 
-      });
+  try {
+    console.log('Authentication check - Session:', req.session);
+    console.log('Session ID:', req.sessionID);
+    console.log('Session userId:', req.session?.userId);
+    
+    // Check for session-based authentication
+    if (req.session && req.session.userId) {
+      console.log('Authentication successful for user:', req.session.userId);
+      return next();
     }
     
-    // Set authenticated flag if missing but session data exists
-    if (session.authenticated !== true) {
-      session.authenticated = true;
-      console.log('🔧 Setting session as authenticated for existing session');
-    }
-    
-    // Ensure req.user is populated for compatibility
-    if (!req.user) {
-      req.user = {
-        id: sessionUser?.id || userId,
-        claims: { sub: sessionUser?.id || userId },
-        ...(sessionUser || {})
-      };
-    }
-    return next();
+    // If no session, return unauthorized
+    console.log('Authentication failed - no valid session');
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return res.status(500).json({ success: false, message: "Authentication error" });
   }
-  
-  return res.status(401).json({ 
-    success: false,
-    message: 'Unauthorized' 
-  });
 };
 
 // Main setup function

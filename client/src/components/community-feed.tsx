@@ -174,15 +174,10 @@ export default function CommunityFeed() {
   // Reaction mutation
   const reactionMutation = useMutation({
     mutationFn: async ({ targetType, targetId, reactionType, emoji }: { targetType: string; targetId: number; reactionType: string; emoji: string }) => {
+      console.log('Sending reaction API request:', { targetType, targetId, reactionType, emoji });
       return await apiRequest('/api/community/reactions', {
-        method: "POST",
-        body: {
-          targetType,
-          targetId,
-          reactionType,
-          emoji,
-          intensity: 1
-        }
+        method: 'POST',
+        body: { targetType, targetId, reactionType, emoji, intensity: 1 }
       });
     },
     onSuccess: () => {
