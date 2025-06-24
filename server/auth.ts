@@ -240,6 +240,23 @@ export function setupAuth(app: Express): void {
         churchId: null,
       });
 
+      // Check for pre-assigned church based on email
+      let claimableChurch = null;
+      try {
+        const church = await storage.getChurchByAdminEmail(email);
+        if (church && !church.claimedBy) {
+          claimableChurch = {
+            id: church.id,
+            name: church.name,
+            address: church.address,
+            city: church.city,
+            state: church.state
+          };
+        }
+      } catch (error) {
+        console.log('No pre-assigned church found for email:', email);
+      }
+
       // Send verification email
       try {
         await sendVerificationEmail({
@@ -253,12 +270,15 @@ export function setupAuth(app: Express): void {
         // Continue with registration even if email fails
       }
 
-      res.status(201).json({
+      const response = {
         success: true,
         message: 'Registration successful! Please check your email to verify your account before logging in.',
         email: newUser.email,
-        requiresVerification: true
-      });
+        requiresVerification: true,
+        ...(claimableChurch && { claimableChurch })
+      };
+
+      res.status(201).json(response);
     } catch (error) {
       console.error('Registration error:', error);
       res.status(500).json({ 

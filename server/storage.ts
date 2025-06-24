@@ -292,6 +292,7 @@ export interface IStorage {
   getChurches(): Promise<Church[]>;
   getNearbyChurches(lat?: number, lng?: number, limit?: number): Promise<Church[]>;
   getChurch(id: number): Promise<Church | undefined>;
+  getChurchByAdminEmail(email: string): Promise<Church | undefined>;
   createChurch(church: InsertChurch): Promise<Church>;
   updateChurch(id: number, updates: Partial<Church>): Promise<Church>;
   getUserCreatedChurches(userId: string): Promise<Church[]>;
@@ -1186,6 +1187,14 @@ export class DatabaseStorage implements IStorage {
 
   async getChurch(id: number): Promise<Church | undefined> {
     const [church] = await db.select().from(churches).where(eq(churches.id, id));
+    return church;
+  }
+
+  async getChurchByAdminEmail(email: string): Promise<Church | undefined> {
+    const [church] = await db
+      .select()
+      .from(churches)
+      .where(eq(churches.adminEmail, email));
     return church;
   }
 
