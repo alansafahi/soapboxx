@@ -600,8 +600,8 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
       await createDiscussionMutation.mutateAsync({
         title: formData.title.trim(),
         content: formData.content.trim(),
-        category: formData.category,
-        isPublic: formData.isPublic,
+        type: 'discussion',
+        audience: formData.isPublic ? 'public' : 'church',
         tags: tagsArray
       });
       

@@ -5672,7 +5672,7 @@ Return JSON with this exact structure:
   app.post("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
-      const { type, content, mood, audience, linkedVerse, attachedMedia, title } = req.body;
+      const { type, content, mood, audience, linkedVerse, attachedMedia, title, category, isPublic, tags } = req.body;
       
       console.log("Creating discussion for user:", userId);
       console.log("Request body:", { type, mood, audience, title, contentLength: content?.length });
@@ -5707,9 +5707,9 @@ Return JSON with this exact structure:
         content: content.trim(),
         authorId: userId,
         churchId: null,
-        category: postType === 'discussion' ? 'general' : 'share',
-        audience: audience || 'public',
-        isPublic: true,
+        category: category || (postType === 'discussion' ? 'general' : 'share'),
+        audience: audience || (isPublic !== undefined ? (isPublic ? 'public' : 'church') : 'public'),
+        isPublic: isPublic !== undefined ? isPublic : true,
         mood: mood || null,
         attachedMedia: attachedMedia || null,
         linkedVerse: linkedVerse || null
