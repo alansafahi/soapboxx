@@ -235,12 +235,17 @@ export default function CommunityFeed() {
   };
 
   const handleCommentClick = (discussionId: number) => {
+    console.log('Opening comment dialog for discussion:', discussionId);
     setCommentDialogOpen(discussionId);
   };
 
   const handleShareDiscussion = (discussionId: number) => {
+    console.log('Sharing discussion:', discussionId);
     const discussion = discussions.find(d => d.id === discussionId);
-    if (!discussion) return;
+    if (!discussion) {
+      console.log('Discussion not found:', discussionId);
+      return;
+    }
 
     // Try to share via API first (creates shared post)
     shareDiscussionMutation.mutate(discussionId);
@@ -285,6 +290,7 @@ export default function CommunityFeed() {
   });
 
   const handleReaction = (discussionId: number, emoji: string) => {
+    console.log('Handling reaction:', { discussionId, emoji });
     reactionMutation.mutate({
       targetType: 'discussion',
       targetId: discussionId,
