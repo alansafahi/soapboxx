@@ -8540,6 +8540,36 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Populate missing Bible versions endpoint
+  app.post('/api/bible/populate-missing', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.session?.user?.role || 'member';
+      if (userRole !== 'soapbox_owner' && userRole !== 'admin') {
+        return res.status(403).json({ message: 'Insufficient permissions for Bible population' });
+      }
+
+      console.log('🚀 Starting missing Bible version population via OpenAI...');
+      
+      // Import the populator dynamically
+      const { biblePopulator } = await import('./populate-missing-versions.js');
+      
+      // Start population in background
+      biblePopulator.populateAllVersions().catch(error => {
+        console.error('Bible population failed:', error);
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Missing Bible version population started',
+        versions: ['ASV', 'WEB'],
+        note: 'This process will take approximately 30-45 minutes to complete all missing verses'
+      });
+    } catch (error) {
+      console.error('Error starting Bible population:', error);
+      res.status(500).json({ message: 'Failed to start Bible population' });
+    }
+  });
+
   // Source Attribution page data
   app.get('/api/bible/attribution', async (req: any, res) => {
     try {

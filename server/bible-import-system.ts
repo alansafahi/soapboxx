@@ -38,7 +38,7 @@ export const BIBLE_VERSIONS: BibleVersionConfig[] = [
     name: 'King James Version',
     phase: 1,
     source: 'public_domain',
-    downloadUrl: 'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/csv/t_kjv.csv',
+    downloadUrl: 'https://raw.githubusercontent.com/aruljohn/Bible-kjv/master/kjv.json',
     attribution: 'Public Domain',
     license: 'Public Domain',
     useOpenAI: false
@@ -48,7 +48,7 @@ export const BIBLE_VERSIONS: BibleVersionConfig[] = [
     name: 'American Standard Version',
     phase: 1,
     source: 'public_domain',
-    downloadUrl: 'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/csv/t_asv.csv',
+    downloadUrl: 'https://bolls.life/get-text/ASV/',
     attribution: 'Public Domain (1901)',
     license: 'Public Domain',
     useOpenAI: false
@@ -58,7 +58,7 @@ export const BIBLE_VERSIONS: BibleVersionConfig[] = [
     name: 'World English Bible',
     phase: 1,
     source: 'public_domain',
-    downloadUrl: 'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/csv/t_web.csv',
+    downloadUrl: 'https://bolls.life/get-text/WEB/',
     attribution: 'Public Domain - World English Bible',
     license: 'Public Domain',
     useOpenAI: false
