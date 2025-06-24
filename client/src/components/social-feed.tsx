@@ -525,55 +525,60 @@ export default function SocialFeed() {
     }
   ];
 
-  // SoapBox Super App Feelings Selector - Organized by category
+  // SoapBox Super App Feelings Selector - 4 Pillars System
 const moodCategories = [
   {
-    title: "🕊️ Spiritual Feelings",
-    description: "Express where you are in your walk with God",
+    title: "🧠 Emotional & Spiritual Support",
+    description: "Express your struggles and need for comfort",
     moods: [
-      { id: 'grateful', label: 'Grateful', icon: '🙏', color: 'bg-blue-100 text-blue-800' },
-      { id: 'blessed', label: 'Blessed', icon: '✨', color: 'bg-purple-100 text-purple-800' },
-      { id: 'peaceful', label: 'Peaceful', icon: '🕊', color: 'bg-green-100 text-green-800' },
-      { id: 'hopeful', label: 'Hopeful', icon: '🌅', color: 'bg-orange-100 text-orange-800' },
-      { id: 'joyful', label: 'Joyful', icon: '😊', color: 'bg-yellow-100 text-yellow-800' },
-      { id: 'praying', label: 'Praying', icon: '🛐', color: 'bg-blue-100 text-blue-800' },
-      { id: 'inspired', label: 'Inspired', icon: '💡', color: 'bg-yellow-100 text-yellow-800' },
-      { id: 'celebrating', label: 'Celebrating', icon: '🎉', color: 'bg-pink-100 text-pink-800' },
-      { id: 'studying', label: 'Studying Scripture', icon: '📖', color: 'bg-green-100 text-green-800' },
-      { id: 'reflective', label: 'Reflective', icon: '🤔', color: 'bg-indigo-100 text-indigo-800' },
-      { id: 'seeking', label: 'Seeking Guidance', icon: '🧭', color: 'bg-purple-100 text-purple-800' },
-      { id: 'surrendered', label: 'Surrendered', icon: '🧎', color: 'bg-blue-100 text-blue-800' },
-      { id: 'convicted', label: 'Convicted', icon: '🔥', color: 'bg-red-100 text-red-800' },
-      { id: 'repentant', label: 'Repentant', icon: '😔', color: 'bg-gray-100 text-gray-800' }
+      { id: 'lonely', label: 'Feeling Lonely', subtitle: "God's presence and companionship", icon: '🙁', color: 'bg-blue-100 text-blue-800' },
+      { id: 'overwhelmed', label: 'Overwhelmed', subtitle: 'Anxiety and fatigue relief', icon: '😰', color: 'bg-orange-100 text-orange-800' },
+      { id: 'shame', label: 'Shame or Guilt', subtitle: 'Forgiveness, grace, redemption', icon: '💔', color: 'bg-red-100 text-red-800' },
+      { id: 'doubting', label: 'Doubting Faith', subtitle: 'Wrestling with God, questions', icon: '😕', color: 'bg-gray-100 text-gray-800' },
+      { id: 'needing-forgiveness', label: 'Needing Forgiveness', subtitle: 'Grace and mercy', icon: '🙏', color: 'bg-purple-100 text-purple-800' },
+      { id: 'struggling-sin', label: 'Struggling with Sin', subtitle: 'Temptation, accountability, renewal', icon: '😖', color: 'bg-red-100 text-red-800' },
+      { id: 'discouraged', label: 'Discouraged', subtitle: 'Hopelessness, low self-worth', icon: '😔', color: 'bg-gray-100 text-gray-800' },
+      { id: 'brokenhearted', label: 'Brokenhearted', subtitle: 'Grief, loss, mourning', icon: '🥹', color: 'bg-blue-100 text-blue-800' }
     ]
   },
   {
-    title: "💭 Emotional & Mental State",
-    description: "Name your internal world — it matters",
+    title: "🌱 Growth & Transformation",
+    description: "Mark your spiritual formation journey",
     moods: [
-      { id: 'anxious', label: 'Anxious', icon: '😰', color: 'bg-red-100 text-red-800' },
-      { id: 'overwhelmed', label: 'Overwhelmed', icon: '😵‍💫', color: 'bg-orange-100 text-orange-800' },
-      { id: 'conflicted', label: 'Conflicted', icon: '🧩', color: 'bg-purple-100 text-purple-800' },
-      { id: 'doubtful', label: 'Doubtful', icon: '🌫', color: 'bg-gray-100 text-gray-800' },
-      { id: 'waiting', label: 'Waiting', icon: '⏳', color: 'bg-yellow-100 text-yellow-800' },
-      { id: 'empty', label: 'Empty', icon: '🕳', color: 'bg-gray-100 text-gray-800' },
-      { id: 'lonely', label: 'Lonely', icon: '🫂', color: 'bg-blue-100 text-blue-800' },
-      { id: 'hurt', label: 'Hurt', icon: '💔', color: 'bg-red-100 text-red-800' }
+      { id: 'seeking-purpose', label: 'Seeking Purpose', subtitle: 'Identity, calling, direction', icon: '❓', color: 'bg-purple-100 text-purple-800' },
+      { id: 'starting-over', label: 'Starting Over', subtitle: 'New beginnings, transformation', icon: '🆕', color: 'bg-green-100 text-green-800' },
+      { id: 'wanting-growth', label: 'Wanting to Grow', subtitle: 'Wisdom, discipline, sanctification', icon: '📈', color: 'bg-blue-100 text-blue-800' },
+      { id: 'building-confidence', label: 'Building Confidence', subtitle: 'Strength, courage, fearlessness', icon: '💪', color: 'bg-orange-100 text-orange-800' },
+      { id: 'desiring-wisdom', label: 'Desiring Wisdom', subtitle: 'Proverbs, guidance, discernment', icon: '🤔', color: 'bg-indigo-100 text-indigo-800' },
+      { id: 'serving-others', label: 'Serving Others', subtitle: 'Compassion, generosity, humility', icon: '🤝', color: 'bg-green-100 text-green-800' },
+      { id: 'spiritually-dry', label: 'Spiritually Dry', subtitle: 'Feeling distant, thirsting for renewal', icon: '🌿', color: 'bg-yellow-100 text-yellow-800' }
     ]
   },
   {
-    title: "🌱 Growth & Purpose",
-    description: "Mark your spiritual formation or movement",
+    title: "🌍 Life Situations", 
+    description: "Navigate life's challenges with faith",
     moods: [
-      { id: 'growing', label: 'Growing', icon: '🌱', color: 'bg-green-100 text-green-800' },
-      { id: 'learning', label: 'Learning', icon: '📘', color: 'bg-blue-100 text-blue-800' },
-      { id: 'purposeful', label: 'Purposeful', icon: '🎯', color: 'bg-purple-100 text-purple-800' },
-      { id: 'visionary', label: 'Visionary', icon: '👁', color: 'bg-indigo-100 text-indigo-800' },
-      { id: 'encouraging', label: 'Encouraging', icon: '💬', color: 'bg-green-100 text-green-800' },
-      { id: 'testifying', label: 'Testifying', icon: '📢', color: 'bg-orange-100 text-orange-800' },
-      { id: 'journaling', label: 'Journaling', icon: '✍️', color: 'bg-blue-100 text-blue-800' },
-      { id: 'serving', label: 'Serving', icon: '🤝', color: 'bg-purple-100 text-purple-800' },
-      { id: 'resting', label: 'Resting', icon: '⛅', color: 'bg-gray-100 text-gray-800' }
+      { id: 'big-decision', label: 'Before a Big Decision', subtitle: 'Discernment scriptures', icon: '🔍', color: 'bg-purple-100 text-purple-800' },
+      { id: 'waiting-god', label: 'Waiting on God', subtitle: 'Patience, faith in timing', icon: '⏳', color: 'bg-yellow-100 text-yellow-800' },
+      { id: 'relationship-struggles', label: 'Struggling in Relationships', subtitle: 'Marriage, family, forgiveness', icon: '💔', color: 'bg-red-100 text-red-800' },
+      { id: 'navigating-change', label: 'Navigating Change', subtitle: 'Transitions, new seasons', icon: '🔄', color: 'bg-blue-100 text-blue-800' },
+      { id: 'dealing-injustice', label: 'Dealing with Injustice', subtitle: 'Encouragement in trials', icon: '⚖️', color: 'bg-orange-100 text-orange-800' },
+      { id: 'facing-illness', label: 'Facing Illness', subtitle: 'Healing, peace in hardship', icon: '🏥', color: 'bg-red-100 text-red-800' },
+      { id: 'financial-worries', label: 'Financial Worries', subtitle: 'Stewardship, provision, hope', icon: '💸', color: 'bg-green-100 text-green-800' },
+      { id: 'burned-out', label: 'Burned Out', subtitle: 'Rest, boundary-setting, balance', icon: '😵‍💫', color: 'bg-gray-100 text-gray-800' }
+    ]
+  },
+  {
+    title: "✝️ Faith & Worship",
+    description: "Express your heart of worship and devotion",
+    moods: [
+      { id: 'hungry-for-god', label: 'Hungry for God', subtitle: 'Revival, intimacy with Christ', icon: '🔥', color: 'bg-red-100 text-red-800' },
+      { id: 'worshipful-heart', label: 'Worshipful Heart', subtitle: 'Psalms, adoration, joy', icon: '🎵', color: 'bg-purple-100 text-purple-800' },
+      { id: 'fasting-prayer', label: 'Fasting/Prayer Mode', subtitle: 'Intensified seeking', icon: '🙇', color: 'bg-blue-100 text-blue-800' },
+      { id: 'grateful-heart', label: 'Grateful Heart', subtitle: 'Thanksgiving and praise', icon: '💚', color: 'bg-green-100 text-green-800' },
+      { id: 'inspired', label: 'Inspired', subtitle: 'Joy, hope, and spiritual creativity', icon: '😇', color: 'bg-yellow-100 text-yellow-800' },
+      { id: 'tired-faithful', label: 'Tired but Faithful', subtitle: 'Endurance, trust in rest', icon: '😴', color: 'bg-gray-100 text-gray-800' },
+      { id: 'contemplative', label: 'Contemplative', subtitle: 'Stillness, reflection, meditation', icon: '🛐', color: 'bg-indigo-100 text-indigo-800' }
     ]
   }
 ];
@@ -581,13 +586,31 @@ const moodCategories = [
 // Flatten all moods for backward compatibility
 const moodOptions = moodCategories.flatMap(category => category.moods);
 
-  const getSelectedMoodData = () => {
-    if (!selectedMood) return null;
-    return moodOptions.find(mood => mood.id === selectedMood) || null;
+  const toggleMoodSelection = (moodId: string) => {
+    setSelectedMoods(prev => {
+      if (prev.includes(moodId)) {
+        return prev.filter(id => id !== moodId);
+      } else {
+        return [...prev, moodId];
+      }
+    });
+    
+    // Update recent moods
+    const mood = moodOptions.find(m => m.id === moodId);
+    if (mood) {
+      setRecentMoods(prev => {
+        const filtered = prev.filter(m => m.id !== moodId);
+        return [mood, ...filtered].slice(0, 5); // Keep only 5 recent
+      });
+    }
   };
 
-  const clearMood = () => {
-    setSelectedMood(null);
+  const getSelectedMoodsData = () => {
+    return selectedMoods.map(id => moodOptions.find(mood => mood.id === id)).filter(Boolean);
+  };
+
+  const clearMoods = () => {
+    setSelectedMoods([]);
   };
 
   if (isLoading) {
@@ -764,27 +787,84 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     <Smile className="w-4 h-4" />
                   </Button>
 
-                  {/* Mood Dropdown */}
+                  {/* Enhanced Mood Dropdown */}
                   {showMoodDropdown && (
-                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg w-64">
-                      <div className="p-3">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">How are you feeling?</div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {moodOptions.map((mood) => (
-                            <Button
-                              key={mood.id}
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedMood(mood.id);
-                                setShowMoodDropdown(false);
-                              }}
-                              className="h-auto p-2 justify-start text-left hover:bg-gray-50 dark:hover:bg-gray-700"
-                            >
-                              <span className="mr-2 text-lg">{mood.icon}</span>
-                              <span className="text-sm">{mood.label}</span>
-                            </Button>
+                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-96 max-h-96 overflow-y-auto">
+                      <div className="p-4">
+                        <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
+                        
+                        {/* Recently Used Section */}
+                        {recentMoods.length > 0 && (
+                          <div className="mb-4">
+                            <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Recently Used</div>
+                            <div className="flex flex-wrap gap-1">
+                              {recentMoods.map((mood) => (
+                                <Button
+                                  key={`recent-${mood.id}`}
+                                  variant={selectedMoods.includes(mood.id) ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => toggleMoodSelection(mood.id)}
+                                  className={`h-8 px-2 text-xs ${selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+                                >
+                                  <span className="mr-1">{mood.icon}</span>
+                                  <span>{mood.label}</span>
+                                </Button>
+                              ))}
+                            </div>
+                            <hr className="my-3 border-gray-200 dark:border-gray-600" />
+                          </div>
+                        )}
+
+                        {/* Categorized Moods */}
+                        <div className="space-y-4">
+                          {moodCategories.map((category) => (
+                            <div key={category.title}>
+                              <div className="mb-2">
+                                <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{category.title}</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 italic">{category.description}</p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-1">
+                                {category.moods.map((mood) => (
+                                  <Button
+                                    key={mood.id}
+                                    variant={selectedMoods.includes(mood.id) ? "default" : "ghost"}
+                                    size="sm"
+                                    onClick={() => toggleMoodSelection(mood.id)}
+                                    className={`h-auto p-2 justify-start text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                                      selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''
+                                    }`}
+                                  >
+                                    <div className="flex flex-col items-start w-full">
+                                      <div className="flex items-center mb-1">
+                                        <span className="mr-2 text-base">{mood.icon}</span>
+                                        <span className="text-sm font-medium">{mood.label}</span>
+                                      </div>
+                                      <span className="text-xs opacity-75 leading-tight">{mood.subtitle}</span>
+                                    </div>
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
                           ))}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedMoods([])}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            Clear All
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => setShowMoodDropdown(false)}
+                            className="bg-purple-600 hover:bg-purple-700"
+                          >
+                            Done ({selectedMoods.length})
+                          </Button>
                         </div>
                       </div>
                     </div>
