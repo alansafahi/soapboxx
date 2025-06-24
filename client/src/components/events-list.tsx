@@ -406,7 +406,7 @@ export default function EventsList() {
   return (
     <div className="space-y-8">
       {/* Enhanced Header and Filters */}
-      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+<Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-3 text-2xl">
             <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
@@ -419,7 +419,7 @@ export default function EventsList() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Enhanced Search and Filters */}
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl space-y-4">
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/50 dark:to-blue-900/50 p-6 rounded-xl space-y-4">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
@@ -427,7 +427,7 @@ export default function EventsList() {
                   placeholder="Search events by name, location, or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 bg-white/80 border-purple-200 focus:border-purple-400 focus:ring-purple-200 rounded-lg shadow-sm"
+                  className="pl-12 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 focus:ring-purple-200 rounded-lg shadow-sm dark:text-white"
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -524,19 +524,19 @@ export default function EventsList() {
       </Card>
 
       {/* Enhanced Events Display */}
-      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+      <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-xl">
         <CardContent className="p-0">
           {filteredEvents.length === 0 ? (
             <div className="text-center py-16 px-8">
               <div className="w-24 h-24 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Calendar className="w-12 h-12 text-purple-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 {searchTerm || categoryFilter !== "all" || timeFilter !== "all" 
                   ? "No Events Match Your Filters" 
                   : "No Upcoming Events"}
               </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto text-lg">
+              <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto text-lg">
                 {searchTerm || categoryFilter !== "all" || timeFilter !== "all"
                   ? "Try adjusting your search criteria or filters to find more events"
                   : "Check back soon for exciting community events and spiritual activities!"}
@@ -571,7 +571,7 @@ export default function EventsList() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-gradient-to-r from-white to-purple-50/30 border border-purple-100 rounded-xl p-6 hover:shadow-lg hover:border-purple-200 transition-all duration-300 group"
+                      className="bg-gradient-to-r from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/30 border border-purple-100 dark:border-purple-800 rounded-xl p-6 hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-300 group"
                     >
                       <div className="flex items-start space-x-6">
                         {/* Enhanced Date Display */}
