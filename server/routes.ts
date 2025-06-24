@@ -5679,15 +5679,24 @@ Return JSON with this exact structure:
     }
   });
 
-  // Add reaction to discussion - REST endpoint
+  // Add reaction to discussion - REST endpoint  
   app.post("/api/community/reactions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
       const { targetType, targetId, reactionType, emoji, intensity } = req.body;
       
-      console.log('Adding reaction:', { userId, targetType, targetId, reactionType, emoji });
+      console.log('Reaction endpoint hit:', { 
+        userId, 
+        targetType, 
+        targetId, 
+        reactionType, 
+        emoji,
+        sessionExists: !!req.session,
+        bodyReceived: req.body
+      });
       
       if (!userId) {
+        console.log('No userId in session, returning 401');
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
@@ -5700,14 +5709,13 @@ Return JSON with this exact structure:
         intensity: intensity || 1
       };
       
-      console.log('Adding reaction with data:', reactionData);
+      console.log('Calling storage.addReaction with:', reactionData);
       const result = await storage.addReaction(reactionData);
-      console.log('Reaction added successfully:', result);
+      console.log('Storage returned:', result);
       
-      // Send success response with proper structure
       res.status(200).json({ 
         success: true, 
-        message: 'Reaction added successfully',
+        message: 'Reaction added!',
         data: result 
       });
     } catch (error) {

@@ -309,14 +309,51 @@ export default function CommunityFeed() {
     },
   });
 
-  const handleReaction = (discussionId: number, emoji: string) => {
-    console.log('Handling reaction:', { discussionId, emoji });
-    reactionMutation.mutate({
-      targetType: 'discussion',
-      targetId: discussionId,
-      reactionType: emoji,
-      emoji: emoji
-    });
+  const handleReaction = async (discussionId: number, emoji: string) => {
+    console.log('Reaction button clicked:', { discussionId, emoji });
+    
+    try {
+      const response = await fetch('/api/community/reactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          targetType: 'discussion',
+          targetId: discussionId,
+          reactionType: emoji,
+          emoji: emoji,
+          intensity: 1
+        })
+      });
+
+      console.log('Reaction response status:', response.status);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Reaction added successfully:', result);
+        
+        // Refresh discussions to show new reaction
+        queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+        
+        toast({
+          title: "Reaction added!",
+          description: "Your reaction was shared",
+        });
+      } else {
+        const errorText = await response.text();
+        console.error('Reaction failed:', errorText);
+        throw new Error(`Failed to add reaction: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Reaction error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add reaction",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatTimeAgo = (date: string) => {
