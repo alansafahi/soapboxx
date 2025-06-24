@@ -17,6 +17,8 @@ export async function apiRequest(
 ): Promise<any> {
   const { method = 'GET', body, headers = {} } = options || {};
   
+  console.log(`API Request: ${method} ${url}`, body ? { body } : '');
+  
   const res = await fetch(url, {
     method,
     headers: {
@@ -29,8 +31,12 @@ export async function apiRequest(
     credentials: "include",
   });
 
+  console.log(`API Response: ${res.status} ${res.statusText}`);
+  
   await throwIfResNotOk(res);
-  return await res.json();
+  const result = await res.json();
+  console.log('API Response data:', result);
+  return result;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

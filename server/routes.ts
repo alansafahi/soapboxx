@@ -1737,10 +1737,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
-  // Setup WebSocket server for real-time chat
+  // Setup WebSocket server for real-time chat (with error handling)
   const wss = new WebSocketServer({ 
     server: httpServer,
-    path: '/ws'
+    path: '/ws',
+    clientTracking: true
   });
 
   // Store active connections
@@ -1824,11 +1825,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         connections.delete(userId);
       }
       // Send error response if connection is still open
-      if (ws.readyState === 1) {
-        ws.send(JSON.stringify({ 
-          type: 'connection_error', 
-          message: 'Connection error occurred' 
-        }));
+      try {
+        if (ws.readyState === 1) {
+          ws.send(JSON.stringify({ 
+            type: 'connection_error', 
+            message: 'Connection error occurred' 
+          }));
+        }
+      } catch (sendError) {
+        console.error('Error sending WebSocket error message:', sendError);
       }
     });
   });
@@ -5771,27 +5776,34 @@ Return JSON with this exact structure:
   // Add reaction to discussion
   app.post("/api/community/reactions", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      console.log('Reaction endpoint hit with session:', req.session);
+      console.log('Session userId:', req.session?.userId);
+      console.log('Request body:', req.body);
+      
+      const userId = req.session?.userId;
       const { targetType, targetId, reactionType, emoji, intensity } = req.body;
       
       if (!userId) {
-        return res.status(401).json({ message: 'User authentication required' });
+        console.log('No userId found in session, returning 401');
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
       const reactionData = {
         userId,
         targetType,
-        targetId,
+        targetId: parseInt(targetId),
         reactionType,
         emoji,
         intensity: intensity || 1
       };
       
+      console.log('Adding reaction with data:', reactionData);
       const result = await storage.addReaction(reactionData);
-      res.json(result);
+      console.log('Reaction added successfully:', result);
+      res.json({ success: true, data: result });
     } catch (error) {
       console.error("Error adding reaction:", error);
-      res.status(500).json({ message: "Failed to add reaction" });
+      res.status(500).json({ success: false, message: "Failed to add reaction" });
     }
   });
 
@@ -5832,17 +5844,22 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/share", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      console.log('Share endpoint hit with session:', req.session);
+      console.log('Session userId:', req.session?.userId);
+      
+      const userId = req.session?.userId;
       const discussionId = parseInt(req.params.id);
       
       if (!userId) {
-        return res.status(401).json({ message: 'User authentication required' });
+        console.log('No userId found in session, returning 401');
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
       // Get the discussion details
+      console.log('Getting discussion:', discussionId);
       const discussion = await storage.getDiscussion(discussionId);
       if (!discussion) {
-        return res.status(404).json({ message: "Discussion not found" });
+        return res.status(404).json({ success: false, message: "Discussion not found" });
       }
       
       // Get author info for the discussion
@@ -5866,7 +5883,8 @@ Return JSON with this exact structure:
         churchId: null,
       });
       
-      res.json({ message: "Discussion shared", sharedPost });
+      console.log('Discussion shared successfully:', sharedPost);
+      res.json({ success: true, message: "Discussion shared", data: sharedPost });
     } catch (error) {
       console.error("Error sharing discussion:", error);
       res.status(500).json({ message: "Failed to share discussion" });
@@ -5913,28 +5931,35 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      console.log('Comment endpoint hit with session:', req.session);
+      console.log('Session userId:', req.session?.userId);
+      console.log('Request body:', req.body);
+      
+      const userId = req.session?.userId;
       const discussionId = parseInt(req.params.id);
       const { content } = req.body;
       
       if (!userId) {
-        return res.status(401).json({ message: 'User authentication required' });
+        console.log('No userId found in session, returning 401');
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
       if (!content || !content.trim()) {
-        return res.status(400).json({ message: "Comment content is required" });
+        return res.status(400).json({ success: false, message: "Comment content is required" });
       }
       
+      console.log('Creating comment with data:', { discussionId, authorId: userId, content: content.trim() });
       const comment = await storage.createDiscussionComment({
         discussionId,
         authorId: userId,
         content: content.trim()
       });
       
-      res.status(201).json(comment);
+      console.log('Comment created successfully:', comment);
+      res.status(201).json({ success: true, data: comment });
     } catch (error) {
       console.error("Error creating discussion comment:", error);
-      res.status(500).json({ message: "Failed to create comment" });
+      res.status(500).json({ success: false, message: "Failed to create comment" });
     }
   });
 
