@@ -242,31 +242,47 @@ export default function CommunityFeed() {
     const discussion = discussions.find(d => d.id === discussionId);
     if (!discussion) return;
 
-    const shareUrl = `${window.location.origin}/discussions/${discussionId}`;
-    const shareText = `Check out this discussion: "${discussion.title}"`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: discussion.title,
-        text: shareText,
-        url: shareUrl,
-      }).catch(() => {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-        toast({
-          title: "Copied!",
-          description: "Discussion link copied",
-        });
-      });
-    } else {
-      // Fallback to clipboard
-      navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-      toast({
-        title: "Copied!",
-        description: "Discussion link copied",
-      });
-    }
+    // Try to share via API first (creates shared post)
+    shareDiscussionMutation.mutate(discussionId);
   };
+
+  // Share discussion mutation
+  const shareDiscussionMutation = useMutation({
+    mutationFn: async (discussionId: number) => {
+      return await apiRequest(`/api/discussions/${discussionId}/share`, {
+        method: "POST"
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      toast({
+        title: "Discussion shared",
+        description: "Shared to community feed",
+      });
+    },
+    onError: (error) => {
+      // Fallback to clipboard sharing
+      const discussion = discussions.find(d => d.id === discussionId);
+      if (discussion) {
+        const shareUrl = `${window.location.origin}/discussions/${discussionId}`;
+        const shareText = `Check out this discussion: "${discussion.title}"`;
+        
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+          toast({
+            title: "Link copied",
+            description: "Discussion link copied to clipboard",
+          });
+        } else {
+          toast({
+            title: "Share failed",
+            description: "Unable to share discussion",
+            variant: "destructive",
+          });
+        }
+      }
+    },
+  });
 
   const handleReaction = (discussionId: number, emoji: string) => {
     reactionMutation.mutate({
