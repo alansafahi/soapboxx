@@ -5679,18 +5679,15 @@ Return JSON with this exact structure:
     }
   });
 
-  // Add reaction to discussion
+  // Add reaction to discussion - REST endpoint
   app.post("/api/community/reactions", isAuthenticated, async (req: any, res) => {
     try {
-      console.log('Reaction endpoint hit with session:', req.session);
-      console.log('Session userId:', req.session?.userId);
-      console.log('Request body:', req.body);
-      
       const userId = req.session?.userId;
       const { targetType, targetId, reactionType, emoji, intensity } = req.body;
       
+      console.log('Adding reaction:', { userId, targetType, targetId, reactionType, emoji });
+      
       if (!userId) {
-        console.log('No userId found in session, returning 401');
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       

@@ -17,26 +17,35 @@ export async function apiRequest(
 ): Promise<any> {
   const { method = 'GET', body, headers = {} } = options || {};
   
-  console.log(`API Request: ${method} ${url}`, body ? body : '');
+  console.log(`Making ${method} request to ${url}`, body ? body : '');
   
-  const res = await fetch(url, {
-    method,
-    headers: {
-      ...(body ? { "Content-Type": "application/json" } : {}),
-      "X-Requested-With": "XMLHttpRequest",
-      "Referer": window.location.href,
-      ...headers,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: "include",
-  });
+  try {
+    const res = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        ...headers,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: "include",
+    });
 
-  console.log(`API Response: ${res.status} ${res.statusText}`);
-  
-  await throwIfResNotOk(res);
-  const result = await res.json();
-  console.log('API Response data:', result);
-  return result;
+    console.log(`Response: ${res.status} ${res.statusText}`);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`API Error: ${res.status} - ${errorText}`);
+      throw new Error(`${res.status}: ${errorText || res.statusText}`);
+    }
+    
+    const result = await res.json();
+    console.log('Response data:', result);
+    return result;
+  } catch (error) {
+    console.error(`Request failed:`, error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
