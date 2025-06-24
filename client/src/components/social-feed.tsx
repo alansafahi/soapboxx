@@ -525,20 +525,61 @@ export default function SocialFeed() {
     }
   ];
 
-  const moodOptions = [
-    { id: 'grateful', label: 'Grateful', icon: '🙏', category: 'Positive', color: 'bg-blue-100 text-blue-800' },
-    { id: 'blessed', label: 'Blessed', icon: '✨', category: 'Positive', color: 'bg-purple-100 text-purple-800' },
-    { id: 'peaceful', label: 'Peaceful', icon: '🕊️', category: 'Positive', color: 'bg-green-100 text-green-800' },
-    { id: 'hopeful', label: 'Hopeful', icon: '🌅', category: 'Positive', color: 'bg-orange-100 text-orange-800' },
-    { id: 'joyful', label: 'Joyful', icon: '😊', category: 'Positive', color: 'bg-yellow-100 text-yellow-800' },
-    { id: 'reflective', label: 'Reflective', icon: '🤔', category: 'Contemplative', color: 'bg-indigo-100 text-indigo-800' },
-    { id: 'seeking', label: 'Seeking Guidance', icon: '🙏', category: 'Seeking', color: 'bg-purple-100 text-purple-800' },
-    { id: 'anxious', label: 'Anxious', icon: '😰', category: 'Struggling', color: 'bg-red-100 text-red-800' },
-    { id: 'celebrating', label: 'Celebrating', icon: '🎉', category: 'Positive', color: 'bg-pink-100 text-pink-800' },
-    { id: 'praying', label: 'Praying', icon: '🙏', category: 'Spiritual', color: 'bg-blue-100 text-blue-800' },
-    { id: 'studying', label: 'Studying Scripture', icon: '📖', category: 'Spiritual', color: 'bg-green-100 text-green-800' },
-    { id: 'inspired', label: 'Inspired', icon: '💡', category: 'Positive', color: 'bg-yellow-100 text-yellow-800' }
-  ];
+  // SoapBox Super App Feelings Selector - Organized by category
+const moodCategories = [
+  {
+    title: "🕊️ Spiritual Feelings",
+    description: "Express where you are in your walk with God",
+    moods: [
+      { id: 'grateful', label: 'Grateful', icon: '🙏', color: 'bg-blue-100 text-blue-800' },
+      { id: 'blessed', label: 'Blessed', icon: '✨', color: 'bg-purple-100 text-purple-800' },
+      { id: 'peaceful', label: 'Peaceful', icon: '🕊', color: 'bg-green-100 text-green-800' },
+      { id: 'hopeful', label: 'Hopeful', icon: '🌅', color: 'bg-orange-100 text-orange-800' },
+      { id: 'joyful', label: 'Joyful', icon: '😊', color: 'bg-yellow-100 text-yellow-800' },
+      { id: 'praying', label: 'Praying', icon: '🛐', color: 'bg-blue-100 text-blue-800' },
+      { id: 'inspired', label: 'Inspired', icon: '💡', color: 'bg-yellow-100 text-yellow-800' },
+      { id: 'celebrating', label: 'Celebrating', icon: '🎉', color: 'bg-pink-100 text-pink-800' },
+      { id: 'studying', label: 'Studying Scripture', icon: '📖', color: 'bg-green-100 text-green-800' },
+      { id: 'reflective', label: 'Reflective', icon: '🤔', color: 'bg-indigo-100 text-indigo-800' },
+      { id: 'seeking', label: 'Seeking Guidance', icon: '🧭', color: 'bg-purple-100 text-purple-800' },
+      { id: 'surrendered', label: 'Surrendered', icon: '🧎', color: 'bg-blue-100 text-blue-800' },
+      { id: 'convicted', label: 'Convicted', icon: '🔥', color: 'bg-red-100 text-red-800' },
+      { id: 'repentant', label: 'Repentant', icon: '😔', color: 'bg-gray-100 text-gray-800' }
+    ]
+  },
+  {
+    title: "💭 Emotional & Mental State",
+    description: "Name your internal world — it matters",
+    moods: [
+      { id: 'anxious', label: 'Anxious', icon: '😰', color: 'bg-red-100 text-red-800' },
+      { id: 'overwhelmed', label: 'Overwhelmed', icon: '😵‍💫', color: 'bg-orange-100 text-orange-800' },
+      { id: 'conflicted', label: 'Conflicted', icon: '🧩', color: 'bg-purple-100 text-purple-800' },
+      { id: 'doubtful', label: 'Doubtful', icon: '🌫', color: 'bg-gray-100 text-gray-800' },
+      { id: 'waiting', label: 'Waiting', icon: '⏳', color: 'bg-yellow-100 text-yellow-800' },
+      { id: 'empty', label: 'Empty', icon: '🕳', color: 'bg-gray-100 text-gray-800' },
+      { id: 'lonely', label: 'Lonely', icon: '🫂', color: 'bg-blue-100 text-blue-800' },
+      { id: 'hurt', label: 'Hurt', icon: '💔', color: 'bg-red-100 text-red-800' }
+    ]
+  },
+  {
+    title: "🌱 Growth & Purpose",
+    description: "Mark your spiritual formation or movement",
+    moods: [
+      { id: 'growing', label: 'Growing', icon: '🌱', color: 'bg-green-100 text-green-800' },
+      { id: 'learning', label: 'Learning', icon: '📘', color: 'bg-blue-100 text-blue-800' },
+      { id: 'purposeful', label: 'Purposeful', icon: '🎯', color: 'bg-purple-100 text-purple-800' },
+      { id: 'visionary', label: 'Visionary', icon: '👁', color: 'bg-indigo-100 text-indigo-800' },
+      { id: 'encouraging', label: 'Encouraging', icon: '💬', color: 'bg-green-100 text-green-800' },
+      { id: 'testifying', label: 'Testifying', icon: '📢', color: 'bg-orange-100 text-orange-800' },
+      { id: 'journaling', label: 'Journaling', icon: '✍️', color: 'bg-blue-100 text-blue-800' },
+      { id: 'serving', label: 'Serving', icon: '🤝', color: 'bg-purple-100 text-purple-800' },
+      { id: 'resting', label: 'Resting', icon: '⛅', color: 'bg-gray-100 text-gray-800' }
+    ]
+  }
+];
+
+// Flatten all moods for backward compatibility
+const moodOptions = moodCategories.flatMap(category => category.moods);
 
   const getSelectedMoodData = () => {
     if (!selectedMood) return null;
