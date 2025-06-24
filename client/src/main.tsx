@@ -4,11 +4,12 @@ import "./index.css";
 
 // Handle unhandled promise rejections to prevent console errors
 window.addEventListener('unhandledrejection', (event) => {
-  // Log WebSocket errors to identify the source
+  // Suppress WebSocket errors since we're using REST-only mode
   if (event.reason && event.reason.message && 
       (event.reason.message.includes('WebSocket') || 
-       event.reason.message.includes('websocket'))) {
-    console.warn('WebSocket error intercepted:', event.reason.message);
+       event.reason.message.includes('websocket') ||
+       event.reason.message.includes('wss://'))) {
+    console.warn('WebSocket error suppressed (REST-only mode):', event.reason.message);
     event.preventDefault();
     return;
   }

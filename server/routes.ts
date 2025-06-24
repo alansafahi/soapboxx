@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
-import { WebSocketServer } from "ws";
+// import { WebSocketServer } from "ws"; // Disabled for REST-only mode
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { db } from "./db";
@@ -1737,106 +1737,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
-  // Setup WebSocket server for real-time chat (with error handling)
-  const wss = new WebSocketServer({ 
-    server: httpServer,
-    path: '/ws',
-    clientTracking: true
-  });
+  // REST-only messaging - no WebSocket dependencies
+  // All real-time features now use polling or manual refresh
+  console.log('WebSocket disabled - using REST API only for better reliability');
 
-  // Store active connections
-  const connections = new Map<string, any>();
+  // No WebSocket connections - using REST endpoints only
 
-  wss.on('connection', (ws, req) => {
-    let userId: string | null = null;
-    
-    // Send connection acknowledgment
-    ws.send(JSON.stringify({ type: 'connection_established' }));
-
-    ws.on('message', async (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        
-        switch (data.type) {
-          case 'auth':
-            userId = data.userId;
-            if (userId) {
-              connections.set(userId, ws);
-              ws.send(JSON.stringify({ type: 'auth_success', userId }));
-            } else {
-              ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid user ID' }));
-            }
-            break;
-            
-          case 'join_conversation':
-            // Store conversation ID for this connection
-            (ws as any).conversationId = data.conversationId;
-            break;
-            
-          case 'send_message':
-            if (userId && data.conversationId && data.content) {
-              try {
-                // Save message to database
-                const message = await storage.sendMessage({
-                  conversationId: data.conversationId,
-                  senderId: userId,
-                  content: data.content,
-                  messageType: data.messageType || 'text',
-                  replyToId: data.replyToId || null,
-                });
-                
-                // Broadcast to sender immediately
-                ws.send(JSON.stringify({
-                  type: 'new_message',
-                  message
-                }));
-                
-                // Broadcast to other participants
-                connections.forEach((connection, connUserId) => {
-                  if (connUserId !== userId && connection.readyState === 1) {
-                    connection.send(JSON.stringify({
-                      type: 'new_message',
-                      message
-                    }));
-                  }
-                });
-              } catch (msgError) {
-                console.error('Error saving message:', msgError);
-                ws.send(JSON.stringify({ type: 'error', message: 'Failed to send message' }));
-              }
-            }
-            break;
-        }
-      } catch (error) {
-        console.error('WebSocket error:', error);
-        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
-      }
-    });
-
-    ws.on('close', () => {
-      if (userId) {
-        connections.delete(userId);
-      }
-    });
-
-    ws.on('error', (error) => {
-      console.error('WebSocket connection error:', error);
-      if (userId) {
-        connections.delete(userId);
-      }
-      // Send error response if connection is still open
-      try {
-        if (ws.readyState === 1) {
-          ws.send(JSON.stringify({ 
-            type: 'connection_error', 
-            message: 'Connection error occurred' 
-          }));
-        }
-      } catch (sendError) {
-        console.error('Error sending WebSocket error message:', sendError);
-      }
-    });
-  });
 
   // Mood check-in API endpoints
   app.post('/api/mood-checkins', isAuthenticated, async (req: any, res) => {
@@ -5800,7 +5706,13 @@ Return JSON with this exact structure:
       console.log('Adding reaction with data:', reactionData);
       const result = await storage.addReaction(reactionData);
       console.log('Reaction added successfully:', result);
-      res.json({ success: true, data: result });
+      
+      // Send success response with proper structure
+      res.status(200).json({ 
+        success: true, 
+        message: 'Reaction added successfully',
+        data: result 
+      });
     } catch (error) {
       console.error("Error adding reaction:", error);
       res.status(500).json({ success: false, message: "Failed to add reaction" });

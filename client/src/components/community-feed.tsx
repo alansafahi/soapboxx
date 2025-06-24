@@ -175,10 +175,17 @@ export default function CommunityFeed() {
   const reactionMutation = useMutation({
     mutationFn: async ({ targetType, targetId, reactionType, emoji }: { targetType: string; targetId: number; reactionType: string; emoji: string }) => {
       console.log('Sending reaction API request:', { targetType, targetId, reactionType, emoji });
-      return await apiRequest('/api/community/reactions', {
-        method: 'POST',
-        body: { targetType, targetId, reactionType, emoji, intensity: 1 }
-      });
+      try {
+        const response = await apiRequest('/api/community/reactions', {
+          method: 'POST',
+          body: { targetType, targetId, reactionType, emoji, intensity: 1 }
+        });
+        console.log('Reaction API response:', response);
+        return response;
+      } catch (error) {
+        console.error('Reaction API error caught:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
