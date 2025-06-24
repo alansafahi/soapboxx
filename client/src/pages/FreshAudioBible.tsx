@@ -49,6 +49,7 @@ export default function FreshAudioBible() {
   const [pendingSettingsUpdate, setPendingSettingsUpdate] = useState(false);
   const [useOpenAIVoice, setUseOpenAIVoice] = useState(true); // Default to premium voice
   const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
+  const [selectedBibleVersion, setSelectedBibleVersion] = useState("NIV"); // Default to NIV
 
   // Real-time audio controls for premium voices (no restart needed)
   useEffect(() => {

@@ -45,6 +45,7 @@ const ContentDistributionPage = lazy(() => import("@/pages/ContentDistributionPa
 const EngagementAnalyticsPage = lazy(() => import("@/pages/EngagementAnalyticsPage"));
 const AIContentDemoPage = lazy(() => import("@/pages/PastoralContentDemoPage"));
 const PersonalizedGuidancePage = lazy(() => import("@/pages/PersonalizedGuidance"));
+const SourceAttributionPage = lazy(() => import("@/pages/SourceAttribution"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -147,6 +148,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/engagement-analytics" component={EngagementAnalyticsPage} />
                                     <ProtectedRoute path="/ai-content-demo" component={AIContentDemoPage} />
                                     <ProtectedRoute path="/ai-guidance" component={PersonalizedGuidancePage} />
+                                    <ProtectedRoute path="/source-attribution" component={SourceAttributionPage} />
                                     
                                     <Route path="*" component={NotFound} />
                                 </Switch>
