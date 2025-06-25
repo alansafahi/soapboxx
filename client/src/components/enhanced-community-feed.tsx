@@ -143,7 +143,9 @@ export default function EnhancedCommunityFeed() {
       });
     },
     onSuccess: () => {
+      // Force fresh data fetch
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      queryClient.refetchQueries({ queryKey: ['/api/discussions'] });
       toast({
         title: "Reaction added",
         description: "Your reaction has been shared with the community",
@@ -164,7 +166,9 @@ export default function EnhancedCommunityFeed() {
       return await apiRequest('DELETE', `/api/community/reactions/${postId}/${reactionType}`);
     },
     onSuccess: () => {
+      // Force fresh data fetch
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      queryClient.refetchQueries({ queryKey: ['/api/discussions'] });
     },
   });
 
