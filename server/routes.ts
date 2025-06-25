@@ -5683,21 +5683,17 @@ Return JSON with this exact structure:
   app.post("/api/community/reactions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Authentication required' });
+      }
+
       const { targetType, targetId, reactionType, emoji, intensity } = req.body;
       
-      console.log('Reaction endpoint hit:', { 
-        userId, 
-        targetType, 
-        targetId, 
-        reactionType, 
-        emoji,
-        sessionExists: !!req.session,
-        bodyReceived: req.body
-      });
-      
-      if (!userId) {
-        console.log('No userId in session, returning 401');
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      if (!targetType || !targetId || !reactionType || !emoji) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields: targetType, targetId, reactionType, emoji' 
+        });
       }
       
       const reactionData = {
@@ -5709,18 +5705,20 @@ Return JSON with this exact structure:
         intensity: intensity || 1
       };
       
-      console.log('Calling storage.addReaction with:', reactionData);
       const result = await storage.addReaction(reactionData);
-      console.log('Storage returned:', result);
       
-      res.status(200).json({ 
+      res.json({ 
         success: true, 
-        message: 'Reaction added!',
+        message: 'Reaction added successfully',
         data: result 
       });
     } catch (error) {
       console.error("Error adding reaction:", error);
-      res.status(500).json({ success: false, message: "Failed to add reaction" });
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to add reaction",
+        error: error.message 
+      });
     }
   });
 
