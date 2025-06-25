@@ -241,7 +241,8 @@ export default function EnhancedCommunityFeed() {
   }
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       {/* Enhanced Actions Bar */}
       <Card className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-100 p-6">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
@@ -439,16 +440,22 @@ export default function EnhancedCommunityFeed() {
                             const isActive = postReaction?.userReacted;
                             
                             return (
-                              <Button
-                                key={reactionType.type}
-                                variant={isActive ? "default" : "ghost"}
-                                size="sm"
-                                onClick={() => handleReaction(post, reactionType.type)}
-                                className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
-                              >
-                                <span className="mr-1">{reactionType.emoji}</span>
-                                <span className="hidden sm:inline">{postReaction?.count || 0}</span>
-                              </Button>
+                              <Tooltip key={reactionType.type}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant={isActive ? "default" : "ghost"}
+                                    size="sm"
+                                    onClick={() => handleReaction(post, reactionType.type)}
+                                    className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
+                                  >
+                                    <span className="mr-1">{reactionType.emoji}</span>
+                                    <span className="hidden sm:inline">{postReaction?.count || 0}</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{reactionType.tooltip}</p>
+                                </TooltipContent>
+                              </Tooltip>
                             );
                           })}
                         </div>
@@ -544,7 +551,8 @@ export default function EnhancedCommunityFeed() {
           </motion.div>
         )}
       </div>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
 
