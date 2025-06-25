@@ -1736,10 +1736,7 @@ export class DatabaseStorage implements IStorage {
     return discussionsWithReactions;
   }
 
-  async getDiscussion(id: number): Promise<Discussion | undefined> {
-    const [discussion] = await db.select().from(discussions).where(eq(discussions.id, id));
-    return discussion;
-  }
+  // Duplicate function removed - implementation exists elsewhere
 
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
@@ -3128,52 +3125,9 @@ export class DatabaseStorage implements IStorage {
     return { bookmarked };
   }
 
-  async createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment> {
-    const [newComment] = await db
-      .insert(discussionComments)
-      .values({
-        discussionId: comment.discussionId,
-        authorId: comment.authorId,
-        content: comment.content,
-        parentId: comment.parentId || null,
-      })
-      .returning();
-    return newComment;
-  }
+  // Duplicate functions removed - implementations exist above at lines 1910 and 1918
 
-  async getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
-    const comments = await db
-      .select({
-        id: discussionComments.id,
-        discussionId: discussionComments.discussionId,
-        authorId: discussionComments.authorId,
-        content: discussionComments.content,
-        parentId: discussionComments.parentId,
-        likeCount: discussionComments.likeCount,
-        createdAt: discussionComments.createdAt,
-        updatedAt: discussionComments.updatedAt,
-        author: {
-          id: users.id,
-          name: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-        }
-      })
-      .from(discussionComments)
-      .leftJoin(users, eq(discussionComments.authorId, users.id))
-      .where(eq(discussionComments.discussionId, discussionId))
-      .orderBy(asc(discussionComments.createdAt));
-    return comments as any;
-  }
-
-  async getDiscussion(discussionId: number): Promise<Discussion | undefined> {
-    const [discussion] = await db
-      .select()
-      .from(discussions)
-      .where(eq(discussions.id, discussionId));
-    return discussion;
-  }
+  // Duplicate function removed - implementation exists elsewhere
 
   async deleteDiscussion(discussionId: number): Promise<void> {
     // Delete all related data first (due to foreign key constraints)

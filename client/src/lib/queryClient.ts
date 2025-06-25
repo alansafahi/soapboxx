@@ -13,12 +13,9 @@ export async function apiRequest(
   body?: unknown,
   headers?: Record<string, string>
 ): Promise<any> {
-  console.log(`Making ${method} request to ${url}`, body ? body : '');
-  
   try {
-    // Safety check: if method looks like a URL, swap parameters
+    // Parameter order safety check
     if (method.startsWith('/') || method.startsWith('http')) {
-      console.warn('Parameter order appears wrong, swapping method and url');
       [method, url] = [url, method];
     }
     
@@ -27,25 +24,20 @@ export async function apiRequest(
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
+        "Referer": window.location.origin,
         ...(headers || {}),
       },
       body: body ? JSON.stringify(body) : undefined,
       credentials: "include",
     });
-
-    console.log(`Response: ${res.status} ${res.statusText}`);
     
     if (!res.ok) {
       const errorText = await res.text();
-      console.error(`API Error: ${res.status} - ${errorText}`);
       throw new Error(`${res.status}: ${errorText || res.statusText}`);
     }
     
-    const result = await res.json();
-    console.log('Response data:', result);
-    return result;
+    return await res.json();
   } catch (error) {
-    console.error(`Request failed:`, error);
     throw error;
   }
 }
