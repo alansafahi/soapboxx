@@ -8,15 +8,11 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
+  method: string,
   url: string,
-  options?: {
-    method?: string;
-    body?: unknown;
-    headers?: Record<string, string>;
-  }
+  body?: unknown,
+  headers?: Record<string, string>
 ): Promise<any> {
-  const { method = 'GET', body, headers = {} } = options || {};
-  
   console.log(`Making ${method} request to ${url}`, body ? body : '');
   
   try {
@@ -25,7 +21,7 @@ export async function apiRequest(
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
-        ...headers,
+        ...(headers || {}),
       },
       body: body ? JSON.stringify(body) : undefined,
       credentials: "include",
