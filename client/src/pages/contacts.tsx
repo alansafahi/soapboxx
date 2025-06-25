@@ -47,17 +47,17 @@ function ContactsPage() {
   // Fetch user's contacts and referral stats
   const { data: contacts = [], isLoading: contactsLoading, refetch: refetchContacts } = useQuery({
     queryKey: ["/api/contacts"],
-    queryFn: () => apiRequest("/api/contacts"),
+    queryFn: () => apiRequest("GET", "/api/contacts"),
   });
 
   const { data: referralStats } = useQuery({
     queryKey: ["/api/referrals/stats"],
-    queryFn: () => apiRequest("/api/referrals/stats"),
+    queryFn: () => apiRequest("GET", "/api/referrals/stats"),
   });
 
   const { data: pendingInvites = [] } = useQuery({
     queryKey: ["/api/invitations/pending"],
-    queryFn: () => apiRequest("/api/invitations/pending"),
+    queryFn: () => apiRequest("GET", "/api/invitations/pending"),
   });
 
   // Send invitation mutation

@@ -21,27 +21,27 @@ export default function SoapPage() {
   // Fetch user's S.O.A.P. entries
   const { data: userEntries = [], isLoading: userLoading } = useQuery({
     queryKey: ['/api/soap'],
-    queryFn: () => apiRequest('/api/soap'),
+    queryFn: () => apiRequest('GET', '/api/soap'),
   });
 
   // Fetch public S.O.A.P. entries for community feed
   const { data: publicEntries = [], isLoading: publicLoading } = useQuery({
     queryKey: ['/api/soap/public'],
-    queryFn: () => apiRequest('/api/soap/public'),
+    queryFn: () => apiRequest('GET', '/api/soap/public'),
   });
 
   // Fetch user's S.O.A.P. streak
   const { data: streakData } = useQuery({
     queryKey: ['/api/soap/streak/current'],
     queryFn: async () => {
-      const user = await apiRequest('/api/auth/user');
-      return apiRequest(`/api/soap/streak/${user.id}`);
+      const user = await apiRequest('GET', '/api/auth/user');
+      return apiRequest('GET', `/api/soap/streak/${user.id}`);
     },
   });
 
   // Delete S.O.A.P. entry mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/soap/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/soap/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
       toast({

@@ -208,10 +208,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         generateComplete: !currentData.scripture || !currentData.scriptureReference // Generate complete S.O.A.P. if no scripture provided
       };
 
-      const suggestions = await apiRequest('/api/soap/ai/suggestions', {
-        method: 'POST',
-        body: requestBody,
-      });
+      const suggestions = await apiRequest('POST', '/api/soap/ai/suggestions', requestBody);
       
       setAiSuggestions(suggestions);
       
@@ -418,12 +415,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsLookingUpVerse(true);
     try {
-      const response = await apiRequest('/api/bible/lookup-verse', {
-        method: 'POST',
-        body: { 
-          reference: reference.trim(),
-          version: version 
-        },
+      const response = await apiRequest('POST', '/api/bible/lookup-verse', { 
+        reference: reference.trim(),
+        version: version 
       });
       
       // Handle the correct response structure
