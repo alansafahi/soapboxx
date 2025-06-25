@@ -132,15 +132,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       try {
         let result;
         if (entry) {
-          result = await apiRequest(`/api/soap/${entry.id}`, {
-            method: 'PUT',
-            body: payload,
-          });
+          result = await apiRequest('PUT', `/api/soap/${entry.id}`, payload);
         } else {
-          result = await apiRequest('/api/soap', {
-            method: 'POST',
-            body: payload,
-          });
+          result = await apiRequest('POST', '/api/soap', payload);
         }
         return result;
       } catch (error) {

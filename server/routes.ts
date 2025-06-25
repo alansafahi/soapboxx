@@ -4158,7 +4158,7 @@ Format your response as JSON with the following structure:
         return res.status(400).json({ message: 'Scripture reference is required' });
       }
 
-      console.log(`[Bible Lookup] Starting lookup for user ${req.user.id}`);
+      console.log(`[Bible Lookup] Starting lookup for user ${req.session.userId}`);
       console.log(`[Bible Lookup] Reference: "${reference}"`);
       console.log(`[Bible Lookup] Requested Version: "${version}"`);
 
@@ -5910,7 +5910,7 @@ Return JSON with this exact structure:
     try {
       console.log("Prayer request body:", req.body);
       console.log("Prayer request user:", req.user);
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       if (!userId) {
         console.error("No user ID found in request");
         return res.status(401).json({ message: 'User authentication required' });
@@ -6675,7 +6675,7 @@ Return JSON with this exact structure:
 
   app.get('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
 
       console.log('Fetching S.O.A.P. entries for user:', userId);
