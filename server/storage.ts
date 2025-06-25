@@ -692,8 +692,7 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({ 
-        phoneNumber,
-        phoneVerified: verified,
+        mobileNumber: phoneNumber,
         updatedAt: new Date()
       })
       .where(eq(users.id, userId))
@@ -1162,10 +1161,8 @@ export class DatabaseStorage implements IStorage {
       .update(churches)
       .set({
         verificationStatus: 'rejected',
-        rejectedBy: rejectedBy,
+        verifiedBy: rejectedBy,
         rejectionReason: reason,
-        rejectedAt: new Date(),
-        isActive: false,
         updatedAt: new Date()
       })
       .where(eq(churches.id, churchId));

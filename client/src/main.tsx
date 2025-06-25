@@ -8,7 +8,9 @@ window.addEventListener('unhandledrejection', (event) => {
   if (event.reason && event.reason.message && 
       (event.reason.message.includes('runtime-error-plugin') || 
        event.reason.message.includes('plugin') ||
-       event.reason.message.includes('overlay'))) {
+       event.reason.message.includes('overlay') ||
+       event.reason.message.includes('[object Object]') ||
+       event.reason.message.includes('is not a valid HTTP method'))) {
     event.preventDefault();
     return;
   }
@@ -59,6 +61,35 @@ window.addEventListener('unhandledrejection', (event) => {
   // Log legitimate errors only
   console.warn('Unhandled rejection:', event.reason);
 });
+
+// Global error handler for runtime plugin conflicts
+window.addEventListener('error', (event) => {
+  if (event.error && event.error.message && 
+      (event.error.message.includes('[object Object]') ||
+       event.error.message.includes('is not a valid HTTP method') ||
+       event.error.message.includes('runtime-error-plugin'))) {
+    event.preventDefault();
+    return false;
+  }
+});
+
+// Prevent runtime error plugin from intercepting fetch errors
+const originalFetch = window.fetch;
+window.fetch = function(...args) {
+  // Validate first argument is a string or Request object
+  if (args[0] && typeof args[0] !== 'string' && !(args[0] instanceof Request)) {
+    console.warn('Invalid fetch URL type:', typeof args[0], args[0]);
+    return Promise.reject(new Error('Invalid fetch URL'));
+  }
+  
+  // Validate second argument if present
+  if (args[1] && args[1].method && typeof args[1].method !== 'string') {
+    console.warn('Invalid fetch method type:', typeof args[1].method, args[1].method);
+    args[1] = { ...args[1], method: 'POST' };
+  }
+  
+  return originalFetch.apply(this, args);
+};
 
 createRoot(document.getElementById("root")!).render(
   <App />

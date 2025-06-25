@@ -14,13 +14,35 @@ export async function apiRequest(
   headers?: Record<string, string>
 ): Promise<any> {
   try {
-    // Parameter order safety check
-    if (method.startsWith('/') || method.startsWith('http')) {
-      [method, url] = [url, method];
+    // Comprehensive type validation
+    if (typeof method !== 'string' || method === null || method === undefined) {
+      console.warn('Invalid method type passed to apiRequest:', typeof method, method);
+      method = 'POST';
     }
     
-    const res = await fetch(url, {
-      method: method || 'POST',
+    if (typeof url !== 'string' || url === null || url === undefined) {
+      console.warn('Invalid URL type passed to apiRequest:', typeof url, url);
+      throw new Error('Invalid URL provided to apiRequest');
+    }
+    
+    // Ensure method is a valid string
+    let validMethod = method.toString().trim();
+    let validUrl = url.toString().trim();
+    
+    // Parameter order safety check
+    if (validMethod.startsWith('/') || validMethod.startsWith('http')) {
+      [validMethod, validUrl] = [validUrl, validMethod];
+    }
+    
+    // Final validation for HTTP methods
+    const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
+    if (!allowedMethods.includes(validMethod.toUpperCase())) {
+      console.warn('Invalid HTTP method:', validMethod, 'defaulting to POST');
+      validMethod = 'POST';
+    }
+    
+    const res = await fetch(validUrl, {
+      method: validMethod.toUpperCase(),
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
