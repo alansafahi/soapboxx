@@ -240,7 +240,7 @@ import {
   type InsertReaction,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -2690,53 +2690,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Church verification methods
-  async getChurchesByStatus(status?: string): Promise<Church[]> {
-    try {
-      let query = db.select().from(churches);
-      
-      if (status && status !== 'all') {
-        query = query.where(eq(churches.verificationStatus, status));
-      }
-      
-      const result = await query.orderBy(desc(churches.createdAt));
-      return result;
-    } catch (error) {
-      console.error('Error fetching churches by status:', error);
-      return [];
-    }
-  }
 
-  async approveChurch(churchId: number, verifiedBy?: string): Promise<void> {
-    try {
-      await db.update(churches)
-        .set({
-          verificationStatus: 'approved',
-          verifiedAt: new Date(),
-          verifiedBy: verifiedBy || null
-        })
-        .where(eq(churches.id, churchId));
-    } catch (error) {
-      console.error('Error approving church:', error);
-      throw error;
-    }
-  }
-
-  async rejectChurch(churchId: number, reason?: string, rejectedBy?: string): Promise<void> {
-    try {
-      await db.update(churches)
-        .set({
-          verificationStatus: 'rejected',
-          rejectionReason: reason || null,
-          verifiedBy: rejectedBy || null,
-          verifiedAt: new Date()
-        })
-        .where(eq(churches.id, churchId));
-    } catch (error) {
-      console.error('Error rejecting church:', error);
-      throw error;
-    }
-  }
 
   // Chat operations
   async getConversations(userId: string): Promise<Conversation[]> {

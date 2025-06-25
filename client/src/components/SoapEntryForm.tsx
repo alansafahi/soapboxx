@@ -375,12 +375,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       // Look up the verse first to show it in the dialog
       setIsLookingUpVerse(true);
       try {
-        const response = await apiRequest('/api/bible/lookup-verse', {
-          method: 'POST',
-          body: { 
-            reference: reference.trim(),
-            version: version 
-          },
+        const response = await apiRequest('POST', '/api/bible/lookup-verse', { 
+          reference: reference.trim(),
+          version: version 
         });
         
         const verseText = response.verse?.text || response.text;
@@ -406,12 +403,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsLookingUpVerse(true);
     try {
-      const response = await apiRequest('/api/bible/lookup-verse', {
-        method: 'POST',
-        body: { 
-          reference: reference.trim(),
-          version: version 
-        },
+      const response = await apiRequest('POST', '/api/bible/lookup-verse', { 
+        reference: reference.trim(),
+        version: version 
       });
       
       // Handle the correct response structure
