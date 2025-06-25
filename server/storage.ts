@@ -60,7 +60,6 @@ import {
   volunteerCertifications,
   userTourCompletions,
   sermonDrafts,
-  reactions,
   type User,
   type UpsertUser,
   type DailyVerse,
