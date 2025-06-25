@@ -142,8 +142,48 @@ export default function EnhancedCommunityFeed() {
         intensity: 1
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+    onSuccess: (data, variables) => {
+      // Immediately update the cache with optimistic update
+      queryClient.setQueryData(['/api/discussions'], (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        
+        return oldData.map(post => {
+          if (post.id === variables.postId) {
+            const existingReactions = post.reactions || [];
+            const existingReaction = existingReactions.find(r => r.type === variables.reactionType);
+            
+            if (existingReaction) {
+              // Increment existing reaction count
+              return {
+                ...post,
+                reactions: existingReactions.map(r => 
+                  r.type === variables.reactionType 
+                    ? { ...r, count: r.count + 1 }
+                    : r
+                )
+              };
+            } else {
+              // Add new reaction
+              return {
+                ...post,
+                reactions: [...existingReactions, {
+                  type: variables.reactionType,
+                  emoji: variables.emoji,
+                  count: 1,
+                  userReacted: true
+                }]
+              };
+            }
+          }
+          return post;
+        });
+      });
+      
+      // Invalidate all discussion queries regardless of filters
+      queryClient.invalidateQueries({ 
+        predicate: (query) => query.queryKey[0] === '/api/discussions' 
+      });
+      
       toast({
         title: "Reaction added",
         description: "Your reaction has been shared with the community",
@@ -164,7 +204,9 @@ export default function EnhancedCommunityFeed() {
       return await apiRequest('DELETE', `/api/community/reactions/${postId}/${reactionType}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => query.queryKey[0] === '/api/discussions' 
+      });
     },
   });
 
