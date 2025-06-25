@@ -1698,7 +1698,43 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(desc(discussions.createdAt));
     
-    return await query;
+    const result = await query;
+    
+    // Add reaction data to each discussion
+    const discussionsWithReactions = await Promise.all(
+      result.map(async (discussion) => {
+        // Get reaction data aggregated by type
+        const reactionData = await db
+          .select({
+            reactionType: reactions.reactionType,
+            emoji: reactions.emoji,
+            count: sql<number>`count(*)`,
+          })
+          .from(reactions)
+          .where(
+            and(
+              eq(reactions.targetType, 'post'),
+              eq(reactions.targetId, discussion.id)
+            )
+          )
+          .groupBy(reactions.reactionType, reactions.emoji);
+
+        // Format reactions for frontend
+        const formattedReactions = reactionData.map(r => ({
+          type: r.reactionType,
+          emoji: r.emoji,
+          count: r.count,
+          userReacted: false
+        }));
+
+        return {
+          ...discussion,
+          reactions: formattedReactions,
+        };
+      })
+    );
+
+    return discussionsWithReactions;
   }
 
   async getDiscussion(id: number): Promise<Discussion | undefined> {

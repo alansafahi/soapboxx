@@ -408,7 +408,7 @@ export default function EnhancedCommunityFeed() {
                             {(post.reactions || []).slice(0, 3).map((reaction, index) => (
                               <span 
                                 key={index}
-                                className="text-lg z-10 bg-white rounded-full border"
+                                className="text-lg z-10 bg-white rounded-full border px-1"
                                 style={{ zIndex: 3 - index }}
                               >
                                 {reaction.emoji}
