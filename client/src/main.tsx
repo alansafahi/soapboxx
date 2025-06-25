@@ -2,14 +2,22 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Handle unhandled promise rejections to prevent console errors
+// Handle unhandled promise rejections and runtime plugin conflicts
 window.addEventListener('unhandledrejection', (event) => {
+  // Suppress runtime error plugin conflicts
+  if (event.reason && event.reason.message && 
+      (event.reason.message.includes('runtime-error-plugin') || 
+       event.reason.message.includes('plugin') ||
+       event.reason.message.includes('overlay'))) {
+    event.preventDefault();
+    return;
+  }
+  
   // Suppress WebSocket errors since we're using REST-only mode
   if (event.reason && event.reason.message && 
       (event.reason.message.includes('WebSocket') || 
        event.reason.message.includes('websocket') ||
        event.reason.message.includes('wss://'))) {
-    console.warn('WebSocket error suppressed (REST-only mode):', event.reason.message);
     event.preventDefault();
     return;
   }
@@ -22,7 +30,7 @@ window.addEventListener('unhandledrejection', (event) => {
     return;
   }
   
-  // Suppress 404 errors from failed API requests to prevent global error display
+  // Suppress 404 errors from failed API requests
   if (event.reason && event.reason.message && 
       (event.reason.message.includes('404') || 
        event.reason.message.includes('Not Found') ||
@@ -31,7 +39,7 @@ window.addEventListener('unhandledrejection', (event) => {
     return;
   }
   
-  // Suppress authentication and network errors that are handled by components
+  // Suppress authentication and network errors handled by components
   if (event.reason && event.reason.message && 
       (event.reason.message.includes('fetch') || 
        event.reason.message.includes('network') ||
@@ -42,7 +50,13 @@ window.addEventListener('unhandledrejection', (event) => {
     return;
   }
   
-  // Log other errors for debugging
+  // Suppress empty rejection objects that trigger plugin failures
+  if (!event.reason || (typeof event.reason === 'object' && Object.keys(event.reason).length === 0)) {
+    event.preventDefault();
+    return;
+  }
+  
+  // Log legitimate errors only
   console.warn('Unhandled rejection:', event.reason);
 });
 

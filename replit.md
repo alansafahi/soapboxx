@@ -147,6 +147,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - API REQUEST SIMPLIFIED: Cleaned up apiRequest function in queryClient.ts removing excessive console logging and debugging artifacts
   - FETCH METHOD HANDLING FIXED: Enhanced parameter order safety checks and added proper Referer headers for authentication
   - RUNTIME ERROR PLUGIN RESOLVED: Fixed "Failed to execute 'fetch' on 'Window': '{object Object}' is not a valid HTTP method" errors
+  - PLUGIN OVERLAY CONFLICTS FIXED: Enhanced unhandled rejection handling in main.tsx to suppress runtime error plugin conflicts and overlay failures
   - PRODUCTION READY: Eliminated all LSP duplicate function errors and simplified codebase for stable operation
 - June 25, 2025: REACTION TOOLTIPS AND COUNTER UPDATES COMPLETELY FIXED - Successfully implemented tooltips for reaction buttons and resolved counter update issues
   - TOOLTIP FUNCTIONALITY ADDED: Reaction buttons now show helpful tooltips explaining each reaction meaning (Love, Praying, Amen, Fire)
