@@ -67,10 +67,7 @@ export default function CommunityFeed() {
   // Create discussion mutation
   const createDiscussionMutation = useMutation({
     mutationFn: async (data: DiscussionFormData) => {
-      return await apiRequest("/api/discussions", {
-        method: "POST",
-        body: data
-      });
+      return await apiRequest('POST', '/api/discussions', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
