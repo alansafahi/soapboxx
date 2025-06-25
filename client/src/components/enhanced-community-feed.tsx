@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import SmartScriptureTextarea from './SmartScriptureTextarea';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { 
@@ -76,17 +77,18 @@ interface ReactionType {
   type: string;
   emoji: string;
   label: string;
+  tooltip: string;
 }
 
 const REACTION_TYPES: ReactionType[] = [
-  { type: 'heart', emoji: '❤️', label: 'Love' },
-  { type: 'pray', emoji: '🙏', label: 'Praying' },
-  { type: 'amen', emoji: '🙌', label: 'Amen' },
-  { type: 'fire', emoji: '🔥', label: 'Fire' },
-  { type: 'peace', emoji: '☮️', label: 'Peace' },
-  { type: 'strength', emoji: '💪', label: 'Strength' },
-  { type: 'joy', emoji: '😊', label: 'Joy' },
-  { type: 'wisdom', emoji: '🧠', label: 'Wisdom' },
+  { type: 'heart', emoji: '❤️', label: 'Love', tooltip: 'Show love and support' },
+  { type: 'pray', emoji: '🙏', label: 'Praying', tooltip: 'Praying for this request' },
+  { type: 'amen', emoji: '🙌', label: 'Amen', tooltip: 'Amen! Agreeing in faith' },
+  { type: 'fire', emoji: '🔥', label: 'Fire', tooltip: 'This is powerful!' },
+  { type: 'peace', emoji: '☮️', label: 'Peace', tooltip: 'Finding peace in this' },
+  { type: 'strength', emoji: '💪', label: 'Strength', tooltip: 'Drawing strength from this' },
+  { type: 'joy', emoji: '😊', label: 'Joy', tooltip: 'This brings me joy' },
+  { type: 'wisdom', emoji: '🧠', label: 'Wisdom', tooltip: 'Wise words and insight' },
 ];
 
 interface FilterOptions {
@@ -142,47 +144,9 @@ export default function EnhancedCommunityFeed() {
         intensity: 1
       });
     },
-    onSuccess: (data, variables) => {
-      // Immediately update the cache with optimistic update
-      queryClient.setQueryData(['/api/discussions'], (oldData: any) => {
-        if (!Array.isArray(oldData)) return oldData;
-        
-        return oldData.map(post => {
-          if (post.id === variables.postId) {
-            const existingReactions = post.reactions || [];
-            const existingReaction = existingReactions.find(r => r.type === variables.reactionType);
-            
-            if (existingReaction) {
-              // Increment existing reaction count
-              return {
-                ...post,
-                reactions: existingReactions.map(r => 
-                  r.type === variables.reactionType 
-                    ? { ...r, count: r.count + 1 }
-                    : r
-                )
-              };
-            } else {
-              // Add new reaction
-              return {
-                ...post,
-                reactions: [...existingReactions, {
-                  type: variables.reactionType,
-                  emoji: variables.emoji,
-                  count: 1,
-                  userReacted: true
-                }]
-              };
-            }
-          }
-          return post;
-        });
-      });
-      
-      // Invalidate all discussion queries regardless of filters
-      queryClient.invalidateQueries({ 
-        predicate: (query) => query.queryKey[0] === '/api/discussions' 
-      });
+    onSuccess: () => {
+      // Force refetch discussions to get updated counts
+      refetch();
       
       toast({
         title: "Reaction added",
@@ -204,9 +168,7 @@ export default function EnhancedCommunityFeed() {
       return await apiRequest('DELETE', `/api/community/reactions/${postId}/${reactionType}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        predicate: (query) => query.queryKey[0] === '/api/discussions' 
-      });
+      refetch();
     },
   });
 
