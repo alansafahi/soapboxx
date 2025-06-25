@@ -1882,18 +1882,43 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    // Filter by church if provided
+    // Apply church filter if provided
     if (churchId) {
-      query = query.where(
-        and(
-          eq(discussions.isPinned, true),
-          eq(discussions.churchId, churchId),
-          or(
-            isNull(discussions.pinnedUntil),
-            gt(discussions.pinnedUntil, new Date())
+      return await db
+        .select({
+          id: discussions.id,
+          authorId: discussions.authorId,
+          churchId: discussions.churchId,
+          title: discussions.title,
+          content: discussions.content,
+          isPinned: discussions.isPinned,
+          pinnedAt: discussions.pinnedAt,
+          pinnedUntil: discussions.pinnedUntil,
+          pinnedBy: discussions.pinnedBy,
+          tags: discussions.tags,
+          createdAt: discussions.createdAt,
+          updatedAt: discussions.updatedAt,
+          author: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            profileImageUrl: users.profileImageUrl,
+          }
+        })
+        .from(discussions)
+        .innerJoin(users, eq(discussions.authorId, users.id))
+        .where(
+          and(
+            eq(discussions.isPinned, true),
+            eq(discussions.churchId, churchId),
+            or(
+              isNull(discussions.pinnedUntil),
+              gt(discussions.pinnedUntil, new Date())
+            )
           )
         )
-      );
+        .orderBy(desc(discussions.pinnedAt))
+        .limit(10);
     }
 
     return await query
@@ -3796,7 +3821,7 @@ export class DatabaseStorage implements IStorage {
     currentDate.setHours(0, 0, 0, 0);
 
     for (const checkIn of userCheckIns) {
-      const checkInDate = new Date(checkIn.createdAt);
+      const checkInDate = new Date(checkIn.createdAt || new Date());
       checkInDate.setHours(0, 0, 0, 0);
       
       const diffTime = currentDate.getTime() - checkInDate.getTime();
@@ -3840,6 +3865,8 @@ export class DatabaseStorage implements IStorage {
         pointsEarned: checkIns.pointsEarned,
         createdAt: checkIns.createdAt,
         updatedAt: checkIns.updatedAt,
+        latitude: checkIns.latitude,
+        longitude: checkIns.longitude,
         user: users,
       })
       .from(checkIns)
