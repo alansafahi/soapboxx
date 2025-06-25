@@ -16,8 +16,14 @@ export async function apiRequest(
   console.log(`Making ${method} request to ${url}`, body ? body : '');
   
   try {
+    // Safety check: if method looks like a URL, swap parameters
+    if (method.startsWith('/') || method.startsWith('http')) {
+      console.warn('Parameter order appears wrong, swapping method and url');
+      [method, url] = [url, method];
+    }
+    
     const res = await fetch(url, {
-      method: method,
+      method: method || 'POST',
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
