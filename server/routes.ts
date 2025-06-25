@@ -748,7 +748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User role endpoint for navigation
   app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch) {

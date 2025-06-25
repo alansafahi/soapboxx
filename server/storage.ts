@@ -122,6 +122,8 @@ import {
   type InsertMoodCheckin,
   type PersonalizedContent,
   type InsertPersonalizedContent,
+  type CheckIn,
+  type InsertCheckIn,
   type QrCode,
   type InsertQrCode,
   type Discussion,

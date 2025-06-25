@@ -2473,6 +2473,8 @@ export type InsertPrayerResponse = typeof prayerResponses.$inferInsert;
 export type PrayerResponse = typeof prayerResponses.$inferSelect;
 
 // Check-in system types
+export type CheckIn = typeof checkIns.$inferSelect;
+export type InsertCheckIn = typeof checkIns.$inferInsert;
 export type QrCode = typeof qrCodes.$inferSelect;
 export type InsertQrCode = typeof qrCodes.$inferInsert;
 
