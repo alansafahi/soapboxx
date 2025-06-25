@@ -249,15 +249,12 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsEnhancing(true);
     try {
-      const enhanced = await apiRequest('/api/soap/ai/enhance', {
-        method: 'POST',
-        body: {
-          scripture: currentData.scripture,
-          scriptureReference: currentData.scriptureReference,
-          observation: currentData.observation,
-          application: currentData.application,
-          prayer: currentData.prayer,
-        },
+      const enhanced = await apiRequest('POST', '/api/soap/ai/enhance', {
+        scripture: currentData.scripture,
+        scriptureReference: currentData.scriptureReference,
+        observation: currentData.observation,
+        application: currentData.application,
+        prayer: currentData.prayer,
       });
       
       // Apply enhanced versions
@@ -471,12 +468,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       // Look up the verse first to show it in the dialog
       setIsLookingUpVerse(true);
       try {
-        const response = await apiRequest('/api/bible/lookup-verse', {
-          method: 'POST',
-          body: { 
-            reference: reference.trim(),
-            version: selectedVersion 
-          },
+        const response = await apiRequest('POST', '/api/bible/lookup-verse', { 
+          reference: reference.trim(),
+          version: selectedVersion 
         });
         
         const verseText = response.verse?.text || response.text;
