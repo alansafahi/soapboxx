@@ -2628,7 +2628,7 @@ export class DatabaseStorage implements IStorage {
   async bulkImportChurches(churchData: any[]): Promise<{ success: boolean; imported: number; error?: string }> {
     try {
       if (churchData.length === 0) {
-        return { success: false, error: 'No church data provided' };
+        return { success: false, error: 'No church data provided', imported: 0 };
       }
 
       // Insert in batches of 100
@@ -4941,13 +4941,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Contacts and Invitations Methods
-  async getUserContacts(userId: string): Promise<Contact[]> {
-    return await db
-      .select()
-      .from(contacts)
-      .where(eq(contacts.userId, userId))
-      .orderBy(desc(contacts.createdAt));
-  }
 
   async addContact(contact: InsertContact): Promise<Contact> {
     const [newContact] = await db

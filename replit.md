@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 25, 2025: MESSAGING API REQUEST METHOD FIXED - Successfully corrected messaging API call that was passing object instead of proper parameters
+  - MESSAGING BUG RESOLVED: Fixed sendMessageMutation in messages.tsx to use proper apiRequest('POST', '/api/chat/send', data) format
+  - TECHNICAL DEBT ELIMINATION ONGOING: Systematically addressing TypeScript compilation errors in storage.ts
+  - PROPERTY NAME CORRECTIONS: Updated phoneNumber→mobileNumber and rejectedBy→verifiedBy property references to match database schema
+  - API REQUEST CONSISTENCY: Ensured all messaging API calls use correct parameter format (method, url, body) instead of object format
 - June 25, 2025: RUNTIME ERROR PLUGIN CONFLICTS COMPLETELY RESOLVED - Successfully eliminated all fetch method validation errors and plugin overlay failures
   - DUPLICATE FUNCTIONS REMOVED: Systematically eliminated duplicate getDiscussion, getDiscussionComments, and createDiscussionComment implementations in storage.ts
   - API REQUEST ENHANCED: Added comprehensive type validation in queryClient.ts to prevent objects being passed as HTTP methods
