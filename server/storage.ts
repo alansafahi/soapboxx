@@ -1173,9 +1173,8 @@ export class DatabaseStorage implements IStorage {
       .update(churches)
       .set({
         verificationStatus: 'suspended',
-        rejectedBy: suspendedBy,
+        verifiedBy: suspendedBy,
         rejectionReason: reason,
-        rejectedAt: new Date(),
         isActive: false,
         updatedAt: new Date()
       })
