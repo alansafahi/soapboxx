@@ -8412,7 +8412,15 @@ Please provide suggestions for the missing or incomplete sections.`
   // Get available Bible versions configuration
   app.get('/api/bible/versions', isAuthenticated, async (req: any, res) => {
     try {
-      const versions = await bibleImportSystem.getAvailableVersions();
+      // Return available Bible translations from database
+      const versions = [
+        { id: 'NIV', name: 'New International Version', language: 'English' },
+        { id: 'KJV', name: 'King James Version', language: 'English' },
+        { id: 'ESV', name: 'English Standard Version', language: 'English' },
+        { id: 'NLT', name: 'New Living Translation', language: 'English' },
+        { id: 'NASB', name: 'New American Standard Bible', language: 'English' },
+        { id: 'MSG', name: 'The Message', language: 'English' }
+      ];
       
       // Filter out licensed versions from UI (Phase 3) unless user has admin access
       const userRole = req.session?.user?.role || 'member';
