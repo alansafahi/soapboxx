@@ -208,10 +208,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         generateComplete: !currentData.scripture || !currentData.scriptureReference // Generate complete S.O.A.P. if no scripture provided
       };
 
-      const suggestions = await apiRequest('/api/soap/ai/suggestions', {
-        method: 'POST',
-        body: requestBody,
-      });
+      const suggestions = await apiRequest('POST', '/api/soap/ai/suggestions', requestBody);
       
       setAiSuggestions(suggestions);
       
@@ -252,15 +249,12 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsEnhancing(true);
     try {
-      const enhanced = await apiRequest('/api/soap/ai/enhance', {
-        method: 'POST',
-        body: {
-          scripture: currentData.scripture,
-          scriptureReference: currentData.scriptureReference,
-          observation: currentData.observation,
-          application: currentData.application,
-          prayer: currentData.prayer,
-        },
+      const enhanced = await apiRequest('POST', '/api/soap/ai/enhance', {
+        scripture: currentData.scripture,
+        scriptureReference: currentData.scriptureReference,
+        observation: currentData.observation,
+        application: currentData.application,
+        prayer: currentData.prayer,
       });
       
       // Apply enhanced versions
@@ -296,12 +290,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     }
 
     try {
-      const response = await apiRequest('/api/soap/ai/questions', {
-        method: 'POST',
-        body: {
-          scripture: currentData.scripture,
-          scriptureReference: currentData.scriptureReference,
-        },
+      const response = await apiRequest('POST', '/api/soap/ai/questions', {
+        scripture: currentData.scripture,
+        scriptureReference: currentData.scriptureReference,
       });
       
       setReflectionQuestions(response.questions);
@@ -336,16 +327,13 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsEnhancing(true);
     try {
-      const enhanced = await apiRequest('/api/soap/ai/enhance', {
-        method: 'POST',
-        body: {
-          scripture: currentData.scripture,
-          scriptureReference: currentData.scriptureReference,
-          observation: section === 'observation' ? currentData.observation : '',
-          application: section === 'application' ? currentData.application : '',
-          prayer: section === 'prayer' ? currentData.prayer : '',
-          enhanceOnly: section, // Tell backend to only enhance this section
-        },
+      const enhanced = await apiRequest('POST', '/api/soap/ai/enhance', {
+        scripture: currentData.scripture,
+        scriptureReference: currentData.scriptureReference,
+        observation: section === 'observation' ? currentData.observation : '',
+        application: section === 'application' ? currentData.application : '',
+        prayer: section === 'prayer' ? currentData.prayer : '',
+        enhanceOnly: section, // Tell backend to only enhance this section
       });
       
       // Apply enhanced version to specific section
