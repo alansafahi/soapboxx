@@ -132,9 +132,15 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       try {
         let result;
         if (entry) {
-          result = await apiRequest('PUT', `/api/soap/${entry.id}`, payload);
+          result = await apiRequest(`/api/soap/${entry.id}`, {
+            method: 'PUT',
+            body: payload,
+          });
         } else {
-          result = await apiRequest('POST', '/api/soap', payload);
+          result = await apiRequest('/api/soap', {
+            method: 'POST',
+            body: payload,
+          });
         }
         return result;
       } catch (error) {
@@ -202,7 +208,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         generateComplete: !currentData.scripture || !currentData.scriptureReference // Generate complete S.O.A.P. if no scripture provided
       };
 
-      const suggestions = await apiRequest('POST', '/api/soap/ai/suggestions', requestBody);
+      const suggestions = await apiRequest('/api/soap/ai/suggestions', {
+        method: 'POST',
+        body: requestBody,
+      });
       
       setAiSuggestions(suggestions);
       
@@ -243,12 +252,15 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsEnhancing(true);
     try {
-      const enhanced = await apiRequest('POST', '/api/soap/ai/enhance', {
-        scripture: currentData.scripture,
-        scriptureReference: currentData.scriptureReference,
-        observation: currentData.observation,
-        application: currentData.application,
-        prayer: currentData.prayer,
+      const enhanced = await apiRequest('/api/soap/ai/enhance', {
+        method: 'POST',
+        body: {
+          scripture: currentData.scripture,
+          scriptureReference: currentData.scriptureReference,
+          observation: currentData.observation,
+          application: currentData.application,
+          prayer: currentData.prayer,
+        },
       });
       
       // Apply enhanced versions
@@ -406,9 +418,12 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsLookingUpVerse(true);
     try {
-      const response = await apiRequest('POST', '/api/bible/lookup-verse', { 
-        reference: reference.trim(),
-        version: version 
+      const response = await apiRequest('/api/bible/lookup-verse', {
+        method: 'POST',
+        body: { 
+          reference: reference.trim(),
+          version: version 
+        },
       });
       
       // Handle the correct response structure
@@ -462,9 +477,12 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       // Look up the verse first to show it in the dialog
       setIsLookingUpVerse(true);
       try {
-        const response = await apiRequest('POST', '/api/bible/lookup-verse', { 
-          reference: reference.trim(),
-          version: selectedVersion 
+        const response = await apiRequest('/api/bible/lookup-verse', {
+          method: 'POST',
+          body: { 
+            reference: reference.trim(),
+            version: selectedVersion 
+          },
         });
         
         const verseText = response.verse?.text || response.text;

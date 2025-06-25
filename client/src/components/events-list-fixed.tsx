@@ -106,7 +106,10 @@ export default function EventsList() {
   // RSVP mutation
   const rsvpMutation = useMutation({
     mutationFn: async ({ eventId, status }: { eventId: number; status: string }) => {
-      return apiRequest("POST", `/api/events/${eventId}/rsvp`, { status });
+      return apiRequest(`/api/events/${eventId}/rsvp`, {
+        method: "POST",
+        body: { status },
+      });
     },
     onSuccess: (_, { eventId, status }) => {
       setRsvpStatus(prev => new Map(prev).set(eventId, status));

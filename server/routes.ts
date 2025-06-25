@@ -748,7 +748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User role endpoint for navigation
   app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user.claims.sub;
       const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch) {
@@ -4158,7 +4158,7 @@ Format your response as JSON with the following structure:
         return res.status(400).json({ message: 'Scripture reference is required' });
       }
 
-      console.log(`[Bible Lookup] Starting lookup for user ${req.session.userId}`);
+      console.log(`[Bible Lookup] Starting lookup for user ${req.user.id}`);
       console.log(`[Bible Lookup] Reference: "${reference}"`);
       console.log(`[Bible Lookup] Requested Version: "${version}"`);
 
@@ -5587,11 +5587,6 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: "User authentication required" });
       }
 
-      // Disable caching to ensure fresh reaction data
-      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.set('Pragma', 'no-cache');
-      res.set('Expires', '0');
-
       console.log("Fetching discussions for authenticated user:", userId);
       const discussions = await storage.getDiscussions();
       console.log("Found discussions:", discussions.length);
@@ -5910,7 +5905,7 @@ Return JSON with this exact structure:
     try {
       console.log("Prayer request body:", req.body);
       console.log("Prayer request user:", req.user);
-      const userId = req.session.userId;
+      const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
         console.error("No user ID found in request");
         return res.status(401).json({ message: 'User authentication required' });
@@ -6605,7 +6600,7 @@ Return JSON with this exact structure:
       console.log('Request body:', JSON.stringify(req.body, null, 2));
       console.log('User object:', req.user);
       
-      const userId = req.session.userId;
+      const userId = req.user?.claims?.sub || req.user?.id;
       console.log('Extracted userId:', userId);
       
       if (!userId) {
@@ -6675,7 +6670,7 @@ Return JSON with this exact structure:
 
   app.get('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.claims?.sub || req.user?.id;
       const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
 
       console.log('Fetching S.O.A.P. entries for user:', userId);
@@ -6735,7 +6730,7 @@ Return JSON with this exact structure:
   app.put('/api/soap/:id', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.session.userId;
+      const userId = req.user?.claims?.sub || req.user?.id;
 
       // Check if entry exists and belongs to user
       const existingEntry = await storage.getSoapEntry(entryId);
@@ -6754,7 +6749,7 @@ Return JSON with this exact structure:
   app.delete('/api/soap/:id', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.session.userId;
+      const userId = req.user?.claims?.sub || req.user?.id;
 
       // Check if entry exists and belongs to user
       const existingEntry = await storage.getSoapEntry(entryId);
@@ -8412,15 +8407,7 @@ Please provide suggestions for the missing or incomplete sections.`
   // Get available Bible versions configuration
   app.get('/api/bible/versions', isAuthenticated, async (req: any, res) => {
     try {
-      // Return available Bible translations from database
-      const versions = [
-        { id: 'NIV', name: 'New International Version', language: 'English' },
-        { id: 'KJV', name: 'King James Version', language: 'English' },
-        { id: 'ESV', name: 'English Standard Version', language: 'English' },
-        { id: 'NLT', name: 'New Living Translation', language: 'English' },
-        { id: 'NASB', name: 'New American Standard Bible', language: 'English' },
-        { id: 'MSG', name: 'The Message', language: 'English' }
-      ];
+      const versions = await bibleImportSystem.getAvailableVersions();
       
       // Filter out licensed versions from UI (Phase 3) unless user has admin access
       const userRole = req.session?.user?.role || 'member';

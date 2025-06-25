@@ -81,13 +81,13 @@ export function ChurchProfileManager({ churchId }: ChurchProfileManagerProps) {
   // Fetch church data
   const { data: church, isLoading: churchLoading } = useQuery({
     queryKey: ["church", churchId],
-    queryFn: () => apiRequest('GET', `/api/churches/${churchId}`),
+    queryFn: () => apiRequest(`/api/churches/${churchId}`),
   });
 
   // Fetch church members
   const { data: members = [], isLoading: membersLoading } = useQuery({
     queryKey: ["church-members", churchId],
-    queryFn: () => apiRequest('GET', `/api/churches/${churchId}/members`),
+    queryFn: () => apiRequest(`/api/churches/${churchId}/members`),
   });
 
   // Church profile form
@@ -123,7 +123,10 @@ export function ChurchProfileManager({ churchId }: ChurchProfileManagerProps) {
 
   // Update church profile mutation
   const updateChurchMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('PUT', `/api/churches/${churchId}`, data),
+    mutationFn: (data: any) => apiRequest(`/api/churches/${churchId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
     onSuccess: () => {
       toast({ title: "Church profile updated successfully" });
       queryClient.invalidateQueries({ queryKey: ["church", churchId] });
@@ -136,7 +139,10 @@ export function ChurchProfileManager({ churchId }: ChurchProfileManagerProps) {
   // Update member role mutation
   const updateMemberMutation = useMutation({
     mutationFn: ({ userId, data }: { userId: string; data: any }) => 
-      apiRequest('PUT', `/api/churches/${churchId}/members/${userId}`, data),
+      apiRequest(`/api/churches/${churchId}/members/${userId}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
     onSuccess: () => {
       toast({ title: "Member role updated successfully" });
       queryClient.invalidateQueries({ queryKey: ["church-members", churchId] });
@@ -150,7 +156,9 @@ export function ChurchProfileManager({ churchId }: ChurchProfileManagerProps) {
   // Remove member mutation
   const removeMemberMutation = useMutation({
     mutationFn: (userId: string) => 
-      apiRequest('DELETE', `/api/churches/${churchId}/members/${userId}`),
+      apiRequest(`/api/churches/${churchId}/members/${userId}`, {
+        method: "DELETE",
+      }),
     onSuccess: () => {
       toast({ title: "Member removed successfully" });
       queryClient.invalidateQueries({ queryKey: ["church-members", churchId] });
@@ -165,7 +173,10 @@ export function ChurchProfileManager({ churchId }: ChurchProfileManagerProps) {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("image", file);
-      return apiRequest("POST", "/api/upload/image", formData);
+      return apiRequest("/api/upload/image", {
+        method: "POST",
+        body: formData,
+      });
     },
     onSuccess: (data) => {
       updateChurchMutation.mutate({ logoUrl: data.url });

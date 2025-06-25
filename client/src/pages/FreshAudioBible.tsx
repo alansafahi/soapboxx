@@ -253,7 +253,7 @@ export default function FreshAudioBible() {
         params.append("category", selectedCategory);
       }
       
-      const response = await apiRequest('GET', `/api/bible/verses?${params.toString()}`);
+      const response = await apiRequest(`/api/bible/verses?${params.toString()}`);
       return response;
     }
   });
@@ -263,7 +263,10 @@ export default function FreshAudioBible() {
   // Generate audio routine mutation
   const generateRoutineMutation = useMutation({
     mutationFn: async (routine: { verseIds: number[], voice: string, musicBed: string }) => {
-      return await apiRequest("POST", "/api/audio/routines/bible-integrated", routine);
+      return await apiRequest("/api/audio/routines/bible-integrated", {
+        method: "POST",
+        body: routine
+      });
     },
     onSuccess: (data) => {
       setCurrentRoutine(data);

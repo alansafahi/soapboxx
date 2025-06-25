@@ -1723,7 +1723,7 @@ export class DatabaseStorage implements IStorage {
         const formattedReactions = reactionData.map(r => ({
           type: r.reactionType,
           emoji: r.emoji,
-          count: Number(r.count),
+          count: r.count,
           userReacted: false
         }));
 

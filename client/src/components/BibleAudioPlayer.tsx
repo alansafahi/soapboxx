@@ -39,7 +39,10 @@ export default function BibleAudioPlayer({
   // Generate audio mutation
   const generateAudioMutation = useMutation({
     mutationFn: async ({ text, voice, musicBed }: { text: string; voice: string; musicBed?: string }) => {
-      return await apiRequest("POST", "/api/audio/generate", { text, voice, musicBed });
+      return await apiRequest(`/api/audio/generate`, {
+        method: "POST",
+        body: { text, voice, musicBed }
+      });
     },
   });
 
