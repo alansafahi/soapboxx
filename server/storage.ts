@@ -1838,7 +1838,7 @@ export class DatabaseStorage implements IStorage {
     return unpinnedPost;
   }
 
-  async getPinnedDiscussions(churchId?: number | null): Promise<Discussion[]> {
+  async getPinnedDiscussions(churchId?: number | null, limit: number = 10): Promise<Discussion[]> {
     let query = db
       .select({
         id: discussions.id,
@@ -1895,7 +1895,7 @@ export class DatabaseStorage implements IStorage {
           pinnedAt: discussions.pinnedAt,
           pinnedUntil: discussions.pinnedUntil,
           pinnedBy: discussions.pinnedBy,
-          tags: discussions.tags,
+
           createdAt: discussions.createdAt,
           updatedAt: discussions.updatedAt,
           author: {
