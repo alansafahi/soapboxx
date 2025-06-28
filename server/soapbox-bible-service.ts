@@ -1,7 +1,7 @@
 import { db } from './db.js';
 import { soapboxBible, bibleVerses } from '../shared/schema.js';
 import { eq, and, sql } from 'drizzle-orm';
-import { getVerseFromScriptureAPI } from './scripture-api-service.js';
+import { scriptureApiService } from './scripture-api-service.js';
 import { lookupBibleVerse } from './bible-api.js';
 
 // Top 1000 most popular Bible verses according to biblical research
@@ -72,7 +72,7 @@ class SoapBoxBibleService {
     
     // Tier 2: Try Scripture API (api.bible)
     try {
-      const apiVerse = await getVerseFromScriptureAPI(reference, translation);
+      const apiVerse = await scriptureApiService.lookupVerse(reference, translation);
       if (apiVerse) {
         console.log(`✓ Found via Scripture API: ${reference}`);
         
@@ -211,7 +211,7 @@ class SoapBoxBibleService {
           }
           
           // Get from Scripture API
-          const apiVerse = await getVerseFromScriptureAPI(reference, translation);
+          const apiVerse = await scriptureApiService.lookupVerse(reference, translation);
           if (apiVerse) {
             await db
               .insert(soapboxBible)
