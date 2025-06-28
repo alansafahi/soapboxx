@@ -21,6 +21,7 @@ import { eq, and, or, gte, lte, desc, asc, like, sql, count, ilike, isNotNull, i
 
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
+import { lookupBibleVerse } from "./bible-api.js";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import multer from "multer";
@@ -4323,54 +4324,43 @@ Format your response as JSON with the following structure:
         return res.status(400).json({ message: 'Scripture reference is required' });
       }
 
-      console.log(`[Bible Lookup] Starting lookup for user ${req.user.id}`);
+      console.log(`[Bible Lookup] Starting lookup for user ${req.session.userId}`);
       console.log(`[Bible Lookup] Reference: "${reference}"`);
       console.log(`[Bible Lookup] Requested Version: "${version}"`);
 
-      // STEP 1: Query database directly for verse with specific translation
-      const matchingVerse = await storage.getBibleVerseByReferenceAndTranslation(reference.trim(), version.toUpperCase());
+      // Use our enhanced three-tier fallback system (Scripture API → Local Database → OpenAI)
+      const result = await lookupBibleVerse(reference.trim(), version.toUpperCase());
       
-      if (matchingVerse) {
-        console.log(`[Bible Lookup] Found verse in database: ${matchingVerse.reference} (${matchingVerse.translation})`);
+      if (result) {
+        console.log(`[Bible Lookup] Found verse: ${result.reference} (${result.version})`);
+        console.log(`[Bible Lookup] Source: ${result.source || 'Local Database'}`);
         
         const responseData: any = {
           success: true,
           verse: {
-            reference: matchingVerse.reference,
-            text: matchingVerse.text,
-            version: matchingVerse.translation
+            reference: result.reference,
+            text: result.text,
+            version: result.version
           }
         };
 
+        // Add source attribution for transparency
+        if (result.source) {
+          responseData.source = result.source;
+        }
+
         // Add notice if verse found in different translation than requested
-        if (matchingVerse.translation !== version.toUpperCase()) {
-          responseData.notice = `Verse found in ${matchingVerse.translation} translation (${version.toUpperCase()} not available for this verse)`;
+        if (result.version !== version.toUpperCase()) {
+          responseData.notice = `Verse found in ${result.version} translation (${version.toUpperCase()} not available for this verse)`;
         }
         
         return res.json(responseData);
       }
-      
-      // STEP 2: Try flexible reference matching across all translations
-      const fallbackVerse = await storage.getBibleVerseByReferenceFlexible(reference.trim(), version.toUpperCase());
-      
-      if (fallbackVerse) {
-        console.log(`[Bible Lookup] Found fallback verse: ${fallbackVerse.reference} (${fallbackVerse.translation})`);
-        
-        return res.json({
-          success: true,
-          verse: {
-            reference: fallbackVerse.reference,
-            text: fallbackVerse.text,
-            version: fallbackVerse.translation
-          },
-          notice: `Verse found in ${fallbackVerse.translation} translation (${version.toUpperCase()} not available for this verse)`
-        });
-      }
 
-      // STEP 3: If not found, provide helpful error message
+      // If no verse found through all fallback methods
       console.log(`[Bible Lookup] No verse found for: "${reference}" with version ${version}`);
       res.status(404).json({ 
-        message: `Verse not found: ${reference}. Please enter the verse text manually in the field below.`,
+        message: `"${reference}" not found. Please enter the verse text manually below.`,
         suggestion: "You can copy and paste the verse text from your preferred Bible translation."
       });
     } catch (error) {
