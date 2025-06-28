@@ -8744,17 +8744,66 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // Source Attribution page data
+  // Source Attribution page data - Limited to 6 public domain/freely available versions
   app.get('/api/bible/attribution', async (req: any, res) => {
     try {
-      const versions = await bibleImportSystem.getAvailableVersions();
+      const limitedVersions = [
+        {
+          code: 'KJV',
+          name: 'King James Version',
+          attribution: 'King James Version (Authorized Version) - Public Domain',
+          license: 'Public Domain',
+          source: 'public_domain',
+          phase: 1
+        },
+        {
+          code: 'KJVA',
+          name: "King James Version with Strong's",
+          attribution: "King James Version with Strong's numbering - Fully Available",
+          license: 'Public Domain',
+          source: 'public_domain',
+          phase: 1
+        },
+        {
+          code: 'WEB',
+          name: 'World English Bible',
+          attribution: 'World English Bible - Modern public-domain revision of ASV',
+          license: 'Public Domain',
+          source: 'public_domain',
+          phase: 1
+        },
+        {
+          code: 'ASV',
+          name: 'American Standard Version',
+          attribution: 'American Standard Version (1901) - Public Domain',
+          license: 'Public Domain',
+          source: 'public_domain',
+          phase: 1
+        },
+        {
+          code: 'CEV',
+          name: 'Contemporary English Version',
+          attribution: 'Contemporary English Version - Freely supported for non-commercial use',
+          license: 'Freely Available',
+          source: 'free_open',
+          phase: 2
+        },
+        {
+          code: 'GNT',
+          name: 'Good News Translation',
+          attribution: 'Good News Translation - Freely supported for non-commercial use',
+          license: 'Freely Available',
+          source: 'free_open',
+          phase: 2
+        }
+      ];
       
       const attributionData = {
-        publicDomain: versions.filter(v => v.source === 'public_domain'),
-        freeOpen: versions.filter(v => v.source === 'free_open'),
-        licensed: versions.filter(v => v.source === 'licensed'),
+        publicDomain: limitedVersions.filter(v => v.source === 'public_domain'),
+        freeOpen: limitedVersions.filter(v => v.source === 'free_open'),
+        licensed: [], // No licensed versions in our limited set
         lastUpdated: new Date().toISOString(),
-        disclaimer: 'Bible text content is used in accordance with publisher licensing terms and fair use provisions.'
+        disclaimer: 'Bible text content is used in accordance with publisher licensing terms and fair use provisions. SoapBox Super App uses only public domain Bible translations and freely available versions for non-commercial spiritual use.'
       };
       
       res.json(attributionData);

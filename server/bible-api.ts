@@ -4,15 +4,14 @@ import { eq, and, like, ilike, or, sql } from 'drizzle-orm';
 import OpenAI from "openai";
 import { scriptureApiService } from "./scripture-api-service.js";
 
-// Basic Bible versions configuration for OpenAI fallback
+// Bible versions configuration - Limited to 6 public domain/freely available versions
 const BIBLE_VERSIONS = [
-  { code: 'NIV', name: 'New International Version', phase: 3, useOpenAI: true },
-  { code: 'ESV', name: 'English Standard Version', phase: 3, useOpenAI: true },
-  { code: 'NLT', name: 'New Living Translation', phase: 3, useOpenAI: true },
-  { code: 'NASB', name: 'New American Standard Bible', phase: 3, useOpenAI: true },
   { code: 'KJV', name: 'King James Version', phase: 1, useOpenAI: false },
+  { code: 'KJVA', name: "King James Version with Strong's", phase: 1, useOpenAI: false },
+  { code: 'WEB', name: 'World English Bible', phase: 1, useOpenAI: false },
   { code: 'ASV', name: 'American Standard Version', phase: 1, useOpenAI: false },
-  { code: 'WEB', name: 'World English Bible', phase: 1, useOpenAI: false }
+  { code: 'CEV', name: 'Contemporary English Version', phase: 2, useOpenAI: false },
+  { code: 'GNT', name: 'Good News Translation', phase: 2, useOpenAI: false }
 ];
 
 const openai = new OpenAI({ 
