@@ -35,14 +35,14 @@ function cleanVerseText(text: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
-    // Remove verse numbers at start (1, 2, 3, etc.)
-    .replace(/^\d+\s+/, '')
-    // Remove verse numbers in brackets [1], [2], etc.
-    .replace(/\[\d+\]/g, '')
-    // Remove verse numbers in parentheses (1), (2), etc.
-    .replace(/\(\d+\)/g, '')
-    // Remove verse numbers with periods 1., 2., etc.
-    .replace(/^\d+\.\s+/, '')
+    // Remove verse numbers at start (1, 2, 3, 2A, 2B etc.)
+    .replace(/^\d+[A-Za-z]?\s+/, '')
+    // Remove verse numbers in brackets [1], [2], [2A], etc.
+    .replace(/\[\d+[A-Za-z]?\]/g, '')
+    // Remove verse numbers in parentheses (1), (2), (2A), etc.
+    .replace(/\(\d+[A-Za-z]?\)/g, '')
+    // Remove verse numbers with periods 1., 2., 2A., etc.
+    .replace(/^\d+[A-Za-z]?\.\s+/, '')
     // Remove multiple spaces
     .replace(/\s+/g, ' ')
     // Remove leading/trailing whitespace

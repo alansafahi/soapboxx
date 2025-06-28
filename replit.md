@@ -146,7 +146,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - UNIVERSAL HTML CLEANING: Implemented cleanVerseText function across scripture-api-service.ts and bible-api.ts for consistent verse formatting
   - COMPREHENSIVE TAG REMOVAL: Removes all HTML tags, entities (&amp;, &lt;, etc.), verse numbers, brackets, and embedded formatting
   - ALL DATA SOURCES ENHANCED: HTML cleaning applied to Scripture API results, local database lookups, OpenAI fallback, and search results
-  - VERSE NUMBER ELIMINATION: Automatically strips verse numbers in multiple formats (1., [1], (1), etc.) for clean reading experience
+  - ALPHANUMERIC VERSE NUMBER ELIMINATION: Enhanced regex patterns to remove verse numbers with letters (1A, 2A, 2B, etc.) for complete verse number removal
+  - VERSE NUMBER FORMATS SUPPORTED: Automatically strips verse numbers in all formats (1., [1], (1), 2A, [2B], etc.) for clean reading experience
   - AUTHENTIC TEXT PRESERVED: Maintains authentic Bible content while removing technical formatting and embedded verse numbering
   - PRODUCTION READY: Clean verse text now displayed consistently across all Bible features including SOAP entries, recommendations, and searches
 - June 28, 2025: AMERICAN BIBLE SOCIETY SCRIPTURE API INTEGRATION COMPLETED - Successfully integrated scripture.api.bible as primary Bible verse source with comprehensive three-tier fallback system
