@@ -408,7 +408,10 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
         }
       }
       
-      enhancedResults.push(verse);
+      enhancedResults.push({
+        ...verse,
+        text: cleanVerseText(verse.text || '')
+      });
     }
     
     return enhancedResults;
@@ -469,7 +472,10 @@ export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<
         }
       }
       
-      return verse;
+      return {
+        ...verse,
+        text: cleanVerseText(verse.text || '')
+      };
     }
 
     return null;
