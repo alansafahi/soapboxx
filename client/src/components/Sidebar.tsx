@@ -95,6 +95,8 @@ export default function Sidebar() {
 
   // Get user role data - use direct user session role instead of API call
   const userRole = user?.role;
+  
+
 
   // Get unread message count for notification badge
   const { data: unreadCount = 0 } = useQuery<number>({
@@ -160,11 +162,14 @@ export default function Sidebar() {
     }
   ];
 
-  // Filter groups based on user role
+  // Filter groups based on user role - Wait for user data to load before filtering
   const visibleGroups = navigationGroups.map(group => ({
     ...group,
     items: group.items.filter(item => {
       if (!item.roles) return true;
+      
+      // If user data is still loading, show all items to prevent flickering
+      if (!user) return true;
       
       const hasAccess = item.roles.some(role => 
         // Check if user has the role directly
@@ -295,8 +300,7 @@ export default function Sidebar() {
           // Expanded Navigation - Full Groups
           visibleGroups.map((group) => {
             const isExpanded = expandedGroups.has(group.label);
-            
-
+            console.log(`Group ${group.label}: isExpanded = ${isExpanded}`);
             
             return (
               <div key={group.label}>
