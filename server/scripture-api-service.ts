@@ -239,6 +239,27 @@ export class ScriptureAPIService {
     const randomReference = popularVerses[Math.floor(Math.random() * popularVerses.length)];
     return this.fetchVerseFromAPI(randomReference, translation);
   }
+
+  /**
+   * Legacy method name for compatibility with existing routes
+   */
+  async lookupVerse(reference: string, translation: string = 'NIV'): Promise<BibleVerseResult | null> {
+    return this.fetchVerseFromAPI(reference, translation);
+  }
+
+  /**
+   * Legacy method name for compatibility with existing routes
+   */
+  async searchVersesByText(query: string, translation: string = 'NIV', limit: number = 20): Promise<BibleVerseResult[]> {
+    return this.searchVerses(query, translation, limit);
+  }
+
+  /**
+   * Get available translations from Scripture API
+   */
+  getAvailableTranslations(): string[] {
+    return Object.keys(this.translationMap);
+  }
 }
 
 export const scriptureApiService = new ScriptureAPIService();

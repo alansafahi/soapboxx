@@ -242,7 +242,7 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
     
     // STEP 1: Try Scripture API first (American Bible Society - authentic source)
     try {
-      const scriptureResult = await scriptureApiService.lookupVerse(reference, preferredVersion);
+      const scriptureResult = await scriptureApiService.fetchVerseFromAPI(reference, preferredVersion);
       if (scriptureResult) {
         console.log(`[Scripture API] ✅ Found ${reference} from American Bible Society`);
         return scriptureResult;
@@ -270,7 +270,7 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
       if (isPlaceholder) {
         console.log(`[Bible API] 🔄 Placeholder detected, trying Scripture API for authentic text`);
         try {
-          const authenticVerse = await scriptureApiService.lookupVerse(reference, preferredVersion);
+          const authenticVerse = await scriptureApiService.fetchVerseFromAPI(reference, preferredVersion);
           if (authenticVerse) {
             console.log(`[Scripture API] ✅ Replaced placeholder with authentic text`);
             return authenticVerse;
@@ -311,7 +311,7 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
     
     // STEP 1: Try Scripture API first for fresh, authentic results
     try {
-      const scriptureResults = await scriptureApiService.searchVersesByText(query, translation, limit);
+      const scriptureResults = await scriptureApiService.searchVerses(query, translation, limit);
       if (scriptureResults && scriptureResults.length > 0) {
         console.log(`[Scripture API] ✅ Found ${scriptureResults.length} verses from American Bible Society`);
         // Convert to expected format
@@ -363,7 +363,7 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
       if (isPlaceholder) {
         // Try to get authentic text from Scripture API
         try {
-          const authenticVerse = await scriptureApiService.lookupVerse(verse.reference || '', translation);
+          const authenticVerse = await scriptureApiService.fetchVerseFromAPI(verse.reference || '', translation);
           if (authenticVerse) {
             enhancedResults.push({
               ...verse,
