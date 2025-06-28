@@ -2,7 +2,17 @@ import { db } from './db';
 import { bibleVerses } from '@shared/schema';
 import { eq, and, like, ilike, or, sql } from 'drizzle-orm';
 import OpenAI from "openai";
-import { BIBLE_VERSIONS } from './bible-import-system.js';
+
+// Basic Bible versions configuration for OpenAI fallback
+const BIBLE_VERSIONS = [
+  { code: 'NIV', name: 'New International Version', phase: 3, useOpenAI: true },
+  { code: 'ESV', name: 'English Standard Version', phase: 3, useOpenAI: true },
+  { code: 'NLT', name: 'New Living Translation', phase: 3, useOpenAI: true },
+  { code: 'NASB', name: 'New American Standard Bible', phase: 3, useOpenAI: true },
+  { code: 'KJV', name: 'King James Version', phase: 1, useOpenAI: false },
+  { code: 'ASV', name: 'American Standard Version', phase: 1, useOpenAI: false },
+  { code: 'WEB', name: 'World English Bible', phase: 1, useOpenAI: false }
+];
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 

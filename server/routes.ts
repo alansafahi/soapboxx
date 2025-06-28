@@ -289,7 +289,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
       
-      const verses = await storage.searchBibleVerses(query as string, translation as string, parseInt(limit as string));
+      let verses = await storage.searchBibleVerses(query as string, translation as string, parseInt(limit as string));
+      
+      // If no verses found and query looks like a Bible reference, try OpenAI fallback
+      const isReference = query.toString().match(/^[1-3]?\s*[A-Za-z]+\s*\d+:\d+/);
+      console.log(`🔍 Checking fallback conditions - verses: ${verses.length}, isReference: ${!!isReference}, query: "${query}"`);
+      
+      if (verses.length === 0 && isReference) {
+        console.log(`🤖 No verses found in database for "${query}", trying OpenAI fallback`);
+        
+        try {
+          const { lookupBibleVerse } = await import('./bible-api.js');
+          console.log(`📚 Successfully imported lookupBibleVerse function`);
+          
+          const fallbackVerse = await lookupBibleVerse(query.toString(), translation as string);
+          console.log(`🔍 OpenAI response:`, fallbackVerse);
+          
+          if (fallbackVerse && fallbackVerse.reference && fallbackVerse.text) {
+            console.log(`✅ OpenAI provided verse for "${query}": ${fallbackVerse.text}`);
+            verses = [{
+              id: `ai-${Date.now()}`,
+              reference: fallbackVerse.reference,
+              text: fallbackVerse.text,
+              translation: fallbackVerse.version,
+              book: fallbackVerse.reference.split(' ')[0],
+              chapter: 1,
+              verse: 1,
+              topic_tags: ["bible", "scripture"],
+              category: "AI Generated",
+              popularity_score: 1,
+              ai_summary: null,
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }];
+          } else {
+            console.log(`❌ OpenAI did not return a valid verse for "${query}"`);
+          }
+        } catch (aiError) {
+          console.error('❌ OpenAI fallback failed:', aiError);
+        }
+      }
       
       console.log(`📚 Public Bible search "${query}" in ${translation}: ${verses.length} verses found`);
       res.json({
