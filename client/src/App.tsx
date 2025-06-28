@@ -46,6 +46,7 @@ const EngagementAnalyticsPage = lazy(() => import("@/pages/EngagementAnalyticsPa
 const AIContentDemoPage = lazy(() => import("@/pages/PastoralContentDemoPage"));
 const PersonalizedGuidancePage = lazy(() => import("@/pages/PersonalizedGuidance"));
 const SourceAttributionPage = lazy(() => import("@/pages/SourceAttribution"));
+const SocialFeedPage = lazy(() => import("@/pages/social-feed"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -123,6 +124,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/video-library" component={VideoLibrary} />
                                     <ProtectedRoute path="/community" component={Community} />
                                     <ProtectedRoute path="/discussions" component={Community} />
+                                    <ProtectedRoute path="/social-feed" component={SocialFeedPage} />
                                     <ProtectedRoute path="/churches" component={Churches} />
                                     <ProtectedRoute path="/church-claiming" component={ChurchClaiming} />
                                     <ProtectedRoute path="/events" component={Events} />
