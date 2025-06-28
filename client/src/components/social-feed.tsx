@@ -155,9 +155,18 @@ export default function SocialFeed() {
   }, []);
 
   // Fetch feed posts
-  const { data: feedPosts = [], isLoading } = useQuery({
+  const { data: feedPosts = [], isLoading, error } = useQuery({
     queryKey: ['/api/feed'],
   });
+
+  // Debug logging for feed posts
+  useEffect(() => {
+    console.log('Feed posts loaded:', feedPosts);
+    console.log('Feed loading state:', isLoading);
+    if (error) {
+      console.log('Feed error:', error);
+    }
+  }, [feedPosts, isLoading, error]);
 
   // Search verses
   const { data: verseSearchData, isLoading: isSearchingVerses } = useQuery<{verses: Array<{id: string; reference: string; text: string}>}>({
@@ -1197,21 +1206,33 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       console.log('MessageCircle clicked for post:', post.id);
                       console.log('Current expandedComments:', expandedComments);
+                      
+                      const isExpanded = expandedComments.has(post.id);
                       const newExpanded = new Set(expandedComments);
-                      if (expandedComments.has(post.id)) {
+                      
+                      if (isExpanded) {
                         console.log('Collapsing comments for post:', post.id);
                         newExpanded.delete(post.id);
                       } else {
                         console.log('Expanding comments for post:', post.id);
                         newExpanded.add(post.id);
                       }
+                      
                       console.log('New expandedComments:', newExpanded);
                       setExpandedComments(newExpanded);
+                      
+                      // Visual feedback
+                      toast({
+                        title: isExpanded ? "Comments Collapsed" : "Comments Expanded",
+                        description: `Post ${post.id} comments ${isExpanded ? 'hidden' : 'shown'}`,
+                      });
                     }}
-                    className="text-gray-500 hover:text-blue-500"
+                    className={`${expandedComments.has(post.id) ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-blue-500 hover:bg-blue-50`}
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     {post.commentCount}
