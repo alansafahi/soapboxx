@@ -70,7 +70,7 @@ export default function TopHeader() {
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: number) => 
-      apiRequest(`/api/notifications/${notificationId}/read`, { method: "POST" }),
+      apiRequest("POST", `/api/notifications/${notificationId}/read`),
     onMutate: (notificationId) => {
       // Immediate local state update for instant UI feedback
       setLocalNotifications(prev => {
@@ -98,7 +98,7 @@ export default function TopHeader() {
   // Mark all notifications as read mutation
   const markAllAsReadMutation = useMutation({
     mutationFn: () => 
-      apiRequest("/api/notifications/mark-all-read", { method: "POST" }),
+      apiRequest("POST", "/api/notifications/mark-all-read"),
     onMutate: () => {
       // Immediate local state update for instant UI feedback
       setLocalNotifications(prev => {

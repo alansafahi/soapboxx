@@ -6753,9 +6753,9 @@ Return JSON with this exact structure:
     try {
       console.log('S.O.A.P. POST request received');
       console.log('Request body:', JSON.stringify(req.body, null, 2));
-      console.log('User object:', req.user);
+      console.log('Session userId:', req.session.userId);
       
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       console.log('Extracted userId:', userId);
       
       if (!userId) {
@@ -6885,7 +6885,7 @@ Return JSON with this exact structure:
   app.put('/api/soap/:id', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
 
       // Check if entry exists and belongs to user
       const existingEntry = await storage.getSoapEntry(entryId);
@@ -6904,7 +6904,7 @@ Return JSON with this exact structure:
   app.delete('/api/soap/:id', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
 
       // Check if entry exists and belongs to user
       const existingEntry = await storage.getSoapEntry(entryId);
