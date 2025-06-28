@@ -846,6 +846,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
+      
+      // First check if user has a session role (soapbox_owner, system_admin, etc.)
+      if (req.session.user && req.session.user.role) {
+        const sessionRole = req.session.user.role;
+        
+        // For platform-level roles, return them directly
+        if (['soapbox_owner', 'system_admin', 'support_agent'].includes(sessionRole)) {
+          return res.json({ 
+            role: sessionRole,
+            churchId: null 
+          });
+        }
+      }
+      
+      // For regular users, check church relationships
       const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch) {
