@@ -68,26 +68,7 @@ interface BibleVerseResponse {
   version: string;
 }
 
-// Complete Bible translation mapping with full names
-const BIBLE_VERSIONS = {
-  'KJV': 'King James Version',
-  'NIV': 'New International Version', 
-  'ESV': 'English Standard Version',
-  'NLT': 'New Living Translation',
-  'NASB': 'New American Standard Bible',
-  'CSB': 'Christian Standard Bible',
-  'MSG': 'The Message',
-  'AMP': 'Amplified Bible',
-  'CEV': 'Contemporary English Version',
-  'NET': 'New English Translation',
-  'CEB': 'Common English Bible',
-  'GNT': 'Good News Translation',
-  'NKJV': 'New King James Version',
-  'RSV': 'Revised Standard Version',
-  'NRSV': 'New Revised Standard Version',
-  'HCSB': 'Holman Christian Standard Bible',
-  'NCV': 'New Century Version'
-};
+
 
 // Database-first Bible verse lookup with zero external dependencies
 async function lookupVerseFromDatabase(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
