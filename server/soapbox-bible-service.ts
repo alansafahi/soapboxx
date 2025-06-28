@@ -77,7 +77,7 @@ class SoapBoxBibleService {
         console.log(`✓ Found via Scripture API: ${reference}`);
         
         // Cache the verse for future use
-        await this.cacheVerse(apiVerse, reference);
+        await this.cacheVerse(apiVerse, reference, translation);
         
         return {
           id: 0, // API verses don't have database IDs
@@ -86,7 +86,7 @@ class SoapBoxBibleService {
           chapter: this.extractChapter(reference),
           verse: this.extractVerse(reference),
           text: apiVerse.text,
-          translation: apiVerse.version,
+          translation: translation,
           source: 'American Bible Society'
         };
       }
@@ -154,7 +154,7 @@ class SoapBoxBibleService {
   /**
    * Cache a verse in SoapBox Bible for future use
    */
-  private async cacheVerse(apiVerse: any, reference: string): Promise<void> {
+  private async cacheVerse(apiVerse: any, reference: string, translation: string): Promise<void> {
     try {
       // Check if this verse is in our top 1000 list
       const popularityRank = TOP_1000_VERSES.indexOf(reference) + 1;
@@ -171,7 +171,7 @@ class SoapBoxBibleService {
           chapter: this.extractChapter(reference),
           verse: this.extractVerse(reference),
           text: apiVerse.text,
-          translation: apiVerse.version,
+          translation: translation,
           popularityRank,
           source: 'American Bible Society',
           importedAt: new Date(),
