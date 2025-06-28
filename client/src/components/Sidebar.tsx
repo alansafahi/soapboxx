@@ -300,7 +300,6 @@ export default function Sidebar() {
           // Expanded Navigation - Full Groups
           visibleGroups.map((group) => {
             const isExpanded = expandedGroups.has(group.label);
-            console.log(`Group ${group.label}: isExpanded = ${isExpanded}`);
             
             return (
               <div key={group.label}>
