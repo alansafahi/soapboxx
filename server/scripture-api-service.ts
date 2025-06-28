@@ -47,8 +47,13 @@ export class ScriptureAPIService {
     'NASB': '68e8b8273301c819-01', // New American Standard Bible
     'KJV': 'de4e12af7f28f599-01', // King James Version
     'CSB': '93b0cfce-70a3-4ba3-85b8-e8d5ff1d7c4d', // Christian Standard Bible
+    'NET': '06125adad2d5898a-01', // New English Translation
+    'AMP': '65eec8e0b60e656b-01', // Amplified Bible
     'MSG': '13c3066b-53c1-4ec5-8b28-3634e2f3a164', // The Message (fallback to NLT)
-    'AMP': '68e8b8273301c819-01', // Amplified Bible (fallback to NASB)
+    'RSV': 'dc84fb8a-8fd9-411c-b5e5-b6859ce36ae5', // Revised Standard Version
+    'NRSV': '81b5726c-8b7e-4de6-9ca9-eb3e7b0a1de7', // New Revised Standard Version
+    'ASV': '7142879509583d59-01', // American Standard Version
+    'WEB': '9879dbb7cfe39e4d-01', // World English Bible
   };
 
   constructor() {
@@ -148,6 +153,8 @@ export class ScriptureAPIService {
 
       const bibleId = this.translationMap[translation.toUpperCase()] || this.translationMap['NIV'];
       const bookId = this.getBookId(parsed.book);
+      
+      console.log(`Version selection debug: translation='${translation}', mapped to bibleId='${bibleId}'`);
       
       // Construct verse ID for Scripture API
       const verseId = `${bookId}.${parsed.chapter}.${parsed.verse}`;

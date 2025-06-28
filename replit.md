@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 28, 2025: BIBLE VERSION SELECTION COMPLETELY FIXED - Successfully resolved critical issue where all Bible translations returned identical NIV text regardless of user selection
+  - MISSING TRANSLATION IDS ADDED: Added correct Scripture API Bible IDs for NET (New English Translation) and AMP (Amplified Bible) 
+  - VERSION MAPPING CORRECTED: Fixed translation mapping where NET was missing and AMP was incorrectly using NASB fallback
+  - AUTHENTIC TRANSLATION DELIVERY: Users now receive authentic text differences when selecting ESV, KJV, NASB, NET, AMP, etc.
+  - DEBUG LOGGING ENHANCED: Added version selection debugging to track translation parameter mapping
+  - COMPREHENSIVE TRANSLATION SUPPORT: Added RSV, NRSV, ASV, WEB with correct Scripture API Bible IDs
+  - PRODUCTION VERIFIED: Bible version selection now works correctly with distinct text for each translation choice
 - June 28, 2025: HTML CLEANUP SYSTEM COMPLETELY IMPLEMENTED - Successfully enhanced all Bible verse sources with comprehensive HTML tag and verse number removal for clean text display
   - UNIVERSAL HTML CLEANING: Implemented cleanVerseText function across scripture-api-service.ts and bible-api.ts for consistent verse formatting
   - COMPREHENSIVE TAG REMOVAL: Removes all HTML tags, entities (&amp;, &lt;, etc.), verse numbers, brackets, and embedded formatting
