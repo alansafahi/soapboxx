@@ -67,6 +67,7 @@ interface BibleVerseResponse {
   reference: string;
   text: string;
   version: string;
+  source?: string;
 }
 
 
