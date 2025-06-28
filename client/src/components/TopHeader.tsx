@@ -240,13 +240,18 @@ export default function TopHeader() {
             </Link>
             
             {/* Admin Portal Section - Only show for admin users */}
-            {userRole && (userRole as any)?.roles && (
-              (userRole as any).roles.includes('admin') || 
-              (userRole as any).roles.includes('church-admin') || 
-              (userRole as any).roles.includes('system-admin') || 
-              (userRole as any).roles.includes('super-admin') || 
-              (userRole as any).roles.includes('pastor') || 
-              (userRole as any).roles.includes('lead-pastor')
+            {userRole && (
+              // Handle both string roles and object with roles array
+              (typeof userRole === 'string' && ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'].includes(userRole)) ||
+              ((userRole as any)?.roles && (
+                (userRole as any).roles.includes('admin') || 
+                (userRole as any).roles.includes('church-admin') || 
+                (userRole as any).roles.includes('system-admin') || 
+                (userRole as any).roles.includes('super-admin') || 
+                (userRole as any).roles.includes('pastor') || 
+                (userRole as any).roles.includes('lead-pastor') ||
+                (userRole as any).roles.includes('soapbox_owner')
+              ))
             ) && (
               <>
                 <DropdownMenuSeparator />
@@ -275,6 +280,31 @@ export default function TopHeader() {
                   <DropdownMenuItem className="cursor-pointer">
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Engagement Analytics
+                  </DropdownMenuItem>
+                </Link>
+              </>
+            )}
+            
+            {/* SoapBox Portal Section - Only show for soapbox_owner */}
+            {userRole && (
+              (typeof userRole === 'string' && userRole === 'soapbox_owner') ||
+              ((userRole as any)?.roles && (userRole as any).roles.includes('soapbox_owner'))
+            ) && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  SoapBox Portal
+                </div>
+                <Link href="/admin">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Church Management
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/admin-enhanced">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Platform Analytics
                   </DropdownMenuItem>
                 </Link>
               </>
