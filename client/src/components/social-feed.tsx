@@ -1209,33 +1209,27 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('MessageCircle clicked for post:', post.id);
-                      console.log('Current expandedComments size:', expandedComments.size);
-                      console.log('Current expandedComments has post:', expandedComments.has(post.id));
-                      console.log('Current expandedComments array:', Array.from(expandedComments));
-                      
                       const isExpanded = expandedComments.has(post.id);
+                      console.log(`Comments ${isExpanded ? 'collapsing' : 'expanding'} for post ${post.id}`);
                       
                       // Create new Set and force React re-render
                       setExpandedComments(prev => {
                         const newSet = new Set(prev);
                         if (isExpanded) {
-                          console.log('Collapsing comments for post:', post.id);
                           newSet.delete(post.id);
                         } else {
-                          console.log('Expanding comments for post:', post.id);
                           newSet.add(post.id);
                         }
-                        console.log('New expandedComments size:', newSet.size);
-                        console.log('New expandedComments array:', Array.from(newSet));
                         return newSet;
                       });
                       
-                      // Visual feedback
-                      toast({
-                        title: isExpanded ? "Comments Collapsed" : "Comments Expanded",
-                        description: `Post ${post.id} comments ${isExpanded ? 'hidden' : 'shown'}`,
-                      });
+                      // Simple visual feedback
+                      if (!isExpanded) {
+                        toast({
+                          title: "Comments Expanded",
+                          description: `Showing comments section`,
+                        });
+                      }
                     }}
                     className={`${expandedComments.has(post.id) ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-blue-500 hover:bg-blue-50`}
                   >
