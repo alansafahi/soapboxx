@@ -160,10 +160,12 @@ export default function SocialFeed() {
   });
 
   // Search verses
-  const { data: verseSearchResults, isLoading: isSearchingVerses } = useQuery<Array<{id: string; reference: string; text: string}>>({
-    queryKey: ['/api/bible-verses/search', verseQuery],
+  const { data: verseSearchData, isLoading: isSearchingVerses } = useQuery<{verses: Array<{id: string; reference: string; text: string}>}>({
+    queryKey: ['/api/bible/search', verseQuery],
     enabled: verseQuery.length >= 2,
   });
+  
+  const verseSearchResults = verseSearchData?.verses || [];
 
   // Fetch user's SOAP entries
   const { data: soapEntries = [] } = useQuery({
