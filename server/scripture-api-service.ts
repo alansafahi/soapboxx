@@ -119,6 +119,15 @@ export class ScriptureApiService {
     return data.data;
   }
 
+  private cleanVerseText(text: string): string {
+    if (!text) return text;
+    
+    // Remove verse numbers at the beginning of the text
+    // Pattern matches: digit(s) followed by optional non-letter characters, then a letter
+    // Examples: "14Therefore" -> "Therefore", "1 In" -> "In", "2:1 And" -> "And"
+    return text.replace(/^\d+[^a-zA-Z]*(?=[a-zA-Z])/, '').trim();
+  }
+
   /**
    * Get available Bible translations
    */
@@ -327,11 +336,14 @@ export class ScriptureApiService {
       const verse = await this.getVerse(bibleId, verseId);
       
       if (verse) {
-        // Clean up the content (remove HTML tags and extra whitespace)
-        const cleanText = verse.content
+        // Clean up the content (remove HTML tags, verse numbers, and extra whitespace)
+        let cleanText = verse.content
           .replace(/<[^>]*>/g, '') // Remove HTML tags
           .replace(/\s+/g, ' ')    // Normalize whitespace
           .trim();
+        
+        // Remove verse numbers from the beginning of the text
+        cleanText = this.cleanVerseText(cleanText);
 
         return {
           reference: verse.reference,
@@ -369,12 +381,23 @@ export class ScriptureApiService {
       const searchResult = await this.searchVerses(bibleId, query, limit);
       
       if (searchResult && searchResult.verses) {
-        return searchResult.verses.map(verse => ({
-          reference: verse.reference,
-          text: verse.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(),
-          version: translation,
-          source: 'American Bible Society'
-        }));
+        return searchResult.verses.map(verse => {
+          // Clean up the content (remove HTML tags, verse numbers, and extra whitespace)
+          let cleanText = verse.content
+            .replace(/<[^>]*>/g, '') // Remove HTML tags
+            .replace(/\s+/g, ' ')    // Normalize whitespace
+            .trim();
+          
+          // Remove verse numbers from the beginning of the text
+          cleanText = this.cleanVerseText(cleanText);
+
+          return {
+            reference: verse.reference,
+            text: cleanText,
+            version: translation,
+            source: 'American Bible Society'
+          };
+        });
       }
 
       return [];
