@@ -57,12 +57,21 @@ export class ScriptureAPIService {
   }
 
   /**
-   * Clean verse text by removing embedded verse numbers and formatting
+   * Clean verse text by removing HTML tags, embedded verse numbers and formatting
    */
   private cleanVerseText(text: string): string {
     if (!text) return '';
     
     return text
+      // Remove all HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Remove HTML entities
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, ' ')
       // Remove verse numbers at start (1, 2, 3, etc.)
       .replace(/^\d+\s+/, '')
       // Remove verse numbers in brackets [1], [2], etc.

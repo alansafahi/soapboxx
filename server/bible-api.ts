@@ -19,6 +19,36 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY 
 });
 
+/**
+ * Clean verse text by removing HTML tags, embedded verse numbers and formatting
+ */
+function cleanVerseText(text: string): string {
+  if (!text) return '';
+  
+  return text
+    // Remove all HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Remove HTML entities
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    // Remove verse numbers at start (1, 2, 3, etc.)
+    .replace(/^\d+\s+/, '')
+    // Remove verse numbers in brackets [1], [2], etc.
+    .replace(/\[\d+\]/g, '')
+    // Remove verse numbers in parentheses (1), (2), etc.
+    .replace(/\(\d+\)/g, '')
+    // Remove verse numbers with periods 1., 2., etc.
+    .replace(/^\d+\.\s+/, '')
+    // Remove multiple spaces
+    .replace(/\s+/g, ' ')
+    // Remove leading/trailing whitespace
+    .trim();
+}
+
 // OpenAI fallback for missing verses
 async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
@@ -51,7 +81,7 @@ async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'):
       console.log(`[Bible AI] Successfully retrieved ${reference} from OpenAI`);
       return {
         reference: reference,
-        text: verseText,
+        text: cleanVerseText(verseText),
         version: version
       };
     }
@@ -130,7 +160,7 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
       
       return {
         reference: verse.reference,
-        text: verse.text || '',
+        text: cleanVerseText(verse.text || ''),
         version: verse.translation || ''
       };
     }
@@ -159,7 +189,7 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
         console.log(`[Bible DB] Found flexible match: ${verse.reference} (${verse.translation})`);
         return {
           reference: verse.reference,
-          text: verse.text,
+          text: cleanVerseText(verse.text || ''),
           version: verse.translation
         };
       }
