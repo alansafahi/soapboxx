@@ -162,10 +162,17 @@ export default function Sidebar() {
     }
   ];
 
+  // Debug logging for role filtering
+  console.log('Sidebar Debug:', {
+    user: user,
+    userRole: userRole,
+    hasUser: !!user,
+    actualRole: user?.role
+  });
+
   // Filter groups based on user role - Wait for user data to load before filtering
-  const visibleGroups = navigationGroups.map(group => ({
-    ...group,
-    items: group.items.filter(item => {
+  const visibleGroups = navigationGroups.map(group => {
+    const filteredItems = group.items.filter(item => {
       if (!item.roles) return true;
       
       // If user data is still loading, show all items to prevent flickering
@@ -178,9 +185,35 @@ export default function Sidebar() {
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
       
+      // Debug specific admin items
+      if (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL') {
+        console.log(`Sidebar Item Debug - ${group.label}:`, {
+          itemLabel: item.label,
+          itemRoles: item.roles,
+          userRole: user?.role,
+          hasAccess: hasAccess
+        });
+      }
+      
       return hasAccess;
-    })
-  })).filter(group => {
+    });
+
+    const result = {
+      ...group,
+      items: filteredItems
+    };
+
+    // Debug group results
+    if (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL') {
+      console.log(`Sidebar Group Debug - ${group.label}:`, {
+        originalItems: group.items.length,
+        filteredItems: filteredItems.length,
+        items: filteredItems.map(item => item.label)
+      });
+    }
+
+    return result;
+  }).filter(group => {
     // Don't filter out empty groups during initial load when user is null
     if (!user) return true;
     
@@ -204,9 +237,8 @@ export default function Sidebar() {
     window.location.href = '/login';
   };
 
-  if (!user) {
-    return null;
-  }
+  // Don't hide sidebar during loading - let the filtering logic handle user permissions
+  // The visibleGroups already handles the null user case properly
 
   return (
     <div className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'} overflow-hidden`}>
