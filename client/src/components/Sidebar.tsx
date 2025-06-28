@@ -93,11 +93,12 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Get user role data
-  const { data: userRole } = useQuery({
-    queryKey: ["/api/auth/user-role"],
-    enabled: !!user,
-  });
+  // Get user role data - use direct user session role instead of API call
+  const userRole = user?.role;
+  
+  // Debug logging for role detection
+  console.log('User data:', user);
+  console.log('User role:', userRole);
 
   // Get unread message count for notification badge
   const { data: unreadCount = 0 } = useQuery<number>({
@@ -170,18 +171,19 @@ export default function Sidebar() {
       if (!item.roles) return true;
       
       const hasAccess = item.roles.some(role => 
-        // Check if user has the role directly or in roles array
+        // Check if user has the role directly
         user?.role === role || 
-        (userRole as any)?.role === role ||
-        (userRole as any)?.roles?.includes(role) || 
-        (userRole as any)?.roles?.includes('super-admin') ||
+        userRole === role ||
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
+      
+      console.log(`Checking item: ${item.label}, roles: ${item.roles}, hasAccess: ${hasAccess}, userRole: ${userRole}`);
       
       return hasAccess;
     })
   })).filter(group => {
     const hasItems = group.items.length > 0;
+    console.log(`Group: ${group.label}, items count: ${group.items.length}, visible: ${hasItems}`);
     return hasItems;
   });
 
