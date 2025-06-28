@@ -2,6 +2,7 @@ import { db } from './db';
 import { bibleVerses } from '@shared/schema';
 import { eq, and, like, ilike, or, sql } from 'drizzle-orm';
 import OpenAI from "openai";
+import { scriptureApiService } from "./scripture-api-service.js";
 
 // Basic Bible versions configuration for OpenAI fallback
 const BIBLE_VERSIONS = [
@@ -233,45 +234,68 @@ function generateReferenceVariations(reference: string): string[] {
   return Array.from(new Set(variations));
 }
 
-// Main Bible lookup function - phased approach with import system integration
+// Main Bible lookup function - Scripture API integration with fallbacks
 export async function lookupBibleVerse(reference: string, preferredVersion: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
     console.log(`[Bible API] Looking up ${reference} in ${preferredVersion}`);
     
-    // Check version configuration to determine lookup strategy
-    const versionConfig = BIBLE_VERSIONS.find(v => v.code === preferredVersion);
-    
-    if (!versionConfig) {
-      console.log(`[Bible API] Unknown version ${preferredVersion}, using OpenAI fallback`);
-      return await fetchVerseFromOpenAI(reference, preferredVersion);
+    // STEP 1: Try Scripture API first (American Bible Society - authentic source)
+    try {
+      const scriptureResult = await scriptureApiService.lookupVerse(reference, preferredVersion);
+      if (scriptureResult) {
+        console.log(`[Scripture API] ✅ Found ${reference} from American Bible Society`);
+        return scriptureResult;
+      }
+    } catch (scriptureError) {
+      console.log(`[Scripture API] ⚠️ Error accessing Scripture API:`, scriptureError);
     }
     
-    // For Phase 3 (licensed) versions, use OpenAI directly unless locally available
-    if (versionConfig.phase === 3 && versionConfig.useOpenAI) {
-      console.log(`[Bible API] Using OpenAI for licensed version ${preferredVersion}`);
-      const openaiResult = await fetchVerseFromOpenAI(reference, preferredVersion);
-      if (openaiResult) return openaiResult;
-    }
-    
-    // For Phase 1 & 2 versions, try local database first
+    // STEP 2: Check local database for existing verses
     let result = await lookupVerseFromDatabase(reference, preferredVersion);
     
     if (result) {
-      console.log(`[Bible API] Found ${reference} in local database`);
-      return result;
-    }
-    
-    // If not found locally and OpenAI is configured as fallback, try it
-    if (versionConfig.useOpenAI) {
-      result = await fetchVerseFromOpenAI(reference, preferredVersion);
+      // Check if the text is a placeholder and needs replacement from Scripture API
+      const isPlaceholder = result.text && (
+        result.text.includes('Scripture according to') ||
+        result.text.includes('GOD\'s Word according to') ||
+        result.text.includes('GOD\'s Message according to') ||
+        result.text.includes('Jesus said to them as recorded in') ||
+        result.text.includes('In those days it happened as recorded in') ||
+        result.text.includes('The LORD spoke as written in') ||
+        result.text.includes('As it is written in') ||
+        result.text.length < 20
+      );
       
-      if (result) {
-        console.log(`[Bible API] Retrieved ${reference} from OpenAI fallback`);
+      if (isPlaceholder) {
+        console.log(`[Bible API] 🔄 Placeholder detected, trying Scripture API for authentic text`);
+        try {
+          const authenticVerse = await scriptureApiService.lookupVerse(reference, preferredVersion);
+          if (authenticVerse) {
+            console.log(`[Scripture API] ✅ Replaced placeholder with authentic text`);
+            return authenticVerse;
+          }
+        } catch (error) {
+          console.log(`[Scripture API] Failed to replace placeholder, trying OpenAI`);
+        }
+      } else {
+        console.log(`[Bible API] Found ${reference} in local database`);
         return result;
       }
     }
     
-    console.log(`[Bible API] Could not find ${reference} in ${preferredVersion}`);
+    // STEP 3: OpenAI fallback for licensed versions or when Scripture API fails
+    const versionConfig = BIBLE_VERSIONS.find(v => v.code === preferredVersion);
+    if (!versionConfig || versionConfig.useOpenAI) {
+      console.log(`[Bible API] 🤖 Trying OpenAI fallback for ${preferredVersion}`);
+      result = await fetchVerseFromOpenAI(reference, preferredVersion);
+      
+      if (result) {
+        console.log(`[Bible API] ✅ Retrieved ${reference} from OpenAI fallback`);
+        return result;
+      }
+    }
+    
+    console.log(`[Bible API] ❌ Could not find ${reference} in ${preferredVersion} from any source`);
     return null;
   } catch (error) {
     console.error('[Bible API] Error in lookupBibleVerse:', error);
@@ -279,11 +303,32 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
   }
 }
 
-// Search Bible verses across all translations
+// Search Bible verses across all translations with Scripture API integration
 export async function searchBibleVerses(query: string, translation: string = 'NIV', limit: number = 20): Promise<any[]> {
   try {
-    console.log(`[Bible DB] Searching for "${query}" in ${translation} translation`);
+    console.log(`[Bible API] Searching for "${query}" in ${translation} translation`);
     
+    // STEP 1: Try Scripture API first for fresh, authentic results
+    try {
+      const scriptureResults = await scriptureApiService.searchVersesByText(query, translation, limit);
+      if (scriptureResults && scriptureResults.length > 0) {
+        console.log(`[Scripture API] ✅ Found ${scriptureResults.length} verses from American Bible Society`);
+        // Convert to expected format
+        return scriptureResults.map(verse => ({
+          reference: verse.reference,
+          text: verse.text,
+          version: verse.version,
+          source: verse.source,
+          book: verse.reference.split(' ')[0],
+          translation: verse.version.toUpperCase(),
+          popularityScore: 0
+        }));
+      }
+    } catch (scriptureError) {
+      console.log(`[Scripture API] ⚠️ Search error:`, scriptureError);
+    }
+    
+    // STEP 2: Search local database as fallback
     const searchResults = await db
       .select()
       .from(bibleVerses)
@@ -301,10 +346,43 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
       .orderBy(bibleVerses.popularityScore)
       .limit(limit);
 
-    console.log(`[Bible DB] Found ${searchResults.length} verses matching "${query}"`);
-    return searchResults;
+    console.log(`[Bible DB] Found ${searchResults.length} verses matching "${query}" in local database`);
+    
+    // Filter out placeholder text and enhance with Scripture API if needed
+    const enhancedResults = [];
+    for (const verse of searchResults) {
+      const isPlaceholder = verse.text && (
+        verse.text.includes('Scripture according to') ||
+        verse.text.includes('GOD\'s Word according to') ||
+        verse.text.includes('GOD\'s Message according to') ||
+        verse.text.includes('Jesus said to them as recorded in') ||
+        verse.text.length < 20
+      );
+      
+      if (isPlaceholder) {
+        // Try to get authentic text from Scripture API
+        try {
+          const authenticVerse = await scriptureApiService.lookupVerse(verse.reference || '', translation);
+          if (authenticVerse) {
+            enhancedResults.push({
+              ...verse,
+              text: authenticVerse.text,
+              source: authenticVerse.source
+            });
+            continue;
+          }
+        } catch (error) {
+          // Skip placeholder verses if we can't get authentic text
+          continue;
+        }
+      }
+      
+      enhancedResults.push(verse);
+    }
+    
+    return enhancedResults;
   } catch (error) {
-    console.error('[Bible DB] Search error:', error);
+    console.error('[Bible API] Search error:', error);
     return [];
   }
 }
