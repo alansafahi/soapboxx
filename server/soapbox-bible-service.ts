@@ -85,7 +85,7 @@ class SoapBoxBibleService {
           book: this.extractBook(reference),
           chapter: this.extractChapter(reference),
           verse: this.extractVerse(reference),
-          text: apiVerse.text,
+          text: this.cleanVerseText(apiVerse.text),
           translation: translation,
           source: 'American Bible Society'
         };
@@ -115,6 +115,40 @@ class SoapBoxBibleService {
     return null;
   }
   
+  /**
+   * Clean verse text by removing HTML tags, embedded verse numbers and formatting
+   */
+  private cleanVerseText(text: string): string {
+    if (!text) return '';
+    
+    return text
+      // Remove all HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Remove HTML entities
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+      // Remove verse numbers with pilcrow (¶) - e.g. "29¶Come unto me"
+      .replace(/^\d+[A-Za-z]?¶/, '')
+      // Remove verse numbers at start (1, 2, 3, 2A, 2B etc.)
+      .replace(/^\d+[A-Za-z]?\s+/, '')
+      // Remove verse numbers in brackets [1], [2], [2A], etc.
+      .replace(/\[\d+[A-Za-z]?\]/g, '')
+      // Remove verse numbers in parentheses (1), (2), (2A), etc.
+      .replace(/\(\d+[A-Za-z]?\)/g, '')
+      // Remove verse numbers with periods 1., 2., 2A., etc.
+      .replace(/^\d+[A-Za-z]?\.\s+/, '')
+      // Remove standalone pilcrow symbols
+      .replace(/¶/g, '')
+      // Remove multiple spaces
+      .replace(/\s+/g, ' ')
+      // Remove leading/trailing whitespace
+      .trim();
+  }
+
   /**
    * Get verse from SoapBox Bible cache
    */

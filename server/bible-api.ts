@@ -34,6 +34,8 @@ function cleanVerseText(text: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
+    // Remove verse numbers with pilcrow (¶) - e.g. "29¶Come unto me"
+    .replace(/^\d+[A-Za-z]?¶/, '')
     // Remove verse numbers at start (1, 2, 3, 2A, 2B etc.)
     .replace(/^\d+[A-Za-z]?\s+/, '')
     // Remove verse numbers in brackets [1], [2], [2A], etc.
@@ -42,6 +44,8 @@ function cleanVerseText(text: string): string {
     .replace(/\(\d+[A-Za-z]?\)/g, '')
     // Remove verse numbers with periods 1., 2., 2A., etc.
     .replace(/^\d+[A-Za-z]?\.\s+/, '')
+    // Remove standalone pilcrow symbols
+    .replace(/¶/g, '')
     // Remove multiple spaces
     .replace(/\s+/g, ' ')
     // Remove leading/trailing whitespace
