@@ -1198,12 +1198,17 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     variant="ghost" 
                     size="sm" 
                     onClick={() => {
+                      console.log('MessageCircle clicked for post:', post.id);
+                      console.log('Current expandedComments:', expandedComments);
                       const newExpanded = new Set(expandedComments);
                       if (expandedComments.has(post.id)) {
+                        console.log('Collapsing comments for post:', post.id);
                         newExpanded.delete(post.id);
                       } else {
+                        console.log('Expanding comments for post:', post.id);
                         newExpanded.add(post.id);
                       }
+                      console.log('New expandedComments:', newExpanded);
                       setExpandedComments(newExpanded);
                     }}
                     className="text-gray-500 hover:text-blue-500"
