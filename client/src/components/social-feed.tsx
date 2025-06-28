@@ -174,9 +174,7 @@ export default function SocialFeed() {
   // Like post mutation
   const likeMutation = useMutation({
     mutationFn: async (postId: number) => {
-      return apiRequest(`/api/discussions/${postId}/like`, {
-        method: 'POST'
-      });
+      return apiRequest('POST', `/api/discussions/${postId}/like`);
     },
     onMutate: async (postId) => {
       // Cancel any outgoing refetches
@@ -220,10 +218,7 @@ export default function SocialFeed() {
   // Comment submission mutation
   const commentMutation = useMutation({
     mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
-      return apiRequest(`/api/discussions/${postId}/comments`, {
-        method: 'POST',
-        body: { content }
-      });
+      return apiRequest('POST', `/api/discussions/${postId}/comments`, { content });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -246,9 +241,7 @@ export default function SocialFeed() {
   // Share/repost mutation
   const shareMutation = useMutation({
     mutationFn: async (postId: number) => {
-      return apiRequest(`/api/discussions/${postId}/share`, {
-        method: 'POST'
-      });
+      return apiRequest('POST', `/api/discussions/${postId}/share`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -269,10 +262,7 @@ export default function SocialFeed() {
   // Create post mutation
   const createPostMutation = useMutation({
     mutationFn: async (postData: any) => {
-      return apiRequest('/api/discussions', {
-        method: 'POST',
-        body: postData,
-      });
+      return apiRequest('POST', '/api/discussions', postData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
@@ -298,9 +288,7 @@ export default function SocialFeed() {
   const deletePostMutation = useMutation({
     mutationFn: async (postId: number) => {
       try {
-        const response = await apiRequest(`/api/discussions/${postId}`, {
-          method: 'DELETE',
-        });
+        const response = await apiRequest('DELETE', `/api/discussions/${postId}`);
         return response;
       } catch (error) {
         throw error;
