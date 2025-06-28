@@ -285,31 +285,6 @@ export default function TopHeader() {
               </>
             )}
             
-            {/* SoapBox Portal Section - Only show for soapbox_owner */}
-            {userRole && (
-              (typeof userRole === 'string' && userRole === 'soapbox_owner') ||
-              ((userRole as any)?.roles && (userRole as any).roles.includes('soapbox_owner'))
-            ) && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  SoapBox Portal
-                </div>
-                <Link href="/admin">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Shield className="w-4 h-4 mr-2" />
-                    Church Management
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/admin-enhanced">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Platform Analytics
-                  </DropdownMenuItem>
-                </Link>
-              </>
-            )}
-            
             <DropdownMenuSeparator />
             
             {/* Account Section */}
