@@ -291,12 +291,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let verses = await storage.searchBibleVerses(query as string, translation as string, parseInt(limit as string));
       
-      // If no verses found and query looks like a Bible reference, try OpenAI fallback
+      // Check if we need OpenAI fallback - either no verses found OR placeholder text detected
       const isReference = query.toString().match(/^[1-3]?\s*[A-Za-z]+\s*\d+:\d+/);
-      console.log(`🔍 Checking fallback conditions - verses: ${verses.length}, isReference: ${!!isReference}, query: "${query}"`);
+      const hasPlaceholderText = verses.length > 0 && verses.some(verse => {
+        const text = verse.text.toLowerCase();
+        return text.includes('as recorded in') || 
+               text.includes('as prophesied in') || 
+               text.includes('it happened as recorded') ||
+               text.includes('this is what the lord says') ||
+               text.includes('according to') ||
+               text.includes('as written in') ||
+               text.includes('as foretold in') ||
+               text.includes('said to them as recorded') ||
+               text.includes('jesus said') && text.includes('as recorded in');
+      });
       
-      if (verses.length === 0 && isReference) {
-        console.log(`🤖 No verses found in database for "${query}", trying OpenAI fallback`);
+      console.log(`🔍 Checking fallback conditions - verses: ${verses.length}, isReference: ${!!isReference}, hasPlaceholder: ${hasPlaceholderText}, query: "${query}"`);
+      if (verses.length > 0) {
+        console.log(`📝 Sample verse text for debugging: "${verses[0].text}"`);
+      }
+      
+      if ((verses.length === 0 || hasPlaceholderText) && isReference) {
+        const reason = verses.length === 0 ? "no verses found" : "placeholder text detected";
+        console.log(`🤖 ${reason} in database for "${query}", trying OpenAI fallback`);
         
         try {
           const { lookupBibleVerse } = await import('./bible-api.js');
