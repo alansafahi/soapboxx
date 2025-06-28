@@ -629,4 +629,36 @@ export function setupAuth(app: Express): void {
   app.get('/api/login', (req, res) => {
     res.redirect('/login');
   });
+
+  // Debug endpoint to establish session (temporary)
+  app.post('/api/debug/establish-session', async (req, res) => {
+    try {
+      const user = await storage.getUserByEmail('alan@soapboxsuperapp.com');
+      if (user) {
+        (req.session as any).userId = user.id;
+        (req.session as any).user = {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        };
+        (req.session as any).authenticated = true;
+        
+        req.session.save((err: any) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).json({ success: false, message: 'Session save failed' });
+          }
+          res.json({ success: true, message: 'Session established', userId: user.id });
+        });
+      } else {
+        res.status(404).json({ success: false, message: 'User not found' });
+      }
+    } catch (error) {
+      console.error('Debug session error:', error);
+      res.status(500).json({ success: false, message: 'Failed to establish session' });
+    }
+  });
 }
