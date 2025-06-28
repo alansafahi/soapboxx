@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Search, Plus, Send, Users, MoreVertical, Mail } from "lucide-react";
+import { Search, Plus, Send, Users, MoreVertical, Mail, MessageCircle, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -87,6 +87,7 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const [showNewMessageDialog, setShowNewMessageDialog] = useState(false);
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
+  const [expandedConversations, setExpandedConversations] = useState<Set<number>>(new Set());
 
   // Fetch conversations
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery<ConversationDisplay[]>({
@@ -132,9 +133,7 @@ export default function MessagesPage() {
   // Mark messages as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (conversationId: string) => {
-      return apiRequest(`/api/chat/conversations/${conversationId}/read`, {
-        method: 'POST',
-      });
+      return apiRequest('POST', `/api/chat/conversations/${conversationId}/read`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
@@ -310,41 +309,110 @@ export default function MessagesPage() {
                 ) : (
                   <div className="space-y-1">
                     {filteredConversations.map((conversation) => (
-                      <div
-                        key={conversation.id}
-                        className={`flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                          selectedConversation === conversation.id ? 'bg-purple-50 dark:bg-purple-900/20 border-l-4 border-l-purple-600' : ''
-                        }`}
-                        onClick={() => handleSelectConversation(conversation.id)}
-                      >
-                        <div className="relative">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={conversation.participantAvatar} />
-                            <AvatarFallback className="bg-purple-600 text-white">
-                              {getInitials(conversation.participantName.split(' ')[0], conversation.participantName.split(' ')[1] || '')}
-                            </AvatarFallback>
-                          </Avatar>
-                          {conversation.isOnline && (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="font-medium text-gray-900 dark:text-white truncate">
-                              {conversation.participantName}
-                            </p>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {formatTime(conversation.lastMessageTime)}
-                            </span>
+                      <div key={conversation.id}>
+                        <div
+                          className={`flex items-center gap-3 p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                            selectedConversation === conversation.id ? 'bg-purple-50 dark:bg-purple-900/20 border-l-4 border-l-purple-600' : ''
+                          }`}
+                        >
+                          <div className="relative">
+                            <Avatar className="w-12 h-12">
+                              <AvatarImage src={conversation.participantAvatar} />
+                              <AvatarFallback className="bg-purple-600 text-white">
+                                {getInitials(conversation.participantName.split(' ')[0], conversation.participantName.split(' ')[1] || '')}
+                              </AvatarFallback>
+                            </Avatar>
+                            {conversation.isOnline && (
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
+                            )}
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
-                            {conversation.lastMessage}
-                          </p>
+                          <div 
+                            className="flex-1 min-w-0 cursor-pointer"
+                            onClick={() => handleSelectConversation(conversation.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium text-gray-900 dark:text-white truncate">
+                                {conversation.participantName}
+                              </p>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatTime(conversation.lastMessageTime)}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                              {conversation.lastMessage}
+                            </p>
+                          </div>
+                          
+                          {/* Message Expansion Button */}
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const isExpanded = expandedConversations.has(conversation.id);
+                                console.log(`Conversation ${isExpanded ? 'collapsing' : 'expanding'} for conversation ${conversation.id}`);
+                                
+                                setExpandedConversations(prev => {
+                                  const newSet = new Set(prev);
+                                  if (isExpanded) {
+                                    newSet.delete(conversation.id);
+                                  } else {
+                                    newSet.add(conversation.id);
+                                  }
+                                  return newSet;
+                                });
+                                
+                                if (!isExpanded) {
+                                  toast({
+                                    title: "Messages Expanded",
+                                    description: `Showing conversation messages`,
+                                  });
+                                }
+                              }}
+                              className={`${expandedConversations.has(conversation.id) ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-blue-500 hover:bg-blue-50`}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              2
+                            </Button>
+                            
+                            {conversation.unreadCount > 0 && (
+                              <Badge className="bg-purple-600 text-white min-w-[1.5rem] h-6 rounded-full text-xs">
+                                {conversation.unreadCount}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        {conversation.unreadCount > 0 && (
-                          <Badge className="bg-purple-600 text-white min-w-[1.5rem] h-6 rounded-full text-xs">
-                            {conversation.unreadCount}
-                          </Badge>
+                        
+                        {/* Expanded Messages Section */}
+                        {expandedConversations.has(conversation.id) && (
+                          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 border-l-4 border-l-blue-500">
+                            <div className="space-y-3">
+                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                Conversation Messages:
+                              </div>
+                              
+                              {/* Sample Messages - Replace with actual messages from API */}
+                              <div className="space-y-2">
+                                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                    <span>Alan Safahi</span>
+                                    <span>10:20 PM</span>
+                                  </div>
+                                  <p className="text-sm text-gray-900 dark:text-white">Hey, how are you doing?</p>
+                                </div>
+                                
+                                <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                    <span>Community Member</span>
+                                    <span>9:20 PM</span>
+                                  </div>
+                                  <p className="text-sm text-gray-900 dark:text-white">Thanks for the prayer support</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         )}
                       </div>
                     ))}
