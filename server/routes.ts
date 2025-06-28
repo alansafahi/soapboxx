@@ -397,6 +397,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Scripture API Test endpoint - verify American Bible Society integration
+  app.get('/api/bible/test-scripture-api', async (req, res) => {
+    try {
+      const { scriptureApiService } = await import('./scripture-api-service.js');
+      
+      console.log('🧪 Testing Scripture API integration...');
+      
+      // Test verse lookup
+      const testVerse = await scriptureApiService.lookupVerse('John 3:16', 'NIV');
+      
+      // Test search
+      const searchResults = await scriptureApiService.searchVersesByText('love', 'NIV', 5);
+      
+      // Test available translations
+      const translations = scriptureApiService.getAvailableTranslations();
+      
+      res.json({
+        message: "Scripture API Integration Test Results",
+        timestamp: new Date().toISOString(),
+        tests: {
+          verseLookup: {
+            query: "John 3:16 (NIV)",
+            success: !!testVerse,
+            result: testVerse
+          },
+          search: {
+            query: "love",
+            success: searchResults.length > 0,
+            resultCount: searchResults.length,
+            results: searchResults
+          },
+          translations: {
+            count: translations.length,
+            available: translations
+          }
+        },
+        integration: {
+          status: testVerse ? "✅ Active" : "⚠️ Issue detected",
+          source: "American Bible Society scripture.api.bible",
+          fallbacks: ["Local Database", "OpenAI API"]
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Scripture API test failed:', error);
+      res.status(500).json({
+        message: "Scripture API Test Failed",
+        error: error.message,
+        status: "❌ Error",
+        suggestion: "Check SCRIPTURE_API_KEY environment variable"
+      });
+    }
+  });
+
   // Unified Authentication System - FIXES CRITICAL SECURITY VULNERABILITIES
   setupAuth(app);
 
