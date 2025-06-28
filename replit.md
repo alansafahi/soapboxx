@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 28, 2025: PILCROW CHARACTER VERSE CLEANING COMPLETELY FIXED - Successfully enhanced cleanVerseText function to remove pilcrow characters (¶) and all verse number formats from Bible text display
+  - PILCROW CHARACTER REMOVAL: Added specific regex pattern to remove verse numbers with pilcrow symbols (e.g., "29¶Come unto me..." → "Come unto me...")
+  - COMPREHENSIVE VERSE CLEANING: Enhanced cleanVerseText function in all Bible services (soapbox-bible-service.ts, scripture-api-service.ts, bible-api.ts) to handle pilcrow characters and various verse number formats
+  - CACHE CLEANING IMPLEMENTED: Fixed caching system to clean verse text before storage, ensuring all cached verses have clean text without verse numbers or pilcrow symbols
+  - PRODUCTION VERIFIED: Matthew 11:28 and John 3:16 now display clean text without verse numbers, Romans 8:28 cache updated for clean display
+  - ALL TEXT SOURCES ENHANCED: Verse cleaning applied to API responses, cached verses, and fallback lookups for consistent clean text across entire system
 - June 28, 2025: SOAPBOX BIBLE API.BIBLE INTEGRATION COMPLETELY OPERATIONAL - Successfully implemented comprehensive three-tier Bible verse lookup system with American Bible Society integration
   - API.BIBLE INTEGRATION COMPLETED: Integrated scripture.api.bible as primary source with proper authentication for 6 public domain Bible versions (KJV, KJVA, WEB, ASV, CEV, GNT)
   - THREE-TIER LOOKUP SYSTEM: SoapBox Bible cache → API.Bible → ChatGPT API provides optimal performance and authentic verse text delivery
