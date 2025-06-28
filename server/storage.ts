@@ -48,6 +48,8 @@ import {
   bibleInADaySectionProgress,
   bibleInADayBadges,
   volunteers,
+  bibleVerses,
+  soapboxBible,
   contacts,
   invitations,
   volunteerRoles,

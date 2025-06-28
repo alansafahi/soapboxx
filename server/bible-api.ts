@@ -19,7 +19,7 @@ const openai = new OpenAI({
 });
 
 /**
- * Clean verse text by removing HTML tags, embedded verse numbers, version abbreviations and formatting
+ * Clean verse text by removing HTML tags, embedded verse numbers and formatting
  */
 function cleanVerseText(text: string): string {
   if (!text) return '';
@@ -34,10 +34,6 @@ function cleanVerseText(text: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
-    // Remove version abbreviations in parentheses like (KJV), (WEB), (ASV), (KJVA), (CEV), (GNT)
-    .replace(/\s*\([A-Z]{2,5}\)\s*/g, ' ')
-    // Remove version abbreviations with brackets like [KJV], [WEB], etc.
-    .replace(/\s*\[[A-Z]{2,5}\]\s*/g, ' ')
     // Remove verse numbers at start (1, 2, 3, 2A, 2B etc.)
     .replace(/^\d+[A-Za-z]?\s+/, '')
     // Remove verse numbers in brackets [1], [2], [2A], etc.

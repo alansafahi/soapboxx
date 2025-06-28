@@ -50,6 +50,26 @@ export const bibleVerses = pgTable("bible_verses", {
   unique("unique_verse_translation").on(table.reference, table.translation),
 ]);
 
+// SoapBox Bible - Top 1000 popular verses cache from api.bible
+export const soapboxBible = pgTable("soapbox_bible", {
+  id: serial("id").primaryKey(),
+  reference: varchar("reference", { length: 100 }).notNull(),
+  book: varchar("book", { length: 50 }).notNull(),
+  chapter: integer("chapter").notNull(),
+  verse: varchar("verse", { length: 20 }).notNull(),
+  text: text("text").notNull(),
+  translation: varchar("translation", { length: 20 }).notNull(),
+  popularityRank: integer("popularity_rank").notNull(), // 1-1000 rank
+  source: varchar("source", { length: 50 }).default("American Bible Society"),
+  importedAt: timestamp("imported_at").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+}, (table) => [
+  index("soapbox_bible_reference_idx").on(table.reference),
+  index("soapbox_bible_translation_idx").on(table.translation),
+  index("soapbox_bible_popularity_idx").on(table.popularityRank),
+  unique("unique_soapbox_verse").on(table.reference, table.translation),
+]);
+
 // Simple notifications table for user notifications
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
