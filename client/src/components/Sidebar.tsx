@@ -181,6 +181,9 @@ export default function Sidebar() {
       return hasAccess;
     })
   })).filter(group => {
+    // Don't filter out empty groups during initial load when user is null
+    if (!user) return true;
+    
     const hasItems = group.items.length > 0;
     return hasItems;
   });
