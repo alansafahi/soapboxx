@@ -8560,25 +8560,63 @@ Please provide suggestions for the missing or incomplete sections.`
 
   // Bible Import Management API Endpoints
   
-  // Get available Bible versions configuration
+  // Get available Bible versions configuration - Limited to 6 public domain/freely available versions
   app.get('/api/bible/versions', isAuthenticated, async (req: any, res) => {
     try {
-      const versions = await bibleImportSystem.getAvailableVersions();
-      
-      // Filter out licensed versions from UI (Phase 3) unless user has admin access
-      const userRole = req.session?.user?.role || 'member';
-      const isAdmin = userRole === 'soapbox_owner' || userRole === 'admin';
-      
-      const filteredVersions = versions.filter(v => {
-        if (v.phase === 3 && !isAdmin) {
-          return false; // Hide licensed versions from regular users
+      const limitedVersions = [
+        {
+          code: 'KJV',
+          name: 'King James Version',
+          attribution: 'King James Version (Authorized Version) - Public Domain',
+          license: 'Public Domain',
+          source: 'public_domain',
+          phase: 1
+        },
+        {
+          code: 'KJVA',
+          name: "King James Version with Strong's",
+          attribution: "King James Version with Strong's numbering - Fully Available",
+          license: 'Public Domain',
+          source: 'public_domain', 
+          phase: 1
+        },
+        {
+          code: 'WEB',
+          name: 'World English Bible',
+          attribution: 'World English Bible - Modern public-domain revision of ASV',
+          license: 'Public Domain',
+          source: 'public_domain',
+          phase: 1
+        },
+        {
+          code: 'ASV',
+          name: 'American Standard Version',
+          attribution: 'American Standard Version (1901) - Public Domain',
+          license: 'Public Domain',
+          source: 'public_domain',
+          phase: 1
+        },
+        {
+          code: 'CEV',
+          name: 'Contemporary English Version',
+          attribution: 'Contemporary English Version - Freely supported for non-commercial use',
+          license: 'Freely Available',
+          source: 'free_open',
+          phase: 2
+        },
+        {
+          code: 'GNT',
+          name: 'Good News Translation',
+          attribution: 'Good News Translation - Freely supported for non-commercial use',
+          license: 'Freely Available',
+          source: 'free_open',
+          phase: 2
         }
-        return true;
-      });
+      ];
       
       res.json({
-        versions: filteredVersions,
-        attribution: filteredVersions.reduce((acc, v) => {
+        versions: limitedVersions,
+        attribution: limitedVersions.reduce((acc, v) => {
           acc[v.code] = {
             name: v.name,
             attribution: v.attribution,

@@ -39,21 +39,14 @@ export class ScriptureAPIService {
   private baseUrl = 'https://api.scripture.api.bible/v1';
   private storage: DatabaseStorage;
 
-  // Bible translation IDs for Scripture API
+  // Bible translation IDs for Scripture API - Limited to 6 public domain/freely available versions
   private translationMap: Record<string, string> = {
-    'NIV': 'de4e12af7f28f599-02', // New International Version
-    'ESV': '59dcc7335de4b402-01', // English Standard Version  
-    'NLT': '13c3066b-53c1-4ec5-8b28-3634e2f3a164', // New Living Translation
-    'NASB': '68e8b8273301c819-01', // New American Standard Bible
-    'KJV': 'de4e12af7f28f599-01', // King James Version
-    'CSB': '93b0cfce-70a3-4ba3-85b8-e8d5ff1d7c4d', // Christian Standard Bible
-    'NET': '06125adad2d5898a-01', // New English Translation
-    'AMP': '65eec8e0b60e656b-01', // Amplified Bible
-    'MSG': '13c3066b-53c1-4ec5-8b28-3634e2f3a164', // The Message (fallback to NLT)
-    'RSV': 'dc84fb8a-8fd9-411c-b5e5-b6859ce36ae5', // Revised Standard Version
-    'NRSV': '81b5726c-8b7e-4de6-9ca9-eb3e7b0a1de7', // New Revised Standard Version
-    'ASV': '7142879509583d59-01', // American Standard Version
-    'WEB': '9879dbb7cfe39e4d-01', // World English Bible
+    'KJV': 'de4e12af7f28f599-01', // King James Version (public domain)
+    'KJVA': 'de4e12af7f28f599-01', // King James Version with Strong's numbering (same as KJV for API)
+    'WEB': '9879dbb7cfe39e4d-01', // World English Bible (public domain)
+    'ASV': '7142879509583d59-01', // American Standard Version (public domain)
+    'CEV': '392a2f6c-9fa4-4f43-9a37-8e5a4c56e1c7', // Contemporary English Version (freely supported)
+    'GNT': 'c315fa9f-f842-4a87-9a8e-5d5c2a3e8b2a', // Good News Translation (freely supported)
   };
 
   constructor() {

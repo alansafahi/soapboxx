@@ -51,7 +51,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState('NIV');
+  const [selectedVersion, setSelectedVersion] = useState('KJV');
   const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
 
@@ -644,17 +644,11 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       <SelectValue placeholder="Select Bible version..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="NIV">NIV - New International Version</SelectItem>
-                      <SelectItem value="ESV">ESV - English Standard Version</SelectItem>
                       <SelectItem value="KJV">KJV - King James Version</SelectItem>
-                      <SelectItem value="NLT">NLT - New Living Translation</SelectItem>
-                      <SelectItem value="NASB">NASB - New American Standard</SelectItem>
-                      <SelectItem value="CSB">CSB - Christian Standard Bible</SelectItem>
-                      <SelectItem value="MSG">MSG - The Message</SelectItem>
-                      <SelectItem value="AMP">AMP - Amplified Bible</SelectItem>
+                      <SelectItem value="KJVA">KJVA - King James Version with Strong's</SelectItem>
+                      <SelectItem value="WEB">WEB - World English Bible</SelectItem>
+                      <SelectItem value="ASV">ASV - American Standard Version</SelectItem>
                       <SelectItem value="CEV">CEV - Contemporary English Version</SelectItem>
-                      <SelectItem value="NET">NET - New English Translation</SelectItem>
-                      <SelectItem value="CEB">CEB - Common English Bible</SelectItem>
                       <SelectItem value="GNT">GNT - Good News Translation</SelectItem>
                     </SelectContent>
                   </Select>
