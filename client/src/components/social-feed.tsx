@@ -1210,21 +1210,26 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                       e.preventDefault();
                       e.stopPropagation();
                       console.log('MessageCircle clicked for post:', post.id);
-                      console.log('Current expandedComments:', expandedComments);
+                      console.log('Current expandedComments size:', expandedComments.size);
+                      console.log('Current expandedComments has post:', expandedComments.has(post.id));
+                      console.log('Current expandedComments array:', Array.from(expandedComments));
                       
                       const isExpanded = expandedComments.has(post.id);
-                      const newExpanded = new Set(expandedComments);
                       
-                      if (isExpanded) {
-                        console.log('Collapsing comments for post:', post.id);
-                        newExpanded.delete(post.id);
-                      } else {
-                        console.log('Expanding comments for post:', post.id);
-                        newExpanded.add(post.id);
-                      }
-                      
-                      console.log('New expandedComments:', newExpanded);
-                      setExpandedComments(newExpanded);
+                      // Create new Set and force React re-render
+                      setExpandedComments(prev => {
+                        const newSet = new Set(prev);
+                        if (isExpanded) {
+                          console.log('Collapsing comments for post:', post.id);
+                          newSet.delete(post.id);
+                        } else {
+                          console.log('Expanding comments for post:', post.id);
+                          newSet.add(post.id);
+                        }
+                        console.log('New expandedComments size:', newSet.size);
+                        console.log('New expandedComments array:', Array.from(newSet));
+                        return newSet;
+                      });
                       
                       // Visual feedback
                       toast({
@@ -1265,7 +1270,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
 
               {/* Comments Section */}
               {expandedComments.has(post.id) && (
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                   {/* Comment Sort Options */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
