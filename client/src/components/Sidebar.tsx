@@ -62,7 +62,7 @@ interface NavigationGroup {
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL']));
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -95,10 +95,6 @@ export default function Sidebar() {
 
   // Get user role data - use direct user session role instead of API call
   const userRole = user?.role;
-  
-  // Debug logging for role detection
-  console.log('User data:', user);
-  console.log('User role:', userRole);
 
   // Get unread message count for notification badge
   const { data: unreadCount = 0 } = useQuery<number>({
@@ -177,13 +173,10 @@ export default function Sidebar() {
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
       
-      console.log(`Checking item: ${item.label}, roles: ${item.roles}, hasAccess: ${hasAccess}, userRole: ${userRole}`);
-      
       return hasAccess;
     })
   })).filter(group => {
     const hasItems = group.items.length > 0;
-    console.log(`Group: ${group.label}, items count: ${group.items.length}, visible: ${hasItems}`);
     return hasItems;
   });
 
