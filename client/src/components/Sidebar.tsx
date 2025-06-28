@@ -162,14 +162,6 @@ export default function Sidebar() {
     }
   ];
 
-  // Debug logging for role filtering
-  console.log('Sidebar Debug:', {
-    user: user,
-    userRole: userRole,
-    hasUser: !!user,
-    actualRole: user?.role
-  });
-
   // Filter groups based on user role - Wait for user data to load before filtering
   const visibleGroups = navigationGroups.map(group => {
     const filteredItems = group.items.filter(item => {
@@ -185,34 +177,13 @@ export default function Sidebar() {
         user?.role === 'soapbox_owner' // Always show for soapbox_owner
       );
       
-      // Debug specific admin items
-      if (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL') {
-        console.log(`Sidebar Item Debug - ${group.label}:`, {
-          itemLabel: item.label,
-          itemRoles: item.roles,
-          userRole: user?.role,
-          hasAccess: hasAccess
-        });
-      }
-      
       return hasAccess;
     });
 
-    const result = {
+    return {
       ...group,
       items: filteredItems
     };
-
-    // Debug group results
-    if (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL') {
-      console.log(`Sidebar Group Debug - ${group.label}:`, {
-        originalItems: group.items.length,
-        filteredItems: filteredItems.length,
-        items: filteredItems.map(item => item.label)
-      });
-    }
-
-    return result;
   }).filter(group => {
     // Don't filter out empty groups during initial load when user is null
     if (!user) return true;
@@ -334,7 +305,9 @@ export default function Sidebar() {
         ) : (
           // Expanded Navigation - Full Groups
           visibleGroups.map((group) => {
-            const isExpanded = expandedGroups.has(group.label);
+            // Ensure admin groups are always expanded for soapbox_owner users
+            const isExpanded = expandedGroups.has(group.label) || 
+              (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL'));
             
             return (
               <div key={group.label}>
