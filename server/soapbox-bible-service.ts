@@ -86,7 +86,7 @@ class SoapBoxBibleService {
           chapter: this.extractChapter(reference),
           verse: this.extractVerse(reference),
           text: apiVerse.text,
-          translation: apiVerse.translation,
+          translation: apiVerse.version,
           source: 'American Bible Society'
         };
       }
@@ -171,7 +171,7 @@ class SoapBoxBibleService {
           chapter: this.extractChapter(reference),
           verse: this.extractVerse(reference),
           text: apiVerse.text,
-          translation: apiVerse.translation,
+          translation: apiVerse.version,
           popularityRank,
           source: 'American Bible Society',
           importedAt: new Date(),
@@ -221,7 +221,7 @@ class SoapBoxBibleService {
                 chapter: this.extractChapter(reference),
                 verse: this.extractVerse(reference),
                 text: apiVerse.text,
-                translation: apiVerse.translation,
+                translation: apiVerse.version,
                 popularityRank,
                 source: 'American Bible Society',
                 importedAt: new Date(),
