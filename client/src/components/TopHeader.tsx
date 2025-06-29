@@ -1,5 +1,6 @@
 import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "@/hooks/useTheme";
 import { useImmediateAuth } from "@/lib/immediateAuth";
 import { Link } from "wouter";
@@ -48,6 +49,13 @@ export default function TopHeader() {
   
   // Use profile data if available, fallback to session user data
   const typedUser = (profileUser || user) as any;
+  
+  // Get user initials for fallback
+  const getUserInitials = () => {
+    const firstName = typedUser?.firstName || '';
+    const lastName = typedUser?.lastName || '';
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
+  };
 
   // Get user role data for permission checking
   const { data: userRole } = useQuery({
@@ -432,14 +440,17 @@ export default function TopHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
+              {console.log('Avatar render check:', { hasProfileImage: !!typedUser?.profileImageUrl, url: typedUser?.profileImageUrl })}
               {typedUser?.profileImageUrl ? (
                 <img 
                   src={typedUser.profileImageUrl} 
                   alt="Profile" 
-                  className="h-5 w-5 rounded-full object-cover"
+                  className="h-8 w-8 rounded-full object-cover"
+                  onError={(e) => console.log('Image load error:', e)}
+                  onLoad={() => console.log('Image loaded successfully')}
                 />
               ) : (
-                <div className="h-5 w-5 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
+                <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
                   {typedUser?.firstName ? `${typedUser.firstName.charAt(0)}${typedUser?.lastName?.charAt(0) || ''}`.toUpperCase() : <User className="h-3 w-3" />}
                 </div>
               )}
