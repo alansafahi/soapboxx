@@ -1683,7 +1683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's sermon drafts
   app.get('/api/sermon/drafts', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const drafts = await storage.getUserSermonDrafts(userId);
       
       res.json(drafts);
