@@ -131,6 +131,12 @@ class SoapBoxBibleService {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
       .replace(/&nbsp;/g, ' ')
+      // Remove explanatory prefixes like "Hebrews 11:2 in the Good News Translation (GNT) is: "
+      .replace(/^[1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?\s+in\s+the\s+[^:]+:\s*/i, '')
+      // Remove other common prefixes like "Matthew 5:16 (KJV): " or "John 3:16 - NIV: "
+      .replace(/^[1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?\s*(?:\([^)]+\))?\s*[-:]\s*/i, '')
+      // Remove remaining translation prefixes like "NIV: " or "KJV - "
+      .replace(/^[A-Z]{2,5}\s*[-:]\s*/i, '')
       // Remove verse numbers with pilcrow (¶) - e.g. "29¶Come unto me"
       .replace(/^\d+[A-Za-z]?¶/, '')
       // Remove verse numbers at start with space (1 By faith, 2 Now faith, etc.)
