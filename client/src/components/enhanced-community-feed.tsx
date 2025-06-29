@@ -100,8 +100,8 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
     const title = titleMatch ? titleMatch[1] : 'Shared Video';
     
     // Extract description (text between title and watch link)
-    const descMatch = content.match(/\*\*\n\n(.*?)\n\n🎬 Watch:/s);
-    const description = descMatch ? descMatch[1] : '';
+    const descMatch = content.match(/\*\*\n\n(.*?)\n\n🎬 Watch:/);
+    const description = descMatch ? descMatch[1].trim() : '';
     
     // Extract YouTube URL
     const urlMatch = content.match(/🎬 Watch: (https:\/\/[^\s]+)/);
@@ -477,7 +477,7 @@ export default function EnhancedCommunityFeed() {
                       <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white dark:font-bold break-words hyphens-auto leading-tight">{post.title}</h3>
                       
                       {/* Check if this is a video share */}
-                      {post.title?.includes('Shared Video:') || post.content?.includes('📺 **Shared Video:') ? (
+                      {post.content?.includes('📺 **Shared Video:') || post.content?.includes('🎬 Watch:') ? (
                         <VideoSharePreview post={post} />
                       ) : (
                         <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
