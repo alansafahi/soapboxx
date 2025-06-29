@@ -655,10 +655,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       return;
     }
     
-    // Convert devotionalDate string to Date object for schema validation
+    // Convert devotionalDate string to proper format for schema validation
     const submissionData = {
       ...data,
-      devotionalDate: new Date(data.devotionalDate)
+      devotionalDate: data.devotionalDate.toString()
     };
     
     saveMutation.mutate(submissionData);

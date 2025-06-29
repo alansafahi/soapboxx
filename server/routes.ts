@@ -1098,7 +1098,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Pastor or admin access required to pin posts" });
       }
 
-      const discussion = await storage.getDiscussion(parseInt(id));
+      const discussions = await storage.getDiscussions();
+      const discussion = discussions.find(d => d.id === parseInt(id));
       if (!discussion) {
         return res.status(404).json({ message: "Post not found" });
       }
@@ -1133,7 +1134,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Pastor or admin access required to unpin posts" });
       }
 
-      const discussion = await storage.getDiscussion(parseInt(id));
+      const discussions = await storage.getDiscussions();
+      const discussion = discussions.find(d => d.id === parseInt(id));
       if (!discussion) {
         return res.status(404).json({ message: "Post not found" });
       }
@@ -5995,7 +5997,8 @@ Return JSON with this exact structure:
       
       // Get the discussion details
       console.log('Getting discussion:', discussionId);
-      const discussion = await storage.getDiscussion(discussionId);
+      const discussions = await storage.getDiscussions();
+      const discussion = discussions.find(d => d.id === discussionId);
       if (!discussion) {
         return res.status(404).json({ success: false, message: "Discussion not found" });
       }
