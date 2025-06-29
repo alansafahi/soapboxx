@@ -30,14 +30,19 @@ interface VideoContent {
   id: number;
   title: string;
   description: string;
-  url: string;
-  thumbnail: string;
-  duration: string;
+  videoUrl?: string;
+  url?: string;
+  thumbnailUrl?: string;
+  thumbnail?: string;
+  duration: string | number;
   category: string;
   uploadedBy: string;
-  uploadedAt: string;
-  views: number;
-  tags: string[];
+  uploadedAt?: string;
+  createdAt?: string;
+  views?: number;
+  viewCount?: number;
+  tags: string[] | string;
+  speaker?: string;
 }
 
 export default function VideoLibrary() {
@@ -154,7 +159,22 @@ export default function VideoLibrary() {
     { value: 'conference', label: 'Conference' },
   ];
 
-  const filteredVideos = videos.filter((video: VideoContent) => {
+  // Map database fields to frontend interface and filter videos
+  const mappedVideos = videos.map((video: any) => ({
+    ...video,
+    url: video.videoUrl || video.url,
+    thumbnail: video.thumbnailUrl || video.thumbnail,
+    uploadedAt: video.createdAt || video.uploadedAt,
+    views: video.viewCount || video.views || 0,
+    tags: typeof video.tags === 'string' ? 
+      (video.tags.startsWith('{') ? 
+        JSON.parse(video.tags.replace(/"/g, '"')) : 
+        video.tags.split(',').map((tag: string) => tag.trim())) 
+      : video.tags || [],
+    duration: typeof video.duration === 'number' ? `${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}` : video.duration
+  }));
+
+  const filteredVideos = mappedVideos.filter((video: VideoContent) => {
     const matchesSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          video.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || video.category === selectedCategory;
@@ -537,11 +557,11 @@ export default function VideoLibrary() {
                 <div className="flex items-center justify-between text-xs text-gray-400">
                   <div className="flex items-center gap-1">
                     <User className="w-3 h-3" />
-                    {video.uploadedBy}
+                    {video.speaker || 'AI Generated'}
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {new Date(video.uploadedAt).toLocaleDateString()}
+                    {video.uploadedAt ? new Date(video.uploadedAt).toLocaleDateString() : 'Recently'}
                   </div>
                 </div>
                 
