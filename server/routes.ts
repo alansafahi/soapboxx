@@ -3616,6 +3616,13 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Helper function to make Bible references TTS-friendly (for single verse)
+  function makeTTSFriendlyReferenceLocal(reference: string): string {
+    // Convert Bible references like "Jeremiah 29:11" to "Jeremiah chapter 29, verse 11"
+    // This prevents TTS from reading "29:11" as "29 hours and 11 minutes"
+    return reference.replace(/(\d+):(\d+)/g, 'chapter $1, verse $2');
+  }
+
   app.post('/api/audio/bible/generate', isAuthenticated, async (req, res) => {
     try {
       const { verseId, voice = 'warm-female', musicBed } = req.body;
@@ -3629,7 +3636,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         return res.status(404).json({ error: 'Bible verse not found' });
       }
 
-      const verseText = `${verse.reference}. ${verse.text}`;
+      const verseText = `${makeTTSFriendlyReferenceLocal(verse.reference)}. ${verse.text}`;
       
       // Generate audio using OpenAI TTS
       const openai = new OpenAI({
@@ -4159,7 +4166,7 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
             id: `verse-${verse.id}`,
             type: 'scripture',
             title: `Scripture Reading: ${verse.reference}`,
-            content: `${verse.reference}. ${verse.text}`,
+            content: `${makeTTSFriendlyReference(verse.reference)}. ${verse.text}`,
             duration: 120,
             voiceSettings: { 
               voice: selectedVoice.name,
@@ -8403,6 +8410,13 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Helper function to make Bible references TTS-friendly
+  function makeTTSFriendlyReference(reference: string): string {
+    // Convert Bible references like "Jeremiah 29:11" to "Jeremiah chapter 29, verse 11"
+    // This prevents TTS from reading "29:11" as "29 hours and 11 minutes"
+    return reference.replace(/(\d+):(\d+)/g, 'chapter $1, verse $2');
+  }
+
   // Audio Bible verse compilation with premium OpenAI TTS
   app.post('/api/audio/compile-verses', isAuthenticated, async (req, res) => {
     try {
@@ -8413,8 +8427,9 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Compile all verses into a single text with proper spacing and pauses
+      // Make Bible references TTS-friendly to prevent time interpretation
       const compiledText = verses.map(verse => 
-        `${verse.reference}. ${verse.text}`
+        `${makeTTSFriendlyReference(verse.reference)}. ${verse.text}`
       ).join('... '); // Natural pause between verses
 
       // Use OpenAI's HD model for premium Audio Bible experience
