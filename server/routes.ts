@@ -1282,7 +1282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sermon/outline', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, topic, audience, length } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
       // Allow all authenticated users to use sermon creation tools for educational purposes
       // In production, you may want to restrict this to specific roles
@@ -1370,7 +1370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sermon/illustrations', isAuthenticated, async (req: any, res) => {
     try {
       const { topic, mainPoints, audience } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
       // Allow all authenticated users to access sermon illustration tools
 
@@ -1492,7 +1492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sermon/enhance', isAuthenticated, async (req: any, res) => {
     try {
       const { outline, research, selectedStories } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
       // Allow all authenticated users to access sermon enhancement tools
 
@@ -1581,7 +1581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sermon/save-draft', isAuthenticated, async (req: any, res) => {
     try {
       const { title, outline, research, illustrations, enhancement, draftId } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
       const contentData = {
         outline,
@@ -1635,7 +1635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sermon/save-completed', isAuthenticated, async (req: any, res) => {
     try {
       const { title, outline, research, illustrations, enhancement, completedAt } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       
       const completedSermonData = {
         title: title || 'Untitled Sermon',
@@ -1670,7 +1670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's completed sermons
   app.get('/api/sermon/completed', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const completedSermons = await storage.getUserCompletedSermons(userId);
       
       res.json(completedSermons);
