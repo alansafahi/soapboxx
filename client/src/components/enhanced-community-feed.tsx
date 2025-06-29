@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import SmartScriptureTextarea from './SmartScriptureTextarea';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { 
@@ -460,9 +461,16 @@ export default function EnhancedCommunityFeed() {
                     {/* Post Header */}
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {post.author?.firstName?.charAt(0) || 'A'}{post.author?.lastName?.charAt(0) || 'U'}
-                        </div>
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage 
+                            src={post.author?.profileImageUrl || ""} 
+                            alt={`${post.author?.firstName || ''} ${post.author?.lastName || ''}`}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                            {post.author?.firstName?.charAt(0) || 'A'}{post.author?.lastName?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <div className="flex items-center space-x-2">
                             <span className="font-semibold text-gray-900 dark:text-white dark:font-bold">

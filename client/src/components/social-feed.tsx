@@ -1058,6 +1058,11 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             <CardContent className="p-6">
               <div className="flex items-start space-x-3 mb-4">
                 <Avatar className="w-10 h-10">
+                  <AvatarImage 
+                    src={post.author.profileImage || ""} 
+                    alt={post.author.name}
+                    className="object-cover"
+                  />
                   <AvatarFallback className="bg-purple-600 text-white">
                     {post.author.name.charAt(0)}
                   </AvatarFallback>
