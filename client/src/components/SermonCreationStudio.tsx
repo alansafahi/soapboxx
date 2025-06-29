@@ -23,6 +23,47 @@ import {
   Archive, Edit3, Eye
 } from "lucide-react";
 
+// Helper function to render formatted text with HTML
+const renderFormattedText = (text: string) => {
+  if (!text) return null;
+  
+  // Handle object format with title/content structure
+  if (typeof text === 'object') {
+    if (text.title && text.content) {
+      return (
+        <div>
+          <strong>{text.title}</strong>
+          <span className="ml-2">{text.content}</span>
+        </div>
+      );
+    }
+    return JSON.stringify(text);
+  }
+  
+  // Convert HTML tags to React elements
+  const parts = text.split(/(<\/?[^>]+>)/g);
+  let isStrong = false;
+  
+  return parts.map((part, index) => {
+    if (part === '<strong>') {
+      isStrong = true;
+      return null;
+    } else if (part === '</strong>') {
+      isStrong = false;
+      return null;
+    } else if (part.startsWith('<')) {
+      // Ignore other HTML tags
+      return null;
+    } else {
+      return isStrong ? (
+        <strong key={index}>{part}</strong>
+      ) : (
+        <span key={index}>{part}</span>
+      );
+    }
+  }).filter(Boolean);
+};
+
 interface SermonOutline {
   title: string;
   theme: string;
@@ -622,7 +663,7 @@ export default function SermonCreationStudio() {
                       {currentResearch.practicalApplications.map((app, idx) => (
                         <li key={idx} className="text-sm text-gray-700 flex items-start">
                           <ChevronRight className="w-4 h-4 mr-1 mt-0.5 text-gray-500" />
-                          {typeof app === 'string' ? app : app.title || app.details || JSON.stringify(app)}
+                          <div>{renderFormattedText(typeof app === 'string' ? app : app.title || app.details || JSON.stringify(app))}</div>
                         </li>
                       ))}
                     </ul>
@@ -680,9 +721,9 @@ export default function SermonCreationStudio() {
                           <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-0.5">
                             {idx + 1}
                           </span>
-                          <p className="text-green-800 text-sm leading-relaxed">
-                            {typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point)}
-                          </p>
+                          <div className="text-green-800 text-sm leading-relaxed">
+                            {renderFormattedText(typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point))}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1006,7 +1047,9 @@ export default function SermonCreationStudio() {
                             <div className="space-y-3">
                               {enhancedOutline.mainPoints?.map((point: any, index: number) => (
                                 <div key={index} className="border-l-4 border-blue-400 pl-4">
-                                  <h5 className="font-medium text-gray-900">{index + 1}. {point}</h5>
+                                  <div className="font-medium text-gray-900">
+                                    {index + 1}. {renderFormattedText(typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point))}
+                                  </div>
                                 </div>
                               ))}
                             </div>
