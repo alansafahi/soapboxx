@@ -5282,6 +5282,29 @@ Return JSON with this exact structure:
 
   // Video generation endpoints removed for production cleanup
 
+  // YouTube Import API
+  app.post('/api/videos/import-youtube', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const { urls } = req.body;
+      
+      if (!urls || !Array.isArray(urls)) {
+        return res.status(400).json({ message: 'URLs array is required' });
+      }
+
+      const { youtubeImporter } = await import('./youtube-importer.js');
+      const results = await youtubeImporter.importMultipleVideos(urls, userId);
+      
+      res.json({
+        message: `Import completed: ${results.success} successful, ${results.failed} failed`,
+        results
+      });
+    } catch (error) {
+      console.error('Error importing YouTube videos:', error);
+      res.status(500).json({ message: 'Failed to import videos' });
+    }
+  });
+
   // Create new church endpoint
   app.post('/api/churches', isAuthenticated, async (req: any, res) => {
     try {
