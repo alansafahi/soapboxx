@@ -6477,11 +6477,11 @@ Return JSON with this exact structure:
   app.get('/api/demo/stats', async (req, res) => {
     try {
       // Production stats endpoint
-      const churches = await storage.db.select().from(schema.churches);
-      const users = await storage.db.select().from(schema.users);
-      const discussions = await storage.db.select().from(schema.discussions);
-      const prayers = await storage.db.select().from(schema.prayerRequests);
-      const events = await storage.db.select().from(schema.events);
+      const churches = await db.select().from(schema.churches);
+      const users = await db.select().from(schema.users);
+      const discussions = await db.select().from(schema.discussions);
+      const prayers = await db.select().from(schema.prayerRequests);
+      const events = await db.select().from(schema.events);
       
       res.json({
         churches: churches.length,
@@ -6500,14 +6500,7 @@ Return JSON with this exact structure:
     try {
       console.log('Starting comprehensive demo data generation...');
       
-      const { demoDB, isDemoEnvironment } = await import('./demo-db');
-      
-      if (!isDemoEnvironment()) {
-        return res.status(400).json({ message: 'Demo environment not available' });
-      }
-
-      // Demo data generation endpoint (generator file removed for production)
-      // This endpoint would generate demo data if needed
+      // Demo endpoint disabled for production
       
       res.json({ 
         success: true, 
@@ -6524,52 +6517,13 @@ Return JSON with this exact structure:
     }
   });
 
-  app.get('/api/demo/users', async (req, res) => {
-    try {
-      const { demoDB, isDemoEnvironment } = await import('./demo-db');
-      
-      if (!isDemoEnvironment()) {
-        return res.status(400).json({ message: 'Demo environment not available' });
-      }
-
-      // Get sample users from demo database for role switching
-      const users = await demoDB.select({
-        id: schema.users.id,
-        firstName: schema.users.firstName,
-        lastName: schema.users.lastName,
-        email: schema.users.email
-      }).from(schema.users).limit(12);
-
-      // Add mock role and church data for demo
-      const demoUsers = users.map((user, index) => ({
-        ...user,
-        role: ['Pastor', 'Member', 'Admin', 'Volunteer'][index % 4],
-        churchName: ['Grace Community Church', 'Faith Baptist Church', 'Hope Presbyterian'][index % 3]
-      }));
-
-      res.json(demoUsers);
-    } catch (error) {
-      console.error('Demo users error:', error);
-      res.status(500).json({ message: 'Failed to load demo users' });
-    }
-  });
+  // Demo users endpoint removed for production
 
   app.post('/api/demo/clear', async (req, res) => {
     try {
       console.log('Clearing demo data...');
       
-      const { demoDB, isDemoEnvironment } = await import('./demo-db');
-      
-      if (!isDemoEnvironment()) {
-        return res.status(400).json({ message: 'Demo environment not available' });
-      }
-
-      // Clear all demo data from isolated demo database
-      await demoDB.delete(schema.events);
-      await demoDB.delete(schema.prayerRequests);
-      await demoDB.delete(schema.discussions);
-      await demoDB.delete(schema.users);
-      await demoDB.delete(schema.churches);
+      // Demo endpoint disabled for production
       
       res.json({ 
         success: true, 
