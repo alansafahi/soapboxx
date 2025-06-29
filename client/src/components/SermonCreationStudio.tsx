@@ -498,7 +498,7 @@ export default function SermonCreationStudio() {
                 placeholder="e.g., John 3:16-21, Romans 8, Psalm 23"
                 value={scriptureText}
                 onChange={(e) => setScriptureText(e.target.value)}
-                className="bg-white"
+                className="bg-white text-gray-900 placeholder-gray-500"
               />
             </div>
             <div>
@@ -509,7 +509,7 @@ export default function SermonCreationStudio() {
                 placeholder="e.g., Grace, Faith in Action, God's Love"
                 value={sermonTopic}
                 onChange={(e) => setSermonTopic(e.target.value)}
-                className="bg-white"
+                className="bg-white text-gray-900 placeholder-gray-500"
               />
             </div>
           </div>
@@ -522,7 +522,7 @@ export default function SermonCreationStudio() {
               <select 
                 value={targetAudience}
                 onChange={(e) => setTargetAudience(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md bg-white"
+                className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900"
               >
                 <option value="general">General Congregation</option>
                 <option value="youth">Youth/Young Adults</option>
@@ -538,7 +538,7 @@ export default function SermonCreationStudio() {
               <select 
                 value={sermonLength}
                 onChange={(e) => setSermonLength(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md bg-white"
+                className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900"
               >
                 <option value="short">Short (15-20 minutes)</option>
                 <option value="medium">Medium (25-30 minutes)</option>
