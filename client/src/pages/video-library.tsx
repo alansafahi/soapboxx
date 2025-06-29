@@ -510,8 +510,11 @@ export default function VideoLibrary() {
           </div>
           
           {/* Upload and Import buttons for admin/pastor users */}
-          {user && ['admin', 'church-admin', 'pastor', 'lead-pastor'].some(role => 
-            (user as any)?.role?.includes?.(role) || (user as any)?.roles?.includes?.(role)
+          {user && (
+            (user as any)?.role === 'soapbox_owner' || 
+            ['admin', 'church-admin', 'pastor', 'lead-pastor'].some(role => 
+              (user as any)?.role?.includes?.(role) || (user as any)?.roles?.includes?.(role)
+            )
           ) && (
             <div className="flex gap-2">
               <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
@@ -644,11 +647,11 @@ export default function VideoLibrary() {
                 <p className="text-gray-400 text-sm mb-3 line-clamp-2">{video.description}</p>
                 
                 <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary" className="bg-purple-600 text-white">
+                  <Badge variant="secondary" className="bg-purple-600/80 text-white border-purple-500/50">
                     {video.category}
                   </Badge>
                   {video.tags.slice(0, 2).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="border-gray-600 text-gray-300">
+                    <Badge key={index} variant="outline" className="border-purple-400/30 text-purple-200 bg-purple-900/20">
                       {tag}
                     </Badge>
                   ))}
