@@ -500,13 +500,13 @@ export default function VideoLibrary() {
 
   // Main video library interface (when videos are available)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-indigo-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100 dark:from-purple-900 dark:via-gray-900 dark:to-indigo-900 text-gray-900 dark:text-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Video Library</h1>
-            <p className="text-gray-300">Spiritual content and devotionals for your faith journey</p>
+            <p className="text-gray-600 dark:text-gray-300">Spiritual content and devotionals for your faith journey</p>
           </div>
           
           {/* Upload and Import buttons for admin/pastor users */}
@@ -574,24 +574,24 @@ export default function VideoLibrary() {
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 mb-8 border border-purple-500/20">
+        <div className="bg-white/60 dark:bg-black/20 backdrop-blur-sm rounded-xl p-6 mb-8 border border-purple-300/40 dark:border-purple-500/20">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 dark:text-purple-300 w-4 h-4" />
               <Input
                 placeholder="Search videos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-purple-900/30 border-purple-500/30 text-white placeholder:text-purple-300/70 focus:border-purple-400"
+                className="pl-10 bg-white/80 dark:bg-purple-900/30 border-purple-400/50 dark:border-purple-500/30 text-gray-900 dark:text-white placeholder:text-purple-500/70 dark:placeholder:text-purple-300/70 focus:border-purple-600 dark:focus:border-purple-400"
               />
             </div>
             
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48 bg-purple-900/30 border-purple-500/30 text-white">
-                <Filter className="w-4 h-4 mr-2 text-purple-300" />
+              <SelectTrigger className="w-48 bg-white/80 dark:bg-purple-900/30 border-purple-400/50 dark:border-purple-500/30 text-gray-900 dark:text-white">
+                <Filter className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-300" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-purple-500/30">
+              <SelectContent className="bg-white dark:bg-gray-900 border-purple-400/50 dark:border-purple-500/30">
                 {categories.map((category) => (
                   <SelectItem key={category.value} value={category.value}>
                     {category.label}
@@ -600,12 +600,12 @@ export default function VideoLibrary() {
               </SelectContent>
             </Select>
             
-            <div className="flex bg-purple-900/30 rounded-md p-1 border border-purple-500/20">
+            <div className="flex bg-white/60 dark:bg-purple-900/30 rounded-md p-1 border border-purple-400/50 dark:border-purple-500/20">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-300 hover:text-white hover:bg-purple-800/50'}
+                className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'text-purple-600 dark:text-purple-300 hover:text-white hover:bg-purple-600 dark:hover:bg-purple-800/50'}
               >
                 <Grid className="w-4 h-4" />
               </Button>
@@ -613,7 +613,7 @@ export default function VideoLibrary() {
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-300 hover:text-white hover:bg-purple-800/50'}
+                className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'text-purple-600 dark:text-purple-300 hover:text-white hover:bg-purple-600 dark:hover:bg-purple-800/50'}
               >
                 <List className="w-4 h-4" />
               </Button>
