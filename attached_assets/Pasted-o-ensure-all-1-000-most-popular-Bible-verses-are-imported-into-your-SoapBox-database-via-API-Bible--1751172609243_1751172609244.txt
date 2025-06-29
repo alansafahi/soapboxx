@@ -1,0 +1,73 @@
+o ensure all 1,000 most popular Bible verses are imported into your SoapBox database via API.Bible, follow these steps in Replit:
+
+✅ Step-by-Step Plan
+1. Use the Right Endpoint
+Use the /v1/bibles/{bibleId}/search endpoint, not just /verses, to ensure full verse retrieval by reference.
+
+2. Use a Reliable Verse List
+Prepare a list of 1,000 most popular verse references (e.g., ["John 3:16", "Romans 8:28", ...])—you can store this in a local JSON or array.
+
+3. Fetch Loop with Delay
+API.Bible enforces rate limits. Insert await new Promise(r => setTimeout(r, 300)); between requests to avoid hitting the rate cap.
+
+4. Example Replit Script (JavaScript)
+ts
+Copy
+Edit
+const axios = require('axios');
+
+const API_KEY = 'your-api-key-here';
+const BIBLE_ID = 'de4e12af7f28f599-02'; // Example: KJV
+const verses = require('./popular-verses.json'); // 1000 verses as array
+
+const headers = {
+  'api-key': API_KEY
+};
+
+async function fetchVerse(reference) {
+  const url = `https://api.scripture.api.bible/v1/bibles/${BIBLE_ID}/search`;
+  const params = {
+    query: reference,
+    limit: 1
+  };
+
+  try {
+    const response = await axios.get(url, { headers, params });
+    return response.data.data.verses?.[0] || null;
+  } catch (err) {
+    console.error(`Error fetching ${reference}:`, err.message);
+    return null;
+  }
+}
+
+async function run() {
+  const results = [];
+
+  for (let i = 0; i < verses.length; i++) {
+    const reference = verses[i];
+    const data = await fetchVerse(reference);
+    if (data) results.push(data);
+    console.log(`[${i + 1}/${verses.length}] ${reference} imported`);
+    await new Promise(r => setTimeout(r, 300)); // throttle
+  }
+
+  require('fs').writeFileSync('./scriptures.json', JSON.stringify(results, null, 2));
+}
+
+run();
+✅ What to Check if You Only Got 147 Verses
+Ensure your input list isn't truncated.
+
+Verify all verses are recognized by the API (some may need slight formatting tweaks).
+
+Check rate-limiting or quota exhaustion (403 or 429 errors).
+
+Inspect network issues like DNS failure or bad key usage.
+
+✅ Recommended Fix Commands (Replit Terminal)
+bash
+Copy
+Edit
+# Ensure popular-verse list is complete and in .json or .txt
+# Then run the fetch script from above
+node fetch-verses.js
