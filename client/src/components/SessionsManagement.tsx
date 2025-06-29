@@ -474,13 +474,7 @@ function SessionFormDialog({
                 ) : members && members.length > 0 ? (
                   members.map((member: any) => (
                     <SelectItem key={member.id} value={member.id.toString()}>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <div>
-                          <div className="font-medium">{member.fullName}</div>
-                          <div className="text-sm text-muted-foreground">{member.email}</div>
-                        </div>
-                      </div>
+                      {member.fullName} ({member.email})
                     </SelectItem>
                   ))
                 ) : (

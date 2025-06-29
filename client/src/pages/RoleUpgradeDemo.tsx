@@ -150,10 +150,7 @@ export default function RoleUpgradeDemo() {
                   <SelectContent>
                     {privilegedRoles.map((role) => (
                       <SelectItem key={role.value} value={role.value}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{role.label}</span>
-                          <span className="text-xs text-gray-500">{role.description}</span>
-                        </div>
+                        {role.label} - {role.description}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -117,9 +117,12 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
 
   const { title, description, url, thumbnail } = extractVideoInfo(post.content);
   
-  // Debug logging
+  // Enhanced debug logging
+  console.log('=== VideoSharePreview Component Rendering ===');
   console.log('VideoSharePreview - Post content:', post.content);
   console.log('VideoSharePreview - Extracted info:', { title, description, url, thumbnail });
+  console.log('VideoSharePreview - Post ID:', post.id);
+  console.log('VideoSharePreview - Has video content?', post.content?.includes('📺'));
 
   const handleWatchVideo = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -487,11 +490,16 @@ export default function EnhancedCommunityFeed() {
                       <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white dark:font-bold break-words hyphens-auto leading-tight">{post.title}</h3>
                       
                       {/* Check if this is a video share */}
-                      {post.content?.includes('📺 **Shared Video:') || post.content?.includes('🎬 Watch:') ? (
-                        <VideoSharePreview post={post} />
-                      ) : (
-                        <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
-                      )}
+                      {(() => {
+                        const hasVideoContent = post.content?.includes('📺 **Shared Video:') || post.content?.includes('🎬 Watch:');
+                        console.log(`Post ${post.id} video detection:`, hasVideoContent, post.content?.substring(0, 50));
+                        
+                        return hasVideoContent ? (
+                          <VideoSharePreview post={post} />
+                        ) : (
+                          <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
+                        );
+                      })()}
                       
                       {/* Tags */}
                       {post.tags && post.tags.length > 0 && (
