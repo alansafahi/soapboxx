@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 29, 2025: TTS BIBLE REFERENCE PRONUNCIATION COMPLETELY FIXED - Successfully resolved critical issue where Bible references with colons were read as time format by both standard and premium voices
+  - FRONTEND FIX APPLIED: Added makeTTSFriendlyReference() function to FreshAudioBible.tsx converting "Jeremiah 29:11" to "Jeremiah chapter 29, verse 11"
+  - BACKEND FIX APPLIED: Enhanced compile-verses and audio generation endpoints with identical TTS-friendly reference conversion
+  - UNIVERSAL PRONUNCIATION RESOLVED: Both browser speechSynthesis (standard voice) and OpenAI TTS (premium voices) now correctly pronounce Bible references
+  - COLON MISINTERPRETATION ELIMINATED: Prevented TTS engines from reading "29:11" as "29 hours and 11 minutes" across all audio Bible features
+  - COMPREHENSIVE COVERAGE: Fix applied to individual verse audio, multi-verse compilation, and audio Bible routines for consistent experience
 - June 29, 2025: THREE-TIER BIBLE SYSTEM COMPLETELY OPERATIONAL - Successfully implemented comprehensive Bible verse lookup system with American Bible Society integration, SoapBox Bible cache, and ChatGPT fallback
   - AUTHENTICATION FIXED: Moved Bible search endpoint to public section enabling universal access without authentication requirements
   - THREE-TIER VERIFICATION: Confirmed complete fallback sequence working - SoapBox Bible → Scripture API → ChatGPT API with proper source attribution

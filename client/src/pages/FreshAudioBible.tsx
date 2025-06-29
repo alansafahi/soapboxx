@@ -29,6 +29,13 @@ interface AudioRoutine {
   audioUrl?: string;
 }
 
+// Helper function to make Bible references TTS-friendly
+function makeTTSFriendlyReference(reference: string): string {
+  // Convert Bible references like "Jeremiah 29:11" to "Jeremiah chapter 29, verse 11"
+  // This prevents TTS from reading "29:11" as "29 hours and 11 minutes"
+  return reference.replace(/(\d+):(\d+)/g, 'chapter $1, verse $2');
+}
+
 export default function FreshAudioBible() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -420,7 +427,7 @@ export default function FreshAudioBible() {
     }
 
     const verse = selectedVerses[verseIndex];
-    const textToSpeak = `${verse.reference}. ${verse.text}`;
+    const textToSpeak = `${makeTTSFriendlyReference(verse.reference)}. ${verse.text}`;
     
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     
