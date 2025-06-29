@@ -462,6 +462,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public contextual scripture selection (POST-AUTH OVERRIDE)
+  app.get('/api/bible/contextual-selection', async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || 'anonymous';
+      const { mood, count = 10, categories, version = 'NIV' } = req.query;
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ error: "AI service not configured" });
+      }
+
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Get current liturgical season and world events context
+      const currentDate = new Date();
+      const liturgicalContext = getLiturgicalSeason(currentDate);
+      const seasonalFocus = getSeasonalFocus(liturgicalContext);
+
+      const contextualPrompt = `
+        Based on the following spiritual context, select ${count} Bible verses that would be most appropriate:
+
+        User Information:
+        - Current Mood/State: ${mood || 'seeking guidance'}
+        - Requested Categories: ${categories || 'general spiritual encouragement'}
+        - Liturgical Season: ${liturgicalContext}
+        - Seasonal Focus: ${seasonalFocus}
+        - Date Context: ${currentDate.toLocaleDateString()}
+
+        Selection Criteria:
+        1. Choose verses that directly address the user's current spiritual state
+        2. Consider the liturgical season and its themes
+        3. Ensure verses offer practical spiritual guidance and comfort
+        4. Include a mix of encouragement, wisdom, and hope
+        5. Select from different books of the Bible for variety
+
+        Please return ONLY a JSON array of ${count} objects with this exact structure:
+        [
+          {
+            "reference": "Book Chapter:Verse",
+            "text": "The actual verse text",
+            "relevance": "Brief explanation of why this verse fits the context",
+            "category": "One of: Faith, Hope, Love, Peace, Strength, Wisdom, Comfort, Forgiveness"
+          }
+        ]
+
+        Important: Return ONLY the JSON array, no additional text or explanations.
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [{ role: "user", content: contextualPrompt }],
+        temperature: 0.7,
+        max_tokens: 2000
+      });
+
+      const content = response.choices[0].message.content;
+      
+      try {
+        const verses = JSON.parse(content);
+        
+        // Add contextual metadata
+        const enrichedResponse = {
+          verses,
+          context: {
+            userId: userId !== 'anonymous' ? userId : null,
+            mood,
+            liturgicalSeason: liturgicalContext,
+            seasonalFocus,
+            requestedAt: new Date().toISOString(),
+            version: version || 'NIV'
+          },
+          meta: {
+            source: 'OpenAI Contextual Selection',
+            count: verses.length,
+            accessibility: 'Public API - No authentication required'
+          }
+        };
+
+        console.log(`📖 Contextual Bible selection: ${verses.length} verses for mood "${mood}" (${liturgicalContext})`);
+        res.json(enrichedResponse);
+        
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', parseError);
+        
+        // Fallback to basic verse selection
+        const fallbackVerses = [
+          {
+            reference: "Jeremiah 29:11",
+            text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.",
+            relevance: "God's plans provide hope and purpose",
+            category: "Hope"
+          },
+          {
+            reference: "Philippians 4:13",
+            text: "I can do all this through him who gives me strength.",
+            relevance: "Divine strength for all circumstances",
+            category: "Strength"
+          }
+        ];
+        
+        res.json({
+          verses: fallbackVerses,
+          context: { mood, fallback: true },
+          meta: { source: 'Fallback Selection', accessibility: 'Public API' }
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error in contextual selection:', error);
+      res.status(500).json({ error: 'Failed to generate contextual selection' });
+    }
+  });
+
   // Basic test route
   app.get('/api/test', (req, res) => {
     res.json({ message: 'Server is running' });
@@ -3563,7 +3675,8 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Dynamic contextual scripture selection
+  // REMOVED: Original contextual scripture selection endpoint (moved to POST-AUTH OVERRIDE)
+  /*
   app.get('/api/bible/contextual-selection', async (req: any, res) => {
     try {
       const userId = req.session?.userId || 'anonymous';
@@ -3882,6 +3995,7 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       }
     }
   });
+  */
 
   // Helper function for liturgical seasons
   function getLiturgicalSeason(date: Date) {
