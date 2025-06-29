@@ -500,7 +500,7 @@ export default function VideoLibrary() {
 
   // Main video library interface (when videos are available)
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-indigo-900 text-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -571,48 +571,50 @@ export default function VideoLibrary() {
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search videos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-          
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-48 bg-gray-800 border-gray-700 text-white">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
-              {categories.map((category) => (
-                <SelectItem key={category.value} value={category.value}>
-                  {category.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <div className="flex bg-gray-800 rounded-md p-1">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="text-white"
-            >
-              <Grid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="text-white"
-            >
-              <List className="w-4 h-4" />
-            </Button>
+        <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6 mb-8 border border-purple-500/20">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300 w-4 h-4" />
+              <Input
+                placeholder="Search videos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-purple-900/30 border-purple-500/30 text-white placeholder:text-purple-300/70 focus:border-purple-400"
+              />
+            </div>
+            
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-48 bg-purple-900/30 border-purple-500/30 text-white">
+                <Filter className="w-4 h-4 mr-2 text-purple-300" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 border-purple-500/30">
+                {categories.map((category) => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <div className="flex bg-purple-900/30 rounded-md p-1 border border-purple-500/20">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className={viewMode === 'grid' ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-300 hover:text-white hover:bg-purple-800/50'}
+              >
+                <Grid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-300 hover:text-white hover:bg-purple-800/50'}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -622,7 +624,7 @@ export default function VideoLibrary() {
           : "space-y-4"
         }>
           {filteredVideos.map((video: VideoContent) => (
-            <Card key={video.id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
+            <Card key={video.id} className="bg-gradient-to-br from-purple-900/40 to-gray-900/60 border-purple-500/20 hover:from-purple-800/50 hover:to-gray-800/70 transition-all duration-300 backdrop-blur-sm">
               <div className="relative">
                 <img 
                   src={video.thumbnail} 
