@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 29, 2025: SERMON STUDIO COMPLETED SERMONS BUG COMPLETELY FIXED - Successfully resolved critical issue where completed sermons displayed invalid dates (12/31/1969) and duplicate content causing user confusion
+  - CRITICAL DATABASE FIELD MISSING: Fixed createSermonDraft function in storage.ts missing publishedAt field in database insertion despite API endpoint correctly setting the value
+  - DATE DISPLAY ISSUE RESOLVED: Enhanced frontend SermonCreationStudio component to gracefully handle null publishedAt values by showing "Recently" instead of invalid Unix epoch dates
+  - EXISTING DATA REPAIRED: Updated all 3 existing completed sermons with proper published_at timestamps from their creation dates to restore correct chronological display
+  - AUTHENTICATION STANDARDIZATION VERIFIED: Confirmed ALL sermon endpoints consistently use session-based authentication (req.session.userId) for reliable user identification
+  - ROOT CAUSE ANALYSIS COMPLETED: Database query revealed null published_at values were being converted to JavaScript Date objects showing December 31, 1969 due to timezone conversion of Unix epoch
+  - PRODUCTION VERIFIED: Completed sermons now display proper dates (6/29/2025, 6/23/2025, 6/13/2025) with chronological ordering working correctly
 - June 29, 2025: 1000 POPULAR VERSES IMPORT SYSTEM COMPLETED - Successfully implemented comprehensive Bible verse import system with API.Bible integration and smart batching for daily rate limits
   - API.BIBLE INTEGRATION FIXED: Corrected verse endpoint usage with proper book code conversion (John 3:16 → JHN.3.16) for direct verse retrieval
   - SMART BATCHING SYSTEM: Implemented daily rate limit awareness (800 requests/day) with automatic pause/resume functionality across multiple days
