@@ -282,86 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public Bible verse search
-  app.get('/api/bible/search', async (req, res) => {
-    try {
-      const { q: query, translation = 'NIV', limit = 20 } = req.query;
-      
-      if (!query) {
-        return res.status(400).json({ message: "Search query is required" });
-      }
-      
-      let verses = await storage.searchBibleVerses(query as string, translation as string, parseInt(limit as string));
-      
-      // Check if we need OpenAI fallback - either no verses found OR placeholder text detected
-      const isReference = query.toString().match(/^[1-3]?\s*[A-Za-z]+\s*\d+:\d+/);
-      const hasPlaceholderText = verses.length > 0 && verses.some(verse => {
-        const text = verse.text.toLowerCase();
-        return text.includes('as recorded in') || 
-               text.includes('as prophesied in') || 
-               text.includes('it happened as recorded') ||
-               text.includes('this is what the lord says') ||
-               text.includes('according to') ||
-               text.includes('as written in') ||
-               text.includes('as foretold in') ||
-               text.includes('said to them as recorded') ||
-               text.includes('jesus said') && text.includes('as recorded in');
-      });
-      
-      console.log(`🔍 Checking fallback conditions - verses: ${verses.length}, isReference: ${!!isReference}, hasPlaceholder: ${hasPlaceholderText}, query: "${query}"`);
-      if (verses.length > 0) {
-        console.log(`📝 Sample verse text for debugging: "${verses[0].text}"`);
-      }
-      
-      if ((verses.length === 0 || hasPlaceholderText) && isReference) {
-        const reason = verses.length === 0 ? "no verses found" : "placeholder text detected";
-        console.log(`🤖 ${reason} in database for "${query}", trying OpenAI fallback`);
-        
-        try {
-          const { lookupBibleVerse } = await import('./bible-api.js');
-          console.log(`📚 Successfully imported lookupBibleVerse function`);
-          
-          const fallbackVerse = await lookupBibleVerse(query.toString(), translation as string);
-          console.log(`🔍 OpenAI response:`, fallbackVerse);
-          
-          if (fallbackVerse && fallbackVerse.reference && fallbackVerse.text) {
-            console.log(`✅ OpenAI provided verse for "${query}": ${fallbackVerse.text}`);
-            verses = [{
-              id: `ai-${Date.now()}`,
-              reference: fallbackVerse.reference,
-              text: fallbackVerse.text,
-              translation: fallbackVerse.version,
-              book: fallbackVerse.reference.split(' ')[0],
-              chapter: 1,
-              verse: 1,
-              topic_tags: ["bible", "scripture"],
-              category: "AI Generated",
-              popularity_score: 1,
-              ai_summary: null,
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }];
-          } else {
-            console.log(`❌ OpenAI did not return a valid verse for "${query}"`);
-          }
-        } catch (aiError) {
-          console.error('❌ OpenAI fallback failed:', aiError);
-        }
-      }
-      
-      console.log(`📚 Public Bible search "${query}" in ${translation}: ${verses.length} verses found`);
-      res.json({
-        query: query,
-        translation: translation,
-        verses: verses,
-        count: verses.length
-      });
-    } catch (error) {
-      console.error("Error searching verses:", error);
-      res.status(500).json({ message: "Failed to search verses" });
-    }
-  });
+  // REMOVED: First duplicate Bible search endpoint
 
   // Public random Bible verse
   app.get('/api/bible/random', async (req, res) => {
@@ -477,70 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public Bible verse search (POST-AUTH OVERRIDE)
-  app.get('/api/bible/search', async (req, res) => {
-    try {
-      const { query, q, translation = 'NIV', limit = 20 } = req.query;
-      const searchQuery = query || q;
-      
-      if (!searchQuery) {
-        return res.status(400).json({ message: "Search query is required" });
-      }
-      
-      let verses = await storage.searchBibleVerses(searchQuery as string, translation as string, parseInt(limit as string));
-      
-      // If no verses found and query looks like a Bible reference, try OpenAI fallback
-      const isReference = searchQuery.toString().match(/^[1-3]?\s*[A-Za-z]+\s*\d+:\d+/);
-      console.log(`🔍 Checking fallback conditions - verses: ${verses.length}, isReference: ${!!isReference}, query: "${searchQuery}"`);
-      
-      if (verses.length === 0 && isReference) {
-        console.log(`🤖 No verses found in database for "${searchQuery}", trying OpenAI fallback`);
-        
-        try {
-          const { lookupBibleVerse } = await import('./bible-api.js');
-          console.log(`📚 Successfully imported lookupBibleVerse function`);
-          
-          const fallbackVerse = await lookupBibleVerse(searchQuery.toString(), translation as string);
-          console.log(`🔍 OpenAI response:`, fallbackVerse);
-          
-          if (fallbackVerse && fallbackVerse.reference && fallbackVerse.text) {
-            console.log(`✅ OpenAI provided verse for "${searchQuery}": ${fallbackVerse.text}`);
-            verses = [{
-              id: `ai-${Date.now()}`,
-              reference: fallbackVerse.reference,
-              text: fallbackVerse.text,
-              translation: fallbackVerse.version,
-              book: fallbackVerse.reference.split(' ')[0],
-              chapter: 1,
-              verse: 1,
-              topic_tags: ["bible", "scripture"],
-              category: "AI Generated",
-              popularity_score: 1,
-              ai_summary: null,
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }];
-          } else {
-            console.log(`❌ OpenAI did not return a valid verse for "${searchQuery}"`);
-          }
-        } catch (aiError) {
-          console.error('❌ OpenAI fallback failed:', aiError);
-        }
-      }
-      
-      console.log(`🔍 Public verse search: "${searchQuery}" found ${verses.length} results`);
-      res.json({
-        query: searchQuery,
-        translation: translation,
-        verses: verses,
-        count: verses.length
-      });
-    } catch (error) {
-      console.error("Error searching verses:", error);
-      res.status(500).json({ message: "Failed to search verses" });
-    }
-  });
+  // REMOVED: Second duplicate Bible search endpoint
 
   // Public random Bible verse (POST-AUTH OVERRIDE)
   app.get('/api/bible/random', async (req, res) => {
@@ -2853,29 +2711,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   // Bible verse lookup endpoint already registered as public API above
 
-  // Public Bible verse search across all translations  
-  app.get('/api/bible/search', async (req, res) => {
-    try {
-      const { q: query, translation = 'NIV', limit = 20 } = req.query;
-      
-      if (!query) {
-        return res.status(400).json({ message: "Search query is required" });
-      }
-      
-      const verses = await storage.searchBibleVerses(query as string, translation as string, parseInt(limit as string));
-      
-      console.log(`📚 Bible search "${query}" in ${translation}: ${verses.length} verses found`);
-      res.json({
-        query: query as string,
-        translation: translation as string,
-        verses: verses,
-        count: verses.length
-      });
-    } catch (error) {
-      console.error("Error searching Bible verses:", error);
-      res.status(500).json({ message: "Failed to search verses" });
-    }
-  });
+  // REMOVED: Third duplicate Bible search endpoint
 
   // Random inspirational verse for daily reading
   // Public random Bible verse (no authentication required)
