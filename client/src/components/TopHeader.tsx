@@ -50,14 +50,6 @@ export default function TopHeader() {
   // Use profile data if available, fallback to session user data
   const typedUser = (profileUser || user) as any;
   
-  // Debug: Log actual data received
-  if (typedUser) {
-    console.log('TopHeader profileUser:', profileUser);
-    console.log('TopHeader session user:', user);
-    console.log('TopHeader final typedUser:', typedUser);
-    console.log('TopHeader profileImageUrl:', typedUser?.profileImageUrl);
-  }
-  
   // Get user initials for fallback
   const getUserInitials = () => {
     const firstName = typedUser?.firstName || '';
@@ -448,26 +440,16 @@ export default function TopHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0">
-              {typedUser?.profileImageUrl ? (
-                <img 
-                  src={typedUser.profileImageUrl} 
-                  alt="Profile Picture" 
-                  className="h-10 w-10 rounded-full object-cover border-2 border-purple-200 relative z-10"
-                  onError={(e) => {
-                    console.error('Profile image failed to load:', e);
-                    // Hide image and show fallback
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                  onLoad={() => console.log('Profile image loaded successfully')}
+              <Avatar className="h-10 w-10">
+                <AvatarImage 
+                  src={typedUser?.profileImageUrl || ""} 
+                  alt={`${typedUser?.firstName || 'User'} ${typedUser?.lastName || ''}`}
+                  className="object-cover"
                 />
-              ) : null}
-              {!typedUser?.profileImageUrl && (
-                <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-medium">
+                <AvatarFallback className="bg-purple-600 text-white text-sm font-medium">
                   {getUserInitials()}
-                </div>
-              )}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
