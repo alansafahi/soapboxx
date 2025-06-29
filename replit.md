@@ -142,6 +142,16 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 28, 2025: EXPLANATORY TEXT PREFIXES COMPLETELY ELIMINATED - Successfully enhanced cleanVerseText function across all Bible services to remove explanatory prefixes like "Hebrews 11:2 in the Good News Translation (GNT) is: " from scripture text display
+  - COMPREHENSIVE PREFIX REMOVAL: Added regex patterns to remove explanatory text like "Hebrews 11:2 in the Good News Translation (GNT) is: " before actual verse content
+  - THREE-SERVICE UPDATE: Enhanced cleanVerseText in bible-api.ts, scripture-api-service.ts, and soapbox-bible-service.ts with identical prefix-removal logic
+  - TRANSLATION PREFIX CLEANUP: Added final cleanup for remaining translation prefixes like "NIV: " or "KJV - " that might escape initial filtering
+  - COMPREHENSIVE TESTING VERIFIED: All test cases pass including original problem case, showing clean verse text without any prefixes or verse numbers
+  - PRODUCTION READY: S.O.A.P. entries and Audio Bible now display clean scripture text without explanatory prefixes or embedded verse numbers
+- June 28, 2025: AUDIO BIBLE DROPDOWN FORMAT UPDATED - Successfully changed Bible Translation dropdown format from "King James Version (KJV) Free" to "KJV - King James Version" matching S.O.A.P. form
+  - CONSISTENT FORMAT ACHIEVED: Audio Bible dropdown now matches S.O.A.P. form with abbreviation first, then hyphen, then full name
+  - FREE/PREMIUM BADGES REMOVED: Eliminated all "Free" and "Premium" labels from Bible translation selections for cleaner interface
+  - SIMPLIFIED LAYOUT: Removed complex justify-between styling and badge elements for streamlined dropdown appearance
 - June 28, 2025: PILCROW CHARACTER VERSE CLEANING COMPLETELY FIXED - Successfully enhanced cleanVerseText function to remove pilcrow characters (¶) and all verse number formats from Bible text display
   - PILCROW CHARACTER REMOVAL: Added specific regex pattern to remove verse numbers with pilcrow symbols (e.g., "29¶Come unto me..." → "Come unto me...")
   - COMPREHENSIVE VERSE CLEANING: Enhanced cleanVerseText function in all Bible services (soapbox-bible-service.ts, scripture-api-service.ts, bible-api.ts) to handle pilcrow characters and various verse number formats
