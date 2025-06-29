@@ -119,21 +119,17 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
   const { title, description, url, thumbnail } = extractVideoInfo(post.content);
   
   // Enhanced debug logging
-  console.log('=== VideoSharePreview Component Rendering ===');
-  console.log('VideoSharePreview - Post content:', post.content);
-  console.log('VideoSharePreview - Extracted info:', { title, description, url, thumbnail });
-  console.log('VideoSharePreview - Post ID:', post.id);
-  console.log('VideoSharePreview - Has video content?', post.content?.includes('📺'));
+  // VideoSharePreview component rendering
 
   const handleWatchVideo = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
-    console.log('Video click handler called, URL:', url);
+    
     if (url) {
-      console.log('Opening video URL:', url);
+      
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
-      console.log('No URL found to open');
+      
     }
   };
 
@@ -500,10 +496,10 @@ export default function EnhancedCommunityFeed() {
                       {/* Check if this is a video share */}
                       {(() => {
                         const hasVideoContent = post.content?.includes('📺 **Shared Video:') || post.content?.includes('🎬 Watch:');
-                        console.log(`Post ${post.id} video detection:`, hasVideoContent, post.content?.substring(0, 50));
+                        
                         
                         if (hasVideoContent) {
-                          console.log(`Rendering VideoSharePreview for post ${post.id}`);
+                          
                           try {
                             return <VideoSharePreview post={post} />;
                           } catch (error) {

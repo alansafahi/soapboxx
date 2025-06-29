@@ -161,11 +161,7 @@ export default function SocialFeed() {
 
   // Debug logging for feed posts
   useEffect(() => {
-    console.log('Feed posts loaded:', feedPosts);
-    console.log('Feed loading state:', isLoading);
-    if (error) {
-      console.log('Feed error:', error);
-    }
+    // Feed data loaded
   }, [feedPosts, isLoading, error]);
 
   // Search verses
@@ -1220,7 +1216,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                       e.preventDefault();
                       e.stopPropagation();
                       const isExpanded = expandedComments.has(post.id);
-                      console.log(`Comments ${isExpanded ? 'collapsing' : 'expanding'} for post ${post.id}`);
+                      // Comments toggle for post
                       
                       // Create new Set and force React re-render
                       setExpandedComments(prev => {

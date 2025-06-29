@@ -447,9 +447,8 @@ export default function TopHeader() {
                     alt="Profile"
                     className="absolute inset-0 h-full w-full object-cover"
                     style={{ zIndex: 10 }}
-                    onLoad={() => console.log('Image loaded in TopHeader')}
+                    onLoad={() => {}}
                     onError={(e) => {
-                      console.log('Image failed to load in TopHeader');
                       e.currentTarget.style.display = 'none';
                     }}
                   />
