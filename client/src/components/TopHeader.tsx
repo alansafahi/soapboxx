@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 import { useImmediateAuth } from "@/lib/immediateAuth";
@@ -240,46 +240,74 @@ export default function TopHeader() {
             </Link>
             
             {/* Admin Portal Section - Only show for admin users */}
-            {userRole && (
-              // Handle both string roles and object with roles array
-              (typeof userRole === 'string' && ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner'].includes(userRole)) ||
-              ((userRole as any)?.roles && (
-                (userRole as any).roles.includes('admin') || 
-                (userRole as any).roles.includes('church-admin') || 
-                (userRole as any).roles.includes('system-admin') || 
-                (userRole as any).roles.includes('super-admin') || 
-                (userRole as any).roles.includes('pastor') || 
-                (userRole as any).roles.includes('lead-pastor') ||
-                (userRole as any).roles.includes('soapbox_owner')
-              ))
-            ) && (
+            {user && ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'].includes((user as any)?.role) && (
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Admin Portal
                 </div>
-                <Link href="/admin/dashboard">
+                <Link href="/members">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Users className="w-4 h-4 mr-2" />
+                    Member Directory
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/sms-giving">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    SMS Giving
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/donation-analytics">
                   <DropdownMenuItem className="cursor-pointer">
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    Admin Dashboard
+                    Donation Analytics
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/communication">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Megaphone className="w-4 h-4 mr-2" />
+                    Communication Hub
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/sermon-studio">
                   <DropdownMenuItem className="cursor-pointer">
-                    <BookOpen className="w-4 h-4 mr-2" />
+                    <PenTool className="w-4 h-4 mr-2" />
                     Sermon Studio
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/content-distribution">
                   <DropdownMenuItem className="cursor-pointer">
-                    <MessageSquare className="w-4 h-4 mr-2" />
+                    <Share2 className="w-4 h-4 mr-2" />
                     Content Distribution
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/engagement-analytics">
                   <DropdownMenuItem className="cursor-pointer">
-                    <BarChart3 className="w-4 h-4 mr-2" />
+                    <TrendingUp className="w-4 h-4 mr-2" />
                     Engagement Analytics
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/ai-content-demo">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Mic className="w-4 h-4 mr-2" />
+                    AI Content Showcase
+                  </DropdownMenuItem>
+                </Link>
+              </>
+            )}
+            
+            {/* SoapBox Portal Section - Only show for soapbox_owner */}
+            {user && (user as any)?.role === 'soapbox_owner' && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  SoapBox Portal
+                </div>
+                <Link href="/admin">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Church Management
                   </DropdownMenuItem>
                 </Link>
               </>
