@@ -4247,7 +4247,7 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
   // Biblical Research API endpoint
   app.post('/api/biblical-research', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const { query, includeCommentary = true, includeCrossReferences = true } = req.body;
       
       if (!query) {
