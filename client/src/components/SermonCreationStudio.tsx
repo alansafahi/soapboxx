@@ -63,22 +63,19 @@ export default function SermonCreationStudio() {
   // Fetch saved sermon drafts
   const { data: savedDrafts, isLoading: draftsLoading, refetch: refetchDrafts } = useQuery({
     queryKey: ['/api/sermon/drafts'],
-    queryFn: () => apiRequest('/api/sermon/drafts'),
+    queryFn: () => apiRequest('GET', '/api/sermon/drafts'),
   });
 
   // Fetch completed sermons
   const { data: completedSermons, isLoading: completedLoading, refetch: refetchCompleted } = useQuery({
     queryKey: ['/api/sermon/completed'],
-    queryFn: () => apiRequest('/api/sermon/completed'),
+    queryFn: () => apiRequest('GET', '/api/sermon/completed'),
   });
 
   // Save Draft mutation
   const saveDraftMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/sermon/save-draft', {
-        method: 'POST',
-        body: { ...data, draftId: currentDraftId }
-      });
+      return await apiRequest('POST', '/api/sermon/save-draft', { ...data, draftId: currentDraftId });
     },
     onSuccess: (data) => {
       setCurrentDraftId(data.draftId);
@@ -184,10 +181,7 @@ export default function SermonCreationStudio() {
   const researchMutation = useMutation({
     mutationFn: async (data: { scripture: string; topic: string }) => {
       const query = data.scripture || data.topic;
-      return apiRequest('/api/biblical-research', {
-        method: 'POST',
-        body: { query }
-      });
+      return apiRequest('POST', '/api/biblical-research', { query });
     },
     onSuccess: (data) => {
       // Extract the research data from the API response
@@ -210,10 +204,7 @@ export default function SermonCreationStudio() {
   // Sermon Outline Mutation
   const outlineMutation = useMutation({
     mutationFn: async (data: { scripture: string; topic: string; audience: string; length: string }) => {
-      return apiRequest('/api/sermon/outline', {
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/sermon/outline', data);
     },
     onSuccess: (data) => {
       setCurrentOutline(data);
@@ -234,10 +225,7 @@ export default function SermonCreationStudio() {
   // Illustrations Mutation for generating stories and presentation content
   const illustrationsMutation = useMutation({
     mutationFn: async (data: { topic: string; mainPoints: string[]; audience: string }) => {
-      return apiRequest('/api/sermon/illustrations', {
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/sermon/illustrations', data);
     },
     onSuccess: (data) => {
       setIllustrations(data);
@@ -258,10 +246,7 @@ export default function SermonCreationStudio() {
   // Enhancement Mutation
   const enhanceMutation = useMutation({
     mutationFn: async (data: { outline: SermonOutline; research: BiblicalResearch; selectedStories?: SermonIllustration[] }) => {
-      return apiRequest('/api/sermon/enhance', {
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/sermon/enhance', data);
     },
     onSuccess: (data) => {
       setEnhancedOutline(data.enhancedOutline);
@@ -277,10 +262,7 @@ export default function SermonCreationStudio() {
   // Save Completed Sermon mutation
   const saveCompletedMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/sermon/save-completed', {
-        method: 'POST',
-        body: data
-      });
+      return await apiRequest('POST', '/api/sermon/save-completed', data);
     },
     onSuccess: () => {
       toast({
@@ -1188,9 +1170,7 @@ export default function SermonCreationStudio() {
                                 variant="destructive"
                                 onClick={async () => {
                                   try {
-                                    await apiRequest(`/api/sermon/drafts/${draft.id}`, {
-                                      method: 'DELETE'
-                                    });
+                                    await apiRequest('DELETE', `/api/sermon/drafts/${draft.id}`);
                                     refetchDrafts();
                                     toast({
                                       title: "Draft Deleted",
