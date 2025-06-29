@@ -241,6 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const publicEndpoints = [
     '/api/bible/verse/',
     '/api/bible/search',
+    '/api/bible/contextual-selection',
     '/api/bible/random',
     '/api/bible/stats',
     '/api/test'
@@ -3563,9 +3564,9 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   });
 
   // Dynamic contextual scripture selection
-  app.get('/api/bible/contextual-selection', isAuthenticated, async (req: any, res) => {
+  app.get('/api/bible/contextual-selection', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || 'anonymous';
       const { mood, count = 10, categories, version = 'NIV' } = req.query;
       
       if (!process.env.OPENAI_API_KEY) {
