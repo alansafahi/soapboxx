@@ -50,6 +50,14 @@ export default function TopHeader() {
   // Use profile data if available, fallback to session user data
   const typedUser = (profileUser || user) as any;
   
+  // Debug: Log actual data received
+  if (typedUser) {
+    console.log('TopHeader profileUser:', profileUser);
+    console.log('TopHeader session user:', user);
+    console.log('TopHeader final typedUser:', typedUser);
+    console.log('TopHeader profileImageUrl:', typedUser?.profileImageUrl);
+  }
+  
   // Get user initials for fallback
   const getUserInitials = () => {
     const firstName = typedUser?.firstName || '';
