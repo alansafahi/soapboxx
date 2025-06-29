@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Video, Upload, Play, Clock, User, Calendar, Filter, Search, Grid, List, Bell, Lightbulb, Heart, BookOpen, Users, Flame, GraduationCap } from "lucide-react";
+import { Video, Upload, Play, Clock, User, Calendar, Filter, Search, Grid, List, Bell, Lightbulb, Heart, BookOpen, Users, Flame, GraduationCap, Download } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -508,21 +509,64 @@ export default function VideoLibrary() {
             <p className="text-gray-300">Spiritual content and devotionals for your faith journey</p>
           </div>
           
-          {/* Upload button for admin/pastor users */}
+          {/* Upload and Import buttons for admin/pastor users */}
           {user && ['admin', 'church-admin', 'pastor', 'lead-pastor'].some(role => 
             (user as any)?.role?.includes?.(role) || (user as any)?.roles?.includes?.(role)
           ) && (
-            <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Video
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-gray-800 text-white border-gray-700">
-                {/* Upload dialog content same as above */}
-              </DialogContent>
-            </Dialog>
+            <div className="flex gap-2">
+              <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white">
+                    <Download className="w-4 h-4 mr-2" />
+                    Import YouTube
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-800 text-white border-gray-700">
+                  <DialogHeader>
+                    <DialogTitle>Import YouTube Videos</DialogTitle>
+                    <DialogDescription className="text-gray-300">
+                      Import videos from YouTube to your church video library
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="youtube-urls">YouTube URLs (one per line)</Label>
+                      <Textarea
+                        id="youtube-urls"
+                        value={youtubeUrls}
+                        onChange={(e) => setYoutubeUrls(e.target.value)}
+                        placeholder="https://www.youtube.com/watch?v=...&#10;https://www.youtube.com/watch?v=..."
+                        className="min-h-[100px] bg-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsImportOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleImport} 
+                      disabled={importMutation.isPending}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      {importMutation.isPending ? 'Importing...' : 'Import Videos'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              
+              <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Video
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-800 text-white border-gray-700">
+                  {/* Upload dialog content same as above */}
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
 
