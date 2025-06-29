@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Video, Upload, Play, Clock, User, Calendar, Filter, Search, Grid, List, Bell, Lightbulb, Heart, BookOpen, Users, Flame, GraduationCap, Download } from "lucide-react";
+import { Video, Upload, Play, Clock, User, Calendar, Filter, Search, Grid, List, Bell, Lightbulb, Heart, BookOpen, Users, Flame, GraduationCap, Download, Share2, MoreVertical } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface VideoContent {
   id: number;
@@ -123,6 +129,78 @@ export default function VideoLibrary() {
       });
     },
   });
+
+  // Share video mutation
+  const shareVideoMutation = useMutation({
+    mutationFn: async (videoData: { videoId: number; title: string; description: string; videoUrl: string }) => {
+      const content = `📺 **Shared Video: ${videoData.title}**\n\n${videoData.description}\n\n🎬 Watch: ${videoData.videoUrl}`;
+      return await apiRequest('POST', '/api/discussions', {
+        title: `Shared: ${videoData.title}`,
+        content,
+        type: 'video_share'
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Video Shared",
+        description: "Video has been shared to the community feed!"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Share Failed",
+        description: "Failed to share video. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Helper functions for sharing
+  const handleShareVideo = (video: VideoContent) => {
+    const videoUrl = video.videoUrl || video.url || `${window.location.origin}/video-library#${video.id}`;
+    shareVideoMutation.mutate({
+      videoId: video.id,
+      title: video.title,
+      description: video.description || '',
+      videoUrl
+    });
+  };
+
+  const handleCopyLink = async (video: VideoContent) => {
+    const videoUrl = video.videoUrl || video.url || `${window.location.origin}/video-library#${video.id}`;
+    try {
+      await navigator.clipboard.writeText(videoUrl);
+      toast({
+        title: "Link Copied",
+        description: "Video link has been copied to clipboard!"
+      });
+    } catch (err) {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy link to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNativeShare = async (video: VideoContent) => {
+    const videoUrl = video.videoUrl || video.url || `${window.location.origin}/video-library#${video.id}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: video.title,
+          text: video.description || '',
+          url: videoUrl,
+        });
+      } catch (err) {
+        // User cancelled or error occurred, fallback to copy
+        handleCopyLink(video);
+      }
+    } else {
+      // Fallback to copy link
+      handleCopyLink(video);
+    }
+  };
 
   const handleUpload = () => {
     if (!uploadForm.title || !uploadForm.description || !uploadForm.category || !uploadForm.file) {
@@ -643,7 +721,43 @@ export default function VideoLibrary() {
               </div>
               
               <CardContent className="p-4">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{video.title}</h3>
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1 mr-2">{video.title}</h3>
+                  
+                  {/* Share/Actions Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/20">
+                        <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <DropdownMenuItem 
+                        onClick={() => handleShareVideo(video)}
+                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                        disabled={shareVideoMutation.isPending}
+                      >
+                        <Heart className="h-4 w-4" />
+                        Post to Community
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleNativeShare(video)}
+                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                      >
+                        <Share2 className="h-4 w-4" />
+                        Share Video
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleCopyLink(video)}
+                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                      >
+                        <Download className="h-4 w-4" />
+                        Copy Link
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">{video.description}</p>
                 
                 <div className="flex items-center gap-2 mb-3">
