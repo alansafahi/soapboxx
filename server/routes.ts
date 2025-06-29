@@ -320,6 +320,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bible verse search endpoint - THREE-TIER SYSTEM ONLY (PUBLIC API)
+  app.get('/api/bible/search', async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      const translation = (req.query.translation as string) || 'KJV';
+      const limit = parseInt((req.query.limit as string) || '6');
+      
+      if (!query || query.length < 2) {
+        return res.json([]);
+      }
+      
+      console.log(`🔍 Bible search: "${query}" in ${translation}`);
+      
+      // Use ONLY SoapBox Bible Service with three-tier lookup
+      const { soapboxBibleService } = await import('./soapbox-bible-service.js');
+      const results = await soapboxBibleService.searchVerses(query, translation, limit);
+      
+      console.log(`✅ Found ${results.length} authentic verses from three-tier system`);
+      res.json(results);
+    } catch (error) {
+      console.error("Error searching Bible verses:", error);
+      res.status(500).json({ message: "Failed to search Bible verses" });
+    }
+  });
+
   // Scripture API Test endpoint - verify American Bible Society integration
   app.get('/api/bible/test-scripture-api', async (req, res) => {
     try {
@@ -2788,28 +2813,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Bible verse search endpoint - THREE-TIER SYSTEM ONLY (PUBLIC API)
-  app.get('/api/bible/search', async (req, res) => {
-    try {
-      const { q: query, translation = 'KJV', limit = 6 } = req.query;
-      
-      if (!query || query.length < 2) {
-        return res.json([]);
-      }
-      
-      console.log(`🔍 Bible search: "${query}" in ${translation}`);
-      
-      // Use ONLY SoapBox Bible Service with three-tier lookup
-      const { soapboxBibleService } = await import('./soapbox-bible-service.js');
-      const results = await soapboxBibleService.searchVerses(query, translation, parseInt(limit) || 6);
-      
-      console.log(`✅ Found ${results.length} authentic verses from three-tier system`);
-      res.json(results);
-    } catch (error) {
-      console.error("Error searching Bible verses:", error);
-      res.status(500).json({ message: "Failed to search Bible verses" });
-    }
-  });
+  // MOVED: Bible search endpoint moved to public section above
 
   // Messaging System API Endpoints
   
