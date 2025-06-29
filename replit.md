@@ -142,6 +142,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- June 29, 2025: SOAP FORM VALIDATION ENHANCEMENT IN PROGRESS - Improved frontend and backend validation with comprehensive error checking, but user reports validation messages not appearing correctly and sharing functionality failing
 - June 29, 2025: TTS BIBLE REFERENCE PRONUNCIATION COMPLETELY FIXED - Successfully resolved critical issue where Bible references with colons were read as time format by both standard and premium voices
   - FRONTEND FIX APPLIED: Added makeTTSFriendlyReference() function to FreshAudioBible.tsx converting "Jeremiah 29:11" to "Jeremiah chapter 29, verse 11"
   - BACKEND FIX APPLIED: Enhanced compile-verses and audio generation endpoints with identical TTS-friendly reference conversion

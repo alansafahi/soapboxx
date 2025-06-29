@@ -573,7 +573,17 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       missingFields.push("Prayer");
     }
     
+    // Set form errors for missing fields to show red error messages
     if (missingFields.length > 0) {
+      // Set form errors for each missing field
+      missingFields.forEach(field => {
+        const fieldName = field.toLowerCase() as keyof FormData;
+        form.setError(fieldName, {
+          type: 'required',
+          message: `${field} section is required`
+        });
+      });
+      
       const missingFieldsList = missingFields.join(", ");
       toast({
         title: "Complete All Required Sections",
@@ -601,29 +611,45 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       return;
     }
     
-    // Additional validation for minimum content length
-    if (data.observation.trim().length < 10) {
-      toast({
-        title: "Observation Too Short",
-        description: "Please add more detail to your observation section (at least 10 characters).",
-        variant: "destructive",
+    // Additional validation for minimum content length with form errors
+    let hasMinLengthErrors = false;
+    
+    if (data.scripture.trim().length < 10) {
+      form.setError('scripture', {
+        type: 'minLength',
+        message: 'Scripture needs at least 10 characters'
       });
-      return;
+      hasMinLengthErrors = true;
+    }
+    
+    if (data.observation.trim().length < 10) {
+      form.setError('observation', {
+        type: 'minLength', 
+        message: 'Observation needs at least 10 characters'
+      });
+      hasMinLengthErrors = true;
     }
     
     if (data.application.trim().length < 10) {
-      toast({
-        title: "Application Too Short", 
-        description: "Please add more detail to your application section (at least 10 characters).",
-        variant: "destructive",
+      form.setError('application', {
+        type: 'minLength',
+        message: 'Application needs at least 10 characters'
       });
-      return;
+      hasMinLengthErrors = true;
     }
     
     if (data.prayer.trim().length < 10) {
+      form.setError('prayer', {
+        type: 'minLength',
+        message: 'Prayer needs at least 10 characters'
+      });
+      hasMinLengthErrors = true;
+    }
+    
+    if (hasMinLengthErrors) {
       toast({
-        title: "Prayer Too Short",
-        description: "Please add more detail to your prayer section (at least 10 characters).",
+        title: "Content Too Short",
+        description: "All sections need at least 10 characters for meaningful reflection. Please see error messages below.",
         variant: "destructive",
       });
       return;
@@ -661,7 +687,11 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          const data = form.getValues();
+          handleSubmit(data);
+        }} className="space-y-6">
           {/* Scripture Section */}
           <Card>
             <CardHeader>
