@@ -4937,7 +4937,7 @@ Return JSON with this exact structure:
 
   app.put('/api/videos/:id', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const video = await storage.getVideoContent(parseInt(req.params.id));
       
       if (!video) {
@@ -4960,7 +4960,7 @@ Return JSON with this exact structure:
 
   app.delete('/api/videos/:id', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const video = await storage.getVideoContent(parseInt(req.params.id));
       
       if (!video) {
@@ -4984,7 +4984,7 @@ Return JSON with this exact structure:
   // Video Analytics Routes
   app.post('/api/videos/:id/view', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const videoId = parseInt(req.params.id);
       const { watchDuration, completionPercentage, deviceType, quality } = req.body;
 
@@ -5007,7 +5007,7 @@ Return JSON with this exact structure:
 
   app.get('/api/videos/:id/analytics', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const video = await storage.getVideoContent(parseInt(req.params.id));
       
       if (!video) {
@@ -5031,7 +5031,7 @@ Return JSON with this exact structure:
   // Video Comments Routes
   app.post('/api/videos/:id/comments', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const videoId = parseInt(req.params.id);
       const { content, timestamp, parentId } = req.body;
 
@@ -5064,7 +5064,7 @@ Return JSON with this exact structure:
   // Video Likes/Reactions Routes
   app.post('/api/videos/:id/like', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const videoId = parseInt(req.params.id);
       const { reactionType = 'like' } = req.body;
 
@@ -5079,7 +5079,7 @@ Return JSON with this exact structure:
   // Video Series Routes
   app.post('/api/video-series', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const userRole = await storage.getUserRole(userId);
       
       // Check if user has permission to create video series
@@ -5132,7 +5132,7 @@ Return JSON with this exact structure:
   // Video Playlists Routes
   app.post('/api/video-playlists', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const userRole = await storage.getUserRole(userId);
       
       // Check if user has permission to create playlists
