@@ -7216,6 +7216,7 @@ export class DatabaseStorage implements IStorage {
       userId: draftData.userId,
       churchId: draftData.churchId || null,
       isPublished: draftData.isPublished || false,
+      publishedAt: draftData.publishedAt || null,
       tags: draftData.tags || [],
       scriptureReferences: draftData.scriptureReferences || [],
       targetAudience: draftData.targetAudience || null,

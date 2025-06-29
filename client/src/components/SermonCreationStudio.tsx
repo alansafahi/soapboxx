@@ -1280,7 +1280,7 @@ export default function SermonCreationStudio() {
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-600 mb-2">
-                                Completed: {new Date(sermon.publishedAt).toLocaleDateString()}
+                                Completed: {sermon.publishedAt ? new Date(sermon.publishedAt).toLocaleDateString() : 'Recently'}
                               </p>
                               {parsedContent.outline && (
                                 <p className="text-sm text-gray-700 mb-2">
