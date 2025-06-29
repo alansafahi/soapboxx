@@ -2788,8 +2788,8 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Bible verse search endpoint - THREE-TIER SYSTEM ONLY
-  app.get('/api/bible/search', isAuthenticated, async (req: any, res) => {
+  // Bible verse search endpoint - THREE-TIER SYSTEM ONLY (PUBLIC API)
+  app.get('/api/bible/search', async (req, res) => {
     try {
       const { q: query, translation = 'KJV', limit = 6 } = req.query;
       
