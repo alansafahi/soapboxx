@@ -5155,7 +5155,7 @@ Return JSON with this exact structure:
 
   app.post('/api/video-playlists/:id/videos', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const playlistId = parseInt(req.params.id);
       const { videoId, position } = req.body;
 
