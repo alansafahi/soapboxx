@@ -6043,7 +6043,8 @@ Return JSON with this exact structure:
       }
       
       // Get the discussion to check ownership
-      const discussion = await storage.getDiscussion(discussionId);
+      const discussions = await storage.getDiscussions();
+      const discussion = discussions.find(d => d.id === discussionId);
       if (!discussion) {
         return res.status(404).json({ message: "Post not found" });
       }
