@@ -100,7 +100,7 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
     const title = titleMatch ? titleMatch[1] : 'Shared Video';
     
     // Extract description (text between title and watch link)
-    const descMatch = content.match(/\*\*\n\n(.*?)\n\n🎬 Watch:/)
+    const descMatch = content.match(/\*\*\n\n(.*?)\n\n🎬 Watch:/s);
     const description = descMatch ? descMatch[1] : '';
     
     // Extract YouTube URL
