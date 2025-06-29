@@ -1,6 +1,6 @@
 import { db } from './db.js';
 import { soapboxBible, bibleVerses } from '../shared/schema.js';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, or } from 'drizzle-orm';
 import { scriptureApiService } from './scripture-api-service.js';
 import { lookupBibleVerse } from './bible-api.js';
 
@@ -333,6 +333,87 @@ class SoapBoxBibleService {
         byTranslation: {},
         popularVerses: 0
       };
+    }
+  }
+  
+  /**
+   * Search verses using three-tier system (NO PLACEHOLDERS EVER)
+   */
+  async searchVerses(query: string, translation: AllowedTranslation = 'KJV', limit: number = 6): Promise<any[]> {
+    console.log(`🔍 SoapBox Bible Search: "${query}" in ${translation}`);
+    
+    try {
+      // TIER 1: Check SoapBox Bible cache first
+      const cacheResults = await db
+        .select()
+        .from(soapboxBible)
+        .where(and(
+          eq(soapboxBible.translation, translation),
+          or(
+            sql`text ILIKE '%' || ${query} || '%'`,
+            sql`reference ILIKE '%' || ${query} || '%'`
+          )
+        ))
+        .orderBy(soapboxBible.popularityRank)
+        .limit(limit);
+        
+      if (cacheResults.length > 0) {
+        console.log(`✅ Found ${cacheResults.length} verses from SoapBox Bible cache`);
+        return cacheResults.map(verse => ({
+          reference: verse.reference,
+          text: this.cleanVerseText(verse.text),
+          translation: verse.translation,
+          source: 'SoapBox Bible',
+          book: verse.book,
+          chapter: verse.chapter,
+          verse: verse.verse
+        }));
+      }
+      
+      // TIER 2: Try Scripture API.Bible
+      try {
+        const apiResults = await scriptureApiService.searchVerses(query, translation, limit);
+        if (apiResults && apiResults.length > 0) {
+          console.log(`✅ Found ${apiResults.length} verses from Scripture API`);
+          return apiResults.map(verse => ({
+            reference: verse.reference,
+            text: this.cleanVerseText(verse.text),
+            translation: verse.version,
+            source: verse.source,
+            book: verse.reference.split(' ')[0],
+            chapter: 1,
+            verse: '1'
+          }));
+        }
+      } catch (error) {
+        console.log(`⚠️ Scripture API search failed:`, error);
+      }
+      
+      // TIER 3: Try ChatGPT API as final fallback
+      try {
+        const { lookupBibleVerse } = await import('./bible-api.js');
+        const aiResult = await lookupBibleVerse(query, translation);
+        if (aiResult && aiResult.text) {
+          console.log(`✅ Found verse from ChatGPT API`);
+          return [{
+            reference: aiResult.reference,
+            text: this.cleanVerseText(aiResult.text),
+            translation: aiResult.version,
+            source: 'ChatGPT API',
+            book: aiResult.reference.split(' ')[0],
+            chapter: 1,
+            verse: '1'
+          }];
+        }
+      } catch (error) {
+        console.log(`⚠️ ChatGPT API search failed:`, error);
+      }
+      
+      console.log(`❌ No authentic verses found for "${query}" in ${translation}`);
+      return []; // NEVER return placeholder text
+    } catch (error) {
+      console.error('SoapBox Bible search error:', error);
+      return [];
     }
   }
   

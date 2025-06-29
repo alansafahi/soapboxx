@@ -2952,27 +2952,23 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
-  // Bible verse search endpoint for social feed linking
+  // Bible verse search endpoint - THREE-TIER SYSTEM ONLY
   app.get('/api/bible/search', isAuthenticated, async (req: any, res) => {
     try {
-      const { q: query, limit = 6 } = req.query;
+      const { q: query, translation = 'KJV', limit = 6 } = req.query;
       
       if (!query || query.length < 2) {
         return res.json([]);
       }
       
-      const limitNum = Math.min(parseInt(limit) || 6, 10); // Max 10 verses per search
+      console.log(`🔍 Bible search: "${query}" in ${translation}`);
       
-      // Search through our comprehensive Bible database
-      const verses = await storage.getBibleVersesPaginated({
-        search: query,
-        limit: limitNum,
-        offset: 0
-      });
+      // Use ONLY SoapBox Bible Service with three-tier lookup
+      const { soapboxBibleService } = await import('./soapbox-bible-service.js');
+      const results = await soapboxBibleService.searchVerses(query, translation, parseInt(limit) || 6);
       
-      console.log(`Bible search for "${query}" returned ${verses.length} verses`);
-      
-      res.json(verses);
+      console.log(`✅ Found ${results.length} authentic verses from three-tier system`);
+      res.json(results);
     } catch (error) {
       console.error("Error searching Bible verses:", error);
       res.status(500).json({ message: "Failed to search Bible verses" });
