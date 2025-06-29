@@ -82,6 +82,47 @@ function parseReference(reference: string): { book: string; chapter: number; ver
 }
 
 /**
+ * Convert reference format for API.Bible verse endpoint
+ */
+function convertReferenceForAPI(reference: string): string {
+  // Convert "John 3:16" to "JHN.3.16"
+  // Convert "1 Corinthians 13:4-7" to "1CO.13.4-1CO.13.7"
+  
+  const bookMap: Record<string, string> = {
+    'Genesis': 'GEN', 'Exodus': 'EXO', 'Leviticus': 'LEV', 'Numbers': 'NUM', 'Deuteronomy': 'DEU',
+    'Joshua': 'JOS', 'Judges': 'JDG', 'Ruth': 'RUT', '1 Samuel': '1SA', '2 Samuel': '2SA',
+    '1 Kings': '1KI', '2 Kings': '2KI', '1 Chronicles': '1CH', '2 Chronicles': '2CH',
+    'Ezra': 'EZR', 'Nehemiah': 'NEH', 'Esther': 'EST', 'Job': 'JOB', 'Psalm': 'PSA', 'Psalms': 'PSA',
+    'Proverbs': 'PRO', 'Ecclesiastes': 'ECC', 'Song of Solomon': 'SNG', 'Isaiah': 'ISA',
+    'Jeremiah': 'JER', 'Lamentations': 'LAM', 'Ezekiel': 'EZK', 'Daniel': 'DAN',
+    'Hosea': 'HOS', 'Joel': 'JOL', 'Amos': 'AMO', 'Obadiah': 'OBA', 'Jonah': 'JON',
+    'Micah': 'MIC', 'Nahum': 'NAM', 'Habakkuk': 'HAB', 'Zephaniah': 'ZEP', 'Haggai': 'HAG',
+    'Zechariah': 'ZEC', 'Malachi': 'MAL', 'Matthew': 'MAT', 'Mark': 'MRK', 'Luke': 'LUK',
+    'John': 'JHN', 'Acts': 'ACT', 'Romans': 'ROM', '1 Corinthians': '1CO', '2 Corinthians': '2CO',
+    'Galatians': 'GAL', 'Ephesians': 'EPH', 'Philippians': 'PHP', 'Colossians': 'COL',
+    '1 Thessalonians': '1TH', '2 Thessalonians': '2TH', '1 Timothy': '1TI', '2 Timothy': '2TI',
+    'Titus': 'TIT', 'Philemon': 'PHM', 'Hebrews': 'HEB', 'James': 'JAS', '1 Peter': '1PE',
+    '2 Peter': '2PE', '1 John': '1JN', '2 John': '2JN', '3 John': '3JN', 'Jude': 'JUD',
+    'Revelation': 'REV'
+  };
+
+  const match = reference.match(/^(\d?\s*[A-Za-z\s]+)\s+(\d+):(.+)$/);
+  if (!match) return reference;
+
+  const [, bookName, chapter, verseRange] = match;
+  const bookCode = bookMap[bookName.trim()];
+  if (!bookCode) return reference;
+
+  // Handle verse ranges like "4-7"
+  if (verseRange.includes('-')) {
+    const [startVerse, endVerse] = verseRange.split('-');
+    return `${bookCode}.${chapter}.${startVerse.trim()}-${bookCode}.${chapter}.${endVerse.trim()}`;
+  }
+  
+  return `${bookCode}.${chapter}.${verseRange.trim()}`;
+}
+
+/**
  * Fetch a single verse from API.Bible with rate limiting
  */
 async function fetchVerseFromAPI(reference: string, translation: string): Promise<ApiVerseResult | null> {
@@ -92,15 +133,12 @@ async function fetchVerseFromAPI(reference: string, translation: string): Promis
   }
 
   try {
-    const searchUrl = `${API_BASE_URL}/bibles/${bibleId}/search`;
-    const params = new URLSearchParams({
-      query: reference,
-      limit: '1'
-    });
+    const verseId = convertReferenceForAPI(reference);
+    const verseUrl = `${API_BASE_URL}/bibles/${bibleId}/verses/${verseId}`;
 
-    console.log(`Fetching ${reference} (${translation}) from API.Bible...`);
+    console.log(`Fetching ${reference} (${translation}) -> ${verseId} from API.Bible...`);
     
-    const response = await fetch(`${searchUrl}?${params}`, {
+    const response = await fetch(verseUrl, {
       headers: {
         'api-key': API_KEY!,
         'Accept': 'application/json'
@@ -113,14 +151,21 @@ async function fetchVerseFromAPI(reference: string, translation: string): Promis
     }
 
     const data = await response.json();
-    const verses = data?.data?.verses;
+    const verse = data?.data;
     
-    if (!verses || verses.length === 0) {
-      console.warn(`No verses found for ${reference} in ${translation}`);
+    if (!verse || !verse.content) {
+      console.warn(`No verse content found for ${reference} in ${translation}`);
       return null;
     }
 
-    return verses[0];
+    return {
+      id: verse.id,
+      orgId: verse.orgId || '',
+      bookId: verse.bookId || '',
+      chapterId: verse.chapterId || '',
+      reference: verse.reference || reference,
+      content: verse.content
+    };
   } catch (error) {
     console.error(`Error fetching ${reference}:`, error);
     return null;

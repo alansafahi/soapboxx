@@ -2938,6 +2938,35 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   // MOVED: Bible search endpoint moved to public section above
 
+  // Import 1000 popular Bible verses - Admin only
+  app.post('/api/admin/import-verses', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.session?.user?.role;
+      if (userRole !== 'soapbox_owner' && userRole !== 'system_admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const { maxDailyRequests = 800 } = req.body;
+
+      // Import the function dynamically to avoid startup dependencies
+      const { import1000PopularVerses } = await import('./import-1000-verses-fixed.js');
+      
+      // Run import in background and return immediate response
+      import1000PopularVerses(maxDailyRequests).catch(error => {
+        console.error('Bible verse import error:', error);
+      });
+
+      res.json({ 
+        success: true, 
+        message: `Bible verse import started with ${maxDailyRequests} daily request limit. Check server logs for progress.`,
+        dailyLimit: maxDailyRequests
+      });
+    } catch (error) {
+      console.error('Error starting Bible verse import:', error);
+      res.status(500).json({ message: 'Failed to start import process' });
+    }
+  });
+
   // Messaging System API Endpoints
   
   // Get unread message count for notification badge
