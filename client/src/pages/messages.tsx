@@ -343,42 +343,35 @@ export default function MessagesPage() {
                             </p>
                           </div>
                           
-                          {/* Message Expansion Button */}
+                          {/* Purple Circle Expansion Button */}
                           <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                const isExpanded = expandedConversations.has(conversation.id);
-                                console.log(`Conversation ${isExpanded ? 'collapsing' : 'expanding'} for conversation ${conversation.id}`);
-                                
-                                setExpandedConversations(prev => {
-                                  const newSet = new Set(prev);
-                                  if (isExpanded) {
-                                    newSet.delete(conversation.id);
-                                  } else {
-                                    newSet.add(conversation.id);
-                                  }
-                                  return newSet;
-                                });
-                                
-                                if (!isExpanded) {
-                                  toast({
-                                    title: "Messages Expanded",
-                                    description: `Showing conversation messages`,
-                                  });
-                                }
-                              }}
-                              className={`${expandedConversations.has(conversation.id) ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-blue-500 hover:bg-blue-50`}
-                            >
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              2
-                            </Button>
-                            
                             {conversation.unreadCount > 0 && (
-                              <Badge className="bg-purple-600 text-white min-w-[1.5rem] h-6 rounded-full text-xs">
+                              <Badge 
+                                className="bg-purple-600 hover:bg-purple-700 text-white min-w-[1.5rem] h-6 rounded-full text-xs cursor-pointer transition-colors"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const isExpanded = expandedConversations.has(conversation.id);
+                                  console.log(`Conversation ${isExpanded ? 'collapsing' : 'expanding'} for conversation ${conversation.id}`);
+                                  
+                                  setExpandedConversations(prev => {
+                                    const newSet = new Set(prev);
+                                    if (isExpanded) {
+                                      newSet.delete(conversation.id);
+                                    } else {
+                                      newSet.add(conversation.id);
+                                    }
+                                    return newSet;
+                                  });
+                                  
+                                  if (!isExpanded) {
+                                    toast({
+                                      title: "Messages Expanded",
+                                      description: `Showing conversation messages`,
+                                    });
+                                  }
+                                }}
+                              >
                                 {conversation.unreadCount}
                               </Badge>
                             )}
