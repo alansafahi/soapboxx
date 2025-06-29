@@ -643,8 +643,96 @@ export default function VideoLibrary() {
                     Upload Video
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-800 text-white border-gray-700">
-                  {/* Upload dialog content same as above */}
+                <DialogContent className="bg-gray-800 text-white border-gray-700 max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Upload Video</DialogTitle>
+                    <DialogDescription className="text-gray-400">
+                      Share spiritual content with your community
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="title">Title *</Label>
+                      <Input
+                        id="title"
+                        value={uploadForm.title}
+                        onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                        className="bg-gray-700 border-gray-600 text-white"
+                        placeholder="Enter video title"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={uploadForm.description}
+                        onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+                        className="bg-gray-700 border-gray-600 text-white"
+                        placeholder="Enter video description"
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={uploadForm.category} onValueChange={(value) => setUploadForm(prev => ({ ...prev, category: value }))}>
+                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-700 border-gray-600">
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category} className="text-white hover:bg-gray-600">
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="tags">Tags</Label>
+                      <Input
+                        id="tags"
+                        value={uploadForm.tags}
+                        onChange={(e) => setUploadForm(prev => ({ ...prev, tags: e.target.value }))}
+                        className="bg-gray-700 border-gray-600 text-white"
+                        placeholder="Enter tags separated by commas"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="video">Video File *</Label>
+                      <Input
+                        id="video"
+                        type="file"
+                        accept="video/mp4,video/webm,video/ogg"
+                        onChange={handleFileChange}
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
+                      <p className="text-sm text-gray-400 mt-1">
+                        Supported formats: MP4, WebM, OGG. Max size: 500MB.
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-2 pt-4">
+                      <Button
+                        onClick={() => setIsUploadOpen(false)}
+                        variant="outline"
+                        className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleUpload}
+                        disabled={uploadMutation.isPending}
+                        className="flex-1 bg-purple-600 hover:bg-purple-700"
+                      >
+                        {uploadMutation.isPending ? 'Uploading...' : 'Upload Video'}
+                      </Button>
+                    </div>
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>

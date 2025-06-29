@@ -116,10 +116,20 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
   };
 
   const { title, description, url, thumbnail } = extractVideoInfo(post.content);
+  
+  // Debug logging
+  console.log('VideoSharePreview - Post content:', post.content);
+  console.log('VideoSharePreview - Extracted info:', { title, description, url, thumbnail });
 
-  const handleWatchVideo = () => {
+  const handleWatchVideo = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    console.log('Video click handler called, URL:', url);
     if (url) {
-      window.open(url, '_blank');
+      console.log('Opening video URL:', url);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      console.log('No URL found to open');
     }
   };
 
