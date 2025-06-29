@@ -466,111 +466,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/bible/contextual-selection', async (req: any, res) => {
     try {
       const userId = req.session?.userId || 'anonymous';
-      const { mood, count = 10, categories, version = 'NIV' } = req.query;
+      const { mood, count = 2, categories, version = 'KJV' } = req.query;
       
-      if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ error: "AI service not configured" });
-      }
+      // Mood to category mapping for authentic verse selection
+      const moodCategoryMap: { [key: string]: string[] } = {
+        'hopeful': ['Core', 'Epistles', 'Gospels'],
+        'grateful': ['Core', 'Wisdom', 'Epistles'], 
+        'peaceful': ['Wisdom', 'Core', 'Gospels'],
+        'anxious': ['Core', 'Epistles', 'Wisdom'],
+        'joyful': ['Core', 'Wisdom', 'Epistles'],
+        'seeking guidance': ['Wisdom', 'Core', 'Epistles'],
+        'blessed': ['Core', 'Epistles', 'Wisdom'],
+        'reflective': ['Wisdom', 'Core', 'Epistles'],
+        'celebrating': ['Core', 'Epistles', 'Wisdom'],
+        'praying': ['Core', 'Epistles', 'Gospels'],
+        'studying scripture': ['Wisdom', 'Core', 'Epistles'],
+        'inspired': ['Core', 'Epistles', 'Gospels'],
+        'wanting to grow': ['Epistles', 'Core', 'Wisdom'],
+        'spiritual thirst': ['Gospels', 'Core', 'Epistles'],
+        'revival': ['Core', 'Epistles', 'Gospels'],
+        'intimacy': ['Core', 'Wisdom', 'Epistles']
+      };
 
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-      // Get current liturgical season and world events context
-      const currentDate = new Date();
-      const liturgicalContext = getLiturgicalSeason(currentDate);
-      const seasonalFocus = getSeasonalFocus(liturgicalContext);
-
-      const contextualPrompt = `
-        Based on the following spiritual context, select ${count} Bible verses that would be most appropriate:
-
-        User Information:
-        - Current Mood/State: ${mood || 'seeking guidance'}
-        - Requested Categories: ${categories || 'general spiritual encouragement'}
-        - Liturgical Season: ${liturgicalContext}
-        - Seasonal Focus: ${seasonalFocus}
-        - Date Context: ${currentDate.toLocaleDateString()}
-
-        Selection Criteria:
-        1. Choose verses that directly address the user's current spiritual state
-        2. Consider the liturgical season and its themes
-        3. Ensure verses offer practical spiritual guidance and comfort
-        4. Include a mix of encouragement, wisdom, and hope
-        5. Select from different books of the Bible for variety
-
-        Please return ONLY a JSON array of ${count} objects with this exact structure:
-        [
-          {
-            "reference": "Book Chapter:Verse",
-            "text": "The actual verse text",
-            "relevance": "Brief explanation of why this verse fits the context",
-            "category": "One of: Faith, Hope, Love, Peace, Strength, Wisdom, Comfort, Forgiveness"
-          }
-        ]
-
-        Important: Return ONLY the JSON array, no additional text or explanations.
-      `;
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-        messages: [{ role: "user", content: contextualPrompt }],
-        temperature: 0.7,
-        max_tokens: 2000
-      });
-
-      const content = response.choices[0].message.content;
+      // Get relevant categories based on mood
+      const relevantCategories = moodCategoryMap[mood as string] || ['Core', 'Epistles', 'Gospels'];
       
-      try {
-        const verses = JSON.parse(content);
+      // Get verses from our actual database with mood-appropriate categories
+      const verseCount = Math.min(parseInt(count as string) || 2, 10);
+      const selectedVerses: any[] = [];
+      
+      // Try to get verses from each relevant category
+      for (const category of relevantCategories) {
+        if (selectedVerses.length >= verseCount) break;
         
-        // Add contextual metadata
-        const enrichedResponse = {
-          verses,
-          context: {
-            userId: userId !== 'anonymous' ? userId : null,
-            mood,
-            liturgicalSeason: liturgicalContext,
-            seasonalFocus,
-            requestedAt: new Date().toISOString(),
-            version: version || 'NIV'
-          },
-          meta: {
-            source: 'OpenAI Contextual Selection',
-            count: verses.length,
-            accessibility: 'Public API - No authentication required'
-          }
-        };
-
-        console.log(`📖 Contextual Bible selection: ${verses.length} verses for mood "${mood}" (${liturgicalContext})`);
-        res.json(enrichedResponse);
-        
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', parseError);
-        
-        // Fallback to basic verse selection
-        const fallbackVerses = [
-          {
-            reference: "Jeremiah 29:11",
-            text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.",
-            relevance: "God's plans provide hope and purpose",
-            category: "Hope"
-          },
-          {
-            reference: "Philippians 4:13",
-            text: "I can do all this through him who gives me strength.",
-            relevance: "Divine strength for all circumstances",
-            category: "Strength"
-          }
-        ];
-        
-        res.json({
-          verses: fallbackVerses,
-          context: { mood, fallback: true },
-          meta: { source: 'Fallback Selection', accessibility: 'Public API' }
+        const categoryVerses = await storage.getBibleVerses({
+          category: category,
+          limit: 20 // Get more to allow for shuffling
         });
+        
+        // Shuffle verses to avoid repetition
+        const shuffled = categoryVerses.sort(() => Math.random() - 0.5);
+        selectedVerses.push(...shuffled);
       }
+
+      // Remove duplicates by reference and limit to requested count
+      const uniqueVerses = selectedVerses.filter((verse, index, self) => 
+        index === self.findIndex(v => v.reference === verse.reference)
+      ).slice(0, verseCount);
+
+      // If we don't have enough unique verses, get random ones from any category
+      if (uniqueVerses.length < verseCount) {
+        const additionalVerses = await storage.getBibleVerses({
+          limit: 30,
+          // Get from different categories to fill gaps
+        });
+        
+        const newVerses = additionalVerses
+          .filter(v => !uniqueVerses.find(uv => uv.reference === v.reference))
+          .sort(() => Math.random() - 0.5)
+          .slice(0, verseCount - uniqueVerses.length);
+        
+        uniqueVerses.push(...newVerses);
+      }
+
+      // Get database statistics for transparency
+      const totalVerses = await storage.getBibleVersesCount();
+      
+      const response = {
+        verses: uniqueVerses.map((verse: any, index: number) => ({
+          id: verse.id || `mood-${Date.now()}-${index}`,
+          reference: verse.reference,
+          text: verse.text,
+          category: verse.category || 'Faith',
+          topicTags: [mood, categories].filter(Boolean),
+          source: verse.source || 'SoapBox Bible',
+          translation: verse.translation || version
+        })),
+        context: {
+          userId: userId !== 'anonymous' ? userId : null,
+          mood: mood || 'seeking guidance',
+          requestedCount: verseCount,
+          actualCount: uniqueVerses.length,
+          categoriesUsed: relevantCategories.slice(0, 3),
+          version: version || 'KJV'
+        },
+        database_stats: {
+          totalVerses: totalVerses,
+          availableCategories: Object.keys(moodCategoryMap),
+          categoryBreakdown: uniqueVerses.reduce((acc: any, v: any) => {
+            const cat = v.category || 'Unknown';
+            acc[cat] = (acc[cat] || 0) + 1;
+            return acc;
+          }, {}),
+          translationBreakdown: uniqueVerses.reduce((acc: any, v: any) => {
+            const trans = v.translation || 'Unknown';
+            acc[trans] = (acc[trans] || 0) + 1;
+            return acc;
+          }, {})
+        },
+        meta: {
+          source: 'SoapBox Bible Database',
+          selection_method: 'mood-based authentic verses',
+          accessibility: 'Public API - No authentication required'
+        }
+      };
+
+      console.log(`📖 Authentic verse selection: ${uniqueVerses.length} verses for mood "${mood}" from ${totalVerses} total database verses`);
+      res.json(response);
       
     } catch (error) {
       console.error('Error in contextual selection:', error);
-      res.status(500).json({ error: 'Failed to generate contextual selection' });
+      res.status(500).json({ error: 'Failed to retrieve authentic verses from database' });
     }
   });
 
