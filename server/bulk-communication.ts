@@ -200,7 +200,7 @@ export class BulkCommunicationService {
         sentAt: new Date()
       });
 
-      console.log(`Bulk message sent: ${successCount} successful, ${failureCount} failed`);
+
     } catch (error) {
       console.error('Error sending bulk message:', error);
       await storage.updateBulkMessage(messageId, { status: 'failed' });
@@ -230,7 +230,7 @@ export class BulkCommunicationService {
   // Send SMS message
   private async sendSMSMessage(message: BulkMessage, recipient: MessageRecipient, sender: any): Promise<void> {
     // Integrate with Twilio or similar SMS service
-    console.log(`SMS to ${recipient.phone}: ${message.content}`);
+
   }
 
   // Send in-app notification
@@ -341,7 +341,7 @@ export class BulkCommunicationService {
     endDate?: Date;
   }): Promise<void> {
     // Implementation for recurring message scheduling
-    console.log('Scheduling recurring message:', { messageData, schedule });
+
   }
 }
 

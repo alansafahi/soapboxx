@@ -42,7 +42,7 @@ export class AIVideoGenerator {
   
   async generateVideoContent(request: VideoGenerationRequest): Promise<VideoContent> {
     try {
-      console.log(`Generating AI video content for ${request.type}: ${request.topic}`);
+
       
       // Generate the video script and content
       const contentResponse = await openai.chat.completions.create({
@@ -194,7 +194,7 @@ Keep the content biblically sound, spiritually enriching, and appropriate for ch
       // 3. Combine audio and visuals into final video
       // 4. Upload to cloud storage
       
-      console.log(`Generated AI video: ${videoUrl}`);
+
       return videoUrl;
       
     } catch (error) {

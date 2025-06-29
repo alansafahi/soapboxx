@@ -251,7 +251,7 @@ export class NotificationScheduler {
 
   private async sendNotification(job: NotificationJob): Promise<void> {
     // Implement with your preferred notification service (Push notifications, Email, SMS)
-    console.log(`Sending notification to user ${job.userId}:`, job.content);
+
     
     // For web push notifications, you would integrate with a service like:
     // - Firebase Cloud Messaging (FCM)

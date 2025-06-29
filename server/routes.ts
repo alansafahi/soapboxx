@@ -254,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     );
     
     if (isPublicEndpoint) {
-      console.log(`📖 Public Bible API access: ${req.method} ${req.path}`);
+
       return next(); // Skip authentication for Bible API endpoints
     }
     
@@ -293,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const verse = await storage.getRandomBibleVerse(translation as string);
       
       if (verse) {
-        console.log(`🎲 Public random verse: ${verse.book} ${verse.chapter}:${verse.verse} (${translation})`);
+
         res.json(verse);
       } else {
         res.status(404).json({ message: "No random verse found" });
@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      console.log(`🔍 Bible search: "${query}" in ${translation}`);
+
       
       // Use ONLY SoapBox Bible Service with three-tier lookup
       const { soapboxBibleService } = await import('./soapbox-bible-service.js');
@@ -340,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validTranslation = allowedTranslations.includes(translation || '') ? translation as "KJV" | "KJVA" | "WEB" | "ASV" | "CEV" | "GNT" : undefined;
       const results = await soapboxBibleService.searchVerses(query, validTranslation, limit);
       
-      console.log(`✅ Found ${results.length} authentic verses from three-tier system`);
+
       res.json(results);
     } catch (error) {
       console.error("Error searching Bible verses:", error);
@@ -353,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { scriptureApiService } = await import('./scripture-api-service.js');
       
-      console.log('🧪 Testing Scripture API integration...');
+
       
       // Test verse lookup
       const testVerse = await scriptureApiService.lookupVerse('John 3:16', 'NIV');
@@ -436,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const verse = await storage.getRandomBibleVerse(translation as string);
       
       if (verse) {
-        console.log(`🎲 Public random verse: ${verse.book} ${verse.chapter}:${verse.verse} (${translation})`);
+
         res.json(verse);
       } else {
         res.status(404).json({ message: "No random verse found" });
@@ -573,7 +573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      console.log(`📖 Authentic verse selection: ${uniqueVerses.length} verses for mood "${mood}" from ${totalVerses} total database verses`);
+
       res.json(response);
       
     } catch (error) {
@@ -657,7 +657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         await sgMail.send(msg);
-        console.log(`Password reset email sent to ${email}`);
+
       } catch (emailError) {
         console.error("Email sending error:", emailError);
         return res.status(500).json({ message: "Unable to send reset email" });
@@ -710,7 +710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to update password" });
       }
 
-      console.log(`Password reset successful for user: ${user.email}`);
+
       res.json({ message: "Password reset successful" });
     } catch (error) {
       console.error("Reset password error:", error);
@@ -1912,7 +1912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // REST-only messaging - no WebSocket dependencies
   // All real-time features now use polling or manual refresh
-  console.log('WebSocket disabled - using REST API only for better reliability');
+
 
   // No WebSocket connections - using REST endpoints only
 
@@ -1933,7 +1933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { mood, moodScore, moodEmoji, notes, shareWithStaff, generatePersonalizedContent } = req.body;
-      console.log('📝 Creating mood check-in for user:', userId);
+
 
       // Create mood check-in record
       const moodCheckin = await storage.createMoodCheckin({
@@ -1948,7 +1948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate personalized content if requested
       let personalizedContent = null;
       if (generatePersonalizedContent) {
-        console.log('🤖 Generating personalized content...');
+
         try {
           personalizedContent = await aiPersonalizationService.generateMoodBasedContent(
             userId,
@@ -1967,7 +1967,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: 'AI-Generated Spiritual Guidance',
               content: JSON.stringify(personalizedContent)
             });
-            console.log('💾 Personalized content saved');
+
           }
         } catch (aiError) {
           console.error('⚠️ Error generating personalized content:', aiError);
@@ -1975,7 +1975,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      console.log('📤 Sending mood check-in response');
+
       res.json({
         moodCheckin,
         personalizedContent
@@ -2355,7 +2355,7 @@ app.post('/api/invitations', async (req: any, res) => {
           inviteLink
         });
 
-        console.log(`Invitation sent to ${email}`);
+
       } catch (emailError) {
         console.error('Error sending invitation email:', emailError);
         // Don't fail the entire request if email fails
@@ -2821,7 +2821,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       };
       
       // Log the reflection generation for analytics
-      console.log(`AI reflection generated for user ${userId}, verse: ${verseReference}`);
+
       
       res.json(safeReflectionData);
     } catch (error) {
@@ -2844,7 +2844,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       const verses = await storage.searchBibleVersesByTopic(topics);
       
-      console.log(`Topic search for user ${userId}: ${topics.join(', ')}`);
+
       
       res.json({
         topics,
@@ -2870,7 +2870,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const verse = await storage.getRandomBibleVerse(translation as string);
       
       if (verse) {
-        console.log(`🎲 Random verse: ${verse.book} ${verse.chapter}:${verse.verse} (${translation})`);
+
         res.json(verse);
       } else {
         res.status(500).json({ message: "Failed to get random verse" });
@@ -2919,7 +2919,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         offset: offsetNum
       });
       
-      console.log(`Bible verses API returned ${verses.length} of ${totalCount} total verses (limit: ${limitNum}, offset: ${offsetNum})`);
+
       
       res.json({
         verses,
@@ -3089,7 +3089,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         return res.status(404).json({ message: "No verses found" });
       }
 
-      console.log(`Random verse for user ${userId}: ${verse.reference}`);
+
       
       res.json(verse);
     } catch (error) {
@@ -3162,7 +3162,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       };
 
       // Log the art generation for analytics
-      console.log(`Verse art generated for user ${userId}, verse: ${verseReference}, theme: ${backgroundTheme}`);
+
       
       res.json(artData);
     } catch (error) {
@@ -3762,11 +3762,11 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       // Use only fully populated translations for consistent verse diversity
       if (fullyPopulatedTranslations.includes(version.toUpperCase())) {
         allVerses = await storage.getBibleVersesByTranslation(version.toUpperCase());
-        console.log(`Using complete ${version} translation: ${allVerses.length} verses`);
+
       } else {
         // Use KJV as reliable fallback for consistent diversity
         allVerses = await storage.getBibleVersesByTranslation('KJV');
-        console.log(`Using KJV fallback for ${version} (${allVerses.length} verses available)`);
+
       }
       
       // Create a diverse selection from relevant categories
@@ -3866,8 +3866,8 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       });
 
       const aiSelection = JSON.parse(response.choices[0].message.content);
-      console.log('AI Selection Response:', aiSelection);
-      console.log('Available verses count:', availableVerses.length);
+
+
       
       // Validate and get the selected verses
       let selectedVerses = [];
@@ -4074,19 +4074,19 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       }
 
       // Get all verses with detailed logging
-      console.log('Requested verse IDs:', verseIds);
+
       
       const verses = await Promise.all(
         verseIds.map(async (id: number) => {
           const verse = await storage.getBibleVerse(id);
-          console.log(`Verse ${id}:`, verse ? `${verse.reference} - ${verse.text.substring(0, 50)}...` : 'NOT FOUND');
+
           return verse;
         })
       );
 
       const validVerses = verses.filter(v => v !== null);
       
-      console.log('Valid verses found:', validVerses.length);
+
       console.log('First verse details:', validVerses[0] ? {
         id: validVerses[0].id,
         reference: validVerses[0].reference,
@@ -4322,16 +4322,16 @@ Format your response as JSON with the following structure:
         return res.status(400).json({ message: 'Scripture reference is required' });
       }
 
-      console.log(`[Bible Lookup] Starting lookup for user ${req.session.userId}`);
-      console.log(`[Bible Lookup] Reference: "${reference}"`);
-      console.log(`[Bible Lookup] Requested Version: "${version}"`);
+
+
+
 
       // Use our enhanced three-tier fallback system (Scripture API → Local Database → OpenAI)
       const result = await lookupBibleVerse(reference.trim(), version.toUpperCase());
       
       if (result) {
-        console.log(`[Bible Lookup] Found verse: ${result.reference} (${result.version})`);
-        console.log(`[Bible Lookup] Source: ${result.source || 'Local Database'}`);
+
+
         
         const responseData: any = {
           success: true,
@@ -4356,7 +4356,7 @@ Format your response as JSON with the following structure:
       }
 
       // If no verse found through all fallback methods
-      console.log(`[Bible Lookup] No verse found for: "${reference}" with version ${version}`);
+
       res.status(404).json({ 
         message: `"${reference}" not found. Please enter the verse text manually below.`,
         suggestion: "You can copy and paste the verse text from your preferred Bible translation."
@@ -4422,14 +4422,14 @@ Format your response as JSON with the following structure:
         return res.status(403).json({ message: 'Insufficient permissions for cache population' });
       }
 
-      console.log('🚀 Starting SoapBox Bible cache population...');
+
       
       // Import the service dynamically
       const { soapboxBibleService } = await import('./soapbox-bible-service.js');
       
       // Start population in background
       soapboxBibleService.populateCache().then(result => {
-        console.log(`SoapBox Bible cache population completed: ${result.success} success, ${result.failed} failed`);
+
       }).catch(error => {
         console.error('SoapBox Bible cache population failed:', error);
       });
@@ -4484,7 +4484,7 @@ Format your response as JSON with the following structure:
 
       // Check if user has pastor or admin role
       const userRole = await storage.getUserRole(userId);
-      console.log(`Content distribution - User ${userId} has role: ${userRole}`);
+
       
       if (!userRole) {
         return res.status(403).json({ 
@@ -5551,7 +5551,7 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      console.log('Profile update request body:', req.body);
+
 
       // Map all possible frontend field names to database schema
       const updateData = {
@@ -5595,7 +5595,7 @@ Return JSON with this exact structure:
         }
       });
 
-      console.log('Mapped update data:', updateData);
+
 
       // Update user profile
       const updatedUser = await storage.updateUserProfile(userId, updateData);
@@ -5710,7 +5710,7 @@ Return JSON with this exact structure:
       const churchId = parseInt(req.params.id);
       const userId = req.session.userId;
       
-      console.log(`Church join request: User ${userId} joining church ${churchId}`);
+
       
       // Verify church exists
       const church = await storage.getChurch(churchId);
@@ -5721,7 +5721,7 @@ Return JSON with this exact structure:
       // Join the church using storage method
       await storage.joinChurch(userId, churchId);
       
-      console.log(`Successfully joined church: User ${userId} joined church ${churchId}`);
+
       
       res.json({ 
         success: true, 
@@ -5842,7 +5842,7 @@ Return JSON with this exact structure:
         });
       }
       
-      console.log(`Created AI-categorized ${type} post for user ${userId}:`, post?.id);
+
       
       // Include suggested verses in response if mood was provided
       const response = {
@@ -5866,9 +5866,9 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: "User authentication required" });
       }
 
-      console.log("Fetching discussions for authenticated user:", userId);
+
       const discussions = await storage.getDiscussions();
-      console.log("Found discussions:", discussions.length);
+
       res.json(discussions);
     } catch (error) {
       console.error("Error fetching discussions:", error);
@@ -5882,8 +5882,8 @@ Return JSON with this exact structure:
       const userId = req.session?.userId || req.user?.claims?.sub;
       const { type, content, mood, audience, linkedVerse, attachedMedia, title, category, isPublic, tags } = req.body;
       
-      console.log("Creating discussion for user:", userId);
-      console.log("Request body:", { type, mood, audience, title, contentLength: content?.length });
+
+
       
       if (!userId) {
         console.error("No user ID found in session");
@@ -5923,11 +5923,11 @@ Return JSON with this exact structure:
         linkedVerse: linkedVerse || null
       };
       
-      console.log("Creating discussion with data:", discussionData);
+
       
       const post = await storage.createDiscussion(discussionData);
       
-      console.log("Successfully created post with ID:", post.id);
+
       res.status(201).json(post);
     } catch (error) {
       console.error("Error creating discussion:", error);
@@ -6038,19 +6038,19 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/share", isAuthenticated, async (req: any, res) => {
     try {
-      console.log('Share endpoint hit with session:', req.session);
-      console.log('Session userId:', req.session?.userId);
+
+
       
       const userId = req.session?.userId;
       const discussionId = parseInt(req.params.id);
       
       if (!userId) {
-        console.log('No userId found in session, returning 401');
+
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
       // Get the discussion details
-      console.log('Getting discussion:', discussionId);
+
       const discussions = await storage.getDiscussions();
       const discussion = discussions.find(d => d.id === discussionId);
       if (!discussion) {
@@ -6078,7 +6078,7 @@ Return JSON with this exact structure:
         churchId: null,
       });
       
-      console.log('Discussion shared successfully:', sharedPost);
+
       res.json({ success: true, message: "Discussion shared", data: sharedPost });
     } catch (error) {
       console.error("Error sharing discussion:", error);
@@ -6127,16 +6127,16 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      console.log('Comment endpoint hit with session:', req.session);
-      console.log('Session userId:', req.session?.userId);
-      console.log('Request body:', req.body);
+
+
+
       
       const userId = req.session?.userId;
       const discussionId = parseInt(req.params.id);
       const { content } = req.body;
       
       if (!userId) {
-        console.log('No userId found in session, returning 401');
+
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
@@ -6144,14 +6144,14 @@ Return JSON with this exact structure:
         return res.status(400).json({ success: false, message: "Comment content is required" });
       }
       
-      console.log('Creating comment with data:', { discussionId, authorId: userId, content: content.trim() });
+
       const comment = await storage.createDiscussionComment({
         discussionId,
         authorId: userId,
         content: content.trim()
       });
       
-      console.log('Comment created successfully:', comment);
+
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
       console.error("Error creating discussion comment:", error);
@@ -6184,8 +6184,8 @@ Return JSON with this exact structure:
 
   app.post('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
-      console.log("Prayer request body:", req.body);
-      console.log("Prayer request user:", req.user);
+
+
       const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
         console.error("No user ID found in request");
@@ -6197,13 +6197,13 @@ Return JSON with this exact structure:
         authorId: userId,
       };
       
-      console.log("Processed prayer data:", prayerData);
+
       const prayer = await storage.createPrayerRequest(prayerData);
-      console.log("Created prayer successfully:", prayer);
+
       
       // Also create a corresponding social feed post so prayers appear in the main feed
       try {
-        console.log("Creating feed post for prayer...");
+
         const feedPostData = {
           title: `Prayer Request: ${prayer.title}`,
           content: prayer.content,
@@ -6217,10 +6217,10 @@ Return JSON with this exact structure:
           attachedMedia: null,
           linkedVerse: null
         };
-        console.log("Feed post data:", feedPostData);
+
         
         const feedPost = await storage.createDiscussion(feedPostData);
-        console.log("Created corresponding feed post for prayer:", feedPost?.id);
+
       } catch (feedError) {
         // Don't fail the prayer creation if feed post fails
         console.error("Failed to create feed post for prayer:", feedError);
@@ -6500,7 +6500,7 @@ Return JSON with this exact structure:
   // Demo Data Generation Routes - DISABLED IN PRODUCTION
   // app.post('/api/demo/generate-data', async (req, res) => {
   //   try {
-  //     console.log('Starting comprehensive demo data generation...');
+
       
   //     // Import and run the comprehensive demo generator
   //     const { generateComprehensiveDemoData } = await import('../comprehensive-demo-generator.js');
@@ -6550,7 +6550,7 @@ Return JSON with this exact structure:
 
   app.post('/api/demo/generate', async (req, res) => {
     try {
-      console.log('Starting comprehensive demo data generation...');
+
       
       // Demo endpoint disabled for production
       
@@ -6573,7 +6573,7 @@ Return JSON with this exact structure:
 
   app.post('/api/demo/clear', async (req, res) => {
     try {
-      console.log('Clearing demo data...');
+
       
       // Demo endpoint disabled for production
       
@@ -6825,15 +6825,15 @@ Return JSON with this exact structure:
   // S.O.A.P. Entry Routes
   app.post('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('S.O.A.P. POST request received');
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
-      console.log('Session userId:', req.session.userId);
+
+
+
       
       const userId = req.session.userId;
-      console.log('Extracted userId:', userId);
+
       
       if (!userId) {
-        console.log('No userId found, returning 401');
+
         return res.status(401).json({ message: 'User authentication required' });
       }
       
@@ -6881,19 +6881,19 @@ Return JSON with this exact structure:
         userId,
       };
       
-      console.log('Data to validate:', JSON.stringify(soapData, null, 2));
+
       
       // Validate with the schema
       const validatedData = schema.insertSoapEntrySchema.parse(soapData);
-      console.log('Schema validation passed');
+
 
       const newEntry = await storage.createSoapEntry(validatedData);
-      console.log('S.O.A.P. entry created successfully:', newEntry.id);
+
       
       // If S.O.A.P. entry is public, also create a corresponding social feed post
       if (newEntry.isPublic) {
         try {
-          console.log('Creating feed post for public S.O.A.P. entry...');
+
           const feedPostData = {
             title: `S.O.A.P. Reflection: ${newEntry.scriptureReference}`,
             content: `📖 <strong>Scripture</strong>: ${newEntry.scriptureReference}\n${newEntry.scripture}\n\n🔍 <strong>Observation</strong>: ${newEntry.observation}\n\n💡 <strong>Application</strong>: ${newEntry.application}\n\n🙏 <strong>Prayer</strong>: ${newEntry.prayer}`,
@@ -6907,10 +6907,10 @@ Return JSON with this exact structure:
             attachedMedia: null,
             linkedVerse: newEntry.scriptureReference
           };
-          console.log('Feed post data for S.O.A.P.:', feedPostData);
+
           
           const feedPost = await storage.createDiscussion(feedPostData);
-          console.log('Created corresponding feed post for S.O.A.P. entry:', feedPost?.id);
+
         } catch (feedError) {
           // Don't fail the S.O.A.P. creation if feed post fails
           console.error('Failed to create feed post for S.O.A.P. entry:', feedError);
@@ -6941,8 +6941,8 @@ Return JSON with this exact structure:
       const userId = req.user?.claims?.sub || req.user?.id;
       const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
 
-      console.log('Fetching S.O.A.P. entries for user:', userId);
-      console.log('Query parameters:', { churchId, isPublic, limit, offset });
+
+
 
       const options = {
         churchId: churchId ? parseInt(churchId) : undefined,
@@ -6952,10 +6952,10 @@ Return JSON with this exact structure:
         offset: parseInt(offset),
       };
 
-      console.log('Storage options:', options);
+
 
       const entries = await storage.getSoapEntries(userId, options);
-      console.log('Found entries:', entries.length);
+
       res.json(entries);
     } catch (error) {
       console.error('Error fetching S.O.A.P. entries:', error);
@@ -7407,7 +7407,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Log the successful communication
-      console.log(`Bulk message "${title}" sent to ${successCount}/${targetMembers.length} recipients`);
+
 
       res.status(201).json({ 
         message: "Message sent successfully", 
@@ -7752,7 +7752,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // In a real implementation, this would integrate with email/SMS service
-      console.log(`Message sent to member ${memberId}: ${message}`);
+
       
       res.json({ success: true, message: "Message sent successfully" });
     } catch (error) {
@@ -8151,7 +8151,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const smsMessage = `Hi! To donate $${amount} to ${fund === 'general' ? 'General Fund' : fund}, text "GIVE ${amount}" to 67283. You'll receive a secure link to complete your donation. Thank you for your generosity! - SoapBox Church`;
 
       // Simulate SMS sending (in production, use Twilio API)
-      console.log(`SMS sent to ${phoneNumber}: ${smsMessage}`);
+
 
       // Log the SMS instruction in database
       await db.insert(donations).values({
@@ -8206,7 +8206,7 @@ Please provide suggestions for the missing or incomplete sections.`
         const helpResponse = `Invalid format. Text "GIVE [amount]" to 67283. Example: "GIVE 50". Minimum donation is $5.`;
         
         // In production, send SMS response via Twilio
-        console.log(`SMS response to ${phoneNumber}: ${helpResponse}`);
+
         
         return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response><Message>' + helpResponse + '</Message></Response>');
       }
@@ -8230,7 +8230,7 @@ Please provide suggestions for the missing or incomplete sections.`
       // Send response with donation link
       const responseMessage = `Thank you! To complete your $${amount} donation to ${keyword === 'GIVE' ? 'General Fund' : keyword}, click: ${donationLink}`;
       
-      console.log(`SMS response to ${phoneNumber}: ${responseMessage}`);
+
 
       res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response><Message>' + responseMessage + '</Message></Response>');
     } catch (error) {
@@ -8241,7 +8241,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
   // Messages API endpoints - standalone without middleware interference
   app.get('/api/chat/conversations', (req: any, res) => {
-    console.log('Chat conversations endpoint hit');
+
     const conversations = [
       {
         id: 3,
@@ -8273,7 +8273,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const { conversationId } = req.params;
       const userId = req.session?.userId;
       
-      console.log(`Chat messages endpoint hit for conversation ${conversationId}, user: ${userId}`);
+
       
       if (!userId) {
         return res.status(401).json({ message: 'Authentication required' });
@@ -8282,7 +8282,7 @@ Please provide suggestions for the missing or incomplete sections.`
       // Get messages from database for this conversation
       const messages = await storage.getConversationMessages(parseInt(conversationId), userId);
       
-      console.log(`Found ${messages.length} messages for conversation ${conversationId}`);
+
       
       res.json(messages);
     } catch (error) {
@@ -8296,10 +8296,10 @@ Please provide suggestions for the missing or incomplete sections.`
       const { conversationId, content } = req.body;
       const userId = req.session?.userId;
       
-      console.log(`Chat send endpoint hit: conversation ${conversationId}, content: ${content}, user: ${userId}`);
+
       
       if (!userId) {
-        console.log('No userId found in session');
+
         return res.status(401).json({ message: 'Authentication required' });
       }
       
@@ -8324,7 +8324,7 @@ Please provide suggestions for the missing or incomplete sections.`
         isEdited: false
       });
 
-      console.log('Message sent successfully:', newMessage.id);
+
       
       res.json({ 
         success: true, 
@@ -8346,7 +8346,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const { conversationId } = req.params;
       const userId = req.session.userId;
 
-      console.log(`Fetching messages for conversation ${conversationId}, user ${userId}`);
+
 
       // Ensure user is participant in conversation before retrieving messages
       await storage.ensureConversationParticipant(parseInt(conversationId), userId);
@@ -8354,7 +8354,7 @@ Please provide suggestions for the missing or incomplete sections.`
       // Get real messages from database
       const messages = await storage.getConversationMessages(parseInt(conversationId), userId);
       
-      console.log(`Retrieved ${messages.length} messages from database`);
+
       
       res.json(messages);
     } catch (error) {
@@ -8771,7 +8771,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(403).json({ message: 'Insufficient permissions for Bible import' });
       }
 
-      console.log('🚀 Starting Phase 1 Bible import (Public Domain versions)');
+
       
       // Start import in background
       bibleImportSystem.importPhase1Versions().catch(error => {
@@ -8797,7 +8797,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(403).json({ message: 'Insufficient permissions for Bible import' });
       }
 
-      console.log('🚀 Starting Phase 2 Bible import (Free/Open versions)');
+
       
       // Start import in background
       bibleImportSystem.importPhase2Versions().catch(error => {
@@ -8842,7 +8842,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(403).json({ message: 'Insufficient permissions for Bible population' });
       }
 
-      console.log('🚀 Starting missing Bible version population via OpenAI...');
+
       
       // Import the populator dynamically
       const { biblePopulator } = await import('./populate-missing-versions.js');

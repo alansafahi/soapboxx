@@ -352,7 +352,7 @@ export default function MessagesPage() {
                                   e.preventDefault();
                                   e.stopPropagation();
                                   const isExpanded = expandedConversations.has(conversation.id);
-                                  console.log(`Conversation ${isExpanded ? 'collapsing' : 'expanding'} for conversation ${conversation.id}`);
+
                                   
                                   setExpandedConversations(prev => {
                                     const newSet = new Set(prev);

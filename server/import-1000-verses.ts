@@ -97,7 +97,7 @@ async function fetchVerseFromAPI(reference: string, translation: string): Promis
       limit: '1'
     });
 
-    console.log(`Fetching ${reference} (${translation}) from API.Bible...`);
+
     
     const response = await fetch(`${searchUrl}?${params}`, {
       headers: {
@@ -172,7 +172,7 @@ async function saveVerse(reference: string, translation: string, apiResult: ApiV
       updatedAt: new Date()
     });
 
-    console.log(`✓ Saved: ${reference} (${translation})`);
+
     return true;
   } catch (error) {
     console.error(`Error saving verse ${reference}:`, error);
@@ -184,7 +184,7 @@ async function saveVerse(reference: string, translation: string, apiResult: ApiV
  * Import verses for a specific translation with rate limiting
  */
 async function importVersesForTranslation(translation: string): Promise<ImportResult> {
-  console.log(`\n📖 Starting import for ${translation}...`);
+
   
   const result: ImportResult = {
     success: 0,
@@ -200,7 +200,7 @@ async function importVersesForTranslation(translation: string): Promise<ImportRe
     try {
       // Check if verse already exists
       if (await verseExists(reference, translation)) {
-        console.log(`⚠️  Already exists: ${reference} (${translation})`);
+
         result.duplicates++;
         continue;
       }
@@ -221,7 +221,7 @@ async function importVersesForTranslation(translation: string): Promise<ImportRe
 
       // Progress indicator
       if (i % 50 === 0) {
-        console.log(`📊 Progress: ${i + 1}/${popularVerses.length} verses processed`);
+
       }
 
       // Rate limiting: 300ms delay between requests
@@ -256,7 +256,7 @@ async function getImportProgress(): Promise<{ completedCount: number, lastTransl
  * Import verses with daily rate limit awareness (5,000 per day)
  */
 async function importVersesWithRateLimit(translation: string, maxDailyRequests: number = 800): Promise<ImportResult> {
-  console.log(`\n📖 Starting import for ${translation} (max ${maxDailyRequests} requests today)...`);
+
   
   const result: ImportResult = {
     success: 0,
@@ -274,17 +274,17 @@ async function importVersesWithRateLimit(translation: string, maxDailyRequests: 
     try {
       // Check if verse already exists (no API call needed)
       if (await verseExists(reference, translation)) {
-        console.log(`⚠️  Already exists: ${reference} (${translation})`);
+
         result.duplicates++;
         continue;
       }
 
       // Check daily rate limit before making API call
       if (requestsToday >= maxDailyRequests) {
-        console.log(`\n⏸️  Daily rate limit reached (${maxDailyRequests} requests)`);
-        console.log(`📊 Processed ${i + 1}/${popularVerses.length} verses for ${translation}`);
-        console.log(`✅ Successfully imported: ${result.success} verses`);
-        console.log(`🔄 Resume tomorrow from verse ${i + 1}: ${popularVerses[i]}`);
+
+
+
+
         break;
       }
 
@@ -306,7 +306,7 @@ async function importVersesWithRateLimit(translation: string, maxDailyRequests: 
 
       // Progress indicator
       if (i % 25 === 0) {
-        console.log(`📊 Progress: ${i + 1}/${popularVerses.length} verses, ${requestsToday}/${maxDailyRequests} API calls today`);
+
       }
 
       // Rate limiting: 300ms delay between requests
@@ -325,10 +325,10 @@ async function importVersesWithRateLimit(translation: string, maxDailyRequests: 
  * Main import function with smart batching and resumption
  */
 export async function import1000PopularVerses(maxDailyRequests: number = 800): Promise<void> {
-  console.log('🚀 Starting import of 1,000 most popular Bible verses...');
-  console.log(`📋 Total verses to process: ${popularVerses.length}`);
-  console.log(`🔤 Translations: ${Object.keys(BIBLE_VERSIONS).join(', ')}`);
-  console.log(`⏱️  Daily rate limit: ${maxDailyRequests} API requests`);
+
+
+
+
 
   if (!API_KEY) {
     throw new Error('SCRIPTURE_API_KEY environment variable not set');
@@ -336,7 +336,7 @@ export async function import1000PopularVerses(maxDailyRequests: number = 800): P
 
   // Check current progress
   const progress = await getImportProgress();
-  console.log(`📈 Current database: ${progress.completedCount} verses cached`);
+
 
   const overallResults = {
     totalSuccess: 0,
@@ -354,19 +354,19 @@ export async function import1000PopularVerses(maxDailyRequests: number = 800): P
       overallResults.totalErrors += result.errors.length;
       overallResults.totalDuplicates += result.duplicates;
 
-      console.log(`\n✅ ${translation} import session completed:`);
-      console.log(`   Success: ${result.success}`);
-      console.log(`   Duplicates: ${result.duplicates}`);
-      console.log(`   Errors: ${result.errors.length}`);
+
+
+
+
       
       if (result.errors.length > 0) {
-        console.log(`   Sample errors:`, result.errors.slice(0, 2));
+
       }
 
       // If we hit rate limit, stop for today
       if (result.totalProcessed < popularVerses.length) {
-        console.log(`\n⏸️  Stopping import for today due to rate limits`);
-        console.log(`🔄 Run again tomorrow to continue importing remaining verses`);
+
+
         break;
       }
     } catch (error) {
@@ -377,22 +377,22 @@ export async function import1000PopularVerses(maxDailyRequests: number = 800): P
 
   // Final summary
   const finalProgress = await getImportProgress();
-  console.log('\n🎯 IMPORT SESSION SUMMARY:');
-  console.log(`📊 Verses imported this session: ${overallResults.totalSuccess}`);
-  console.log(`⚠️  Duplicates skipped: ${overallResults.totalDuplicates}`);
-  console.log(`❌ Errors encountered: ${overallResults.totalErrors}`);
-  console.log(`💾 Total verses in database: ${finalProgress.completedCount}`);
+
+
+
+
+
 
   // Calculate estimated completion
   const totalPossible = popularVerses.length * Object.keys(BIBLE_VERSIONS).length;
   const percentComplete = ((finalProgress.completedCount / totalPossible) * 100).toFixed(1);
-  console.log(`📈 Overall progress: ${percentComplete}% complete`);
+
 
   if (finalProgress.completedCount < totalPossible) {
     const remainingDays = Math.ceil((totalPossible - finalProgress.completedCount) / maxDailyRequests);
-    console.log(`⏳ Estimated ${remainingDays} more day(s) to complete all translations`);
+
   } else {
-    console.log(`🎉 All verses imported successfully!`);
+
   }
 }
 

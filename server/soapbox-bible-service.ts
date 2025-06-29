@@ -61,12 +61,12 @@ class SoapBoxBibleService {
    * Get verse with three-tier lookup priority
    */
   async getVerse(reference: string, translation: AllowedTranslation = 'KJV'): Promise<SoapBoxVerseResult | null> {
-    console.log(`SoapBox Bible lookup: ${reference} (${translation})`);
+
     
     // Tier 1: Check SoapBox Bible cache first
     const cachedVerse = await this.getFromSoapBoxCache(reference, translation);
     if (cachedVerse) {
-      console.log(`✓ Found in SoapBox Bible cache: ${reference}`);
+
       return cachedVerse;
     }
     
@@ -74,7 +74,7 @@ class SoapBoxBibleService {
     try {
       const apiVerse = await scriptureApiService.lookupVerse(reference, translation);
       if (apiVerse) {
-        console.log(`✓ Found via Scripture API: ${reference}`);
+
         
         // Cache the verse for future use
         await this.cacheVerse(apiVerse, reference, translation);
@@ -91,14 +91,14 @@ class SoapBoxBibleService {
         };
       }
     } catch (error) {
-      console.log(`Scripture API failed for ${reference}: ${error}`);
+
     }
     
     // Tier 3: Fallback to ChatGPT API via existing bible-api.ts
-    console.log(`Falling back to ChatGPT for: ${reference}`);
+
     const fallbackVerse = await lookupBibleVerse(reference, translation);
     if (fallbackVerse) {
-      console.log(`✓ Found via ChatGPT fallback: ${reference}`);
+
       return {
         id: fallbackVerse.id,
         reference: fallbackVerse.reference,
@@ -111,7 +111,7 @@ class SoapBoxBibleService {
       };
     }
     
-    console.log(`✗ Verse not found in any source: ${reference}`);
+
     return null;
   }
   
@@ -221,7 +221,7 @@ class SoapBoxBibleService {
         })
         .onConflictDoNothing(); // Avoid duplicates
         
-      console.log(`Cached verse in SoapBox Bible: ${reference} (rank ${popularityRank})`);
+
     } catch (error) {
       console.error('Error caching verse:', error);
     }
@@ -234,13 +234,13 @@ class SoapBoxBibleService {
     let success = 0;
     let failed = 0;
     
-    console.log('Starting SoapBox Bible cache population with top 1000 verses...');
+
     
     for (let i = 0; i < TOP_1000_VERSES.length; i++) {
       const reference = TOP_1000_VERSES[i];
       const popularityRank = i + 1;
       
-      console.log(`Populating ${popularityRank}/1000: ${reference}`);
+
       
       // Try all 6 allowed translations for each verse
       for (const translation of ALLOWED_TRANSLATIONS) {
@@ -248,7 +248,7 @@ class SoapBoxBibleService {
           // Check if already cached
           const existing = await this.getFromSoapBoxCache(reference, translation);
           if (existing) {
-            console.log(`Already cached: ${reference} (${translation})`);
+
             continue;
           }
           
@@ -272,10 +272,10 @@ class SoapBoxBibleService {
               .onConflictDoNothing();
             
             success++;
-            console.log(`✓ Cached: ${reference} (${translation})`);
+
           } else {
             failed++;
-            console.log(`✗ Failed to get: ${reference} (${translation})`);
+
           }
           
           // Rate limiting - wait 100ms between API calls
@@ -288,7 +288,7 @@ class SoapBoxBibleService {
       }
     }
     
-    console.log(`SoapBox Bible cache population complete: ${success} success, ${failed} failed`);
+
     return { success, failed };
   }
   
@@ -340,7 +340,7 @@ class SoapBoxBibleService {
    * Search verses using three-tier system (NO PLACEHOLDERS EVER)
    */
   async searchVerses(query: string, translation: AllowedTranslation = 'KJV', limit: number = 6): Promise<any[]> {
-    console.log(`🔍 SoapBox Bible Search: "${query}" in ${translation}`);
+
     
     try {
       // TIER 1: Check SoapBox Bible cache first
@@ -358,7 +358,7 @@ class SoapBoxBibleService {
         .limit(limit);
         
       if (cacheResults.length > 0) {
-        console.log(`✅ Found ${cacheResults.length} verses from SoapBox Bible cache`);
+
         return cacheResults.map(verse => ({
           reference: verse.reference,
           text: this.cleanVerseText(verse.text),
@@ -374,7 +374,7 @@ class SoapBoxBibleService {
       try {
         const apiResults = await scriptureApiService.searchVerses(query, translation, limit);
         if (apiResults && apiResults.length > 0) {
-          console.log(`✅ Found ${apiResults.length} verses from Scripture API`);
+
           return apiResults.map(verse => ({
             reference: verse.reference,
             text: this.cleanVerseText(verse.text),
@@ -386,7 +386,7 @@ class SoapBoxBibleService {
           }));
         }
       } catch (error) {
-        console.log(`⚠️ Scripture API search failed:`, error);
+
       }
       
       // TIER 3: Try ChatGPT API as final fallback
@@ -394,7 +394,7 @@ class SoapBoxBibleService {
         const { lookupBibleVerse } = await import('./bible-api.js');
         const aiResult = await lookupBibleVerse(query, translation);
         if (aiResult && aiResult.text) {
-          console.log(`✅ Found verse from ChatGPT API`);
+
           return [{
             reference: aiResult.reference,
             text: this.cleanVerseText(aiResult.text),
@@ -406,10 +406,10 @@ class SoapBoxBibleService {
           }];
         }
       } catch (error) {
-        console.log(`⚠️ ChatGPT API search failed:`, error);
+
       }
       
-      console.log(`❌ No authentic verses found for "${query}" in ${translation}`);
+
       return []; // NEVER return placeholder text
     } catch (error) {
       console.error('SoapBox Bible search error:', error);

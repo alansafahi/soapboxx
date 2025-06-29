@@ -2423,7 +2423,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async joinChurch(userId: string, churchId: number): Promise<void> {
-    console.log(`Storage: joinChurch called for user ${userId} and church ${churchId}`);
+
     
     // First, check if the user is already a member
     const existing = await db
@@ -2436,7 +2436,7 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
 
     if (existing.length > 0) {
-      console.log(`User ${userId} already exists in church ${churchId}, reactivating`);
+
       // User already exists, just reactivate
       await db
         .update(userChurches)
@@ -2449,7 +2449,7 @@ export class DatabaseStorage implements IStorage {
           eq(userChurches.churchId, churchId)
         ));
     } else {
-      console.log(`Creating new membership for user ${userId} in church ${churchId}`);
+
       // Insert new membership with minimal required fields
       await db
         .insert(userChurches)
@@ -2462,7 +2462,7 @@ export class DatabaseStorage implements IStorage {
         });
     }
     
-    console.log(`Successfully processed church join for user ${userId} and church ${churchId}`);
+
       
     // Track activity
     await this.trackUserActivity({
@@ -2839,7 +2839,7 @@ export class DatabaseStorage implements IStorage {
         isActive: true,
         joinedAt: new Date()
       });
-      console.log(`Added user ${userId} as participant in conversation ${conversationId}`);
+
     }
   }
 
@@ -6273,7 +6273,7 @@ export class DatabaseStorage implements IStorage {
       
       // For demo/testing purposes, allow switching to any role in hierarchy
       // In production, you might want to restrict this based on business rules
-      console.log(`Role switch attempt: User ${userId} switching from ${currentRole} (level ${currentLevel}) to ${newRole} (level ${targetLevel})`);
+
 
       // Update all roles for this user to inactive
       await db.execute(
@@ -6299,7 +6299,7 @@ export class DatabaseStorage implements IStorage {
         );
       }
 
-      console.log(`Role switch approved: User ${userId} switched from ${currentRole} to ${newRole}`);
+
       return true;
     } catch (error) {
       console.error('Error switching user role:', error);
@@ -6823,7 +6823,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateRoutineProgress(userId: string, routineId: number, progress: any): Promise<void> {
-    console.log(`Updated routine progress for user ${userId}, routine ${routineId}:`, progress);
+
   }
 
   // Video Content Management (Phase 1: Pastor/Admin Uploads)

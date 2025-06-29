@@ -64,11 +64,11 @@ function cleanVerseText(text: string): string {
 async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
     if (!process.env.OPENAI_API_KEY) {
-      console.log('[Bible AI] OpenAI API key not available, skipping fallback');
+
       return null;
     }
 
-    console.log(`[Bible AI] Fetching ${reference} (${version}) from OpenAI as fallback`);
+
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -89,7 +89,7 @@ async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'):
     const verseText = response.choices[0]?.message?.content?.trim();
     
     if (verseText && verseText.length > 10) {
-      console.log(`[Bible AI] Successfully retrieved ${reference} from OpenAI`);
+
       return {
         reference: reference,
         text: cleanVerseText(verseText),
@@ -116,7 +116,7 @@ interface BibleVerseResponse {
 // Database-first Bible verse lookup with zero external dependencies
 async function lookupVerseFromDatabase(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
-    console.log(`[Bible DB] Looking up "${reference}" in ${version} translation`);
+
     
     // Clean and normalize the reference
     const cleanRef = reference.trim();
@@ -137,7 +137,7 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
 
     if (exactMatch.length > 0) {
       const verse = exactMatch[0];
-      console.log(`[Bible DB] Found exact match: ${verse.reference} (${verse.translation})`);
+
       
       // Check if the text is a placeholder and needs replacement
       const isPlaceholder = verse.text && (
@@ -152,7 +152,7 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
       );
       
       if (isPlaceholder) {
-        console.log(`[Bible DB] Placeholder detected for ${verse.reference}, fetching authentic text from OpenAI`);
+
         const authenticVerse = await fetchVerseFromOpenAI(cleanRef, upperVersion);
         if (authenticVerse) {
           // Update database with authentic verse
@@ -164,7 +164,7 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
             })
             .where(eq(bibleVerses.id, verse.id));
           
-          console.log(`[Bible DB] Updated ${verse.reference} with authentic text`);
+
           return authenticVerse;
         }
       }
@@ -197,7 +197,7 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
 
       if (flexibleMatch.length > 0) {
         const verse = flexibleMatch[0];
-        console.log(`[Bible DB] Found flexible match: ${verse.reference} (${verse.translation})`);
+
         return {
           reference: verse.reference,
           text: cleanVerseText(verse.text || ''),
@@ -208,16 +208,16 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
 
     // If requested version not found, try fallback to NIV
     if (upperVersion !== 'NIV') {
-      console.log(`[Bible DB] ${upperVersion} not found, trying NIV fallback`);
+
       return await lookupVerseFromDatabase(reference, 'NIV');
     }
 
-    console.log(`[Bible DB] No verse found for "${reference}" in any available translation`);
+
     
     // Try OpenAI fallback for authentic scripture
     const aiResult = await fetchVerseFromOpenAI(reference, version);
     if (aiResult) {
-      console.log(`[Bible DB] Retrieved ${reference} from OpenAI fallback`);
+
       return aiResult;
     }
     
@@ -229,7 +229,7 @@ async function lookupVerseFromDatabase(reference: string, version: string = 'NIV
     try {
       const aiResult = await fetchVerseFromOpenAI(reference, version);
       if (aiResult) {
-        console.log(`[Bible DB] Retrieved ${reference} from OpenAI fallback after DB error`);
+
         return aiResult;
       }
     } catch (aiError) {
@@ -279,17 +279,17 @@ function generateReferenceVariations(reference: string): string[] {
 // Main Bible lookup function - Scripture API integration with fallbacks
 export async function lookupBibleVerse(reference: string, preferredVersion: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
-    console.log(`[Bible API] Looking up ${reference} in ${preferredVersion}`);
+
     
     // STEP 1: Try Scripture API first (American Bible Society - authentic source)
     try {
       const scriptureResult = await scriptureApiService.fetchVerseFromAPI(reference, preferredVersion);
       if (scriptureResult) {
-        console.log(`[Scripture API] ✅ Found ${reference} from American Bible Society`);
+
         return scriptureResult;
       }
     } catch (scriptureError) {
-      console.log(`[Scripture API] ⚠️ Error accessing Scripture API:`, scriptureError);
+
     }
     
     // STEP 2: Check local database for existing verses
@@ -309,18 +309,18 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
       );
       
       if (isPlaceholder) {
-        console.log(`[Bible API] 🔄 Placeholder detected, trying Scripture API for authentic text`);
+
         try {
           const authenticVerse = await scriptureApiService.fetchVerseFromAPI(reference, preferredVersion);
           if (authenticVerse) {
-            console.log(`[Scripture API] ✅ Replaced placeholder with authentic text`);
+
             return authenticVerse;
           }
         } catch (error) {
-          console.log(`[Scripture API] Failed to replace placeholder, trying OpenAI`);
+
         }
       } else {
-        console.log(`[Bible API] Found ${reference} in local database`);
+
         return result;
       }
     }
@@ -328,16 +328,16 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
     // STEP 3: OpenAI fallback for licensed versions or when Scripture API fails
     const versionConfig = BIBLE_VERSIONS.find(v => v.code === preferredVersion);
     if (!versionConfig || versionConfig.useOpenAI) {
-      console.log(`[Bible API] 🤖 Trying OpenAI fallback for ${preferredVersion}`);
+
       result = await fetchVerseFromOpenAI(reference, preferredVersion);
       
       if (result) {
-        console.log(`[Bible API] ✅ Retrieved ${reference} from OpenAI fallback`);
+
         return result;
       }
     }
     
-    console.log(`[Bible API] ❌ Could not find ${reference} in ${preferredVersion} from any source`);
+
     return null;
   } catch (error) {
     console.error('[Bible API] Error in lookupBibleVerse:', error);
@@ -348,13 +348,13 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
 // Search Bible verses across all translations with Scripture API integration
 export async function searchBibleVerses(query: string, translation: string = 'NIV', limit: number = 20): Promise<any[]> {
   try {
-    console.log(`[Bible API] Searching for "${query}" in ${translation} translation`);
+
     
     // STEP 1: Try Scripture API first for fresh, authentic results
     try {
       const scriptureResults = await scriptureApiService.searchVerses(query, translation, limit);
       if (scriptureResults && scriptureResults.length > 0) {
-        console.log(`[Scripture API] ✅ Found ${scriptureResults.length} verses from American Bible Society`);
+
         // Convert to expected format
         return scriptureResults.map(verse => ({
           reference: verse.reference,
@@ -367,7 +367,7 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
         }));
       }
     } catch (scriptureError) {
-      console.log(`[Scripture API] ⚠️ Search error:`, scriptureError);
+
     }
     
     // STEP 2: Search local database as fallback
@@ -388,7 +388,7 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
       .orderBy(bibleVerses.popularityScore)
       .limit(limit);
 
-    console.log(`[Bible DB] Found ${searchResults.length} verses matching "${query}" in local database`);
+
     
     // Filter out placeholder text and enhance with Scripture API if needed
     const enhancedResults = [];
@@ -435,7 +435,7 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
 // Get random Bible verse from licensed database
 export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<any | null> {
   try {
-    console.log(`[Bible DB] Getting random verse in ${translation}`);
+
     
     const randomVerse = await db
       .select()
@@ -451,7 +451,7 @@ export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<
 
     if (randomVerse.length > 0) {
       const verse = randomVerse[0];
-      console.log(`[Bible DB] Random verse: ${verse.reference}`);
+
       
       // Check if the text is a placeholder and needs replacement
       const isPlaceholder = verse.text && (
@@ -463,7 +463,7 @@ export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<
       );
       
       if (isPlaceholder) {
-        console.log(`[Bible DB] Placeholder detected in random verse ${verse.reference}, fetching authentic text`);
+
         const authenticVerse = await fetchVerseFromOpenAI(verse.reference, verse.translation || 'NIV');
         if (authenticVerse) {
           // Update database with authentic verse
@@ -475,7 +475,7 @@ export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<
             })
             .where(eq(bibleVerses.id, verse.id));
           
-          console.log(`[Bible DB] Updated random verse ${verse.reference} with authentic text`);
+
           return {
             ...verse,
             text: authenticVerse.text

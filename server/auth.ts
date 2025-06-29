@@ -151,18 +151,18 @@ function configurePassport() {
 // Unified authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
-    console.log('Authentication check - Session:', req.session);
-    console.log('Session ID:', req.sessionID);
-    console.log('Session userId:', req.session?.userId);
+
+
+
     
     // Check for session-based authentication
     if (req.session && req.session.userId) {
-      console.log('Authentication successful for user:', req.session.userId);
+
       return next();
     }
     
     // If no session, return unauthorized
-    console.log('Authentication failed - no valid session');
+
     return res.status(401).json({ success: false, message: "Unauthorized" });
   } catch (error) {
     console.error("Authentication error:", error);
@@ -254,7 +254,7 @@ export function setupAuth(app: Express): void {
           };
         }
       } catch (error) {
-        console.log('No pre-assigned church found for email:', email);
+
       }
 
       // Send verification email
@@ -264,7 +264,7 @@ export function setupAuth(app: Express): void {
           firstName,
           token: verificationToken
         });
-        console.log(`Verification email sent to ${email}`);
+
       } catch (emailError) {
         console.error('Failed to send verification email:', emailError);
         // Continue with registration even if email fails
@@ -587,7 +587,7 @@ export function setupAuth(app: Express): void {
   // Logout endpoint
   app.post('/api/auth/logout', (req, res) => {
     try {
-      console.log('🚪 Logout request received, destroying session...');
+
       
       // Clear all session data immediately
       if (req.session) {

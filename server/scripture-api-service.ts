@@ -145,27 +145,27 @@ export class ScriptureAPIService {
    */
   async fetchVerseFromAPI(reference: string, translation: string = 'NIV'): Promise<BibleVerseResult | null> {
     if (!this.apiKey) {
-      console.log('Scripture API key not available, falling back to local database');
+
       return null;
     }
 
     try {
       const parsed = this.parseReference(reference);
       if (!parsed) {
-        console.log(`Invalid reference format: ${reference}`);
+
         return null;
       }
 
       const bibleId = this.translationMap[translation.toUpperCase()] || this.translationMap['NIV'];
       const bookId = this.getBookId(parsed.book);
       
-      console.log(`Version selection debug: translation='${translation}', mapped to bibleId='${bibleId}'`);
+
       
       // Construct verse ID for Scripture API
       const verseId = `${bookId}.${parsed.chapter}.${parsed.verse}`;
       const url = `${this.baseUrl}/bibles/${bibleId}/verses/${verseId}`;
 
-      console.log(`Fetching from Scripture API: ${url}`);
+
 
       const response = await fetch(url, {
         headers: {
@@ -175,14 +175,14 @@ export class ScriptureAPIService {
       });
 
       if (!response.ok) {
-        console.log(`Scripture API error: ${response.status} - ${response.statusText}`);
+
         return null;
       }
 
       const data: ScriptureAPIResponse = await response.json();
       
       if (!data.data || !data.data.content) {
-        console.log('No content received from Scripture API');
+
         return null;
       }
 
@@ -206,7 +206,7 @@ export class ScriptureAPIService {
    */
   async searchVerses(query: string, translation: string = 'NIV', limit: number = 20): Promise<BibleVerseResult[]> {
     if (!this.apiKey) {
-      console.log('Scripture API key not available for search');
+
       return [];
     }
 
@@ -224,7 +224,7 @@ export class ScriptureAPIService {
       });
 
       if (!response.ok) {
-        console.log(`Scripture API search error: ${response.status}`);
+
         return [];
       }
 

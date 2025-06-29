@@ -225,15 +225,15 @@ export default function CommunityFeed() {
   };
 
   const handleCommentClick = (discussionId: number) => {
-    console.log('Opening comment dialog for discussion:', discussionId);
+
     setCommentDialogOpen(discussionId);
   };
 
   const handleShareDiscussion = (discussionId: number) => {
-    console.log('Sharing discussion:', discussionId);
+
     const discussion = discussions.find(d => d.id === discussionId);
     if (!discussion) {
-      console.log('Discussion not found:', discussionId);
+
       return;
     }
 
@@ -244,7 +244,7 @@ export default function CommunityFeed() {
   // Share discussion mutation
   const shareDiscussionMutation = useMutation({
     mutationFn: async (discussionId: number) => {
-      console.log('Sending share API request:', discussionId);
+
       const response = await fetch(`/api/discussions/${discussionId}/share`, {
         method: "POST",
         headers: {
@@ -262,7 +262,7 @@ export default function CommunityFeed() {
       return await response.json();
     },
     onSuccess: (data) => {
-      console.log('Share API success:', data);
+
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       toast({
         title: "Discussion shared",
@@ -295,7 +295,7 @@ export default function CommunityFeed() {
   });
 
   const handleReaction = async (discussionId: number, emoji: string) => {
-    console.log('Reaction button clicked:', { discussionId, emoji });
+
     
     try {
       const response = await fetch('/api/community/reactions', {
@@ -315,11 +315,11 @@ export default function CommunityFeed() {
         })
       });
 
-      console.log('Reaction response status:', response.status);
+
       
       if (response.ok) {
         const result = await response.json();
-        console.log('Reaction added successfully:', result);
+
         
         // Refresh discussions to show new reaction
         queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
@@ -424,7 +424,7 @@ export default function CommunityFeed() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              console.log('Reaction button clicked:', emoji, discussion.id);
+
                               handleReaction(discussion.id, emoji);
                             }}
                             className="p-1 h-auto text-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
@@ -483,7 +483,7 @@ export default function CommunityFeed() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('Comment button clicked:', discussion.id);
+
                             handleCommentClick(discussion.id);
                           }}
                           className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
@@ -509,7 +509,7 @@ export default function CommunityFeed() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('Share button clicked:', discussion.id);
+
                             handleShareDiscussion(discussion.id);
                           }}
                           className="text-gray-500 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
