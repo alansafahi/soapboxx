@@ -336,7 +336,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Use ONLY SoapBox Bible Service with three-tier lookup
       const { soapboxBibleService } = await import('./soapbox-bible-service.js');
-      const results = await soapboxBibleService.searchVerses(query, translation, limit);
+      const allowedTranslations = ["KJV", "KJVA", "WEB", "ASV", "CEV", "GNT"];
+      const validTranslation = allowedTranslations.includes(translation || '') ? translation as "KJV" | "KJVA" | "WEB" | "ASV" | "CEV" | "GNT" : undefined;
+      const results = await soapboxBibleService.searchVerses(query, validTranslation, limit);
       
       console.log(`✅ Found ${results.length} authentic verses from three-tier system`);
       res.json(results);
@@ -6474,18 +6476,12 @@ Return JSON with this exact structure:
 
   app.get('/api/demo/stats', async (req, res) => {
     try {
-      // Use demo database for stats
-      const { demoDB, isDemoEnvironment } = await import('./demo-db');
-      
-      if (!isDemoEnvironment()) {
-        return res.status(400).json({ message: 'Demo environment not available' });
-      }
-
-      const churches = await demoDB.select().from(schema.churches);
-      const users = await demoDB.select().from(schema.users);
-      const discussions = await demoDB.select().from(schema.discussions);
-      const prayers = await demoDB.select().from(schema.prayerRequests);
-      const events = await demoDB.select().from(schema.events);
+      // Production stats endpoint
+      const churches = await storage.db.select().from(schema.churches);
+      const users = await storage.db.select().from(schema.users);
+      const discussions = await storage.db.select().from(schema.discussions);
+      const prayers = await storage.db.select().from(schema.prayerRequests);
+      const events = await storage.db.select().from(schema.events);
       
       res.json({
         churches: churches.length,
