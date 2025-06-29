@@ -157,25 +157,46 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     onError: (error) => {
       
       let errorMessage = "Failed to save S.O.A.P. entry. Please try again.";
+      let errorTitle = "Not Saved";
       
       if (error && typeof error === 'object' && 'message' in error) {
         const errorMsg = error.message as string;
         
-        if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
+        // Check for specific validation errors from backend
+        if (errorMsg.includes('Missing required fields')) {
+          errorTitle = "Complete All Required Sections";
+          errorMessage = errorMsg;
+        } else if (errorMsg.includes('must be at least 10 characters long')) {
+          errorTitle = "More Detail Needed";
+          errorMessage = errorMsg;
+        } else if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
           errorMessage = "Your session has expired. Please refresh the page to continue.";
         } else if (errorMsg.includes('400')) {
           errorMessage = "Please make sure all required fields are filled out correctly.";
         } else if (errorMsg.includes('500')) {
           errorMessage = "Something went wrong on our end. Please try again in a moment.";
         } else {
-          errorMessage = "Something went wrong. Please try again.";
+          // Try to parse JSON error for more specific messages
+          try {
+            const errorObj = JSON.parse(errorMsg);
+            if (errorObj.message) {
+              errorMessage = errorObj.message;
+              if (errorObj.missingFields) {
+                errorTitle = "Complete All Required Sections";
+              } else if (errorObj.field) {
+                errorTitle = "More Detail Needed";
+              }
+            }
+          } catch {
+            errorMessage = errorMsg.length > 100 ? "Please check your entry and try again." : errorMsg;
+          }
         }
       }
       
       toast({
-        title: "Not Saved",
+        title: errorTitle,
         description: errorMessage,
-        variant: "default",
+        variant: "destructive",
       });
     },
   });
@@ -536,11 +557,73 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   const handleSubmit = (data: FormData) => {
     
-    // Check if all required fields are filled
-    if (!data.scripture || !data.observation || !data.application || !data.prayer) {
+    // Check if all required fields are filled with meaningful content
+    const missingFields: string[] = [];
+    
+    if (!data.scripture || data.scripture.trim().length === 0) {
+      missingFields.push("Scripture");
+    }
+    if (!data.observation || data.observation.trim().length === 0) {
+      missingFields.push("Observation");
+    }
+    if (!data.application || data.application.trim().length === 0) {
+      missingFields.push("Application");
+    }
+    if (!data.prayer || data.prayer.trim().length === 0) {
+      missingFields.push("Prayer");
+    }
+    
+    if (missingFields.length > 0) {
+      const missingFieldsList = missingFields.join(", ");
       toast({
-        title: "Missing Required Fields",
-        description: "Please fill out Scripture, Observation, Application, and Prayer sections.",
+        title: "Complete All Required Sections",
+        description: `Please fill out the following sections before saving: ${missingFieldsList}`,
+        variant: "destructive",
+      });
+      
+      // Focus on the first missing field for better UX
+      const fieldMap: { [key: string]: string } = {
+        "Scripture": "scripture",
+        "Observation": "observation", 
+        "Application": "application",
+        "Prayer": "prayer"
+      };
+      const firstMissingField = fieldMap[missingFields[0]];
+      if (firstMissingField) {
+        // Try to focus the field
+        const element = document.getElementsByName(firstMissingField)[0] as HTMLElement;
+        if (element) {
+          element.focus();
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      
+      return;
+    }
+    
+    // Additional validation for minimum content length
+    if (data.observation.trim().length < 10) {
+      toast({
+        title: "Observation Too Short",
+        description: "Please add more detail to your observation section (at least 10 characters).",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (data.application.trim().length < 10) {
+      toast({
+        title: "Application Too Short", 
+        description: "Please add more detail to your application section (at least 10 characters).",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (data.prayer.trim().length < 10) {
+      toast({
+        title: "Prayer Too Short",
+        description: "Please add more detail to your prayer section (at least 10 characters).",
         variant: "destructive",
       });
       return;

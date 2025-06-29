@@ -6831,6 +6831,45 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
+      // Enhanced validation before schema parsing
+      const { scripture, observation, application, prayer, scriptureReference } = req.body;
+      
+      // Check for missing required fields
+      const missingFields: string[] = [];
+      if (!scripture || scripture.trim().length === 0) missingFields.push("Scripture");
+      if (!observation || observation.trim().length === 0) missingFields.push("Observation");
+      if (!application || application.trim().length === 0) missingFields.push("Application");
+      if (!prayer || prayer.trim().length === 0) missingFields.push("Prayer");
+      
+      if (missingFields.length > 0) {
+        return res.status(400).json({ 
+          message: `Missing required fields: ${missingFields.join(", ")}`,
+          missingFields: missingFields
+        });
+      }
+      
+      // Check for minimum content length
+      if (observation.trim().length < 10) {
+        return res.status(400).json({ 
+          message: "Observation section must be at least 10 characters long",
+          field: "observation"
+        });
+      }
+      
+      if (application.trim().length < 10) {
+        return res.status(400).json({ 
+          message: "Application section must be at least 10 characters long",
+          field: "application"
+        });
+      }
+      
+      if (prayer.trim().length < 10) {
+        return res.status(400).json({ 
+          message: "Prayer section must be at least 10 characters long",
+          field: "prayer"
+        });
+      }
+      
       const soapData = {
         ...req.body,
         userId,
