@@ -4875,7 +4875,7 @@ Return JSON with this exact structure:
   // Video Content Routes (Phase 1: Pastor/Admin Uploads)
   app.post('/api/videos', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const userRole = await storage.getUserRole(userId);
       
       // Check if user has permission to upload videos
