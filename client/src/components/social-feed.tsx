@@ -630,6 +630,11 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
           <CardHeader>
             <div className="flex items-center space-x-3">
               <Avatar className="w-10 h-10">
+                <AvatarImage 
+                  src={user && typeof user === 'object' && 'profileImageUrl' in user ? user.profileImageUrl : ""} 
+                  alt="Profile"
+                  className="object-cover"
+                />
                 <AvatarFallback className="bg-purple-600 text-white">
                   {user && typeof user === 'object' && 'firstName' in user && user.firstName && 'lastName' in user && user.lastName 
                     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
