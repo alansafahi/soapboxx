@@ -278,7 +278,7 @@ export default function EnhancedCommunityFeed() {
     const reaction = REACTION_TYPES.find(r => r.type === reactionType);
     if (!reaction) return;
 
-    const existingReaction = post.reactions.find(r => r.type === reactionType);
+    const existingReaction = post.reactions?.find(r => r.type === reactionType);
     
     if (existingReaction?.userReacted) {
       removeReactionMutation.mutate({ postId: post.id, reactionType });

@@ -177,7 +177,7 @@ export default function SocialFeed() {
   const verseSearchResults = verseSearchData?.verses || [];
 
   // Fetch user's SOAP entries
-  const { data: soapEntries = [] } = useQuery({
+  const { data: soapEntries = [] } = useQuery<any[]>({
     queryKey: ['/api/soap'],
     enabled: showSoapDialog,
   });
@@ -606,7 +606,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
   };
 
   const getSelectedMoodsData = () => {
-    return selectedMoods.map(id => moodOptions.find(mood => mood.id === id)).filter(Boolean);
+    return selectedMoods.map(id => moodOptions.find(mood => mood.id === id)).filter((mood): mood is NonNullable<typeof mood> => Boolean(mood));
   };
 
   const clearMoods = () => {
@@ -1512,8 +1512,8 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {soapEntries.length > 0 ? (
-              soapEntries.map((entry: any) => (
+            {(soapEntries as any[]).length > 0 ? (
+              (soapEntries as any[]).map((entry: any) => (
                 <Card 
                   key={entry.id} 
                   className={`cursor-pointer border-2 transition-colors ${
