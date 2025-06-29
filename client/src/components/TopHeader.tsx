@@ -440,19 +440,22 @@ export default function TopHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0">
-              {typedUser?.profileImageUrl ? (
-                <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold relative overflow-hidden">
+                {typedUser?.profileImageUrl ? (
                   <img 
                     src={typedUser.profileImageUrl} 
-                    alt={`${typedUser?.firstName || 'User'} ${typedUser?.lastName || ''}`}
-                    className="h-full w-full object-cover"
+                    alt="Profile"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    style={{ zIndex: 10 }}
+                    onLoad={() => console.log('Image loaded in TopHeader')}
+                    onError={(e) => {
+                      console.log('Image failed to load in TopHeader');
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
-                </div>
-              ) : (
-                <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-white">{getUserInitials()}</span>
-                </div>
-              )}
+                ) : null}
+                <span style={{ zIndex: 5 }}>{getUserInitials()}</span>
+              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
