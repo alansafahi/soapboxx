@@ -20,6 +20,8 @@ interface User {
   id?: string;
   name?: string;
   email?: string;
+  firstName?: string;
+  lastName?: string;
   profileImageUrl?: string;
 }
 
@@ -38,7 +40,14 @@ export default function TopHeader() {
   const { user, logout } = useImmediateAuth();
   const { toast } = useToast();
   
-  const typedUser = user as User | null;
+  // Fetch complete user profile data with profile image
+  const { data: profileUser } = useQuery({
+    queryKey: ["/api/auth/user"],
+    enabled: !!user,
+  });
+  
+  // Use profile data if available, fallback to session user data
+  const typedUser = (profileUser || user) as any;
 
   // Get user role data for permission checking
   const { data: userRole } = useQuery({
@@ -431,14 +440,14 @@ export default function TopHeader() {
                 />
               ) : (
                 <div className="h-5 w-5 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
-                  {typedUser?.name ? typedUser.name.charAt(0).toUpperCase() : <User className="h-3 w-3" />}
+                  {typedUser?.firstName ? `${typedUser.firstName.charAt(0)}${typedUser?.lastName?.charAt(0) || ''}`.toUpperCase() : <User className="h-3 w-3" />}
                 </div>
               )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5 text-sm font-medium">
-              {typedUser?.name || "User"}
+              {typedUser?.firstName && typedUser?.lastName ? `${typedUser.firstName} ${typedUser.lastName}` : "User"}
             </div>
             <div className="px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400">
               {typedUser?.email}
