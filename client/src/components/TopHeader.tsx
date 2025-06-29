@@ -440,16 +440,19 @@ export default function TopHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0">
-              <Avatar className="h-10 w-10">
-                <AvatarImage 
-                  src={typedUser?.profileImageUrl || ""} 
-                  alt={`${typedUser?.firstName || 'User'} ${typedUser?.lastName || ''}`}
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-purple-600 text-white text-sm font-medium">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
+              {typedUser?.profileImageUrl ? (
+                <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <img 
+                    src={typedUser.profileImageUrl} 
+                    alt={`${typedUser?.firstName || 'User'} ${typedUser?.lastName || ''}`}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center">
+                  <span className="text-sm font-semibold text-white">{getUserInitials()}</span>
+                </div>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
