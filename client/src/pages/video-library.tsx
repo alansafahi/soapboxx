@@ -627,7 +627,7 @@ export default function VideoLibrary() {
           : "space-y-4"
         }>
           {filteredVideos.map((video: VideoContent) => (
-            <Card key={video.id} className="bg-gradient-to-br from-purple-900/40 to-gray-900/60 border-purple-500/20 hover:from-purple-800/50 hover:to-gray-800/70 transition-all duration-300 backdrop-blur-sm">
+            <Card key={video.id} className="bg-gradient-to-br from-white/90 to-purple-50/90 dark:from-purple-900/40 dark:to-gray-900/60 border-purple-400/30 dark:border-purple-500/20 hover:from-purple-50/90 hover:to-purple-100/90 dark:hover:from-purple-800/50 dark:hover:to-gray-800/70 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl">
               <div className="relative">
                 <img 
                   src={video.thumbnail} 
@@ -643,21 +643,21 @@ export default function VideoLibrary() {
               </div>
               
               <CardContent className="p-4">
-                <h3 className="font-semibold text-white mb-2 line-clamp-2">{video.title}</h3>
-                <p className="text-gray-400 text-sm mb-3 line-clamp-2">{video.description}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{video.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">{video.description}</p>
                 
                 <div className="flex items-center gap-2 mb-3">
                   <Badge variant="secondary" className="bg-purple-600/80 text-white border-purple-500/50">
                     {video.category}
                   </Badge>
                   {video.tags.slice(0, 2).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="border-purple-400/30 text-purple-200 bg-purple-900/20">
+                    <Badge key={index} variant="outline" className="border-purple-400/50 dark:border-purple-400/30 text-purple-700 dark:text-purple-200 bg-purple-100/60 dark:bg-purple-900/20">
                       {tag}
                     </Badge>
                   ))}
                 </div>
                 
-                <div className="flex items-center justify-between text-xs text-gray-400">
+                <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-1">
                     <User className="w-3 h-3" />
                     {video.speaker || 'AI Generated'}
@@ -669,7 +669,7 @@ export default function VideoLibrary() {
                 </div>
                 
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-gray-400">{video.views} views</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{video.views} views</span>
                   <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
                     <Play className="w-3 h-3 mr-1" />
                     Watch
