@@ -712,15 +712,7 @@ export default function FreshAudioBible() {
                     <SelectContent>
                       {bibleVersions.map((version: any) => (
                         <SelectItem key={version.code} value={version.code}>
-                          <div className="flex items-center justify-between w-full">
-                            <span>{version.name} ({version.code})</span>
-                            {version.source === 'licensed' && (
-                              <Badge variant="secondary" className="ml-2 text-xs">Premium</Badge>
-                            )}
-                            {version.source === 'public_domain' && (
-                              <Badge variant="outline" className="ml-2 text-xs">Free</Badge>
-                            )}
-                          </div>
+                          {version.code} - {version.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
