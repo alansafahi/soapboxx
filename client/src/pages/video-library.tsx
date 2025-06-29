@@ -60,6 +60,9 @@ export default function VideoLibrary() {
     file: null as File | null
   });
 
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [youtubeUrls, setYoutubeUrls] = useState('');
+
   // Fetch videos from API
   const { data: videos = [], isLoading } = useQuery({
     queryKey: ['/api/videos'],
@@ -97,6 +100,29 @@ export default function VideoLibrary() {
     },
   });
 
+  // YouTube import mutation
+  const importMutation = useMutation({
+    mutationFn: async (urls: string[]) => {
+      return await apiRequest('POST', '/api/videos/import-youtube', { urls });
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Import Complete",
+        description: data.message || "YouTube videos imported successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/videos'] });
+      setIsImportOpen(false);
+      setYoutubeUrls('');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Import Failed",
+        description: error.message || "Failed to import YouTube videos",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleUpload = () => {
     if (!uploadForm.title || !uploadForm.description || !uploadForm.category || !uploadForm.file) {
       toast({
@@ -115,6 +141,34 @@ export default function VideoLibrary() {
     formData.append('video', uploadForm.file);
 
     uploadMutation.mutate(formData);
+  };
+
+  const handleImport = () => {
+    if (!youtubeUrls.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter at least one YouTube URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Split URLs by new lines and filter out empty lines
+    const urls = youtubeUrls
+      .split('\n')
+      .map(url => url.trim())
+      .filter(url => url && url.includes('youtube.com'));
+
+    if (urls.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please enter valid YouTube URLs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    importMutation.mutate(urls);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
