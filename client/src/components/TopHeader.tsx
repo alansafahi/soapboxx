@@ -439,21 +439,16 @@ export default function TopHeader() {
         {/* Profile Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              {console.log('Avatar render check:', { hasProfileImage: !!typedUser?.profileImageUrl, url: typedUser?.profileImageUrl })}
-              {typedUser?.profileImageUrl ? (
-                <img 
-                  src={typedUser.profileImageUrl} 
-                  alt="Profile" 
-                  className="h-8 w-8 rounded-full object-cover"
-                  onError={(e) => console.log('Image load error:', e)}
-                  onLoad={() => console.log('Image loaded successfully')}
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage 
+                  src={typedUser?.profileImageUrl || ""} 
+                  alt={`${typedUser?.firstName || 'User'} ${typedUser?.lastName || ''}`}
                 />
-              ) : (
-                <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">
-                  {typedUser?.firstName ? `${typedUser.firstName.charAt(0)}${typedUser?.lastName?.charAt(0) || ''}`.toUpperCase() : <User className="h-3 w-3" />}
-                </div>
-              )}
+                <AvatarFallback className="bg-purple-600 text-white text-sm font-medium">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
