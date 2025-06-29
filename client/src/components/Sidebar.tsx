@@ -76,10 +76,21 @@ export default function Sidebar() {
       setIsMobile(isMobileScreen);
       
       // Auto-collapse on small screens, expand on large screens
-      if (isMobileScreen) {
+      // But don't auto-collapse if user is soapbox_owner to ensure admin access
+      if (isMobileScreen && user?.role !== 'soapbox_owner') {
         setIsCollapsed(true);
       } else if (isLargeScreen) {
         setIsCollapsed(false);
+      }
+      
+      // For admin users on mobile, keep admin sections expanded even when sidebar is collapsed
+      if (isMobileScreen && user?.role === 'soapbox_owner') {
+        setExpandedGroups(prev => {
+          const newSet = new Set(prev);
+          newSet.add('ADMIN PORTAL');
+          newSet.add('SOAPBOX PORTAL');
+          return newSet;
+        });
       }
     };
 
@@ -274,33 +285,62 @@ export default function Sidebar() {
       {/* Navigation Groups */}
       <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${isCollapsed ? 'p-2' : 'p-4 space-y-6'} min-h-0`}>
         {isCollapsed ? (
-          // Collapsed Navigation - Icon Only
-          <div className="space-y-2">
-            {visibleGroups.flatMap(group => group.items).map((item) => {
-              const Icon = item.icon;
-              const isActive = location === item.href;
-              return (
-                <Link key={item.href} href={item.href}>
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    size="icon"
-                    className={`relative w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
-                      isActive 
-                        ? 'bg-purple-600 text-white hover:bg-purple-700' 
-                        : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
-                    }`}
-                    title={item.label}
-                  >
-                    <Icon className="w-5 h-5" />
-                    {item.label === "Messages" && unreadCount > 0 && (
-                      <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 py-0 rounded-full min-w-[1rem] h-4 flex items-center justify-center">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </Link>
-              );
-            })}
+          // Collapsed Navigation - Icon Only with Admin Section Grouping
+          <div className="space-y-4">
+            {/* Regular Navigation Items */}
+            <div className="space-y-2">
+              {visibleGroups.filter(group => !['ADMIN PORTAL', 'SOAPBOX PORTAL'].includes(group.label)).flatMap(group => group.items).map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.href;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      size="icon"
+                      className={`relative w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
+                        isActive 
+                          ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                          : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+                      }`}
+                      title={item.label}
+                    >
+                      <Icon className="w-5 h-5" />
+                      {item.label === "Messages" && unreadCount > 0 && (
+                        <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 py-0 rounded-full min-w-[1rem] h-4 flex items-center justify-center">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </div>
+            
+            {/* Admin Section - Visually Separated for soapbox_owner */}
+            {user?.role === 'soapbox_owner' && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+                {visibleGroups.filter(group => ['ADMIN PORTAL', 'SOAPBOX PORTAL'].includes(group.label)).flatMap(group => group.items).map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location === item.href;
+                  return (
+                    <Link key={item.href} href={item.href}>
+                      <Button
+                        variant={isActive ? "default" : "ghost"}
+                        size="icon"
+                        className={`relative w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm border-2 ${
+                          isActive 
+                            ? 'bg-purple-600 text-white hover:bg-purple-700 border-purple-600' 
+                            : 'text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 border-purple-300 dark:border-purple-600 hover:border-purple-500 dark:hover:border-purple-400'
+                        }`}
+                        title={`Admin: ${item.label}`}
+                      >
+                        <Icon className="w-5 h-5" />
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ) : (
           // Expanded Navigation - Full Groups
