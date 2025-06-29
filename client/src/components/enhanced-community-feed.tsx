@@ -494,11 +494,17 @@ export default function EnhancedCommunityFeed() {
                         const hasVideoContent = post.content?.includes('📺 **Shared Video:') || post.content?.includes('🎬 Watch:');
                         console.log(`Post ${post.id} video detection:`, hasVideoContent, post.content?.substring(0, 50));
                         
-                        return hasVideoContent ? (
-                          <VideoSharePreview post={post} />
-                        ) : (
-                          <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
-                        );
+                        if (hasVideoContent) {
+                          console.log(`Rendering VideoSharePreview for post ${post.id}`);
+                          try {
+                            return <VideoSharePreview post={post} />;
+                          } catch (error) {
+                            console.error('Error rendering VideoSharePreview:', error);
+                            return <div className="text-red-500">Error loading video preview</div>;
+                          }
+                        } else {
+                          return <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>;
+                        }
                       })()}
                       
                       {/* Tags */}
