@@ -1209,26 +1209,34 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                       <span className="text-xs text-gray-500 dark:text-gray-400">YouTube</span>
                                     </div>
                                     
-                                    <Button 
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        console.log('Watch button clicked! URL:', url);
-                                        alert('Watch button clicked! URL: ' + url);
-                                        if (url) {
-                                          console.log('Opening URL:', url);
-                                          window.open(url, '_blank', 'noopener,noreferrer');
-                                        } else {
-                                          console.log('No URL found!');
-                                          alert('No URL found!');
-                                        }
-                                      }}
-                                      size="sm" 
-                                      className="mt-3 bg-purple-600 hover:bg-purple-700 text-white"
-                                    >
-                                      <Play className="w-3 h-3 mr-1" />
-                                      Watch Video
-                                    </Button>
+                                    <div className="mt-3">
+                                      <button 
+                                        onClick={() => alert('Simple button clicked!')}
+                                        className="px-3 py-1 bg-red-500 text-white rounded mr-2"
+                                      >
+                                        Test Click
+                                      </button>
+                                      <Button 
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          console.log('Watch button clicked! URL:', url);
+                                          alert('Watch button clicked! URL: ' + url);
+                                          if (url) {
+                                            console.log('Opening URL:', url);
+                                            window.open(url, '_blank', 'noopener,noreferrer');
+                                          } else {
+                                            console.log('No URL found!');
+                                            alert('No URL found!');
+                                          }
+                                        }}
+                                        size="sm" 
+                                        className="bg-purple-600 hover:bg-purple-700 text-white z-50 relative"
+                                      >
+                                        <Play className="w-3 h-3 mr-1" />
+                                        Watch Video
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
