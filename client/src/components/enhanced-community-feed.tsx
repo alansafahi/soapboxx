@@ -495,17 +495,46 @@ export default function EnhancedCommunityFeed() {
                       
                       {/* Check if this is a video share */}
                       {(() => {
-                        const hasVideoContent = post.content?.includes('📺 **Shared Video:') || post.content?.includes('🎬 Watch:');
-                        console.log('Video detection for post', post.id, ':', hasVideoContent, post.content?.substring(0, 50));
+                        const hasVideoContent = post.content?.includes('📺') && post.content?.includes('🎬 Watch:');
+                        console.log('Video detection for post', post.id, ':', hasVideoContent);
+                        console.log('Post content preview:', post.content?.substring(0, 100));
                         
                         if (hasVideoContent) {
-                          
+                          console.log('Rendering VideoSharePreview for post', post.id);
                           try {
                             return <VideoSharePreview post={post} />;
                           } catch (error) {
+                            console.error('VideoSharePreview error:', error);
                             return <div className="text-red-500">Error loading video preview</div>;
                           }
                         } else {
+                          // Add a test button for YouTube videos even when not detected as video content
+                          const hasYouTubeLink = post.content?.includes('youtube.com') || post.content?.includes('youtu.be');
+                          if (hasYouTubeLink) {
+                            const urlMatch = post.content?.match(/(https:\/\/[^\s]+youtube[^\s]*)/);
+                            const youtubeUrl = urlMatch ? urlMatch[1] : '';
+                            console.log('Found YouTube URL:', youtubeUrl);
+                            
+                            return (
+                              <div>
+                                <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
+                                {youtubeUrl && (
+                                  <Button 
+                                    onClick={() => {
+                                      console.log('Direct YouTube button clicked:', youtubeUrl);
+                                      window.open(youtubeUrl, '_blank', 'noopener,noreferrer');
+                                    }}
+                                    size="sm" 
+                                    className="mt-2 bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    <Play className="w-3 h-3 mr-1" />
+                                    Watch on YouTube
+                                  </Button>
+                                )}
+                              </div>
+                            );
+                          }
+                          
                           return <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>;
                         }
                       })()}
