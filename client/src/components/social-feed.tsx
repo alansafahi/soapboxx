@@ -1153,6 +1153,17 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                           // Check for video content first
                           const hasVideoContent = post.content?.includes('📺') && post.content?.includes('🎬 Watch:');
                           
+                          // Always show debug info for posts that might be videos
+                          if (post.content?.includes('📺') || post.content?.includes('🎬') || post.content?.includes('youtube')) {
+                            console.log('Video debug - Post content:', post.content);
+                            console.log('Video debug - Has 📺:', post.content?.includes('📺'));
+                            console.log('Video debug - Has 🎬 Watch:', post.content?.includes('🎬 Watch:'));
+                            console.log('Video debug - hasVideoContent:', hasVideoContent);
+                          }
+                          
+                          // Add visible indicator if this is a video post
+                          const isVideoPost = post.content?.includes('📺') || post.content?.includes('🎬') || post.content?.includes('youtube');
+                          
                           if (hasVideoContent) {
                             // Extract video information
                             const titleMatch = post.content.match(/📺 \*\*Shared Video: (.*?)\*\*/);
@@ -1267,6 +1278,13 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                           
                           return null;
                         })()}
+                        
+                        {/* Debug banner for video posts */}
+                        {(post.content?.includes('📺') || post.content?.includes('🎬') || post.content?.includes('youtube')) && (
+                          <div className="bg-red-500 text-white p-2 mt-2 text-center font-bold">
+                            🚨 VIDEO POST DETECTED - POST ID: {post.id} 🚨
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
