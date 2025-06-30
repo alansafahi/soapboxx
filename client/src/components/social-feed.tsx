@@ -1150,19 +1150,86 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                       <div>
                         <p className="whitespace-pre-wrap">{post.content}</p>
                         
-                        {/* Simple test for video posts */}
-                        {(post.content?.includes('📺') || post.content?.includes('🎬') || post.content?.includes('youtube')) && (
-                          <div className="bg-red-500 text-white p-4 mt-3 rounded">
-                            <h3 className="font-bold">🚨 VIDEO POST DETECTED 🚨</h3>
-                            <p>Post ID: {post.id}</p>
-                            <button 
-                              onClick={() => alert('Red button works!')}
-                              className="bg-white text-red-500 px-4 py-2 rounded mt-2"
-                            >
-                              Test Button
-                            </button>
-                          </div>
-                        )}
+                        {/* Video content detection and rendering */}
+                        {(() => {
+                          const hasVideoContent = post.content?.includes('📺') && post.content?.includes('🎬 Watch:');
+                          
+                          if (hasVideoContent) {
+                            // Extract video information
+                            const titleMatch = post.content.match(/📺 \*\*Shared Video: (.*?)\*\*/);
+                            const title = titleMatch ? titleMatch[1] : 'Shared Video';
+                            
+                            const urlMatch = post.content.match(/🎬 Watch: (https:\/\/[^\s]+)/);
+                            const url = urlMatch ? urlMatch[1] : '';
+                            
+                            const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+                            const videoId = videoIdMatch ? videoIdMatch[1] : '';
+                            const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+                            
+                            return (
+                              <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-700 mt-3">
+                                <div className="flex items-start gap-4">
+                                  {thumbnail && (
+                                    <div className="relative flex-shrink-0 w-32 h-20 sm:w-40 sm:h-24">
+                                      <img 
+                                        src={thumbnail} 
+                                        alt={title}
+                                        className="w-full h-full object-cover rounded-lg"
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          if (target.src.includes('maxresdefault')) {
+                                            target.src = target.src.replace('maxresdefault', 'hqdefault');
+                                          }
+                                        }}
+                                      />
+                                      <div 
+                                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 hover:bg-opacity-30 transition-all rounded-lg cursor-pointer" 
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          if (url) {
+                                            window.open(url, '_blank', 'noopener,noreferrer');
+                                          }
+                                        }}
+                                      >
+                                        <Play className="w-8 h-8 text-white" />
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base line-clamp-2">{title}</h4>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <Badge variant="outline" className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-600">
+                                        📺 Video
+                                      </Badge>
+                                      <span className="text-xs text-gray-500 dark:text-gray-400">YouTube</span>
+                                    </div>
+                                    
+                                    <div className="mt-3">
+                                      <Button 
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          if (url) {
+                                            window.open(url, '_blank', 'noopener,noreferrer');
+                                          }
+                                        }}
+                                        size="sm" 
+                                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                                      >
+                                        <Play className="w-3 h-3 mr-1" />
+                                        Watch Video
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          return null;
+                        })()}
                       </div>
                     )}
                   </div>
