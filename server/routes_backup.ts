@@ -3980,6 +3980,12 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
 
       const validVerses = verses.filter(v => v !== null);
       
+
+        id: validVerses[0].id,
+        reference: validVerses[0].reference,
+        text: validVerses[0].text.substring(0, 100) + '...'
+      } : 'None');
+      
       if (validVerses.length === 0) {
         return res.status(404).json({ error: 'No valid verses found' });
       }
