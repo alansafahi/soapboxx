@@ -6192,11 +6192,9 @@ Return JSON with this exact structure:
 
   app.post('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
-
-
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       if (!userId) {
-        console.error("No user ID found in request");
+        console.error("No user ID found in session");
         return res.status(401).json({ message: 'User authentication required' });
       }
       
@@ -6250,7 +6248,7 @@ Return JSON with this exact structure:
   app.post('/api/prayers/:id/pray', isAuthenticated, async (req: any, res) => {
     try {
       const prayerRequestId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       
       const response = await storage.prayForRequest({
         prayerRequestId,
@@ -6267,7 +6265,7 @@ Return JSON with this exact structure:
   app.post('/api/prayers/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const prayerRequestId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
@@ -6297,7 +6295,7 @@ Return JSON with this exact structure:
   // Prayer response endpoints (supportive comments on prayers)
   app.post("/api/prayers/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       const prayerId = parseInt(req.params.id);
       const { content } = req.body;
       
@@ -6336,7 +6334,7 @@ Return JSON with this exact structure:
   app.post('/api/prayers/:id/support', isAuthenticated, async (req: any, res) => {
     try {
       const prayerRequestId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
       const { content } = req.body;
       
       if (!userId) {
