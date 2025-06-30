@@ -39,11 +39,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
       const messageId = response[0]?.headers?.['x-message-id'] || 'unknown';
       return { success: true, messageId };
     } else {
-      console.log('📧 Email would be sent (development mode):', {
-        to: options.to,
-        subject: options.subject,
-        hasAttachments: !!options.attachments?.length
-      });
+      // Development mode - simulate email sending
       return { success: true, messageId: 'dev-mode' };
     }
   } catch (error: any) {

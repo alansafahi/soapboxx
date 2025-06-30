@@ -12,7 +12,6 @@ interface UnverifiedUser {
 
 async function resendVerificationEmails() {
   try {
-    console.log('🔍 Finding unverified users...');
     
     // Get legitimate unverified users (excluding test/demo accounts)
     const result = await pool.query(`
@@ -33,17 +32,13 @@ async function resendVerificationEmails() {
     const unverifiedUsers: UnverifiedUser[] = result.rows;
     
     if (unverifiedUsers.length === 0) {
-      console.log('✅ No legitimate unverified users found.');
       return;
     }
 
-    console.log(`📋 Found ${unverifiedUsers.length} legitimate unverified users:`);
     
     for (const user of unverifiedUsers) {
-      console.log(`   • ${user.first_name} ${user.last_name} (${user.email}) - registered ${user.created_at}`);
     }
 
-    console.log('\n📧 Sending verification emails...\n');
 
     let sentCount = 0;
     let failedCount = 0;
@@ -67,22 +62,15 @@ async function resendVerificationEmails() {
         });
 
         if (result.success) {
-          console.log(`✅ ${user.first_name} ${user.last_name} (${user.email}) - Email sent successfully (ID: ${result.messageId})`);
           sentCount++;
         } else {
-          console.log(`❌ ${user.first_name} ${user.last_name} (${user.email}) - Failed: ${result.error}`);
           failedCount++;
         }
       } catch (error) {
-        console.log(`❌ ${user.first_name} ${user.last_name} (${user.email}) - Error: ${error}`);
         failedCount++;
       }
     }
 
-    console.log(`\n📊 Summary:`);
-    console.log(`   ✅ Successfully sent: ${sentCount} emails`);
-    console.log(`   ❌ Failed to send: ${failedCount} emails`);
-    console.log(`   📋 Total users processed: ${unverifiedUsers.length}`);
 
     return {
       users: unverifiedUsers,
@@ -103,7 +91,6 @@ export { resendVerificationEmails };
 if (import.meta.url === `file://${process.argv[1]}`) {
   resendVerificationEmails()
     .then(() => {
-      console.log('\n🎉 Verification email resend process completed!');
       process.exit(0);
     })
     .catch((error) => {

@@ -162,7 +162,6 @@ Respond in JSON format with an array of objects containing these fields.`;
     const result = JSON.parse(response.choices[0].message.content || '{}');
     return result.verses || verses.slice(0, 3);
   } catch (error) {
-    console.error('Error generating mood-based verses:', error);
     // Fallback to basic verses from database
     const fallbackThemes = ['peace', 'comfort', 'hope'];
     const verses = await storage.searchBibleVersesByTopic(fallbackThemes);
@@ -199,7 +198,6 @@ async function categorizePost(content: string): Promise<{ type: 'discussion' | '
       title: result.title || undefined
     };
   } catch (error) {
-    console.error('AI categorization failed:', error);
     // Fallback to simple keyword detection
     const lowerContent = content.toLowerCase();
     
@@ -228,7 +226,6 @@ async function checkForNewRoleAssignment(userId: string, currentRole: string): P
     
     return Boolean(isNewUser || hasNotSeenTour);
   } catch (error) {
-    console.error("Error checking role assignments:", error);
     return true; // Default to showing tour if check fails
   }
 }
@@ -278,7 +275,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: "Verse not found" });
       }
     } catch (error) {
-      console.error("Error fetching verse:", error);
       res.status(500).json({ message: "Failed to fetch verse" });
     }
   });
@@ -299,7 +295,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: "No random verse found" });
       }
     } catch (error) {
-      console.error("Error fetching random verse:", error);
       res.status(500).json({ message: "Failed to fetch random verse" });
     }
   });
@@ -316,7 +311,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accessibility: "Public API - No authentication required"
       });
     } catch (error) {
-      console.error("Error fetching Bible stats:", error);
       res.status(500).json({ message: "Failed to fetch Bible statistics" });
     }
   });
@@ -343,7 +337,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(results);
     } catch (error) {
-      console.error("Error searching Bible verses:", error);
       res.status(500).json({ message: "Failed to search Bible verses" });
     }
   });
@@ -391,7 +384,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error: any) {
-      console.error('❌ Scripture API test failed:', error);
       res.status(500).json({
         message: "Scripture API Test Failed",
         error: error.message,
@@ -421,7 +413,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: "Verse not found" });
       }
     } catch (error) {
-      console.error("Error fetching verse:", error);
       res.status(500).json({ message: "Failed to fetch verse" });
     }
   });
@@ -442,7 +433,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: "No random verse found" });
       }
     } catch (error) {
-      console.error("Error fetching random verse:", error);
       res.status(500).json({ message: "Failed to fetch random verse" });
     }
   });
@@ -459,7 +449,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accessibility: "Public API - No authentication required"
       });
     } catch (error) {
-      console.error("Error fetching Bible stats:", error);
       res.status(500).json({ message: "Failed to fetch Bible statistics" });
     }
   });
@@ -577,7 +566,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
       
     } catch (error) {
-      console.error('Error in contextual selection:', error);
       res.status(500).json({ error: 'Failed to retrieve authentic verses from database' });
     }
   });
@@ -604,7 +592,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         user = await storage.getUserByEmail(email);
       } catch (dbError) {
-        console.error("Database error during user lookup:", dbError);
         return res.status(500).json({ message: "Service temporarily unavailable" });
       }
 
@@ -621,14 +608,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         await storage.storePasswordResetToken(user.id, resetToken, resetExpires);
       } catch (dbError) {
-        console.error("Database error storing reset token:", dbError);
         return res.status(500).json({ message: "Unable to process reset request" });
       }
 
       // Send reset email with enhanced error handling
       try {
         if (!process.env.SENDGRID_API_KEY) {
-          console.error("SENDGRID_API_KEY not configured");
           return res.status(500).json({ message: "Email service not configured" });
         }
 
@@ -659,13 +644,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await sgMail.send(msg);
 
       } catch (emailError) {
-        console.error("Email sending error:", emailError);
         return res.status(500).json({ message: "Unable to send reset email" });
       }
 
       res.json({ message: "Password reset email sent successfully" });
     } catch (error) {
-      console.error("Forgot password error:", error);
       res.status(500).json({ message: "Password reset request failed" });
     }
   });
@@ -689,7 +672,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         user = await storage.verifyPasswordResetToken(token);
       } catch (dbError) {
-        console.error("Database error during token verification:", dbError);
         return res.status(500).json({ message: "Service temporarily unavailable" });
       }
 
@@ -706,14 +688,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateUserPassword(user.id, hashedPassword);
         await storage.clearPasswordResetToken(user.id);
       } catch (dbError) {
-        console.error("Database error updating password:", dbError);
         return res.status(500).json({ message: "Failed to update password" });
       }
 
 
       res.json({ message: "Password reset successful" });
     } catch (error) {
-      console.error("Reset password error:", error);
       res.status(500).json({ message: "Password reset failed" });
     }
   });
@@ -794,7 +774,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.redirect('/');
     } catch (error) {
-      console.error("Apple OAuth error:", error);
       res.redirect('/login?error=oauth_failed');
     }
   });
@@ -849,7 +828,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(mappedUser);
     } catch (error) {
-      console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
@@ -867,7 +845,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         canSwitch: availableRoles.length > 1
       });
     } catch (error) {
-      console.error("Error fetching available roles:", error);
       res.status(500).json({ message: "Failed to fetch available roles" });
     }
   });
@@ -896,7 +873,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
     } catch (error) {
-      console.error("Error switching role:", error);
       res.status(500).json({ message: "Failed to switch role" });
     }
   });
@@ -931,7 +907,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         churchId: userChurch.churchId 
       });
     } catch (error) {
-      console.error("Error fetching user role:", error);
       res.json({ role: 'member', churchId: null });
     }
   });
@@ -943,7 +918,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const completion = await storage.getTourCompletion(userId, tourType);
       res.json(completion);
     } catch (error) {
-      console.error("Error fetching tour completion:", error);
       res.status(500).json({ message: "Failed to fetch tour completion" });
     }
   });
@@ -963,7 +937,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(completion);
     } catch (error) {
-      console.error("Error saving tour completion:", error);
       res.status(500).json({ message: "Failed to save tour completion" });
     }
   });
@@ -981,7 +954,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(completion);
     } catch (error) {
-      console.error("Error updating tour completion:", error);
       res.status(500).json({ message: "Failed to update tour completion" });
     }
   });
@@ -1057,7 +1029,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasNewRoleAssignment
       });
     } catch (error) {
-      console.error("Error checking tour status:", error);
       res.status(500).json({ message: "Failed to check tour status" });
     }
   });
@@ -1082,7 +1053,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true, message: "Tour marked as completed" });
     } catch (error) {
-      console.error("Error completing tour:", error);
       res.status(500).json({ message: "Failed to complete tour" });
     }
   });
@@ -1120,7 +1090,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         post: pinnedPost
       });
     } catch (error) {
-      console.error("Error pinning post:", error);
       res.status(500).json({ message: "Failed to pin post" });
     }
   });
@@ -1151,7 +1120,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         post: unpinnedPost
       });
     } catch (error) {
-      console.error("Error unpinning post:", error);
       res.status(500).json({ message: "Failed to unpin post" });
     }
   });
@@ -1174,7 +1142,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(pinnedPosts);
     } catch (error) {
-      console.error("Error fetching pinned posts:", error);
       res.status(500).json({ message: "Failed to fetch pinned posts" });
     }
   });
@@ -1208,7 +1175,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
     } catch (error) {
-      console.error("SMS test error:", error);
       res.status(500).json({ message: "SMS test failed" });
     }
   });
@@ -1274,7 +1240,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error generating sermon research:", error);
       res.status(500).json({ message: "Failed to generate sermon research" });
     }
   });
@@ -1362,7 +1327,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error generating sermon outline:", error);
       res.status(500).json({ message: "Failed to generate sermon outline" });
     }
   });
@@ -1484,7 +1448,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(illustrations);
 
     } catch (error) {
-      console.error("Error generating sermon illustrations:", error);
       res.status(500).json({ message: "Failed to generate sermon illustrations" });
     }
   });
@@ -1572,7 +1535,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error enhancing sermon:", error);
       res.status(500).json({ message: "Failed to enhance sermon" });
     }
   });
@@ -1626,7 +1588,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error saving sermon draft:", error);
       res.status(500).json({ message: "Failed to save sermon draft" });
     }
   });
@@ -1662,7 +1623,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error saving completed sermon:", error);
       res.status(500).json({ message: "Failed to save completed sermon" });
     }
   });
@@ -1675,7 +1635,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(completedSermons);
     } catch (error) {
-      console.error("Error fetching completed sermons:", error);
       res.status(500).json({ message: "Failed to fetch completed sermons" });
     }
   });
@@ -1688,7 +1647,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(drafts);
     } catch (error) {
-      console.error("Error fetching sermon drafts:", error);
       res.status(500).json({ message: "Failed to fetch sermon drafts" });
     }
   });
@@ -1707,7 +1665,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(draft);
     } catch (error) {
-      console.error("Error fetching sermon draft:", error);
       res.status(500).json({ message: "Failed to fetch sermon draft" });
     }
   });
@@ -1741,7 +1698,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Sermon draft updated successfully'
       });
     } catch (error) {
-      console.error("Error updating sermon draft:", error);
       res.status(500).json({ message: "Failed to update sermon draft" });
     }
   });
@@ -1759,7 +1715,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Sermon draft deleted successfully'
       });
     } catch (error) {
-      console.error("Error deleting sermon draft:", error);
       res.status(500).json({ message: "Failed to delete sermon draft" });
     }
   });
@@ -1903,7 +1858,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
     } catch (error) {
-      console.error("Error exporting sermon:", error);
       res.status(500).json({ message: "Failed to export sermon" });
     }
   });
@@ -1919,12 +1873,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mood check-in API endpoints
   app.post('/api/mood-checkins', isAuthenticated, async (req: any, res) => {
-    console.log('🔷 Mood check-in request received:', {
-      body: req.body,
-      userId: req.session?.userId,
-      sessionId: req.sessionID
-    });
-    
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       
@@ -1970,7 +1918,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           }
         } catch (aiError) {
-          console.error('⚠️ Error generating personalized content:', aiError);
           // Continue without personalized content rather than failing the whole request
         }
       }
@@ -1998,7 +1945,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recentCheckins = await storage.getRecentMoodCheckins(userId, limit);
       res.json(recentCheckins);
     } catch (error) {
-      console.error('Error fetching recent mood check-ins:', error);
       res.status(500).json({ message: 'Failed to fetch mood check-ins' });
     }
   });
@@ -2015,7 +1961,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const personalizedContent = await storage.getUserPersonalizedContent(userId);
       res.json(personalizedContent);
     } catch (error) {
-      console.error('Error fetching personalized content:', error);
       res.status(500).json({ message: 'Failed to fetch personalized content' });
     }
   });
@@ -2033,7 +1978,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.markPersonalizedContentAsViewed(contentId, userId);
       res.json({ success: true });
     } catch (error) {
-      console.error('Error marking content as viewed:', error);
       res.status(500).json({ error: 'Failed to mark content as viewed' });
     }
   });
@@ -2096,7 +2040,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const todayCheckIn = await storage.getUserDailyCheckIn(userId);
       res.json(todayCheckIn);
     } catch (error) {
-      console.error('Error fetching today check-in:', error);
       res.status(500).json({ message: 'Failed to fetch today check-in' });
     }
   });
@@ -2112,7 +2055,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const streak = await storage.getUserCheckInStreak(userId);
       res.json({ streak });
     } catch (error) {
-      console.error('Error fetching user streak:', error);
       res.status(500).json({ message: 'Failed to fetch streak' });
     }
   });
@@ -2129,7 +2071,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recentCheckIns = await storage.getUserCheckIns(userId, limit);
       res.json(recentCheckIns);
     } catch (error) {
-      console.error('Error fetching recent check-ins:', error);
       res.status(500).json({ message: 'Failed to fetch recent check-ins' });
     }
   });
@@ -2147,7 +2088,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insights = await storage.getMoodInsights(userId, days);
       res.json(insights);
     } catch (error) {
-      console.error('Error fetching mood insights:', error);
       res.status(500).json({ message: 'Failed to fetch mood insights' });
     }
   });
@@ -2166,7 +2106,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: 'Content not found' });
       }
     } catch (error) {
-      console.error('Error fetching personalized content:', error);
       res.status(500).json({ message: 'Failed to fetch personalized content' });
     }
   });
@@ -2182,7 +2121,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contacts = await storage.getUserContacts(userId);
       res.json(contacts);
     } catch (error) {
-      console.error('Error fetching contacts:', error);
       res.status(500).json({ message: 'Failed to fetch contacts' });
     }
   });
@@ -2207,7 +2145,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(contact);
     } catch (error) {
-      console.error('Error adding contact:', error);
       res.status(500).json({ message: 'Failed to add contact' });
     }
   });
@@ -2225,7 +2162,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contact = await storage.updateContactStatus(parseInt(id), status);
       res.json(contact);
     } catch (error) {
-      console.error('Error updating contact status:', error);
       res.status(500).json({ message: 'Failed to update contact status' });
     }
   });
@@ -2241,7 +2177,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.removeContact(parseInt(id));
       res.json({ success: true });
     } catch (error) {
-      console.error('Error removing contact:', error);
       res.status(500).json({ message: 'Failed to remove contact' });
     }
   });
@@ -2310,7 +2245,6 @@ app.post('/api/invitations', async (req: any, res) => {
             return res.json({ ...existingInvitation, resent: false, emailError: emailResult.error });
           }
         } catch (emailError) {
-          console.error('Error resending invitation email:', emailError);
           return res.json({ ...existingInvitation, resent: false, emailError: true });
         }
       }
@@ -2357,13 +2291,11 @@ app.post('/api/invitations', async (req: any, res) => {
 
 
       } catch (emailError) {
-        console.error('Error sending invitation email:', emailError);
         // Don't fail the entire request if email fails
       }
 
       res.json({ success: true, ...invitation });
     } catch (error) {
-      console.error('Error creating invitation:', error);
       res.status(500).json({ success: false, message: 'Failed to create invitation' });
     }
   });
@@ -2378,7 +2310,6 @@ app.post('/api/invitations', async (req: any, res) => {
       const invitations = await storage.getUserInvitations(userId);
       res.json(invitations);
     } catch (error) {
-      console.error('Error fetching invitations:', error);
       res.status(500).json({ message: 'Failed to fetch invitations' });
     }
   });
@@ -2393,7 +2324,6 @@ app.post('/api/invitations', async (req: any, res) => {
       const pendingInvitations = await storage.getPendingInvitations(userId);
       res.json(pendingInvitations);
     } catch (error) {
-      console.error('Error fetching pending invitations:', error);
       res.status(500).json({ message: 'Failed to fetch pending invitations' });
     }
   });
@@ -2406,7 +2336,6 @@ app.post('/api/invitations', async (req: any, res) => {
       const invitation = await storage.updateInvitationStatus(code, status);
       res.json(invitation);
     } catch (error) {
-      console.error('Error updating invitation status:', error);
       res.status(500).json({ message: 'Failed to update invitation status' });
     }
   });
@@ -2439,7 +2368,6 @@ app.post('/api/invitations', async (req: any, res) => {
           });
           importResults.push(newContact);
         } catch (contactError) {
-          console.error('Error importing individual contact:', contactError);
           // Continue with other contacts even if one fails
         }
       }
@@ -2450,7 +2378,6 @@ app.post('/api/invitations', async (req: any, res) => {
         contacts: importResults
       });
     } catch (error) {
-      console.error('Error importing contacts:', error);
       res.status(500).json({ message: 'Failed to import contacts' });
     }
   });
@@ -2501,7 +2428,6 @@ app.post('/api/invitations', async (req: any, res) => {
       
       res.json(verse);
     } catch (error) {
-      console.error("Error fetching daily verse:", error);
       res.status(500).json({ message: "Failed to fetch daily verse" });
     }
   });
@@ -2548,7 +2474,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         generatedAt: new Date()
       });
     } catch (error) {
-      console.error("Error generating AI reflection:", error);
       res.status(500).json({ message: "Failed to generate reflection" });
     }
   });
@@ -2633,7 +2558,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(devotionalPacks);
     } catch (error) {
-      console.error("Error fetching devotional packs:", error);
       res.status(500).json({ message: "Failed to fetch devotional packs" });
     }
   });
@@ -2701,7 +2625,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       res.json(content);
     } catch (error) {
-      console.error("Error fetching devotional pack content:", error);
       res.status(500).json({ message: "Failed to fetch devotional content" });
     }
   });
@@ -2723,7 +2646,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(streak);
     } catch (error) {
-      console.error("Error fetching bible streak:", error);
       res.status(500).json({ message: "Failed to fetch bible streak" });
     }
   });
@@ -2804,7 +2726,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       try {
         reflectionData = JSON.parse(responseContent);
       } catch (parseError) {
-        console.error("Failed to parse AI response:", responseContent);
         throw new Error("Invalid JSON response from AI service");
       }
 
@@ -2825,7 +2746,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(safeReflectionData);
     } catch (error) {
-      console.error("Error generating AI reflection:", error);
       res.status(500).json({ message: "Failed to generate AI reflection. Please try again." });
     }
   });
@@ -2852,7 +2772,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         count: verses.length
       });
     } catch (error) {
-      console.error("Error searching verses by topic:", error);
       res.status(500).json({ message: "Failed to search verses by topic" });
     }
   });
@@ -2876,7 +2795,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         res.status(500).json({ message: "Failed to get random verse" });
       }
     } catch (error) {
-      console.error("Error fetching random verse:", error);
       res.status(500).json({ message: "Failed to fetch random verse" });
     }
   });
@@ -2896,7 +2814,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Error fetching Bible stats:", error);
       res.status(500).json({ message: "Failed to fetch Bible statistics" });
     }
   });
@@ -2931,7 +2848,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         }
       });
     } catch (error) {
-      console.error("Error fetching Bible verses:", error);
       res.status(500).json({ message: "Failed to fetch Bible verses" });
     }
   });
@@ -2953,7 +2869,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       // Run import in background and return immediate response
       import1000PopularVerses(maxDailyRequests).catch(error => {
-        console.error('Bible verse import error:', error);
       });
 
       res.json({ 
@@ -2962,7 +2877,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         dailyLimit: maxDailyRequests
       });
     } catch (error) {
-      console.error('Error starting Bible verse import:', error);
       res.status(500).json({ message: 'Failed to start import process' });
     }
   });
@@ -2981,7 +2895,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const unreadCount = await storage.getUnreadMessageCount(userId);
       res.json(unreadCount);
     } catch (error) {
-      console.error("Error fetching unread message count:", error);
       res.status(500).json({ message: "Failed to fetch unread count" });
     }
   });
@@ -2998,7 +2911,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const conversations = await storage.getUserConversations(userId);
       res.json(conversations);
     } catch (error) {
-      console.error("Error fetching conversations:", error);
       res.status(500).json({ message: "Failed to fetch conversations" });
     }
   });
@@ -3016,7 +2928,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const messages = await storage.getConversationMessages(conversationId, userId);
       res.json(messages);
     } catch (error) {
-      console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
@@ -3046,7 +2957,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       res.json(message);
     } catch (error) {
-      console.error("Error sending message:", error);
       res.status(500).json({ message: "Failed to send message" });
     }
   });
@@ -3060,7 +2970,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       await storage.markConversationAsRead(conversationId, userId);
       res.json({ success: true });
     } catch (error) {
-      console.error("Error marking conversation as read:", error);
       res.status(500).json({ message: "Failed to mark as read" });
     }
   });
@@ -3072,7 +2981,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const contacts = await storage.getUserContacts(userId);
       res.json(contacts);
     } catch (error) {
-      console.error("Error fetching contacts:", error);
       res.status(500).json({ message: "Failed to fetch contacts" });
     }
   });
@@ -3093,7 +3001,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(verse);
     } catch (error) {
-      console.error("Error getting random verse:", error);
       res.status(500).json({ message: "Failed to get random verse" });
     }
   });
@@ -3174,7 +3081,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(artData);
     } catch (error) {
-      console.error("Error generating verse art:", error);
       res.status(500).json({ message: "Failed to generate verse art" });
     }
   });
@@ -3199,7 +3105,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       res.setHeader('Content-Disposition', 'attachment; filename="verse-art.png"');
       res.send(buffer);
     } catch (error) {
-      console.error("Error downloading verse art:", error);
       res.status(500).json({ message: "Failed to download verse art" });
     }
   });
@@ -3227,7 +3132,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(badges);
     } catch (error) {
-      console.error("Error fetching bible badges:", error);
       res.status(500).json({ message: "Failed to fetch bible badges" });
     }
   });
@@ -3241,7 +3145,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(stats);
     } catch (error) {
-      console.error("Error fetching community stats:", error);
       res.status(500).json({ message: "Failed to fetch community stats" });
     }
   });
@@ -3264,7 +3167,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(reading);
     } catch (error) {
-      console.error("Error recording bible reading:", error);
       res.status(500).json({ message: "Failed to record bible reading" });
     }
   });
@@ -3295,7 +3197,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         memberDetails: checkinData.members
       });
     } catch (error) {
-      console.error("Error fetching member check-ins:", error);
       res.status(500).json({ message: "Failed to fetch member check-ins" });
     }
   });
@@ -3326,7 +3227,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         memberReadingStats: devotionStats.memberStats
       });
     } catch (error) {
-      console.error("Error fetching devotion analytics:", error);
       res.status(500).json({ message: "Failed to fetch devotion analytics" });
     }
   });
@@ -3363,7 +3263,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         }))
       });
     } catch (error) {
-      console.error("Error fetching at-risk members:", error);
       res.status(500).json({ message: "Failed to fetch at-risk members" });
     }
   });
@@ -3405,7 +3304,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         }
       });
     } catch (error) {
-      console.error("Error fetching engagement overview:", error);
       res.status(500).json({ message: "Failed to fetch engagement overview" });
     }
   });
@@ -3433,7 +3331,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         timeframe: 'Last 7 days'
       });
     } catch (error) {
-      console.error("Error fetching prayer engagement analytics:", error);
       res.status(500).json({ message: "Failed to fetch prayer engagement data" });
     }
   });
@@ -3464,7 +3361,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         message: `${completions.length} members completed the ${devotionalName} devotional`
       });
     } catch (error) {
-      console.error("Error fetching devotional completions:", error);
       res.status(500).json({ message: "Failed to fetch devotional completion data" });
     }
   });
@@ -3490,7 +3386,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         speed: parseFloat(speed as string)
       });
     } catch (error) {
-      console.error('Audio generation error:', error);
       res.status(500).json({ error: 'Failed to generate audio' });
     }
   });
@@ -3513,7 +3408,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const audioBuffer = Buffer.alloc(1024);
       res.send(audioBuffer);
     } catch (error) {
-      console.error('Audio streaming error:', error);
       res.status(500).json({ error: 'Failed to stream audio' });
     }
   });
@@ -3524,7 +3418,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const routines = await storage.getAudioRoutines(category as string);
       res.json(routines);
     } catch (error) {
-      console.error('Error fetching audio routines:', error);
       res.status(500).json({ error: 'Failed to fetch routines' });
     }
   });
@@ -3540,7 +3433,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(routine);
     } catch (error) {
-      console.error('Error fetching audio routine:', error);
       res.status(500).json({ error: 'Failed to fetch routine' });
     }
   });
@@ -3560,7 +3452,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       res.json({ success: true });
     } catch (error) {
-      console.error('Error updating routine progress:', error);
       res.status(500).json({ error: 'Failed to update progress' });
     }
   });
@@ -3600,7 +3491,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.send(audioBuffer);
     } catch (error) {
-      console.error('Meditation audio generation error:', error);
       res.status(500).json({ error: 'Failed to generate meditation audio' });
     }
   });
@@ -3641,7 +3531,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.send(audioBuffer);
     } catch (error) {
-      console.error('Premium speech generation error:', error);
       res.status(500).json({ error: 'Failed to generate premium speech' });
     }
   });
@@ -3658,7 +3547,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       res.json(verse);
     } catch (error) {
-      console.error('Error fetching Bible verse:', error);
       res.status(500).json({ error: 'Failed to fetch Bible verse' });
     }
   });
@@ -3724,7 +3612,6 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       });
 
     } catch (error) {
-      console.error('Error generating Bible audio:', error);
       res.status(500).json({ error: 'Failed to generate Bible audio' });
     }
   });
@@ -4020,7 +3907,6 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       });
 
     } catch (error) {
-      console.error('Error generating contextual scripture selection:', error);
       
       // Fallback to basic category-based selection
       try {
@@ -4095,7 +3981,6 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       const validVerses = verses.filter(v => v !== null);
       
 
-      console.log('First verse details:', validVerses[0] ? {
         id: validVerses[0].id,
         reference: validVerses[0].reference,
         text: validVerses[0].text.substring(0, 100) + '...'
@@ -4247,7 +4132,6 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
       res.json(routine);
 
     } catch (error) {
-      console.error('Error creating Bible-integrated routine:', error);
       res.status(500).json({ error: 'Failed to create Bible routine' });
     }
   });
@@ -4312,7 +4196,6 @@ Format your response as JSON with the following structure:
       });
 
     } catch (error) {
-      console.error("Biblical research error:", error);
       res.status(500).json({ 
         success: false,
         message: "Research needs a moment - let's try that again with your input.",
@@ -4370,7 +4253,6 @@ Format your response as JSON with the following structure:
         suggestion: "You can copy and paste the verse text from your preferred Bible translation."
       });
     } catch (error) {
-      console.error('Bible lookup error:', error);
       res.status(500).json({ 
         message: 'Error looking up verse. Please enter the verse text manually.'
       });
@@ -4414,7 +4296,6 @@ Format your response as JSON with the following structure:
         });
       }
     } catch (error) {
-      console.error('SoapBox Bible lookup error:', error);
       res.status(500).json({ 
         error: 'Lookup failed',
         message: 'Error accessing SoapBox Bible service'
@@ -4439,7 +4320,6 @@ Format your response as JSON with the following structure:
       soapboxBibleService.populateCache().then(result => {
 
       }).catch(error => {
-        console.error('SoapBox Bible cache population failed:', error);
       });
 
       res.json({ 
@@ -4450,7 +4330,6 @@ Format your response as JSON with the following structure:
         allowedTranslations: ['KJV', 'KJVA', 'WEB', 'ASV', 'CEV', 'GNT']
       });
     } catch (error) {
-      console.error('Error starting cache population:', error);
       res.status(500).json({ message: 'Failed to start cache population' });
     }
   });
@@ -4472,7 +4351,6 @@ Format your response as JSON with the following structure:
         description: 'Top 1000 popular Bible verses cached for performance'
       });
     } catch (error) {
-      console.error('Error getting cache stats:', error);
       res.status(500).json({ 
         error: 'Stats unavailable',
         message: 'Error accessing SoapBox Bible cache statistics'
@@ -4594,7 +4472,6 @@ Return JSON with this exact structure:
         const contentText = allContentCompletion.choices[0].message.content || '{}';
         allContentData = JSON.parse(contentText);
       } catch (error) {
-        console.error('Error parsing content:', error);
         // Provide fallback structure
         allContentData = {
           social: { 
@@ -4704,7 +4581,6 @@ Return JSON with this exact structure:
       res.json(distributionPackage);
 
     } catch (error) {
-      console.error("Content distribution error:", error);
       res.status(500).json({ message: "Failed to generate content distribution package" });
     }
   });
@@ -4760,7 +4636,6 @@ Return JSON with this exact structure:
       });
 
     } catch (error) {
-      console.error("Content publishing error:", error);
       res.status(500).json({ message: "Failed to publish content" });
     }
   });
@@ -4776,7 +4651,6 @@ Return JSON with this exact structure:
       const credentials = await storage.getSocialMediaCredentials(userId);
       res.json(credentials || {});
     } catch (error) {
-      console.error('Error fetching social credentials:', error);
       res.status(500).json({ 
         message: 'Unable to load social media connections. Please try again.',
         details: 'Connection retrieval failed'
@@ -4806,7 +4680,6 @@ Return JSON with this exact structure:
       const credential = await storage.saveSocialMediaCredential(credentialData);
       res.status(201).json(credential);
     } catch (error) {
-      console.error('Error saving social credentials:', error);
       res.status(500).json({ message: 'Failed to save credentials' });
     }
   });
@@ -4856,7 +4729,6 @@ Return JSON with this exact structure:
       });
 
     } catch (error) {
-      console.error('Error publishing to social media:', error);
       res.status(500).json({ message: 'Failed to publish content' });
     }
   });
@@ -4875,7 +4747,6 @@ Return JSON with this exact structure:
 
       res.json(posts);
     } catch (error) {
-      console.error('Error fetching social media posts:', error);
       res.status(500).json({ message: 'Failed to fetch posts' });
     }
   });
@@ -4901,7 +4772,6 @@ Return JSON with this exact structure:
       const video = await storage.createVideoContent(videoData);
       res.status(201).json(video);
     } catch (error) {
-      console.error('Error creating video:', error);
       res.status(500).json({ message: 'Failed to create video' });
     }
   });
@@ -4925,7 +4795,6 @@ Return JSON with this exact structure:
       
       res.json(videos);
     } catch (error) {
-      console.error('Error fetching videos:', error);
       res.status(500).json({ message: 'Failed to fetch videos' });
     }
   });
@@ -4938,7 +4807,6 @@ Return JSON with this exact structure:
       }
       res.json(video);
     } catch (error) {
-      console.error('Error fetching video:', error);
       res.status(500).json({ message: 'Failed to fetch video' });
     }
   });
@@ -4961,7 +4829,6 @@ Return JSON with this exact structure:
       const updatedVideo = await storage.updateVideoContent(parseInt(req.params.id), req.body);
       res.json(updatedVideo);
     } catch (error) {
-      console.error('Error updating video:', error);
       res.status(500).json({ message: 'Failed to update video' });
     }
   });
@@ -4984,7 +4851,6 @@ Return JSON with this exact structure:
       await storage.deleteVideoContent(parseInt(req.params.id));
       res.json({ message: 'Video deleted successfully' });
     } catch (error) {
-      console.error('Error deleting video:', error);
       res.status(500).json({ message: 'Failed to delete video' });
     }
   });
@@ -5008,7 +4874,6 @@ Return JSON with this exact structure:
       const view = await storage.recordVideoView(viewData);
       res.json(view);
     } catch (error) {
-      console.error('Error recording video view:', error);
       res.status(500).json({ message: 'Failed to record video view' });
     }
   });
@@ -5031,7 +4896,6 @@ Return JSON with this exact structure:
       const analytics = await storage.getVideoAnalytics(parseInt(req.params.id));
       res.json(analytics);
     } catch (error) {
-      console.error('Error fetching video analytics:', error);
       res.status(500).json({ message: 'Failed to fetch video analytics' });
     }
   });
@@ -5054,7 +4918,6 @@ Return JSON with this exact structure:
       const comment = await storage.createVideoComment(commentData);
       res.status(201).json(comment);
     } catch (error) {
-      console.error('Error creating video comment:', error);
       res.status(500).json({ message: 'Failed to create comment' });
     }
   });
@@ -5064,7 +4927,6 @@ Return JSON with this exact structure:
       const comments = await storage.getVideoComments(parseInt(req.params.id));
       res.json(comments);
     } catch (error) {
-      console.error('Error fetching video comments:', error);
       res.status(500).json({ message: 'Failed to fetch comments' });
     }
   });
@@ -5079,7 +4941,6 @@ Return JSON with this exact structure:
       const result = await storage.toggleVideoLike(userId, videoId, reactionType);
       res.json(result);
     } catch (error) {
-      console.error('Error toggling video like:', error);
       res.status(500).json({ message: 'Failed to toggle like' });
     }
   });
@@ -5103,7 +4964,6 @@ Return JSON with this exact structure:
       const series = await storage.createVideoSeries(seriesData);
       res.status(201).json(series);
     } catch (error) {
-      console.error('Error creating video series:', error);
       res.status(500).json({ message: 'Failed to create video series' });
     }
   });
@@ -5119,7 +4979,6 @@ Return JSON with this exact structure:
       const series = await storage.getVideoSeriesByChurch(parseInt(churchId as string));
       res.json(series);
     } catch (error) {
-      console.error('Error fetching video series:', error);
       res.status(500).json({ message: 'Failed to fetch video series' });
     }
   });
@@ -5132,7 +4991,6 @@ Return JSON with this exact structure:
       }
       res.json(series);
     } catch (error) {
-      console.error('Error fetching video series:', error);
       res.status(500).json({ message: 'Failed to fetch video series' });
     }
   });
@@ -5156,7 +5014,6 @@ Return JSON with this exact structure:
       const playlist = await storage.createVideoPlaylist(playlistData);
       res.status(201).json(playlist);
     } catch (error) {
-      console.error('Error creating video playlist:', error);
       res.status(500).json({ message: 'Failed to create playlist' });
     }
   });
@@ -5181,7 +5038,6 @@ Return JSON with this exact structure:
       const playlistVideo = await storage.addVideoToPlaylist(playlistId, videoId, position);
       res.status(201).json(playlistVideo);
     } catch (error) {
-      console.error('Error adding video to playlist:', error);
       res.status(500).json({ message: 'Failed to add video to playlist' });
     }
   });
@@ -5191,7 +5047,6 @@ Return JSON with this exact structure:
       const videos = await storage.getPlaylistVideos(parseInt(req.params.id));
       res.json(videos);
     } catch (error) {
-      console.error('Error fetching playlist videos:', error);
       res.status(500).json({ message: 'Failed to fetch playlist videos' });
     }
   });
@@ -5216,7 +5071,6 @@ Return JSON with this exact structure:
       
       res.json({ success: true, message: 'Demo progress tracked' });
     } catch (error) {
-      console.error('Error tracking demo progress:', error);
       res.status(500).json({ message: 'Failed to track demo progress' });
     }
   });
@@ -5235,7 +5089,6 @@ Return JSON with this exact structure:
       const progress = await storage.getDemoProgress(userId);
       res.json(progress);
     } catch (error) {
-      console.error('Error fetching demo progress:', error);
       res.status(500).json({ message: 'Failed to fetch demo progress' });
     }
   });
@@ -5253,7 +5106,6 @@ Return JSON with this exact structure:
       const analytics = await storage.getDemoAnalytics();
       res.json(analytics);
     } catch (error) {
-      console.error('Error fetching demo analytics:', error);
       res.status(500).json({ message: 'Failed to fetch demo analytics' });
     }
   });
@@ -5283,7 +5135,6 @@ Return JSON with this exact structure:
         res.json(videoContent);
       }
     } catch (error) {
-      console.error('Error generating AI video content:', error);
       res.status(500).json({ message: 'Failed to generate AI video content' });
     }
   });
@@ -5308,7 +5159,6 @@ Return JSON with this exact structure:
         results
       });
     } catch (error) {
-      console.error('Error importing YouTube videos:', error);
       res.status(500).json({ message: 'Failed to import videos' });
     }
   });
@@ -5403,7 +5253,6 @@ Return JSON with this exact structure:
           });
         }
       } catch (searchError) {
-        console.warn('Could not check for duplicate churches:', searchError);
         // Continue with creation if search fails
       }
 
@@ -5440,7 +5289,6 @@ Return JSON with this exact structure:
       });
 
     } catch (error: any) {
-      console.error('Error creating church:', error);
       
       // Handle specific database errors
       let errorMessage = 'Failed to create church. Please try again.';
@@ -5477,7 +5325,6 @@ Return JSON with this exact structure:
       const claimableChurches = await storage.getClaimableChurches(user.email);
       res.json(claimableChurches);
     } catch (error) {
-      console.error('Error fetching claimable churches:', error);
       res.status(500).json({ message: 'Failed to fetch claimable churches' });
     }
   });
@@ -5507,7 +5354,6 @@ Return JSON with this exact structure:
         });
       }
     } catch (error) {
-      console.error('Error claiming church:', error);
       res.status(500).json({ message: 'Failed to claim church' });
     }
   });
@@ -5526,7 +5372,6 @@ Return JSON with this exact structure:
       // Church bulk import functionality removed for production
       res.json({ message: 'Bulk import functionality disabled for production' });
     } catch (error) {
-      console.error('Error running bulk import:', error);
       res.status(500).json({ message: 'Bulk import failed' });
     }
   });
@@ -5545,7 +5390,6 @@ Return JSON with this exact structure:
       const result = await storage.removeDemoChurches();
       res.json(result);
     } catch (error) {
-      console.error('Error removing demo churches:', error);
       res.status(500).json({ message: 'Failed to remove demo churches' });
     }
   });
@@ -5619,7 +5463,6 @@ Return JSON with this exact structure:
       });
 
     } catch (error) {
-      console.error('Error updating user profile:', error);
       res.status(500).json({ 
         message: 'Failed to update profile',
         error: error instanceof Error ? error.message : String(error)
@@ -5633,7 +5476,6 @@ Return JSON with this exact structure:
       const churches = await storage.getChurches();
       res.json(churches);
     } catch (error) {
-      console.error("Error fetching churches:", error);
       res.status(500).json({ message: "Failed to fetch churches" });
     }
   });
@@ -5645,7 +5487,6 @@ Return JSON with this exact structure:
       const churches = await storage.getUserCreatedChurches(userId);
       res.json(churches);
     } catch (error) {
-      console.error("Error fetching user created churches:", error);
       res.status(500).json({ message: "Failed to fetch user created churches" });
     }
   });
@@ -5660,7 +5501,6 @@ Return JSON with this exact structure:
       );
       res.json(churches);
     } catch (error) {
-      console.error("Error fetching nearby churches:", error);
       res.status(500).json({ message: "Failed to fetch nearby churches" });
     }
   });
@@ -5682,7 +5522,6 @@ Return JSON with this exact structure:
       const churches = await storage.searchChurches(searchParams);
       res.json(churches);
     } catch (error) {
-      console.error("Error searching churches:", error);
       res.status(500).json({ message: "Failed to search churches" });
     }
   });
@@ -5693,7 +5532,6 @@ Return JSON with this exact structure:
       const denominations = await storage.getChurchDenominations();
       res.json(denominations);
     } catch (error) {
-      console.error("Error fetching denominations:", error);
       res.status(500).json({ message: "Failed to fetch denominations" });
     }
   });
@@ -5707,7 +5545,6 @@ Return JSON with this exact structure:
       }
       res.json(church);
     } catch (error) {
-      console.error("Error fetching church:", error);
       res.status(500).json({ message: "Failed to fetch church" });
     }
   });
@@ -5738,7 +5575,6 @@ Return JSON with this exact structure:
         churchName: church.name
       });
     } catch (error) {
-      console.error("Error joining church:", error);
       res.status(500).json({ message: "Failed to join church" });
     }
   });
@@ -5755,7 +5591,6 @@ Return JSON with this exact structure:
       const feedPosts = await storage.getFeedPosts(userId);
       res.json(feedPosts);
     } catch (error) {
-      console.error("Error fetching feed:", error);
       res.status(500).json({ message: "Failed to fetch feed" });
     }
   });
@@ -5779,7 +5614,6 @@ Return JSON with this exact structure:
         try {
           suggestedVerses = await generateMoodBasedVerses(mood);
         } catch (error) {
-          console.error('Error generating mood-based verses:', error);
           // Continue with post creation even if verse suggestions fail
         }
       }
@@ -5861,7 +5695,6 @@ Return JSON with this exact structure:
       
       res.json(response);
     } catch (error) {
-      console.error("Error creating feed post:", error);
       res.status(500).json({ message: "Failed to create post" });
     }
   });
@@ -5879,7 +5712,6 @@ Return JSON with this exact structure:
 
       res.json(discussions);
     } catch (error) {
-      console.error("Error fetching discussions:", error);
       res.status(500).json({ message: "Failed to fetch discussions" });
     }
   });
@@ -5894,12 +5726,10 @@ Return JSON with this exact structure:
 
       
       if (!userId) {
-        console.error("No user ID found in session");
         return res.status(401).json({ message: "User authentication required" });
       }
       
       if (!content || !content.trim()) {
-        console.error("Content validation failed:", { content });
         return res.status(400).json({ message: "Content is required" });
       }
 
@@ -5938,9 +5768,6 @@ Return JSON with this exact structure:
 
       res.status(201).json(post);
     } catch (error) {
-      console.error("Error creating discussion:", error);
-      console.error("Error details:", error instanceof Error ? error.message : String(error));
-      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ 
         message: "Failed to create post",
         error: error instanceof Error ? error.message : String(error)
@@ -5961,7 +5788,6 @@ Return JSON with this exact structure:
       const result = await storage.toggleDiscussionLike(userId, discussionId);
       res.json(result);
     } catch (error) {
-      console.error("Error toggling discussion like:", error);
       res.status(500).json({ message: "Failed to toggle like" });
     }
   });
@@ -6000,7 +5826,6 @@ Return JSON with this exact structure:
         data: result 
       });
     } catch (error) {
-      console.error("Error adding reaction:", error);
       res.status(500).json({ 
         success: false, 
         message: "Failed to add reaction",
@@ -6022,7 +5847,6 @@ Return JSON with this exact structure:
       const result = await storage.removeReaction(userId, parseInt(targetId), reactionType);
       res.json(result);
     } catch (error) {
-      console.error("Error removing reaction:", error);
       res.status(500).json({ message: "Failed to remove reaction" });
     }
   });
@@ -6039,7 +5863,6 @@ Return JSON with this exact structure:
       const result = await storage.toggleDiscussionBookmark(userId, discussionId);
       res.json(result);
     } catch (error) {
-      console.error("Error toggling discussion bookmark:", error);
       res.status(500).json({ message: "Failed to toggle bookmark" });
     }
   });
@@ -6089,7 +5912,6 @@ Return JSON with this exact structure:
 
       res.json({ success: true, message: "Discussion shared", data: sharedPost });
     } catch (error) {
-      console.error("Error sharing discussion:", error);
       res.status(500).json({ message: "Failed to share discussion" });
     }
   });
@@ -6128,7 +5950,6 @@ Return JSON with this exact structure:
         deletedBy: isAuthor ? "author" : "admin"
       });
     } catch (error) {
-      console.error("Error deleting discussion:", error);
       res.status(500).json({ message: "Failed to delete post" });
     }
   });
@@ -6162,7 +5983,6 @@ Return JSON with this exact structure:
 
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      console.error("Error creating discussion comment:", error);
       res.status(500).json({ success: false, message: "Failed to create comment" });
     }
   });
@@ -6173,7 +5993,6 @@ Return JSON with this exact structure:
       const comments = await storage.getDiscussionComments(discussionId);
       res.json(comments);
     } catch (error) {
-      console.error("Error fetching discussion comments:", error);
       res.status(500).json({ message: "Failed to fetch comments" });
     }
   });
@@ -6185,7 +6004,6 @@ Return JSON with this exact structure:
       const prayers = await storage.getPrayerRequests(churchId ? parseInt(churchId) : undefined);
       res.json(prayers);
     } catch (error) {
-      console.error("Error fetching prayer requests:", error);
       res.status(500).json({ message: "Failed to fetch prayer requests" });
     }
   });
@@ -6194,7 +6012,6 @@ Return JSON with this exact structure:
     try {
       const userId = req.session.userId;
       if (!userId) {
-        console.error("No user ID found in session");
         return res.status(401).json({ message: 'User authentication required' });
       }
       
@@ -6229,15 +6046,10 @@ Return JSON with this exact structure:
 
       } catch (feedError) {
         // Don't fail the prayer creation if feed post fails
-        console.error("Failed to create feed post for prayer:", feedError);
-        console.error("Feed error details:", feedError instanceof Error ? feedError.message : String(feedError));
-        console.error("Feed error stack:", feedError instanceof Error ? feedError.stack : 'No stack trace');
       }
       
       res.status(201).json(prayer);
     } catch (error) {
-      console.error("Error creating prayer request:", error);
-      console.error("Error details:", error instanceof Error ? error.message : String(error));
       res.status(500).json({ 
         message: "Failed to create prayer request", 
         error: error instanceof Error ? error.message : String(error)
@@ -6257,7 +6069,6 @@ Return JSON with this exact structure:
       
       res.json(response);
     } catch (error) {
-      console.error("Error praying for request:", error);
       res.status(500).json({ message: "Failed to pray for request" });
     }
   });
@@ -6285,7 +6096,6 @@ Return JSON with this exact structure:
         message: `${reaction} reaction added successfully` 
       });
     } catch (error) {
-      console.error("Error reacting to prayer:", error);
       res.status(500).json({ message: "Failed to add reaction" });
     }
   });
@@ -6307,7 +6117,6 @@ Return JSON with this exact structure:
         message: "Prayer bookmarked successfully" 
       });
     } catch (error) {
-      console.error("Error bookmarking prayer:", error);
       res.status(500).json({ message: "Failed to bookmark prayer" });
     }
   });
@@ -6341,7 +6150,6 @@ Return JSON with this exact structure:
         message: 'Photo uploaded successfully'
       });
     } catch (error) {
-      console.error('Error uploading prayer photo:', error);
       res.status(500).json({ message: 'Failed to upload photo' });
     }
   });
@@ -6371,7 +6179,6 @@ Return JSON with this exact structure:
         res.json({ liked: true });
       }
     } catch (error) {
-      console.error("Error toggling prayer like:", error);
       res.status(500).json({ message: "Failed to toggle like" });
     }
   });
@@ -6396,7 +6203,6 @@ Return JSON with this exact structure:
       
       res.status(201).json(response);
     } catch (error) {
-      console.error("Error creating prayer response:", error);
       res.status(500).json({ message: "Failed to create prayer response" });
     }
   });
@@ -6410,7 +6216,6 @@ Return JSON with this exact structure:
       const responses = prayerRequest ? [] : []; // TODO: Implement proper prayer responses fetching
       res.json(responses);
     } catch (error) {
-      console.error("Error fetching prayer responses:", error);
       res.status(500).json({ message: "Failed to fetch prayer responses" });
     }
   });
@@ -6438,7 +6243,6 @@ Return JSON with this exact structure:
       
       res.status(201).json(supportResponse);
     } catch (error) {
-      console.error("Error adding support message:", error);
       res.status(500).json({ message: "Failed to add support message" });
     }
   });
@@ -6449,7 +6253,6 @@ Return JSON with this exact structure:
       const supportMessages = await storage.getPrayerSupportMessages(prayerRequestId);
       res.json(supportMessages);
     } catch (error) {
-      console.error("Error fetching support messages:", error);
       res.status(500).json({ message: "Failed to fetch support messages" });
     }
   });
@@ -6549,7 +6352,6 @@ Return JSON with this exact structure:
       });
 
     } catch (error) {
-      console.error('Error generating AI prayer assistance:', error);
       res.status(500).json({ 
         message: 'Failed to generate prayer suggestions. Please try again or write your prayer manually.' 
       });
@@ -6582,7 +6384,6 @@ Return JSON with this exact structure:
 
       res.status(201).json(prayerCircle);
     } catch (error) {
-      console.error("Error creating prayer circle:", error);
       res.status(500).json({ message: "Failed to create prayer circle" });
     }
   });
@@ -6602,7 +6403,6 @@ Return JSON with this exact structure:
   //       summary: 'Created comprehensive demo environment with churches, users, discussions, prayers, events, and more'
   //     });
   //   } catch (error: any) {
-  //     console.error('Demo data generation error:', error);
   //     res.status(500).json({ 
   //       success: false, 
   //       message: 'Failed to generate demo data',
@@ -6633,7 +6433,6 @@ Return JSON with this exact structure:
         events: events.length
       });
     } catch (error) {
-      console.error('Demo stats error:', error);
       res.status(500).json({ message: 'Failed to load demo stats' });
     }
   });
@@ -6650,7 +6449,6 @@ Return JSON with this exact structure:
         summary: 'Created comprehensive demo environment with churches, users, discussions, prayers, events, and more'
       });
     } catch (error: any) {
-      console.error('Demo data generation error:', error);
       res.status(500).json({ 
         success: false, 
         message: 'Failed to generate demo data',
@@ -6672,7 +6470,6 @@ Return JSON with this exact structure:
         message: 'Demo data cleared successfully' 
       });
     } catch (error: any) {
-      console.error('Demo data clearing error:', error);
       res.status(500).json({ 
         success: false,
         message: 'Failed to clear demo data',
@@ -6705,7 +6502,6 @@ Return JSON with this exact structure:
         userId 
       });
     } catch (error: any) {
-      console.error('Demo login error:', error);
       res.status(500).json({ 
         success: false, 
         message: 'Failed to clear demo data',
@@ -6741,7 +6537,6 @@ Return JSON with this exact structure:
         }
       });
     } catch (error) {
-      console.error('Demo auth error:', error);
       res.status(500).json({ message: 'Demo authentication failed' });
     }
   });
@@ -6793,7 +6588,6 @@ Return JSON with this exact structure:
       
       res.json(baseMetrics);
     } catch (error) {
-      console.error('Error fetching engagement metrics:', error);
       res.status(500).json({ message: 'Failed to fetch engagement metrics' });
     }
   });
@@ -6839,7 +6633,6 @@ Return JSON with this exact structure:
       
       res.json(platformStats);
     } catch (error) {
-      console.error('Error fetching platform stats:', error);
       res.status(500).json({ message: 'Failed to fetch platform statistics' });
     }
   });
@@ -6869,7 +6662,6 @@ Return JSON with this exact structure:
       
       res.json(sentimentData);
     } catch (error) {
-      console.error('Error fetching sentiment analysis:', error);
       res.status(500).json({ message: 'Failed to fetch sentiment analysis' });
     }
   });
@@ -6907,7 +6699,6 @@ Return JSON with this exact structure:
       
       res.json(insights);
     } catch (error) {
-      console.error('Error fetching AI insights:', error);
       res.status(500).json({ message: 'Failed to fetch AI insights' });
     }
   });
@@ -7003,18 +6794,12 @@ Return JSON with this exact structure:
 
         } catch (feedError) {
           // Don't fail the S.O.A.P. creation if feed post fails
-          console.error('Failed to create feed post for S.O.A.P. entry:', feedError);
-          console.error('Feed error details:', feedError instanceof Error ? feedError.message : String(feedError));
         }
       }
       
       res.status(201).json(newEntry);
     } catch (error) {
-      console.error('Error creating S.O.A.P. entry:', error);
       if (error instanceof Error) {
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
       }
       
       // Send more detailed error information
@@ -7048,7 +6833,6 @@ Return JSON with this exact structure:
 
       res.json(entries);
     } catch (error) {
-      console.error('Error fetching S.O.A.P. entries:', error);
       res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries' });
     }
   });
@@ -7064,7 +6848,6 @@ Return JSON with this exact structure:
       );
       res.json(entries);
     } catch (error) {
-      console.error('Error fetching public S.O.A.P. entries:', error);
       res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries' });
     }
   });
@@ -7080,7 +6863,6 @@ Return JSON with this exact structure:
 
       res.json(entry);
     } catch (error) {
-      console.error('Error fetching S.O.A.P. entry:', error);
       res.status(500).json({ message: 'Failed to fetch S.O.A.P. entry' });
     }
   });
@@ -7099,7 +6881,6 @@ Return JSON with this exact structure:
       const updatedEntry = await storage.updateSoapEntry(entryId, req.body);
       res.json(updatedEntry);
     } catch (error) {
-      console.error('Error updating S.O.A.P. entry:', error);
       res.status(500).json({ message: 'Failed to update S.O.A.P. entry' });
     }
   });
@@ -7118,7 +6899,6 @@ Return JSON with this exact structure:
       await storage.deleteSoapEntry(entryId);
       res.status(204).send();
     } catch (error) {
-      console.error('Error deleting S.O.A.P. entry:', error);
       res.status(500).json({ message: 'Failed to delete S.O.A.P. entry' });
     }
   });
@@ -7129,7 +6909,6 @@ Return JSON with this exact structure:
       const streak = await storage.getUserSoapStreak(userId);
       res.json({ streak });
     } catch (error) {
-      console.error('Error fetching S.O.A.P. streak:', error);
       res.status(500).json({ message: 'Failed to fetch S.O.A.P. streak' });
     }
   });
@@ -7150,7 +6929,6 @@ Return JSON with this exact structure:
       const featuredEntry = await storage.featureSoapEntry(entryId, userId);
       res.json(featuredEntry);
     } catch (error) {
-      console.error('Error featuring S.O.A.P. entry:', error);
       res.status(500).json({ message: 'Failed to feature S.O.A.P. entry' });
     }
   });
@@ -7177,7 +6955,6 @@ Return JSON with this exact structure:
 
       res.json(suggestions);
     } catch (error) {
-      console.error('Error generating S.O.A.P. suggestions:', error);
       res.status(500).json({ message: error.message || 'Failed to generate AI suggestions' });
     }
   });
@@ -7193,7 +6970,6 @@ Return JSON with this exact structure:
       const enhanced = await enhanceSoapEntry(scripture, scriptureReference, observation, application, prayer);
       res.json(enhanced);
     } catch (error) {
-      console.error('Error enhancing S.O.A.P. entry:', error);
       res.status(500).json({ message: error.message || 'Failed to enhance reflection' });
     }
   });
@@ -7209,7 +6985,6 @@ Return JSON with this exact structure:
       const questions = await generateScriptureQuestions(scripture, scriptureReference);
       res.json({ questions });
     } catch (error) {
-      console.error('Error generating Scripture questions:', error);
       res.status(500).json({ message: error.message || 'Failed to generate questions' });
     }
   });
@@ -7226,7 +7001,6 @@ Return JSON with this exact structure:
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error fetching world events context:', error);
       res.status(500).json({ message: 'Failed to fetch current events context' });
     }
   });
@@ -7286,7 +7060,6 @@ Return JSON with this exact structure:
         seasonalFocus: getSeasonalFocus(season)
       });
     } catch (error) {
-      console.error('Error fetching liturgical context:', error);
       res.status(500).json({ message: 'Failed to fetch liturgical context' });
     }
   });
@@ -7337,7 +7110,6 @@ Return JSON with this exact structure:
       const unfeaturedEntry = await storage.unfeatureSoapEntry(entryId);
       res.json(unfeaturedEntry);
     } catch (error) {
-      console.error('Error unfeaturing S.O.A.P. entry:', error);
       res.status(500).json({ message: 'Failed to unfeature S.O.A.P. entry' });
     }
   });
@@ -7378,7 +7150,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const suggestions = JSON.parse(response.choices[0].message.content || '{}');
       res.json(suggestions);
     } catch (error) {
-      console.error('Error generating AI S.O.A.P. suggestions:', error);
       res.status(500).json({ message: 'Failed to generate S.O.A.P. suggestions' });
     }
   });
@@ -7398,7 +7169,6 @@ Please provide suggestions for the missing or incomplete sections.`
       // Return empty array for now - can implement message history later
       res.json([]);
     } catch (error) {
-      console.error("Error fetching bulk messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
@@ -7492,7 +7262,6 @@ Please provide suggestions for the missing or incomplete sections.`
           });
           successCount++;
         } catch (notificationError) {
-          console.warn(`Failed to notify member ${member.userId}:`, notificationError);
         }
       }
 
@@ -7511,7 +7280,6 @@ Please provide suggestions for the missing or incomplete sections.`
         }
       });
     } catch (error) {
-      console.error("Error creating bulk message:", error);
       res.status(500).json({ message: "Failed to send message" });
     }
   });
@@ -7560,7 +7328,6 @@ Please provide suggestions for the missing or incomplete sections.`
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Error sending emergency broadcast:", error);
       res.status(500).json({ message: error.message || "Failed to send emergency broadcast" });
     }
   });
@@ -7627,7 +7394,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(templates);
     } catch (error) {
-      console.error("Error fetching templates:", error);
       res.status(500).json({ message: "Failed to fetch templates" });
     }
   });
@@ -7679,7 +7445,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(transformedMembers);
     } catch (error) {
-      console.error("Error fetching members:", error);
       res.status(500).json({ message: "Failed to fetch members" });
     }
   });
@@ -7770,7 +7535,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.status(201).json(transformedMember);
     } catch (error) {
-      console.error("Error adding member:", error);
       res.status(500).json({ message: "Failed to add member" });
     }
   });
@@ -7824,7 +7588,6 @@ Please provide suggestions for the missing or incomplete sections.`
         }
       });
     } catch (error) {
-      console.error("Error updating member profile:", error);
       res.status(500).json({ message: "Failed to update member profile" });
     }
   });
@@ -7846,7 +7609,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: "Message sent successfully" });
     } catch (error) {
-      console.error('Error sending message:', error);
       res.status(500).json({ message: "Failed to send message" });
     }
   });
@@ -7873,7 +7635,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: "Member status updated successfully" });
     } catch (error) {
-      console.error('Error updating member status:', error);
       res.status(500).json({ message: "Failed to update member status" });
     }
   });
@@ -7900,7 +7661,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: "Member suspended successfully" });
     } catch (error) {
-      console.error('Error suspending member:', error);
       res.status(500).json({ message: "Failed to suspend member" });
     }
   });
@@ -7925,7 +7685,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: "Member removed successfully" });
     } catch (error) {
-      console.error('Error removing member:', error);
       res.status(500).json({ message: "Failed to remove member" });
     }
   });
@@ -7948,7 +7707,6 @@ Please provide suggestions for the missing or incomplete sections.`
         message: "Receipt sent successfully" 
       });
     } catch (error) {
-      console.error('Error sending receipt:', error);
       res.status(500).json({ 
         message: "Failed to send receipt" 
       });
@@ -8167,7 +7925,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(analytics);
     } catch (error) {
-      console.error('Analytics error:', error);
       res.status(500).json({ message: 'Failed to fetch donation analytics' });
     }
   });
@@ -8188,7 +7945,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(smsConfig);
     } catch (error) {
-      console.error('SMS config error:', error);
       res.status(500).json({ message: 'Failed to fetch SMS configuration' });
     }
   });
@@ -8223,7 +7979,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(stats);
     } catch (error) {
-      console.error('SMS stats error:', error);
       res.status(500).json({ message: 'Failed to fetch SMS statistics' });
     }
   });
@@ -8262,7 +8017,6 @@ Please provide suggestions for the missing or incomplete sections.`
         amount
       });
     } catch (error) {
-      console.error('SMS send error:', error);
       res.status(500).json({ message: 'Failed to send SMS instructions' });
     }
   });
@@ -8324,7 +8078,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response><Message>' + responseMessage + '</Message></Response>');
     } catch (error) {
-      console.error('SMS webhook error:', error);
       res.status(500).json({ message: 'SMS processing failed' });
     }
   });
@@ -8376,7 +8129,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(messages);
     } catch (error) {
-      console.error('Error fetching messages:', error);
       res.status(500).json({ message: 'Failed to fetch messages' });
     }
   });
@@ -8423,7 +8175,6 @@ Please provide suggestions for the missing or incomplete sections.`
         data: newMessage
       });
     } catch (error) {
-      console.error('Error sending message:', error);
       res.status(500).json({ 
         message: 'Failed to send message',
         error: error.message 
@@ -8448,7 +8199,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(messages);
     } catch (error) {
-      console.error('Error fetching messages:', error);
       res.status(500).json({ 
         message: 'Failed to fetch messages',
         error: error.message 
@@ -8476,7 +8226,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const contacts = await storage.getUserContacts(userId);
       res.json(contacts);
     } catch (error) {
-      console.error('Error fetching contacts:', error);
       res.status(500).json({ message: 'Failed to fetch contacts' });
     }
   });
@@ -8510,7 +8259,6 @@ Please provide suggestions for the missing or incomplete sections.`
         receiptGenerated: true
       });
     } catch (error) {
-      console.error('Error getting receipt info:', error);
       res.status(500).json({ 
         message: "Failed to get receipt information" 
       });
@@ -8546,7 +8294,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.send(buffer);
     } catch (error) {
-      console.error('AI voice synthesis error:', error);
       res.status(500).json({ error: 'Voice synthesis failed' });
     }
   });
@@ -8595,7 +8342,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.send(buffer);
     } catch (error) {
-      console.error('Audio Bible compilation error:', error);
       res.status(500).json({ error: 'Audio compilation failed' });
     }
   });
@@ -8629,7 +8375,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json({ files: uploadedFiles });
     } catch (error) {
-      console.error('Error uploading files:', error);
       res.status(500).json({ message: 'Failed to upload files' });
     }
   });
@@ -8655,7 +8400,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(uploadedFile);
     } catch (error) {
-      console.error('Error uploading file:', error);
       res.status(500).json({ message: 'Failed to upload file' });
     }
   });
@@ -8711,7 +8455,6 @@ Please provide suggestions for the missing or incomplete sections.`
         }
       });
     } catch (error) {
-      console.error('Error uploading video:', error);
       res.status(500).json({ message: 'Failed to upload video' });
     }
   });
@@ -8726,7 +8469,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(notifications);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
       res.status(500).json({ message: 'Failed to fetch notifications' });
     }
   });
@@ -8741,7 +8483,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: 'Notification marked as read' });
     } catch (error) {
-      console.error('Error marking notification as read:', error);
       res.status(500).json({ message: 'Failed to mark notification as read' });
     }
   });
@@ -8755,7 +8496,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: 'All notifications marked as read' });
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
       res.status(500).json({ message: 'Failed to mark all notifications as read' });
     }
   });
@@ -8777,7 +8517,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(churches);
     } catch (error) {
-      console.error('Error fetching admin churches:', error);
       res.status(500).json({ message: 'Failed to fetch churches' });
     }
   });
@@ -8798,7 +8537,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: 'Church approved successfully' });
     } catch (error) {
-      console.error('Error approving church:', error);
       res.status(500).json({ message: 'Failed to approve church' });
     }
   });
@@ -8819,7 +8557,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json({ success: true, message: 'Church rejected successfully' });
     } catch (error) {
-      console.error('Error rejecting church:', error);
       res.status(500).json({ message: 'Failed to reject church' });
     }
   });
@@ -8893,7 +8630,6 @@ Please provide suggestions for the missing or incomplete sections.`
         }, {} as any)
       });
     } catch (error) {
-      console.error('Error fetching Bible versions:', error);
       res.status(500).json({ message: 'Failed to fetch Bible versions' });
     }
   });
@@ -8904,7 +8640,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const status = await bibleImportSystem.getImportStatus();
       res.json(status);
     } catch (error) {
-      console.error('Error fetching import status:', error);
       res.status(500).json({ message: 'Failed to fetch import status' });
     }
   });
@@ -8921,7 +8656,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Start import in background
       bibleImportSystem.importPhase1Versions().catch(error => {
-        console.error('Phase 1 import failed:', error);
       });
 
       res.json({ 
@@ -8930,7 +8664,6 @@ Please provide suggestions for the missing or incomplete sections.`
         versions: ['KJV', 'ASV', 'WEB']
       });
     } catch (error) {
-      console.error('Error starting Phase 1 import:', error);
       res.status(500).json({ message: 'Failed to start Phase 1 import' });
     }
   });
@@ -8947,7 +8680,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Start import in background
       bibleImportSystem.importPhase2Versions().catch(error => {
-        console.error('Phase 2 import failed:', error);
       });
 
       res.json({ 
@@ -8956,7 +8688,6 @@ Please provide suggestions for the missing or incomplete sections.`
         versions: ['NET']
       });
     } catch (error) {
-      console.error('Error starting Phase 2 import:', error);
       res.status(500).json({ message: 'Failed to start Phase 2 import' });
     }
   });
@@ -8975,7 +8706,6 @@ Please provide suggestions for the missing or incomplete sections.`
         config: versionConfig || null
       });
     } catch (error) {
-      console.error('Error checking version status:', error);
       res.status(500).json({ message: 'Failed to check version status' });
     }
   });
@@ -8995,7 +8725,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Start population in background
       biblePopulator.populateAllVersions().catch(error => {
-        console.error('Bible population failed:', error);
       });
 
       res.json({ 
@@ -9005,7 +8734,6 @@ Please provide suggestions for the missing or incomplete sections.`
         note: 'This process will take approximately 30-45 minutes to complete all missing verses'
       });
     } catch (error) {
-      console.error('Error starting Bible population:', error);
       res.status(500).json({ message: 'Failed to start Bible population' });
     }
   });
@@ -9074,7 +8802,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(attributionData);
     } catch (error) {
-      console.error('Error fetching attribution data:', error);
       res.status(500).json({ message: 'Failed to fetch attribution data' });
     }
   });

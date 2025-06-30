@@ -119,17 +119,17 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
   const { title, description, url, thumbnail } = extractVideoInfo(post.content);
   
   // Debug video info
-  console.log('VideoSharePreview:', { postId: post.id, title, url, hasUrl: !!url });
+  
 
   const handleWatchVideo = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
     
-    console.log('Watch button clicked! URL:', url);
+    
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
-      console.log('No URL available to open');
+      
     }
   };
 
@@ -496,11 +496,11 @@ export default function EnhancedCommunityFeed() {
                       {/* Check if this is a video share */}
                       {(() => {
                         const hasVideoContent = post.content?.includes('📺') && post.content?.includes('🎬 Watch:');
-                        console.log('Video detection for post', post.id, ':', hasVideoContent);
-                        console.log('Post content preview:', post.content?.substring(0, 100));
+                        
+                        
                         
                         if (hasVideoContent) {
-                          console.log('Rendering VideoSharePreview for post', post.id);
+                          
                           try {
                             return <VideoSharePreview post={post} />;
                           } catch (error) {
@@ -513,7 +513,7 @@ export default function EnhancedCommunityFeed() {
                           if (hasYouTubeLink) {
                             const urlMatch = post.content?.match(/(https:\/\/[^\s]+youtube[^\s]*)/);
                             const youtubeUrl = urlMatch ? urlMatch[1] : '';
-                            console.log('Found YouTube URL:', youtubeUrl);
+                            
                             
                             return (
                               <div>
@@ -521,7 +521,7 @@ export default function EnhancedCommunityFeed() {
                                 {youtubeUrl && (
                                   <Button 
                                     onClick={() => {
-                                      console.log('Direct YouTube button clicked:', youtubeUrl);
+                                      
                                       window.open(youtubeUrl, '_blank', 'noopener,noreferrer');
                                     }}
                                     size="sm" 
