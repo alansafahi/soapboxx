@@ -8585,6 +8585,8 @@ Please provide suggestions for the missing or incomplete sections.`
       const file = req.file;
       const { title, description, category, tags } = req.body;
       
+
+      
       if (!file) {
         return res.status(400).json({ message: 'No video file uploaded' });
       }
