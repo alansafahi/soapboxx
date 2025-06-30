@@ -108,7 +108,7 @@ export default function EnhancedPrayerWall() {
   // Create prayer request mutation
   const createPrayerMutation = useMutation({
     mutationFn: async (data: PrayerRequestFormData) => {
-      return await apiRequest("/api/prayers", { method: "POST", body: data });
+      return await apiRequest("POST", "/api/prayers", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
@@ -131,7 +131,7 @@ export default function EnhancedPrayerWall() {
   // Create prayer circle mutation
   const createCircleMutation = useMutation({
     mutationFn: async (data: PrayerCircleFormData) => {
-      return await apiRequest("/api/prayer-circles", { method: "POST", body: data });
+      return await apiRequest("POST", "/api/prayer-circles", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayer-circles"] });
@@ -154,7 +154,7 @@ export default function EnhancedPrayerWall() {
   // Pray for request mutation
   const prayForRequestMutation = useMutation({
     mutationFn: async (prayerId: number) => {
-      return await apiRequest(`/api/prayers/${prayerId}/pray`, { method: "POST", body: {} });
+      return await apiRequest("POST", `/api/prayers/${prayerId}/pray`, {});
     },
     onSuccess: (_, prayerId) => {
       setPrayedRequests(prev => new Set(Array.from(prev).concat([prayerId])));
@@ -175,7 +175,7 @@ export default function EnhancedPrayerWall() {
   // React to prayer mutation
   const reactToPrayerMutation = useMutation({
     mutationFn: async ({ prayerId, reaction }: { prayerId: number, reaction: string }) => {
-      return await apiRequest(`/api/prayers/${prayerId}/react`, { method: "POST", body: { reaction } });
+      return await apiRequest("POST", `/api/prayers/${prayerId}/react`, { reaction });
     },
     onSuccess: (_, { prayerId, reaction }) => {
       setReactions(prev => {
@@ -193,7 +193,7 @@ export default function EnhancedPrayerWall() {
   // Bookmark prayer mutation
   const bookmarkPrayerMutation = useMutation({
     mutationFn: async (prayerId: number) => {
-      return await apiRequest(`/api/prayers/${prayerId}/bookmark`, { method: "POST", body: {} });
+      return await apiRequest("POST", `/api/prayers/${prayerId}/bookmark`, {});
     },
     onSuccess: (_, prayerId) => {
       setBookmarkedRequests(prev => {
