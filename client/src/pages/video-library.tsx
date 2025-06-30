@@ -78,10 +78,7 @@ export default function VideoLibrary() {
   // Upload video mutation
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      return await apiRequest('/api/videos/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      return await apiRequest('POST', '/api/videos/upload', formData);
     },
     onSuccess: () => {
       toast({
@@ -682,9 +679,9 @@ export default function VideoLibrary() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent className="bg-gray-700 border-gray-600">
-                          {categories.map((category) => (
-                            <SelectItem key={category} value={category} className="text-white hover:bg-gray-600">
-                              {category}
+                          {categories.slice(1).map((category) => (
+                            <SelectItem key={category.value} value={category.value} className="text-white hover:bg-gray-600">
+                              {category.label}
                             </SelectItem>
                           ))}
                         </SelectContent>

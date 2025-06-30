@@ -8578,6 +8578,60 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Video upload endpoint
+  app.post('/api/videos/upload', isAuthenticated, upload.single('video'), async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub || req.user?.id;
+      const file = req.file;
+      const { title, description, category, tags } = req.body;
+      
+      if (!file) {
+        return res.status(400).json({ message: 'No video file uploaded' });
+      }
+
+      if (!title || !description || !category) {
+        return res.status(400).json({ message: 'Title, description, and category are required' });
+      }
+
+      // Validate video file type
+      const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov'];
+      if (!allowedTypes.includes(file.mimetype)) {
+        return res.status(400).json({ message: 'Invalid video file type. Supported formats: MP4, WebM, OGG, AVI, MOV' });
+      }
+
+      // Create video record in database
+      const videoData = {
+        title,
+        description,
+        category,
+        tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
+        videoUrl: `/uploads/${file.filename}`,
+        thumbnailUrl: `/uploads/default-thumbnail.jpg`, // Default thumbnail
+        duration: '0:00', // Could be calculated from file metadata
+        uploadedBy: userId,
+        viewCount: 0,
+        createdAt: new Date()
+      };
+
+      const video = await storage.createVideoContent(videoData);
+
+      res.json({
+        message: 'Video uploaded successfully',
+        video: {
+          ...video,
+          filename: file.filename,
+          originalName: file.originalname,
+          type: file.mimetype,
+          size: file.size,
+          url: `/uploads/${file.filename}`
+        }
+      });
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      res.status(500).json({ message: 'Failed to upload video' });
+    }
+  });
+
   // Notification API endpoints
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
