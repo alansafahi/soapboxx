@@ -1183,9 +1183,15 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                       />
                                       <div 
                                         className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 hover:bg-opacity-30 transition-all rounded-lg cursor-pointer" 
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          console.log('Thumbnail clicked! URL:', url);
                                           if (url) {
+                                            console.log('Opening URL from thumbnail:', url);
                                             window.open(url, '_blank', 'noopener,noreferrer');
+                                          } else {
+                                            console.log('No URL found for thumbnail!');
                                           }
                                         }}
                                       >
@@ -1204,9 +1210,17 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                     </div>
                                     
                                     <Button 
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log('Watch button clicked! URL:', url);
+                                        alert('Watch button clicked! URL: ' + url);
                                         if (url) {
+                                          console.log('Opening URL:', url);
                                           window.open(url, '_blank', 'noopener,noreferrer');
+                                        } else {
+                                          console.log('No URL found!');
+                                          alert('No URL found!');
                                         }
                                       }}
                                       size="sm" 
