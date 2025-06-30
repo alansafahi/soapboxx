@@ -119,17 +119,20 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
   const { title, description, url, thumbnail } = extractVideoInfo(post.content);
   
   // Enhanced debug logging
-  // VideoSharePreview component rendering
+  console.log('VideoSharePreview rendering for post:', post.id);
+  console.log('Post content:', post.content);
+  console.log('Extracted info:', { title, description, url, thumbnail });
 
   const handleWatchVideo = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
     
+    console.log('Video button clicked! URL:', url);
     if (url) {
-      
+      console.log('Opening video URL:', url);
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
-      
+      console.log('No URL found for video');
     }
   };
 
@@ -503,7 +506,6 @@ export default function EnhancedCommunityFeed() {
                           try {
                             return <VideoSharePreview post={post} />;
                           } catch (error) {
-                            console.error('Error rendering VideoSharePreview:', error);
                             return <div className="text-red-500">Error loading video preview</div>;
                           }
                         } else {
