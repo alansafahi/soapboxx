@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Heart, MessageCircle, Share, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter } from 'lucide-react';
+import { Heart, MessageCircle, Share, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -158,11 +158,13 @@ export default function EnhancedPrayerWall() {
     },
     onSuccess: (_, prayerId) => {
       setPrayedRequests(prev => new Set(Array.from(prev).concat([prayerId])));
-      // Update reaction count locally
+      // Update reaction count locally to reflect the new prayer
       setReactions(prev => {
         const newMap = new Map(prev);
-        const current = newMap.get(prayerId) || { praying: 0, heart: 0, fire: 0, praise: 0 };
-        newMap.set(prayerId, { ...current, praying: current.praying + 1 });
+        const prayer = prayerRequests.find(p => p.id === prayerId);
+        const basePrayerCount = prayer?.prayerCount || 0;
+        const current = newMap.get(prayerId) || { praying: basePrayerCount, heart: 0, fire: 0, praise: 0 };
+        newMap.set(prayerId, { ...current, praying: basePrayerCount + 1 });
         return newMap;
       });
       toast({
@@ -456,7 +458,15 @@ export default function EnhancedPrayerWall() {
           <div className="space-y-4">
             <AnimatePresence>
               {filteredPrayers.map((prayer) => {
-                const currentReactions = reactions.get(prayer.id) || { praying: prayer.prayerCount || 0, heart: 0, fire: 0, praise: 0 };
+                // Calculate accurate prayer count including current user's prayer status
+                const basePrayerCount = prayer.prayerCount || 0;
+                const userIsPraying = prayedRequests.has(prayer.id) ? 1 : 0;
+                const currentReactions = reactions.get(prayer.id) || { 
+                  praying: basePrayerCount + userIsPraying, 
+                  heart: 0, 
+                  fire: 0, 
+                  praise: 0 
+                };
                 const isExpanded = expandedCards.has(prayer.id);
                 const showingWhosPraying = showWhosPraying.get(prayer.id) || false;
                 const authorName = prayer.isAnonymous ? 'Anonymous' : (prayer.authorId ? 'Community Member' : 'Anonymous');
@@ -506,12 +516,45 @@ export default function EnhancedPrayerWall() {
                             <Button 
                               variant="ghost" 
                               size="sm"
+                              onClick={() => {
+                                toast({
+                                  title: "Upload Feature",
+                                  description: "Photo upload coming soon!",
+                                });
+                              }}
+                              title="Upload photo or attachment"
+                            >
+                              <Upload className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
                               onClick={() => bookmarkPrayerMutation.mutate(prayer.id)}
                               className={bookmarkedRequests.has(prayer.id) ? 'text-yellow-600' : ''}
+                              title="Bookmark this prayer"
                             >
                               <Bookmark className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                if (navigator.share) {
+                                  navigator.share({
+                                    title: `Prayer Request: ${prayer.title || 'Community Prayer'}`,
+                                    text: prayer.content,
+                                    url: window.location.href
+                                  });
+                                } else {
+                                  navigator.clipboard.writeText(`Prayer Request: ${prayer.content}\n\nJoin us in prayer at ${window.location.href}`);
+                                  toast({
+                                    title: "Prayer Link Copied",
+                                    description: "Share this prayer with others.",
+                                  });
+                                }
+                              }}
+                              title="Share this prayer"
+                            >
                               <Share className="w-4 h-4" />
                             </Button>
                           </div>
@@ -571,6 +614,7 @@ export default function EnhancedPrayerWall() {
                               className={`flex items-center gap-2 ${prayedRequests.has(prayer.id) ? 'text-blue-600' : ''}`}
                               onClick={() => prayForRequestMutation.mutate(prayer.id)}
                               disabled={prayedRequests.has(prayer.id)}
+                              title="Pray for this request"
                             >
                               🙏 <span className="font-semibold">{currentReactions.praying}</span>
                               <span className="text-sm">Praying</span>
@@ -578,24 +622,27 @@ export default function EnhancedPrayerWall() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 hover:text-red-500"
                               onClick={() => reactToPrayerMutation.mutate({ prayerId: prayer.id, reaction: 'heart' })}
+                              title="Show love and support"
                             >
                               ❤️ <span>{currentReactions.heart}</span>
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 hover:text-orange-500"
                               onClick={() => reactToPrayerMutation.mutate({ prayerId: prayer.id, reaction: 'fire' })}
+                              title="This is powerful!"
                             >
                               🔥 <span>{currentReactions.fire}</span>
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 hover:text-yellow-500"
                               onClick={() => reactToPrayerMutation.mutate({ prayerId: prayer.id, reaction: 'praise' })}
+                              title="Praise God!"
                             >
                               🙌 <span>{currentReactions.praise}</span>
                             </Button>
