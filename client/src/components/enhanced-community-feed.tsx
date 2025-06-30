@@ -119,20 +119,13 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
   const { title, description, url, thumbnail } = extractVideoInfo(post.content);
   
   // Enhanced debug logging
-  console.log('VideoSharePreview rendering for post:', post.id);
-  console.log('Post content:', post.content);
-  console.log('Extracted info:', { title, description, url, thumbnail });
 
   const handleWatchVideo = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
     
-    console.log('Video button clicked! URL:', url);
     if (url) {
-      console.log('Opening video URL:', url);
       window.open(url, '_blank', 'noopener,noreferrer');
-    } else {
-      console.log('No URL found for video');
     }
   };
 
