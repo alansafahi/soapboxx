@@ -800,7 +800,23 @@ export default function VideoLibrary() {
                   alt={video.title}
                   className="w-full h-48 object-cover rounded-t-lg"
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
+                <div 
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const videoUrl = video.url || video.videoUrl;
+                    if (videoUrl) {
+                      window.open(videoUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      toast({
+                        title: "Error",
+                        description: "Video URL not available",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                >
                   <Play className="w-12 h-12 text-white" />
                 </div>
                 <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
@@ -872,7 +888,24 @@ export default function VideoLibrary() {
                 
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-gray-600 dark:text-gray-400">{video.views} views</span>
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                  <Button 
+                    size="sm" 
+                    className="bg-purple-600 hover:bg-purple-700"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const videoUrl = video.url || video.videoUrl;
+                      if (videoUrl) {
+                        window.open(videoUrl, '_blank', 'noopener,noreferrer');
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Video URL not available",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
                     <Play className="w-3 h-3 mr-1" />
                     Watch
                   </Button>
