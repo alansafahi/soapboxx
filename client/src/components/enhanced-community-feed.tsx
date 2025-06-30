@@ -118,14 +118,18 @@ function VideoSharePreview({ post }: { post: EnhancedPost }) {
 
   const { title, description, url, thumbnail } = extractVideoInfo(post.content);
   
-  // Enhanced debug logging
+  // Debug video info
+  console.log('VideoSharePreview:', { postId: post.id, title, url, hasUrl: !!url });
 
   const handleWatchVideo = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
     
+    console.log('Watch button clicked! URL:', url);
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      console.log('No URL available to open');
     }
   };
 
@@ -492,7 +496,7 @@ export default function EnhancedCommunityFeed() {
                       {/* Check if this is a video share */}
                       {(() => {
                         const hasVideoContent = post.content?.includes('📺 **Shared Video:') || post.content?.includes('🎬 Watch:');
-                        
+                        console.log('Video detection for post', post.id, ':', hasVideoContent, post.content?.substring(0, 50));
                         
                         if (hasVideoContent) {
                           
