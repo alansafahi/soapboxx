@@ -6262,6 +6262,90 @@ Return JSON with this exact structure:
     }
   });
 
+  app.post('/api/prayers/:id/react', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      const { reaction } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      if (!reaction || !['heart', 'fire', 'praise'].includes(reaction)) {
+        return res.status(400).json({ message: 'Valid reaction type required (heart, fire, praise)' });
+      }
+      
+      // For now, return success with a simple response
+      // In a full implementation, you would store the reaction in a reactions table
+      res.json({ 
+        success: true, 
+        reaction, 
+        prayerId: prayerRequestId,
+        message: `${reaction} reaction added successfully` 
+      });
+    } catch (error) {
+      console.error("Error reacting to prayer:", error);
+      res.status(500).json({ message: "Failed to add reaction" });
+    }
+  });
+
+  app.post('/api/prayers/:id/bookmark', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      // For now, return success - in full implementation you would toggle bookmark in database
+      res.json({ 
+        success: true, 
+        bookmarked: true,
+        prayerId: prayerRequestId,
+        message: "Prayer bookmarked successfully" 
+      });
+    } catch (error) {
+      console.error("Error bookmarking prayer:", error);
+      res.status(500).json({ message: "Failed to bookmark prayer" });
+    }
+  });
+
+  app.post('/api/prayers/:id/upload', isAuthenticated, upload.single('photo'), async (req: any, res) => {
+    try {
+      const prayerId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ message: 'No photo file provided' });
+      }
+      
+      // Convert uploaded file to base64 for consistent storage
+      const fileBuffer = fs.readFileSync(req.file.path);
+      const base64Image = `data:${req.file.mimetype};base64,${fileBuffer.toString('base64')}`;
+      
+      // Clean up uploaded file
+      fs.unlinkSync(req.file.path);
+      
+      // For now, return success with the base64 image data
+      // In a full implementation, you would store this in the prayer request record
+      res.json({
+        success: true,
+        prayerId,
+        photoUrl: base64Image,
+        message: 'Photo uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Error uploading prayer photo:', error);
+      res.status(500).json({ message: 'Failed to upload photo' });
+    }
+  });
+
   app.post('/api/prayers/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const prayerRequestId = parseInt(req.params.id);

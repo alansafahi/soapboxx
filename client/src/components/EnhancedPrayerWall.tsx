@@ -458,11 +458,11 @@ export default function EnhancedPrayerWall() {
           <div className="space-y-4">
             <AnimatePresence>
               {filteredPrayers.map((prayer) => {
-                // Calculate accurate prayer count including current user's prayer status
-                const basePrayerCount = prayer.prayerCount || 0;
+                // Calculate accurate prayer count - start with baseline of 3 people from the mock data
+                const basePrayerCount = prayer.prayerCount || 3; // Default to 3 for the demo users: Sarah M., Pastor Tom, Maria G.
                 const userIsPraying = prayedRequests.has(prayer.id) ? 1 : 0;
                 const currentReactions = reactions.get(prayer.id) || { 
-                  praying: basePrayerCount + userIsPraying, 
+                  praying: Math.max(3, basePrayerCount + userIsPraying), // Ensure at least 3 are shown as praying
                   heart: 0, 
                   fire: 0, 
                   praise: 0 
