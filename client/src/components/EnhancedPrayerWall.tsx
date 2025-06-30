@@ -517,10 +517,48 @@ export default function EnhancedPrayerWall() {
                               variant="ghost" 
                               size="sm"
                               onClick={() => {
-                                toast({
-                                  title: "Upload Feature",
-                                  description: "Photo upload coming soon!",
-                                });
+                                // Create file input element
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = async (e) => {
+                                  const file = (e.target as HTMLInputElement).files?.[0];
+                                  if (file) {
+                                    try {
+                                      const formData = new FormData();
+                                      formData.append('photo', file);
+                                      
+                                      const response = await fetch(`/api/prayers/${prayer.id}/upload`, {
+                                        method: 'POST',
+                                        body: formData,
+                                        credentials: 'include'
+                                      });
+                                      
+                                      if (response.ok) {
+                                        const result = await response.json();
+                                        toast({
+                                          title: "Photo Uploaded",
+                                          description: "Your photo has been uploaded successfully!",
+                                        });
+                                      } else {
+                                        const error = await response.json();
+                                        toast({
+                                          title: "Upload Failed",
+                                          description: error.message || "Failed to upload photo",
+                                          variant: "destructive"
+                                        });
+                                      }
+                                    } catch (error) {
+                                      console.error('Upload error:', error);
+                                      toast({
+                                        title: "Upload Error",
+                                        description: "An error occurred while uploading the photo",
+                                        variant: "destructive"
+                                      });
+                                    }
+                                  }
+                                };
+                                input.click();
                               }}
                               title="Upload photo or attachment"
                             >
