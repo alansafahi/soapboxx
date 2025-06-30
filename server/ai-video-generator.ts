@@ -205,14 +205,21 @@ Keep the content biblically sound, spiritually enriching, and appropriate for ch
 
   async createThumbnail(videoContent: VideoContent, visualStyle: string): Promise<string> {
     try {
-      // Generate thumbnail using DALL-E
-      const thumbnailResponse = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: `Create a thumbnail for a Christian video titled "${videoContent.title}". ${this.generateBackgroundPrompt(videoContent.description, visualStyle)}. Include the title text overlay. Church-appropriate, professional quality.`,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-      });
+      // DISABLED: Generate thumbnail using DALL-E (causing 403 errors)
+      // const thumbnailResponse = await openai.images.generate({
+      //   model: "dall-e-3",
+      //   prompt: `Create a thumbnail for a Christian video titled "${videoContent.title}". ${this.generateBackgroundPrompt(videoContent.description, visualStyle)}. Include the title text overlay. Church-appropriate, professional quality.`,
+      //   n: 1,
+      //   size: "1024x1024",
+      //   quality: "standard",
+      // });
+      
+      // Return placeholder thumbnail
+      const thumbnailResponse = {
+        data: [{
+          url: "https://via.placeholder.com/1024x1024/7c3aed/ffffff?text=Video+Thumbnail"
+        }]
+      };
 
       return thumbnailResponse.data[0].url || '';
     } catch (error) {

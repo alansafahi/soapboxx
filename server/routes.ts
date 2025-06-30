@@ -3138,13 +3138,21 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         Make it Instagram-ready with good contrast and beautiful composition.
       `, 'verse-art');
 
-      const imageResponse = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: imagePrompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "standard",
-      });
+      // DISABLED: OpenAI image generation causing 403 errors
+      // const imageResponse = await openai.images.generate({
+      //   model: "dall-e-3",
+      //   prompt: imagePrompt,
+      //   n: 1,
+      //   size: "1024x1024",
+      //   quality: "standard",
+      // });
+
+      // Return placeholder response since image generation is disabled
+      const imageResponse = {
+        data: [{
+          url: "https://via.placeholder.com/1024x1024/7c3aed/ffffff?text=Verse+Art+Disabled"
+        }]
+      };
 
       if (!imageResponse.data || imageResponse.data.length === 0) {
         throw new Error("Failed to generate image - no data returned from DALL-E");
