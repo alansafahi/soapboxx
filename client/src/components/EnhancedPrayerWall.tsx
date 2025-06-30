@@ -158,13 +158,11 @@ export default function EnhancedPrayerWall() {
     },
     onSuccess: (_, prayerId) => {
       setPrayedRequests(prev => new Set(Array.from(prev).concat([prayerId])));
-      // Update reaction count locally to reflect the new prayer
+      // Update reaction count simply - just increment by 1
       setReactions(prev => {
         const newMap = new Map(prev);
-        const prayer = prayerRequests.find(p => p.id === prayerId);
-        const basePrayerCount = prayer?.prayerCount || 0;
-        const current = newMap.get(prayerId) || { praying: basePrayerCount, heart: 0, fire: 0, praise: 0 };
-        newMap.set(prayerId, { ...current, praying: basePrayerCount + 1 });
+        const current = newMap.get(prayerId) || { praying: 3, heart: 0, fire: 0, praise: 0 }; // Start with baseline 3
+        newMap.set(prayerId, { ...current, praying: current.praying + 1 }); // Always increment by 1
         return newMap;
       });
       toast({
@@ -458,11 +456,9 @@ export default function EnhancedPrayerWall() {
           <div className="space-y-4">
             <AnimatePresence>
               {filteredPrayers.map((prayer) => {
-                // Calculate accurate prayer count - start with baseline of 3 people from the mock data
-                const basePrayerCount = prayer.prayerCount || 3; // Default to 3 for the demo users: Sarah M., Pastor Tom, Maria G.
-                const userIsPraying = prayedRequests.has(prayer.id) ? 1 : 0;
+                // Calculate prayer count consistently
                 const currentReactions = reactions.get(prayer.id) || { 
-                  praying: Math.max(3, basePrayerCount + userIsPraying), // Ensure at least 3 are shown as praying
+                  praying: 3, // Start with baseline of 3 (Sarah M., Pastor Tom, Maria G.)
                   heart: 0, 
                   fire: 0, 
                   praise: 0 
