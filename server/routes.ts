@@ -5656,7 +5656,12 @@ Return JSON with this exact structure:
 
   app.post("/api/feed/posts", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User authentication required" });
+      }
+      
       const { content, mood, audience = 'public', attachedMedia, linkedVerse } = req.body;
       
       if (!content || !content.trim()) {
@@ -6893,11 +6898,13 @@ Return JSON with this exact structure:
 
   app.get('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
-
-
-
 
       const options = {
         churchId: churchId ? parseInt(churchId) : undefined,
@@ -6906,8 +6913,6 @@ Return JSON with this exact structure:
         limit: parseInt(limit),
         offset: parseInt(offset),
       };
-
-
 
       const entries = await storage.getSoapEntries(userId, options);
 
