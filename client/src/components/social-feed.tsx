@@ -269,7 +269,7 @@ export default function SocialFeed() {
   // Create post mutation
   const createPostMutation = useMutation({
     mutationFn: async (postData: any) => {
-      return apiRequest('POST', '/api/discussions', postData);
+      return apiRequest('POST', '/api/feed/posts', postData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
