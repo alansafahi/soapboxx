@@ -587,7 +587,23 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
       if (prev.includes(moodId)) {
         return prev.filter(id => id !== moodId);
       } else {
-        return [...prev, moodId];
+        // Check if adding this mood would exceed the character limit
+        const newMoods = [...prev, moodId];
+        const moodString = newMoods.join(',');
+        
+        if (moodString.length > 255) {
+          // Show error message using toast
+          import('@/hooks/use-toast').then(({ toast }) => {
+            toast({
+              title: "Too many moods selected",
+              description: `You can select up to ${255 - prev.join(',').length} more characters worth of moods. Current selection: ${moodString.length}/255 characters.`,
+              variant: "destructive",
+            });
+          });
+          return prev; // Don't add the mood
+        }
+        
+        return newMoods;
       }
     });
     
@@ -656,7 +672,18 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             {/* Selected Moods Display */}
             {selectedMoods.length > 0 && (
               <div className="mb-3 space-y-2">
-                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Current feelings:</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Current feelings:</div>
+                  <div className={`text-xs px-2 py-1 rounded-full ${
+                    selectedMoods.join(',').length > 200 
+                      ? 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800' 
+                      : selectedMoods.join(',').length > 150
+                      ? 'bg-yellow-100 text-yellow-700 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800'
+                      : 'bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
+                  }`}>
+                    {selectedMoods.join(',').length}/255 chars
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-1">
                   {getSelectedMoodsData().map((mood, index) => (
                     <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
@@ -814,14 +841,27 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                           <div className="mb-4">
                             <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Recently Used</div>
                             <div className="flex flex-wrap gap-1">
-                              {recentMoods.map((mood) => (
-                                <Button
-                                  key={`recent-${mood.id}`}
-                                  variant={selectedMoods.includes(mood.id) ? "default" : "outline"}
-                                  size="sm"
-                                  onClick={() => toggleMoodSelection(mood.id)}
-                                  className={`h-7 px-2 text-xs ${selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
-                                >
+                              {recentMoods.map((mood) => {
+                                const isSelected = selectedMoods.includes(mood.id);
+                                const currentString = selectedMoods.join(',');
+                                const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
+                                
+                                return (
+                                  <Button
+                                    key={`recent-${mood.id}`}
+                                    variant={isSelected ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => toggleMoodSelection(mood.id)}
+                                    disabled={wouldExceedLimit}
+                                    className={`h-7 px-2 text-xs ${
+                                      isSelected 
+                                        ? 'bg-purple-600 hover:bg-purple-700' 
+                                        : wouldExceedLimit 
+                                        ? 'opacity-50 cursor-not-allowed' 
+                                        : ''
+                                    }`}
+                                    title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : undefined}
+                                  >
                                   <span className="mr-1">{mood.icon}</span>
                                   <span className="hidden sm:inline">{mood.label}</span>
                                   <span className="sm:hidden">{mood.label.length > 8 ? mood.label.substring(0, 8) + '...' : mood.label}</span>
@@ -841,17 +881,27 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                 <p className="text-xs text-gray-500 dark:text-gray-400 italic hidden sm:block">{category.description}</p>
                               </div>
                               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                {category.moods.map((mood) => (
-                                  <Button
-                                    key={mood.id}
-                                    variant={selectedMoods.includes(mood.id) ? "default" : "ghost"}
-                                    size="sm"
-                                    onClick={() => toggleMoodSelection(mood.id)}
-                                    className={`h-auto min-h-[3rem] p-2 justify-start text-left hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                                      selectedMoods.includes(mood.id) ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''
-                                    }`}
-                                    title={mood.subtitle} // Keep subtitle as tooltip for context
-                                  >
+                                {category.moods.map((mood) => {
+                                  const isSelected = selectedMoods.includes(mood.id);
+                                  const currentString = selectedMoods.join(',');
+                                  const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
+                                  
+                                  return (
+                                    <Button
+                                      key={mood.id}
+                                      variant={isSelected ? "default" : "ghost"}
+                                      size="sm"
+                                      onClick={() => toggleMoodSelection(mood.id)}
+                                      disabled={wouldExceedLimit}
+                                      className={`h-auto min-h-[3rem] p-2 justify-start text-left ${
+                                        isSelected 
+                                          ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                                          : wouldExceedLimit 
+                                          ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400'
+                                          : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                      }`}
+                                      title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : mood.subtitle}
+                                    >
                                     <div className="flex items-center w-full">
                                       <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
                                       <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.label}</span>
