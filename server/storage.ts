@@ -637,6 +637,8 @@ export interface IStorage {
   getPublicSoapEntries(churchId?: number, limit?: number, offset?: number): Promise<SoapEntry[]>;
   featureSoapEntry(id: number, featuredBy: string): Promise<SoapEntry>;
   unfeatureSoapEntry(id: number): Promise<SoapEntry>;
+  getChurchPastors(churchId: number): Promise<{ id: string; firstName: string; lastName: string; email: string; role: string }[]>;
+  getSoapEntriesSharedWithPastor(pastorId: string, churchId: number): Promise<SoapEntry[]>;
 
   // Admin Analytics Methods
   getUserRole(userId: string): Promise<string>;
@@ -7525,6 +7527,56 @@ export class DatabaseStorage implements IStorage {
       .where(eq(soapEntries.id, id))
       .returning();
     return unfeaturedEntry;
+  }
+
+  async getChurchPastors(churchId: number): Promise<{ id: string; firstName: string; lastName: string; email: string; role: string }[]> {
+    const pastors = await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        role: roles.name
+      })
+      .from(userChurches)
+      .innerJoin(users, eq(userChurches.userId, users.id))
+      .innerJoin(roles, eq(userChurches.roleId, roles.id))
+      .where(
+        and(
+          eq(userChurches.churchId, churchId),
+          eq(userChurches.isActive, true),
+          or(
+            eq(roles.name, 'pastor'),
+            eq(roles.name, 'lead_pastor'),
+            eq(roles.name, 'senior_pastor'),
+            eq(roles.name, 'associate_pastor')
+          )
+        )
+      );
+    return pastors;
+  }
+
+  async getSoapEntriesSharedWithPastor(pastorId: string, churchId: number): Promise<SoapEntry[]> {
+    const entries = await db
+      .select({
+        ...soapEntries,
+        authorFirstName: users.firstName,
+        authorLastName: users.lastName,
+        authorEmail: users.email
+      })
+      .from(soapEntries)
+      .innerJoin(users, eq(soapEntries.userId, users.id))
+      .innerJoin(userChurches, eq(users.id, userChurches.userId))
+      .where(
+        and(
+          eq(soapEntries.isSharedWithPastor, true),
+          eq(soapEntries.churchId, churchId),
+          eq(userChurches.churchId, churchId),
+          eq(userChurches.isActive, true)
+        )
+      )
+      .orderBy(desc(soapEntries.createdAt));
+    return entries;
   }
 
   // Notification operations
