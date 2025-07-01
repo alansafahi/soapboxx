@@ -80,6 +80,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     queryKey: ['/api/auth/user'],
   });
 
+  const { data: churchAffiliation } = useQuery({
+    queryKey: ['/api/user/church-affiliation'],
+  });
+
   // Fetch contextual information for AI enhancement
   const { data: worldEvents } = useQuery({
     queryKey: ['/api/context/world-events'],
@@ -1136,15 +1140,30 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   render={({ field }) => (
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label>Share with Pastor</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Allow your pastor to see this entry
-                        </p>
+                        <Label className={!churchAffiliation?.hasChurch ? "text-muted-foreground" : ""}>
+                          Share with Pastor
+                        </Label>
+                        {churchAffiliation?.hasChurch ? (
+                          churchAffiliation.hasPastors ? (
+                            <p className="text-sm text-muted-foreground">
+                              Share this reflection with your church pastors ({churchAffiliation.pastorCount} pastor{churchAffiliation.pastorCount !== 1 ? 's' : ''})
+                            </p>
+                          ) : (
+                            <p className="text-sm text-orange-600">
+                              Your church doesn't have any pastors registered yet
+                            </p>
+                          )
+                        ) : (
+                          <p className="text-sm text-orange-600">
+                            Join a church to share reflections with pastors
+                          </p>
+                        )}
                       </div>
                       <FormControl>
                         <Switch 
                           checked={field.value || false} 
-                          onCheckedChange={field.onChange} 
+                          onCheckedChange={churchAffiliation?.hasChurch && churchAffiliation?.hasPastors ? field.onChange : undefined}
+                          disabled={!churchAffiliation?.hasChurch || !churchAffiliation?.hasPastors}
                         />
                       </FormControl>
                     </div>

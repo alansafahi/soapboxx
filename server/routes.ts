@@ -6764,6 +6764,27 @@ Return JSON with this exact structure:
 
       const newEntry = await storage.createSoapEntry(validatedData);
 
+      // If S.O.A.P. entry is shared with pastor, notify pastors
+      if (newEntry.isSharedWithPastor && newEntry.churchId) {
+        try {
+          const pastors = await storage.getChurchPastors(newEntry.churchId);
+          const user = await storage.getUser(userId);
+          
+          // Create notifications for all pastors
+          for (const pastor of pastors) {
+            await storage.createNotification({
+              userId: pastor.id,
+              type: 'soap_shared',
+              title: 'New S.O.A.P. Entry Shared',
+              message: `${user?.firstName} ${user?.lastName} shared a S.O.A.P. reflection on ${newEntry.scriptureReference || 'Scripture'}`,
+              actionUrl: `/pastor/soap-entries?entry=${newEntry.id}`,
+              isRead: false
+            });
+          }
+        } catch (pastorNotificationError) {
+          // Don't fail the S.O.A.P. creation if pastor notifications fail
+        }
+      }
       
       // If S.O.A.P. entry is public, also create a corresponding social feed post
       if (newEntry.isPublic) {
@@ -7105,6 +7126,54 @@ Return JSON with this exact structure:
       res.json(unfeaturedEntry);
     } catch (error) {
       res.status(500).json({ message: 'Failed to unfeature S.O.A.P. entry' });
+    }
+  });
+
+  // Pastor dashboard - view SOAP entries shared with pastors
+  app.get('/api/pastor/soap-entries', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      // Check if user is a pastor
+      const userRole = await storage.getUserRole(userId);
+      const isPastor = ['pastor', 'lead_pastor', 'senior_pastor', 'associate_pastor'].includes(userRole);
+      
+      if (!isPastor) {
+        return res.status(403).json({ message: 'Unauthorized: Pastor access required' });
+      }
+
+      // Get user's church
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch) {
+        return res.status(404).json({ message: 'Church affiliation required' });
+      }
+
+      const sharedEntries = await storage.getSoapEntriesSharedWithPastor(userId, userChurch.churchId);
+      res.json(sharedEntries);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to retrieve shared S.O.A.P. entries' });
+    }
+  });
+
+  // Check user church affiliation for pastor sharing functionality
+  app.get('/api/user/church-affiliation', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      const userChurch = await storage.getUserChurch(userId);
+      const pastors = userChurch ? await storage.getChurchPastors(userChurch.churchId) : [];
+      
+      res.json({
+        hasChurch: !!userChurch,
+        church: userChurch ? {
+          id: userChurch.churchId,
+          name: 'Church Name', // Will be populated from church details
+        } : null,
+        hasPastors: pastors.length > 0,
+        pastorCount: pastors.length
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to check church affiliation' });
     }
   });
 
