@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,8 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Heart, BookOpen, MessageCircle, Sparkles, Calendar, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface PersonalizedContent {
   id: number;
@@ -74,8 +76,31 @@ const getMoodEmoji = (mood: string, score: number) => {
 };
 
 export default function PersonalizedGuidance() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
   const { data: personalizedContent, isLoading, refetch } = useQuery<PersonalizedContent[]>({
     queryKey: ['/api/personalized-content'],
+  });
+
+  // Refresh mutation to generate new content based on latest mood
+  const refreshContentMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/personalized-content/refresh', {}),
+    onSuccess: (data) => {
+      // Invalidate and refetch the personalized content
+      queryClient.invalidateQueries({ queryKey: ['/api/personalized-content'] });
+      toast({
+        title: "Guidance Refreshed",
+        description: `New spiritual guidance generated based on your ${data.basedOnMood.mood} mood.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Refresh Failed",
+        description: error.message || "Unable to generate fresh guidance. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const markAsViewed = async (contentId: number) => {
@@ -109,9 +134,14 @@ export default function PersonalizedGuidance() {
             Personalized biblical guidance based on your mood check-ins
           </p>
         </div>
-        <Button onClick={() => refetch()} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+        <Button 
+          onClick={() => refreshContentMutation.mutate()} 
+          variant="outline" 
+          size="sm"
+          disabled={refreshContentMutation.isPending}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshContentMutation.isPending ? 'animate-spin' : ''}`} />
+          {refreshContentMutation.isPending ? 'Generating...' : 'Refresh'}
         </Button>
       </div>
 
