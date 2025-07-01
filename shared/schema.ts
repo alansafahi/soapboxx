@@ -650,7 +650,7 @@ export const discussions = pgTable("discussions", {
   category: varchar("category", { length: 50 }), // general, prayer, bible_study, events
   isPublic: boolean("is_public").default(true),
   audience: varchar("audience", { length: 20 }).default("public"), // 'public', 'church', 'private'
-  mood: varchar("mood", { length: 50 }), // Facebook-style mood/activity tag
+  mood: varchar("mood", { length: 255 }), // Facebook-style mood/activity tag (supports multiple moods)
   suggestedVerses: jsonb("suggested_verses"), // AI-generated Bible verse suggestions
   attachedMedia: jsonb("attached_media"), // Array of uploaded media files
   linkedVerse: jsonb("linked_verse"), // User-selected Bible verse to link with post
