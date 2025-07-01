@@ -862,11 +862,12 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                     }`}
                                     title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : undefined}
                                   >
-                                  <span className="mr-1">{mood.icon}</span>
-                                  <span className="hidden sm:inline">{mood.label}</span>
-                                  <span className="sm:hidden">{mood.label.length > 8 ? mood.label.substring(0, 8) + '...' : mood.label}</span>
-                                </Button>
-                              ))}
+                                    <span className="mr-1">{mood.icon}</span>
+                                    <span className="hidden sm:inline">{mood.label}</span>
+                                    <span className="sm:hidden">{mood.label.length > 8 ? mood.label.substring(0, 8) + '...' : mood.label}</span>
+                                  </Button>
+                                );
+                              })}
                             </div>
                             <hr className="my-3 border-gray-200 dark:border-gray-600" />
                           </div>
@@ -902,12 +903,13 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                       }`}
                                       title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : mood.subtitle}
                                     >
-                                    <div className="flex items-center w-full">
-                                      <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
-                                      <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.label}</span>
-                                    </div>
-                                  </Button>
-                                ))}
+                                      <div className="flex items-center w-full">
+                                        <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
+                                        <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.label}</span>
+                                      </div>
+                                    </Button>
+                                  );
+                                })}
                               </div>
                             </div>
                           ))}
