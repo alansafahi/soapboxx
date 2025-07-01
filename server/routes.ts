@@ -5668,8 +5668,15 @@ Return JSON with this exact structure:
         return res.status(400).json({ message: "Post content is required" });
       }
       
-      // Use AI to categorize the post
-      const categorization = await categorizePost(content.trim());
+      // Use AI to categorize the post (with error handling)
+      let categorization;
+      try {
+        categorization = await categorizePost(content.trim());
+      } catch (error) {
+        console.error('AI categorization failed:', error);
+        // Fallback to simple categorization
+        categorization = { type: 'discussion', title: 'Community Post' };
+      }
       const { type, title } = categorization;
 
       // If post has mood data, provide AI-powered Bible verse suggestions
@@ -5759,7 +5766,14 @@ Return JSON with this exact structure:
       
       res.json(response);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create post" });
+      console.error('Failed to create post:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        userId: req.session?.userId,
+        body: req.body
+      });
+      res.status(500).json({ message: "Failed to create post", error: error.message });
     }
   });
 
