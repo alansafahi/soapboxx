@@ -133,9 +133,9 @@ export default function Sidebar() {
       label: "SPIRITUAL TOOLS",
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
+        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
-        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Spiritual Guidance", href: "/ai-guidance", icon: Sparkles },
       ]
     },

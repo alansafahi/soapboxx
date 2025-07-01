@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 1, 2025: PASTOR SHARING SYSTEM COMPLETELY IMPLEMENTED - Successfully created comprehensive pastor sharing functionality for S.O.A.P. entries with intelligent church affiliation detection
+  - SMART UI MESSAGING: Pastor sharing toggle now shows pastor count, "Join a church" message, or "No pastors registered" based on user's church affiliation status
+  - AUTOMATIC PASTOR NOTIFICATIONS: Pastors receive notifications when S.O.A.P. entries are shared with them, including user name and scripture reference
+  - CHURCH AFFILIATION API: Added /api/user/church-affiliation endpoint to check user's church status and pastor availability
+  - PASTOR DASHBOARD ENDPOINTS: Created API routes for pastors to view S.O.A.P. entries shared with them through /api/pastor/soap-entries
+  - DATABASE INTEGRATION: Enhanced storage methods with getChurchPastors() and getSoapEntriesSharedWithPastor() for complete functionality
+  - ADAPTIVE TOGGLE BEHAVIOR: Share with Pastor toggle automatically disables for users without church affiliation or churches without registered pastors
 - June 30, 2025: PRAYER FUNCTIONALITY COMPLETELY FIXED - Successfully resolved "Failed to add prayer" errors by fixing authentication inconsistencies and API request format issues
   - AUTHENTICATION STANDARDIZED: All prayer endpoints now use consistent session-based authentication (req.session.userId) instead of mixed OAuth/session approaches  
   - API REQUEST FORMAT FIXED: Corrected EnhancedPrayerWall.tsx to use proper apiRequest format ("POST", "/api/prayers", data) instead of object format

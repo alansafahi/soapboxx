@@ -1965,6 +1965,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate fresh personalized content based on user's most recent mood
+  app.post('/api/personalized-content/refresh', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get user's most recent mood check-in
+      const recentMoodCheckins = await storage.getRecentMoodCheckins(userId, 1);
+      
+      if (recentMoodCheckins.length === 0) {
+        return res.status(404).json({ 
+          message: 'No mood check-ins found. Please complete a mood check-in first to generate personalized guidance.' 
+        });
+      }
+
+      const latestMoodCheckin = recentMoodCheckins[0];
+      const { mood, moodScore, notes } = latestMoodCheckin;
+
+      // Generate new personalized content based on latest mood
+      let personalizedContent;
+      try {
+        personalizedContent = await aiPersonalizationService.generateMoodBasedContent(
+          userId,
+          mood,
+          moodScore,
+          notes || undefined
+        );
+        
+        // Store the new personalized content
+        if (personalizedContent) {
+          await storage.savePersonalizedContent({
+            userId,
+            moodCheckinId: latestMoodCheckin.id,
+            contentType: 'mood_based_refresh',
+            title: 'AI-Generated Spiritual Guidance (Refreshed)',
+            content: JSON.stringify(personalizedContent)
+          });
+        }
+      } catch (aiError) {
+        return res.status(500).json({ 
+          message: 'Failed to generate AI content', 
+          error: aiError.message 
+        });
+      }
+
+      res.json({
+        success: true,
+        personalizedContent,
+        basedOnMood: {
+          mood,
+          moodScore,
+          checkinDate: latestMoodCheckin.createdAt
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to refresh personalized content', 
+        error: error.message 
+      });
+    }
+  });
+
   // Mark personalized content as viewed
   app.post('/api/personalized-content/:id/viewed', isAuthenticated, async (req: any, res) => {
     try {
