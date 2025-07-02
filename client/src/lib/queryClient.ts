@@ -14,6 +14,16 @@ export async function apiRequest(
   headers?: Record<string, string>
 ): Promise<any> {
   try {
+    // Debug logging for all parameters
+    console.log('apiRequest called with:', { 
+      method: method, 
+      methodType: typeof method, 
+      url: url, 
+      urlType: typeof url, 
+      body: body,
+      headers: headers 
+    });
+    
     // Comprehensive type validation
     if (typeof method !== 'string' || method === null || method === undefined) {
       console.warn('Invalid method type passed to apiRequest:', typeof method, method);
@@ -21,7 +31,8 @@ export async function apiRequest(
     }
     
     if (typeof url !== 'string' || url === null || url === undefined) {
-      console.warn('Invalid URL type passed to apiRequest:', typeof url, url);
+      console.error('Invalid URL type passed to apiRequest:', typeof url, url);
+      console.error('Full parameters received:', { method, url, body, headers });
       throw new Error('Invalid URL provided to apiRequest');
     }
     
