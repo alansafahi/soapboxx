@@ -200,10 +200,11 @@ export default function EngagementAnalytics() {
       </Card>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="sentiment">Sentiment</TabsTrigger>
+          <TabsTrigger value="distribution">Content Distribution</TabsTrigger>
           <TabsTrigger value="insights">AI Insights</TabsTrigger>
         </TabsList>
 
@@ -706,6 +707,202 @@ export default function EngagementAnalytics() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Content Distribution Tab */}
+        <TabsContent value="distribution" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* Distribution Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Share2 className="w-5 h-5 mr-2" />
+                  Content Distribution Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">247</div>
+                      <div className="text-sm text-blue-700">Total Posts Distributed</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">11</div>
+                      <div className="text-sm text-green-700">Active Platforms</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span className="text-sm">Facebook</span>
+                      </div>
+                      <span className="text-sm font-medium">89 posts</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span className="text-sm">Instagram</span>
+                      </div>
+                      <span className="text-sm font-medium">76 posts</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                        <span className="text-sm">YouTube</span>
+                      </div>
+                      <span className="text-sm font-medium">34 posts</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                        <span className="text-sm">TikTok</span>
+                      </div>
+                      <span className="text-sm font-medium">48 posts</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Best Performing Content */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Award className="w-5 h-5 mr-2" />
+                  Top Performing Content
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-medium text-sm">Sunday Service Highlights</h4>
+                      <Badge className="bg-green-100 text-green-800">+28% engagement</Badge>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Facebook • Instagram • YouTube
+                    </div>
+                    <div className="flex space-x-4 text-xs text-gray-600 mt-2">
+                      <span>👁 2.4K views</span>
+                      <span>❤️ 89 likes</span>
+                      <span>💬 23 comments</span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-medium text-sm">Daily Devotional - Psalm 23</h4>
+                      <Badge className="bg-blue-100 text-blue-800">+22% engagement</Badge>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Instagram • Twitter • LinkedIn
+                    </div>
+                    <div className="flex space-x-4 text-xs text-gray-600 mt-2">
+                      <span>👁 1.8K views</span>
+                      <span>❤️ 67 likes</span>
+                      <span>💬 15 comments</span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 border rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-medium text-sm">Community Prayer Request</h4>
+                      <Badge className="bg-purple-100 text-purple-800">+19% engagement</Badge>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Facebook • Instagram
+                    </div>
+                    <div className="flex space-x-4 text-xs text-gray-600 mt-2">
+                      <span>👁 1.2K views</span>
+                      <span>❤️ 45 likes</span>
+                      <span>💬 32 comments</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Content Calendar & Scheduling */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2" />
+                Content Scheduling Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Optimal Posting Times</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Sunday 9:00 AM</span>
+                      <span className="text-green-600">High engagement</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Wednesday 7:00 PM</span>
+                      <span className="text-blue-600">Medium engagement</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Friday 12:00 PM</span>
+                      <span className="text-yellow-600">Low engagement</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Content Types Performance</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Video Content</span>
+                      <span className="text-green-600">8.4% avg engagement</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Image Posts</span>
+                      <span className="text-blue-600">6.2% avg engagement</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Text Updates</span>
+                      <span className="text-yellow-600">4.1% avg engagement</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Platform ROI</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Facebook</span>
+                      <span className="text-green-600">92% success rate</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Instagram</span>
+                      <span className="text-blue-600">87% success rate</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>YouTube</span>
+                      <span className="text-purple-600">84% success rate</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-medium text-blue-800 mb-2">🚀 Distribution Insights</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• Cross-platform content sharing increases reach by 34%</li>
+                  <li>• Video content performs 2.3x better than static images</li>
+                  <li>• Weekend posts receive 45% more engagement</li>
+                  <li>• Community-driven content has highest retention rate</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
