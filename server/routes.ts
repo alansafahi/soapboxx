@@ -4938,6 +4938,10 @@ Return JSON with this exact structure:
   app.get('/api/videos/:id/analytics', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const video = await storage.getVideoContent(parseInt(req.params.id));
       
       if (!video) {
@@ -4992,6 +4996,10 @@ Return JSON with this exact structure:
   app.post('/api/videos/:id/like', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const videoId = parseInt(req.params.id);
       const { reactionType = 'like' } = req.body;
 
@@ -5006,6 +5014,10 @@ Return JSON with this exact structure:
   app.post('/api/video-series', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const userRole = await storage.getUserRole(userId);
       
       // Check if user has permission to create video series
@@ -5056,6 +5068,9 @@ Return JSON with this exact structure:
   app.post('/api/video-playlists', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       const userRole = await storage.getUserRole(userId);
       
       // Check if user has permission to create playlists
@@ -5078,6 +5093,10 @@ Return JSON with this exact structure:
   app.post('/api/video-playlists/:id/videos', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const playlistId = parseInt(req.params.id);
       const { videoId, position } = req.body;
 
@@ -5202,6 +5221,10 @@ Return JSON with this exact structure:
   app.post('/api/videos/import-youtube', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const { urls } = req.body;
       
       if (!urls || !Array.isArray(urls)) {
