@@ -5740,12 +5740,12 @@ Return JSON with this exact structure:
     } catch (error) {
       console.error('Failed to create post:', error);
       console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
         userId: req.session?.userId,
         body: req.body
       });
-      res.status(500).json({ message: "Failed to create post", error: error.message });
+      res.status(500).json({ message: "Failed to create post", error: (error as Error).message });
     }
   });
 
