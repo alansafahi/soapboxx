@@ -686,9 +686,20 @@ export default function SermonCreationStudio() {
                   size="sm"
                   variant="outline"
                   className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100"
-                  onClick={() => setActiveTab(getNextStep()?.tab)}
+                  onClick={() => {
+                    const nextStep = getNextStep();
+                    if (nextStep?.tab === 'research' && !currentResearch) {
+                      // If first step, jump to Generate Research
+                      setActiveTab('research');
+                      setTimeout(() => {
+                        handleResearch();
+                      }, 100);
+                    } else {
+                      setActiveTab(nextStep?.tab);
+                    }
+                  }}
                 >
-                  Continue →
+                  {getProgressSteps().completed === 0 ? 'Start' : 'Continue'} →
                 </Button>
               </div>
               <p className="text-xs text-blue-600 mt-1">{getNextStep()?.description}</p>
@@ -1183,15 +1194,19 @@ export default function SermonCreationStudio() {
                               <div className="flex justify-between items-start mb-2">
                                 <h5 className="font-medium text-gray-900">{illustration.title}</h5>
                                 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                  {illustration.type}
+                                  Relevance: {Math.round(illustration.relevanceScore * 100)}%
                                 </span>
                               </div>
                               <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                {illustration.content}
+                                {illustration.story}
                               </p>
+                              <div className="bg-blue-50 p-3 rounded mb-3">
+                                <h6 className="font-medium text-blue-900 text-xs mb-1">Application:</h6>
+                                <p className="text-blue-800 text-xs">{illustration.application}</p>
+                              </div>
                               <div className="flex justify-between items-center text-xs text-gray-500">
-                                <span>Impact: {illustration.impact}/10</span>
-                                <span>Duration: {illustration.duration}</span>
+                                <span>Source: {illustration.source}</span>
+                                <span>Timing: {illustration.presentationTips?.timing || 'During message'}</span>
                               </div>
                             </div>
                           ))}
@@ -1331,7 +1346,8 @@ export default function SermonCreationStudio() {
                                   if (nextStep) {
                                     setActiveTab(nextStep.tab);
                                   } else {
-                                    setActiveTab('outline');
+                                    // If all steps are complete, go to enhance tab for final editing
+                                    setActiveTab('enhance');
                                   }
                                   toast({
                                     title: "Draft Loaded",
@@ -1542,17 +1558,7 @@ export default function SermonCreationStudio() {
       {(currentOutline || currentResearch) && (
         <Card className="bg-gray-50">
           <CardContent className="p-4">
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-2">
-                <Badge variant="outline" className="bg-white">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Time Saved: ~6 hours
-                </Badge>
-                <Badge variant="outline" className="bg-white">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  AI-Powered Research
-                </Badge>
-              </div>
+            <div className="flex justify-end items-center">
               <div className="flex space-x-2">
                 <Button 
                   variant="outline" 
