@@ -8996,5 +8996,44 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Admin role assignment endpoint
+  app.post('/api/admin/assign-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentUserRole = req.session?.user?.role || 'member';
+      if (currentUserRole !== 'soapbox_owner') {
+        return res.status(403).json({ message: 'Only SoapBox Owner can assign admin roles' });
+      }
+
+      const { email, role } = req.body;
+      
+      if (!email || !role) {
+        return res.status(400).json({ message: 'Email and role are required' });
+      }
+
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Update user role
+      const updatedUser = await storage.updateUser(user.id, { role });
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully assigned ${role} role to ${email}`,
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          role: updatedUser.role
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to assign admin role' });
+    }
+  });
+
   return httpServer;
 }
