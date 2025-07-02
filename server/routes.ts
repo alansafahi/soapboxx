@@ -6611,37 +6611,7 @@ Return JSON with this exact structure:
     }
   });
 
-  app.post('/api/demo/login', async (req, res) => {
-    try {
-      const { userId } = req.body;
-      
-      if (!userId) {
-        return res.status(400).json({ message: 'User ID required' });
-      }
 
-      const { demoDB, isDemoEnvironment } = await import('./demo-db');
-      
-      if (!isDemoEnvironment()) {
-        return res.status(400).json({ message: 'Demo environment not available' });
-      }
-
-      // Simulate demo user login by setting session
-      req.session.demoUserId = userId;
-      req.session.isDemoMode = true;
-      
-      res.json({ 
-        success: true, 
-        message: 'Demo login successful',
-        userId 
-      });
-    } catch (error: any) {
-      res.status(500).json({ 
-        success: false, 
-        message: 'Failed to clear demo data',
-        error: error?.message || 'Unknown error'
-      });
-    }
-  });
 
 
 

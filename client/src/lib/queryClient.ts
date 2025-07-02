@@ -18,34 +18,19 @@ export async function apiRequest(
     if (typeof method === 'object' && method !== null) {
       const obj = method as any;
       if (obj.method && obj.url) {
-        console.log('Detected object-style parameters, restructuring...');
         return apiRequest(obj.method, obj.url, obj.body, obj.headers);
       } else if (obj.method && !obj.url && typeof url === 'object') {
-        console.log('Detected mixed object parameters, restructuring...');
         const urlObj = url as any;
         return apiRequest(obj.method, urlObj.url || '/api/invitations', obj.body || urlObj, obj.headers);
       }
     }
     
-    // Debug logging for all parameters
-    console.log('apiRequest called with:', { 
-      method: method, 
-      methodType: typeof method, 
-      url: url, 
-      urlType: typeof url, 
-      body: body,
-      headers: headers 
-    });
-    
-    // Comprehensive type validation
+    // Type validation
     if (typeof method !== 'string' || method === null || method === undefined) {
-      console.warn('Invalid method type passed to apiRequest:', typeof method, method);
       method = 'POST';
     }
     
     if (typeof url !== 'string' || url === null || url === undefined) {
-      console.error('Invalid URL type passed to apiRequest:', typeof url, url);
-      console.error('Full parameters received:', { method, url, body, headers });
       throw new Error('Invalid URL provided to apiRequest');
     }
     
@@ -61,7 +46,6 @@ export async function apiRequest(
     // Final validation for HTTP methods
     const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
     if (!allowedMethods.includes(validMethod.toUpperCase())) {
-      console.warn('Invalid HTTP method:', validMethod, 'defaulting to POST');
       validMethod = 'POST';
     }
     
