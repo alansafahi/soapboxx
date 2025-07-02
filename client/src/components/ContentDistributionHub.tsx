@@ -17,6 +17,17 @@ import {
   Youtube, Video, MessageCircle, Phone, Music
 } from "lucide-react";
 
+// Extend window interface for pendingPublish
+declare global {
+  interface Window {
+    pendingPublish: {
+      platform: string;
+      content: string;
+      hashtags?: string[];
+    } | null;
+  }
+}
+
 interface ContentVariation {
   platform: string;
   format: string;
@@ -90,10 +101,7 @@ export default function ContentDistributionHub() {
       keyPoints: string[];
       audiences: string[];
     }) => {
-      return apiRequest('/api/content/distribute', {
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/content/distribute', data);
     },
     onSuccess: (data) => {
       setDistributionPackage(data);
@@ -135,10 +143,7 @@ export default function ContentDistributionHub() {
       selectedPlatforms: string[];
       scheduleTime?: string;
     }) => {
-      return apiRequest('/api/content/publish', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
+      return apiRequest('POST', '/api/content/publish', data);
     },
     onSuccess: (data) => {
       toast({
@@ -156,10 +161,7 @@ export default function ContentDistributionHub() {
       credentialsId: string;
       sermonId?: string;
     }) => {
-      return apiRequest('/api/social-media/publish', {
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/social-media/publish', data);
     },
     onSuccess: (data) => {
       toast({
@@ -186,10 +188,7 @@ export default function ContentDistributionHub() {
       accountId?: string;
       accountName?: string;
     }) => {
-      return apiRequest('/api/social-credentials', {
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/social-credentials', data);
     },
     onSuccess: (data) => {
       setSocialCredentials(prev => ({
