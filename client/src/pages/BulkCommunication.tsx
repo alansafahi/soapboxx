@@ -50,6 +50,14 @@ export default function BulkCommunication() {
     requiresResponse: false
   });
 
+  const [showTemplateCreator, setShowTemplateCreator] = useState(false);
+  const [newTemplate, setNewTemplate] = useState({
+    name: '',
+    subject: '',
+    content: '',
+    category: 'announcements'
+  });
+
   // Fetch message templates
   const { data: templates } = useQuery({
     queryKey: ['/api/communications/templates'],
@@ -76,6 +84,27 @@ export default function BulkCommunication() {
     onError: (error: any) => {
       toast({
         title: "Failed to send message",
+        description: error.message || "Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Create template mutation
+  const createTemplateMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/communications/templates', data),
+    onSuccess: () => {
+      toast({
+        title: "Template saved successfully",
+        description: "Your custom template has been added to the library."
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
+      setNewTemplate({ name: '', subject: '', content: '', category: 'announcements' });
+      setShowTemplateCreator(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to save template",
         description: error.message || "Please try again.",
         variant: "destructive"
       });
@@ -146,6 +175,19 @@ export default function BulkCommunication() {
     }
 
     createMessageMutation.mutate(messageForm);
+  };
+
+  const handleSaveTemplate = () => {
+    if (!newTemplate.name.trim() || !newTemplate.subject.trim() || !newTemplate.content.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in template name, subject, and content.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    createTemplateMutation.mutate(newTemplate);
   };
 
   const handleEmergencyBroadcast = () => {
@@ -435,10 +477,99 @@ export default function BulkCommunication() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Message Templates</CardTitle>
-                  <CardDescription>Quick-start with pre-written templates</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Message Templates</CardTitle>
+                      <CardDescription>Quick-start with pre-written templates</CardDescription>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowTemplateCreator(!showTemplateCreator)}
+                    >
+                      {showTemplateCreator ? 'Cancel' : 'Create New'}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {showTemplateCreator && (
+                    <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950 space-y-3">
+                      <h4 className="font-medium text-sm text-blue-800 dark:text-blue-200">Create New Template</h4>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="template-name">Template Name</Label>
+                        <Input
+                          id="template-name"
+                          placeholder="e.g., Weekly Newsletter"
+                          value={newTemplate.name}
+                          onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="template-category">Category</Label>
+                        <Select value={newTemplate.category} onValueChange={(value) => setNewTemplate(prev => ({ ...prev, category: value }))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="announcements">Announcements</SelectItem>
+                            <SelectItem value="emergencies">Emergencies</SelectItem>
+                            <SelectItem value="prayers">Prayers</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="template-subject">Subject Line</Label>
+                        <Input
+                          id="template-subject"
+                          placeholder="e.g., This Week at Our Church"
+                          value={newTemplate.subject}
+                          onChange={(e) => setNewTemplate(prev => ({ ...prev, subject: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="template-content">Message Content</Label>
+                        <Textarea
+                          id="template-content"
+                          placeholder="Enter your template message content..."
+                          value={newTemplate.content}
+                          onChange={(e) => setNewTemplate(prev => ({ ...prev, content: e.target.value }))}
+                          rows={4}
+                        />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={handleSaveTemplate}
+                          disabled={createTemplateMutation.isPending}
+                          className="flex-1"
+                        >
+                          {createTemplateMutation.isPending ? (
+                            <>
+                              <Clock className="w-4 h-4 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            'Save Template'
+                          )}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setShowTemplateCreator(false);
+                            setNewTemplate({ name: '', subject: '', content: '', category: 'announcements' });
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   {!templates ? (
                     <div className="text-center py-4">
                       <Clock className="w-6 h-6 mx-auto text-gray-400 mb-2" />

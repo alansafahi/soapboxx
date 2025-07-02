@@ -239,6 +239,7 @@ import {
   reactions,
   type Reaction,
   type InsertReaction,
+  communicationTemplates,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt } from "drizzle-orm";
@@ -382,6 +383,12 @@ export interface IStorage {
   createPrayerAssignment(assignment: InsertPrayerAssignment): Promise<PrayerAssignment>;
   createPrayerFollowUp(followUp: InsertPrayerFollowUp): Promise<PrayerFollowUp>;
   getAllUsers(): Promise<User[]>;
+  
+  // Template management operations
+  getCommunicationTemplates(userId: string, churchId?: number): Promise<any[]>;
+  createCommunicationTemplate(template: any): Promise<any>;
+  updateCommunicationTemplate(templateId: number, updates: any): Promise<any>;
+  deleteCommunicationTemplate(templateId: number): Promise<void>;
   
   // User stats and achievements
   getUserStats(userId: string): Promise<{
@@ -2111,6 +2118,38 @@ export class DatabaseStorage implements IStorage {
       .values(followUp)
       .returning();
     return newFollowUp;
+  }
+
+  // Template management operations
+  async getCommunicationTemplates(userId: string, churchId?: number): Promise<any[]> {
+    let query = db
+      .select()
+      .from(communicationTemplates)
+      .where(eq(communicationTemplates.createdBy, userId));
+    
+    if (churchId) {
+      query = query.where(eq(communicationTemplates.churchId, churchId));
+    }
+    
+    return await query.orderBy(desc(communicationTemplates.createdAt));
+  }
+
+  async createCommunicationTemplate(template: any): Promise<any> {
+    const [newTemplate] = await db.insert(communicationTemplates).values(template).returning();
+    return newTemplate;
+  }
+
+  async updateCommunicationTemplate(templateId: number, updates: any): Promise<any> {
+    const [updatedTemplate] = await db
+      .update(communicationTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(communicationTemplates.id, templateId))
+      .returning();
+    return updatedTemplate;
+  }
+
+  async deleteCommunicationTemplate(templateId: number): Promise<void> {
+    await db.delete(communicationTemplates).where(eq(communicationTemplates.id, templateId));
   }
 
   async getAllUsers(): Promise<User[]> {

@@ -7476,7 +7476,14 @@ Please provide suggestions for the missing or incomplete sections.`
       if (!userId) {
         return res.status(401).json({ message: 'Authentication required' });
       }
-      const templates = {
+
+      // Get user's custom templates
+      const user = await storage.getUser(userId);
+      const churchId = user?.churchId;
+      const customTemplates = await storage.getCommunicationTemplates(userId, churchId);
+
+      // Static templates
+      const staticTemplates = {
         announcements: [
           {
             id: 'service_update',
@@ -7533,9 +7540,75 @@ Please provide suggestions for the missing or incomplete sections.`
         ]
       };
 
-      res.json(templates);
+      // Group custom templates by category
+      const customTemplatesByCategory: any = {};
+      customTemplates.forEach((template: any) => {
+        const category = template.category || 'custom';
+        if (!customTemplatesByCategory[category]) {
+          customTemplatesByCategory[category] = [];
+        }
+        customTemplatesByCategory[category].push({
+          id: `custom_${template.id}`,
+          name: template.name,
+          subject: template.subject,
+          content: template.content,
+          isCustom: true
+        });
+      });
+
+      // Merge static and custom templates
+      const allTemplates = { ...staticTemplates };
+      Object.keys(customTemplatesByCategory).forEach(category => {
+        if (allTemplates[category]) {
+          allTemplates[category] = [...allTemplates[category], ...customTemplatesByCategory[category]];
+        } else {
+          allTemplates[category] = customTemplatesByCategory[category];
+        }
+      });
+
+      res.json(allTemplates);
     } catch (error) {
+      console.error('Error fetching templates:', error);
       res.status(500).json({ message: "Failed to fetch templates" });
+    }
+  });
+
+  // Create custom communication template
+  app.post('/api/communications/templates', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const { name, category, subject, content } = req.body;
+      
+      if (!name || !category || !content) {
+        return res.status(400).json({ message: 'Name, category, and content are required' });
+      }
+
+      // Get user's church ID if available
+      const user = await storage.getUser(userId);
+      const churchId = user?.churchId || 1; // Default to church ID 1 if not found
+
+      const templateData = {
+        name,
+        category,
+        subject: subject || '',
+        content,
+        type: category, // Use category as type
+        churchId,
+        createdBy: userId,
+        isActive: true,
+        usageCount: 0,
+        variables: [], // Could be enhanced to extract variables from content
+      };
+
+      const newTemplate = await storage.createCommunicationTemplate(templateData);
+      res.status(201).json(newTemplate);
+    } catch (error) {
+      console.error('Error creating template:', error);
+      res.status(500).json({ message: 'Failed to create template' });
     }
   });
 
