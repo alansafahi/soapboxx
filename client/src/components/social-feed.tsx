@@ -1688,8 +1688,13 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             <Button 
               onClick={() => {
                 if (selectedSoapEntry) {
-                  // Set the post content to include SOAP entry
-                  setNewPost(`Sharing my SOAP journal reflection:\n\n📖 ${selectedSoapEntry.scriptureReference || 'Scripture Study'}\n\n💭 Observation: ${selectedSoapEntry.observation}\n\n🎯 Application: ${selectedSoapEntry.application}\n\n🙏 Prayer: ${selectedSoapEntry.prayer}`);
+                  // Set the post content to include full SOAP entry details
+                  const scriptureText = selectedSoapEntry.scripture ? `\n\n"${selectedSoapEntry.scripture}"` : '';
+                  const observationText = selectedSoapEntry.observation ? `\n\n💭 Observation: ${selectedSoapEntry.observation}` : '';
+                  const applicationText = selectedSoapEntry.application ? `\n\n🎯 Application: ${selectedSoapEntry.application}` : '';
+                  const prayerText = selectedSoapEntry.prayer ? `\n\n🙏 Prayer: ${selectedSoapEntry.prayer}` : '';
+                  
+                  setNewPost(`Sharing my SOAP journal reflection:\n\n📖 ${selectedSoapEntry.scriptureReference || 'Scripture Study'}${scriptureText}${observationText}${applicationText}${prayerText}`);
                   setShowSoapDialog(false);
                   setSelectedSoapEntry(null);
                   toast({

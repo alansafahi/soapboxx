@@ -77,7 +77,13 @@ function ContactsPage() {
       setShowInviteDialog(false);
       
       // Handle different response types
-      if (data.resent) {
+      if (data.alreadyMember) {
+        toast({
+          title: "Already Connected!",
+          description: data.message,
+          variant: "default",
+        });
+      } else if (data.resent) {
         toast({
           title: "Invitation Resent",
           description: "Invitation resent!",

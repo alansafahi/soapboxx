@@ -2277,10 +2277,11 @@ app.post('/api/invitations', async (req: any, res) => {
       // Check if the email is already a registered user
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Already a member.',
-          type: 'already_member'
+        return res.status(200).json({ 
+          success: true, 
+          message: `Good news! ${email} is already part of the SoapBox community. You can connect with them directly through the app or send them a personal message to let them know you're here too!`,
+          type: 'already_member',
+          alreadyMember: true
         });
       }
       
