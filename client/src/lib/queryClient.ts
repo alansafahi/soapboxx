@@ -14,6 +14,19 @@ export async function apiRequest(
   headers?: Record<string, string>
 ): Promise<any> {
   try {
+    // Handle case where all parameters are passed as a single object (common mistake)
+    if (typeof method === 'object' && method !== null) {
+      const obj = method as any;
+      if (obj.method && obj.url) {
+        console.log('Detected object-style parameters, restructuring...');
+        return apiRequest(obj.method, obj.url, obj.body, obj.headers);
+      } else if (obj.method && !obj.url && typeof url === 'object') {
+        console.log('Detected mixed object parameters, restructuring...');
+        const urlObj = url as any;
+        return apiRequest(obj.method, urlObj.url || '/api/invitations', obj.body || urlObj, obj.headers);
+      }
+    }
+    
     // Debug logging for all parameters
     console.log('apiRequest called with:', { 
       method: method, 
