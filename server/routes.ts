@@ -2072,7 +2072,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pointsEarned: checkIn.pointsEarned
       });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to create check-in', error: error.message });
+      res.status(500).json({ message: 'Failed to create check-in', error: (error as Error).message });
     }
   });
 
@@ -7835,7 +7835,7 @@ Please provide suggestions for the missing or incomplete sections.`
         .where(gte(donations.donationDate, startDate));
 
       // Calculate real analytics from actual donation data
-      const totalGiving = donationData.reduce((sum, d) => sum + (d.amount || 0), 0);
+      const totalGiving = donationData.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
       const uniqueDonors = new Set(donationData.map(d => d.donorEmail || d.donorName)).size;
       const averageGift = uniqueDonors > 0 ? totalGiving / uniqueDonors : 0;
       const recurringDonors = donationData.filter(d => d.isRecurring).length;
@@ -7851,11 +7851,11 @@ Please provide suggestions for the missing or incomplete sections.`
         monthEnd.setMonth(monthStart.getMonth() + 1);
         
         const monthDonations = donationData.filter(d => {
-          const donationDate = new Date(d.createdAt);
+          const donationDate = d.createdAt ? new Date(d.createdAt) : new Date();
           return donationDate >= monthStart && donationDate < monthEnd;
         });
         
-        const monthTotal = monthDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
+        const monthTotal = monthDonations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
         const monthDonors = new Set(monthDonations.map(d => d.donorEmail || d.donorName)).size;
         const monthAverage = monthDonors > 0 ? monthTotal / monthDonors : 0;
         
@@ -7874,12 +7874,18 @@ Please provide suggestions for the missing or incomplete sections.`
       
       const currentYear = new Date().getFullYear();
       const yearStart = new Date(currentYear, 0, 1);
-      const yearDonations = donationData.filter(d => new Date(d.createdAt) >= yearStart);
-      const annualCurrent = yearDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
+      const yearDonations = donationData.filter(d => {
+        const donationDate = d.createdAt ? new Date(d.createdAt) : new Date();
+        return donationDate >= yearStart;
+      });
+      const annualCurrent = yearDonations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
       
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const monthDonations = donationData.filter(d => new Date(d.createdAt) >= monthStart);
-      const monthlyCurrent = monthDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
+      const monthDonations = donationData.filter(d => {
+        const donationDate = d.createdAt ? new Date(d.createdAt) : new Date();
+        return donationDate >= monthStart;
+      });
+      const monthlyCurrent = monthDonations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
       
       // Calculate building fund (assume 25% of general donations go to building)
       const buildingCurrent = annualCurrent * 0.25;
