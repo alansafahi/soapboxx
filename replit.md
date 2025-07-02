@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 2, 2025: EMERGENCY BROADCAST AUTHENTICATION BUG COMPLETELY FIXED - Successfully resolved critical "Invalid URL provided to apiRequest" error preventing emergency broadcasts from working
+  - AUTHENTICATION MISMATCH RESOLVED: Updated emergency broadcast endpoint from OAuth-style authentication (req.user?.claims?.sub) to session-based authentication (req.session.userId)
+  - CONSISTENCY ACHIEVED: All communication endpoints now use uniform session-based authentication matching rest of platform
+  - EMERGENCY BROADCAST OPERATIONAL: Fixed authentication issue that was preventing urgent communications from being sent to church members
+  - USER EXPERIENCE IMPROVED: Eliminated confusing "Invalid URL" error messages when attempting emergency broadcasts
 - July 2, 2025: CUSTOM TEMPLATE CREATION SYSTEM COMPLETELY IMPLEMENTED - Successfully created comprehensive template creation functionality for Communication Hub
   - FRONTEND UI ADDED: Created prominent blue "+ Create New" button next to Message Templates heading with proper responsive layout
   - TEMPLATE CREATION FORM: Implemented complete form with template name, category dropdown, subject line, and message content fields

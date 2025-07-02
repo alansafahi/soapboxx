@@ -7424,7 +7424,10 @@ Please provide suggestions for the missing or incomplete sections.`
   // Emergency broadcast endpoint
   app.post('/api/communications/emergency-broadcast', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor'].includes(userChurch.role)) {
