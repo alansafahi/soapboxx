@@ -4475,7 +4475,7 @@ Format your response as JSON with the following structure:
   // Content Distribution API routes
   app.post('/api/content/distribute', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -4701,7 +4701,7 @@ Return JSON with this exact structure:
 
   app.post('/api/content/publish', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -4774,7 +4774,7 @@ Return JSON with this exact structure:
 
   app.post('/api/social-credentials', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
       const { platform, accessToken, refreshToken, accountId, accountName } = req.body;
 
       if (!platform || !accessToken) {
