@@ -5879,7 +5879,7 @@ Return JSON with this exact structure:
       res.status(500).json({ 
         success: false, 
         message: "Failed to add reaction",
-        error: error.message 
+        error: (error as Error).message 
       });
     }
   });
@@ -6996,7 +6996,7 @@ Return JSON with this exact structure:
 
       res.json(suggestions);
     } catch (error) {
-      res.status(500).json({ message: error.message || 'Failed to generate AI suggestions' });
+      res.status(500).json({ message: (error as Error).message || 'Failed to generate AI suggestions' });
     }
   });
 
@@ -7011,7 +7011,7 @@ Return JSON with this exact structure:
       const enhanced = await enhanceSoapEntry(scripture, scriptureReference, observation, application, prayer);
       res.json(enhanced);
     } catch (error) {
-      res.status(500).json({ message: error.message || 'Failed to enhance reflection' });
+      res.status(500).json({ message: (error as Error).message || 'Failed to enhance reflection' });
     }
   });
 
@@ -7026,7 +7026,7 @@ Return JSON with this exact structure:
       const questions = await generateScriptureQuestions(scripture, scriptureReference);
       res.json({ questions });
     } catch (error) {
-      res.status(500).json({ message: error.message || 'Failed to generate questions' });
+      res.status(500).json({ message: (error as Error).message || 'Failed to generate questions' });
     }
   });
 
@@ -7417,7 +7417,7 @@ Please provide suggestions for the missing or incomplete sections.`
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      res.status(500).json({ message: error.message || "Failed to send emergency broadcast" });
+      res.status(500).json({ message: (error as Error).message || "Failed to send emergency broadcast" });
     }
   });
 
@@ -8095,7 +8095,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Log the SMS instruction in database
       await db.insert(donations).values({
-        amount: parseFloat(amount),
+        amount: amount.toString(),
         donorName: 'SMS Instruction',
         donorEmail: null,
         method: 'SMS_INSTRUCTION',
@@ -8156,7 +8156,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Create pending donation record
       await db.insert(donations).values({
-        amount: amount,
+        amount: amount.toString(),
         donorName: 'SMS Donor',
         donorEmail: null,
         method: 'SMS',
