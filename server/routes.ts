@@ -2277,9 +2277,51 @@ app.post('/api/invitations', async (req: any, res) => {
       // Check if the email is already a registered user
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
+        // Add existing member as a contact
+        try {
+          await storage.addContact({
+            userId: userId,
+            email,
+            name: `${existingUser.firstName || ''} ${existingUser.lastName || ''}`.trim() || existingUser.email,
+            contactType: 'member',
+            status: 'connected'
+          });
+
+          // Send a connection notification to the existing member
+          const inviter = await storage.getUser(userId);
+          const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'Someone';
+          
+          // Send notification email to existing member
+          const { sendEmail } = await import('./email-service.js');
+          await sendEmail({
+            to: email,
+            subject: `${inviterName} wants to connect with you on SoapBox`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #7c3aed;">New Connection Request</h2>
+                <p>Hi ${existingUser.firstName || 'there'},</p>
+                <p><strong>${inviterName}</strong> wants to connect with you on SoapBox Super App!</p>
+                <p>${message || 'They\'d love to share their faith journey with you.'}</p>
+                <p>You can find them in your SoapBox community and start connecting right away.</p>
+                <p style="margin-top: 30px;">
+                  <a href="https://www.soapboxapp.org" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+                    Open SoapBox App
+                  </a>
+                </p>
+                <p style="color: #666; font-size: 14px; margin-top: 20px;">
+                  Blessings,<br>
+                  The SoapBox Team
+                </p>
+              </div>
+            `
+          });
+        } catch (error) {
+          // Don't fail if contact already exists or email fails
+        }
+
         return res.status(200).json({ 
           success: true, 
-          message: `Good news! ${email} is already part of the SoapBox community. You can connect with them directly through the app or send them a personal message to let them know you're here too!`,
+          message: `Great! ${email} is already part of SoapBox. They've been notified that you want to connect and added to your contacts.`,
           type: 'already_member',
           alreadyMember: true
         });
