@@ -477,7 +477,7 @@ export default function BulkCommunication() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="flex-1">
                       <CardTitle className="text-lg">Message Templates</CardTitle>
                       <CardDescription>Quick-start with pre-written templates</CardDescription>
@@ -486,7 +486,7 @@ export default function BulkCommunication() {
                       variant="outline" 
                       size="sm"
                       onClick={() => setShowTemplateCreator(!showTemplateCreator)}
-                      className="shrink-0 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
+                      className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 border-blue-600 font-medium"
                     >
                       {showTemplateCreator ? 'Cancel' : '+ Create New'}
                     </Button>
