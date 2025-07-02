@@ -2955,11 +2955,7 @@ export const insertDonationReportSchema = createInsertSchema(donationReports).om
 export const insertCampusSchema = createInsertSchema(campuses).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCampusAssignmentSchema = createInsertSchema(campusAssignments).omit({ id: true, createdAt: true, updatedAt: true });
 
-// Bible verses types and schemas
-export type BibleVerse = typeof bibleVerses.$inferSelect;
-export type InsertBibleVerse = typeof bibleVerses.$inferInsert;
-
-export const insertBibleVerseSchema = createInsertSchema(bibleVerses).omit({ id: true, createdAt: true, updatedAt: true });
+// Bible verses handling is now done via API.Bible and ChatGPT fallback only - no database cache
 
 // Social Media Credentials and Posts schemas
 export const insertSocialMediaCredentialSchema = createInsertSchema(socialMediaCredentials).omit({ 

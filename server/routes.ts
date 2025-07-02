@@ -10,7 +10,6 @@ import {
   churches, 
   soapEntries, 
   discussions, 
-  bibleVerses,
   events,
   prayerRequests,
   notifications,
@@ -479,85 +478,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'intimacy': ['Core', 'Wisdom', 'Epistles']
       };
 
-      // Get relevant categories based on mood
-      const relevantCategories = moodCategoryMap[mood as string] || ['Core', 'Epistles', 'Gospels'];
-      
-      // Get verses from our actual database with mood-appropriate categories
+      // Get Bible verses using API.Bible direct lookup
       const verseCount = Math.min(parseInt(count as string) || 2, 10);
-      const selectedVerses: any[] = [];
       
-      // Try to get verses from each relevant category
-      for (const category of relevantCategories) {
-        if (selectedVerses.length >= verseCount) break;
-        
-        const categoryVerses = await storage.getBibleVerses({
-          category: category,
-          limit: 20 // Get more to allow for shuffling
-        });
-        
-        // Shuffle verses to avoid repetition
-        const shuffled = categoryVerses.sort(() => Math.random() - 0.5);
-        selectedVerses.push(...shuffled);
+      // Popular verses for different moods
+      const moodVerseMap = {
+        'anxious': ['Philippians 4:6-7', 'Matthew 6:26', '1 Peter 5:7', 'Psalm 23:1-4'],
+        'sad': ['Psalm 34:18', 'Matthew 11:28', 'Romans 8:28', 'Isaiah 41:10'],
+        'grateful': ['1 Thessalonians 5:18', 'Psalm 100:4', 'Ephesians 5:20', 'Colossians 3:17'],
+        'joyful': ['Psalm 118:24', 'Nehemiah 8:10', 'Philippians 4:4', 'Proverbs 17:22'],
+        'peaceful': ['John 14:27', 'Isaiah 26:3', 'Philippians 4:7', 'Psalm 29:11'],
+        'hopeful': ['Jeremiah 29:11', 'Romans 15:13', 'Lamentations 3:22-23', 'Psalm 42:11'],
+        'stressed': ['Psalm 55:22', 'Matthew 11:28-30', '2 Corinthians 12:9', 'Isaiah 40:31'],
+        'lonely': ['Hebrews 13:5', 'Deuteronomy 31:6', 'Psalm 68:6', 'Matthew 28:20'],
+        'confused': ['Proverbs 3:5-6', 'James 1:5', 'Isaiah 55:8-9', 'Psalm 32:8'],
+        'angry': ['Ephesians 4:26-27', 'Proverbs 29:11', 'James 1:19-20', 'Psalm 37:8']
+      };
+      
+      // Get verses for the mood or fallback to popular verses
+      const verseRefs = moodVerseMap[mood as keyof typeof moodVerseMap] || [
+        'John 3:16', 'Romans 8:28', 'Philippians 4:13', 'Jeremiah 29:11', 
+        'Romans 5:8', 'Matthew 28:19-20', 'John 14:6', 'Psalm 23:1'
+      ];
+      
+      // Shuffle and take the requested count
+      const shuffledRefs = verseRefs.sort(() => Math.random() - 0.5).slice(0, verseCount);
+      
+      // Lookup verses using API.Bible
+      const { lookupBibleVerse } = await import('./bible-api.js');
+      const selectedVerses = [];
+      
+      for (const ref of shuffledRefs) {
+        try {
+          const verse = await lookupBibleVerse(ref, 'NIV');
+          if (verse) {
+            selectedVerses.push({
+              id: Date.now() + Math.random(),
+              reference: verse.reference,
+              text: verse.text,
+              version: verse.version,
+              source: verse.source,
+              category: 'Mood-Based',
+              popularityScore: 8
+            });
+          }
+        } catch (error) {
+          // Skip failed lookups
+        }
       }
 
-      // Remove duplicates by reference and limit to requested count
-      const uniqueVerses = selectedVerses.filter((verse, index, self) => 
-        index === self.findIndex(v => v.reference === verse.reference)
-      ).slice(0, verseCount);
-
-      // If we don't have enough unique verses, get random ones from any category
-      if (uniqueVerses.length < verseCount) {
-        const additionalVerses = await storage.getBibleVerses({
-          limit: 30,
-          // Get from different categories to fill gaps
-        });
-        
-        const newVerses = additionalVerses
-          .filter(v => !uniqueVerses.find(uv => uv.reference === v.reference))
-          .sort(() => Math.random() - 0.5)
-          .slice(0, verseCount - uniqueVerses.length);
-        
-        uniqueVerses.push(...newVerses);
-      }
-
-      // Get database statistics for transparency
-      const totalVerses = await storage.getBibleVersesCount();
-      
       const response = {
-        verses: uniqueVerses.map((verse: any, index: number) => ({
-          id: verse.id || `mood-${Date.now()}-${index}`,
-          reference: verse.reference,
-          text: verse.text,
-          category: verse.category || 'Faith',
-          topicTags: [mood, categories].filter(Boolean),
-          source: verse.source || 'SoapBox Bible',
-          translation: verse.translation || version
-        })),
+        verses: selectedVerses,
         context: {
           userId: userId !== 'anonymous' ? userId : null,
           mood: mood || 'seeking guidance',
           requestedCount: verseCount,
-          actualCount: uniqueVerses.length,
-          categoriesUsed: relevantCategories.slice(0, 3),
-          version: version || 'KJV'
-        },
-        database_stats: {
-          totalVerses: totalVerses,
-          availableCategories: Object.keys(moodCategoryMap),
-          categoryBreakdown: uniqueVerses.reduce((acc: any, v: any) => {
-            const cat = v.category || 'Unknown';
-            acc[cat] = (acc[cat] || 0) + 1;
-            return acc;
-          }, {}),
-          translationBreakdown: uniqueVerses.reduce((acc: any, v: any) => {
-            const trans = v.translation || 'Unknown';
-            acc[trans] = (acc[trans] || 0) + 1;
-            return acc;
-          }, {})
+          actualCount: selectedVerses.length,
+          version: 'NIV'
         },
         meta: {
-          source: 'SoapBox Bible Database',
-          selection_method: 'mood-based authentic verses',
+          source: 'API.Bible + ChatGPT Fallback',
+          selection_method: 'mood-based direct lookup',
           accessibility: 'Public API - No authentication required'
         }
       };
