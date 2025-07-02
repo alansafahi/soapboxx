@@ -477,8 +477,8 @@ export default function BulkCommunication() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
                       <CardTitle className="text-lg">Message Templates</CardTitle>
                       <CardDescription>Quick-start with pre-written templates</CardDescription>
                     </div>
@@ -486,8 +486,9 @@ export default function BulkCommunication() {
                       variant="outline" 
                       size="sm"
                       onClick={() => setShowTemplateCreator(!showTemplateCreator)}
+                      className="shrink-0 bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                     >
-                      {showTemplateCreator ? 'Cancel' : 'Create New'}
+                      {showTemplateCreator ? 'Cancel' : '+ Create New'}
                     </Button>
                   </div>
                 </CardHeader>
@@ -575,8 +576,8 @@ export default function BulkCommunication() {
                       <Clock className="w-6 h-6 mx-auto text-gray-400 mb-2" />
                       <p className="text-sm text-gray-500">Loading templates...</p>
                     </div>
-                  ) : templates?.announcements?.length > 0 ? (
-                    templates.announcements.map((template: any) => (
+                  ) : Array.isArray(templates) && templates.length > 0 ? (
+                    templates.map((template: any) => (
                       <div key={template.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                         <h4 className="font-medium text-sm">{template.name}</h4>
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{template.subject}</p>
@@ -591,9 +592,43 @@ export default function BulkCommunication() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-4">
-                      <MessageSquare className="w-6 h-6 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">No templates available</p>
+                    <div className="space-y-3">
+                      {/* Default templates when API fails */}
+                      <div className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <h4 className="font-medium text-sm">Service Update</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Important Service Information</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="mt-2 text-xs hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => useTemplate({
+                            id: 'service-update',
+                            name: 'Service Update',
+                            subject: 'Important Service Information',
+                            content: 'Dear Church Family,\n\nWe have an important update regarding our upcoming service. Please see the details below.\n\nBlessings,\nChurch Leadership'
+                          })}
+                        >
+                          Use Template
+                        </Button>
+                      </div>
+                      
+                      <div className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <h4 className="font-medium text-sm">Weekly Announcement</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Weekly Church News</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="mt-2 text-xs hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => useTemplate({
+                            id: 'weekly-announcement',
+                            name: 'Weekly Announcement',
+                            subject: 'Weekly Church News',
+                            content: 'Dear Church Family,\n\nHere are this week\'s announcements and upcoming events.\n\nIn His Service,\nChurch Staff'
+                          })}
+                        >
+                          Use Template
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
