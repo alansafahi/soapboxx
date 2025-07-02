@@ -14,7 +14,8 @@ import {
   prayerRequests,
   notifications,
   contacts,
-  invitations
+  invitations,
+  donations
 } from "../shared/schema";
 import * as schema from "../shared/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, ilike, isNotNull, inArray } from "drizzle-orm";
@@ -1909,7 +1910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         personalizedContent
       });
     } catch (error) {
-      res.status(500).json({ message: 'Failed to create mood check-in', error: error.message });
+      res.status(500).json({ message: 'Failed to create mood check-in', error: (error as Error).message });
     }
   });
 
@@ -1990,7 +1991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (aiError) {
         return res.status(500).json({ 
           message: 'Failed to generate AI content', 
-          error: aiError.message 
+          error: (aiError as Error).message 
         });
       }
 
@@ -2006,7 +2007,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ 
         message: 'Failed to refresh personalized content', 
-        error: error.message 
+        error: (error as Error).message 
       });
     }
   });
@@ -7831,7 +7832,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const donationData = await db
         .select()
         .from(donations)
-        .where(gte(donations.createdAt, startDate));
+        .where(gte(donations.donationDate, startDate));
 
       // Calculate real analytics from actual donation data
       const totalGiving = donationData.reduce((sum, d) => sum + (d.amount || 0), 0);
