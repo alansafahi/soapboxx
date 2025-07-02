@@ -1129,7 +1129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user's church to filter pinned posts
       const userChurches = await storage.getUserChurches(userId);
-      const churchId = userChurches?.[0]?.churchId || null;
+      const churchId = userChurches?.[0]?.id || null;
 
       const pinnedPosts = await storage.getPinnedDiscussions(churchId);
 
@@ -3554,7 +3554,10 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     try {
       const { id } = req.params;
       const { stepIndex, timeElapsed, completed } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
 
       await storage.updateRoutineProgress(userId, parseInt(id), {
         stepIndex,
