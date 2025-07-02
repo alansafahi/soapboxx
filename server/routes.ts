@@ -9016,8 +9016,12 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(404).json({ message: 'User not found' });
       }
 
-      // Update user role
-      const updatedUser = await storage.updateUser(user.id, { role });
+      // Update user role directly in database (since storage.updateUser doesn't exist)
+      await db.update(users).set({ role }).where(eq(users.email, email));
+      
+      // Get updated user
+      const updatedUsers = await db.select().from(users).where(eq(users.email, email));
+      const updatedUser = updatedUsers[0];
       
       res.json({ 
         success: true, 
