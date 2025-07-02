@@ -15,10 +15,11 @@ import {
   notifications,
   contacts,
   invitations,
-  donations
+  donations,
+  volunteerHours
 } from "../shared/schema";
 import * as schema from "../shared/schema";
-import { eq, and, or, gte, lte, desc, asc, like, sql, count, ilike, isNotNull, inArray } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray } from "drizzle-orm";
 
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
