@@ -23,6 +23,18 @@ import {
 import * as schema from "../shared/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray } from "drizzle-orm";
 
+// Extend session data interface to include userId
+declare module 'express-session' {
+  interface SessionData {
+    userId?: string;
+  }
+}
+
+// Request interface with session data
+interface RequestWithSession extends express.Request {
+  session: any & { userId?: string };
+}
+
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import { lookupBibleVerse } from "./bible-api.js";
@@ -4789,6 +4801,9 @@ Return JSON with this exact structure:
   app.post('/api/videos', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
       const userRole = await storage.getUserRole(userId);
       
       // Check if user has permission to upload videos
@@ -4848,6 +4863,10 @@ Return JSON with this exact structure:
   app.put('/api/videos/:id', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const video = await storage.getVideoContent(parseInt(req.params.id));
       
       if (!video) {
@@ -4870,6 +4889,10 @@ Return JSON with this exact structure:
   app.delete('/api/videos/:id', isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
       const video = await storage.getVideoContent(parseInt(req.params.id));
       
       if (!video) {
