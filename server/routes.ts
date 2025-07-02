@@ -985,12 +985,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // For church members, determine role based on profile or church relationships
         if (userChurches && userChurches.length > 0) {
-          // Use church role if available
-          const churchRole = userChurches[0].roleId;
-          // Map church role IDs to tour role names (simplified for demo)
-          if (churchRole === 2) userRole = 'volunteer';
-          else if (churchRole === 3) userRole = 'small_group_leader';
-          else userRole = 'member';
+          // Use member role as default for church members
+          userRole = 'member';
         } else {
           // For new users, check if they just completed onboarding
           const isRecentUser = user.createdAt && Date.now() - new Date(user.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
@@ -2582,7 +2578,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         max_tokens: 600
       });
 
-      const aiReflection = JSON.parse(response.choices[0].message.content);
+      const aiReflection = JSON.parse(response.choices[0].message.content || '{}');
       
       res.json({
         reflectionQuestions: aiReflection.reflectionQuestions || [],
@@ -4297,7 +4293,7 @@ Format your response as JSON with the following structure:
         max_tokens: 2000
       });
 
-      const researchData = JSON.parse(response.choices[0].message.content);
+      const researchData = JSON.parse(response.choices[0].message.content || '{}');
       
       res.json({
         success: true,
@@ -6438,7 +6434,7 @@ Return JSON with this exact structure:
         temperature: 0.7
       });
 
-      const aiResponse = JSON.parse(response.choices[0].message.content);
+      const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
       
       res.json({
         suggestions: aiResponse.suggestions || [],
