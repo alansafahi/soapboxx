@@ -275,19 +275,7 @@ export interface IStorage {
   saveTourCompletion(data: any): Promise<any>;
   updateTourCompletion(userId: string, tourType: string, data: any): Promise<any>;
   
-  // Bible verse lookup operations
-  lookupBibleVerse(reference: string): Promise<{ reference: string; text: string } | null>;
-  getBibleVerseByReferenceAndTranslation(reference: string, translation: string): Promise<any | null>;
-  getBibleVerseByReferenceFlexible(reference: string, translation: string): Promise<any | null>;
-  searchBibleVersesByTopic(topics: string[]): Promise<any[]>;
-  getRandomVerseByCategory(category?: string): Promise<any | null>;
-  getBibleVerses(): Promise<any[]>;
-  getBibleVersesByTranslation(translation: string): Promise<any[]>;
-  getBibleVersesCount(): Promise<number>;
-  getBibleVersesPaginated(options: { search?: string; category?: string; limit: number; offset: number }): Promise<any[]>;
-  getBibleVerse(book: string, chapter: number, verse: number, translation?: string): Promise<any | undefined>;
-  searchBibleVerses(query: string, translation?: string, limit?: number): Promise<any[]>;
-  getRandomBibleVerse(translation?: string): Promise<any | undefined>;
+  // Bible verse operations now handled by API.Bible + ChatGPT fallback only
   
   // Church operations
   getChurches(): Promise<Church[]>;
