@@ -47,27 +47,21 @@ function ContactsPage() {
   // Fetch user's contacts and referral stats
   const { data: contacts = [], isLoading: contactsLoading, refetch: refetchContacts } = useQuery({
     queryKey: ["/api/contacts"],
-    queryFn: () => apiRequest("/api/contacts"),
   });
 
   const { data: referralStats } = useQuery({
     queryKey: ["/api/referrals/stats"],
-    queryFn: () => apiRequest("/api/referrals/stats"),
   });
 
   const { data: pendingInvites = [] } = useQuery({
     queryKey: ["/api/invitations/pending"],
-    queryFn: () => apiRequest("/api/invitations/pending"),
   });
 
   // Send invitation mutation
   const inviteMutation = useMutation({
     mutationFn: async (data: { email: string; message?: string }) => {
       try {
-        const response = await apiRequest("/api/invitations", {
-          method: "POST",
-          body: data
-        });
+        const response = await apiRequest("POST", "/api/invitations", data);
         return response;
       } catch (error) {
         throw error;
@@ -144,10 +138,7 @@ function ContactsPage() {
   // Add contact mutation
   const addContactMutation = useMutation({
     mutationFn: async (data: { userId: string; name: string }) => {
-      return apiRequest("/api/contacts/add", {
-        method: "POST",
-        body: data
-      });
+      return apiRequest("POST", "/api/contacts/add", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
@@ -161,10 +152,7 @@ function ContactsPage() {
   // Import device contacts mutation
   const importContactsMutation = useMutation({
     mutationFn: async (contacts: any[]) => {
-      return apiRequest("/api/contacts/import", {
-        method: "POST",
-        body: { contacts }
-      });
+      return apiRequest("POST", "/api/contacts/import", { contacts });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
