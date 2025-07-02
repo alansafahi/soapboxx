@@ -16,7 +16,9 @@ import {
   contacts,
   invitations,
   donations,
-  volunteerHours
+  volunteerHours,
+  messages,
+  conversations
 } from "../shared/schema";
 import * as schema from "../shared/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray } from "drizzle-orm";

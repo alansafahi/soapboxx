@@ -64,10 +64,7 @@ export default function BulkCommunication() {
 
   // Create bulk message mutation
   const createMessageMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/communications/messages', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    }),
+    mutationFn: (data: any) => apiRequest('POST', '/api/communications/messages', data),
     onSuccess: () => {
       toast({
         title: "Message sent successfully",
@@ -87,10 +84,7 @@ export default function BulkCommunication() {
 
   // Emergency broadcast mutation
   const emergencyBroadcastMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/communications/emergency-broadcast', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    }),
+    mutationFn: (data: any) => apiRequest('POST', '/api/communications/emergency-broadcast', data),
     onSuccess: () => {
       toast({
         title: "Emergency broadcast sent",
