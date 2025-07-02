@@ -196,11 +196,11 @@ function ContactsPage() {
       
       // Check if Contact Picker API is supported
       if (!('contacts' in navigator && 'ContactsManager' in window)) {
-        // Fallback: Ask user to manually add contacts or import from other sources
+        // Provide helpful guidance for manual contact addition
         toast({
-          title: "Contact Import Not Supported",
-          description: "Your browser doesn't support automatic contact import. Please add contacts manually using the invite feature.",
-          variant: "destructive",
+          title: "Contact Import Not Available",
+          description: "For privacy and security, automatic contact import isn't available on this browser. You can easily invite friends by typing their email addresses below!",
+          variant: "default",
         });
         setIsImportingContacts(false);
         return;
