@@ -63,9 +63,13 @@ function ContactsPage() {
   const inviteMutation = useMutation({
     mutationFn: async (data: { email: string; message?: string }) => {
       try {
+        // Add debugging for API request parameters
+        console.log('Sending invitation with data:', data);
         const response = await apiRequest("POST", "/api/invitations", data);
+        console.log('Invitation response:', response);
         return response;
       } catch (error) {
+        console.error('Invitation error:', error);
         throw error;
       }
     },
@@ -105,8 +109,23 @@ function ContactsPage() {
     },
     onError: (error: any) => {
       
-      // Check if user is already a member
-      if (error.message && error.message.includes('already a member')) {
+      // Check for specific API request errors
+      if (error.message && error.message.includes('Invalid URL provided to apiRequest')) {
+        toast({
+          title: "Technical Error",
+          description: "There was a problem with the invitation system. Please refresh the page and try again.",
+          variant: "destructive",
+          action: (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </Button>
+          ),
+        });
+      } else if (error.message && error.message.includes('already a member')) {
         toast({
           title: "Already a Member",
           description: "This person is already a member of SoapBox Super App. You can connect with them through the app instead.",
