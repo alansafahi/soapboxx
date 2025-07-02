@@ -17,16 +17,12 @@ import {
   Youtube, Video, MessageCircle, Phone, Music
 } from "lucide-react";
 
-// Extend window interface for pendingPublish
-declare global {
-  interface Window {
-    pendingPublish: {
-      platform: string;
-      content: string;
-      hashtags?: string[];
-    } | null;
-  }
-}
+// Type for window.pendingPublish
+type PendingPublish = {
+  platform: string;
+  content: string;
+  hashtags?: string[];
+} | null;
 
 interface ContentVariation {
   platform: string;
@@ -298,7 +294,7 @@ export default function ContentDistributionHub() {
     
     if (!socialCredentials[credentialsKey]) {
       // Store the publishing request for after credentials are saved
-      window.pendingPublish = { platform, content, hashtags };
+      (window as any).pendingPublish = { platform, content, hashtags };
       
       toast({
         title: "Connect Your Account",
@@ -326,10 +322,11 @@ export default function ContentDistributionHub() {
     
     // After saving credentials, automatically publish if there's a pending publish request
     setTimeout(() => {
-      if (window.pendingPublish && window.pendingPublish.platform === platform) {
-        const { content, hashtags } = window.pendingPublish;
+      const pendingPublish = (window as any).pendingPublish;
+      if (pendingPublish && pendingPublish.platform === platform) {
+        const { content, hashtags } = pendingPublish;
         handleDirectPublish(platform, content, hashtags);
-        window.pendingPublish = null;
+        (window as any).pendingPublish = null;
       }
     }, 1000);
   };
