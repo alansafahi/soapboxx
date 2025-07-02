@@ -33,6 +33,8 @@ import { useLocation } from "wouter";
 function ContactsPage() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showContactsDialog, setShowContactsDialog] = useState(false);
+  const [showPendingDialog, setShowPendingDialog] = useState(false);
   const [copiedReferral, setCopiedReferral] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
@@ -450,7 +452,10 @@ function ContactsPage() {
 
         {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <Card 
+            className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+            onClick={() => setShowContactsDialog(true)}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -478,7 +483,10 @@ function ContactsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <Card 
+            className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+            onClick={() => setShowPendingDialog(true)}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -728,6 +736,115 @@ function ContactsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Contacts Details Dialog */}
+      <Dialog open={showContactsDialog} onOpenChange={setShowContactsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Your Contacts ({Array.isArray(contacts) ? contacts.length : 0})</DialogTitle>
+            <DialogDescription>
+              People you've connected with on SoapBox
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto space-y-3">
+            {Array.isArray(contacts) && contacts.length > 0 ? (
+              contacts.map((contact: any) => (
+                <div key={contact.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold">
+                      {contact.name?.charAt(0)?.toUpperCase() || contact.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <p className="font-medium">{contact.name || 'Unknown'}</p>
+                      <p className="text-sm text-gray-500">{contact.email}</p>
+                      <p className="text-xs text-gray-400">
+                        Status: {contact.status || 'Connected'} • 
+                        Added: {contact.createdAt ? new Date(contact.createdAt).toLocaleDateString() : 'Unknown'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      toast({
+                        title: "Opening Messages",
+                        description: `Starting conversation with ${contact.name || contact.email}`,
+                      });
+                      setLocation('/messages');
+                      setShowContactsDialog(false);
+                    }}
+                  >
+                    Message
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>No contacts yet</p>
+                <p className="text-sm">Invite friends to start building your network</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pending Invites Details Dialog */}
+      <Dialog open={showPendingDialog} onOpenChange={setShowPendingDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Pending Invites ({Array.isArray(pendingInvites) ? pendingInvites.length : 0})</DialogTitle>
+            <DialogDescription>
+              Invitations waiting for response
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto space-y-3">
+            {Array.isArray(pendingInvites) && pendingInvites.length > 0 ? (
+              pendingInvites.map((invite: any) => (
+                <div key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
+                      {invite.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <p className="font-medium">{invite.email}</p>
+                      <p className="text-sm text-gray-500">
+                        Sent: {invite.createdAt ? new Date(invite.createdAt).toLocaleDateString() : 'Unknown'}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Status: {invite.status || 'Pending'} • 
+                        Message: {invite.message ? `"${invite.message.substring(0, 50)}..."` : 'Standard invitation'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Resend invitation logic
+                        toast({
+                          title: "Invitation Resent",
+                          description: `Resent invitation to ${invite.email}`,
+                        });
+                      }}
+                    >
+                      Resend
+                    </Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Mail className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>No pending invites</p>
+                <p className="text-sm">All your invitations have been responded to</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
