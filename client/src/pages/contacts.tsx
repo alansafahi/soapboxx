@@ -127,9 +127,9 @@ function ContactsPage() {
         });
       } else if (error.message && error.message.includes('self-invitations')) {
         toast({
-          title: "Self-Invitation Not Allowed",
-          description: "You can't invite yourself! Try inviting a friend or family member instead.",
-          variant: "destructive",
+          title: "Oops! That's Your Email",
+          description: "Looks like you're trying to invite yourself! Try sharing SoapBox with a friend or family member instead.",
+          variant: "default",
         });
       } else if (error.message && error.message.includes('already a member')) {
         toast({

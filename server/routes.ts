@@ -2281,7 +2281,7 @@ app.post('/api/invitations', async (req: any, res) => {
       if (currentUser && currentUser.email && currentUser.email.toLowerCase() === email.toLowerCase()) {
         return res.status(400).json({ 
           success: false, 
-          message: "You can't invite yourself! The system doesn't support self-invitations. Try inviting a friend or family member instead.",
+          message: "Looks like you're trying to invite yourself! Try sharing SoapBox with a friend or family member instead.",
           type: 'self_invitation'
         });
       }
