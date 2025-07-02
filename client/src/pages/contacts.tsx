@@ -125,6 +125,12 @@ function ContactsPage() {
             </Button>
           ),
         });
+      } else if (error.message && error.message.includes('self-invitations')) {
+        toast({
+          title: "Self-Invitation Not Allowed",
+          description: "You can't invite yourself! Try inviting a friend or family member instead.",
+          variant: "destructive",
+        });
       } else if (error.message && error.message.includes('already a member')) {
         toast({
           title: "Already a Member",
