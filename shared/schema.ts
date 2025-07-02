@@ -27,48 +27,7 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Bible verses database for auto-population
-export const bibleVerses = pgTable("bible_verses", {
-  id: serial("id").primaryKey(),
-  reference: varchar("reference", { length: 100 }).notNull(),
-  book: varchar("book", { length: 50 }).notNull(),
-  chapter: integer("chapter").notNull(),
-  verse: varchar("verse", { length: 20 }).notNull(), // Can be "16" or "16-17"
-  text: text("text").notNull(),
-  translation: varchar("translation", { length: 20 }).default("NIV"),
-  topicTags: text("topic_tags").array(), // ["anxiety", "peace", "hope"]
-  category: varchar("category", { length: 50 }).notNull(), // "core", "topical", "devotional"
-  popularityScore: integer("popularity_score").default(1), // 1-10, higher = more popular
-  aiSummary: text("ai_summary"), // Pre-generated AI commentary
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("bible_verses_reference_idx").on(table.reference),
-  index("bible_verses_book_idx").on(table.book),
-  index("bible_verses_category_idx").on(table.category),
-  unique("unique_verse_translation").on(table.reference, table.translation),
-]);
-
-// SoapBox Bible - Top 1000 popular verses cache from api.bible
-export const soapboxBible = pgTable("soapbox_bible", {
-  id: serial("id").primaryKey(),
-  reference: varchar("reference", { length: 100 }).notNull(),
-  book: varchar("book", { length: 50 }).notNull(),
-  chapter: integer("chapter").notNull(),
-  verse: varchar("verse", { length: 20 }).notNull(),
-  text: text("text").notNull(),
-  translation: varchar("translation", { length: 20 }).notNull(),
-  popularityRank: integer("popularity_rank").notNull(), // 1-1000 rank
-  source: varchar("source", { length: 50 }).default("American Bible Society"),
-  importedAt: timestamp("imported_at").defaultNow(),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-}, (table) => [
-  index("soapbox_bible_reference_idx").on(table.reference),
-  index("soapbox_bible_translation_idx").on(table.translation),
-  index("soapbox_bible_popularity_idx").on(table.popularityRank),
-  unique("unique_soapbox_verse").on(table.reference, table.translation),
-]);
+// Note: Bible verse caching removed - using API.Bible direct lookup with ChatGPT fallback
 
 // Simple notifications table for user notifications
 export const notifications = pgTable("notifications", {

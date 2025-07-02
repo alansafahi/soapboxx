@@ -1,22 +1,4 @@
-import { db } from './db';
-import { bibleVerses } from '@shared/schema';
-import { eq, and, like, ilike, or, sql } from 'drizzle-orm';
-import OpenAI from "openai";
-import { scriptureApiService } from "./scripture-api-service.js";
-
-// Bible versions configuration - Limited to 6 public domain/freely available versions
-const BIBLE_VERSIONS = [
-  { code: 'KJV', name: 'King James Version', phase: 1, useOpenAI: false },
-  { code: 'KJVA', name: "King James Version with Strong's", phase: 1, useOpenAI: false },
-  { code: 'WEB', name: 'World English Bible', phase: 1, useOpenAI: false },
-  { code: 'ASV', name: 'American Standard Version', phase: 1, useOpenAI: false },
-  { code: 'CEV', name: 'Contemporary English Version', phase: 2, useOpenAI: false },
-  { code: 'GNT', name: 'Good News Translation', phase: 2, useOpenAI: false }
-];
-
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+import { scriptureApiService } from './scripture-api-service.js';
 
 /**
  * Clean verse text by removing HTML tags, embedded verse numbers and formatting
@@ -50,56 +32,77 @@ function cleanVerseText(text: string): string {
     .replace(/\[\d+[A-Za-z]?\]/g, '')
     // Remove verse numbers in parentheses (1), (2), (2A), etc.
     .replace(/\(\d+[A-Za-z]?\)/g, '')
-    // Remove verse numbers with periods 1., 2., 2A., etc.
-    .replace(/^\d+[A-Za-z]?\.\s*/, '')
-    // Remove standalone pilcrow symbols
-    .replace(/¶/g, '')
-    // Remove multiple spaces
+    // Clean up extra whitespace
     .replace(/\s+/g, ' ')
-    // Remove leading/trailing whitespace
     .trim();
 }
 
-// OpenAI fallback for missing verses
 async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    if (!OPENAI_API_KEY) {
+      console.error('OpenAI API key not configured');
       return null;
     }
 
-
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        {
-          role: "system",
-          content: `You are a Biblical scholar. Provide the exact, authentic Bible verse text for the requested reference and translation. Return only the verse text without commentary or additional information. Be precise and accurate.`
-        },
-        {
-          role: "user", 
-          content: `Please provide the exact text of ${reference} from the ${version} translation of the Bible.`
-        }
-      ],
-      max_tokens: 300,
-      temperature: 0.1
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a Bible verse lookup assistant. Provide ONLY the exact verse text from the ${version} translation without any commentary, explanations, or additional text. Return the verse in this exact JSON format: {"reference": "${reference}", "text": "verse text here", "version": "${version}"}`
+          },
+          {
+            role: 'user',
+            content: `Please provide the exact text of ${reference} from the ${version} Bible translation.`
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 500
+      })
     });
 
-    const verseText = response.choices[0]?.message?.content?.trim();
-    
-    if (verseText && verseText.length > 10) {
-
-      return {
-        reference: reference,
-        text: cleanVerseText(verseText),
-        version: version
-      };
+    if (!response.ok) {
+      console.error('OpenAI API error:', response.status);
+      return null;
     }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
     
-    return null;
+    if (!content) {
+      return null;
+    }
+
+    try {
+      const verseData = JSON.parse(content);
+      return {
+        reference: verseData.reference || reference,
+        text: cleanVerseText(verseData.text || ''),
+        version: verseData.version || version,
+        source: 'ChatGPT API'
+      };
+    } catch (parseError) {
+      // If JSON parsing fails, try to extract text content
+      const cleanedContent = cleanVerseText(content);
+      if (cleanedContent) {
+        return {
+          reference,
+          text: cleanedContent,
+          version,
+          source: 'ChatGPT API'
+        };
+      }
+      return null;
+    }
   } catch (error) {
-    console.error('[Bible AI] Error fetching verse from OpenAI:', error);
+    console.error('Error fetching verse from OpenAI:', error);
     return null;
   }
 }
@@ -111,465 +114,104 @@ interface BibleVerseResponse {
   source?: string;
 }
 
-
-
-// Database-first Bible verse lookup with zero external dependencies
-async function lookupVerseFromDatabase(reference: string, version: string = 'NIV'): Promise<BibleVerseResponse | null> {
-  try {
-
-    
-    // Clean and normalize the reference
-    const cleanRef = reference.trim();
-    const upperVersion = version.toUpperCase();
-    
-    // First try exact reference match
-    const exactMatch = await db
-      .select()
-      .from(bibleVerses)
-      .where(
-        and(
-          eq(bibleVerses.reference, cleanRef),
-          eq(bibleVerses.translation, upperVersion),
-          eq(bibleVerses.isActive, true)
-        )
-      )
-      .limit(1);
-
-    if (exactMatch.length > 0) {
-      const verse = exactMatch[0];
-
-      
-      // Check if the text is a placeholder and needs replacement
-      const isPlaceholder = verse.text && (
-        verse.text.includes('Scripture according to') ||
-        verse.text.includes('GOD\'s Word according to') ||
-        verse.text.includes('GOD\'s Message according to') ||
-        verse.text.includes('Jesus said to them as recorded in') ||
-        verse.text.includes('In those days it happened as recorded in') ||
-        verse.text.includes('The LORD spoke as written in') ||
-        verse.text.includes('As it is written in') ||
-        verse.text.length < 20
-      );
-      
-      if (isPlaceholder) {
-
-        const authenticVerse = await fetchVerseFromOpenAI(cleanRef, upperVersion);
-        if (authenticVerse) {
-          // Update database with authentic verse
-          await db
-            .update(bibleVerses)
-            .set({ 
-              text: authenticVerse.text,
-              updatedAt: new Date()
-            })
-            .where(eq(bibleVerses.id, verse.id));
-          
-
-          return authenticVerse;
-        }
-      }
-      
-      return {
-        reference: verse.reference,
-        text: cleanVerseText(verse.text || ''),
-        version: verse.translation || ''
-      };
-    }
-
-    // Try flexible matching with different reference formats
-    const referenceVariations = generateReferenceVariations(cleanRef);
-    
-    for (const refVariation of referenceVariations) {
-      const flexibleMatch = await db
-        .select()
-        .from(bibleVerses)
-        .where(
-          and(
-            or(
-              eq(bibleVerses.reference, refVariation),
-              ilike(bibleVerses.reference, `${refVariation}%`)
-            ),
-            eq(bibleVerses.translation, upperVersion),
-            eq(bibleVerses.isActive, true)
-          )
-        )
-        .limit(1);
-
-      if (flexibleMatch.length > 0) {
-        const verse = flexibleMatch[0];
-
-        return {
-          reference: verse.reference,
-          text: cleanVerseText(verse.text || ''),
-          version: verse.translation
-        };
-      }
-    }
-
-    // If requested version not found, try fallback to NIV
-    if (upperVersion !== 'NIV') {
-
-      return await lookupVerseFromDatabase(reference, 'NIV');
-    }
-
-
-    
-    // Try OpenAI fallback for authentic scripture
-    const aiResult = await fetchVerseFromOpenAI(reference, version);
-    if (aiResult) {
-
-      return aiResult;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('[Bible DB] Database lookup error:', error);
-    
-    // Try OpenAI fallback when database fails
-    try {
-      const aiResult = await fetchVerseFromOpenAI(reference, version);
-      if (aiResult) {
-
-        return aiResult;
-      }
-    } catch (aiError) {
-      console.error('[Bible AI] Fallback error:', aiError);
-    }
-    
-    return null;
-  }
-}
-
-// Generate reference variations for flexible matching
 function generateReferenceVariations(reference: string): string[] {
   const variations = [reference];
   
-  // Handle book name variations
-  const bookAbbreviations: Record<string, string[]> = {
-    'Gen': ['Genesis'],
-    'Genesis': ['Gen'],
-    'Exod': ['Exodus', 'Ex'],
-    'Exodus': ['Exod', 'Ex'],
-    'Ps': ['Psalm', 'Psalms'],
-    'Psalm': ['Ps', 'Psalms'],
-    'Psalms': ['Ps', 'Psalm'],
-    'Matt': ['Matthew', 'Mt'],
-    'Matthew': ['Matt', 'Mt'],
-    'John': ['Jn', 'Jhn'],
-    'Rom': ['Romans', 'Rm'],
-    'Romans': ['Rom', 'Rm']
-  };
-
-  const referenceWords = reference.split(' ');
-  if (referenceWords.length > 0) {
-    const firstWord = referenceWords[0];
-    const alternatives = bookAbbreviations[firstWord];
-    
-    if (alternatives) {
-      for (const alt of alternatives) {
-        const newRef = [alt, ...referenceWords.slice(1)].join(' ');
-        variations.push(newRef);
-      }
-    }
+  // Handle verse ranges (e.g., "John 3:16-17" vs "John 3:16")
+  if (reference.includes('-')) {
+    const basePart = reference.split('-')[0];
+    variations.push(basePart);
   }
-
-  return Array.from(new Set(variations));
+  
+  // Handle chapter references (e.g., "Psalm 23" vs "Psalm 23:1")
+  if (!reference.includes(':')) {
+    variations.push(`${reference}:1`);
+  }
+  
+  return variations;
 }
 
-// Main Bible lookup function - Scripture API integration with fallbacks
 export async function lookupBibleVerse(reference: string, preferredVersion: string = 'NIV'): Promise<BibleVerseResponse | null> {
-  try {
-
-    
-    // STEP 1: Try Scripture API first (American Bible Society - authentic source)
+  const referenceVariations = generateReferenceVariations(reference);
+  
+  // Try API.Bible first (primary source)
+  for (const refVariation of referenceVariations) {
     try {
-      const scriptureResult = await scriptureApiService.fetchVerseFromAPI(reference, preferredVersion);
-      if (scriptureResult) {
-
-        return scriptureResult;
+      const scriptureResult = await scriptureApiService.lookupVerse(refVariation, preferredVersion);
+      if (scriptureResult && scriptureResult.text) {
+        return {
+          reference: scriptureResult.reference,
+          text: cleanVerseText(scriptureResult.text),
+          version: scriptureResult.version,
+          source: 'API.Bible'
+        };
       }
-    } catch (scriptureError) {
-
+    } catch (error) {
+      console.error(`API.Bible error for ${refVariation}:`, error);
     }
-    
-    // STEP 2: Check local database for existing verses
-    let result = await lookupVerseFromDatabase(reference, preferredVersion);
-    
-    if (result) {
-      // Check if the text is a placeholder and needs replacement from Scripture API
-      const isPlaceholder = result.text && (
-        result.text.includes('Scripture according to') ||
-        result.text.includes('GOD\'s Word according to') ||
-        result.text.includes('GOD\'s Message according to') ||
-        result.text.includes('Jesus said to them as recorded in') ||
-        result.text.includes('In those days it happened as recorded in') ||
-        result.text.includes('The LORD spoke as written in') ||
-        result.text.includes('As it is written in') ||
-        result.text.length < 20
-      );
-      
-      if (isPlaceholder) {
-
-        try {
-          const authenticVerse = await scriptureApiService.fetchVerseFromAPI(reference, preferredVersion);
-          if (authenticVerse) {
-
-            return authenticVerse;
-          }
-        } catch (error) {
-
-        }
-      } else {
-
-        return result;
-      }
-    }
-    
-    // STEP 3: OpenAI fallback for licensed versions or when Scripture API fails
-    const versionConfig = BIBLE_VERSIONS.find(v => v.code === preferredVersion);
-    if (!versionConfig || versionConfig.useOpenAI) {
-
-      result = await fetchVerseFromOpenAI(reference, preferredVersion);
-      
-      if (result) {
-
-        return result;
-      }
-    }
-    
-
-    return null;
-  } catch (error) {
-    console.error('[Bible API] Error in lookupBibleVerse:', error);
-    return null;
   }
+  
+  // Fallback to ChatGPT only if API.Bible is unresponsive
+  const versePattern = /^[1-3]?\s*[A-Za-z]+\s+\d+:\d+/;
+  if (versePattern.test(reference)) {
+    const openAIResult = await fetchVerseFromOpenAI(reference, preferredVersion);
+    if (openAIResult) {
+      return openAIResult;
+    }
+  }
+  
+  return null;
 }
 
-// Search Bible verses across all translations with Scripture API integration
 export async function searchBibleVerses(query: string, translation: string = 'NIV', limit: number = 20): Promise<any[]> {
   try {
-
-    
-    // STEP 1: Try Scripture API first for fresh, authentic results
-    try {
-      const scriptureResults = await scriptureApiService.searchVerses(query, translation, limit);
-      if (scriptureResults && scriptureResults.length > 0) {
-
-        // Convert to expected format
-        return scriptureResults.map(verse => ({
-          reference: verse.reference,
-          text: verse.text,
-          version: verse.version,
-          source: verse.source,
-          book: verse.reference.split(' ')[0],
-          translation: verse.version.toUpperCase(),
-          popularityScore: 0
-        }));
-      }
-    } catch (scriptureError) {
-
-    }
-    
-    // STEP 2: Search local database as fallback
-    const searchResults = await db
-      .select()
-      .from(bibleVerses)
-      .where(
-        and(
-          eq(bibleVerses.translation, translation.toUpperCase()),
-          or(
-            ilike(bibleVerses.text, `%${query}%`),
-            ilike(bibleVerses.reference, `%${query}%`),
-            ilike(bibleVerses.book, `%${query}%`)
-          ),
-          eq(bibleVerses.isActive, true)
-        )
-      )
-      .orderBy(bibleVerses.popularityScore)
-      .limit(limit);
-
-
-    
-    // Filter out placeholder text and enhance with Scripture API if needed
-    const enhancedResults = [];
-    for (const verse of searchResults) {
-      const isPlaceholder = verse.text && (
-        verse.text.includes('Scripture according to') ||
-        verse.text.includes('GOD\'s Word according to') ||
-        verse.text.includes('GOD\'s Message according to') ||
-        verse.text.includes('Jesus said to them as recorded in') ||
-        verse.text.length < 20
-      );
-      
-      if (isPlaceholder) {
-        // Try to get authentic text from Scripture API
-        try {
-          const authenticVerse = await scriptureApiService.fetchVerseFromAPI(verse.reference || '', translation);
-          if (authenticVerse) {
-            enhancedResults.push({
-              ...verse,
-              text: authenticVerse.text,
-              source: authenticVerse.source
-            });
-            continue;
-          }
-        } catch (error) {
-          // Skip placeholder verses if we can't get authentic text
-          continue;
-        }
-      }
-      
-      enhancedResults.push({
+    // Use API.Bible for search (primary source)
+    const scriptureResults = await scriptureApiService.searchVerses(query, translation, limit);
+    if (scriptureResults && scriptureResults.length > 0) {
+      return scriptureResults.map(verse => ({
         ...verse,
-        text: cleanVerseText(verse.text || '')
-      });
+        text: cleanVerseText(verse.text),
+        source: 'API.Bible'
+      }));
     }
-    
-    return enhancedResults;
   } catch (error) {
-    console.error('[Bible API] Search error:', error);
-    return [];
+    console.error('API.Bible search error:', error);
   }
+  
+  // No fallback for search - API.Bible only
+  return [];
 }
 
-// Get random Bible verse from licensed database
 export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<any | null> {
   try {
-
+    // Try to get a well-known verse via API.Bible
+    const popularVerses = [
+      'John 3:16', 'Romans 8:28', 'Philippians 4:13', 'Jeremiah 29:11', 'Romans 5:8',
+      'Matthew 28:19-20', 'John 14:6', 'Psalm 23:1', 'Isaiah 40:31', 'Matthew 11:28-30'
+    ];
     
-    const randomVerse = await db
-      .select()
-      .from(bibleVerses)
-      .where(
-        and(
-          eq(bibleVerses.translation, translation.toUpperCase()),
-          eq(bibleVerses.isActive, true)
-        )
-      )
-      .orderBy(sql`RANDOM()`)
-      .limit(1);
-
-    if (randomVerse.length > 0) {
-      const verse = randomVerse[0];
-
-      
-      // Check if the text is a placeholder and needs replacement
-      const isPlaceholder = verse.text && (
-        verse.text.includes('Scripture according to') ||
-        verse.text.includes('GOD\'s Word according to') ||
-        verse.text.includes('GOD\'s Message according to') ||
-        verse.text.includes('Jesus said to them as recorded in') ||
-        verse.text.length < 20
-      );
-      
-      if (isPlaceholder) {
-
-        const authenticVerse = await fetchVerseFromOpenAI(verse.reference, verse.translation || 'NIV');
-        if (authenticVerse) {
-          // Update database with authentic verse
-          await db
-            .update(bibleVerses)
-            .set({ 
-              text: authenticVerse.text,
-              updatedAt: new Date()
-            })
-            .where(eq(bibleVerses.id, verse.id));
-          
-
-          return {
-            ...verse,
-            text: authenticVerse.text
-          };
-        }
-      }
-      
-      return {
-        ...verse,
-        text: cleanVerseText(verse.text || '')
-      };
-    }
-
-    return null;
+    const randomReference = popularVerses[Math.floor(Math.random() * popularVerses.length)];
+    return await lookupBibleVerse(randomReference, translation);
   } catch (error) {
-    console.error('[Bible DB] Random verse error:', error);
-    return null;
+    console.error('Random verse error:', error);
+    return await lookupBibleVerse('John 3:16', translation);
   }
 }
 
-// Helper function to normalize Bible references
 function normalizeReference(reference: string): string[] {
-  const variations: string[] = [reference];
+  // Handle various reference formats
+  const normalized = [];
   
-  // Capitalize the first letter of each word for proper Bible book names
-  const properCase = reference.replace(/\b\w+/g, word => 
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  );
+  // Base reference
+  normalized.push(reference);
   
-  if (properCase !== reference) {
-    variations.push(properCase);
-  }
-  
-  // Handle common book name variations
-  const bookMappings: Record<string, string[]> = {
-    'matt': ['Matthew', 'Mt'],
-    'matthew': ['Matt', 'Mt'],
-    'mk': ['Mark'],
-    'mark': ['Mk'],
-    'lk': ['Luke', 'Lk'],
-    'luke': ['Lk'],
-    'jn': ['John', 'Jhn'],
-    'john': ['Jn', 'Jhn'],
-    'acts': ['Act'],
-    'rom': ['Romans', 'Rm'],
-    'romans': ['Rom', 'Rm'],
-    '1 cor': ['1 Corinthians', '1Cor'],
-    '1 corinthians': ['1 Cor', '1Cor'],
-    '2 cor': ['2 Corinthians', '2Cor'],
-    '2 corinthians': ['2 Cor', '2Cor'],
-    'gal': ['Galatians'],
-    'galatians': ['Gal'],
-    'eph': ['Ephesians'],
-    'ephesians': ['Eph'],
-    'phil': ['Philippians', 'Php'],
-    'philippians': ['Phil', 'Php'],
-    'col': ['Colossians'],
-    'colossians': ['Col'],
-    '1 thess': ['1 Thessalonians', '1Th'],
-    '1 thessalonians': ['1 Thess', '1Th'],
-    '2 thess': ['2 Thessalonians', '2Th'],
-    '2 thessalonians': ['2 Thess', '2Th'],
-    '1 tim': ['1 Timothy', '1Ti'],
-    '1 timothy': ['1 Tim', '1Ti'],
-    '2 tim': ['2 Timothy', '2Ti'],
-    '2 timothy': ['2 Tim', '2Ti'],
-    'titus': ['Tit'],
-    'philemon': ['Phlm'],
-    'heb': ['Hebrews'],
-    'hebrews': ['Heb'],
-    'jas': ['James', 'Jam'],
-    'james': ['Jas', 'Jam'],
-    '1 pet': ['1 Peter', '1Pe'],
-    '1 peter': ['1 Pet', '1Pe'],
-    '2 pet': ['2 Peter', '2Pe'],
-    '2 peter': ['2 Pet', '2Pe'],
-    '1 john': ['1 Jn', '1Jo'],
-    '2 john': ['2 Jn', '2Jo'],
-    '3 john': ['3 Jn', '3Jo'],
-    'jude': ['Jud'],
-    'rev': ['Revelation', 'Re'],
-    'revelation': ['Rev', 'Re']
-  };
-
-  const lowerRef = reference.toLowerCase();
-  for (const [key, alternatives] of Object.entries(bookMappings)) {
-    if (lowerRef.startsWith(key + ' ')) {
-      for (const alt of alternatives) {
-        variations.push(reference.replace(new RegExp(`^${key}`, 'i'), alt));
-      }
+  // Handle ranges like "John 3:16-17"
+  if (reference.includes('-')) {
+    const parts = reference.split('-');
+    if (parts.length === 2) {
+      normalized.push(parts[0].trim());
     }
   }
-
-  return Array.from(new Set(variations)); // Remove duplicates
+  
+  return normalized;
 }
-
-export default { lookupBibleVerse };

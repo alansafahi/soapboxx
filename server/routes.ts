@@ -4373,101 +4373,36 @@ Format your response as JSON with the following structure:
     }
   });
 
-  // ===== SOAPBOX BIBLE API ENDPOINTS =====
-  // SoapBox Bible - Get verse with three-tier lookup
-  app.get('/api/soapbox-bible/verse/:reference', async (req, res) => {
+  // ===== BIBLE API ENDPOINTS =====
+  // Bible verse lookup with API.Bible and ChatGPT fallback only
+  app.get('/api/bible/verse/:reference', async (req, res) => {
     try {
       const { reference } = req.params;
-      const { translation = 'KJV' } = req.query;
+      const { translation = 'NIV' } = req.query;
       
-      // Import the service dynamically
-      const { soapboxBibleService, ALLOWED_TRANSLATIONS } = await import('./soapbox-bible-service.js');
+      const { lookupBibleVerse } = await import('./bible-api.js');
       
-      // Validate translation
-      if (!ALLOWED_TRANSLATIONS.includes(translation as any)) {
-        return res.status(400).json({ 
-          error: 'Invalid translation',
-          allowedTranslations: ALLOWED_TRANSLATIONS,
-          message: 'Only 6 public domain translations are supported'
-        });
-      }
-      
-      const verse = await soapboxBibleService.getVerse(reference, translation as any);
+      const verse = await lookupBibleVerse(reference, translation as string);
       
       if (verse) {
         res.json({
           success: true,
           verse,
-          lookupPriority: 'SoapBox Bible → API.Bible → ChatGPT',
-          allowedTranslations: ALLOWED_TRANSLATIONS
+          lookupPriority: 'API.Bible → ChatGPT fallback',
+          source: verse.source
         });
       } else {
         res.status(404).json({ 
           error: 'Verse not found',
           reference,
           translation,
-          message: 'Verse not found in any of the three lookup sources'
+          message: 'Verse not found in API.Bible or ChatGPT fallback'
         });
       }
     } catch (error) {
       res.status(500).json({ 
         error: 'Lookup failed',
-        message: 'Error accessing SoapBox Bible service'
-      });
-    }
-  });
-  
-  // Populate SoapBox Bible cache with top 1000 verses
-  app.post('/api/soapbox-bible/populate-cache', isAuthenticated, async (req: any, res) => {
-    try {
-      const userRole = req.session?.user?.role || 'member';
-      if (userRole !== 'soapbox_owner' && userRole !== 'admin') {
-        return res.status(403).json({ message: 'Insufficient permissions for cache population' });
-      }
-
-
-      
-      // Import the service dynamically
-      const { soapboxBibleService } = await import('./soapbox-bible-service.js');
-      
-      // Start population in background
-      soapboxBibleService.populateCache().then(result => {
-
-      }).catch(error => {
-      });
-
-      res.json({ 
-        success: true, 
-        message: 'SoapBox Bible cache population started',
-        expectedVerses: 6000, // 1000 verses × 6 translations
-        estimatedTime: '15-20 minutes',
-        allowedTranslations: ['KJV', 'KJVA', 'WEB', 'ASV', 'CEV', 'GNT']
-      });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to start cache population' });
-    }
-  });
-  
-  // Get SoapBox Bible cache statistics
-  app.get('/api/soapbox-bible/stats', async (req, res) => {
-    try {
-      // Import the service dynamically
-      const { soapboxBibleService, ALLOWED_TRANSLATIONS } = await import('./soapbox-bible-service.js');
-      
-      const stats = await soapboxBibleService.getCacheStats();
-      
-      res.json({
-        ...stats,
-        allowedTranslations: ALLOWED_TRANSLATIONS,
-        target: 6000, // 1000 verses × 6 translations
-        completionPercentage: Math.round((stats.totalCached / 6000) * 100),
-        source: 'SoapBox Bible Cache (API.Bible)',
-        description: 'Top 1000 popular Bible verses cached for performance'
-      });
-    } catch (error) {
-      res.status(500).json({ 
-        error: 'Stats unavailable',
-        message: 'Error accessing SoapBox Bible cache statistics'
+        message: 'Error accessing Bible lookup service'
       });
     }
   });
