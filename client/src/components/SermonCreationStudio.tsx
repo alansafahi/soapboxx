@@ -170,6 +170,48 @@ export default function SermonCreationStudio() {
     };
   }, [currentOutline, currentResearch, illustrations, enhancedOutline]);
 
+  // Progress tracking functions
+  const getProgressSteps = () => {
+    let completed = 0;
+    if (currentResearch) completed++;
+    if (currentOutline) completed++;
+    if (illustrations.length > 0) completed++;
+    if (enhancedOutline) completed++;
+    return { completed, total: 4 };
+  };
+
+  const getNextStep = () => {
+    if (!currentResearch) {
+      return {
+        tab: 'research',
+        title: 'Generate Biblical Research',
+        description: 'Start with biblical commentary and context for your sermon'
+      };
+    }
+    if (!currentOutline) {
+      return {
+        tab: 'outline',
+        title: 'Create Sermon Outline',
+        description: 'Build your sermon structure with main points and flow'
+      };
+    }
+    if (illustrations.length === 0) {
+      return {
+        tab: 'illustrations',
+        title: 'Add Stories & Content',
+        description: 'Find compelling illustrations and stories for your sermon'
+      };
+    }
+    if (!enhancedOutline) {
+      return {
+        tab: 'enhance',
+        title: 'Enhance Your Sermon',
+        description: 'Polish and refine your sermon with AI suggestions'
+      };
+    }
+    return null;
+  };
+
   // Export mutation  
   const exportMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -601,6 +643,59 @@ export default function SermonCreationStudio() {
           </TabsTrigger>
         </TabsList>
 
+        {/* Progress Bar */}
+        <div className="mt-4 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">Sermon Creation Progress</span>
+            <span className="text-sm text-gray-500">
+              {getProgressSteps().completed}/{getProgressSteps().total} steps completed
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-in-out"
+              style={{ width: `${(getProgressSteps().completed / getProgressSteps().total) * 100}%` }}
+            ></div>
+          </div>
+          <div className="flex justify-between mt-2">
+            <div className={`text-xs ${currentResearch ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+              ✓ Research
+            </div>
+            <div className={`text-xs ${currentOutline ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+              ✓ Outline
+            </div>
+            <div className={`text-xs ${illustrations.length > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+              ✓ Stories
+            </div>
+            <div className={`text-xs ${enhancedOutline ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+              ✓ Enhanced
+            </div>
+          </div>
+          
+          {/* Next Step Suggestion */}
+          {getNextStep() && (
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></div>
+                  <span className="text-sm text-blue-800 font-medium">
+                    Next: {getNextStep()?.title}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100"
+                  onClick={() => setActiveTab(getNextStep()?.tab)}
+                >
+                  Continue →
+                </Button>
+              </div>
+              <p className="text-xs text-blue-600 mt-1">{getNextStep()?.description}</p>
+            </div>
+          )}
+        </div>
+
         {/* Research Tab */}
         <TabsContent value="research" className="space-y-4">
           <Card>
@@ -640,7 +735,7 @@ export default function SermonCreationStudio() {
                       <h4 className="font-semibold text-purple-900 mb-2">Key Themes</h4>
                       <div className="space-y-1">
                         {currentResearch.keyThemes.map((theme, idx) => (
-                          <Badge key={idx} variant="outline" className="mr-1">
+                          <Badge key={idx} variant="outline" className="mr-1 mb-1 text-purple-700 border-purple-300 bg-white">
                             {theme}
                           </Badge>
                         ))}
@@ -1176,8 +1271,41 @@ export default function SermonCreationStudio() {
                               <p className="text-sm text-gray-600 mb-2">
                                 Created: {new Date(draft.createdAt).toLocaleDateString()}
                               </p>
+                              
+                              {/* Progress indicator for draft */}
+                              <div className="mb-3">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs text-gray-500">Progress</span>
+                                  <span className="text-xs text-gray-500">
+                                    {(() => {
+                                      let completed = 0;
+                                      if (parsedContent.research) completed++;
+                                      if (parsedContent.outline) completed++;
+                                      if (parsedContent.illustrations && parsedContent.illustrations.length > 0) completed++;
+                                      if (parsedContent.enhancement) completed++;
+                                      return `${completed}/4 steps`;
+                                    })()}
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                  <div 
+                                    className="bg-blue-500 h-1.5 rounded-full"
+                                    style={{ 
+                                      width: `${(() => {
+                                        let completed = 0;
+                                        if (parsedContent.research) completed++;
+                                        if (parsedContent.outline) completed++;
+                                        if (parsedContent.illustrations && parsedContent.illustrations.length > 0) completed++;
+                                        if (parsedContent.enhancement) completed++;
+                                        return (completed / 4) * 100;
+                                      })()}%` 
+                                    }}
+                                  ></div>
+                                </div>
+                              </div>
+                              
                               {parsedContent.outline && (
-                                <p className="text-sm text-gray-700 mb-2">
+                                <p className="text-sm text-gray-700 mb-1">
                                   <strong>Theme:</strong> {parsedContent.outline.theme || 'Not specified'}
                                 </p>
                               )}
@@ -1198,15 +1326,22 @@ export default function SermonCreationStudio() {
                                   if (parsedContent.enhancement) setEnhancedOutline(parsedContent.enhancement);
                                   setSermonTopic(draft.title);
                                   setCurrentDraftId(draft.id);
-                                  setActiveTab('outline');
+                                  // Smart navigation - go to the most logical next step
+                                  const nextStep = getNextStep();
+                                  if (nextStep) {
+                                    setActiveTab(nextStep.tab);
+                                  } else {
+                                    setActiveTab('outline');
+                                  }
                                   toast({
                                     title: "Draft Loaded",
-                                    description: "Sermon draft has been loaded for editing."
+                                    description: `Sermon draft loaded. ${nextStep ? `Next: ${nextStep.title}` : 'Continue editing your sermon.'}`
                                   });
                                 }}
+                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
                               >
                                 <FileText className="w-4 h-4 mr-1" />
-                                Load
+                                Continue Editing
                               </Button>
                               <Button
                                 size="sm"
