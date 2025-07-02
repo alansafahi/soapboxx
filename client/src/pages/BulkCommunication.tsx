@@ -168,6 +168,11 @@ export default function BulkCommunication() {
       content: template.content,
       type: template.id.includes('emergency') || template.id.includes('urgent') ? 'urgent' : 'announcement'
     }));
+    
+    toast({
+      title: "Template Applied",
+      description: `"${template.name}" template has been loaded into the message form.`
+    });
   };
 
   return (
@@ -434,20 +439,32 @@ export default function BulkCommunication() {
                   <CardDescription>Quick-start with pre-written templates</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {templates?.announcements?.map((template: any) => (
-                    <div key={template.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
-                      <h4 className="font-medium text-sm">{template.name}</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{template.subject}</p>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="mt-2 text-xs"
-                        onClick={() => useTemplate(template)}
-                      >
-                        Use Template
-                      </Button>
+                  {!templates ? (
+                    <div className="text-center py-4">
+                      <Clock className="w-6 h-6 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500">Loading templates...</p>
                     </div>
-                  ))}
+                  ) : templates?.announcements?.length > 0 ? (
+                    templates.announcements.map((template: any) => (
+                      <div key={template.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <h4 className="font-medium text-sm">{template.name}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{template.subject}</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="mt-2 text-xs hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => useTemplate(template)}
+                        >
+                          Use Template
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <MessageSquare className="w-6 h-6 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500">No templates available</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

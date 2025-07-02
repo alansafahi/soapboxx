@@ -7472,6 +7472,10 @@ Please provide suggestions for the missing or incomplete sections.`
   // Get message templates
   app.get('/api/communications/templates', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
       const templates = {
         announcements: [
           {
