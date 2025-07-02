@@ -59,9 +59,19 @@ export default function BulkCommunication() {
   });
 
   // Fetch message templates
-  const { data: templates } = useQuery({
+  const { data: templates, error: templatesError, isLoading: templatesLoading } = useQuery({
     queryKey: ['/api/communications/templates'],
-    retry: 1
+    retry: 1,
+    refetchOnWindowFocus: false
+  });
+
+  // Debug logging for templates
+  console.log('Templates debug:', { 
+    templates, 
+    templatesError, 
+    templatesLoading, 
+    showTemplateCreator, 
+    isArray: Array.isArray(templates) 
   });
 
   // Fetch existing messages
@@ -485,8 +495,12 @@ export default function BulkCommunication() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setShowTemplateCreator(!showTemplateCreator)}
-                      className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 border-blue-600 font-medium"
+                      onClick={() => {
+                        console.log('Create Template button clicked, current state:', showTemplateCreator);
+                        setShowTemplateCreator(!showTemplateCreator);
+                      }}
+                      className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 border-blue-600 font-medium shadow-lg"
+                      style={{ minWidth: '100px', zIndex: 10 }}
                     >
                       {showTemplateCreator ? 'Cancel' : '+ Create New'}
                     </Button>
@@ -740,7 +754,7 @@ export default function BulkCommunication() {
                   <Clock className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
                   <p className="text-gray-600 dark:text-gray-400">Loading message history...</p>
                 </div>
-              ) : !messages || messages.length === 0 ? (
+              ) : !messages || !Array.isArray(messages) || messages.length === 0 ? (
                 <div className="text-center py-12">
                   <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No messages yet</h3>
@@ -748,7 +762,7 @@ export default function BulkCommunication() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {messages.map((message: any) => (
+                  {Array.isArray(messages) && messages.map((message: any) => (
                     <div key={message.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
