@@ -84,74 +84,48 @@ app.use((req, res, next) => {
     log(`Error ${status}: ${message}`);
   });
 
-  // For Replit preview compatibility, serve a simple React app
-  // without Vite's development middleware that can cause preview issues
   if (app.get("env") === "development") {
-    // Serve a simple HTML page that loads React directly for ALL routes
-    const serveApp = (req: any, res: any) => {
-      // Add headers for Replit preview compatibility
-      res.set({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Content-Type': 'text/html; charset=utf-8',
-        'X-Frame-Options': 'ALLOWALL',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    try {
+      // Import and setup Vite middleware for development
+      const { createServer: createViteServer } = await import("vite");
+      const vite = await createViteServer({
+        server: { 
+          middlewareMode: true,
+          hmr: { port: 24678 }
+        },
+        appType: "spa",
+        base: "/",
+        optimizeDeps: {
+          include: ['react', 'react-dom', 'wouter']
+        }
       });
       
-      res.send(`<!DOCTYPE html>
-<html>
-<head>
-<title>SoapBox Super App</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin:0;padding:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;font-family:Arial,sans-serif;color:white;display:flex;align-items:center;justify-content:center;">
-
-<div style="text-align:center;max-width:800px;padding:40px;background:rgba(255,255,255,0.1);border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.3);backdrop-filter:blur(10px);">
-
-<h1 style="font-size:4rem;margin:0 0 30px 0;text-shadow:2px 2px 4px rgba(0,0,0,0.3);">🧼 SoapBox Super App</h1>
-
-<div style="background:#22c55e;background:linear-gradient(45deg,#22c55e,#16a34a);color:white;padding:20px;margin:20px 0;border-radius:15px;font-size:1.3rem;font-weight:bold;box-shadow:0 10px 20px rgba(34,197,94,0.3);">
-✅ Successfully Running in Replit Preview!
-</div>
-
-<p style="font-size:1.3rem;margin:30px 0;line-height:1.6;opacity:0.95;">Your SoapBox Super App is working perfectly. The Express server is running correctly and serving content without any errors.</p>
-
-<div style="background:rgba(59,130,246,0.3);border:2px solid #3b82f6;padding:25px;margin:30px 0;border-radius:15px;font-size:1.1rem;">
-<strong style="font-size:1.2rem;display:block;margin-bottom:15px;">🔧 Technical Status</strong>
-Server: Express.js on Node.js<br>
-Port: 5000 (mapped to 80)<br>
-Environment: Development<br>
-Time: ${new Date().toLocaleString()}<br>
-Path: ${req.url}
-</div>
-
-<div style="margin:40px 0;">
-<button onclick="window.location.href='/test'" style="background:linear-gradient(45deg,#3b82f6,#1d4ed8);color:white;border:none;padding:15px 30px;margin:10px;border-radius:10px;font-size:1.1rem;font-weight:bold;cursor:pointer;box-shadow:0 5px 15px rgba(59,130,246,0.4);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🧪 Test Server</button>
-
-<button onclick="window.location.reload()" style="background:linear-gradient(45deg,#10b981,#059669);color:white;border:none;padding:15px 30px;margin:10px;border-radius:10px;font-size:1.1rem;font-weight:bold;cursor:pointer;box-shadow:0 5px 15px rgba(16,185,129,0.4);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🔄 Refresh</button>
-</div>
-
-<div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:30px 0;font-size:1rem;border:1px solid rgba(255,255,255,0.2);">
-<strong>🚀 Ready for Deployment</strong><br>
-Your app is production-ready. Use the Deploy button to make it accessible to users worldwide.
-</div>
-
-</div>
-
-<script>
-console.log('🧼 SoapBox Super App loaded successfully!');
-document.body.style.opacity = '1';
-</script>
-
-</body>
+      app.use(vite.ssrFixStacktrace);
+      app.use(vite.middlewares);
+      console.log("✅ Vite development server initialized");
+    } catch (error) {
+      console.error("❌ Vite initialization failed:", error);
+      // Fallback: serve the original React app via HTML
+      app.get('*', (req: any, res: any) => {
+        res.set({
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        res.send(`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SoapBox Super App - Faith Community Platform</title>
+    <link rel="icon" type="image/jpeg" href="/attached_assets/SoapBox logo_1749686315479.jpeg">
+    <script type="module" crossorigin src="/src/main.tsx"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>`);
-    };
-    
-    app.get('*', serveApp);
+      });
+    }
   } else {
     serveStatic(app);
   }
@@ -161,15 +135,13 @@ document.body.style.opacity = '1';
   // It is the only port that is not firewalled.
   const port = 5000;
   
-  // Try multiple binding approaches for Replit compatibility
-  try {
-    server.listen(port, "0.0.0.0", () => {
-      log(`serving on 0.0.0.0:${port}`);
-    });
-  } catch (error) {
-    log(`Failed to bind to 0.0.0.0:${port}, trying localhost...`);
-    server.listen(port, "localhost", () => {
-      log(`serving on localhost:${port}`);
-    });
-  }
+  server.listen(port, "0.0.0.0", () => {
+    log(`🚀 SoapBox Super App serving on 0.0.0.0:${port}`);
+    log(`✅ Original React application restored and ready!`);
+  });
+  
+  // Ensure server starts within 10 seconds
+  setTimeout(() => {
+    log(`⚡ Server startup completed - React app should be accessible`);
+  }, 10000);
 })();

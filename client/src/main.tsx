@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import TestApp from "./TestApp";
+import App from "./App";
 import "./index.css";
 
 // Clear any cached data that might be pointing to external domains
@@ -105,7 +105,7 @@ try {
   
   console.log("Starting React app...");
   const root = createRoot(container);
-  root.render(<TestApp />);
+  root.render(<App />);
   console.log("React app rendered successfully");
 } catch (error) {
   console.error("Failed to render React app:", error);
