@@ -831,3 +831,4 @@ export default function EnhancedAudioPlayer({
       </CardContent>
     </Card>
   );
+}
