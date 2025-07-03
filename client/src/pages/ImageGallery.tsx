@@ -124,18 +124,18 @@ export default function ImageGallery() {
     }
   });
 
-  const handleLike = (imageId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleLike = (imageId: number, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     likeMutation.mutate(imageId);
   };
 
-  const handleSave = (imageId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSave = (imageId: number, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     saveMutation.mutate(imageId);
   };
 
-  const handleShare = (image: GalleryImage, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleShare = (image: GalleryImage, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (navigator.share) {
       navigator.share({
         title: image.title,
@@ -504,7 +504,7 @@ export default function ImageGallery() {
                   <div className="flex items-center gap-4">
                     <Button
                       variant={selectedImage.isLiked ? "default" : "outline"}
-                      onClick={() => handleLike(selectedImage.id, {} as React.MouseEvent)}
+                      onClick={() => handleLike(selectedImage.id)}
                       className="flex-1"
                     >
                       <Heart className={`w-4 h-4 mr-2 ${selectedImage.isLiked ? 'fill-current' : ''}`} />
@@ -512,7 +512,7 @@ export default function ImageGallery() {
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => handleShare(selectedImage, {} as React.MouseEvent)}
+                      onClick={() => handleShare(selectedImage)}
                       className="flex-1"
                     >
                       <Share2 className="w-4 h-4 mr-2" />
