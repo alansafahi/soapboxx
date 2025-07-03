@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 3, 2025: SERMON STUDIO DARK MODE TEXT VISIBILITY COMPLETELY FIXED - Successfully resolved all text visibility issues in dark mode including Scripture Reference labels and Continue button contrast
+  - SCRIPTURE REFERENCE LABEL FIXED: Changed from white/invisible text to dark:text-gray-300 for proper dark mode visibility
+  - ALL FORM LABELS UPDATED: Scripture Reference, Sermon Topic/Theme, Target Audience, and Sermon Length labels now have dark:text-gray-300 styling
+  - CONTINUE BUTTON ENHANCED: Added bright white text (dark:text-white) with proper dark mode border and hover states for maximum contrast
+  - PROGRESS TEXT VISIBILITY: Fixed "Sermon Creation Progress" text with dark mode styling for better readability
+  - COMPREHENSIVE DARK MODE SUPPORT: All text elements in Sermon Studio now properly visible in both light and dark themes
 - July 3, 2025: IMAGE GALLERY DUAL ACTION BUTTON SYSTEM COMPLETELY IMPLEMENTED - Successfully added both hover buttons and permanent action buttons for maximum user accessibility and interaction flexibility
   - DUAL BUTTON SYSTEM: Added both hover buttons on images AND always-visible action buttons at bottom of cards for optimal user experience
   - HOVER INTERACTION: Icon-only buttons (Like, Share, Copy) appear when hovering over images with semi-transparent background overlay

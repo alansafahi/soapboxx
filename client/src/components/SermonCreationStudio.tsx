@@ -556,7 +556,7 @@ export default function SermonCreationStudio() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Scripture Reference (Optional)
               </label>
               <Input
@@ -567,7 +567,7 @@ export default function SermonCreationStudio() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Sermon Topic/Theme
               </label>
               <Input
@@ -581,7 +581,7 @@ export default function SermonCreationStudio() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Target Audience
               </label>
               <select 
@@ -597,7 +597,7 @@ export default function SermonCreationStudio() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Sermon Length
               </label>
               <select 
@@ -646,7 +646,7 @@ export default function SermonCreationStudio() {
         {/* Progress Bar */}
         <div className="mt-4 mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Sermon Creation Progress</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sermon Creation Progress</span>
             <span className="text-sm text-gray-500">
               {getProgressSteps().completed}/{getProgressSteps().total} steps completed
             </span>
@@ -685,7 +685,7 @@ export default function SermonCreationStudio() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100"
+                  className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-white dark:border-blue-600 dark:hover:bg-blue-800"
                   onClick={() => {
                     const nextStep = getNextStep();
                     if (nextStep?.tab === 'research' && !currentResearch) {
