@@ -407,34 +407,6 @@ export default function ImageGallery() {
                     className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
                     style={{ height: viewMode === 'grid' ? '200px' : 'auto' }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="bg-white/90 text-gray-900 hover:bg-white"
-                        onClick={(e) => handleLike(image.id, e)}
-                      >
-                        <Heart className={`w-4 h-4 ${image.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="bg-white/90 text-gray-900 hover:bg-white"
-                        onClick={(e) => handleShareToSocialFeed(image, e)}
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="bg-white/90 text-gray-900 hover:bg-white"
-                        onClick={(e) => handleCopyLink(image, e)}
-                      >
-                        <Link className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
                 </div>
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
@@ -460,7 +432,7 @@ export default function ImageGallery() {
                       {new Date(image.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-3">
                     <div className="flex items-center gap-4">
                       <span className="flex items-center gap-1">
                         <Heart className="w-4 h-4" />
@@ -470,6 +442,46 @@ export default function ImageGallery() {
                     <Badge variant="outline" className="text-xs">
                       {categories.find(c => c.value === image.collection)?.icon} {image.collection}
                     </Badge>
+                  </div>
+                  
+                  {/* Action Buttons - Always Visible */}
+                  <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(image.id);
+                      }}
+                    >
+                      <Heart className={`w-4 h-4 mr-1 ${image.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                      Like
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShareToSocialFeed(image);
+                      }}
+                    >
+                      <Share2 className="w-4 h-4 mr-1" />
+                      Share
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyLink(image);
+                      }}
+                    >
+                      <Link className="w-4 h-4 mr-1" />
+                      Copy
+                    </Button>
                   </div>
                   {image.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
