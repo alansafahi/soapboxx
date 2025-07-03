@@ -305,12 +305,7 @@ export default function TopHeader() {
                     Engagement Analytics
                   </DropdownMenuItem>
                 </Link>
-                <Link href="/ai-content-demo">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Mic className="w-4 h-4 mr-2" />
-                    AI Content Showcase
-                  </DropdownMenuItem>
-                </Link>
+
               </>
             )}
             

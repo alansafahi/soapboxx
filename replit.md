@@ -143,7 +143,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 
 ## Recent Changes
 - July 3, 2025: FINAL NAVIGATION STRUCTURE COMPLETELY IMPLEMENTED - Successfully fixed sidebar navigation to show exact user-specified structure with proper categorization
-  - COMMUNITY SECTION: Home, Messages, Contacts, Churches, Events, Discussions, SMS Giving
+  - COMMUNITY SECTION: Home, Messages, Contacts, Churches, Events, SMS Giving, Discussions
   - SPIRITUAL TOOLS SECTION: Today's Reading, Prayer Wall, S.O.A.P. Journal, Audio Bible, Audio Routines
   - MEDIA CONTENTS SECTION: Video Library, Image Gallery
   - ADMIN PORTAL SECTION: Member Directory, Donation Analytics, Communication Hub, Sermon Studio, Engagement Analytics

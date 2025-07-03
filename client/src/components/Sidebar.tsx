@@ -126,8 +126,8 @@ export default function Sidebar() {
         { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
-        { label: "Discussions", href: "/discussions", icon: MessageSquare },
         { label: "SMS Giving", href: "/sms-giving", icon: DollarSign },
+        { label: "Discussions", href: "/discussions", icon: MessageSquare },
       ]
     },
     {
