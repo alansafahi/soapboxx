@@ -155,7 +155,7 @@ export default function VolunteerManagementSystem() {
 
   // Create volunteer mutation
   const createVolunteerMutation = useMutation({
-    mutationFn: async (volunteerData: any) => {
+    mutationFn: async (volunteerData: Omit<Volunteer, 'id' | 'joinedAt' | 'totalHours'>) => {
       return await apiRequest("/api/volunteers", {
         method: "POST",
         body: volunteerData,
@@ -180,7 +180,7 @@ export default function VolunteerManagementSystem() {
 
   // Create opportunity mutation
   const createOpportunityMutation = useMutation({
-    mutationFn: async (opportunityData: any) => {
+    mutationFn: async (opportunityData: Omit<VolunteerOpportunity, 'id' | 'volunteersRegistered'>) => {
       return await apiRequest("/api/volunteer-opportunities", {
         method: "POST",
         body: opportunityData,

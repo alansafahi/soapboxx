@@ -79,6 +79,27 @@ const counselingSessionSchema = z.object({
 
 type CounselingSessionForm = z.infer<typeof counselingSessionSchema>;
 
+interface CounselingSession {
+  id: string;
+  memberId: string;
+  sessionType: string;
+  scheduledTime: string;
+  duration: number;
+  location: string;
+  notes?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  memberName?: string;
+}
+
+interface Member {
+  id: string;
+  name: string;
+  fullName: string;
+  email?: string;
+}
+
 const sessionTypes = [
   "Individual Counseling",
   "Couples Counseling", 
@@ -106,7 +127,7 @@ interface CounselingManagementProps {
 }
 
 export function CounselingManagement({ selectedChurch }: CounselingManagementProps) {
-  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [selectedSession, setSelectedSession] = useState<CounselingSession | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isViewing, setIsViewing] = useState(false);
@@ -255,7 +276,7 @@ export function CounselingManagement({ selectedChurch }: CounselingManagementPro
   };
 
   // Start editing
-  const startEditing = (session: any) => {
+  const startEditing = (session: CounselingSession) => {
     setSelectedSession(session);
     setIsEditing(true);
     form.reset({
@@ -269,7 +290,7 @@ export function CounselingManagement({ selectedChurch }: CounselingManagementPro
   };
 
   // Filter sessions
-  const filteredSessions = sessions.filter((session: any) => {
+  const filteredSessions = sessions.filter((session: CounselingSession) => {
     const matchesStatus = filterStatus === "all" || session.status === filterStatus;
     const matchesSearch = !searchTerm || 
       session.memberName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -354,7 +375,7 @@ export function CounselingManagement({ selectedChurch }: CounselingManagementPro
                         </FormControl>
                         <SelectContent>
                           {members && Array.isArray(members) && members.length > 0 ? (
-                            members.map((member: any) => (
+                            members.map((member: Member) => (
                               <SelectItem key={member.id} value={member.id}>
                                 {member.fullName}
                               </SelectItem>
@@ -585,7 +606,7 @@ export function CounselingManagement({ selectedChurch }: CounselingManagementPro
         </Card>
       ) : (
         <div className="grid gap-4">
-          {filteredSessions.map((session: any) => (
+          {filteredSessions.map((session: CounselingSession) => (
             <Card key={session.id}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
@@ -698,7 +719,7 @@ export function CounselingManagement({ selectedChurch }: CounselingManagementPro
                       </FormControl>
                       <SelectContent>
                         {members && Array.isArray(members) && members.length > 0 ? (
-                          members.map((member: any) => (
+                          members.map((member: Member) => (
                             <SelectItem key={member.id} value={member.id}>
                               {member.fullName}
                             </SelectItem>

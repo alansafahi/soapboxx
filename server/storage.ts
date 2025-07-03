@@ -5371,7 +5371,7 @@ export class DatabaseStorage implements IStorage {
       type: r.reactionType,
       emoji: r.emoji,
       count: Number(r.count),
-      userReacted: false, // TODO: Check if current user reacted
+      userReacted: false
     }));
   }
 

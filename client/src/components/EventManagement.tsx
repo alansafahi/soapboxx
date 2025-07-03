@@ -161,7 +161,7 @@ export function EventManagement() {
         description: "Event created successfully!" 
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ 
         title: "Failed to create event", 
         description: error.message, 
@@ -185,7 +185,7 @@ export function EventManagement() {
       setIsEditDialogOpen(false);
       toast({ title: "Event updated successfully" });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ title: "Failed to update event", description: error.message, variant: "destructive" });
     },
   });
@@ -202,7 +202,7 @@ export function EventManagement() {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       toast({ title: "Event deleted successfully" });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({ title: "Failed to delete event", description: error.message, variant: "destructive" });
     },
   });

@@ -56,6 +56,18 @@ interface WizardData {
   emailVerified?: boolean;
 }
 
+interface Church {
+  id: number;
+  name: string;
+  denomination?: string;
+  memberCount?: number;
+  musicStyle?: string;
+  meetingStyle?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+}
+
 const denominations = [
   // Main Denominations
   { id: "non-denominational", label: "Non-Denominational", description: "Community-focused worship", category: "main" },
@@ -267,7 +279,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       if (error.message === "Email is already verified") {
         setWizardData(prev => ({ ...prev, emailVerified: true }));
         toast({
@@ -297,7 +309,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
       });
       setCurrentStep(2); // Move to denomination step
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Verification Failed",
         description: error.message || "Invalid verification token",
@@ -310,7 +322,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     mutationFn: async (data: WizardData) => {
       // Simulate AI-powered matching based on preferences
       const churchList = Array.isArray(churches) ? churches : [];
-      const scored = churchList.map((church: any) => {
+      const scored = churchList.map((church: Church) => {
         let score = 0;
         
         // Denomination matching
@@ -428,7 +440,7 @@ export default function WelcomeWizard({ onComplete }: WelcomeWizardProps) {
     }
   };
 
-  const updateWizardData = (field: keyof WizardData, value: any) => {
+  const updateWizardData = (field: keyof WizardData, value: WizardData[keyof WizardData]) => {
     setWizardData(prev => ({ ...prev, [field]: value }));
   };
 

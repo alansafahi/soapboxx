@@ -6312,7 +6312,7 @@ Return JSON with this exact structure:
       // For now, return empty array as we need to implement getPrayerResponses method
       // or use existing prayer responses from the prayer request data
       const prayerRequest = await storage.getPrayerRequest(prayerId);
-      const responses = prayerRequest ? [] : []; // TODO: Implement proper prayer responses fetching
+      const responses = prayerRequest ? await storage.getPrayerResponses(prayerRequest.id) : [];
       res.json(responses);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch prayer responses" });

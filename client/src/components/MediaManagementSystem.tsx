@@ -66,7 +66,7 @@ interface MediaFile {
   viewCount: number;
   duration?: number;
   dimensions?: { width: number; height: number };
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -170,7 +170,7 @@ export default function MediaManagementSystem() {
 
   // Update file mutation
   const updateFileMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<MediaFile> }) => {
       const response = await apiRequest("PATCH", `/api/media/files/${id}`, data);
       return response.json();
     },
@@ -200,7 +200,7 @@ export default function MediaManagementSystem() {
 
   // Create collection mutation
   const createCollectionMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: Omit<MediaCollection, 'id' | 'createdAt' | 'updatedAt'>) => {
       const response = await apiRequest("POST", "/api/media/collections", data);
       return response.json();
     },

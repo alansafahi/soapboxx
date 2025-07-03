@@ -33,7 +33,7 @@ interface TourStep {
   id: string;
   title: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   target?: string;
   action?: string;
   highlight?: string;
