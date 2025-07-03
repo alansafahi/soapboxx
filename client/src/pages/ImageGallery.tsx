@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
@@ -134,28 +134,30 @@ export default function ImageGallery() {
     saveMutation.mutate(imageId);
   };
 
-  const handleShare = async (image: GalleryImage, e?: React.MouseEvent) => {
+  const handleShareToSocialFeed = async (image: GalleryImage, e?: React.MouseEvent) => {
     e?.stopPropagation();
     try {
-      if (navigator.share && 'canShare' in navigator) {
-        const shareData = {
-          title: image.title,
-          text: image.description || 'Check out this image from our gallery',
-          url: `${window.location.origin}/image-gallery`
-        };
-        
-        if (navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          toast({ title: 'Image shared successfully!' });
-          return;
-        }
+      const shareData = {
+        title: image.title,
+        content: `📸 **Shared Image: ${image.title}**\n\n${image.description || 'Check out this amazing image from our gallery!'}\n\n#${image.collection} #ImageGallery`,
+        isPublic: true,
+        mood: ['blessed', 'grateful'],
+        mediaUrl: image.url,
+        mediaType: 'image'
+      };
+
+      const response = await apiRequest('POST', '/api/discussions', shareData);
+      if (response.ok) {
+        toast({ title: 'Image shared to social feed!' });
+      } else {
+        throw new Error('Failed to share to social feed');
       }
-      
-      // Fallback to clipboard
-      await handleCopyLink(image);
     } catch (error) {
-      console.log('Share failed, falling back to copy link');
-      await handleCopyLink(image);
+      console.log('Share to social feed failed:', error);
+      toast({ 
+        title: 'Failed to share to social feed',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -419,9 +421,17 @@ export default function ImageGallery() {
                         size="sm"
                         variant="secondary"
                         className="bg-white/90 text-gray-900 hover:bg-white"
-                        onClick={(e) => handleShare(image, e)}
+                        onClick={(e) => handleShareToSocialFeed(image, e)}
                       >
                         <Share2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-white/90 text-gray-900 hover:bg-white"
+                        onClick={(e) => handleCopyLink(image, e)}
+                      >
+                        <Link className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -456,10 +466,6 @@ export default function ImageGallery() {
                         <Heart className="w-4 h-4" />
                         {image.likesCount || 0}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-4 h-4" />
-                        {image.commentsCount || 0}
-                      </span>
                     </div>
                     <Badge variant="outline" className="text-xs">
                       {categories.find(c => c.value === image.collection)?.icon} {image.collection}
@@ -489,6 +495,10 @@ export default function ImageGallery() {
         {selectedImage && (
           <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+              <DialogHeader className="sr-only">
+                <DialogTitle>Gallery Image: {selectedImage.title}</DialogTitle>
+                <DialogDescription>View and interact with this gallery image</DialogDescription>
+              </DialogHeader>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="relative">
                   <img
@@ -543,11 +553,11 @@ export default function ImageGallery() {
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
-                        onClick={() => handleShare(selectedImage)}
+                        onClick={() => handleShareToSocialFeed(selectedImage)}
                         className="flex-1"
                       >
                         <Share2 className="w-4 h-4 mr-2" />
-                        Share
+                        Share to Feed
                       </Button>
                       <Button
                         variant="outline"
