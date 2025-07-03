@@ -9052,7 +9052,8 @@ Please provide suggestions for the missing or incomplete sections.`
 
       console.log('Fetching gallery images for churchId:', churchId, 'with filters:', filters);
       
-      const images = await storage.getGalleryImages(churchId, filters);
+      // For now, ignore church filtering and show all images since users may not have church associations
+      const images = await storage.getGalleryImages(null, filters);
       console.log('Found images:', images.length, 'images');
       
       // Add user-specific interaction data
