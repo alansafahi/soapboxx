@@ -70,18 +70,7 @@ export default function BulkCommunication() {
     refetchOnWindowFocus: false
   });
 
-  // Debug logging for templates
-    templates, 
-    templatesError, 
-    templatesLoading, 
-    showTemplateCreator, 
-    isArray: Array.isArray(templates),
-    hasAnnouncements: (templates as any)?.announcements?.length,
-    hasEmergencies: (templates as any)?.emergencies?.length,
-    hasPrayers: (templates as any)?.prayers?.length,
-    allTemplatesCount: templates && typeof templates === 'object' && (templates as any).announcements ? 
-      [...(templates as any).announcements, ...(templates as any).emergencies, ...(templates as any).prayers].length : 0
-  });
+  // Debug logging for templates removed for production
 
   // Fetch existing messages
   const { data: messages, isLoading: messagesLoading } = useQuery({
