@@ -24,7 +24,7 @@ class SoapBoxBibleService {
   async getVerse(reference: string, translation: AllowedTranslation = 'KJV'): Promise<SoapBoxVerseResult | null> {
     try {
       // First try Scripture API
-      const scriptureResult = await scriptureApiService.getVerse(reference, translation);
+      const scriptureResult = await scriptureApiService.lookupVerse(reference, translation);
       if (scriptureResult) {
         return {
           id: Math.floor(Math.random() * 1000000), // Generate unique ID
