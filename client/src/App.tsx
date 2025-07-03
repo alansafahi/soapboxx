@@ -89,7 +89,7 @@ function AppRouter() {
         <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
             {isAuthenticated && (
                 <div className="hidden md:block">
-                    <Sidebar />
+                    <SidebarFixed />
                 </div>
             )}
             <div className={isAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>

@@ -109,6 +109,7 @@ export default function SidebarFixed() {
       items: [
         { label: "Home", href: "/", icon: Home },
         { label: "Messages", href: "/messages", icon: Mail },
+        { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
