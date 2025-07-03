@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Share2, Filter, Search, Upload, Grid, List, Image as ImageIcon, Plus } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Filter, Search, Upload, Grid, List, Image as ImageIcon, Plus, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -134,16 +134,45 @@ export default function ImageGallery() {
     saveMutation.mutate(imageId);
   };
 
-  const handleShare = (image: GalleryImage, e?: React.MouseEvent) => {
+  const handleShare = async (image: GalleryImage, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (navigator.share) {
-      navigator.share({
-        title: image.title,
-        text: image.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
+    try {
+      if (navigator.share && 'canShare' in navigator) {
+        const shareData = {
+          title: image.title,
+          text: image.description || 'Check out this image from our gallery',
+          url: `${window.location.origin}/image-gallery`
+        };
+        
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          toast({ title: 'Image shared successfully!' });
+          return;
+        }
+      }
+      
+      // Fallback to clipboard
+      await handleCopyLink(image);
+    } catch (error) {
+      console.log('Share failed, falling back to copy link');
+      await handleCopyLink(image);
+    }
+  };
+
+  const handleCopyLink = async (image: GalleryImage, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      const imageUrl = `${window.location.origin}/image-gallery`;
+      await navigator.clipboard.writeText(imageUrl);
+      toast({ title: 'Link copied to clipboard!' });
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = `${window.location.origin}/image-gallery`;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
       toast({ title: 'Link copied to clipboard!' });
     }
   };
@@ -501,23 +530,34 @@ export default function ImageGallery() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
+                  <div className="space-y-3">
                     <Button
                       variant={selectedImage.isLiked ? "default" : "outline"}
                       onClick={() => handleLike(selectedImage.id)}
-                      className="flex-1"
+                      className="w-full"
                     >
                       <Heart className={`w-4 h-4 mr-2 ${selectedImage.isLiked ? 'fill-current' : ''}`} />
                       {selectedImage.likesCount || 0} Likes
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleShare(selectedImage)}
-                      className="flex-1"
-                    >
-                      <Share2 className="w-4 h-4 mr-2" />
-                      Share
-                    </Button>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleShare(selectedImage)}
+                        className="flex-1"
+                      >
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleCopyLink(selectedImage)}
+                        className="flex-1"
+                      >
+                        <Link className="w-4 h-4 mr-2" />
+                        Copy Link
+                      </Button>
+                    </div>
                   </div>
 
                   {selectedImage.tags.length > 0 && (
