@@ -1,4 +1,4 @@
-import PastoralContentDemo from "@/components/PastoralContentDemo";
+import PastoralContentDemo from "../components/PastoralContentDemo";
 
 export default function PastoralContentDemoPage() {
   return (

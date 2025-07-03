@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import EventsList from "@/components/events-list";
-import MobileNav from "@/components/mobile-nav";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
+import EventsList from "../components/events-list";
+import MobileNav from "../components/mobile-nav";
 
 export default function EventsPage() {
   const { toast } = useToast();

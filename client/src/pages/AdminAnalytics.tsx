@@ -1,9 +1,9 @@
-import { AdminAnalyticsDashboard } from "@/components/AdminAnalyticsDashboard";
-import { useAuth } from "@/hooks/useAuth";
+import { AdminAnalyticsDashboard } from "../components/AdminAnalyticsDashboard";
+import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Shield, AlertCircle } from "lucide-react";
 
 export default function AdminAnalytics() {

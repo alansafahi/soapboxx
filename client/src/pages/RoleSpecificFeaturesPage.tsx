@@ -1,4 +1,4 @@
-import RoleSpecificFeatures from "@/components/RoleSpecificFeatures";
+import RoleSpecificFeatures from "../components/RoleSpecificFeatures";
 
 export default function RoleSpecificFeaturesPage() {
   return (

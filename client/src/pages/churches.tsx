@@ -1,5 +1,5 @@
-import { useAuth } from "@/hooks/useAuth";
-import EnhancedChurchDiscovery from "@/components/enhanced-church-discovery";
+import { useAuth } from "../hooks/useAuth";
+import EnhancedChurchDiscovery from "../components/enhanced-church-discovery";
 
 export default function Churches() {
   const { user } = useAuth();

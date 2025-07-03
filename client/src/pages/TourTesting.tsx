@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import PersonalizedTour from "@/components/PersonalizedTour";
-import InteractiveTour from "@/components/InteractiveTour";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import PersonalizedTour from "../components/PersonalizedTour";
+import InteractiveTour from "../components/InteractiveTour";
 import { Users, Church, Heart, Settings, UserCheck, ShieldCheck, Settings2, Headphones } from "lucide-react";
 
 const roleOptions = [

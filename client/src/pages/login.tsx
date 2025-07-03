@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { useImmediateAuth } from "@/lib/immediateAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { formatErrorForToast } from "@/lib/errorUtils";
+import { useImmediateAuth } from "../lib/immediateAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest, queryClient } from "../lib/queryClient";
+import { formatErrorForToast } from "../lib/errorUtils";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "../components/ui/separator";
 import { useLocation } from "wouter";
-import AutomatedChurchClaiming from "@/components/AutomatedChurchClaiming";
+import AutomatedChurchClaiming from "../components/AutomatedChurchClaiming";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading: authLoading } = useImmediateAuth();

@@ -1,4 +1,4 @@
-import SermonCreationStudio from "@/components/SermonCreationStudio";
+import SermonCreationStudio from "../components/SermonCreationStudio";
 
 export default function SermonStudioPage() {
   return (

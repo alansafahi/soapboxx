@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { ScrollArea } from "../components/ui/scroll-area";
 import { Plus, BookOpen, Heart, Share2, Star, Calendar, Zap } from "lucide-react";
-import { SoapEntryForm } from "@/components/SoapEntryForm";
-import { SoapEntryCard } from "@/components/SoapEntryCard";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import type { SoapEntry } from "@shared/schema";
+import { SoapEntryForm } from "../components/SoapEntryForm";
+import { SoapEntryCard } from "../components/SoapEntryCard";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
+import type { SoapEntry } from "../../../shared/schema";
 
 export default function SoapPage() {
   const [showForm, setShowForm] = useState(false);

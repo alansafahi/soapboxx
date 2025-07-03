@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, LogOut } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
-import soapboxLogo from "@/assets/soapbox-logo.jpeg";
+import { useAuth } from "../hooks/useAuth";
+import soapboxLogo from "../assets/soapbox-logo.jpeg";
 
 export default function Landing() {
   const [, setLocation] = useLocation();

@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+import { Card } from "../components/ui/card";
 import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {

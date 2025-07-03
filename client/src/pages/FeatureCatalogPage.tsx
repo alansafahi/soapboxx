@@ -1,4 +1,4 @@
-import FeatureCatalog from "@/components/FeatureCatalog";
+import FeatureCatalog from "../components/FeatureCatalog";
 
 export default function FeatureCatalogPage() {
   return (

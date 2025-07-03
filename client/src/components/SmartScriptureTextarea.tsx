@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { useToast } from "../hooks/use-toast";
 import { BookOpen, Loader2 } from "lucide-react";
 
 interface SmartScriptureTextareaProps {

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import EnhancedPrayerWall from "@/components/EnhancedPrayerWall";
-import MobileNav from "@/components/mobile-nav";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
+import EnhancedPrayerWall from "../components/EnhancedPrayerWall";
+import MobileNav from "../components/mobile-nav";
 
 export default function PrayerPage() {
   const { toast } = useToast();

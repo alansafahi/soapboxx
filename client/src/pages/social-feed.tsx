@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
-import SocialFeed from "@/components/social-feed";
-import MobileNav from "@/components/mobile-nav";
+import SocialFeed from "../components/social-feed";
+import MobileNav from "../components/mobile-nav";
 
 export default function SocialFeedPage() {
   const { toast } = useToast();

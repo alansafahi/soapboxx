@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
 
-import SocialFeed from "@/components/social-feed";
-import EventsList from "@/components/events-list";
-import PrayerWall from "@/components/prayer-wall";
-import ChurchDiscovery from "@/components/church-discovery";
-import LeaderboardWidget from "@/components/leaderboard-widget";
-import MobileNav from "@/components/mobile-nav";
-import CheckInSystem from "@/components/CheckInSystem";
-import { ReferralWelcome } from "@/components/ReferralWelcome";
+import SocialFeed from "../components/social-feed";
+import EventsList from "../components/events-list";
+import PrayerWall from "../components/prayer-wall";
+import ChurchDiscovery from "../components/church-discovery";
+import LeaderboardWidget from "../components/leaderboard-widget";
+import MobileNav from "../components/mobile-nav";
+import CheckInSystem from "../components/CheckInSystem";
+import { ReferralWelcome } from "../components/ReferralWelcome";
 import { useQuery } from "@tanstack/react-query";
 
 interface HomeProps {

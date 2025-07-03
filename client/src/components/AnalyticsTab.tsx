@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
 import { TrendingUp, Eye, Heart, Share2, MessageSquare, BarChart3 } from "lucide-react";
 
 export function AnalyticsTab() {

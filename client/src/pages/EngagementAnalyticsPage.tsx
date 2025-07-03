@@ -1,4 +1,4 @@
-import EngagementAnalyticsDashboard from "@/components/EngagementAnalyticsDashboard";
+import EngagementAnalyticsDashboard from "../components/EngagementAnalyticsDashboard";
 
 export default function EngagementAnalyticsPage() {
   return (

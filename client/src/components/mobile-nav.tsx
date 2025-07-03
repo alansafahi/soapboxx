@@ -1,6 +1,6 @@
 import { useLocation, Link } from "wouter";
 import { Home, Users, Calendar, Hand, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 
 export default function MobileNav() {
   const [location] = useLocation();

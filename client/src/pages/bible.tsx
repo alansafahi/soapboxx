@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import { BookOpen, Calendar, Heart, Share2 } from "lucide-react";
-import MobileNav from "@/components/mobile-nav";
-import { useToast } from "@/hooks/use-toast";
+import MobileNav from "../components/mobile-nav";
+import { useToast } from "../hooks/use-toast";
 
 export default function BiblePage() {
   const { user, isAuthenticated, isLoading } = useAuth();

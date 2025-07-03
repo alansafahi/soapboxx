@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "../hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Progress } from "./ui/progress";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { 
   Trophy, 
   Heart, 
@@ -20,7 +20,7 @@ import {
   Shield
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { UserAchievement } from "@shared/schema";
+import type { UserAchievement } from "../../../shared/schema";
 
 interface UserStats {
   attendanceCount: number;

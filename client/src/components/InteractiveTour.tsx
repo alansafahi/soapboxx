@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X, ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
 import { useLocation } from 'wouter';
 
 interface TourStep {

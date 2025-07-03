@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
+import { Textarea } from "../components/ui/textarea";
+import { Badge } from "../components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
 import { 
   Church, Calendar, Users, MessageSquare, Heart, Building, MapPin, Phone, Mail, Globe, Clock, Plus, Upload, X, Trophy, Settings, 
   BookOpen, Video, Music, FileText, Edit, Trash2, Eye, Book, AlertTriangle, UserCheck, Tag, Flag, CheckCircle, XCircle, 
@@ -20,11 +20,11 @@ import {
   User, Home, MapPinIcon, UserCog, HeartHandshake, Star, TrendingUp, PanelLeftClose, PanelLeftOpen, HelpCircle, Bell,
   Edit3, Mic, Share2, Download
 } from "lucide-react";
-import { insertChurchSchema, insertEventSchema, insertDevotionalSchema } from "@shared/schema";
-import { SimpleMemberDirectory } from "@/components/SimpleMemberDirectory";
-import { SessionsManagement } from "@/components/SessionsManagement";
-import SermonCreationStudio from "@/components/SermonCreationStudio";
-import RoleSwitcher from "@/components/RoleSwitcher";
+import { insertChurchSchema, insertEventSchema, insertDevotionalSchema } from "../../../shared/schema";
+import { SimpleMemberDirectory } from "../components/SimpleMemberDirectory";
+import { SessionsManagement } from "../components/SessionsManagement";
+import SermonCreationStudio from "../components/SermonCreationStudio";
+import RoleSwitcher from "../components/RoleSwitcher";
 
 const churchFormSchema = insertChurchSchema;
 const eventFormSchema = insertEventSchema;

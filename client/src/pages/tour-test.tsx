@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import InteractiveTour from "@/components/InteractiveTour";
-import { useAuth } from "@/hooks/useAuth";
-import { useRoleBasedTour } from "@/hooks/useRoleBasedTour";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import InteractiveTour from "../components/InteractiveTour";
+import { useAuth } from "../hooks/useAuth";
+import { useRoleBasedTour } from "../hooks/useRoleBasedTour";
 import { useQuery } from "@tanstack/react-query";
 
 export default function TourTestPage() {

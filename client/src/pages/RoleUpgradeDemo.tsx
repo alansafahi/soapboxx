@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Shield, Crown, Users, AlertTriangle, CheckCircle, ArrowRight } from "lucide-react";
-import TwoFactorOnboarding from "@/components/TwoFactorOnboarding";
-import { useToast } from "@/hooks/use-toast";
+import TwoFactorOnboarding from "../components/TwoFactorOnboarding";
+import { useToast } from "../hooks/use-toast";
 
 export default function RoleUpgradeDemo() {
   const { toast } = useToast();

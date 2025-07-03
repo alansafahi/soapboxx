@@ -1,4 +1,4 @@
-import ContentDistributionHub from "@/components/ContentDistributionHub";
+import ContentDistributionHub from "../components/ContentDistributionHub";
 
 export default function ContentDistributionPage() {
   return (

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader } from "./ui/card";
+import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Badge } from "./ui/badge";
+import { Textarea } from "./ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
+import { useToast } from "../hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
+import { apiRequest } from "../lib/queryClient";
 import { 
   Heart, 
   MessageCircle, 
@@ -593,7 +593,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
         
         if (moodString.length > 255) {
           // Show error message using toast
-          import('@/hooks/use-toast').then(({ toast }) => {
+          import('../hooks/use-toast').then(({ toast }) => {
             toast({
               title: "Too many moods selected",
               description: `You can select up to ${255 - prev.join(',').length} more characters worth of moods. Current selection: ${moodString.length}/255 characters.`,

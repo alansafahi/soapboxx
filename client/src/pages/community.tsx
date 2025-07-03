@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
-import CommunityFeed from "@/components/community-feed";
-import EnhancedCommunityFeed from "@/components/enhanced-community-feed";
-import MobileNav from "@/components/mobile-nav";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import CommunityFeed from "../components/community-feed";
+import EnhancedCommunityFeed from "../components/enhanced-community-feed";
+import MobileNav from "../components/mobile-nav";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Button } from "../components/ui/button";
 import { Sparkles, Users, MessageCircle } from "lucide-react";
 
 export default function CommunityPage() {
