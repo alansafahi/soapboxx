@@ -9026,5 +9026,275 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Gallery API endpoints
+  // Get gallery images with optional filters
+  app.get('/api/gallery/images', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUserById(userId);
+      const churchId = user?.churchId;
+      
+      const { collection, tags, uploadedBy, limit = 20, offset = 0 } = req.query;
+      
+      const filters = {
+        collection: collection as string,
+        tags: tags ? (tags as string).split(',') : undefined,
+        uploadedBy: uploadedBy as string,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      };
+
+      const images = await storage.getGalleryImages(churchId, filters);
+      
+      // Add user-specific interaction data
+      const imagesWithInteractions = await Promise.all(
+        images.map(async (image) => ({
+          ...image,
+          isLiked: await storage.isGalleryImageLiked(userId, image.id),
+          isSaved: await storage.isGalleryImageSaved(userId, image.id)
+        }))
+      );
+
+      res.json(imagesWithInteractions);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch gallery images' });
+    }
+  });
+
+  // Get single gallery image
+  app.get('/api/gallery/images/:imageId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const imageId = parseInt(req.params.imageId);
+      const image = await storage.getGalleryImage(imageId);
+      
+      if (!image) {
+        return res.status(404).json({ message: 'Image not found' });
+      }
+
+      const imageWithInteractions = {
+        ...image,
+        isLiked: await storage.isGalleryImageLiked(userId, image.id),
+        isSaved: await storage.isGalleryImageSaved(userId, image.id),
+        comments: await storage.getGalleryImageComments(image.id),
+        likes: await storage.getGalleryImageLikes(image.id)
+      };
+
+      res.json(imageWithInteractions);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch gallery image' });
+    }
+  });
+
+  // Upload gallery image
+  app.post('/api/gallery/upload', isAuthenticated, upload.single('image'), async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No image file provided' });
+      }
+
+      const user = await storage.getUserById(userId);
+      const churchId = user?.churchId;
+      
+      const { title, description, collection, tags } = req.body;
+      
+      const imageData = {
+        url: `/uploads/${req.file.filename}`,
+        title: title || req.file.originalname,
+        description: description || null,
+        collection: collection || 'General',
+        tags: tags ? JSON.parse(tags) : [],
+        uploadedBy: userId,
+        churchId: churchId || null
+      };
+
+      const newImage = await storage.uploadGalleryImage(imageData);
+      res.json(newImage);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to upload image' });
+    }
+  });
+
+  // Update gallery image
+  app.put('/api/gallery/images/:imageId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const imageId = parseInt(req.params.imageId);
+      const { title, description, collection, tags } = req.body;
+      
+      // Check if user owns the image
+      const image = await storage.getGalleryImage(imageId);
+      if (!image || image.uploadedBy !== userId) {
+        return res.status(403).json({ message: 'Not authorized to update this image' });
+      }
+
+      const updates = {
+        title,
+        description,
+        collection,
+        tags: tags ? JSON.parse(tags) : undefined
+      };
+
+      const updatedImage = await storage.updateGalleryImage(imageId, updates);
+      res.json(updatedImage);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update image' });
+    }
+  });
+
+  // Delete gallery image
+  app.delete('/api/gallery/images/:imageId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const imageId = parseInt(req.params.imageId);
+      await storage.deleteGalleryImage(imageId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete image' });
+    }
+  });
+
+  // Like/unlike gallery image
+  app.post('/api/gallery/images/:imageId/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const imageId = parseInt(req.params.imageId);
+      const isLiked = await storage.isGalleryImageLiked(userId, imageId);
+      
+      if (isLiked) {
+        await storage.unlikeGalleryImage(userId, imageId);
+        res.json({ liked: false });
+      } else {
+        await storage.likeGalleryImage(userId, imageId);
+        res.json({ liked: true });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to toggle like' });
+    }
+  });
+
+  // Save/unsave gallery image
+  app.post('/api/gallery/images/:imageId/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const imageId = parseInt(req.params.imageId);
+      const isSaved = await storage.isGalleryImageSaved(userId, imageId);
+      
+      if (isSaved) {
+        await storage.unsaveGalleryImage(userId, imageId);
+        res.json({ saved: false });
+      } else {
+        await storage.saveGalleryImage(userId, imageId);
+        res.json({ saved: true });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to toggle save' });
+    }
+  });
+
+  // Add comment to gallery image
+  app.post('/api/gallery/images/:imageId/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const imageId = parseInt(req.params.imageId);
+      const { content } = req.body;
+      
+      if (!content?.trim()) {
+        return res.status(400).json({ message: 'Comment content is required' });
+      }
+
+      const comment = await storage.addGalleryImageComment({
+        imageId,
+        userId,
+        content: content.trim()
+      });
+
+      res.json(comment);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to add comment' });
+    }
+  });
+
+  // Get gallery collections
+  app.get('/api/gallery/collections', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUserById(userId);
+      const churchId = user?.churchId;
+      
+      const collections = await storage.getGalleryCollections(churchId);
+      res.json(collections);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch collections' });
+    }
+  });
+
+  // Get user's saved images
+  app.get('/api/gallery/saved', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const savedImages = await storage.getUserSavedGalleryImages(userId);
+      res.json(savedImages);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch saved images' });
+    }
+  });
+
+  // Get user's uploaded images
+  app.get('/api/gallery/uploads', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const uploads = await storage.getUserGalleryUploads(userId);
+      res.json(uploads);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch user uploads' });
+    }
+  });
+
   return httpServer;
 }

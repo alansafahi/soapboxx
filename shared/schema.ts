@@ -3185,6 +3185,79 @@ export const mediaCollectionItems = pgTable("media_collection_items", {
   collectionMediaUnique: unique().on(table.collectionId, table.mediaFileId),
 }));
 
+// Gallery images table for Image Gallery feature
+export const galleryImages = pgTable("gallery_images", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
+  title: varchar("title", { length: 300 }).notNull(),
+  description: text("description"),
+  imageUrl: varchar("image_url", { length: 500 }).notNull(),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  category: varchar("category", { length: 100 }).notNull(), // worship, testimonies, events, sacred-spaces, verses, art, daily-inspiration
+  tags: text("tags").array(),
+  visibility: varchar("visibility", { length: 20 }).default("church"), // public, church, private
+  isApproved: boolean("is_approved").default(false),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  likeCount: integer("like_count").default(0),
+  commentCount: integer("comment_count").default(0),
+  shareCount: integer("share_count").default(0),
+  viewCount: integer("view_count").default(0),
+  isFeatured: boolean("is_featured").default(false),
+  featuredAt: timestamp("featured_at"),
+  dimensions: jsonb("dimensions"), // {width, height}
+  fileSize: integer("file_size"), // in bytes
+  mimeType: varchar("mime_type", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("gallery_images_church_idx").on(table.churchId),
+  index("gallery_images_category_idx").on(table.category),
+  index("gallery_images_uploaded_by_idx").on(table.uploadedBy),
+  index("gallery_images_visibility_idx").on(table.visibility),
+]);
+
+// Gallery image likes
+export const galleryImageLikes = pgTable("gallery_image_likes", {
+  id: serial("id").primaryKey(),
+  imageId: integer("image_id").notNull().references(() => galleryImages.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_user_image_like").on(table.imageId, table.userId),
+  index("gallery_image_likes_image_idx").on(table.imageId),
+  index("gallery_image_likes_user_idx").on(table.userId),
+]);
+
+// Gallery image comments
+export const galleryImageComments = pgTable("gallery_image_comments", {
+  id: serial("id").primaryKey(),
+  imageId: integer("image_id").notNull().references(() => galleryImages.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  comment: text("comment").notNull(),
+  isApproved: boolean("is_approved").default(true),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("gallery_image_comments_image_idx").on(table.imageId),
+  index("gallery_image_comments_user_idx").on(table.userId),
+]);
+
+// Gallery image saves/favorites
+export const galleryImageSaves = pgTable("gallery_image_saves", {
+  id: serial("id").primaryKey(),
+  imageId: integer("image_id").notNull().references(() => galleryImages.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_user_image_save").on(table.imageId, table.userId),
+  index("gallery_image_saves_image_idx").on(table.imageId),
+  index("gallery_image_saves_user_idx").on(table.userId),
+]);
+
 // Video content table for comprehensive video system
 export const videoContent = pgTable("video_content", {
   id: serial("id").primaryKey(),
@@ -3344,6 +3417,19 @@ export type InsertVideoSeries = typeof videoSeries.$inferInsert;
 
 export type VideoView = typeof videoViews.$inferSelect;
 export type InsertVideoView = typeof videoViews.$inferInsert;
+
+// Gallery system type definitions
+export type GalleryImage = typeof galleryImages.$inferSelect;
+export type InsertGalleryImage = typeof galleryImages.$inferInsert;
+
+export type GalleryImageLike = typeof galleryImageLikes.$inferSelect;
+export type InsertGalleryImageLike = typeof galleryImageLikes.$inferInsert;
+
+export type GalleryImageComment = typeof galleryImageComments.$inferSelect;
+export type InsertGalleryImageComment = typeof galleryImageComments.$inferInsert;
+
+export type GalleryImageSave = typeof galleryImageSaves.$inferSelect;
+export type InsertGalleryImageSave = typeof galleryImageSaves.$inferInsert;
 
 export type VideoComment = typeof videoComments.$inferSelect;
 export type InsertVideoComment = typeof videoComments.$inferInsert;
