@@ -25,6 +25,22 @@ app.use(compression({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Simple test route to verify server is working
+app.get('/test', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head><title>SoapBox Test</title></head>
+    <body>
+      <h1>Server is working!</h1>
+      <p>URL: ${req.url}</p>
+      <p>Host: ${req.get('host')}</p>
+      <p>Time: ${new Date().toISOString()}</p>
+    </body>
+    </html>
+  `);
+});
+
 
 
 app.use((req, res, next) => {

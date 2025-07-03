@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoapBox Test</title>
+</head>
+<body>
+    <h1>SoapBox Super App - Simple Test</h1>
+    <p>If you can see this, the server is working!</p>
+    <p>Current URL: <span id="url"></span></p>
+    <p>Current hostname: <span id="hostname"></span></p>
+    <p>Current port: <span id="port"></span></p>
+    
+    <script>
+        document.getElementById('url').textContent = window.location.href;
+        document.getElementById('hostname').textContent = window.location.hostname;
+        document.getElementById('port').textContent = window.location.port;
+        console.log("Simple HTML page loaded successfully");
+    </script>
+</body>
+</html>
