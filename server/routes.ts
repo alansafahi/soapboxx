@@ -9048,7 +9048,10 @@ Please provide suggestions for the missing or incomplete sections.`
         offset: parseInt(offset as string)
       };
 
+      console.log('Fetching gallery images for churchId:', churchId, 'with filters:', filters);
+      
       const images = await storage.getGalleryImages(churchId, filters);
+      console.log('Found images:', images.length, 'images');
       
       // Add user-specific interaction data
       const imagesWithInteractions = await Promise.all(
@@ -9059,6 +9062,7 @@ Please provide suggestions for the missing or incomplete sections.`
         }))
       );
 
+      console.log('Returning images with interactions:', imagesWithInteractions.length);
       res.json(imagesWithInteractions);
     } catch (error) {
       console.error('Gallery images fetch error:', error);
