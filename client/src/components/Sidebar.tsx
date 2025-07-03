@@ -62,7 +62,7 @@ interface NavigationGroup {
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['HOME', 'COMMUNITY', 'SPIRITUAL TOOLS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -118,15 +118,18 @@ export default function Sidebar() {
 
   const navigationGroups: NavigationGroup[] = [
     {
-      label: "COMMUNITY",
+      label: "HOME",
       items: [
         { label: "Home", href: "/", icon: Home },
+      ]
+    },
+    {
+      label: "COMMUNITY",
+      items: [
+        { label: "Messages", href: "/messages", icon: Mail },
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
-        { label: "Messages", href: "/messages", icon: Mail },
-        { label: "Contacts", href: "/contacts", icon: UserPlus },
-        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "SMS Giving", href: "/sms-giving", icon: DollarSign },
       ]
     },
@@ -134,19 +137,10 @@ export default function Sidebar() {
       label: "SPIRITUAL TOOLS",
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
+        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
-        { label: "Spiritual Guidance", href: "/ai-guidance", icon: Sparkles },
-      ]
-    },
-    {
-      label: "MEDIA CONTENTS",
-      items: [
-        { label: "Video Library", href: "/video-library", icon: Video },
-        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Content Distribution", href: "/content-distribution", icon: Share2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
       ]
     },
     {
@@ -155,6 +149,8 @@ export default function Sidebar() {
         { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
       ]
     },
     {
