@@ -199,16 +199,16 @@ export default function TopHeader() {
                 Events
               </DropdownMenuItem>
             </Link>
-            <Link href="/sms-giving">
-              <DropdownMenuItem className="cursor-pointer">
-                <DollarSign className="w-4 h-4 mr-2" />
-                SMS Giving
-              </DropdownMenuItem>
-            </Link>
             <Link href="/discussions">
               <DropdownMenuItem className="cursor-pointer">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Discussions
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/sms-giving">
+              <DropdownMenuItem className="cursor-pointer">
+                <DollarSign className="w-4 h-4 mr-2" />
+                SMS Giving
               </DropdownMenuItem>
             </Link>
             
