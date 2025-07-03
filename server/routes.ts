@@ -9036,7 +9036,9 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const user = await storage.getUser(userId);
+      console.log('User object:', user);
       const churchId = user?.churchId;
+      console.log('User churchId from object:', churchId);
       
       const { collection, tags, uploadedBy, limit = 20, offset = 0 } = req.query;
       

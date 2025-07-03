@@ -7722,7 +7722,7 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(galleryImages.churchId, churchId));
     }
     
-    if (filters?.collection) {
+    if (filters?.collection && filters.collection !== 'all') {
       conditions.push(eq(galleryImages.collection, filters.collection));
     }
     
