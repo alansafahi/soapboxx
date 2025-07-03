@@ -407,6 +407,44 @@ export default function ImageGallery() {
                     className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
                     style={{ height: viewMode === 'grid' ? '200px' : 'auto' }}
                   />
+                  {/* Hover Action Buttons */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-white/90 text-gray-900 hover:bg-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike(image.id);
+                        }}
+                      >
+                        <Heart className={`w-4 h-4 ${image.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-white/90 text-gray-900 hover:bg-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShareToSocialFeed(image);
+                        }}
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-white/90 text-gray-900 hover:bg-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyLink(image);
+                        }}
+                      >
+                        <Link className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
