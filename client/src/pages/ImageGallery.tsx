@@ -55,6 +55,14 @@ export default function ImageGallery() {
   const [viewMode, setViewMode] = useState<'grid' | 'masonry'>('masonry');
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    image: null as File | null,
+    title: '',
+    description: '',
+    category: '',
+    tags: '',
+    visibility: 'church'
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -80,19 +88,30 @@ export default function ImageGallery() {
   });
 
   const uploadMutation = useMutation({
-    mutationFn: (formData: FormData) => {
-      // Convert form data to proper format for backend
+    mutationFn: () => {
+      if (!uploadForm.image) {
+        throw new Error('No image selected');
+      }
+      
       const data = new FormData();
-      data.append('image', formData.get('image') as File);
-      data.append('title', formData.get('title') as string);
-      data.append('description', formData.get('description') as string);
-      data.append('collection', formData.get('category') as string);
-      data.append('tags', JSON.stringify((formData.get('tags') as string).split(',').map(t => t.trim()).filter(t => t)));
+      data.append('image', uploadForm.image);
+      data.append('title', uploadForm.title);
+      data.append('description', uploadForm.description);
+      data.append('collection', uploadForm.category);
+      data.append('tags', JSON.stringify(uploadForm.tags.split(',').map(t => t.trim()).filter(t => t)));
       return apiRequest('POST', '/api/gallery/upload', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery/images'] });
       setShowUploadDialog(false);
+      setUploadForm({
+        image: null,
+        title: '',
+        description: '',
+        category: '',
+        tags: '',
+        visibility: 'church'
+      });
       toast({ title: 'Image uploaded successfully!' });
     },
     onError: (error: any) => {
@@ -130,8 +149,14 @@ export default function ImageGallery() {
 
   const handleUpload = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    uploadMutation.mutate(formData);
+    if (!uploadForm.image || !uploadForm.title || !uploadForm.category) {
+      toast({
+        title: 'Please fill in all required fields',
+        variant: 'destructive'
+      });
+      return;
+    }
+    uploadMutation.mutate();
   };
 
   return (
@@ -177,19 +202,39 @@ export default function ImageGallery() {
                 <form onSubmit={handleUpload} className="space-y-4">
                   <div>
                     <Label htmlFor="image">Image File</Label>
-                    <Input id="image" name="image" type="file" accept="image/*" required />
+                    <Input 
+                      id="image" 
+                      type="file" 
+                      accept="image/*" 
+                      required 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setUploadForm(prev => ({ ...prev, image: file }));
+                      }}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="title">Title</Label>
-                    <Input id="title" name="title" placeholder="Give your image a title..." required />
+                    <Input 
+                      id="title" 
+                      placeholder="Give your image a title..." 
+                      required 
+                      value={uploadForm.title}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" name="description" placeholder="Share the story behind this image..." />
+                    <Textarea 
+                      id="description" 
+                      placeholder="Share the story behind this image..." 
+                      value={uploadForm.description}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select name="category" required>
+                    <Select value={uploadForm.category} onValueChange={(value) => setUploadForm(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -204,11 +249,16 @@ export default function ImageGallery() {
                   </div>
                   <div>
                     <Label htmlFor="tags">Tags (comma separated)</Label>
-                    <Input id="tags" name="tags" placeholder="faith, worship, community..." />
+                    <Input 
+                      id="tags" 
+                      placeholder="faith, worship, community..." 
+                      value={uploadForm.tags}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, tags: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="visibility">Visibility</Label>
-                    <Select name="visibility" defaultValue="church">
+                    <Select value={uploadForm.visibility} onValueChange={(value) => setUploadForm(prev => ({ ...prev, visibility: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
