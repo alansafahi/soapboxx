@@ -274,11 +274,16 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  
+  // Try multiple binding approaches for Replit compatibility
+  try {
+    server.listen(port, "0.0.0.0", () => {
+      log(`serving on 0.0.0.0:${port}`);
+    });
+  } catch (error) {
+    log(`Failed to bind to 0.0.0.0:${port}, trying localhost...`);
+    server.listen(port, "localhost", () => {
+      log(`serving on localhost:${port}`);
+    });
+  }
 })();
