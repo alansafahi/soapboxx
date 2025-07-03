@@ -88,6 +88,27 @@ window.fetch = function(...args) {
   return originalFetch.apply(this, args);
 };
 
-createRoot(document.getElementById("root")!).render(
-  <App />
-);
+try {
+  const container = document.getElementById("root");
+  if (!container) {
+    throw new Error("Root element not found");
+  }
+  
+  console.log("Starting React app...");
+  const root = createRoot(container);
+  root.render(<App />);
+  console.log("React app rendered successfully");
+} catch (error) {
+  console.error("Failed to render React app:", error);
+  const container = document.getElementById("root");
+  if (container) {
+    container.innerHTML = `
+      <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+        <h1>SoapBox Super App</h1>
+        <p>Loading error. Please refresh the page.</p>
+        <p style="color: red; font-size: 12px;">Error: ${error.message}</p>
+        <button onclick="window.location.reload()" style="margin-top: 10px; padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 5px; cursor: pointer;">Refresh Page</button>
+      </div>
+    `;
+  }
+}
