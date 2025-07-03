@@ -49,17 +49,32 @@ export async function apiRequest(
       validMethod = 'POST';
     }
     
-    const res = await fetch(validUrl, {
+    // Check if body is FormData to handle file uploads correctly
+    const isFormData = body instanceof FormData;
+    
+    const fetchOptions: RequestInit = {
       method: validMethod.toUpperCase(),
       headers: {
-        "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
         "Referer": window.location.origin,
         ...(headers || {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
       credentials: "include",
-    });
+    };
+
+    // For FormData, don't set Content-Type (let browser handle it with boundary)
+    // For other data, use JSON
+    if (isFormData) {
+      fetchOptions.body = body as FormData;
+    } else {
+      fetchOptions.headers = {
+        ...fetchOptions.headers,
+        "Content-Type": "application/json",
+      };
+      fetchOptions.body = body ? JSON.stringify(body) : undefined;
+    }
+
+    const res = await fetch(validUrl, fetchOptions);
     
     if (!res.ok) {
       const errorText = await res.text();

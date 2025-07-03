@@ -89,8 +89,6 @@ export default function ImageGallery() {
 
   const uploadMutation = useMutation({
     mutationFn: () => {
-      console.log('Upload form data:', uploadForm);
-      
       if (!uploadForm.image) {
         throw new Error('No image selected');
       }
@@ -101,11 +99,6 @@ export default function ImageGallery() {
       data.append('description', uploadForm.description);
       data.append('collection', uploadForm.category);
       data.append('tags', JSON.stringify(uploadForm.tags.split(',').map(t => t.trim()).filter(t => t)));
-      
-      console.log('FormData entries:');
-      Array.from(data.entries()).forEach(([key, value]) => {
-        console.log(key, value);
-      });
       
       return apiRequest('POST', '/api/gallery/upload', data);
     },
@@ -217,7 +210,6 @@ export default function ImageGallery() {
                       required 
                       onChange={(e) => {
                         const file = e.target.files?.[0] || null;
-                        console.log('File selected:', file);
                         setUploadForm(prev => ({ ...prev, image: file }));
                       }}
                     />
