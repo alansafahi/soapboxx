@@ -7697,10 +7697,10 @@ export class DatabaseStorage implements IStorage {
     let query = db
       .select({
         id: galleryImages.id,
-        url: galleryImages.imageUrl,
+        url: galleryImages.url,
         title: galleryImages.title,
         description: galleryImages.description,
-        collection: galleryImages.category,
+        collection: galleryImages.collection,
         tags: galleryImages.tags,
         uploadedBy: galleryImages.uploadedBy,
         churchId: galleryImages.churchId,
@@ -7723,7 +7723,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (filters?.collection) {
-      conditions.push(eq(galleryImages.category, filters.collection));
+      conditions.push(eq(galleryImages.collection, filters.collection));
     }
     
     if (filters?.uploadedBy) {
@@ -7762,10 +7762,10 @@ export class DatabaseStorage implements IStorage {
     const [image] = await db
       .select({
         id: galleryImages.id,
-        url: galleryImages.imageUrl,
+        url: galleryImages.url,
         title: galleryImages.title,
         description: galleryImages.description,
-        collection: galleryImages.category,
+        collection: galleryImages.collection,
         tags: galleryImages.tags,
         uploadedBy: galleryImages.uploadedBy,
         churchId: galleryImages.churchId,
@@ -7908,10 +7908,10 @@ export class DatabaseStorage implements IStorage {
     const images = await db
       .select({
         id: galleryImages.id,
-        url: galleryImages.imageUrl,
+        url: galleryImages.url,
         title: galleryImages.title,
         description: galleryImages.description,
-        collection: galleryImages.category,
+        collection: galleryImages.collection,
         tags: galleryImages.tags,
         uploadedBy: galleryImages.uploadedBy,
         churchId: galleryImages.churchId,
@@ -7980,9 +7980,9 @@ export class DatabaseStorage implements IStorage {
   async getGalleryCollections(churchId?: number): Promise<{ collection: string; count: number; thumbnail?: string }[]> {
     let query = db
       .select({
-        collection: galleryImages.category,
+        collection: galleryImages.collection,
         count: sql`COUNT(*)`.as('count'),
-        thumbnail: sql`MIN(${galleryImages.imageUrl})`.as('thumbnail')
+        thumbnail: sql`MIN(${galleryImages.url})`.as('thumbnail')
       })
       .from(galleryImages);
 
@@ -7991,7 +7991,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     const collections = await query
-      .groupBy(galleryImages.category)
+      .groupBy(galleryImages.collection)
       .orderBy(sql`COUNT(*) DESC`);
 
     return collections.map(c => ({
@@ -8005,10 +8005,10 @@ export class DatabaseStorage implements IStorage {
     const images = await db
       .select({
         id: galleryImages.id,
-        url: galleryImages.imageUrl,
+        url: galleryImages.url,
         title: galleryImages.title,
         description: galleryImages.description,
-        collection: galleryImages.category,
+        collection: galleryImages.collection,
         tags: galleryImages.tags,
         uploadedBy: galleryImages.uploadedBy,
         churchId: galleryImages.churchId,

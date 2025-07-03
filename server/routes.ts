@@ -9113,10 +9113,10 @@ Please provide suggestions for the missing or incomplete sections.`
       const { title, description, collection, tags } = req.body;
       
       const imageData = {
-        imageUrl: `/uploads/${req.file.filename}`,
+        url: `/uploads/${req.file.filename}`,
         title: title || req.file.originalname,
         description: description || null,
-        category: collection || 'General',
+        collection: collection || 'General',
         tags: tags ? JSON.parse(tags) : [],
         uploadedBy: userId,
         churchId: churchId || null

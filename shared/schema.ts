@@ -3192,31 +3192,12 @@ export const galleryImages = pgTable("gallery_images", {
   uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
   title: varchar("title", { length: 300 }).notNull(),
   description: text("description"),
-  imageUrl: varchar("image_url", { length: 500 }).notNull(),
-  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
-  category: varchar("category", { length: 100 }).notNull(), // worship, testimonies, events, sacred-spaces, verses, art, daily-inspiration
+  url: varchar("url", { length: 500 }).notNull(),
+  collection: varchar("collection", { length: 100 }).notNull(),
   tags: text("tags").array(),
-  visibility: varchar("visibility", { length: 20 }).default("church"), // public, church, private
-  isApproved: boolean("is_approved").default(false),
-  approvedBy: varchar("approved_by").references(() => users.id),
-  approvedAt: timestamp("approved_at"),
-  likeCount: integer("like_count").default(0),
-  commentCount: integer("comment_count").default(0),
-  shareCount: integer("share_count").default(0),
-  viewCount: integer("view_count").default(0),
-  isFeatured: boolean("is_featured").default(false),
-  featuredAt: timestamp("featured_at"),
-  dimensions: jsonb("dimensions"), // {width, height}
-  fileSize: integer("file_size"), // in bytes
-  mimeType: varchar("mime_type", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("gallery_images_church_idx").on(table.churchId),
-  index("gallery_images_category_idx").on(table.category),
-  index("gallery_images_uploaded_by_idx").on(table.uploadedBy),
-  index("gallery_images_visibility_idx").on(table.visibility),
-]);
+});
 
 // Gallery image likes
 export const galleryImageLikes = pgTable("gallery_image_likes", {
