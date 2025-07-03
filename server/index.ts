@@ -89,12 +89,16 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     // Serve a simple HTML page that loads React directly for ALL routes
     const serveApp = (req: any, res: any) => {
-      // Add proper headers to prevent caching issues
+      // Add headers for Replit preview compatibility
       res.set({
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',
-        'Content-Type': 'text/html; charset=utf-8'
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-Frame-Options': 'ALLOWALL',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       });
       
       res.send(`<!DOCTYPE html>
@@ -253,9 +257,42 @@ app.use((req, res, next) => {
       document.getElementById('loading').style.display = 'block';
     });
     
+    // Force content visibility for Replit preview
+    function forceContentVisible() {
+      const root = document.getElementById('root');
+      const container = document.querySelector('.container');
+      
+      if (root && container) {
+        // Force display styles
+        root.style.display = 'block';
+        root.style.visibility = 'visible';
+        root.style.opacity = '1';
+        container.style.display = 'block';
+        container.style.visibility = 'visible';
+        container.style.opacity = '1';
+        
+        // Hide any loading screens
+        const loadingElements = document.querySelectorAll('[class*="loading"], [id*="loading"]');
+        loadingElements.forEach(el => {
+          if (el.id !== 'loading') { // Keep our loading div
+            el.style.display = 'none';
+          }
+        });
+        
+        console.log('Content visibility forced for Replit preview');
+        return true;
+      }
+      return false;
+    }
+    
+    // Try multiple times to ensure content is visible
+    setTimeout(forceContentVisible, 100);
+    setTimeout(forceContentVisible, 500);
+    setTimeout(forceContentVisible, 1000);
+    
     // Auto-refresh if page seems stuck
     setTimeout(() => {
-      if (document.getElementById('root').children.length === 0) {
+      if (!forceContentVisible()) {
         console.log('Page appears blank, auto-refreshing...');
         window.location.reload();
       }
