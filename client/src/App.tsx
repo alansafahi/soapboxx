@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useImmediateAuth } from "@/lib/immediateAuth";
 import { AnimatePresence, motion } from "framer-motion";
 
-import Sidebar from "@/components/Sidebar";
+import SidebarFixed from "@/components/SidebarFixed";
 import TopHeader from "@/components/TopHeader";
 
 // Lazy-loaded pages
