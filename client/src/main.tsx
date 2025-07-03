@@ -2,6 +2,21 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+// Clear any cached data that might be pointing to external domains
+try {
+  localStorage.clear();
+  sessionStorage.clear();
+  console.log("Cleared browser storage to fix external domain issues");
+  
+  // Override any external domain references
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    console.log("Detected external domain, forcing reload to localhost");
+    window.location.href = 'http://localhost:5000';
+  }
+} catch (e) {
+  console.log("Storage clear failed:", e);
+}
+
 // Handle unhandled promise rejections and runtime plugin conflicts
 window.addEventListener('unhandledrejection', (event) => {
   // Suppress runtime error plugin conflicts
