@@ -106,8 +106,8 @@ export const getQueryFn: <T>(options: {
       url += `?q=${encodeURIComponent(searchTerm)}`;
     }
     
-    // Ensure URL is absolute
-    const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+    // Use relative URLs for same-origin requests
+    const fullUrl = url.startsWith('http') ? url : url;
     
     const res = await fetch(fullUrl, {
       credentials: "include",
