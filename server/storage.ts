@@ -7718,10 +7718,9 @@ export class DatabaseStorage implements IStorage {
 
     const conditions = [];
     
-    // Skip church filtering for now - show all images regardless of church association
-    // if (churchId) {
-    //   conditions.push(eq(galleryImages.churchId, churchId));
-    // }
+    if (churchId) {
+      conditions.push(eq(galleryImages.churchId, churchId));
+    }
     
     if (filters?.collection && filters.collection !== 'all') {
       conditions.push(eq(galleryImages.collection, filters.collection));

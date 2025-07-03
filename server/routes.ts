@@ -8,6 +8,7 @@ import { db } from "./db";
 import { 
   users, 
   churches, 
+  userChurches,
   soapEntries, 
   discussions, 
   events,
@@ -9037,8 +9038,28 @@ Please provide suggestions for the missing or incomplete sections.`
 
       const user = await storage.getUser(userId);
       console.log('User object:', user);
-      const churchId = user?.churchId;
-      console.log('User churchId from object:', churchId);
+      
+      // Get user's church associations directly from userChurches table
+      const userChurchAssociations = await db
+        .select()
+        .from(userChurches)
+        .where(and(
+          eq(userChurches.userId, userId),
+          eq(userChurches.isActive, true)
+        ));
+      
+      console.log('User church associations:', userChurchAssociations);
+      
+      // If user has no church associations, show no images for security
+      if (!userChurchAssociations || userChurchAssociations.length === 0) {
+        console.log('User has no church associations - returning empty gallery for security');
+        return res.json([]);
+      }
+      
+      // Use the first active church association
+      const primaryChurch = userChurchAssociations[0];
+      const churchId = primaryChurch?.churchId;
+      console.log('Using churchId from user association:', churchId);
       
       const { collection, tags, uploadedBy, limit = 20, offset = 0 } = req.query;
       
@@ -9052,8 +9073,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       console.log('Fetching gallery images for churchId:', churchId, 'with filters:', filters);
       
-      // For now, ignore church filtering and show all images since users may not have church associations
-      const images = await storage.getGalleryImages(null, filters);
+      const images = await storage.getGalleryImages(churchId, filters);
       console.log('Found images:', images.length, 'images');
       
       // Add user-specific interaction data
@@ -9114,8 +9134,23 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(400).json({ message: 'No image file provided' });
       }
 
-      const user = await storage.getUser(userId);
-      const churchId = user?.churchId;
+      // Get user's church associations directly from userChurches table
+      const userChurchAssociations = await db
+        .select()
+        .from(userChurches)
+        .where(and(
+          eq(userChurches.userId, userId),
+          eq(userChurches.isActive, true)
+        ));
+      
+      // Prevent upload if user has no church associations for security
+      if (!userChurchAssociations || userChurchAssociations.length === 0) {
+        return res.status(403).json({ message: 'You must be a member of a church to upload images' });
+      }
+      
+      // Use the first active church association
+      const primaryChurch = userChurchAssociations[0];
+      const churchId = primaryChurch?.churchId;
       
       const { title, description, collection, tags } = req.body;
       
@@ -9126,7 +9161,7 @@ Please provide suggestions for the missing or incomplete sections.`
         collection: collection || 'General',
         tags: tags ? JSON.parse(tags) : [],
         uploadedBy: userId,
-        churchId: churchId || null
+        churchId: churchId
       };
 
       const newImage = await storage.uploadGalleryImage(imageData);
