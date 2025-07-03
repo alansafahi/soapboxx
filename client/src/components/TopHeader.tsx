@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "@/hooks/useTheme";
@@ -193,22 +193,22 @@ export default function TopHeader() {
                 Churches
               </DropdownMenuItem>
             </Link>
-            <Link href="/discussions">
-              <DropdownMenuItem className="cursor-pointer">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Discussions
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/prayer">
-              <DropdownMenuItem className="cursor-pointer">
-                <Heart className="w-4 h-4 mr-2" />
-                Prayer Wall
-              </DropdownMenuItem>
-            </Link>
             <Link href="/events">
               <DropdownMenuItem className="cursor-pointer">
                 <Calendar className="w-4 h-4 mr-2" />
                 Events
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/sms-giving">
+              <DropdownMenuItem className="cursor-pointer">
+                <DollarSign className="w-4 h-4 mr-2" />
+                SMS Giving
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/discussions">
+              <DropdownMenuItem className="cursor-pointer">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Discussions
               </DropdownMenuItem>
             </Link>
             
@@ -224,6 +224,18 @@ export default function TopHeader() {
                 Today's Reading
               </DropdownMenuItem>
             </Link>
+            <Link href="/prayer-wall">
+              <DropdownMenuItem className="cursor-pointer">
+                <Heart className="w-4 h-4 mr-2" />
+                Prayer Wall
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/soap">
+              <DropdownMenuItem className="cursor-pointer">
+                <PenTool className="w-4 h-4 mr-2" />
+                S.O.A.P. Journal
+              </DropdownMenuItem>
+            </Link>
             <Link href="/audio-bible">
               <DropdownMenuItem className="cursor-pointer">
                 <Play className="w-4 h-4 mr-2" />
@@ -234,12 +246,6 @@ export default function TopHeader() {
               <DropdownMenuItem className="cursor-pointer">
                 <Mic className="w-4 h-4 mr-2" />
                 Audio Routines
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/soap-journal">
-              <DropdownMenuItem className="cursor-pointer">
-                <BookOpen className="w-4 h-4 mr-2" />
-                S.O.A.P. Journal
               </DropdownMenuItem>
             </Link>
             
@@ -255,6 +261,12 @@ export default function TopHeader() {
                 Video Library
               </DropdownMenuItem>
             </Link>
+            <Link href="/image-gallery">
+              <DropdownMenuItem className="cursor-pointer">
+                <Image className="w-4 h-4 mr-2" />
+                Image Gallery
+              </DropdownMenuItem>
+            </Link>
             
             {/* Admin Portal Section - Only show for admin users */}
             {user && ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'].includes((user as any)?.role) && (
@@ -267,12 +279,6 @@ export default function TopHeader() {
                   <DropdownMenuItem className="cursor-pointer">
                     <Users className="w-4 h-4 mr-2" />
                     Member Directory
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/sms-giving">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    SMS Giving
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/donation-analytics">
@@ -291,12 +297,6 @@ export default function TopHeader() {
                   <DropdownMenuItem className="cursor-pointer">
                     <PenTool className="w-4 h-4 mr-2" />
                     Sermon Studio
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/content-distribution">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Content Distribution
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/engagement-analytics">
