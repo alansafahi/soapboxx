@@ -17,20 +17,18 @@ interface GalleryImage {
   id: number;
   title: string;
   description?: string;
-  imageUrl: string;
-  category: string;
+  url: string;
+  collection: string;
   tags: string[];
-  uploadedBy: {
-    id: string;
-    name: string;
-    profileImageUrl?: string;
-  };
+  uploadedBy: string;
+  uploaderName: string;
+  uploaderAvatar?: string;
   createdAt: string;
-  likes: number;
-  comments: number;
+  likesCount?: number;
+  commentsCount?: number;
   isLiked: boolean;
   isSaved: boolean;
-  visibility: 'public' | 'church' | 'private';
+  churchId?: number;
 }
 
 const categories = [
@@ -62,11 +60,11 @@ export default function ImageGallery() {
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ['/api/gallery/images', selectedCategory, sortBy, searchQuery],
-    queryFn: () => apiRequest('GET', `/api/gallery/images?category=${selectedCategory}&sort=${sortBy}&search=${encodeURIComponent(searchQuery)}`),
+    queryFn: () => apiRequest('GET', `/api/gallery/images?collection=${selectedCategory}&limit=20&offset=0`),
   });
 
   const likeMutation = useMutation({
-    mutationFn: (imageId: number) => apiRequest('POST', '/api/gallery/like', { imageId }),
+    mutationFn: (imageId: number) => apiRequest('POST', `/api/gallery/images/${imageId}/like`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery/images'] });
       toast({ title: 'Image liked!' });
@@ -74,7 +72,7 @@ export default function ImageGallery() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: (imageId: number) => apiRequest('POST', '/api/gallery/save', { imageId }),
+    mutationFn: (imageId: number) => apiRequest('POST', `/api/gallery/images/${imageId}/save`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery/images'] });
       toast({ title: 'Image saved to favorites!' });
@@ -82,12 +80,31 @@ export default function ImageGallery() {
   });
 
   const uploadMutation = useMutation({
-    mutationFn: (formData: FormData) => apiRequest('POST', '/api/gallery/upload', formData),
+    mutationFn: (formData: FormData) => {
+      // Convert form data to proper format for backend
+      const data = new FormData();
+      data.append('image', formData.get('image') as File);
+      data.append('title', formData.get('title') as string);
+      data.append('description', formData.get('description') as string);
+      data.append('collection', formData.get('category') as string);
+      data.append('tags', JSON.stringify((formData.get('tags') as string).split(',').map(t => t.trim()).filter(t => t)));
+      return fetch('/api/gallery/upload', {
+        method: 'POST',
+        body: data
+      }).then(res => res.json());
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery/images'] });
       setShowUploadDialog(false);
       toast({ title: 'Image uploaded successfully!' });
     },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Upload failed',
+        description: error.message || 'Failed to upload image',
+        variant: 'destructive'
+      });
+    }
   });
 
   const handleLike = (imageId: number, e: React.MouseEvent) => {
@@ -306,7 +323,7 @@ export default function ImageGallery() {
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={image.imageUrl}
+                    src={image.url}
                     alt={image.title}
                     className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
                     style={{ height: viewMode === 'grid' ? '200px' : 'auto' }}
@@ -344,13 +361,12 @@ export default function ImageGallery() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Avatar className="w-6 h-6">
-                        <AvatarImage src={image.uploadedBy.profileImageUrl} />
                         <AvatarFallback className="text-xs">
-                          {image.uploadedBy.name.charAt(0)}
+                          {image.uploadedBy?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-xs text-gray-600 dark:text-gray-400">
-                        {image.uploadedBy.name}
+                        {image.uploadedBy || 'Anonymous'}
                       </span>
                     </div>
                     <span className="text-xs text-gray-500">
@@ -361,15 +377,15 @@ export default function ImageGallery() {
                     <div className="flex items-center gap-4">
                       <span className="flex items-center gap-1">
                         <Heart className="w-4 h-4" />
-                        {image.likes}
+                        {image.likesCount || 0}
                       </span>
                       <span className="flex items-center gap-1">
                         <MessageCircle className="w-4 h-4" />
-                        {image.comments}
+                        {image.commentsCount || 0}
                       </span>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {categories.find(c => c.value === image.category)?.icon} {image.category}
+                      {categories.find(c => c.value === image.collection)?.icon} {image.collection}
                     </Badge>
                   </div>
                   {image.tags.length > 0 && (
@@ -399,7 +415,7 @@ export default function ImageGallery() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="relative">
                   <img
-                    src={selectedImage.imageUrl}
+                    src={selectedImage.url}
                     alt={selectedImage.title}
                     className="w-full h-auto rounded-lg"
                   />
@@ -418,14 +434,14 @@ export default function ImageGallery() {
 
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={selectedImage.uploadedBy.profileImageUrl} />
+                      <AvatarImage src={selectedImage.uploaderAvatar} />
                       <AvatarFallback>
-                        {selectedImage.uploadedBy.name.charAt(0)}
+                        {selectedImage.uploaderName?.charAt(0) || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">
-                        {selectedImage.uploadedBy.name}
+                        {selectedImage.uploaderName || 'Unknown User'}
                       </p>
                       <p className="text-sm text-gray-500">
                         {new Date(selectedImage.createdAt).toLocaleDateString('en-US', {
@@ -444,7 +460,7 @@ export default function ImageGallery() {
                       className="flex-1"
                     >
                       <Heart className={`w-4 h-4 mr-2 ${selectedImage.isLiked ? 'fill-current' : ''}`} />
-                      {selectedImage.likes} Likes
+                      {selectedImage.likesCount || 0} Likes
                     </Button>
                     <Button
                       variant="outline"
