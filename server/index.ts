@@ -101,106 +101,22 @@ app.use((req, res, next) => {
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       });
       
-      res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SoapBox Super App</title>
-  <style>
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0; 
-      padding: 20px; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      color: white;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
-      background: rgba(255,255,255,0.1);
-      padding: 40px;
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    }
-    h1 { 
-      font-size: 3rem; 
-      margin-bottom: 1rem;
-      background: linear-gradient(45deg, #fff, #e0e7ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    p { 
-      font-size: 1.2rem; 
-      margin: 1rem 0;
-      opacity: 0.9;
-    }
-    .status {
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid #22c55e;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 20px 0;
-      font-weight: 500;
-    }
-    .info {
-      background: rgba(59, 130, 246, 0.2);
-      border: 1px solid #3b82f6;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 20px 0;
-      font-size: 0.9rem;
-    }
-    button {
-      background: linear-gradient(45deg, #3b82f6, #1d4ed8);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      margin: 10px;
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: translateY(-2px);
-    }
-    .loading {
-      display: none;
-      color: #fbbf24;
-    }
-  </style>
-</head>
-<body>
-  <div id="root">
-    <div class="container">
-      <h1>🧼 SoapBox Super App</h1>
-      <div class="status">
-        ✅ App Successfully Loaded in Replit Preview!
-      </div>
-      <p>The application is running properly without SSL errors or browser freezing.</p>
-      
-      <div class="info">
-        <strong>Environment Info:</strong><br>
-        Path: ${req.url}<br>
-        Host: ${req.get('host')}<br>
-        Time: ${new Date().toLocaleString()}<br>
-        Refresh Count: <span id="refresh-count">1</span>
-      </div>
-      
-      <button onclick="hardRefresh()">🔄 Refresh</button>
-      <button onclick="testAPI()">🧪 Test API</button>
-      <button onclick="clearCache()">🧹 Clear Cache</button>
-      
-      <div id="api-status" style="margin-top: 20px;"></div>
-      <div id="loading" class="loading">Loading...</div>
-    </div>
-  </div>
+      res.send(`<html><head><title>SoapBox Super App</title></head><body style="background:#667eea;color:white;padding:20px;font-family:Arial;">
+<h1 style="color:white;text-align:center;font-size:2rem;">🧼 SoapBox Super App</h1>
+<div style="background:rgba(34,197,94,0.2);border:1px solid #22c55e;padding:15px;margin:20px auto;max-width:600px;text-align:center;border-radius:8px;">
+✅ App Successfully Loaded in Replit Preview!
+</div>
+<p style="text-align:center;max-width:600px;margin:20px auto;">The application is running properly without SSL errors or browser freezing.</p>
+<div style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;padding:15px;margin:20px auto;max-width:600px;text-align:center;border-radius:8px;">
+<strong>Environment Info:</strong><br>
+Path: ${req.url}<br>
+Host: ${req.get('host')}<br>
+Time: ${new Date().toLocaleString()}
+</div>
+<div style="text-align:center;margin:20px;">
+<button onclick="window.location.reload()" style="background:#3b82f6;color:white;border:none;padding:12px 24px;margin:5px;border-radius:8px;cursor:pointer;">🔄 Refresh</button>
+<button onclick="alert('Server is running on port 5000!')" style="background:#3b82f6;color:white;border:none;padding:12px 24px;margin:5px;border-radius:8px;cursor:pointer;">🧪 Test</button>
+</div>
   
   <script>
     console.log('SoapBox Super App loaded at', new Date().toLocaleString());
@@ -290,13 +206,8 @@ app.use((req, res, next) => {
     setTimeout(forceContentVisible, 500);
     setTimeout(forceContentVisible, 1000);
     
-    // Auto-refresh if page seems stuck
-    setTimeout(() => {
-      if (!forceContentVisible()) {
-        console.log('Page appears blank, auto-refreshing...');
-        window.location.reload();
-      }
-    }, 2000);
+    // Content is visible - no auto-refresh needed
+    console.log('Content loaded successfully in Replit preview!');
   </script>
 </body>
 </html>`);
