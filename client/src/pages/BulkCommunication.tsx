@@ -71,7 +71,12 @@ export default function BulkCommunication() {
     templatesError, 
     templatesLoading, 
     showTemplateCreator, 
-    isArray: Array.isArray(templates) 
+    isArray: Array.isArray(templates),
+    hasAnnouncements: templates?.announcements?.length,
+    hasEmergencies: templates?.emergencies?.length,
+    hasPrayers: templates?.prayers?.length,
+    allTemplatesCount: templates && typeof templates === 'object' && templates.announcements ? 
+      [...templates.announcements, ...templates.emergencies, ...templates.prayers].length : 0
   });
 
   // Fetch existing messages
@@ -590,11 +595,25 @@ export default function BulkCommunication() {
                       <Clock className="w-6 h-6 mx-auto text-gray-400 mb-2" />
                       <p className="text-sm text-gray-500">Loading templates...</p>
                     </div>
-                  ) : Array.isArray(templates) && templates.length > 0 ? (
-                    templates.map((template: any) => (
+                  ) : templates && typeof templates === 'object' && templates.announcements ? (
+                    // Show all templates from all categories
+                    [
+                      ...templates.announcements,
+                      ...templates.emergencies, 
+                      ...templates.prayers
+                    ].map((template: any) => (
                       <div key={template.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <h4 className="font-medium text-sm">{template.name}</h4>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{template.subject}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-sm flex items-center gap-2">
+                              {template.name}
+                              {template.isCustom && (
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Custom</span>
+                              )}
+                            </h4>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{template.subject}</p>
+                          </div>
+                        </div>
                         <Button 
                           variant="ghost" 
                           size="sm" 
