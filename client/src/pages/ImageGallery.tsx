@@ -88,10 +88,7 @@ export default function ImageGallery() {
       data.append('description', formData.get('description') as string);
       data.append('collection', formData.get('category') as string);
       data.append('tags', JSON.stringify((formData.get('tags') as string).split(',').map(t => t.trim()).filter(t => t)));
-      return fetch('/api/gallery/upload', {
-        method: 'POST',
-        body: data
-      }).then(res => res.json());
+      return apiRequest('POST', '/api/gallery/upload', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery/images'] });
