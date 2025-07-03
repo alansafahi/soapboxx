@@ -143,11 +143,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 
 ## Recent Changes
 - July 3, 2025: SERMON STUDIO DARK MODE TEXT VISIBILITY COMPLETELY FIXED - Successfully resolved all text visibility issues in dark mode including Scripture Reference labels and Continue button contrast
-  - SCRIPTURE REFERENCE LABEL FIXED: Changed from white/invisible text to dark:text-gray-300 for proper dark mode visibility
-  - ALL FORM LABELS UPDATED: Scripture Reference, Sermon Topic/Theme, Target Audience, and Sermon Length labels now have dark:text-gray-300 styling
+  - MAIN FORM LABELS CORRECTED: Scripture Reference (Optional), Sermon Topic/Theme, Target Audience, and Sermon Length labels now use dark blue (dark:text-blue-400) matching "Sermon Foundation" heading color
+  - STEP 2/4 OUTLINE LABELS FIXED: "Scripture References" and "Closing Prayer" labels in outline section now have proper dark mode styling (dark:text-gray-300 and dark:text-indigo-300)
   - CONTINUE BUTTON ENHANCED: Added bright white text (dark:text-white) with proper dark mode border and hover states for maximum contrast
   - PROGRESS TEXT VISIBILITY: Fixed "Sermon Creation Progress" text with dark mode styling for better readability
-  - COMPREHENSIVE DARK MODE SUPPORT: All text elements in Sermon Studio now properly visible in both light and dark themes
+  - USER CLARIFICATION ADDRESSED: Fixed the specific labels that appear in step 2/4 after clicking "Generate outline" between Call to Action and Closing Prayer sections
+  - COMPREHENSIVE DARK MODE SUPPORT: All text elements in Sermon Studio now properly visible in both light and dark themes with consistent color scheme
 - July 3, 2025: IMAGE GALLERY DUAL ACTION BUTTON SYSTEM COMPLETELY IMPLEMENTED - Successfully added both hover buttons and permanent action buttons for maximum user accessibility and interaction flexibility
   - DUAL BUTTON SYSTEM: Added both hover buttons on images AND always-visible action buttons at bottom of cards for optimal user experience
   - HOVER INTERACTION: Icon-only buttons (Like, Share, Copy) appear when hovering over images with semi-transparent background overlay

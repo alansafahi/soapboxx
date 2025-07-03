@@ -556,7 +556,7 @@ export default function SermonCreationStudio() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
                 Scripture Reference (Optional)
               </label>
               <Input
@@ -567,7 +567,7 @@ export default function SermonCreationStudio() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
                 Sermon Topic/Theme
               </label>
               <Input
@@ -581,7 +581,7 @@ export default function SermonCreationStudio() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
                 Target Audience
               </label>
               <select 
@@ -597,7 +597,7 @@ export default function SermonCreationStudio() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
                 Sermon Length
               </label>
               <select 
@@ -846,7 +846,7 @@ export default function SermonCreationStudio() {
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-2">Scripture References</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-300 mb-2">Scripture References</h4>
                     <div className="flex flex-wrap gap-2">
                       {currentOutline.scriptureReferences.map((ref, idx) => (
                         <Badge key={idx} variant="outline">{ref}</Badge>
@@ -856,7 +856,7 @@ export default function SermonCreationStudio() {
                   
                   {currentOutline.closingPrayer && (
                     <div className="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-400">
-                      <h4 className="font-semibold text-indigo-900 mb-2 flex items-center">
+                      <h4 className="font-semibold text-indigo-900 dark:text-indigo-300 mb-2 flex items-center">
                         <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
                         Closing Prayer
                       </h4>
