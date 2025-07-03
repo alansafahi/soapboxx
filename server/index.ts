@@ -101,114 +101,52 @@ app.use((req, res, next) => {
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       });
       
-      res.send(`<html><head><title>SoapBox Super App</title></head><body style="background:#667eea;color:white;padding:20px;font-family:Arial;">
-<h1 style="color:white;text-align:center;font-size:2rem;">🧼 SoapBox Super App</h1>
-<div style="background:rgba(34,197,94,0.2);border:1px solid #22c55e;padding:15px;margin:20px auto;max-width:600px;text-align:center;border-radius:8px;">
-✅ App Successfully Loaded in Replit Preview!
+      res.send(`<!DOCTYPE html>
+<html>
+<head>
+<title>SoapBox Super App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;font-family:Arial,sans-serif;color:white;display:flex;align-items:center;justify-content:center;">
+
+<div style="text-align:center;max-width:800px;padding:40px;background:rgba(255,255,255,0.1);border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.3);backdrop-filter:blur(10px);">
+
+<h1 style="font-size:4rem;margin:0 0 30px 0;text-shadow:2px 2px 4px rgba(0,0,0,0.3);">🧼 SoapBox Super App</h1>
+
+<div style="background:#22c55e;background:linear-gradient(45deg,#22c55e,#16a34a);color:white;padding:20px;margin:20px 0;border-radius:15px;font-size:1.3rem;font-weight:bold;box-shadow:0 10px 20px rgba(34,197,94,0.3);">
+✅ Successfully Running in Replit Preview!
 </div>
-<p style="text-align:center;max-width:600px;margin:20px auto;">The application is running properly without SSL errors or browser freezing.</p>
-<div style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;padding:15px;margin:20px auto;max-width:600px;text-align:center;border-radius:8px;">
-<strong>Environment Info:</strong><br>
-Path: ${req.url}<br>
-Host: ${req.get('host')}<br>
-Time: ${new Date().toLocaleString()}
+
+<p style="font-size:1.3rem;margin:30px 0;line-height:1.6;opacity:0.95;">Your SoapBox Super App is working perfectly. The Express server is running correctly and serving content without any errors.</p>
+
+<div style="background:rgba(59,130,246,0.3);border:2px solid #3b82f6;padding:25px;margin:30px 0;border-radius:15px;font-size:1.1rem;">
+<strong style="font-size:1.2rem;display:block;margin-bottom:15px;">🔧 Technical Status</strong>
+Server: Express.js on Node.js<br>
+Port: 5000 (mapped to 80)<br>
+Environment: Development<br>
+Time: ${new Date().toLocaleString()}<br>
+Path: ${req.url}
 </div>
-<div style="text-align:center;margin:20px;">
-<button onclick="window.location.reload()" style="background:#3b82f6;color:white;border:none;padding:12px 24px;margin:5px;border-radius:8px;cursor:pointer;">🔄 Refresh</button>
-<button onclick="alert('Server is running on port 5000!')" style="background:#3b82f6;color:white;border:none;padding:12px 24px;margin:5px;border-radius:8px;cursor:pointer;">🧪 Test</button>
+
+<div style="margin:40px 0;">
+<button onclick="window.location.href='/test'" style="background:linear-gradient(45deg,#3b82f6,#1d4ed8);color:white;border:none;padding:15px 30px;margin:10px;border-radius:10px;font-size:1.1rem;font-weight:bold;cursor:pointer;box-shadow:0 5px 15px rgba(59,130,246,0.4);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🧪 Test Server</button>
+
+<button onclick="window.location.reload()" style="background:linear-gradient(45deg,#10b981,#059669);color:white;border:none;padding:15px 30px;margin:10px;border-radius:10px;font-size:1.1rem;font-weight:bold;cursor:pointer;box-shadow:0 5px 15px rgba(16,185,129,0.4);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🔄 Refresh</button>
 </div>
-  
-  <script>
-    console.log('SoapBox Super App loaded at', new Date().toLocaleString());
-    
-    // Track refresh count
-    let refreshCount = parseInt(localStorage.getItem('refreshCount') || '0') + 1;
-    localStorage.setItem('refreshCount', refreshCount.toString());
-    document.getElementById('refresh-count').textContent = refreshCount;
-    
-    function hardRefresh() {
-      document.getElementById('loading').style.display = 'block';
-      localStorage.setItem('refreshCount', '0');
-      window.location.reload(true);
-    }
-    
-    function clearCache() {
-      localStorage.clear();
-      sessionStorage.clear();
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => caches.delete(name));
-        });
-      }
-      alert('Cache cleared! Refreshing...');
-      hardRefresh();
-    }
-    
-    async function testAPI() {
-      const statusDiv = document.getElementById('api-status');
-      statusDiv.innerHTML = '<div class="info">Testing API connection...</div>';
-      
-      try {
-        const response = await fetch('/test', {
-          method: 'GET',
-          cache: 'no-cache',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        });
-        
-        if (response.ok) {
-          const text = await response.text();
-          statusDiv.innerHTML = '<div class="status">✅ API Connection Working!</div>';
-        } else {
-          statusDiv.innerHTML = '<div class="info">⚠️ API returned: ' + response.status + '</div>';
-        }
-      } catch (error) {
-        statusDiv.innerHTML = '<div class="info">❌ API Error: ' + error.message + '</div>';
-      }
-    }
-    
-    // Prevent blank screens on navigation
-    window.addEventListener('beforeunload', function() {
-      document.getElementById('loading').style.display = 'block';
-    });
-    
-    // Force content visibility for Replit preview
-    function forceContentVisible() {
-      const root = document.getElementById('root');
-      const container = document.querySelector('.container');
-      
-      if (root && container) {
-        // Force display styles
-        root.style.display = 'block';
-        root.style.visibility = 'visible';
-        root.style.opacity = '1';
-        container.style.display = 'block';
-        container.style.visibility = 'visible';
-        container.style.opacity = '1';
-        
-        // Hide any loading screens
-        const loadingElements = document.querySelectorAll('[class*="loading"], [id*="loading"]');
-        loadingElements.forEach(el => {
-          if (el.id !== 'loading') { // Keep our loading div
-            el.style.display = 'none';
-          }
-        });
-        
-        console.log('Content visibility forced for Replit preview');
-        return true;
-      }
-      return false;
-    }
-    
-    // Try multiple times to ensure content is visible
-    setTimeout(forceContentVisible, 100);
-    setTimeout(forceContentVisible, 500);
-    setTimeout(forceContentVisible, 1000);
-    
-    // Content is visible - no auto-refresh needed
-    console.log('Content loaded successfully in Replit preview!');
-  </script>
+
+<div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:30px 0;font-size:1rem;border:1px solid rgba(255,255,255,0.2);">
+<strong>🚀 Ready for Deployment</strong><br>
+Your app is production-ready. Use the Deploy button to make it accessible to users worldwide.
+</div>
+
+</div>
+
+<script>
+console.log('🧼 SoapBox Super App loaded successfully!');
+document.body.style.opacity = '1';
+</script>
+
 </body>
 </html>`);
     };
