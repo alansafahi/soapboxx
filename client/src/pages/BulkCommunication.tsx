@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { 
@@ -23,7 +24,10 @@ import {
   Clock,
   Target,
   Megaphone,
-  Shield
+  Shield,
+  Edit,
+  Trash2,
+  MoreVertical
 } from 'lucide-react';
 
 export default function BulkCommunication() {
@@ -51,6 +55,7 @@ export default function BulkCommunication() {
   });
 
   const [showTemplateCreator, setShowTemplateCreator] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [newTemplate, setNewTemplate] = useState({
     name: '',
     subject: '',
@@ -72,11 +77,11 @@ export default function BulkCommunication() {
     templatesLoading, 
     showTemplateCreator, 
     isArray: Array.isArray(templates),
-    hasAnnouncements: templates?.announcements?.length,
-    hasEmergencies: templates?.emergencies?.length,
-    hasPrayers: templates?.prayers?.length,
-    allTemplatesCount: templates && typeof templates === 'object' && templates.announcements ? 
-      [...templates.announcements, ...templates.emergencies, ...templates.prayers].length : 0
+    hasAnnouncements: (templates as any)?.announcements?.length,
+    hasEmergencies: (templates as any)?.emergencies?.length,
+    hasPrayers: (templates as any)?.prayers?.length,
+    allTemplatesCount: templates && typeof templates === 'object' && (templates as any).announcements ? 
+      [...(templates as any).announcements, ...(templates as any).emergencies, ...(templates as any).prayers].length : 0
   });
 
   // Fetch existing messages
@@ -120,6 +125,46 @@ export default function BulkCommunication() {
     onError: (error: any) => {
       toast({
         title: "Failed to save template",
+        description: error.message || "Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Update template mutation
+  const updateTemplateMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('PUT', `/api/communications/templates/${data.id}`, data),
+    onSuccess: () => {
+      toast({
+        title: "Template updated successfully",
+        description: "Your template changes have been saved."
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
+      setEditingTemplate(null);
+      setNewTemplate({ name: '', subject: '', content: '', category: 'announcements' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to update template",
+        description: error.message || "Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Delete template mutation
+  const deleteTemplateMutation = useMutation({
+    mutationFn: (templateId: string) => apiRequest('DELETE', `/api/communications/templates/${templateId}`),
+    onSuccess: () => {
+      toast({
+        title: "Template deleted successfully",
+        description: "The template has been removed from your library."
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete template",
         description: error.message || "Please try again.",
         variant: "destructive"
       });
@@ -202,7 +247,34 @@ export default function BulkCommunication() {
       return;
     }
 
-    createTemplateMutation.mutate(newTemplate);
+    if (editingTemplate) {
+      updateTemplateMutation.mutate({ ...newTemplate, id: editingTemplate.id });
+    } else {
+      createTemplateMutation.mutate(newTemplate);
+    }
+  };
+
+  const handleEditTemplate = (template: any) => {
+    setEditingTemplate(template);
+    setNewTemplate({
+      name: template.name,
+      subject: template.subject,
+      content: template.content,
+      category: template.category || 'announcements'
+    });
+    setShowTemplateCreator(true);
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    if (confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+      deleteTemplateMutation.mutate(templateId);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTemplate(null);
+    setNewTemplate({ name: '', subject: '', content: '', category: 'announcements' });
+    setShowTemplateCreator(false);
   };
 
   const handleEmergencyBroadcast = () => {
@@ -514,7 +586,9 @@ export default function BulkCommunication() {
                 <CardContent className="space-y-3">
                   {showTemplateCreator && (
                     <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950 space-y-3">
-                      <h4 className="font-medium text-sm text-blue-800 dark:text-blue-200">Create New Template</h4>
+                      <h4 className="font-medium text-sm text-blue-800 dark:text-blue-200">
+                        {editingTemplate ? 'Edit Template' : 'Create New Template'}
+                      </h4>
                       
                       <div className="space-y-2">
                         <Label htmlFor="template-name">Template Name</Label>
@@ -565,25 +639,22 @@ export default function BulkCommunication() {
                         <Button 
                           size="sm" 
                           onClick={handleSaveTemplate}
-                          disabled={createTemplateMutation.isPending}
+                          disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}
                           className="flex-1"
                         >
-                          {createTemplateMutation.isPending ? (
+                          {(createTemplateMutation.isPending || updateTemplateMutation.isPending) ? (
                             <>
                               <Clock className="w-4 h-4 mr-2 animate-spin" />
-                              Saving...
+                              {editingTemplate ? 'Updating...' : 'Saving...'}
                             </>
                           ) : (
-                            'Save Template'
+                            editingTemplate ? 'Update Template' : 'Save Template'
                           )}
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => {
-                            setShowTemplateCreator(false);
-                            setNewTemplate({ name: '', subject: '', content: '', category: 'announcements' });
-                          }}
+                          onClick={handleCancelEdit}
                         >
                           Cancel
                         </Button>
@@ -595,12 +666,12 @@ export default function BulkCommunication() {
                       <Clock className="w-6 h-6 mx-auto text-gray-400 mb-2" />
                       <p className="text-sm text-gray-500">Loading templates...</p>
                     </div>
-                  ) : templates && typeof templates === 'object' && templates.announcements ? (
+                  ) : templates && typeof templates === 'object' && (templates as any).announcements ? (
                     // Show all templates from all categories
                     [
-                      ...templates.announcements,
-                      ...templates.emergencies, 
-                      ...templates.prayers
+                      ...(templates as any).announcements,
+                      ...(templates as any).emergencies, 
+                      ...(templates as any).prayers
                     ].map((template: any) => (
                       <div key={template.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                         <div className="flex items-center justify-between">
@@ -613,6 +684,28 @@ export default function BulkCommunication() {
                             </h4>
                             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{template.subject}</p>
                           </div>
+                          {template.isCustom && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEditTemplate(template)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Template
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeleteTemplate(template.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Template
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                         </div>
                         <Button 
                           variant="ghost" 

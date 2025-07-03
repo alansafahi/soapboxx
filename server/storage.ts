@@ -2149,6 +2149,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCommunicationTemplate(templateId: number): Promise<void> {
+    await db
+      .delete(communicationTemplates)
+      .where(eq(communicationTemplates.id, templateId));
+  }
+
+  async deleteCommunicationTemplate(templateId: number): Promise<void> {
     await db.delete(communicationTemplates).where(eq(communicationTemplates.id, templateId));
   }
 

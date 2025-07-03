@@ -7615,6 +7615,61 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Update communication template
+  app.put('/api/communications/templates/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const { id } = req.params;
+      const { name, category, subject, content } = req.body;
+      
+      if (!name || !category || !content) {
+        return res.status(400).json({ message: 'Name, category, and content are required' });
+      }
+
+      // Parse the template ID to get the actual database ID
+      const templateId = id.startsWith('custom_') ? parseInt(id.replace('custom_', '')) : parseInt(id);
+      
+      const updates = {
+        name,
+        category,
+        subject: subject || '',
+        content,
+        type: category
+      };
+
+      const updatedTemplate = await storage.updateCommunicationTemplate(templateId, updates);
+      res.json(updatedTemplate);
+    } catch (error) {
+      console.error('Error updating template:', error);
+      res.status(500).json({ message: 'Failed to update template' });
+    }
+  });
+
+  // Delete communication template
+  app.delete('/api/communications/templates/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const { id } = req.params;
+      
+      // Parse the template ID to get the actual database ID
+      const templateId = id.startsWith('custom_') ? parseInt(id.replace('custom_', '')) : parseInt(id);
+      
+      await storage.deleteCommunicationTemplate(templateId);
+      res.json({ message: 'Template deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      res.status(500).json({ message: 'Failed to delete template' });
+    }
+  });
+
   // ====== MEMBER DIRECTORY ENDPOINTS ======
 
   // Get members with optional church filtering
