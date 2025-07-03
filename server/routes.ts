@@ -9061,7 +9061,8 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(imagesWithInteractions);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch gallery images' });
+      console.error('Gallery images fetch error:', error);
+      res.status(500).json({ message: 'Failed to fetch gallery images', error: error.message });
     }
   });
 
@@ -9124,7 +9125,8 @@ Please provide suggestions for the missing or incomplete sections.`
       const newImage = await storage.uploadGalleryImage(imageData);
       res.json(newImage);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to upload image' });
+      console.error('Gallery image upload error:', error);
+      res.status(500).json({ message: 'Failed to upload image', error: error.message });
     }
   });
 
