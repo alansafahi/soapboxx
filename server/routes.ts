@@ -9037,7 +9037,6 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const user = await storage.getUser(userId);
-      console.log('User object:', user);
       
       // Get user's church associations directly from userChurches table
       const userChurchAssociations = await db
@@ -9048,18 +9047,15 @@ Please provide suggestions for the missing or incomplete sections.`
           eq(userChurches.isActive, true)
         ));
       
-      console.log('User church associations:', userChurchAssociations);
       
       // If user has no church associations, show no images for security
       if (!userChurchAssociations || userChurchAssociations.length === 0) {
-        console.log('User has no church associations - returning empty gallery for security');
         return res.json([]);
       }
       
       // Use the first active church association
       const primaryChurch = userChurchAssociations[0];
       const churchId = primaryChurch?.churchId;
-      console.log('Using churchId from user association:', churchId);
       
       const { collection, tags, uploadedBy, limit = 20, offset = 0 } = req.query;
       
@@ -9071,10 +9067,8 @@ Please provide suggestions for the missing or incomplete sections.`
         offset: parseInt(offset as string)
       };
 
-      console.log('Fetching gallery images for churchId:', churchId, 'with filters:', filters);
       
       const images = await storage.getGalleryImages(churchId, filters);
-      console.log('Found images:', images.length, 'images');
       
       // Add user-specific interaction data
       const imagesWithInteractions = await Promise.all(
@@ -9085,7 +9079,6 @@ Please provide suggestions for the missing or incomplete sections.`
         }))
       );
 
-      console.log('Returning images with interactions:', imagesWithInteractions.length);
       res.json(imagesWithInteractions);
     } catch (error) {
       console.error('Gallery images fetch error:', error);

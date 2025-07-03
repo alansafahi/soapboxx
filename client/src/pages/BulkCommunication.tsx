@@ -71,7 +71,6 @@ export default function BulkCommunication() {
   });
 
   // Debug logging for templates
-  console.log('Templates debug:', { 
     templates, 
     templatesError, 
     templatesLoading, 
@@ -573,7 +572,6 @@ export default function BulkCommunication() {
                       variant="outline" 
                       size="sm"
                       onClick={() => {
-                        console.log('Create Template button clicked, current state:', showTemplateCreator);
                         setShowTemplateCreator(!showTemplateCreator);
                       }}
                       className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 border-blue-600 font-medium shadow-lg"

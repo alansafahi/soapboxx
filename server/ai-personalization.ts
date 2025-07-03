@@ -129,7 +129,6 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
       // Validate mood input
       const moodValidation = contentSafety.validateTextContent(mood);
       if (!moodValidation.isAllowed) {
-        console.warn(`Invalid mood content blocked: ${moodValidation.reason}`);
         return this.generateFallbackMoodContent(mood, moodScore);
       }
 
@@ -137,7 +136,6 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
       if (notes) {
         const notesValidation = contentSafety.validateReflectionContent(notes);
         if (!notesValidation.isAllowed) {
-          console.warn(`Invalid notes content blocked: ${notesValidation.reason}`);
           notes = undefined; // Remove problematic notes
         }
       }

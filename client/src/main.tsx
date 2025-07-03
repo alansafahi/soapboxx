@@ -59,7 +59,6 @@ window.addEventListener('unhandledrejection', (event) => {
   }
   
   // Log legitimate errors only
-  console.warn('Unhandled rejection:', event.reason);
 });
 
 // Global error handler for runtime plugin conflicts
@@ -78,13 +77,11 @@ const originalFetch = window.fetch;
 window.fetch = function(...args) {
   // Validate first argument is a string or Request object
   if (args[0] && typeof args[0] !== 'string' && !(args[0] instanceof Request)) {
-    console.warn('Invalid fetch URL type:', typeof args[0], args[0]);
     return Promise.reject(new Error('Invalid fetch URL'));
   }
   
   // Validate second argument if present
   if (args[1] && args[1].method && typeof args[1].method !== 'string') {
-    console.warn('Invalid fetch method type:', typeof args[1].method, args[1].method);
     args[1] = { ...args[1], method: 'POST' };
   }
   

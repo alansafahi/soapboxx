@@ -153,7 +153,6 @@ export default function ImageGallery() {
         throw new Error('Failed to share to social feed');
       }
     } catch (error) {
-      console.log('Share to social feed failed:', error);
       toast({ 
         title: 'Failed to share to social feed',
         variant: 'destructive'

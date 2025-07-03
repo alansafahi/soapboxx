@@ -68,7 +68,6 @@ function parseReference(reference: string): { book: string; chapter: number; ver
   // Handle ranges like "Matthew 11:28-30" 
   const match = reference.match(/^(\d?\s*[A-Za-z\s]+)\s+(\d+):(.+)$/);
   if (!match) {
-    console.warn(`Could not parse reference: ${reference}`);
     return { book: reference, chapter: 1, verse: '1' };
   }
   
@@ -115,7 +114,6 @@ async function fetchVerseFromAPI(reference: string, translation: string): Promis
     const verses = data?.data?.verses;
     
     if (!verses || verses.length === 0) {
-      console.warn(`No verses found for ${reference} in ${translation}`);
       return null;
     }
 
@@ -155,7 +153,6 @@ async function saveVerse(reference: string, translation: string, apiResult: ApiV
     const cleanText = cleanVerseText(apiResult.content);
     
     if (!cleanText || cleanText.length < 5) {
-      console.warn(`Skipping verse with insufficient content: ${reference}`);
       return false;
     }
 

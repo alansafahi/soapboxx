@@ -510,6 +510,7 @@ export default function EnhancedAudioPlayer({
       };
       
       utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', {
           error: event.error,
           utterance: {
             text: utterance.text.substring(0, 50) + '...',
@@ -519,6 +520,7 @@ export default function EnhancedAudioPlayer({
             volume: utterance.volume
           }
         });
+      };
         
         stopProgressTracking();
         
@@ -559,7 +561,6 @@ export default function EnhancedAudioPlayer({
       
       utteranceRef.current = utterance;
       speechSynthesis.speak(utterance);
-    } else {
     }
   };
 
@@ -831,3 +832,5 @@ export default function EnhancedAudioPlayer({
     </Card>
   );
 }
+
+export default EnhancedAudioPlayer;

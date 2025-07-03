@@ -64,9 +64,7 @@ function ContactsPage() {
     mutationFn: async (data: { email: string; message?: string }) => {
       try {
         // Add debugging for API request parameters
-        console.log('Sending invitation with data:', data);
         const response = await apiRequest("POST", "/api/invitations", data);
-        console.log('Invitation response:', response);
         return response;
       } catch (error) {
         console.error('Invitation error:', error);
