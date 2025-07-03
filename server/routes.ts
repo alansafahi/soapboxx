@@ -9102,6 +9102,11 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(401).json({ message: 'Authentication required' });
       }
 
+      console.log('Upload request received:');
+      console.log('Body:', req.body);
+      console.log('File:', req.file);
+      console.log('Headers:', req.headers);
+
       if (!req.file) {
         return res.status(400).json({ message: 'No image file provided' });
       }
