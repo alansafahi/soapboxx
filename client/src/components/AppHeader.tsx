@@ -70,47 +70,54 @@ export default function AppHeader() {
 
   const navigationGroups: NavigationGroup[] = [
     {
-      label: "Community",
+      label: "HOME",
       items: [
         { label: "Home", href: "/", icon: Home },
-        { label: "Churches", href: "/churches", icon: Users },
-        { label: "Events", href: "/events", icon: Calendar },
-        { label: "Messages", href: "/messages", icon: MessageSquare },
-        { label: "Prayer Wall", href: "/prayer", icon: Heart },
-      ],
+      ]
     },
     {
-      label: "Spiritual Tools",
+      label: "COMMUNITY",
+      items: [
+        { label: "Messages", href: "/messages", icon: Mail },
+        { label: "Churches", href: "/churches", icon: Users },
+        { label: "Events", href: "/events", icon: Calendar },
+        { label: "Discussions", href: "/discussions", icon: MessageSquare },
+        { label: "SMS Giving", href: "/sms-giving", icon: DollarSign },
+      ]
+    },
+    {
+      label: "SPIRITUAL TOOLS",
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
+        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
-      ],
+      ]
     },
     {
-      label: "Media Contents",
+      label: "ADMIN PORTAL",
       items: [
-        { label: "Video Library", href: "/video-library", icon: Video },
-      ],
+        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+      ]
     },
     {
-      label: "Giving & Donations",
+      label: "SOAPBOX PORTAL",
       items: [
-        { label: "Give Now", href: "/donation-demo", icon: DollarSign },
-      ],
+        { label: "Church Management", href: "/admin", icon: BarChart3, roles: ['soapbox_owner'] },
+      ]
     },
     {
-      label: "Admin Portal",
+      label: "ACCOUNT",
       items: [
-        { label: "Admin Dashboard", href: "/admin", icon: BarChart3, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Bulk Communication", href: "/communications", icon: Megaphone, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Content Distribution Hub", href: "/content-distribution", icon: Share2, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-        { label: "AI Content Showcase", href: "/pastoral-demo", icon: BarChart3, roles: ["admin", "church_admin", "system_admin", "super_admin", "pastor", "lead_pastor"] },
-      ],
-    },
+        { label: "Profile", href: "/profile", icon: User },
+        { label: "Settings", href: "/settings", icon: Settings },
+      ]
+    }
   ];
 
   // Filter navigation items based on current active role
