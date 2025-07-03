@@ -70,14 +70,9 @@ export default function AppHeader() {
 
   const navigationGroups: NavigationGroup[] = [
     {
-      label: "HOME",
-      items: [
-        { label: "Home", href: "/", icon: Home },
-      ]
-    },
-    {
       label: "COMMUNITY",
       items: [
+        { label: "Home", href: "/", icon: Home },
         { label: "Messages", href: "/messages", icon: Mail },
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
@@ -93,6 +88,13 @@ export default function AppHeader() {
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
+      ]
+    },
+    {
+      label: "MEDIA CONTENTS",
+      items: [
+        { label: "Video Library", href: "/video-library", icon: Video },
+        { label: "Image Gallery", href: "/image-gallery", icon: Video },
       ]
     },
     {
