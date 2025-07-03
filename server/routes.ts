@@ -9035,7 +9035,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(401).json({ message: 'Authentication required' });
       }
 
-      const user = await storage.getUserById(userId);
+      const user = await storage.getUser(userId);
       const churchId = user?.churchId;
       
       const { collection, tags, uploadedBy, limit = 20, offset = 0 } = req.query;
@@ -9107,7 +9107,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(400).json({ message: 'No image file provided' });
       }
 
-      const user = await storage.getUserById(userId);
+      const user = await storage.getUser(userId);
       const churchId = user?.churchId;
       
       const { title, description, collection, tags } = req.body;
@@ -9258,7 +9258,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(401).json({ message: 'Authentication required' });
       }
 
-      const user = await storage.getUserById(userId);
+      const user = await storage.getUser(userId);
       const churchId = user?.churchId;
       
       const collections = await storage.getGalleryCollections(churchId);
