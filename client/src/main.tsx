@@ -2,15 +2,6 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Clear any cached data that might be pointing to external domains
-try {
-  localStorage.clear();
-  sessionStorage.clear();
-  console.log("Cleared browser storage to fix external domain issues");
-} catch (e) {
-  console.log("Storage clear failed:", e);
-}
-
 // Handle unhandled promise rejections and runtime plugin conflicts
 window.addEventListener('unhandledrejection', (event) => {
   // Suppress runtime error plugin conflicts

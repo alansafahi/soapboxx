@@ -25,22 +25,6 @@ app.use(compression({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Simple test route to verify server is working
-app.get('/test', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-    <head><title>SoapBox Test</title></head>
-    <body>
-      <h1>Server is working!</h1>
-      <p>URL: ${req.url}</p>
-      <p>Host: ${req.get('host')}</p>
-      <p>Time: ${new Date().toISOString()}</p>
-    </body>
-    </html>
-  `);
-});
-
 
 
 app.use((req, res, next) => {
@@ -84,48 +68,11 @@ app.use((req, res, next) => {
     log(`Error ${status}: ${message}`);
   });
 
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
   if (app.get("env") === "development") {
-    try {
-      // Import and setup Vite middleware for development
-      const { createServer: createViteServer } = await import("vite");
-      const vite = await createViteServer({
-        server: { 
-          middlewareMode: true,
-          hmr: { port: 24678 }
-        },
-        appType: "spa",
-        base: "/",
-        optimizeDeps: {
-          include: ['react', 'react-dom', 'wouter']
-        }
-      });
-      
-      app.use(vite.ssrFixStacktrace);
-      app.use(vite.middlewares);
-      console.log("✅ Vite development server initialized");
-    } catch (error) {
-      console.error("❌ Vite initialization failed:", error);
-      // Fallback: serve the original React app via HTML
-      app.get('*', (req: any, res: any) => {
-        res.set({
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache'
-        });
-        res.send(`<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SoapBox Super App - Faith Community Platform</title>
-    <link rel="icon" type="image/jpeg" href="/attached_assets/SoapBox logo_1749686315479.jpeg">
-    <script type="module" crossorigin src="/src/main.tsx"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>`);
-      });
-    }
+    await setupVite(app, server);
   } else {
     serveStatic(app);
   }
@@ -134,14 +81,11 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  
-  server.listen(port, "0.0.0.0", () => {
-    log(`🚀 SoapBox Super App serving on 0.0.0.0:${port}`);
-    log(`✅ Original React application restored and ready!`);
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+    log(`serving on port ${port}`);
   });
-  
-  // Ensure server starts within 10 seconds
-  setTimeout(() => {
-    log(`⚡ Server startup completed - React app should be accessible`);
-  }, 10000);
 })();
