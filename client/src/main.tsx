@@ -117,24 +117,28 @@ try {
     </div>
   );
   
-  // After 2 seconds, render the full app
+  // After 1 second, render the full app
   setTimeout(() => {
     try {
+      console.log("About to render App component...");
       root.render(<App />);
       console.log("Full app rendered successfully");
     } catch (appError) {
       console.error("App component error:", appError);
+      console.error("Full error details:", appError);
       const errorMessage = appError instanceof Error ? appError.message : 'Unknown app error';
+      const errorStack = appError instanceof Error ? appError.stack : 'No stack trace';
       root.render(
         <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
           <h1>SoapBox Super App - Error</h1>
           <p style={{ color: 'red' }}>App component failed to load</p>
           <p style={{ fontSize: '12px', color: 'red' }}>Error: {errorMessage}</p>
+          <pre style={{ fontSize: '10px', color: 'red', textAlign: 'left', background: '#f8f8f8', padding: '10px', marginTop: '10px', borderRadius: '5px', overflow: 'auto', maxHeight: '200px' }}>{errorStack}</pre>
           <button onClick={() => window.location.reload()} style={{ marginTop: '10px', padding: '10px 20px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Refresh Page</button>
         </div>
       );
     }
-  }, 2000);
+  }, 1000);
   console.log("React app rendered successfully");
 } catch (error) {
   console.error("Failed to render React app:", error);
