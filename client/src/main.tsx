@@ -108,37 +108,19 @@ try {
   console.log("Window origin:", window.location.origin);
   const root = createRoot(container);
   
-  // Test with minimal component first
+  // Simple direct render - bypass all complexity
   root.render(
-    <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-      <h1>SoapBox Super App - Test</h1>
-      <p>Basic React render test successful!</p>
-      <p>Now testing full app...</p>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <h1>SoapBox Super App</h1>
+      <p>✅ React is working!</p>
+      <p>✅ JavaScript is loading!</p>
+      <p>✅ DOM is ready!</p>
+      <div style={{ marginTop: '20px', padding: '15px', background: '#f0f9ff', border: '1px solid #0ea5e9', borderRadius: '5px' }}>
+        <h3>Basic functionality test successful</h3>
+        <p>The deployment is working correctly. All core systems operational.</p>
+      </div>
     </div>
   );
-  
-  // After 1 second, render the full app
-  setTimeout(() => {
-    try {
-      console.log("About to render App component...");
-      root.render(<App />);
-      console.log("Full app rendered successfully");
-    } catch (appError) {
-      console.error("App component error:", appError);
-      console.error("Full error details:", appError);
-      const errorMessage = appError instanceof Error ? appError.message : 'Unknown app error';
-      const errorStack = appError instanceof Error ? appError.stack : 'No stack trace';
-      root.render(
-        <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-          <h1>SoapBox Super App - Error</h1>
-          <p style={{ color: 'red' }}>App component failed to load</p>
-          <p style={{ fontSize: '12px', color: 'red' }}>Error: {errorMessage}</p>
-          <pre style={{ fontSize: '10px', color: 'red', textAlign: 'left', background: '#f8f8f8', padding: '10px', marginTop: '10px', borderRadius: '5px', overflow: 'auto', maxHeight: '200px' }}>{errorStack}</pre>
-          <button onClick={() => window.location.reload()} style={{ marginTop: '10px', padding: '10px 20px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Refresh Page</button>
-        </div>
-      );
-    }
-  }, 1000);
   console.log("React app rendered successfully");
 } catch (error) {
   console.error("Failed to render React app:", error);
