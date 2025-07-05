@@ -106,8 +106,10 @@ export const getQueryFn: <T>(options: {
       url += `?q=${encodeURIComponent(searchTerm)}`;
     }
     
-    // Use relative URLs for same-origin requests
-    const fullUrl = url.startsWith('http') ? url : url;
+    // Force all API calls to use relative URLs (no external domains)
+    // This prevents SSL errors from hardcoded external URLs
+    const fullUrl = url.startsWith('/') ? url : `/${url}`;
+    console.log("API Request URL:", fullUrl);
     
     const res = await fetch(fullUrl, {
       credentials: "include",
