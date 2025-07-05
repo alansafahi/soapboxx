@@ -1,6 +1,15 @@
+console.log("main.tsx loading...");
 import { createRoot } from "react-dom/client";
+console.log("React imports loaded");
 import App from "./App";
+console.log("App import loaded");
 import "./index.css";
+console.log("CSS loaded");
+
+// Check if DOM is ready
+console.log("DOM readyState:", document.readyState);
+console.log("Root element exists:", !!document.getElementById("root"));
+console.log("Document body exists:", !!document.body);
 
 // Handle unhandled promise rejections and runtime plugin conflicts
 window.addEventListener('unhandledrejection', (event) => {
