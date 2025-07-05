@@ -98,7 +98,34 @@ try {
   console.log("Window location:", window.location.href);
   console.log("Window origin:", window.location.origin);
   const root = createRoot(container);
-  root.render(<App />);
+  
+  // Test with minimal component first
+  root.render(
+    <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
+      <h1>SoapBox Super App - Test</h1>
+      <p>Basic React render test successful!</p>
+      <p>Now testing full app...</p>
+    </div>
+  );
+  
+  // After 2 seconds, render the full app
+  setTimeout(() => {
+    try {
+      root.render(<App />);
+      console.log("Full app rendered successfully");
+    } catch (appError) {
+      console.error("App component error:", appError);
+      const errorMessage = appError instanceof Error ? appError.message : 'Unknown app error';
+      root.render(
+        <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
+          <h1>SoapBox Super App - Error</h1>
+          <p style={{ color: 'red' }}>App component failed to load</p>
+          <p style={{ fontSize: '12px', color: 'red' }}>Error: {errorMessage}</p>
+          <button onClick={() => window.location.reload()} style={{ marginTop: '10px', padding: '10px 20px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Refresh Page</button>
+        </div>
+      );
+    }
+  }, 2000);
   console.log("React app rendered successfully");
 } catch (error) {
   console.error("Failed to render React app:", error);
