@@ -9333,5 +9333,14 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Simple health check endpoint
+  app.get('/health', (req, res) => {
+    res.json({ 
+      status: 'OK', 
+      timestamp: new Date().toISOString(),
+      server: 'running'
+    });
+  });
+
   return httpServer;
 }

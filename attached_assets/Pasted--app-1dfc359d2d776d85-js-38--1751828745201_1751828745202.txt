@@ -1,0 +1,118 @@
+_app-1dfc359d2d776d85.js:38 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-1dfc359d2d776d85.js:38 [LaunchDarkly] LaunchDarkly client initialized
+/~:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+framework-c2be319115910dbc.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-c2be319115910dbc.js:1Understand this error
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'battery'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+framework-c2be319115910dbc.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-c2be319115910dbc.js:1Understand this warning
+dotdevproxy.pike.replit.dev/__reachability:1 
+            
+            
+           Failed to load resource: net::ERR_SSL_PROTOCOL_ERRORUnderstand this error
+dotdevproxy.pike.replit.dev/__reachability:1 
+            
+            
+           Failed to load resource: net::ERR_SSL_PROTOCOL_ERRORUnderstand this error
+_app-1dfc359d2d776d85.js:38 
+            
+            
+           GET https://dotdevproxy.pike.replit.dev/__reachability net::ERR_SSL_PROTOCOL_ERROR
+(anonymous) @ _app-1dfc359d2d776d85.js:38
+(anonymous) @ _app-1dfc359d2d776d85.js:6
+o @ _app-1dfc359d2d776d85.js:11
+(anonymous) @ _app-1dfc359d2d776d85.js:6
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+b @ _app-1dfc359d2d776d85.js:6
+(anonymous) @ _app-1dfc359d2d776d85.js:6
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1Understand this error
+_app-1dfc359d2d776d85.js:38 
+            
+            
+           GET https://dotdevproxy.picard.repl.co/__reachability net::ERR_SSL_PROTOCOL_ERROR
+(anonymous) @ _app-1dfc359d2d776d85.js:38
+(anonymous) @ _app-1dfc359d2d776d85.js:6
+o @ _app-1dfc359d2d776d85.js:11
+(anonymous) @ _app-1dfc359d2d776d85.js:6
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+b @ _app-1dfc359d2d776d85.js:6
+(anonymous) @ _app-1dfc359d2d776d85.js:6
+(anonymous) @ main-b1d98e5b70c3078c.js:1
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+Promise.then
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+Promise.then
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+Promise.then
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+Promise.then
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+Promise.then
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+Promise.then
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1
+Promise.then
+n @ main-b1d98e5b70c3078c.js:1
+u @ main-b1d98e5b70c3078c.js:1Understand this error
+_app-1dfc359d2d776d85.js:38 
+            
+            
+           GET https://dotdevproxy.picard.repl.co/__reachability net::ERR_SSL_PROTOCOL_ERROR
