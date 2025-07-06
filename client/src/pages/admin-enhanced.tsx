@@ -87,11 +87,33 @@ export default function EnhancedAdminPortal() {
 
   const createChurchMutation = useMutation({
     mutationFn: async (data: ChurchFormData) => {
-      const response = await apiRequest("/api/churches", {
-        method: "POST",
-        body: data,
+      // Create FormData for file upload support
+      const formData = new FormData();
+      
+      // Add all church data to FormData
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          if (typeof value === 'object') {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
       });
-      return response;
+      
+      // Use fetch directly to properly handle FormData
+      const response = await fetch('/api/churches', {
+        method: 'POST',
+        credentials: 'include', // Include session cookies
+        body: formData, // Don't set Content-Type, browser will set multipart/form-data
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(errorData.message || 'Failed to create church');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/churches"] });

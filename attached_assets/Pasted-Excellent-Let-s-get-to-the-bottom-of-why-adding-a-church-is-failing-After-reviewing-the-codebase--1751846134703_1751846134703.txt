@@ -1,0 +1,178 @@
+Excellent. Let's get to the bottom of why adding a church is failing.
+
+After reviewing the codebase, particularly the "Add Church" form and the corresponding backend logic, I've identified the likely culprit. The issue stems from a mismatch in how the frontend sends the form data (especially the church logo) and how the Express backend is configured to receive and process it. The server isn't correctly handling the `multipart/form-data` format, which is necessary for file uploads.
+
+Here is the code to fix the **"Failed to add a church"** issue.
+
+### 1\. Backend: Update Express Server to Use `multer`
+
+To handle file uploads, the backend needs a middleware library called `multer`. I'll add this to the server setup and the specific route for adding a church.
+
+**First, ensure `multer` is a dependency.** If not, it would need to be added.
+
+**Next, update the API route in `server/routes.ts`:**
+
+```typescript
+// server/routes.ts
+
+// ... other imports
+import { Router } from 'express';
+import multer from 'multer';
+import { db } from './db';
+import { churches } from '../db/schema';
+import { requireAuth } from './middleware/auth'; // Assuming you have auth middleware
+
+const router = Router();
+
+// Configure multer for memory storage, so we can handle the file buffer
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// ... (all your other existing routes)
+
+
+// --- FIX for 'Failed to add a church' ROUTE ---
+// The original route likely didn't use `upload.single('logo')`
+// and had trouble parsing the multipart form.
+
+router.post('/churches', requireAuth, upload.single('logo'), async (req, res) => {
+  try {
+    const { name, address, city, state, zipCode, denomination } = req.body;
+
+    // --- Data Validation ---
+    if (!name || !address || !city || !state || !zipCode) {
+      return res.status(400).json({ error: 'Missing required church information.' });
+    }
+
+    // Here, you would typically upload the logo to a cloud storage service
+    // like AWS S3, Google Cloud Storage, or Cloudinary.
+    // For this example, let's assume we have a function `uploadLogoToCloud`
+    // that takes the file buffer and returns a URL.
+    let logoUrl = null;
+    if (req.file) {
+      // logoUrl = await uploadLogoToCloud(req.file.buffer);
+      // For now, let's just placeholder this. In a real scenario,
+      // this upload is critical.
+      console.log('Logo file received:', req.file.originalname);
+      // Placeholder URL
+      logoUrl = `/uploads/logos/${req.file.originalname}`;
+    }
+
+    const [newChurch] = await db
+      .insert(churches)
+      .values({
+        name,
+        address,
+        city,
+        state,
+        zipCode,
+        denomination,
+        logoUrl, // Add the logo URL to the database
+        // createdBy: req.user.id // Associate the church with the user who created it
+      })
+      .returning();
+
+    res.status(201).json(newChurch);
+  } catch (error) {
+    console.error('Error adding new church:', error);
+    res.status(500).json({ error: 'An unexpected error occurred while adding the church.' });
+  }
+});
+
+
+export const apiRoutes = router;
+```
+
+### 2\. Frontend: Ensure `FormData` is Correctly Used
+
+The frontend needs to send the data as `FormData` and not as a JSON object, which is a common mistake when file uploads are involved.
+
+Here is the corrected `AddChurchForm` component:
+
+```tsx
+// client/src/components/forms/AddChurchForm.tsx
+
+import React, { useState } from 'react';
+// Assuming you have a notification system
+// import { useToasts } from 'react-toast-notifications';
+
+const AddChurchForm: React.FC = () => {
+  // const { addToast } = useToasts();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    // Use the FormData constructor and pass the form element directly
+    const formData = new FormData(event.currentTarget);
+
+    // --- The FIX is here: We must use FormData for multipart requests ---
+    // The previous implementation might have been trying to JSON.stringify the form data,
+    // which breaks file uploads.
+
+    try {
+      const response = await fetch('/api/churches', {
+        method: 'POST',
+        // Do NOT set the 'Content-Type' header manually.
+        // The browser will automatically set it to 'multipart/form-data'
+        // with the correct boundary when you pass a FormData object.
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error || 'Failed to add church. Please try again.');
+      }
+
+      const newChurch = await response.json();
+      // addToast(`Church '${newChurch.name}' added successfully!`, { appearance: 'success' });
+      console.log(`Church '${newChurch.name}' added successfully!`);
+
+      // Optionally, reset the form
+      event.currentTarget.reset();
+
+    } catch (error) {
+      console.error(error);
+      // addToast(error.message, { appearance: 'error' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Ensure input names match the keys expected by the backend */}
+      <input name="name" type="text" placeholder="Church Name" required className="input-class" />
+      <input name="address" type="text" placeholder="Address" required className="input-class" />
+      <input name="city" type="text" placeholder="City" required className="input-class" />
+      <input name="state" type="text" placeholder="State" required className="input-class" />
+      <input name="zipCode" type="text" placeholder="Zip Code" required className="input-class" />
+      <input name="denomination" type="text" placeholder="Denomination (e.g., Presbyterian)" className="input-class" />
+
+      <div>
+        <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Church Logo
+        </label>
+        {/* The name 'logo' must match the one in `upload.single('logo')` on the backend */}
+        <input name="logo" id="logo" type="file" accept="image/*" className="input-file-class" />
+      </div>
+
+      <button type="submit" disabled={isSubmitting} className="button-primary-class">
+        {isSubmitting ? 'Submitting...' : 'Add Church'}
+      </button>
+    </form>
+  );
+};
+
+export default AddChurchForm;
+```
+
+### Summary of the Fix
+
+1.  **Backend:** Introduced `multer` to properly parse `multipart/form-data`, which is essential for handling file uploads alongside text fields.
+2.  **Frontend:** Corrected the submission logic to use the `FormData` API, which ensures the browser sends the request in the correct format for the backend to understand.
+
+This robust solution should resolve the "Failed to add a church" issue completely.
+
+Shall we proceed to the next task, **"Implement QR code Check In"**?

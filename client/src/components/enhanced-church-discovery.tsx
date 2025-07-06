@@ -270,11 +270,38 @@ export default function EnhancedChurchDiscovery() {
 
   const addChurchMutation = useMutation({
     mutationFn: async (churchData: typeof newChurchData) => {
-      const response = await apiRequest('/api/churches', {
-        method: 'POST',
-        body: churchData, // apiRequest already handles JSON.stringify
+      // Create FormData for file upload support
+      const formData = new FormData();
+      
+      // Add all church data to FormData
+      Object.entries(churchData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          if (typeof value === 'object') {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
       });
-      return response;
+      
+      // Add logo file if selected
+      if (logoFile) {
+        formData.append('logo', logoFile);
+      }
+      
+      // Use fetch directly to properly handle FormData
+      const response = await fetch('/api/churches', {
+        method: 'POST',
+        credentials: 'include', // Include session cookies
+        body: formData, // Don't set Content-Type, browser will set multipart/form-data
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(errorData.message || 'Failed to add church');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({

@@ -5190,8 +5190,8 @@ Return JSON with this exact structure:
     }
   });
 
-  // Create new church endpoint
-  app.post('/api/churches', isAuthenticated, async (req: any, res) => {
+  // Create new church endpoint with file upload support
+  app.post('/api/churches', isAuthenticated, upload.single('logo'), async (req: any, res) => {
     try {
       const userId = req.session.userId;
       if (!userId) {
@@ -5209,11 +5209,18 @@ Return JSON with this exact structure:
         phone,
         email,
         website,
-        logoUrl,
         size,
         hoursOfOperation,
         socialMedia
       } = req.body;
+
+      // Handle logo file upload
+      let logoUrl = null;
+      if (req.file) {
+        console.log('Logo file received:', req.file.originalname);
+        // Store the uploaded file URL
+        logoUrl = `/uploads/${req.file.filename}`;
+      }
 
       // Enhanced validation with specific error messages
       const errors = [];
@@ -5295,7 +5302,7 @@ Return JSON with this exact structure:
         phone: phone?.trim() || null,
         email: email?.trim() || null,
         website: website?.trim() || null,
-        logoUrl: logoUrl?.trim() || null,
+        logoUrl: logoUrl || null,
         size: size?.trim() || null,
         hoursOfOperation: hoursOfOperation || null,
         socialLinks: socialMedia || null,
