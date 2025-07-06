@@ -9264,6 +9264,85 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Leaderboard endpoint
+  app.get('/api/leaderboard', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      // Get user's church to scope leaderboard
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const userChurchAssociations = await db
+        .select()
+        .from(userChurches)
+        .where(and(
+          eq(userChurches.userId, userId),
+          eq(userChurches.isActive, true)
+        ));
+
+      if (!userChurchAssociations || userChurchAssociations.length === 0) {
+        return res.status(403).json({ message: 'You must be a member of a church to view leaderboard' });
+      }
+
+      const churchId = userChurchAssociations[0].churchId;
+
+      // Get all users in the same church
+      const churchMembers = await db
+        .select({ userId: userChurches.userId })
+        .from(userChurches)
+        .where(and(
+          eq(userChurches.churchId, churchId),
+          eq(userChurches.isActive, true)
+        ));
+
+      const memberIds = churchMembers.map(m => m.userId);
+
+      if (memberIds.length === 0) {
+        return res.json([]);
+      }
+
+      // Calculate scores for church members
+      const leaderboardData = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          score: sql<number>`
+            COALESCE(
+              (SELECT COUNT(*) FROM ${schema.discussions} WHERE ${schema.discussions}.author_id = ${users.id}) * 5 +
+              (SELECT COUNT(*) FROM ${schema.soapEntries} WHERE ${schema.soapEntries}.user_id = ${users.id}) * 3 +
+              (SELECT COUNT(*) FROM ${schema.prayerRequests} WHERE ${schema.prayerRequests}.user_id = ${users.id}) * 2 +
+              (SELECT COUNT(*) FROM ${schema.events} WHERE ${schema.events}.created_by = ${users.id}) * 4,
+              0
+            )::int
+          `,
+        })
+        .from(users)
+        .where(inArray(users.id, memberIds))
+        .orderBy(sql`score DESC`)
+        .limit(100);
+
+      // Add rank to each entry
+      const rankedLeaderboard = leaderboardData.map((user, index) => ({
+        ...user,
+        rank: index + 1,
+        avatarUrl: user.profileImageUrl // Map to expected field name
+      }));
+
+      res.json(rankedLeaderboard);
+    } catch (error) {
+      console.error('Error fetching leaderboard data:', error);
+      res.status(500).json({ error: 'Failed to fetch leaderboard data.' });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 

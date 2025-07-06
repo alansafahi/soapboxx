@@ -45,7 +45,8 @@ import {
   ChevronLeft,
   ChevronRight,
   UserPlus,
-  Sparkles
+  Sparkles,
+  Trophy
 } from "lucide-react";
 
 interface NavigationItem {
@@ -131,6 +132,7 @@ export default function SidebarFixed() {
       items: [
         { label: "Video Library", href: "/video-library", icon: Video },
         { label: "Image Gallery", href: "/image-gallery", icon: ImageIcon },
+        { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
       ]
     },
     {
