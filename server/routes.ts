@@ -5537,9 +5537,15 @@ Return JSON with this exact structure:
         limit: limit ? parseInt(limit as string) : 1000
       };
       
+      console.log('Church search params:', searchParams);
       const churches = await storage.searchChurches(searchParams);
+      console.log('Churches found:', churches.length);
       res.json(churches);
     } catch (error) {
+      console.error('--- CHURCH SEARCH ERROR ---');
+      console.error('Error:', error);
+      console.error('Query params:', req.query);
+      console.error('--- END OF ERROR ---');
       res.status(500).json({ message: "Failed to search churches" });
     }
   });

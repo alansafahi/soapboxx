@@ -189,7 +189,7 @@ export default function EnhancedChurchDiscovery() {
       params.append('proximity', filters.proximity.toString());
       params.append('limit', '2000'); // Get all churches for client-side pagination
       
-      const response = await apiRequest(`/api/churches/search?${params}`);
+      const response = await apiRequest("GET", `/api/churches/search?${params}`);
       return response as ChurchWithDistance[];
     },
   });
@@ -202,7 +202,7 @@ export default function EnhancedChurchDiscovery() {
   // Join church mutation
   const joinChurchMutation = useMutation({
     mutationFn: async (churchId: number) => {
-      await apiRequest(`/api/churches/${churchId}/join`, { method: "POST" });
+      await apiRequest("POST", `/api/churches/${churchId}/join`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/churches/search"] });
