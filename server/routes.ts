@@ -9294,7 +9294,8 @@ Please provide suggestions for the missing or incomplete sections.`
         ));
 
       if (!userChurchAssociations || userChurchAssociations.length === 0) {
-        return res.status(403).json({ message: 'You must be a member of a church to view leaderboard' });
+        // Return empty leaderboard for users not in a church, with helpful message
+        return res.json([]);
       }
 
       const churchId = userChurchAssociations[0].churchId;
@@ -9323,10 +9324,10 @@ Please provide suggestions for the missing or incomplete sections.`
           profileImageUrl: users.profileImageUrl,
           score: sql<number>`
             COALESCE(
-              (SELECT COUNT(*) FROM ${schema.discussions} WHERE ${schema.discussions}.author_id = ${users.id}) * 5 +
-              (SELECT COUNT(*) FROM ${schema.soapEntries} WHERE ${schema.soapEntries}.user_id = ${users.id}) * 3 +
-              (SELECT COUNT(*) FROM ${schema.prayerRequests} WHERE ${schema.prayerRequests}.user_id = ${users.id}) * 2 +
-              (SELECT COUNT(*) FROM ${schema.events} WHERE ${schema.events}.created_by = ${users.id}) * 4,
+              (SELECT COUNT(*) FROM discussions WHERE discussions.author_id = ${users.id}) * 5 +
+              (SELECT COUNT(*) FROM soap_entries WHERE soap_entries.user_id = ${users.id}) * 3 +
+              (SELECT COUNT(*) FROM prayer_requests WHERE prayer_requests.user_id = ${users.id}) * 2 +
+              (SELECT COUNT(*) FROM events WHERE events.created_by = ${users.id}) * 4,
               0
             )::int
           `,

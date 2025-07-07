@@ -21,7 +21,9 @@ const Leaderboard: React.FC = () => {
       try {
         setLoading(true);
         // This fetch call targets our new Express endpoint
-        const response = await fetch('/api/leaderboard');
+        const response = await fetch('/api/leaderboard', {
+          credentials: 'include', // Include session cookies for authentication
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data.');
         }
@@ -109,8 +111,21 @@ const Leaderboard: React.FC = () => {
         {leaderboard.length === 0 ? (
           <div className="text-center py-12">
             <Trophy className="w-24 h-24 mx-auto mb-6 text-blue-300 opacity-50" />
-            <h2 className="text-2xl font-bold mb-4">No Activity Yet</h2>
-            <p className="text-blue-200">Be the first to engage with your community and claim the top spot!</p>
+            <h2 className="text-2xl font-bold mb-4">Join a Church Community</h2>
+            <p className="text-blue-200 mb-6">
+              To see the engagement leaderboard, you need to be a member of a church community. 
+              Join a church to connect with fellow believers and track community engagement!
+            </p>
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 max-w-md mx-auto">
+              <h3 className="text-lg font-semibold mb-3 text-yellow-400">Getting Started</h3>
+              <ul className="text-left text-blue-200 space-y-2">
+                <li>• Browse and join a church in the Churches section</li>
+                <li>• Start participating in discussions</li>
+                <li>• Share SOAP journal entries</li>
+                <li>• Submit prayer requests</li>
+                <li>• Create community events</li>
+              </ul>
+            </div>
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
