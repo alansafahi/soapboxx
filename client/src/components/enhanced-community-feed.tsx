@@ -599,7 +599,7 @@ export default function EnhancedCommunityFeed() {
                                     className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
                                   >
                                     <span className="mr-1">{reactionType.emoji}</span>
-                                    <span className="hidden sm:inline">{postReaction?.count || 0}</span>
+                                    <span className="hidden sm:inline">{parseInt(String(postReaction?.count || 0), 10)}</span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>

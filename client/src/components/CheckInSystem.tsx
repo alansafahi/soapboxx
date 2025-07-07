@@ -433,33 +433,7 @@ export default function CheckInSystem() {
         </CardContent>
       </Card>
 
-      {/* AI Mood Check-In - Always Available */}
-      <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950 dark:to-indigo-950 border-purple-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-purple-700">
-            <Brain className="w-6 h-6" />
-            AI Mood Check-In
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Get personalized spiritual guidance anytime
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            size="lg"
-            className="w-full h-16 bg-purple-600 hover:bg-purple-700 text-white"
-            onClick={() => setShowMoodCheckIn(true)}
-          >
-            <div className="text-center">
-              <Brain className="w-6 h-6 mx-auto mb-1" />
-              <div>Start AI Mood Check-In</div>
-            </div>
-          </Button>
-          <p className="text-xs text-center text-muted-foreground mt-3">
-            Share your mood and receive personalized biblical guidance powered by AI
-          </p>
-        </CardContent>
-      </Card>
+
 
       {/* Today's Events Context */}
       {todayEvents && todayEvents.length > 0 && (

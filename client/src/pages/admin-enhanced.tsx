@@ -135,10 +135,7 @@ export default function EnhancedAdminPortal() {
 
   const createEventMutation = useMutation({
     mutationFn: async (data: EventFormData) => {
-      const response = await apiRequest("/api/events", {
-        method: "POST",
-        body: data,
-      });
+      const response = await apiRequest("POST", "/api/events", data);
       return response;
     },
     onSuccess: () => {
