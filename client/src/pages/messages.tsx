@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -82,12 +83,29 @@ interface Contact {
 export default function MessagesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [location] = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [showNewMessageDialog, setShowNewMessageDialog] = useState(false);
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const [expandedConversations, setExpandedConversations] = useState<Set<number>>(new Set());
+
+  // Handle auto-selection of contact from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const contactId = urlParams.get('contact');
+    const contactName = urlParams.get('name');
+    
+    if (contactId && contactName) {
+      setSelectedContact(contactId);
+      setShowNewMessageDialog(true);
+      toast({
+        title: "Contact Selected",
+        description: `Ready to message ${decodeURIComponent(contactName)}`,
+      });
+    }
+  }, [location, toast]);
 
   // Fetch conversations
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery<ConversationDisplay[]>({

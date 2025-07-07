@@ -614,17 +614,18 @@ function ContactsPage() {
                         </div>
                         <div className="flex items-center space-x-3">
                           <Badge 
-                            variant={contact.isActive ? "default" : "secondary"}
-                            className={contact.isActive ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-gray-100 text-gray-600"}
+                            variant={contact.status === 'connected' ? "default" : "secondary"}
+                            className={contact.status === 'connected' ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-amber-100 text-amber-700"}
                           >
-                            {contact.isActive ? "✅ Active" : "⏸️ Inactive"}
+                            {contact.status === 'connected' ? "✅ Connected" : "⏳ Pending"}
                           </Badge>
                           <Button 
                             size="sm" 
                             variant="outline"
                             className="gap-2 bg-white/50 hover:bg-purple-50 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800"
                             onClick={() => {
-                              setLocation('/messages');
+                              // Auto-select contact and navigate to messages
+                              setLocation(`/messages?contact=${contact.id}&name=${encodeURIComponent(contact.name || contact.firstName || contact.email?.split('@')[0] || 'contact')}`);
                               toast({
                                 title: "Opening Messages",
                                 description: `Starting conversation with ${contact.name || contact.firstName || 'contact'}`,
@@ -781,7 +782,9 @@ function ContactsPage() {
                       <p className="font-medium">{contact.name || 'Unknown'}</p>
                       <p className="text-sm text-gray-500">{contact.email}</p>
                       <p className="text-xs text-gray-400">
-                        Status: {contact.status || 'Connected'} • 
+                        Status: <span className={contact.status === 'connected' ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
+                          {contact.status === 'connected' ? 'Connected' : 'Pending'}
+                        </span> • 
                         Added: {contact.createdAt ? new Date(contact.createdAt).toLocaleDateString() : 'Unknown'}
                       </p>
                     </div>
@@ -790,12 +793,12 @@ function ContactsPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => {
+                      setLocation(`/messages?contact=${contact.id}&name=${encodeURIComponent(contact.name || contact.email?.split('@')[0] || 'contact')}`);
+                      setShowContactsDialog(false);
                       toast({
                         title: "Opening Messages",
                         description: `Starting conversation with ${contact.name || contact.email}`,
                       });
-                      setLocation('/messages');
-                      setShowContactsDialog(false);
                     }}
                   >
                     Message
