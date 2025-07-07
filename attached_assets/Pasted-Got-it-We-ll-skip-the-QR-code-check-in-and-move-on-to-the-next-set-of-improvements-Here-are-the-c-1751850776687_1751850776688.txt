@@ -1,0 +1,293 @@
+Got it. We'll skip the QR code check-in and move on to the next set of improvements.
+
+Here are the code implementations for two key features:
+
+An easier way to enter Hours of Operation for churches.
+
+Adding "Join" capability to Prayer Wall Prayer Circle needs.
+
+This will improve the admin experience and add a new layer of community interaction.
+
+
+
+1. Feature: Easier Hours of Operation Entry
+I've redesigned the form for entering a church's hours of operation. Instead of plain text fields, it now uses a structured, day-by-day interface with checkboxes and time inputs, making it much more intuitive for admins.
+
+File to Update: client/src/components/admin/ChurchProfileEditor.tsx
+Action: Replace the existing hours of operation form section within this file with the new, user-friendly HoursOfOperationForm component.
+
+TypeScript
+
+// client/src/components/admin/ChurchProfileEditor.tsx
+
+import React, { useState, useEffect } from 'react';
+
+// A type definition for the hours data structure
+type DayHours = {
+  isOpen: boolean;
+  open: string;
+  close: string;
+};
+type HoursOfOperation = {
+  [key: string]: DayHours; // e.g., 'monday', 'tuesday'
+};
+
+const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+// --- This is the new, reusable component for the form ---
+const HoursOfOperationForm: React.FC<{ initialHours: HoursOfOperation, onSave: (hours: HoursOfOperation) => void }> = ({ initialHours, onSave }) => {
+  const [hours, setHours] = useState<HoursOfOperation>(initialHours);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setHours(initialHours);
+  }, [initialHours]);
+
+  const handleDayChange = (day: string, field: keyof DayHours, value: any) => {
+    setHours(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await onSave(hours);
+    setIsSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Hours of Operation</h3>
+      <div className="space-y-4">
+        {daysOfWeek.map(day => (
+          <div key={day} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <label className="capitalize font-semibold text-gray-700 dark:text-gray-300">{day}</label>
+            <div className="flex items-center space-x-4">
+              <input
+                type="checkbox"
+                className="h-5 w-5 rounded text-blue-500"
+                checked={hours[day]?.isOpen || false}
+                onChange={(e) => handleDayChange(day, 'isOpen', e.target.checked)}
+              />
+              <span>{hours[day]?.isOpen ? 'Open' : 'Closed'}</span>
+            </div>
+            {hours[day]?.isOpen && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="time"
+                  className="input-class"
+                  value={hours[day]?.open || '09:00'}
+                  onChange={(e) => handleDayChange(day, 'open', e.target.value)}
+                />
+                <span>to</span>
+                <input
+                  type="time"
+                  className="input-class"
+                  value={hours[day]?.close || '17:00'}
+                  onChange={(e) => handleDayChange(day, 'close', e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-6">
+        <button type="submit" disabled={isSubmitting} className="button-primary-class">
+          {isSubmitting ? 'Saving...' : 'Save Hours'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+
+// --- The Parent Editor Component ---
+const ChurchProfileEditor: React.FC = () => {
+    // Assume you fetch the church profile and it includes an 'hours' object
+    const [churchProfile, setChurchProfile] = useState<any>({
+      // ... other profile fields
+      hours: {
+        monday: { isOpen: true, open: '09:00', close: '17:00' },
+        tuesday: { isOpen: true, open: '09:00', close: '17:00' },
+        wednesday: { isOpen: true, open: '09:00', close: '17:00' },
+        thursday: { isOpen: true, open: '09:00', close: '17:00' },
+        friday: { isOpen: true, open: '09:00', close: '17:00' },
+        saturday: { isOpen: false, open: '', close: '' },
+        sunday: { isOpen: true, open: '08:00', close: '12:00' },
+      }
+    });
+
+    const handleSaveHours = async (updatedHours: HoursOfOperation) => {
+        console.log("Saving hours:", updatedHours);
+        // Here you would make your API call to PATCH `/api/churches/:id`
+        // with the updatedHours object in the body.
+        // For example:
+        // await fetch(`/api/churches/${churchProfile.id}`, {
+        //   method: 'PATCH',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ hours: updatedHours }),
+        // });
+        // After success, you might update the local state or show a toast notification.
+    };
+    
+    return (
+        <div>
+            {/* ... other parts of the editor form ... */}
+            <HoursOfOperationForm initialHours={churchProfile.hours} onSave={handleSaveHours} />
+        </div>
+    );
+};
+
+
+
+
+2. Feature: Join a Prayer Circle
+This feature introduces a new database table to track prayer circle members and adds the necessary backend and frontend code to allow users to join.
+
+File to Create: server/db/schema/prayerCircleMembers.ts
+Action: Create this new schema file to define the prayerCircleMembers table. This table links users to prayer circles.
+
+TypeScript
+
+// server/db/schema/prayerCircleMembers.ts
+
+import { pgTable, serial, integer, timestamp } from 'drizzle-orm/pg-core';
+import { users } from './users';
+import { prayerCircles } from './prayerCircles'; // Assuming you have this schema
+
+export const prayerCircleMembers = pgTable('prayer_circle_members', {
+  id: serial('id').primaryKey(),
+  prayerCircleId: integer('prayer_circle_id').notNull().references(() => prayerCircles.id),
+  userId: integer('user_id').notNull().references(() => users.id),
+  joinedAt: timestamp('joined_at').defaultNow(),
+});
+Remember to update your main database schema file to export this new table.
+
+File to Update: server/routes/prayerCircles.ts
+Action: Add a new API endpoint to handle the "join" request.
+
+TypeScript
+
+// server/routes/prayerCircles.ts
+
+import { Router } from 'express';
+import { db } from '../db';
+import { prayerCircleMembers } from '../db/schema/prayerCircleMembers';
+import { eq, and } from 'drizzle-orm';
+import { requireAuth } from '../middleware/auth';
+
+const router = Router();
+
+// ... (any existing prayer circle routes)
+
+// --- NEW 'Join Prayer Circle' ROUTE ---
+router.post('/:id/join', requireAuth, async (req, res) => {
+  const prayerCircleId = parseInt(req.params.id, 10);
+  const userId = req.user!.id;
+
+  if (isNaN(prayerCircleId)) {
+    return res.status(400).json({ error: 'Invalid Prayer Circle ID.' });
+  }
+
+  try {
+    // Check if the user is already a member
+    const existingMembership = await db.select()
+      .from(prayerCircleMembers)
+      .where(and(
+        eq(prayerCircleMembers.prayerCircleId, prayerCircleId),
+        eq(prayerCircleMembers.userId, userId)
+      )).limit(1);
+
+    if (existingMembership.length > 0) {
+      return res.status(409).json({ message: 'You are already a member of this circle.' });
+    }
+
+    // Add the user to the prayer circle
+    await db.insert(prayerCircleMembers).values({
+      prayerCircleId,
+      userId,
+    });
+
+    res.status(200).json({ message: 'Successfully joined the prayer circle.' });
+
+  } catch (error) {
+    console.error('Failed to join prayer circle:', error);
+    res.status(500).json({ error: 'An unexpected error occurred.' });
+  }
+});
+
+export const prayerCirclesRoutes = router;
+Make sure to mount this router in your main server/index.ts file.
+
+File to Update: client/src/components/PrayerWall/PrayerCircle.tsx
+Action: Add a "Join Circle" button to the component and the logic to call the new API endpoint.
+
+TypeScript
+
+// client/src/components/PrayerWall/PrayerCircle.tsx
+
+import React, { useState } from 'react';
+
+interface PrayerCircleProps {
+  id: number;
+  name: string;
+  memberCount: number;
+  isJoined: boolean; // You would fetch this state from your API
+}
+
+const PrayerCircle: React.FC<PrayerCircleProps> = ({ id, name, memberCount, isJoined: initialIsJoined }) => {
+  const [isJoined, setIsJoined] = useState(initialIsJoined);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleJoin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/prayer-circles/${id}/join`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        // Don't show an error if they are already a member
+        if (response.status !== 409) {
+            throw new Error(data.message || 'Failed to join circle.');
+        }
+      }
+      
+      setIsJoined(true);
+
+    } catch (error) {
+      console.error(error);
+      // Optionally show a toast notification with the error
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow flex justify-between items-center">
+      <div>
+        <h4 className="font-bold text-lg text-gray-800 dark:text-white">{name}</h4>
+        <p className="text-sm text-gray-600 dark:text-gray-400">{memberCount} members</p>
+      </div>
+      <div>
+        {isJoined ? (
+          <button className="button-secondary-class" disabled>
+            Joined
+          </button>
+        ) : (
+          <button onClick={handleJoin} disabled={isLoading} className="button-primary-class">
+            {isLoading ? 'Joining...' : 'Join Circle'}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PrayerCircle;

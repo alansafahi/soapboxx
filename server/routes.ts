@@ -6402,32 +6402,151 @@ Return JSON with this exact structure:
   });
 
   // Prayer Circles endpoints
+  app.get('/api/prayer-circles', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.query;
+      const prayerCircles = await storage.getPrayerCircles(churchId ? parseInt(churchId) : undefined);
+      res.json(prayerCircles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch prayer circles" });
+    }
+  });
+
+  app.get('/api/prayer-circles/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const prayerCircle = await storage.getPrayerCircle(id);
+      
+      if (!prayerCircle) {
+        return res.status(404).json({ message: "Prayer circle not found" });
+      }
+      
+      res.json(prayerCircle);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch prayer circle" });
+    }
+  });
+
   app.post("/api/prayer-circles", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
-      const { name, description, isPrivate, maxMembers } = req.body;
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const { name, description, isPublic, memberLimit, focusAreas, meetingSchedule, churchId } = req.body;
 
       if (!name || !description) {
         return res.status(400).json({ message: "Name and description are required" });
       }
 
-      // Create prayer circle (for now, we'll mock this since we don't have a prayer circles table)
-      const prayerCircle = {
-        id: Math.floor(Math.random() * 10000) + 1000,
+      const prayerCircleData = {
         name,
         description,
-        isPrivate: isPrivate || false,
-        maxMembers: maxMembers || 50,
-        creatorId: userId,
-        memberCount: 1, // Creator is first member
-        activePrayers: 0,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        isPublic: isPublic || false,
+        memberLimit: memberLimit || null,
+        focusAreas: focusAreas || [],
+        meetingSchedule: meetingSchedule || null,
+        churchId: churchId || null,
+        createdBy: userId,
       };
+
+      const prayerCircle = await storage.createPrayerCircle(prayerCircleData);
+
+      // Automatically add creator as first member
+      await storage.joinPrayerCircle({
+        prayerCircleId: prayerCircle.id,
+        userId: userId,
+        role: 'leader',
+        isActive: true,
+      });
 
       res.status(201).json(prayerCircle);
     } catch (error) {
       res.status(500).json({ message: "Failed to create prayer circle" });
+    }
+  });
+
+  app.post('/api/prayer-circles/:id/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const circleId = parseInt(req.params.id);
+      const { role = 'member' } = req.body;
+
+      // Check if user is already in the circle
+      const isAlreadyMember = await storage.isUserInPrayerCircle(circleId, userId);
+      if (isAlreadyMember) {
+        return res.status(400).json({ message: "You are already a member of this prayer circle" });
+      }
+
+      // Check if circle exists
+      const circle = await storage.getPrayerCircle(circleId);
+      if (!circle) {
+        return res.status(404).json({ message: "Prayer circle not found" });
+      }
+
+      // Check member limit
+      if (circle.memberLimit) {
+        const members = await storage.getPrayerCircleMembers(circleId);
+        if (members.length >= circle.memberLimit) {
+          return res.status(400).json({ message: "Prayer circle is full" });
+        }
+      }
+
+      const membership = await storage.joinPrayerCircle({
+        prayerCircleId: circleId,
+        userId: userId,
+        role: role,
+        isActive: true,
+      });
+
+      res.status(201).json(membership);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to join prayer circle" });
+    }
+  });
+
+  app.delete('/api/prayer-circles/:id/leave', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const circleId = parseInt(req.params.id);
+
+      await storage.leavePrayerCircle(circleId, userId);
+      res.status(200).json({ message: "Successfully left prayer circle" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to leave prayer circle" });
+    }
+  });
+
+  app.get('/api/prayer-circles/:id/members', isAuthenticated, async (req: any, res) => {
+    try {
+      const circleId = parseInt(req.params.id);
+      const members = await storage.getPrayerCircleMembers(circleId);
+      res.json(members);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch prayer circle members" });
+    }
+  });
+
+  app.get('/api/user/prayer-circles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const userCircles = await storage.getUserPrayerCircles(userId);
+      res.json(userCircles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user prayer circles" });
     }
   });
 

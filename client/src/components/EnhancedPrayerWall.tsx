@@ -19,7 +19,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { formatDistanceToNow } from 'date-fns';
-import type { PrayerRequest } from '../../../shared/schema';
+import type { PrayerRequest, PrayerCircle, PrayerCircleMember } from '../../../shared/schema';
+import { insertPrayerCircleSchema } from '../../../shared/schema';
 
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
@@ -32,15 +33,8 @@ const prayerRequestSchema = z.object({
   isSilent: z.boolean().default(false),
 });
 
-const prayerCircleSchema = z.object({
-  name: z.string().min(1, "Circle name is required"),
-  description: z.string().min(1, "Description is required"),
-  isPrivate: z.boolean().default(false),
-  maxMembers: z.number().min(2).max(10000).optional(),
-});
-
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
-type PrayerCircleFormData = z.infer<typeof prayerCircleSchema>;
+type PrayerCircleFormData = z.infer<typeof insertPrayerCircleSchema>;
 
 const prayerCategories = [
   { id: 'all', label: 'All Prayers', icon: '🙏', count: 47 },
@@ -52,6 +46,59 @@ const prayerCategories = [
   { id: 'urgent', label: 'Urgent', icon: '⚡', count: 3 },
   { id: 'general', label: 'General', icon: '🤲', count: 8 },
 ];
+
+interface PrayerCircleCardProps {
+  circle: any;
+  onJoin: () => void;
+  onLeave: () => void;
+  isJoining: boolean;
+  isLeaving: boolean;
+  userCircles: any[];
+}
+
+function PrayerCircleCard({ circle, onJoin, onLeave, isJoining, isLeaving, userCircles }: PrayerCircleCardProps) {
+  const isUserMember = userCircles.some((uc: any) => uc.id === circle.id);
+  
+  return (
+    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <div className="flex-1">
+        <div className="font-semibold">{circle.name}</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {circle.memberCount || 0} members • {circle.activeMembers || 0} active
+        </div>
+        {circle.description && (
+          <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {circle.description}
+          </div>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <Badge variant={!circle.isPublic ? "default" : "outline"}>
+          {!circle.isPublic ? "Private" : "Public"}
+        </Badge>
+        {isUserMember ? (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={onLeave}
+            disabled={isLeaving}
+          >
+            {isLeaving ? "Leaving..." : "Leave"}
+          </Button>
+        ) : (
+          <Button
+            variant="default"
+            size="sm"
+            onClick={onJoin}
+            disabled={isJoining || (circle.memberLimit && circle.memberCount >= circle.memberLimit)}
+          >
+            {isJoining ? "Joining..." : "Join"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function EnhancedPrayerWall() {
   const { user } = useAuth();
@@ -79,12 +126,13 @@ export default function EnhancedPrayerWall() {
   });
 
   const circleForm = useForm<PrayerCircleFormData>({
-    resolver: zodResolver(prayerCircleSchema),
+    resolver: zodResolver(insertPrayerCircleSchema),
     defaultValues: {
       name: "",
       description: "",
-      isPrivate: false,
-      maxMembers: 25,
+      isPublic: true,
+      memberLimit: 25,
+      focusAreas: [],
     },
   });
 
@@ -96,6 +144,11 @@ export default function EnhancedPrayerWall() {
   // Fetch prayer circles
   const { data: prayerCircles = [] } = useQuery({
     queryKey: ["/api/prayer-circles"],
+  });
+
+  // Fetch user's prayer circles
+  const { data: userPrayerCircles = [] } = useQuery({
+    queryKey: ["/api/user/prayer-circles"],
   });
 
   // Filter prayers by category
@@ -135,6 +188,7 @@ export default function EnhancedPrayerWall() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayer-circles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/prayer-circles"] });
       setIsCreateCircleDialogOpen(false);
       circleForm.reset();
       toast({
@@ -146,6 +200,50 @@ export default function EnhancedPrayerWall() {
       toast({
         title: "Error",
         description: "Failed to create prayer circle. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Join prayer circle mutation
+  const joinCircleMutation = useMutation({
+    mutationFn: async (circleId: number) => {
+      return await apiRequest("POST", `/api/prayer-circles/${circleId}/join`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayer-circles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/prayer-circles"] });
+      toast({
+        title: "Joined Prayer Circle",
+        description: "You have successfully joined the prayer circle.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to join prayer circle. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Leave prayer circle mutation
+  const leaveCircleMutation = useMutation({
+    mutationFn: async (circleId: number) => {
+      return await apiRequest("DELETE", `/api/prayer-circles/${circleId}/leave`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayer-circles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/prayer-circles"] });
+      toast({
+        title: "Left Prayer Circle",
+        description: "You have successfully left the prayer circle.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to leave prayer circle. Please try again.",
         variant: "destructive",
       });
     },
@@ -736,27 +834,23 @@ export default function EnhancedPrayerWall() {
                 Join private or public prayer groups for deeper fellowship and focused prayer.
               </p>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <div className="font-semibold">Youth Ministry Circle</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">15 members • 3 active prayers</div>
+                {prayerCircles.length > 0 ? (
+                  prayerCircles.map((circle: any) => (
+                    <PrayerCircleCard 
+                      key={circle.id} 
+                      circle={circle}
+                      onJoin={() => joinCircleMutation.mutate(circle.id)}
+                      onLeave={() => leaveCircleMutation.mutate(circle.id)}
+                      isJoining={joinCircleMutation.isPending}
+                      isLeaving={leaveCircleMutation.isPending}
+                      userCircles={userPrayerCircles}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    No prayer circles available yet. Create the first one!
                   </div>
-                  <Badge>Private</Badge>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <div className="font-semibold">Recovery Support Group</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">8 members • 2 active prayers</div>
-                  </div>
-                  <Badge variant="outline">Public</Badge>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <div className="font-semibold">Women's Ministry Circle</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">22 members • 5 active prayers</div>
-                  </div>
-                  <Badge variant="outline">Public</Badge>
-                </div>
+                )}
               </div>
               <Dialog open={isCreateCircleDialogOpen} onOpenChange={setIsCreateCircleDialogOpen}>
                 <DialogTrigger asChild>
@@ -805,7 +899,7 @@ export default function EnhancedPrayerWall() {
 
                       <FormField
                         control={circleForm.control}
-                        name="maxMembers"
+                        name="memberLimit"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Maximum Members (optional)</FormLabel>
@@ -814,7 +908,7 @@ export default function EnhancedPrayerWall() {
                                 type="number" 
                                 min="2" 
                                 max="10000" 
-                                placeholder="250"
+                                placeholder="50"
                                 {...field}
                                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                               />
@@ -826,13 +920,13 @@ export default function EnhancedPrayerWall() {
 
                       <FormField
                         control={circleForm.control}
-                        name="isPrivate"
+                        name="isPublic"
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Private Circle</FormLabel>
+                              <FormLabel className="text-base">Public Circle</FormLabel>
                               <div className="text-sm text-gray-600">
-                                Private circles require approval to join and are not visible in public listings
+                                Public circles are visible to all church members and can be joined freely
                               </div>
                             </div>
                             <FormControl>

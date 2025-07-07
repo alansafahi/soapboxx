@@ -714,6 +714,33 @@ export const prayerAssignments = pgTable("prayer_assignments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Prayer circles for group prayer focus
+export const prayerCircles = pgTable("prayer_circles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  isPublic: boolean("is_public").default(true),
+  memberLimit: integer("member_limit").default(50), // Optional limit
+  focusAreas: text("focus_areas").array().default([]), // healing, family, missions, etc.
+  meetingSchedule: text("meeting_schedule"), // Optional meeting info
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Prayer circle membership tracking
+export const prayerCircleMembers = pgTable("prayer_circle_members", {
+  id: serial("id").primaryKey(),
+  prayerCircleId: integer("prayer_circle_id").notNull().references(() => prayerCircles.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: varchar("role", { length: 20 }).default("member"), // member, leader, facilitator
+  joinedAt: timestamp("joined_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+}, (table) => [
+  unique().on(table.prayerCircleId, table.userId),
+]);
+
 // User achievements/badges
 export const userAchievements = pgTable("user_achievements", {
   id: serial("id").primaryKey(),
@@ -1998,6 +2025,29 @@ export const prayerResponsesRelations = relations(prayerResponses, ({ one }) => 
   }),
 }));
 
+export const prayerCirclesRelations = relations(prayerCircles, ({ one, many }) => ({
+  church: one(churches, {
+    fields: [prayerCircles.churchId],
+    references: [churches.id],
+  }),
+  creator: one(users, {
+    fields: [prayerCircles.createdBy],
+    references: [users.id],
+  }),
+  members: many(prayerCircleMembers),
+}));
+
+export const prayerCircleMembersRelations = relations(prayerCircleMembers, ({ one }) => ({
+  prayerCircle: one(prayerCircles, {
+    fields: [prayerCircleMembers.prayerCircleId],
+    references: [prayerCircles.id],
+  }),
+  user: one(users, {
+    fields: [prayerCircleMembers.userId],
+    references: [users.id],
+  }),
+}));
+
 export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
   user: one(users, {
     fields: [userAchievements.userId],
@@ -2450,6 +2500,12 @@ export type PrayerRequest = typeof prayerRequests.$inferSelect;
 
 export type InsertPrayerResponse = typeof prayerResponses.$inferInsert;
 export type PrayerResponse = typeof prayerResponses.$inferSelect;
+
+export type InsertPrayerCircle = typeof prayerCircles.$inferInsert;
+export type PrayerCircle = typeof prayerCircles.$inferSelect;
+
+export type InsertPrayerCircleMember = typeof prayerCircleMembers.$inferInsert;
+export type PrayerCircleMember = typeof prayerCircleMembers.$inferSelect;
 
 // Check-in system types
 export type CheckIn = typeof checkIns.$inferSelect;
@@ -3014,6 +3070,17 @@ export const insertPrayerUpdateSchema = createInsertSchema(prayerUpdates).omit({
 export const insertPrayerAssignmentSchema = createInsertSchema(prayerAssignments).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertPrayerCircleSchema = createInsertSchema(prayerCircles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPrayerCircleMemberSchema = createInsertSchema(prayerCircleMembers).omit({
+  id: true,
+  joinedAt: true,
 });
 
 // Enhanced Social & Community Insert Schemas

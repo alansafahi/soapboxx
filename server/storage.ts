@@ -20,6 +20,8 @@ import {
   prayerFollowUps,
   prayerUpdates,
   prayerAssignments,
+  prayerCircles,
+  prayerCircleMembers,
   userAchievements,
   userActivities,
   userChurches,
@@ -134,6 +136,10 @@ import {
   type InsertPrayerUpdate,
   type PrayerAssignment,
   type InsertPrayerAssignment,
+  type PrayerCircle,
+  type InsertPrayerCircle,
+  type PrayerCircleMember,
+  type InsertPrayerCircleMember,
   type UserAchievement,
   type UserActivity,
   type InsertUserActivity,
@@ -390,6 +396,20 @@ export interface IStorage {
   createPrayerAssignment(assignment: InsertPrayerAssignment): Promise<PrayerAssignment>;
   createPrayerFollowUp(followUp: InsertPrayerFollowUp): Promise<PrayerFollowUp>;
   getAllUsers(): Promise<User[]>;
+  
+  // Prayer circle operations
+  getPrayerCircles(churchId?: number): Promise<PrayerCircle[]>;
+  getPrayerCircle(id: number): Promise<PrayerCircle | undefined>;
+  createPrayerCircle(circle: InsertPrayerCircle): Promise<PrayerCircle>;
+  updatePrayerCircle(id: number, updates: Partial<PrayerCircle>): Promise<PrayerCircle>;
+  deletePrayerCircle(id: number): Promise<void>;
+  
+  // Prayer circle membership operations
+  joinPrayerCircle(membership: InsertPrayerCircleMember): Promise<PrayerCircleMember>;
+  leavePrayerCircle(circleId: number, userId: string): Promise<void>;
+  getPrayerCircleMembers(circleId: number): Promise<(PrayerCircleMember & { user: User })[]>;
+  getUserPrayerCircles(userId: string): Promise<(PrayerCircleMember & { prayerCircle: PrayerCircle })[]>;
+  isUserInPrayerCircle(circleId: number, userId: string): Promise<boolean>;
   
   // Template management operations
   getCommunicationTemplates(userId: string, churchId?: number): Promise<any[]>;
@@ -2138,6 +2158,144 @@ export class DatabaseStorage implements IStorage {
       .values(followUp)
       .returning();
     return newFollowUp;
+  }
+
+  // Prayer circle operations
+  async getPrayerCircles(churchId?: number): Promise<PrayerCircle[]> {
+    let query = db.select().from(prayerCircles);
+    
+    if (churchId) {
+      query = query.where(eq(prayerCircles.churchId, churchId));
+    }
+    
+    return await query.orderBy(desc(prayerCircles.createdAt));
+  }
+
+  async getPrayerCircle(id: number): Promise<PrayerCircle | undefined> {
+    const [circle] = await db
+      .select()
+      .from(prayerCircles)
+      .where(eq(prayerCircles.id, id))
+      .limit(1);
+    return circle;
+  }
+
+  async createPrayerCircle(circle: InsertPrayerCircle): Promise<PrayerCircle> {
+    const [newCircle] = await db
+      .insert(prayerCircles)
+      .values(circle)
+      .returning();
+    return newCircle;
+  }
+
+  async updatePrayerCircle(id: number, updates: Partial<PrayerCircle>): Promise<PrayerCircle> {
+    const [updatedCircle] = await db
+      .update(prayerCircles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(prayerCircles.id, id))
+      .returning();
+    return updatedCircle;
+  }
+
+  async deletePrayerCircle(id: number): Promise<void> {
+    // First remove all members
+    await db
+      .delete(prayerCircleMembers)
+      .where(eq(prayerCircleMembers.prayerCircleId, id));
+    
+    // Then delete the circle
+    await db
+      .delete(prayerCircles)
+      .where(eq(prayerCircles.id, id));
+  }
+
+  // Prayer circle membership operations
+  async joinPrayerCircle(membership: InsertPrayerCircleMember): Promise<PrayerCircleMember> {
+    const [newMembership] = await db
+      .insert(prayerCircleMembers)
+      .values(membership)
+      .returning();
+    return newMembership;
+  }
+
+  async leavePrayerCircle(circleId: number, userId: string): Promise<void> {
+    await db
+      .delete(prayerCircleMembers)
+      .where(and(
+        eq(prayerCircleMembers.prayerCircleId, circleId),
+        eq(prayerCircleMembers.userId, userId)
+      ));
+  }
+
+  async getPrayerCircleMembers(circleId: number): Promise<(PrayerCircleMember & { user: User })[]> {
+    return await db
+      .select({
+        id: prayerCircleMembers.id,
+        prayerCircleId: prayerCircleMembers.prayerCircleId,
+        userId: prayerCircleMembers.userId,
+        role: prayerCircleMembers.role,
+        joinedAt: prayerCircleMembers.joinedAt,
+        isActive: prayerCircleMembers.isActive,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(prayerCircleMembers)
+      .innerJoin(users, eq(prayerCircleMembers.userId, users.id))
+      .where(and(
+        eq(prayerCircleMembers.prayerCircleId, circleId),
+        eq(prayerCircleMembers.isActive, true)
+      ))
+      .orderBy(prayerCircleMembers.joinedAt);
+  }
+
+  async getUserPrayerCircles(userId: string): Promise<(PrayerCircleMember & { prayerCircle: PrayerCircle })[]> {
+    return await db
+      .select({
+        id: prayerCircleMembers.id,
+        prayerCircleId: prayerCircleMembers.prayerCircleId,
+        userId: prayerCircleMembers.userId,
+        role: prayerCircleMembers.role,
+        joinedAt: prayerCircleMembers.joinedAt,
+        isActive: prayerCircleMembers.isActive,
+        prayerCircle: {
+          id: prayerCircles.id,
+          name: prayerCircles.name,
+          description: prayerCircles.description,
+          churchId: prayerCircles.churchId,
+          createdBy: prayerCircles.createdBy,
+          isPublic: prayerCircles.isPublic,
+          memberLimit: prayerCircles.memberLimit,
+          focusAreas: prayerCircles.focusAreas,
+          meetingSchedule: prayerCircles.meetingSchedule,
+          createdAt: prayerCircles.createdAt,
+          updatedAt: prayerCircles.updatedAt,
+        }
+      })
+      .from(prayerCircleMembers)
+      .innerJoin(prayerCircles, eq(prayerCircleMembers.prayerCircleId, prayerCircles.id))
+      .where(and(
+        eq(prayerCircleMembers.userId, userId),
+        eq(prayerCircleMembers.isActive, true)
+      ))
+      .orderBy(desc(prayerCircleMembers.joinedAt));
+  }
+
+  async isUserInPrayerCircle(circleId: number, userId: string): Promise<boolean> {
+    const [membership] = await db
+      .select({ id: prayerCircleMembers.id })
+      .from(prayerCircleMembers)
+      .where(and(
+        eq(prayerCircleMembers.prayerCircleId, circleId),
+        eq(prayerCircleMembers.userId, userId),
+        eq(prayerCircleMembers.isActive, true)
+      ))
+      .limit(1);
+    return !!membership;
   }
 
   // Template management operations
