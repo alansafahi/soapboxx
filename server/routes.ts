@@ -9315,7 +9315,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.json([]);
       }
 
-      // Calculate scores for church members
+      // Calculate scores for church members using LEFT JOINs for better performance
       const leaderboardData = await db
         .select({
           id: users.id,
@@ -9323,17 +9323,19 @@ Please provide suggestions for the missing or incomplete sections.`
           lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
           score: sql<number>`
-            COALESCE(
-              (SELECT COUNT(*) FROM discussions WHERE discussions.author_id = ${users.id}) * 5 +
-              (SELECT COUNT(*) FROM soap_entries WHERE soap_entries.user_id = ${users.id}) * 3 +
-              (SELECT COUNT(*) FROM prayer_requests WHERE prayer_requests.user_id = ${users.id}) * 2 +
-              (SELECT COUNT(*) FROM events WHERE events.created_by = ${users.id}) * 4,
-              0
-            )::int
-          `,
+            COALESCE(COUNT(DISTINCT ${discussions.id}) * 5, 0) +
+            COALESCE(COUNT(DISTINCT ${soapEntries.id}) * 3, 0) +
+            COALESCE(COUNT(DISTINCT ${prayerRequests.id}) * 2, 0) +
+            COALESCE(COUNT(DISTINCT ${events.id}) * 4, 0)
+          `.as('score'),
         })
         .from(users)
+        .leftJoin(discussions, eq(discussions.authorId, users.id))
+        .leftJoin(soapEntries, eq(soapEntries.userId, users.id))
+        .leftJoin(prayerRequests, eq(prayerRequests.authorId, users.id))
+        .leftJoin(events, eq(events.organizerId, users.id))
         .where(inArray(users.id, memberIds))
+        .groupBy(users.id, users.firstName, users.lastName, users.profileImageUrl)
         .orderBy(sql`score DESC`)
         .limit(100);
 
@@ -9346,8 +9348,20 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(rankedLeaderboard);
     } catch (error) {
-      console.error('Error fetching leaderboard data:', error);
-      res.status(500).json({ error: 'Failed to fetch leaderboard data.' });
+      // Enhanced error logging for debugging
+      console.error('--- DETAILED LEADERBOARD ERROR ---');
+      console.error('Timestamp:', new Date().toISOString());
+      console.error('Error Object:', error);
+      console.error('User ID:', req.session.userId);
+      console.error('--- END OF ERROR ---');
+      
+      // Send back a more informative error message for debugging
+      const errorMessage = error instanceof Error ? error.message : 'An unknown database error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to fetch leaderboard data.',
+        details: errorMessage,
+        timestamp: new Date().toISOString()
+      });
     }
   });
 
