@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 8, 2025: PENDING INVITATIONS DUPLICATE CLEANUP COMPLETED - Successfully removed 4 duplicate pending invitations that were also active contacts
+  - DUPLICATE DETECTION: Identified contacts with both pending invitation AND contact records (zachlakin0@gmail.com, alan@safahi, boxy-dancing-wager@duck.com, support@soapboxsuperapp.com)
+  - DATABASE CLEANUP: Removed redundant pending invitations while preserving active contact relationships
+  - DATA INTEGRITY MAINTAINED: Connected contacts (zachlakin0@gmail.com, boxy-dancing-wager@duck.com) retained their connected status
+  - USER EXPERIENCE IMPROVED: Pending invites dialog now shows only legitimate pending invitations
 - July 8, 2025: AI MOOD CHECK-IN CHARACTER LIMIT INCREASED - Successfully expanded mood field from 30 to 200 characters to accommodate 6+ mood/feeling selections
   - DATABASE FIELD EXPANDED: Updated mood_checkins table mood column from varchar(30) to varchar(200)
   - SCHEMA DEFINITION UPDATED: Modified shared/schema.ts to reflect new 200 character limit
