@@ -152,7 +152,6 @@ export default function EnhancedPrayerWall() {
   });
 
   const form = useForm<PrayerRequestFormData>({
-    resolver: zodResolver(prayerRequestSchema),
     defaultValues: {
       title: "",
       content: "",

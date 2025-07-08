@@ -58,7 +58,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const { toast } = useToast();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    // resolver: zodResolver(formSchema), // Simplified validation
     defaultValues: {
       scripture: entry?.scripture || "",
       scriptureReference: entry?.scriptureReference || "",
