@@ -77,7 +77,7 @@ export default function AppHeader() {
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
-        { label: "Donation", href: "/sms-giving", icon: DollarSign },
+        { label: "Donation", href: "/donation-demo", icon: DollarSign },
       ]
     },
     {
