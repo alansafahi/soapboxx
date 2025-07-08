@@ -7,6 +7,8 @@ import EventsList from "../components/events-list";
 import PrayerWall from "../components/prayer-wall";
 import ChurchDiscovery from "../components/church-discovery";
 import LeaderboardWidget from "../components/leaderboard-widget";
+import LeaderboardPreview from "../components/LeaderboardPreview";
+import UpcomingEventsPreview from "../components/UpcomingEventsPreview";
 import MobileNav from "../components/mobile-nav";
 import CheckInSystem from "../components/CheckInSystem";
 import { ReferralWelcome } from "../components/ReferralWelcome";
@@ -80,6 +82,12 @@ export default function Home({ referralCode }: HomeProps = {}) {
           <div className="space-y-3 sm:space-y-4 md:space-y-6">
             <div id="check-in-system">
               <CheckInSystem />
+            </div>
+            <div id="leaderboard-preview">
+              <LeaderboardPreview />
+            </div>
+            <div id="upcoming-events-preview">
+              <UpcomingEventsPreview />
             </div>
             <div id="leaderboard-widget">
               <LeaderboardWidget />

@@ -9895,6 +9895,38 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Upcoming Events endpoint for home page preview
+  app.get('/api/events/upcoming', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 3;
+      
+      // Get user's church to scope events
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const userChurches = await storage.getUserChurches(userId);
+      if (!userChurches || userChurches.length === 0) {
+        return res.json([]); // Return empty array if no church
+      }
+
+      const churchId = userChurches[0].churchId;
+      
+      // Use the existing getUpcomingEvents method from storage
+      const upcomingEvents = await storage.getUpcomingEvents(churchId, limit);
+      res.json(upcomingEvents);
+    } catch (error) {
+      console.error('Error fetching upcoming events:', error);
+      res.status(500).json({ message: 'Failed to fetch upcoming events' });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 
