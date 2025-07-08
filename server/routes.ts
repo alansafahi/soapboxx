@@ -3429,7 +3429,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const badges = await storage.getBadgeProgress(userId);
       res.json(badges);
     } catch (error) {
-      console.error('Error fetching badge progress:', error);
+
       res.status(500).json({ error: 'Failed to fetch badge progress' });
     }
   });
@@ -3443,7 +3443,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       );
       res.json(answeredPrayers);
     } catch (error) {
-      console.error('Error fetching answered prayers:', error);
+
       res.status(500).json({ error: 'Failed to fetch answered prayers' });
     }
   });
@@ -3456,7 +3456,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       });
       res.json(testimony);
     } catch (error) {
-      console.error('Error creating answered prayer testimony:', error);
+
       res.status(500).json({ error: 'Failed to create testimony' });
     }
   });
@@ -3467,7 +3467,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       await storage.reactToAnsweredPrayer(testimonyId, req.session.userId, reactionType);
       res.json({ success: true });
     } catch (error) {
-      console.error('Error reacting to answered prayer:', error);
+
       res.status(500).json({ error: 'Failed to react to answered prayer' });
     }
   });
@@ -3479,7 +3479,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const trends = await storage.getPrayerTrends(filters, userChurch?.churchId);
       res.json(trends);
     } catch (error) {
-      console.error('Error fetching prayer trends:', error);
+
       res.status(500).json({ error: 'Failed to fetch prayer trends' });
     }
   });
@@ -3490,7 +3490,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       await storage.updateUserProgress(req.session.userId, activityType, entityId);
       res.json({ success: true });
     } catch (error) {
-      console.error('Error tracking user activity:', error);
+
       res.status(500).json({ error: 'Failed to track activity' });
     }
   });
@@ -3506,7 +3506,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       await storage.initializeBadges();
       res.json({ success: true, message: 'Badges initialized successfully' });
     } catch (error) {
-      console.error('Error initializing badges:', error);
+
       res.status(500).json({ error: 'Failed to initialize badges' });
     }
   });
@@ -5631,10 +5631,6 @@ Return JSON with this exact structure:
       console.log('Churches found:', churches.length);
       res.json(churches);
     } catch (error) {
-      console.error('--- CHURCH SEARCH ERROR ---');
-      console.error('Error:', error);
-      console.error('Query params:', req.query);
-      console.error('--- END OF ERROR ---');
       res.status(500).json({ message: "Failed to search churches" });
     }
   });
@@ -5727,7 +5723,6 @@ Return JSON with this exact structure:
       try {
         categorization = await categorizePost(content.trim());
       } catch (error) {
-        console.error('AI categorization failed:', error);
         // Fallback to simple categorization
         categorization = { type: 'discussion', title: 'Community Post' };
       }
@@ -5820,13 +5815,6 @@ Return JSON with this exact structure:
       
       res.json(response);
     } catch (error) {
-      console.error('Failed to create post:', error);
-      console.error('Error details:', {
-        message: (error as Error).message,
-        stack: (error as Error).stack,
-        userId: req.session?.userId,
-        body: req.body
-      });
       res.status(500).json({ message: "Failed to create post", error: (error as Error).message });
     }
   });
@@ -7770,7 +7758,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(allTemplates);
     } catch (error) {
-      console.error('Error fetching templates:', error);
       res.status(500).json({ message: "Failed to fetch templates" });
     }
   });
@@ -7809,7 +7796,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const newTemplate = await storage.createCommunicationTemplate(templateData);
       res.status(201).json(newTemplate);
     } catch (error) {
-      console.error('Error creating template:', error);
       res.status(500).json({ message: 'Failed to create template' });
     }
   });
@@ -7843,7 +7829,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const updatedTemplate = await storage.updateCommunicationTemplate(templateId, updates);
       res.json(updatedTemplate);
     } catch (error) {
-      console.error('Error updating template:', error);
       res.status(500).json({ message: 'Failed to update template' });
     }
   });
@@ -7864,7 +7849,6 @@ Please provide suggestions for the missing or incomplete sections.`
       await storage.deleteCommunicationTemplate(templateId);
       res.json({ message: 'Template deleted successfully' });
     } catch (error) {
-      console.error('Error deleting template:', error);
       res.status(500).json({ message: 'Failed to delete template' });
     }
   });
@@ -9279,7 +9263,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(imagesWithInteractions);
     } catch (error) {
-      console.error('Gallery images fetch error:', error);
       res.status(500).json({ message: 'Failed to fetch gallery images', error: error.message });
     }
   });
@@ -9358,7 +9341,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const newImage = await storage.uploadGalleryImage(imageData);
       res.json(newImage);
     } catch (error) {
-      console.error('Gallery image upload error:', error);
       res.status(500).json({ message: 'Failed to upload image', error: error.message });
     }
   });
@@ -9609,11 +9591,6 @@ Please provide suggestions for the missing or incomplete sections.`
       res.json(rankedLeaderboard);
     } catch (error) {
       // Enhanced error logging for debugging
-      console.error('--- DETAILED LEADERBOARD ERROR ---');
-      console.error('Timestamp:', new Date().toISOString());
-      console.error('Error Object:', error);
-      console.error('User ID:', req.session.userId);
-      console.error('--- END OF ERROR ---');
       
       // Send back a more informative error message for debugging
       const errorMessage = error instanceof Error ? error.message : 'An unknown database error occurred.';
