@@ -6519,13 +6519,24 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
+      console.log("Creating prayer circle for user:", userId);
+
       // Get user's primary church for prayer circle creation
-      const userChurch = await storage.getUserChurch(userId);
+      let userChurch;
+      try {
+        userChurch = await storage.getUserChurch(userId);
+      } catch (error) {
+        console.error("Error getting user church:", error);
+        return res.status(500).json({ message: "Error retrieving user church information" });
+      }
+
       if (!userChurch) {
         return res.status(400).json({ message: "You must be a member of a church to create prayer circles" });
       }
 
       const { name, description, isPublic, memberLimit, focusAreas, meetingSchedule } = req.body;
+
+      console.log("Prayer circle data:", { name, description, isPublic, memberLimit, focusAreas, meetingSchedule });
 
       if (!name || !description) {
         return res.status(400).json({ message: "Name and description are required" });
@@ -6542,6 +6553,8 @@ Return JSON with this exact structure:
         createdBy: userId,
       };
 
+      console.log("Creating prayer circle with data:", prayerCircleData);
+
       const prayerCircle = await storage.createPrayerCircle(prayerCircleData);
 
       // Automatically add creator as first member
@@ -6552,11 +6565,11 @@ Return JSON with this exact structure:
         isActive: true,
       });
 
-      // Note: Points system integration placeholder for future enhancement
-
+      console.log("Prayer circle created successfully:", prayerCircle);
       res.status(201).json(prayerCircle);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create prayer circle" });
+      console.error("Prayer circle creation error:", error);
+      res.status(500).json({ message: "Failed to create prayer circle", error: error.message });
     }
   });
 
