@@ -208,7 +208,7 @@ export default function TopHeader() {
             <Link href="/sms-giving">
               <DropdownMenuItem className="cursor-pointer">
                 <DollarSign className="w-4 h-4 mr-2" />
-                SMS Giving
+                Donation
               </DropdownMenuItem>
             </Link>
             

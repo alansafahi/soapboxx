@@ -8603,7 +8603,7 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // SMS Giving Configuration endpoint
+  // Donation Configuration endpoint
   app.get('/api/sms-giving/config', isAuthenticated, async (req: any, res) => {
     try {
       // In production, this would fetch from database
