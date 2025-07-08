@@ -133,7 +133,7 @@ export default function SMSGiving() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">SMS Giving</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Donation</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Enable convenient mobile giving through text messages. Perfect for tech-forward churches.
           </p>
