@@ -597,12 +597,12 @@ function ContactsPage() {
                           <Avatar className="w-12 h-12 border-2 border-purple-200">
                             <AvatarImage src={contact.profileImageUrl} />
                             <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold">
-                              {getInitials(contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User')}
+                              {getInitials(contact.name || (contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName) || contact.email?.split('@')[0] || 'Unknown User')}
                             </AvatarFallback>
                           </Avatar>
                           <div className="space-y-1">
                             <h3 className="font-semibold text-gray-900 text-lg">
-                              {contact.name || contact.firstName || contact.email?.split('@')[0] || 'Unknown User'}
+                              {contact.name || (contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName) || contact.email?.split('@')[0] || 'Unknown User'}
                             </h3>
                             <p className="text-sm text-gray-600">{contact.email || 'No email'}</p>
                             {contact.church && contact.church.name && (
@@ -625,10 +625,11 @@ function ContactsPage() {
                             className="gap-2 bg-white/50 hover:bg-purple-50 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800"
                             onClick={() => {
                               // Auto-select contact and navigate to messages
-                              setLocation(`/messages?contact=${contact.id}&name=${encodeURIComponent(contact.name || contact.firstName || contact.email?.split('@')[0] || 'contact')}`);
+                              const displayName = contact.name || (contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName) || contact.email?.split('@')[0] || 'contact';
+                              setLocation(`/messages?contact=${contact.id}&name=${encodeURIComponent(displayName)}`);
                               toast({
                                 title: "Opening Messages",
-                                description: `Starting conversation with ${contact.name || contact.firstName || 'contact'}`,
+                                description: `Starting conversation with ${displayName}`,
                               });
                             }}
                           >
@@ -779,7 +780,7 @@ function ContactsPage() {
                       {contact.name?.charAt(0)?.toUpperCase() || contact.email?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div>
-                      <p className="font-medium">{contact.name || 'Unknown'}</p>
+                      <p className="font-medium">{contact.name || (contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName) || contact.email?.split('@')[0] || 'Unknown'}</p>
                       <p className="text-sm text-gray-500">{contact.email}</p>
                       <p className="text-xs text-gray-400">
                         Status: <span className={contact.status === 'connected' ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
@@ -793,11 +794,12 @@ function ContactsPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setLocation(`/messages?contact=${contact.id}&name=${encodeURIComponent(contact.name || contact.email?.split('@')[0] || 'contact')}`);
+                      const displayName = contact.name || (contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName) || contact.email?.split('@')[0] || 'contact';
+                      setLocation(`/messages?contact=${contact.id}&name=${encodeURIComponent(displayName)}`);
                       setShowContactsDialog(false);
                       toast({
                         title: "Opening Messages",
-                        description: `Starting conversation with ${contact.name || contact.email}`,
+                        description: `Starting conversation with ${displayName}`,
                       });
                     }}
                   >

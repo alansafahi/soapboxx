@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 7, 2025: CONTACT NAME DISPLAY ISSUE COMPLETELY FIXED - Successfully resolved "Unknown" contact names by fixing backend data mapping and frontend display logic
+  - BACKEND MAPPING CORRECTED: Fixed getUserContacts method to properly include contact.name field in returned data structure
+  - FRONTEND DISPLAY ENHANCED: Updated contact display logic to prioritize contact.name over firstName/lastName combinations
+  - NAME FALLBACK HIERARCHY: Implemented proper fallback sequence: contact.name → firstName+lastName → firstName → email prefix → 'Unknown'
+  - DATA STRUCTURE PRESERVED: Maintained compatibility with both user-linked contacts and standalone contact records
 - July 7, 2025: CONTACT SYSTEM ISSUES COMPLETELY FIXED - Successfully resolved multiple contact system problems including duplicate contacts, incorrect status display, pending invitation logic, and messaging workflow
   - DUPLICATE CONTACTS ELIMINATED: Removed redundant contact entries (multiple Alan@soapboxsuperapp.com entries) using database deduplication
   - STATUS DISPLAY CORRECTED: Fixed "Inactive" status display to show proper "Connected" vs "Pending" based on actual contact.status field

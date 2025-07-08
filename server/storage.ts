@@ -4928,15 +4928,17 @@ export class DatabaseStorage implements IStorage {
 
     return userContacts.map(contact => ({
       id: contact.contactUserId || contact.id,
-      firstName: contact.firstName || contact.name?.split(' ')[0] || 'Unknown',
-      lastName: contact.firstName ? contact.lastName : contact.name?.split(' ').slice(1).join(' ') || '',
+      name: contact.name, // Keep the full name from contacts table
+      firstName: contact.firstName || contact.name?.split(' ')[0] || contact.email?.split('@')[0] || 'Unknown',
+      lastName: contact.lastName || (contact.name?.split(' ').length > 1 ? contact.name.split(' ').slice(1).join(' ') : ''),
       profileImageUrl: contact.profileImageUrl,
       role: contact.role || 'contact',
       email: contact.email,
       phone: contact.phone,
       status: contact.status,
       contactType: contact.contactType,
-      isOnline: false // Could be enhanced with real-time status
+      isOnline: false, // Could be enhanced with real-time status
+      createdAt: contact.createdAt
     }));
   }
 
