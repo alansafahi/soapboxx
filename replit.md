@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 8, 2025: DONATION LABEL UPDATE AND RECURRING PAYMENT FREQUENCIES COMPLETED - Successfully changed all "SMS Giving" references to "Donation" throughout the application and added comprehensive recurring payment options
+  - COMPLETE LABEL CHANGE: Updated all instances of "SMS Giving" to "Donation" in page headers, body content, tabs, and service status sections
+  - RECURRING PAYMENT FREQUENCIES: Added weekly, monthly, quarterly, and annually options with dynamic UI that shows selected frequency
+  - ENHANCED DONATION FORM: Payment form now displays "Recurring Donation (weekly/monthly/quarterly/annually)" with frequency selection buttons
+  - PAYMENT INTEGRATION: Updated payment intent creation to include recurringFrequency parameter for Stripe processing
+  - IMPROVED UX: Suggested amounts text dynamically updates based on selected frequency (e.g., "Suggested weekly amounts for sustained impact")
+  - BACKEND SUPPORT: Modified donation data structure to support different recurring intervals beyond just monthly
 - July 8, 2025: COMPREHENSIVE PRAYER CIRCLE ENHANCEMENT SYSTEM COMPLETED - Successfully implemented advanced prayer circle guardrails with profile verification requirements, smart church connection prompts, reporting system, and moderation tools
   - ENHANCED PROFILE VERIFICATION: Added phoneVerified, profileCompleteness, verificationStatus, realNameVerified fields to users table with configurable independentCircleLimit
   - COMPREHENSIVE GUARDRAILS: Profile verification required (email, full name, phone) before prayer circle creation with detailed missing field feedback

@@ -136,7 +136,7 @@ export default function SMSGiving() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Smartphone className="h-6 w-6 text-blue-600" />
-              <span>SMS Service Status</span>
+              <span>Donation Service Status</span>
               {smsConfig?.isActive ? (
                 <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
               ) : (
@@ -144,7 +144,7 @@ export default function SMSGiving() {
               )}
             </CardTitle>
             <CardDescription>
-              Current status of your SMS giving service and configuration
+              Current status of your donation service and configuration
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -166,14 +166,14 @@ export default function SMSGiving() {
             ) : (
               <div className="text-center py-8">
                 <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">SMS Giving Not Configured</h3>
-                <p className="text-gray-600 mb-4">Set up SMS giving to enable mobile donations</p>
+                <h3 className="text-lg font-semibold mb-2">Donation Service Not Configured</h3>
+                <p className="text-gray-600 mb-4">Set up donation service to enable mobile donations</p>
                 <Button 
                   onClick={() => setIsSettingUp(true)}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   <Settings className="h-4 w-4 mr-2" />
-                  Configure SMS Giving
+                  Configure Donation Service
                 </Button>
               </div>
             )}
@@ -183,7 +183,7 @@ export default function SMSGiving() {
         <Tabs defaultValue="send" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="send">Send Instructions</TabsTrigger>
-            <TabsTrigger value="keywords">SMS Keywords</TabsTrigger>
+            <TabsTrigger value="keywords">Donation Keywords</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -195,10 +195,10 @@ export default function SMSGiving() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Send className="h-5 w-5" />
-                    <span>Send Giving Instructions</span>
+                    <span>Send Donation Instructions</span>
                   </CardTitle>
                   <CardDescription>
-                    Send personalized SMS giving instructions to a member
+                    Send personalized donation instructions to a member
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -251,14 +251,14 @@ export default function SMSGiving() {
                     ) : (
                       <MessageSquare className="h-4 w-4 mr-2" />
                     )}
-                    Send SMS Instructions
+                    Send Instructions
                   </Button>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>How SMS Giving Works</CardTitle>
+                  <CardTitle>How Donation Works</CardTitle>
                   <CardDescription>
                     Simple steps for your congregation to give via text
                   </CardDescription>
@@ -313,7 +313,7 @@ export default function SMSGiving() {
             </div>
           </TabsContent>
 
-          {/* SMS Keywords */}
+          {/* Donation Keywords */}
           <TabsContent value="keywords" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
@@ -352,7 +352,7 @@ export default function SMSGiving() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">SMS Donations Today</p>
+                      <p className="text-sm font-medium text-gray-600">Donations Today</p>
                       <p className="text-2xl font-bold">${(smsStats?.todayAmount || 0).toLocaleString()}</p>
                     </div>
                     <DollarSign className="h-8 w-8 text-green-600" />
@@ -399,8 +399,8 @@ export default function SMSGiving() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Recent SMS Donations</CardTitle>
-                <CardDescription>Latest donations received via SMS</CardDescription>
+                <CardTitle>Recent Donations</CardTitle>
+                <CardDescription>Latest donations received</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -430,9 +430,9 @@ export default function SMSGiving() {
           <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>SMS Service Configuration</CardTitle>
+                <CardTitle>Donation Service Configuration</CardTitle>
                 <CardDescription>
-                  Configure your SMS giving service settings and preferences
+                  Configure your donation service settings and preferences
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">

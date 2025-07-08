@@ -160,6 +160,7 @@ export default function DonationDemo() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState<'weekly' | 'monthly' | 'quarterly' | 'annually'>('monthly');
   const [selectedChurch, setSelectedChurch] = useState("");
   const [churchAllocations, setChurchAllocations] = useState<ChurchAllocation[]>([]);
   const [allocationMode, setAllocationMode] = useState<'single' | 'multiple'>('single');
@@ -437,6 +438,7 @@ export default function DonationDemo() {
       metadata: {
         allocationMode,
         isRecurring,
+        recurringFrequency: isRecurring ? recurringFrequency : undefined,
         dedicationType: honorType,
         dedicationName: honorName,
         purpose,
@@ -807,7 +809,7 @@ export default function DonationDemo() {
                 <Label className="text-base font-medium">Donation Amount</Label>
                 <div className="text-sm text-gray-600 mb-2">
                   {isRecurring 
-                    ? "Suggested monthly amounts for sustained impact:" 
+                    ? `Suggested ${recurringFrequency} amounts for sustained impact:` 
                     : "Suggested one-time amounts:"}
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -849,16 +851,52 @@ export default function DonationDemo() {
                   />
                   <div>
                     <span className="font-medium">
-                      {isRecurring ? "Monthly Recurring" : "One-time Donation"}
+                      {isRecurring ? `Recurring Donation (${recurringFrequency})` : "One-time Donation"}
                     </span>
                     <p className="text-sm text-gray-600">
                       {isRecurring 
-                        ? "Automatically donate this amount each month" 
+                        ? `Automatically donate this amount ${recurringFrequency === 'weekly' ? 'every week' : recurringFrequency === 'monthly' ? 'each month' : recurringFrequency === 'quarterly' ? 'every quarter' : 'each year'}` 
                         : "Make a single donation today"
                       }
                     </p>
                   </div>
                 </div>
+                
+                {isRecurring && (
+                  <div className="ml-8 space-y-2">
+                    <Label className="text-sm font-medium">Frequency</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <Button
+                        variant={recurringFrequency === 'weekly' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setRecurringFrequency('weekly')}
+                      >
+                        Weekly
+                      </Button>
+                      <Button
+                        variant={recurringFrequency === 'monthly' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setRecurringFrequency('monthly')}
+                      >
+                        Monthly
+                      </Button>
+                      <Button
+                        variant={recurringFrequency === 'quarterly' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setRecurringFrequency('quarterly')}
+                      >
+                        Quarterly
+                      </Button>
+                      <Button
+                        variant={recurringFrequency === 'annually' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setRecurringFrequency('annually')}
+                      >
+                        Annually
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Separator />

@@ -144,7 +144,7 @@ export default function SMSGiving() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Smartphone className="h-6 w-6 text-blue-600" />
-              <span>SMS Service Status</span>
+              <span>Donation Service Status</span>
               {smsConfig?.isActive ? (
                 <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
               ) : (
