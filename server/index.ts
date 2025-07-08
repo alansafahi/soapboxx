@@ -86,6 +86,5 @@ app.use((req, res, next) => {
   const port = 5000;
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
-    log(`Development URL: https://${process.env.REPLIT_DEV_DOMAIN || `localhost:${port}`}`);
   });
 })();

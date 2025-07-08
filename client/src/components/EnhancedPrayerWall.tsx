@@ -16,11 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Heart, MessageCircle, Share, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { formatDistanceToNow } from 'date-fns';
 import type { PrayerRequest, PrayerCircle, PrayerCircleMember } from '../../../shared/schema';
-import { insertPrayerCircleSchema } from '../../../shared/schema';
 import PrayerAnalyticsBadges from './PrayerAnalyticsBadges';
 
 const prayerRequestSchema = z.object({
