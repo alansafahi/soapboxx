@@ -202,6 +202,7 @@ export default function EnhancedPrayerWall() {
   // Create prayer circle mutation
   const createCircleMutation = useMutation({
     mutationFn: async (data: PrayerCircleFormData) => {
+      console.log("Creating prayer circle with data:", data);
       return await apiRequest("POST", "/api/prayer-circles", data);
     },
     onSuccess: () => {
@@ -214,10 +215,12 @@ export default function EnhancedPrayerWall() {
         description: "Your prayer circle has been created successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Prayer circle creation error:", error);
+      const errorMessage = error?.message || "Failed to create prayer circle. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to create prayer circle. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -907,7 +910,11 @@ export default function EnhancedPrayerWall() {
                     <DialogTitle>Create New Prayer Circle</DialogTitle>
                   </DialogHeader>
                   <Form {...circleForm}>
-                    <form onSubmit={circleForm.handleSubmit((data) => createCircleMutation.mutate(data))} className="space-y-6">
+                    <form onSubmit={circleForm.handleSubmit((data) => {
+                      console.log("Form submitted with data:", data);
+                      console.log("Form errors:", circleForm.formState.errors);
+                      createCircleMutation.mutate(data);
+                    })} className="space-y-6">
                       <FormField
                         control={circleForm.control}
                         name="name"
