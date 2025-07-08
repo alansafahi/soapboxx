@@ -175,14 +175,18 @@ export default function EnhancedPrayerWall() {
     queryKey: ["/api/prayers"],
   });
 
-  // Fetch prayer circles
-  const { data: prayerCircles = [] } = useQuery({
+  // Fetch prayer circles with error handling
+  const { data: prayerCircles = [], isLoading: circlesLoading, error: circlesError } = useQuery({
     queryKey: ["/api/prayer-circles"],
+    retry: 3,
+    retryDelay: 1000,
   });
 
-  // Fetch user's prayer circles
-  const { data: userPrayerCircles = [] } = useQuery({
+  // Fetch user's prayer circles with error handling
+  const { data: userPrayerCircles = [], isLoading: userCirclesLoading, error: userCirclesError } = useQuery({
     queryKey: ["/api/user/prayer-circles"],
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Filter prayers by category

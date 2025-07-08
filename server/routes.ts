@@ -6597,7 +6597,9 @@ Return JSON with this exact structure:
         focusAreas: focusAreas || [],
         meetingSchedule: meetingSchedule || null,
         churchId: userChurch ? userChurch.churchId : null, // null for independent circles
-        createdBy: userId
+        createdBy: userId,
+        isIndependent: isIndependent, // Mark independent circles
+        type: isIndependent ? 'independent' : 'church'
       };
 
       console.log("Creating prayer circle with data:", prayerCircleData);

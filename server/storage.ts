@@ -2219,10 +2219,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(prayerCircles.createdBy, userId));
 
     if (independentOnly) {
-      // For now, consider circles without churchId as independent
+      // Independent circles have null churchId AND isIndependent = true
       query = query.where(and(
         eq(prayerCircles.createdBy, userId),
-        isNull(prayerCircles.churchId)
+        isNull(prayerCircles.churchId),
+        eq(prayerCircles.isIndependent, true)
       ));
     }
 
