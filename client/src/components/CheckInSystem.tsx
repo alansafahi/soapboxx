@@ -75,16 +75,73 @@ interface Event {
   isOnline?: boolean;
 }
 
-const moodOptions = [
-  { value: "joyful", emoji: "😊", label: "Joyful" },
-  { value: "peaceful", emoji: "😌", label: "Peaceful" },
-  { value: "grateful", emoji: "🙏", label: "Grateful" },
-  { value: "hopeful", emoji: "🌟", label: "Hopeful" },
-  { value: "contemplative", emoji: "🤔", label: "Contemplative" },
-  { value: "struggling", emoji: "😔", label: "Struggling" },
-  { value: "seeking", emoji: "🔍", label: "Seeking" },
-  { value: "blessed", emoji: "✨", label: "Blessed" },
+// 4-Pillar Comprehensive Mood System matching AI Check-In
+const moodCategories = [
+  {
+    title: "💙 Emotional & Spiritual Support",
+    description: "Express your struggles and need for comfort",
+    moods: [
+      { value: "anxious", emoji: "😰", label: "Anxious" },
+      { value: "depressed", emoji: "😞", label: "Depressed" },
+      { value: "lonely", emoji: "😔", label: "Lonely" },
+      { value: "grieving", emoji: "💔", label: "Grieving" },
+      { value: "fearful", emoji: "😨", label: "Fearful" },
+      { value: "overwhelmed", emoji: "😵", label: "Overwhelmed" },
+      { value: "doubtful", emoji: "🤔", label: "Doubtful" },
+      { value: "angry", emoji: "😠", label: "Angry" },
+    ]
+  },
+  {
+    title: "🌱 Growth & Transformation",
+    description: "Mark your spiritual formation journey",
+    moods: [
+      { value: "seeking-direction", emoji: "🧭", label: "Seeking Direction" },
+      { value: "repentant", emoji: "🙏", label: "Repentant" },
+      { value: "motivated", emoji: "🔥", label: "Motivated" },
+      { value: "curious", emoji: "🤓", label: "Curious" },
+      { value: "determined", emoji: "💪", label: "Determined" },
+      { value: "reflective", emoji: "🤲", label: "Reflective" },
+      { value: "inspired", emoji: "✨", label: "Inspired" },
+      { value: "focused", emoji: "🎯", label: "Focused" },
+    ]
+  },
+  {
+    title: "🏠 Life Situations",
+    description: "Navigate life's challenges with faith",
+    moods: [
+      { value: "celebrating", emoji: "🎉", label: "Celebrating" },
+      { value: "in-transition", emoji: "🚪", label: "In Transition" },
+      { value: "healing", emoji: "🩹", label: "Healing" },
+      { value: "parenting-challenges", emoji: "👨‍👩‍👧‍👦", label: "Parenting Challenges" },
+      { value: "work-stress", emoji: "💼", label: "Work Stress" },
+      { value: "relationship-issues", emoji: "💕", label: "Relationship Issues" },
+      { value: "financial-concerns", emoji: "💰", label: "Financial Concerns" },
+      { value: "health-concerns", emoji: "🏥", label: "Health Concerns" },
+    ]
+  },
+  {
+    title: "⛪ Faith & Worship",
+    description: "Express your spiritual state and connection",
+    moods: [
+      { value: "grateful", emoji: "🙌", label: "Grateful" },
+      { value: "peaceful", emoji: "🕊️", label: "Peaceful" },
+      { value: "joyful", emoji: "😊", label: "Joyful" },
+      { value: "blessed", emoji: "😇", label: "Blessed" },
+      { value: "prayerful", emoji: "🙏", label: "Prayerful" },
+      { value: "worshipful", emoji: "🎵", label: "Worshipful" },
+      { value: "hopeful", emoji: "🌅", label: "Hopeful" },
+      { value: "content", emoji: "😌", label: "Content" },
+    ]
+  }
 ];
+
+// Flattened mood options for easier access
+const moodOptions = moodCategories.flatMap(category => 
+  category.moods.map(mood => ({
+    ...mood,
+    category: category.title
+  }))
+);
 
 const checkInTypes = [
   { value: "Sunday Service", icon: Users, description: "Attending Sunday Service" },
@@ -295,25 +352,34 @@ export default function CheckInSystem() {
                         )}
                       </div>
 
-                      {/* Mood Selection */}
+                      {/* Comprehensive Mood Selection */}
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
+                        <label className="text-sm font-medium mb-3 block">
                           How are you feeling? (Optional)
                         </label>
-                        <div className="grid grid-cols-4 gap-2">
-                          {moodOptions.map((mood) => (
-                            <button
-                              key={mood.value}
-                              onClick={() => setSelectedMood(mood.value === selectedMood ? "" : mood.value)}
-                              className={`p-2 rounded-lg border text-center transition-colors ${
-                                selectedMood === mood.value
-                                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
-                                  : "border-gray-200 hover:border-gray-300"
-                              }`}
-                            >
-                              <div className="text-lg mb-1">{mood.emoji}</div>
-                              <div className="text-xs leading-tight">{mood.label}</div>
-                            </button>
+                        <div className="space-y-4 max-h-60 overflow-y-auto">
+                          {moodCategories.map((category) => (
+                            <div key={category.title} className="space-y-2">
+                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {category.title}
+                              </div>
+                              <div className="grid grid-cols-4 gap-2">
+                                {category.moods.map((mood) => (
+                                  <button
+                                    key={mood.value}
+                                    onClick={() => setSelectedMood(mood.value === selectedMood ? "" : mood.value)}
+                                    className={`p-2 rounded-lg border text-center transition-colors ${
+                                      selectedMood === mood.value
+                                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
+                                        : "border-gray-200 hover:border-gray-300"
+                                    }`}
+                                  >
+                                    <div className="text-lg mb-1">{mood.emoji}</div>
+                                    <div className="text-xs leading-tight">{mood.label}</div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>
