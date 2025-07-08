@@ -9,6 +9,8 @@ import ChurchDiscovery from "../components/church-discovery";
 import LeaderboardWidget from "../components/leaderboard-widget";
 import LeaderboardPreview from "../components/LeaderboardPreview";
 import UpcomingEventsPreview from "../components/UpcomingEventsPreview";
+import CompactPostComposer from "../components/CompactPostComposer";
+import LimitedSocialFeed from "../components/LimitedSocialFeed";
 import MobileNav from "../components/mobile-nav";
 import CheckInSystem from "../components/CheckInSystem";
 import { ReferralWelcome } from "../components/ReferralWelcome";
@@ -66,41 +68,66 @@ export default function Home({ referralCode }: HomeProps = {}) {
           </div>
         )}
         
-        {/* Main Social Feed Layout - Mobile-First Responsive */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-          {/* Primary Feed Column */}
-          <div className="lg:col-span-2 min-w-0">
-            <div id="social-feed" className="mb-4 sm:mb-6">
-              <SocialFeed />
-            </div>
-            <div id="events-list" className="mb-4 sm:mb-6 lg:mb-0">
-              <EventsList />
-            </div>
-          </div>
-          
-          {/* Right Sidebar - Stack on Mobile */}
-          <div className="space-y-3 sm:space-y-4 md:space-y-6">
-            <div id="check-in-system">
+        {/* Spiritual Highlights Carousel/Grid */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Spiritual Highlights</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="order-1">
               <CheckInSystem />
             </div>
-            <div id="leaderboard-preview">
-              <LeaderboardPreview />
-            </div>
-            <div id="upcoming-events-preview">
+            <div className="order-2">
               <UpcomingEventsPreview />
             </div>
-            <div id="leaderboard-widget">
-              <LeaderboardWidget />
+            <div className="order-3">
+              <LeaderboardPreview />
             </div>
+          </div>
+        </div>
+
+        {/* Main Feed Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Primary Feed Column */}
+          <div className="lg:col-span-3 min-w-0 space-y-6">
+            {/* Post Composer */}
+            <CompactPostComposer />
+
+            {/* Latest Posts */}
+            <LimitedSocialFeed initialLimit={5} />
+          </div>
+          
+          {/* Right Sidebar - Hidden on smaller screens */}
+          <div className="hidden lg:block space-y-6">
             <div id="prayer-wall">
               <PrayerWall />
             </div>
             <div id="church-discovery">
               <ChurchDiscovery />
             </div>
+            <div id="events-list">
+              <EventsList />
+            </div>
           </div>
         </div>
       </main>
+      
+      {/* Floating Post Button - Mobile Only */}
+      <div className="lg:hidden fixed bottom-20 right-4 z-40">
+        <button 
+          className="w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+          onClick={() => {
+            const composer = document.querySelector('[data-testid="compact-composer"] textarea') as HTMLTextAreaElement;
+            if (composer) {
+              composer.focus();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+      
       <MobileNav />
     </div>
   );
