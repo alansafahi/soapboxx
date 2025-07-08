@@ -35,7 +35,14 @@ const prayerRequestSchema = z.object({
 });
 
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
-type PrayerCircleFormData = z.infer<typeof insertPrayerCircleSchema.omit({ createdBy: true })>;
+// Simplified form type without complex validation
+interface PrayerCircleFormData {
+  name: string;
+  description: string;
+  isPublic: boolean;
+  memberLimit?: number;
+  focusAreas: string[];
+}
 
 const prayerCategories = [
   { id: 'all', label: 'All Prayers', icon: '🙏', count: 47 },
@@ -159,8 +166,7 @@ export default function EnhancedPrayerWall() {
     },
   });
 
-  const circleForm = useForm<PrayerCircleFormData>({
-    resolver: zodResolver(insertPrayerCircleSchema.omit({ createdBy: true })),
+  const circleForm = useForm({
     defaultValues: {
       name: "",
       description: "",
@@ -221,7 +227,7 @@ export default function EnhancedPrayerWall() {
 
   // Create prayer circle mutation
   const createCircleMutation = useMutation({
-    mutationFn: async (data: Omit<PrayerCircleFormData, 'createdBy'>) => {
+    mutationFn: async (data: PrayerCircleFormData) => {
 
       return await apiRequest("POST", "/api/prayer-circles", data);
     },
