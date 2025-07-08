@@ -3422,6 +3422,95 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     }
   });
 
+  // Prayer Analytics & Badges API endpoints
+  app.get('/api/prayer-analytics/badges/:userId', isAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const badges = await storage.getBadgeProgress(userId);
+      res.json(badges);
+    } catch (error) {
+      console.error('Error fetching badge progress:', error);
+      res.status(500).json({ error: 'Failed to fetch badge progress' });
+    }
+  });
+
+  app.get('/api/prayer-analytics/answered-prayers', isAuthenticated, async (req, res) => {
+    try {
+      const { userId, churchId } = req.query;
+      const answeredPrayers = await storage.getAnsweredPrayers(
+        userId as string, 
+        churchId ? parseInt(churchId as string) : undefined
+      );
+      res.json(answeredPrayers);
+    } catch (error) {
+      console.error('Error fetching answered prayers:', error);
+      res.status(500).json({ error: 'Failed to fetch answered prayers' });
+    }
+  });
+
+  app.post('/api/prayer-analytics/answered-prayer-testimony', isAuthenticated, async (req, res) => {
+    try {
+      const testimony = await storage.createAnsweredPrayerTestimony({
+        ...req.body,
+        userId: req.session.userId,
+      });
+      res.json(testimony);
+    } catch (error) {
+      console.error('Error creating answered prayer testimony:', error);
+      res.status(500).json({ error: 'Failed to create testimony' });
+    }
+  });
+
+  app.post('/api/prayer-analytics/react-answered-prayer', isAuthenticated, async (req, res) => {
+    try {
+      const { testimonyId, reactionType } = req.body;
+      await storage.reactToAnsweredPrayer(testimonyId, req.session.userId, reactionType);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error reacting to answered prayer:', error);
+      res.status(500).json({ error: 'Failed to react to answered prayer' });
+    }
+  });
+
+  app.get('/api/prayer-analytics/trends', isAuthenticated, async (req, res) => {
+    try {
+      const filters = req.query;
+      const userChurch = await storage.getUserChurch(req.session.userId);
+      const trends = await storage.getPrayerTrends(filters, userChurch?.churchId);
+      res.json(trends);
+    } catch (error) {
+      console.error('Error fetching prayer trends:', error);
+      res.status(500).json({ error: 'Failed to fetch prayer trends' });
+    }
+  });
+
+  app.post('/api/prayer-analytics/track-activity', isAuthenticated, async (req, res) => {
+    try {
+      const { activityType, entityId } = req.body;
+      await storage.updateUserProgress(req.session.userId, activityType, entityId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error tracking user activity:', error);
+      res.status(500).json({ error: 'Failed to track activity' });
+    }
+  });
+
+  app.post('/api/admin/initialize-badges', isAuthenticated, async (req, res) => {
+    try {
+      // Check if user has admin permissions
+      const userRole = await storage.getUserRole(req.session.userId);
+      if (!['soapbox_owner', 'super_admin', 'admin'].includes(userRole)) {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+      
+      await storage.initializeBadges();
+      res.json({ success: true, message: 'Badges initialized successfully' });
+    } catch (error) {
+      console.error('Error initializing badges:', error);
+      res.status(500).json({ error: 'Failed to initialize badges' });
+    }
+  });
+
   // Enhanced spiritual health analytics endpoints
   app.get('/api/admin/analytics/prayer-engagement', isAuthenticated, async (req: any, res) => {
     try {

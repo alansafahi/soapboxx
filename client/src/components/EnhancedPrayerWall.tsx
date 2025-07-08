@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { formatDistanceToNow } from 'date-fns';
 import type { PrayerRequest, PrayerCircle, PrayerCircleMember } from '../../../shared/schema';
 import { insertPrayerCircleSchema } from '../../../shared/schema';
+import PrayerAnalyticsBadges from './PrayerAnalyticsBadges';
 
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
@@ -1006,96 +1007,7 @@ export default function EnhancedPrayerWall() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Prayer Impact Badges */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Award className="w-5 h-5 text-yellow-600" />
-                  Prayer Badges
-                </h3>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white text-sm font-bold">🏆</div>
-                    <div>
-                      <div className="font-semibold text-sm">Prayer Warrior</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">50+ prayers this week</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">🙏</div>
-                    <div>
-                      <div className="font-semibold text-sm">Faithful Intercessor</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Daily prayer streak: 7 days</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Answered Prayers */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs">✓</div>
-                  Answered Prayers
-                </h3>
-              </CardHeader>
-              <CardContent className="text-center">
-                <div className="text-3xl font-bold text-green-600">127</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Prayers answered this month</div>
-                <div className="mt-4 space-y-1 text-left">
-                  <div className="text-xs text-gray-600 dark:text-gray-400">Recent answers:</div>
-                  <div className="text-sm">• Job interview success</div>
-                  <div className="text-sm">• Successful surgery</div>
-                  <div className="text-sm">• Family reconciliation</div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Engagement Trends */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-purple-600" />
-                  Prayer Trends
-                </h3>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Health Prayers</span>
-                      <span className="text-purple-600">↑ 25%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div className="bg-purple-600 h-2 rounded-full" style={{width: '75%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Youth Prayers</span>
-                      <span className="text-green-600">↑ 15%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{width: '60%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Career Prayers</span>
-                      <span className="text-blue-600">↑ 8%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{width: '45%'}}></div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <PrayerAnalyticsBadges />
         </TabsContent>
       </Tabs>
     </div>

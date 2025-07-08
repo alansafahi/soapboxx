@@ -29,6 +29,67 @@ export const sessions = pgTable(
 
 // Note: Bible verse caching removed - using API.Bible direct lookup with ChatGPT fallback
 
+// Prayer analytics and badges schema
+export const answeredPrayerTestimonies = pgTable("answered_prayer_testimonies", {
+  id: serial("id").primaryKey(),
+  prayerId: integer("prayer_id").notNull().references(() => prayerRequests.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  userName: varchar("user_name", { length: 255 }).notNull(),
+  testimony: text("testimony").notNull(),
+  answeredAt: timestamp("answered_at").defaultNow(),
+  category: varchar("category", { length: 50 }),
+  isPublic: boolean("is_public").default(true),
+  moderationStatus: varchar("moderation_status", { length: 20 }).default("approved"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const answeredPrayerReactions = pgTable("answered_prayer_reactions", {
+  id: serial("id").primaryKey(),
+  testimonyId: integer("testimony_id").notNull().references(() => answeredPrayerTestimonies.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  reactionType: varchar("reaction_type", { length: 20 }).notNull(), // praise, heart, fire
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userTestimonyReactionUnique: unique().on(table.userId, table.testimonyId, table.reactionType),
+}));
+
+export const answeredPrayerComments = pgTable("answered_prayer_comments", {
+  id: serial("id").primaryKey(),
+  testimonyId: integer("testimony_id").notNull().references(() => answeredPrayerTestimonies.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  userName: varchar("user_name", { length: 255 }).notNull(),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const prayerBadges = pgTable("prayer_badges", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon", { length: 10 }).notNull(),
+  category: varchar("category", { length: 20 }).notNull(), // prayer, community, growth, service
+  requirement: jsonb("requirement").notNull(), // { type: 'prayer_count', value: 50, timeframe: 'week' }
+  color: varchar("color", { length: 50 }).notNull(),
+  reward: text("reward"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userBadgeProgress = pgTable("user_badge_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: integer("badge_id").notNull().references(() => prayerBadges.id),
+  currentProgress: integer("current_progress").default(0),
+  maxProgress: integer("max_progress").notNull(),
+  isUnlocked: boolean("is_unlocked").default(false),
+  unlockedAt: timestamp("unlocked_at"),
+  lastProgressUpdate: timestamp("last_progress_update").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userBadgeUnique: unique().on(table.userId, table.badgeId),
+}));
+
 // Simple notifications table for user notifications
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
