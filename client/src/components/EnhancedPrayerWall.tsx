@@ -35,7 +35,7 @@ const prayerRequestSchema = z.object({
 });
 
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
-type PrayerCircleFormData = z.infer<typeof insertPrayerCircleSchema>;
+type PrayerCircleFormData = z.infer<typeof insertPrayerCircleSchema.omit({ createdBy: true })>;
 
 const prayerCategories = [
   { id: 'all', label: 'All Prayers', icon: '🙏', count: 47 },
@@ -160,7 +160,7 @@ export default function EnhancedPrayerWall() {
   });
 
   const circleForm = useForm<PrayerCircleFormData>({
-    resolver: zodResolver(insertPrayerCircleSchema),
+    resolver: zodResolver(insertPrayerCircleSchema.omit({ createdBy: true })),
     defaultValues: {
       name: "",
       description: "",
@@ -221,8 +221,8 @@ export default function EnhancedPrayerWall() {
 
   // Create prayer circle mutation
   const createCircleMutation = useMutation({
-    mutationFn: async (data: PrayerCircleFormData) => {
-      console.log("Form data being submitted:", data);
+    mutationFn: async (data: Omit<PrayerCircleFormData, 'createdBy'>) => {
+
       return await apiRequest("POST", "/api/prayer-circles", data);
     },
     onSuccess: () => {
@@ -977,8 +977,7 @@ export default function EnhancedPrayerWall() {
 
                   <Form {...circleForm}>
                     <form onSubmit={circleForm.handleSubmit((data) => {
-                      console.log("Form submitted with data:", data);
-                      console.log("Form errors:", circleForm.formState.errors);
+
                       createCircleMutation.mutate(data);
                     })} className="space-y-6">
                       <FormField
