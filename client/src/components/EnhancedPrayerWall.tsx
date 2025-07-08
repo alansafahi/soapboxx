@@ -51,13 +51,17 @@ interface PrayerCircleCardProps {
   circle: any;
   onJoin: () => void;
   onLeave: () => void;
+  onDelete: () => void;
   isJoining: boolean;
   isLeaving: boolean;
+  isDeleting: boolean;
   userCircles: any[];
+  currentUserId: string;
 }
 
-function PrayerCircleCard({ circle, onJoin, onLeave, isJoining, isLeaving, userCircles }: PrayerCircleCardProps) {
+function PrayerCircleCard({ circle, onJoin, onLeave, onDelete, isJoining, isLeaving, isDeleting, userCircles, currentUserId }: PrayerCircleCardProps) {
   const isUserMember = userCircles.some((uc: any) => uc.id === circle.id);
+  const isCreator = circle.createdBy === currentUserId;
   
   return (
     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -65,6 +69,7 @@ function PrayerCircleCard({ circle, onJoin, onLeave, isJoining, isLeaving, userC
         <div className="font-semibold">{circle.name}</div>
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {circle.memberCount || 0} members • {circle.activeMembers || 0} active
+          {isCreator && <span className="text-purple-600 ml-2">• Creator</span>}
         </div>
         {circle.description && (
           <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -76,24 +81,36 @@ function PrayerCircleCard({ circle, onJoin, onLeave, isJoining, isLeaving, userC
         <Badge variant={!circle.isPublic ? "default" : "outline"}>
           {!circle.isPublic ? "Private" : "Public"}
         </Badge>
-        {isUserMember ? (
+        {isCreator && (
           <Button
             variant="destructive"
             size="sm"
-            onClick={onLeave}
-            disabled={isLeaving}
+            onClick={onDelete}
+            disabled={isDeleting}
           >
-            {isLeaving ? "Leaving..." : "Leave"}
+            {isDeleting ? "Deleting..." : "Delete"}
           </Button>
-        ) : (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={onJoin}
-            disabled={isJoining || (circle.memberLimit && circle.memberCount >= circle.memberLimit)}
-          >
-            {isJoining ? "Joining..." : "Join"}
-          </Button>
+        )}
+        {!isCreator && (
+          isUserMember ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onLeave}
+              disabled={isLeaving}
+            >
+              {isLeaving ? "Leaving..." : "Leave"}
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onJoin}
+              disabled={isJoining || (circle.memberLimit && circle.memberCount >= circle.memberLimit)}
+            >
+              {isJoining ? "Joining..." : "Join"}
+            </Button>
+          )
         )}
       </div>
     </div>
@@ -244,6 +261,28 @@ export default function EnhancedPrayerWall() {
       toast({
         title: "Error",
         description: "Failed to leave prayer circle. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete prayer circle mutation
+  const deleteCircleMutation = useMutation({
+    mutationFn: async (circleId: number) => {
+      return await apiRequest("DELETE", `/api/prayer-circles/${circleId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayer-circles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/prayer-circles"] });
+      toast({
+        title: "Prayer Circle Deleted",
+        description: "Prayer circle has been permanently deleted.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete prayer circle. Please try again.",
         variant: "destructive",
       });
     },
@@ -841,9 +880,12 @@ export default function EnhancedPrayerWall() {
                       circle={circle}
                       onJoin={() => joinCircleMutation.mutate(circle.id)}
                       onLeave={() => leaveCircleMutation.mutate(circle.id)}
+                      onDelete={() => deleteCircleMutation.mutate(circle.id)}
                       isJoining={joinCircleMutation.isPending}
                       isLeaving={leaveCircleMutation.isPending}
+                      isDeleting={deleteCircleMutation.isPending}
                       userCircles={userPrayerCircles}
+                      currentUserId={user?.id || ''}
                     />
                   ))
                 ) : (

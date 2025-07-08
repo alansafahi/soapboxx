@@ -6404,8 +6404,16 @@ Return JSON with this exact structure:
   // Prayer Circles endpoints
   app.get('/api/prayer-circles', isAuthenticated, async (req: any, res) => {
     try {
-      const { churchId } = req.query;
-      const prayerCircles = await storage.getPrayerCircles(churchId ? parseInt(churchId) : undefined);
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get user's church for scoped prayer circles
+      const userChurch = await storage.getUserChurch(userId);
+      const churchId = userChurch?.churchId;
+      
+      const prayerCircles = await storage.getPrayerCircles(churchId);
       res.json(prayerCircles);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch prayer circles" });
@@ -6434,7 +6442,13 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      const { name, description, isPublic, memberLimit, focusAreas, meetingSchedule, churchId } = req.body;
+      // Get user's primary church for prayer circle creation
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch) {
+        return res.status(400).json({ message: "You must be a member of a church to create prayer circles" });
+      }
+
+      const { name, description, isPublic, memberLimit, focusAreas, meetingSchedule } = req.body;
 
       if (!name || !description) {
         return res.status(400).json({ message: "Name and description are required" });
@@ -6443,11 +6457,11 @@ Return JSON with this exact structure:
       const prayerCircleData = {
         name,
         description,
-        isPublic: isPublic || false,
+        isPublic: isPublic !== undefined ? isPublic : true,
         memberLimit: memberLimit || null,
         focusAreas: focusAreas || [],
         meetingSchedule: meetingSchedule || null,
-        churchId: churchId || null,
+        churchId: userChurch.churchId, // Use user's church
         createdBy: userId,
       };
 
@@ -6460,6 +6474,8 @@ Return JSON with this exact structure:
         role: 'leader',
         isActive: true,
       });
+
+      // Note: Points system integration placeholder for future enhancement
 
       res.status(201).json(prayerCircle);
     } catch (error) {
@@ -6523,6 +6539,36 @@ Return JSON with this exact structure:
       res.status(200).json({ message: "Successfully left prayer circle" });
     } catch (error) {
       res.status(500).json({ message: "Failed to leave prayer circle" });
+    }
+  });
+
+  // Delete prayer circle (creator only)
+  app.delete("/api/prayer-circles/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const circleId = parseInt(req.params.id);
+      
+      // Check if user is the creator
+      const circle = await storage.getPrayerCircle(circleId);
+      if (!circle) {
+        return res.status(404).json({ message: "Prayer circle not found" });
+      }
+      
+      if (circle.createdBy !== userId) {
+        return res.status(403).json({ message: "Only the creator can delete this prayer circle" });
+      }
+
+      // Note: Points system integration placeholder for future enhancement
+      
+      await storage.deletePrayerCircle(circleId);
+      
+      res.json({ message: "Prayer circle deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete prayer circle" });
     }
   });
 
