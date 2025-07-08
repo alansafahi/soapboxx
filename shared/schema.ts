@@ -780,12 +780,16 @@ export const prayerCircles = pgTable("prayer_circles", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  churchId: integer("church_id").references(() => churches.id), // Optional for independent circles
   createdBy: varchar("created_by").notNull().references(() => users.id),
   isPublic: boolean("is_public").default(true),
   memberLimit: integer("member_limit").default(50), // Optional limit
   focusAreas: text("focus_areas").array().default([]), // healing, family, missions, etc.
   meetingSchedule: text("meeting_schedule"), // Optional meeting info
+  isIndependent: boolean("is_independent").default(false), // Independent prayer circles
+  type: varchar("type", { length: 20 }).default("church"), // church, independent
+  status: varchar("status", { length: 20 }).default("active"), // active, pending_moderation, suspended
+  moderationNotes: text("moderation_notes"), // For reporting and moderation
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

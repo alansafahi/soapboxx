@@ -408,6 +408,7 @@ export interface IStorage {
   createPrayerCircle(circle: InsertPrayerCircle): Promise<PrayerCircle>;
   updatePrayerCircle(id: number, updates: Partial<PrayerCircle>): Promise<PrayerCircle>;
   deletePrayerCircle(id: number): Promise<void>;
+  getUserCreatedCircles(userId: string, independentOnly?: boolean): Promise<PrayerCircle[]>;
   
   // Prayer circle membership operations
   joinPrayerCircle(membership: InsertPrayerCircleMember): Promise<PrayerCircleMember>;
@@ -2209,6 +2210,23 @@ export class DatabaseStorage implements IStorage {
       .where(eq(prayerCircles.id, id))
       .returning();
     return updatedCircle;
+  }
+
+  async getUserCreatedCircles(userId: string, independentOnly?: boolean): Promise<PrayerCircle[]> {
+    let query = db
+      .select()
+      .from(prayerCircles)
+      .where(eq(prayerCircles.createdBy, userId));
+
+    if (independentOnly) {
+      // For now, consider circles without churchId as independent
+      query = query.where(and(
+        eq(prayerCircles.createdBy, userId),
+        isNull(prayerCircles.churchId)
+      ));
+    }
+
+    return await query.orderBy(desc(prayerCircles.createdAt));
   }
 
   async deletePrayerCircle(id: number): Promise<void> {

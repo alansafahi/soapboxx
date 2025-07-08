@@ -48,6 +48,17 @@ const prayerCategories = [
   { id: 'general', label: 'General', icon: '🤲', count: 8 },
 ];
 
+const prayerFocusAreas = [
+  { id: 'healing', label: 'Healing & Health', icon: '💊', description: 'Physical and emotional healing prayers' },
+  { id: 'family', label: 'Family & Relationships', icon: '👨‍👩‍👧‍👦', description: 'Marriage, children, and family unity' },
+  { id: 'students', label: 'Students & Education', icon: '🎓', description: 'Academic success and wisdom' },
+  { id: 'career', label: 'Career & Finances', icon: '💼', description: 'Job opportunities and financial provision' },
+  { id: 'missions', label: 'Missions & Outreach', icon: '🌍', description: 'Global ministry and evangelism' },
+  { id: 'spiritual_growth', label: 'Spiritual Growth', icon: '✝️', description: 'Discipleship and spiritual maturity' },
+  { id: 'breakthrough', label: 'Breakthrough & Victory', icon: '⚡', description: 'Overcoming challenges and obstacles' },
+  { id: 'worship', label: 'Worship & Praise', icon: '🙌', description: 'Celebration and thanksgiving' },
+];
+
 interface PrayerCircleCardProps {
   circle: any;
   onJoin: () => void;
@@ -129,6 +140,11 @@ export default function EnhancedPrayerWall() {
   const [bookmarkedRequests, setBookmarkedRequests] = useState<Set<number>>(new Set());
   const [showWhosPraying, setShowWhosPraying] = useState<Map<number, boolean>>(new Map());
   const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
+  
+  // Check user's church status for prayer circle limits
+  const { data: userChurchStatus } = useQuery({
+    queryKey: ["/api/user/church-status"],
+  });
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),
@@ -217,7 +233,16 @@ export default function EnhancedPrayerWall() {
     },
     onError: (error: any) => {
       console.error("Prayer circle creation error:", error);
-      const errorMessage = error?.message || "Failed to create prayer circle. Please try again.";
+      let errorMessage = "Failed to create prayer circle. Please try again.";
+      
+      if (error?.requiresVerification) {
+        errorMessage = "Please verify your email and complete your profile before creating prayer circles.";
+      } else if (error?.limitReached) {
+        errorMessage = "You can create up to 2 independent prayer circles. Consider joining a local church for unlimited circles.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
         description: errorMessage,
@@ -909,6 +934,44 @@ export default function EnhancedPrayerWall() {
                   <DialogHeader>
                     <DialogTitle>Create New Prayer Circle</DialogTitle>
                   </DialogHeader>
+
+                  {/* Church Status Information */}
+                  {userChurchStatus && !userChurchStatus.hasChurch && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="text-blue-600 dark:text-blue-400 mt-0.5">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                            Independent Prayer Circle
+                          </h4>
+                          <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                            You can create up to 2 independent prayer circles ({userChurchStatus.independentCirclesCount}/2 created).
+                          </p>
+                          <p className="text-xs text-blue-700 dark:text-blue-300">
+                            💡 Join a local church to create unlimited prayer circles and connect with a larger faith community.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {userChurchStatus?.hasChurch && (
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-4">
+                      <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-sm font-medium">
+                          Church Member • {userChurchStatus.churchName}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   <Form {...circleForm}>
                     <form onSubmit={circleForm.handleSubmit((data) => {
                       console.log("Form submitted with data:", data);
@@ -942,6 +1005,37 @@ export default function EnhancedPrayerWall() {
                                 {...field} 
                               />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={circleForm.control}
+                        name="focusAreas"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Prayer Focus Area</FormLabel>
+                            <Select onValueChange={(value) => field.onChange([value])} defaultValue={field.value?.[0]}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a prayer focus" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {prayerFocusAreas.map((focus) => (
+                                  <SelectItem key={focus.id} value={focus.id}>
+                                    <div className="flex items-center gap-2">
+                                      <span>{focus.icon}</span>
+                                      <div>
+                                        <div className="font-medium">{focus.label}</div>
+                                        <div className="text-xs text-gray-500">{focus.description}</div>
+                                      </div>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}

@@ -6478,6 +6478,29 @@ Return JSON with this exact structure:
     }
   });
 
+  // User church status for prayer circle creation
+  app.get("/api/user/church-status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const userChurch = await storage.getUserChurch(userId);
+      const userCreatedCircles = await storage.getUserCreatedCircles(userId, true);
+      
+      res.json({
+        hasChurch: !!userChurch,
+        churchName: userChurch?.name,
+        independentCirclesCount: userCreatedCircles.length,
+        canCreateMore: userCreatedCircles.length < 2
+      });
+    } catch (error) {
+      console.error("Error fetching church status:", error);
+      res.json({ hasChurch: false, independentCirclesCount: 0, canCreateMore: true });
+    }
+  });
+
   // Prayer Circles endpoints
   app.get('/api/prayer-circles', isAuthenticated, async (req: any, res) => {
     try {
@@ -6521,17 +6544,41 @@ Return JSON with this exact structure:
 
       console.log("Creating prayer circle for user:", userId);
 
-      // Get user's primary church for prayer circle creation
+      // Get user information and church affiliation
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check profile verification requirements for non-church members
+      if (!user.emailVerified || !user.firstName || !user.lastName) {
+        return res.status(400).json({ 
+          message: "Profile verification required. Please verify your email and complete your profile before creating prayer circles.",
+          requiresVerification: true
+        });
+      }
+
       let userChurch;
+      let isIndependent = false;
       try {
         userChurch = await storage.getUserChurch(userId);
       } catch (error) {
         console.error("Error getting user church:", error);
-        return res.status(500).json({ message: "Error retrieving user church information" });
+        // Continue without church - allow independent circles
       }
 
       if (!userChurch) {
-        return res.status(400).json({ message: "You must be a member of a church to create prayer circles" });
+        isIndependent = true;
+        console.log("Creating independent prayer circle for non-church member:", userId);
+        
+        // Check limits for independent circles
+        const existingIndependentCircles = await storage.getUserCreatedCircles(userId, true); // independent only
+        if (existingIndependentCircles.length >= 2) {
+          return res.status(400).json({ 
+            message: "Independent members can create up to 2 prayer circles. Consider joining a local church for unlimited circles.",
+            limitReached: true
+          });
+        }
       }
 
       const { name, description, isPublic, memberLimit, focusAreas, meetingSchedule } = req.body;
@@ -6549,8 +6596,8 @@ Return JSON with this exact structure:
         memberLimit: memberLimit || null,
         focusAreas: focusAreas || [],
         meetingSchedule: meetingSchedule || null,
-        churchId: userChurch.churchId, // Use user's church
-        createdBy: userId,
+        churchId: userChurch ? userChurch.churchId : null, // null for independent circles
+        createdBy: userId
       };
 
       console.log("Creating prayer circle with data:", prayerCircleData);
