@@ -6476,33 +6476,7 @@ Return JSON with this exact structure:
     }
   });
 
-  // User church status for prayer circle creation
-  app.get("/api/user/church-status", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.session.userId;
-      if (!userId) {
-        return res.status(401).json({ message: 'User authentication required' });
-      }
-
-      const userChurch = await storage.getUserChurch(userId);
-      const userCreatedCircles = await storage.getUserCreatedCircles(userId, true);
-      
-      const user = await storage.getUser(userId);
-      const userLimit = user?.independentCircleLimit || 2;
-      
-      res.json({
-        hasChurch: !!userChurch,
-        churchName: userChurch?.name,
-        independentCirclesCount: userCreatedCircles.length,
-        canCreateMore: userCreatedCircles.length < userLimit,
-        circleLimit: userLimit,
-        profileComplete: !!(user?.emailVerified && user?.firstName && user?.lastName && user?.mobileNumber)
-      });
-    } catch (error) {
-
-      res.json({ hasChurch: false, independentCirclesCount: 0, canCreateMore: true });
-    }
-  });
+  // REMOVED: Duplicate endpoint - using enhanced version below
 
   // Prayer Circles endpoints
   app.get('/api/prayer-circles', isAuthenticated, async (req: any, res) => {
@@ -6818,6 +6792,69 @@ Return JSON with this exact structure:
       res.json({ message: "Prayer circle deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete prayer circle" });
+    }
+  });
+
+  // Enhanced church status endpoint for prayer circle guardrails
+  app.get('/api/user/church-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Check if user has church affiliation
+      const userChurch = await db
+        .select()
+        .from(userChurches)
+        .where(eq(userChurches.userId, userId))
+        .limit(1);
+
+      // Calculate profile completeness
+      const profileComplete = !!(
+        user.emailVerified && 
+        user.firstName && 
+        user.lastName && 
+        user.phoneVerified
+      );
+
+      // Count independent circles created by user
+      const independentCircles = await db
+        .select()
+        .from(prayerCircles)
+        .where(and(
+          eq(prayerCircles.createdBy, userId),
+          isNull(prayerCircles.churchId)
+        ));
+
+      const circleLimit = user.independentCircleLimit || 2;
+      const independentCirclesCount = independentCircles.length;
+      const canCreateMore = userChurch.length > 0 || independentCirclesCount < circleLimit;
+
+      return res.json({
+        hasChurch: userChurch.length > 0,
+        profileComplete,
+        circleLimit,
+        independentCirclesCount,
+        canCreateMore,
+        emailVerified: !!user.emailVerified,
+        phoneVerified: !!user.phoneVerified,
+        hasName: !!(user.firstName && user.lastName),
+        missingFields: profileComplete ? [] : [
+          !user.emailVerified && 'Email verification',
+          !user.firstName && 'First name',
+          !user.lastName && 'Last name', 
+          !user.phoneVerified && 'Phone verification'
+        ].filter(Boolean)
+      });
+    } catch (error) {
+      console.error('Church status error:', error);
+      return res.status(500).json({ message: 'Failed to get church status' });
     }
   });
 
