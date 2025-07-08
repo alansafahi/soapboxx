@@ -479,19 +479,19 @@ export default function PrayerWall() {
         {/* AI Prayer Assistance Button */}
         <Button 
           onClick={() => setIsAIAssistanceOpen(true)}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-6 text-lg"
+          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-6 px-4 text-base md:text-lg h-auto min-h-[60px] whitespace-normal"
         >
-          <Sparkles className="w-5 h-5 mr-2" />
-          Get AI Help Writing Prayer
+          <Sparkles className="w-5 h-5 mr-2 flex-shrink-0" />
+          <span className="text-center">Get AI Help Writing Prayer</span>
         </Button>
 
         {/* Create Prayer Request Button */}
         <Button 
           onClick={() => setIsCreateDialogOpen(true)}
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 text-lg"
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 px-4 text-base md:text-lg h-auto min-h-[60px] whitespace-normal"
         >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Prayer Request to Wall
+          <Plus className="w-5 h-5 mr-2 flex-shrink-0" />
+          <span className="text-center">Add Prayer Request</span>
         </Button>
       </div>
 
