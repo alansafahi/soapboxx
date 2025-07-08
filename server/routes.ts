@@ -9726,6 +9726,86 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // User streaks endpoint for leaderboard streak icons
+  app.get('/api/user-streaks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      // Get current user's church to scope streaks
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const userChurches = await storage.getUserChurches(userId);
+      if (!userChurches || userChurches.length === 0) {
+        return res.json([]); // Return empty array if no church
+      }
+
+      const churchId = userChurches[0].churchId;
+      
+      // Get all church members' streak information
+      const churchMembers = await storage.getChurchMembers(churchId);
+      
+      // Calculate streaks for each member (simplified - using check-in activity)
+      const userStreaks = [];
+      
+      for (const member of churchMembers) {
+        try {
+          // Get recent check-ins for streak calculation
+          const recentCheckIns = await storage.getUserCheckIns(member.userId, 30); // Last 30 days
+          
+          let currentStreak = 0;
+          let isActive = false;
+          
+          if (recentCheckIns && recentCheckIns.length > 0) {
+            // Sort by date descending
+            const sortedCheckIns = recentCheckIns.sort((a: any, b: any) => 
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            
+            // Calculate consecutive days
+            const today = new Date();
+            let checkDate = new Date(today);
+            
+            for (const checkIn of sortedCheckIns) {
+              const checkInDate = new Date(checkIn.createdAt);
+              checkInDate.setHours(0, 0, 0, 0);
+              checkDate.setHours(0, 0, 0, 0);
+              
+              const daysDiff = Math.floor((checkDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+              
+              if (daysDiff === currentStreak) {
+                currentStreak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+                isActive = currentStreak >= 3; // 3+ day streak is considered active
+              } else {
+                break;
+              }
+            }
+          }
+          
+          userStreaks.push({
+            userId: member.userId,
+            currentStreak,
+            isActive
+          });
+        } catch (error) {
+          // If we can't calculate for this user, skip them
+          continue;
+        }
+      }
+      
+      res.json(userStreaks);
+    } catch (error) {
+      console.error('Error fetching user streaks:', error);
+      res.status(500).json({ message: 'Failed to fetch user streaks' });
+    }
+  });
+
   // Leaderboard endpoint
   app.get('/api/leaderboard', isAuthenticated, async (req: any, res) => {
     try {

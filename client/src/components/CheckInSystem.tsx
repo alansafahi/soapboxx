@@ -160,7 +160,7 @@ export default function CheckInSystem() {
   const [showQrScanner, setShowQrScanner] = useState(false);
   const [showMoodCheckIn, setShowMoodCheckIn] = useState(false);
   const [selectedType, setSelectedType] = useState("Spiritual Check-In");
-  const [selectedMood, setSelectedMood] = useState("");
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [prayerIntent, setPrayerIntent] = useState("");
   const [customType, setCustomType] = useState("");
@@ -217,7 +217,7 @@ export default function CheckInSystem() {
       setShowCheckInDialog(false);
       setNotes("");
       setPrayerIntent("");
-      setSelectedMood("");
+      setSelectedMoods([]);
       setCustomType("");
       queryClient.invalidateQueries({ queryKey: ["/api/checkins"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/score"] });
@@ -232,10 +232,13 @@ export default function CheckInSystem() {
   });
 
   const handleCheckIn = () => {
+    const moodString = selectedMoods.join(', ');
+    const moodEmojis = selectedMoods.map(mood => moodOptions.find(m => m.value === mood)?.emoji).filter(Boolean).join('');
+    
     const checkInData = {
       checkInType: selectedType === "Custom" ? customType : selectedType,
-      mood: selectedMood,
-      moodEmoji: moodOptions.find(m => m.value === selectedMood)?.emoji,
+      mood: moodString,
+      moodEmoji: moodEmojis,
       notes: notes.trim() || undefined,
       prayerIntent: prayerIntent.trim() || undefined,
       isPhysicalAttendance: false,
@@ -245,12 +248,15 @@ export default function CheckInSystem() {
   };
 
   const handleQrCheckIn = (qrCodeId: string) => {
+    const moodString = selectedMoods.join(', ');
+    const moodEmojis = selectedMoods.map(mood => moodOptions.find(m => m.value === mood)?.emoji).filter(Boolean).join('');
+    
     const checkInData = {
       checkInType: "Physical Attendance",
       isPhysicalAttendance: true,
       qrCodeId,
-      mood: selectedMood,
-      moodEmoji: moodOptions.find(m => m.value === selectedMood)?.emoji,
+      mood: moodString,
+      moodEmoji: moodEmojis,
       notes: notes.trim() || undefined,
     };
 
@@ -357,6 +363,40 @@ export default function CheckInSystem() {
                         <label className="text-sm font-medium mb-3 block">
                           How are you feeling? (Optional)
                         </label>
+                        
+                        {/* Selected moods display */}
+                        {selectedMoods.length > 0 && (
+                          <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                            <div className="text-sm text-blue-700 dark:text-blue-300 mb-2">
+                              Selected feelings ({selectedMoods.join(', ').length}/150 characters):
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {selectedMoods.map((moodValue) => {
+                                const mood = moodOptions.find(m => m.value === moodValue);
+                                return mood ? (
+                                  <span key={moodValue} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-800 rounded text-xs">
+                                    {mood.emoji} {mood.label}
+                                    <button
+                                      onClick={() => setSelectedMoods(prev => prev.filter(m => m !== moodValue))}
+                                      className="ml-1 text-blue-600 hover:text-blue-800"
+                                    >
+                                      ×
+                                    </button>
+                                  </span>
+                                ) : null;
+                              })}
+                            </div>
+                            {selectedMoods.length > 0 && (
+                              <button
+                                onClick={() => setSelectedMoods([])}
+                                className="text-xs text-blue-600 hover:text-blue-800 mt-2"
+                              >
+                                Clear all
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        
                         <div className="space-y-4 max-h-60 overflow-y-auto">
                           {moodCategories.map((category) => (
                             <div key={category.title} className="space-y-2">
@@ -364,20 +404,34 @@ export default function CheckInSystem() {
                                 {category.title}
                               </div>
                               <div className="grid grid-cols-4 gap-2">
-                                {category.moods.map((mood) => (
-                                  <button
-                                    key={mood.value}
-                                    onClick={() => setSelectedMood(mood.value === selectedMood ? "" : mood.value)}
-                                    className={`p-2 rounded-lg border text-center transition-colors ${
-                                      selectedMood === mood.value
-                                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
-                                        : "border-gray-200 hover:border-gray-300"
-                                    }`}
-                                  >
-                                    <div className="text-lg mb-1">{mood.emoji}</div>
-                                    <div className="text-xs leading-tight">{mood.label}</div>
-                                  </button>
-                                ))}
+                                {category.moods.map((mood) => {
+                                  const isSelected = selectedMoods.includes(mood.value);
+                                  const wouldExceedLimit = !isSelected && (selectedMoods.join(', ') + ', ' + mood.label).length > 150;
+                                  
+                                  return (
+                                    <button
+                                      key={mood.value}
+                                      onClick={() => {
+                                        if (isSelected) {
+                                          setSelectedMoods(prev => prev.filter(m => m !== mood.value));
+                                        } else if (!wouldExceedLimit) {
+                                          setSelectedMoods(prev => [...prev, mood.value]);
+                                        }
+                                      }}
+                                      disabled={wouldExceedLimit}
+                                      className={`p-2 rounded-lg border text-center transition-colors ${
+                                        isSelected
+                                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
+                                          : wouldExceedLimit
+                                          ? "border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed"
+                                          : "border-gray-200 hover:border-gray-300"
+                                      }`}
+                                    >
+                                      <div className="text-lg mb-1">{mood.emoji}</div>
+                                      <div className="text-xs leading-tight">{mood.label}</div>
+                                    </button>
+                                  );
+                                })}
                               </div>
                             </div>
                           ))}

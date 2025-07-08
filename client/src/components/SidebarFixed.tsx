@@ -122,6 +122,7 @@ export default function SidebarFixed() {
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
+        { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
@@ -132,7 +133,6 @@ export default function SidebarFixed() {
       items: [
         { label: "Video Library", href: "/video-library", icon: Video },
         { label: "Image Gallery", href: "/image-gallery", icon: ImageIcon },
-        { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
       ]
     },
     {

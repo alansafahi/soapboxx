@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Medal, Award, Crown } from 'lucide-react';
+import { Trophy, Medal, Award, Crown, Flame, User } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 // Define the structure of our leaderboard data
 interface LeaderboardEntry {
@@ -9,26 +10,52 @@ interface LeaderboardEntry {
   lastName: string;
   avatarUrl: string | null;
   score: number;
+  profileImageUrl?: string;
+}
+
+// User streak information
+interface UserStreak {
+  userId: string;
+  currentStreak: number;
+  isActive: boolean;
 }
 
 const Leaderboard: React.FC = () => {
+  const { user } = useAuth();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [userStreaks, setUserStreaks] = useState<UserStreak[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        // This fetch call targets our new Express endpoint
-        const response = await fetch('/api/leaderboard', {
-          credentials: 'include', // Include session cookies for authentication
+        
+        // Fetch leaderboard data
+        const leaderboardResponse = await fetch('/api/leaderboard', {
+          credentials: 'include',
         });
-        if (!response.ok) {
+        if (!leaderboardResponse.ok) {
           throw new Error('Failed to fetch leaderboard data.');
         }
-        const data: LeaderboardEntry[] = await response.json();
-        setLeaderboard(data);
+        const leaderboardData: LeaderboardEntry[] = await leaderboardResponse.json();
+        setLeaderboard(leaderboardData);
+
+        // Fetch user streaks data for streak icons
+        try {
+          const streaksResponse = await fetch('/api/user-streaks', {
+            credentials: 'include',
+          });
+          if (streaksResponse.ok) {
+            const streaksData: UserStreak[] = await streaksResponse.json();
+            setUserStreaks(streaksData);
+          }
+        } catch (streakError) {
+          // Don't fail if streaks API isn't available, just continue without streak data
+          console.warn('Streaks data not available:', streakError);
+        }
+        
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred.');
       } finally {
@@ -36,7 +63,7 @@ const Leaderboard: React.FC = () => {
       }
     };
 
-    fetchLeaderboard();
+    fetchData();
   }, []);
 
   const getRankIcon = (rank: number) => {
@@ -63,6 +90,20 @@ const Leaderboard: React.FC = () => {
       default:
         return 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white';
     }
+  };
+
+  // Check if user has a streak (7+ days or top 20%)
+  const hasStreak = (userId: string, rank: number) => {
+    const userStreak = userStreaks.find(s => s.userId === userId);
+    const isTopPercentile = rank <= Math.ceil(leaderboard.length * 0.2); // Top 20%
+    const hasActiveStreak = userStreak && userStreak.isActive && userStreak.currentStreak >= 7;
+    return isTopPercentile || hasActiveStreak;
+  };
+
+  // Handle profile click
+  const handleProfileClick = (userId: string) => {
+    // Navigate to user profile page
+    window.location.href = `/profile/${userId}`;
   };
 
   if (loading) {
@@ -149,7 +190,7 @@ const Leaderboard: React.FC = () => {
                     {leaderboard.map((entry) => (
                       <tr 
                         key={entry.id} 
-                        className="hover:bg-white/5 transition-colors duration-200"
+                        className="hover:bg-white/5 transition-colors duration-200 group"
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center">
@@ -160,17 +201,28 @@ const Leaderboard: React.FC = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 w-12 h-12 mr-4">
+                            <div 
+                              className="flex-shrink-0 w-12 h-12 mr-4 cursor-pointer hover:scale-105 transition-transform"
+                              onClick={() => handleProfileClick(entry.id)}
+                            >
                               <img
                                 className="w-full h-full rounded-full border-2 border-white/20 object-cover"
-                                src={entry.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.firstName + ' ' + entry.lastName)}&background=6366f1&color=fff&size=48`}
+                                src={entry.avatarUrl || entry.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.firstName + ' ' + entry.lastName)}&background=6366f1&color=fff&size=48`}
                                 alt={`${entry.firstName} ${entry.lastName}`}
                               />
                             </div>
-                            <div>
-                              <p className="text-lg font-semibold text-white">
-                                {entry.firstName} {entry.lastName}
-                              </p>
+                            <div 
+                              className="cursor-pointer hover:text-yellow-300 transition-colors flex-grow"
+                              onClick={() => handleProfileClick(entry.id)}
+                            >
+                              <div className="flex items-center gap-2">
+                                <p className="text-lg font-semibold text-white">
+                                  {entry.firstName} {entry.lastName}
+                                </p>
+                                {hasStreak(entry.id, entry.rank) && (
+                                  <Flame className="w-4 h-4 text-orange-500" title="On a streak!" />
+                                )}
+                              </div>
                               {entry.rank <= 3 && (
                                 <p className="text-sm text-blue-200">
                                   {entry.rank === 1 && "🏆 Community Champion"}
@@ -183,7 +235,7 @@ const Leaderboard: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end">
-                            <span className="text-2xl font-bold text-yellow-400 mr-2">
+                            <span className="text-2xl font-bold text-yellow-400 mr-2 group-hover:text-yellow-300 transition-colors">
                               {entry.score}
                             </span>
                             <span className="text-sm text-blue-200">points</span>
