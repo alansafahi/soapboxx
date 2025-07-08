@@ -22,6 +22,8 @@ import {
   prayerAssignments,
   prayerCircles,
   prayerCircleMembers,
+  prayerCircleReports,
+  prayerCircleUpdates,
   userAchievements,
   userActivities,
   userChurches,
@@ -2329,6 +2331,53 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
     return !!membership;
+  }
+
+  // Enhanced prayer circle methods for new features
+  async getPrayerCircleByInviteCode(inviteCode: string): Promise<PrayerCircle | undefined> {
+    const [circle] = await db
+      .select()
+      .from(prayerCircles)
+      .where(eq(prayerCircles.inviteCode, inviteCode))
+      .limit(1);
+    return circle;
+  }
+
+  async createPrayerCircleReport(report: any): Promise<any> {
+    const [newReport] = await db
+      .insert(prayerCircleReports)
+      .values(report)
+      .returning();
+    return newReport;
+  }
+
+  async incrementCircleReportCount(circleId: number): Promise<void> {
+    await db
+      .update(prayerCircles)
+      .set({ 
+        reportCount: sql`${prayerCircles.reportCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(prayerCircles.id, circleId));
+  }
+
+  async createPrayerUpdate(update: any): Promise<any> {
+    const [newUpdate] = await db
+      .insert(prayerCircleUpdates)
+      .values(update)
+      .returning();
+    return newUpdate;
+  }
+
+  async incrementAnsweredPrayersCount(circleId: number): Promise<void> {
+    await db
+      .update(prayerCircles)
+      .set({ 
+        answeredPrayersCount: sql`${prayerCircles.answeredPrayersCount} + 1`,
+        lastActivityAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(prayerCircles.id, circleId));
   }
 
   // Template management operations

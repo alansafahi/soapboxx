@@ -13,7 +13,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Heart, MessageCircle, Share, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload } from 'lucide-react';
+import { Heart, MessageCircle, Share, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -139,6 +139,8 @@ export default function EnhancedPrayerWall() {
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateCircleDialogOpen, setIsCreateCircleDialogOpen] = useState(false);
+  const [showProfileVerificationDialog, setShowProfileVerificationDialog] = useState(false);
+  const [showChurchPromptDialog, setShowChurchPromptDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
   const [prayedRequests, setPrayedRequests] = useState<Set<number>>(new Set());
@@ -146,10 +148,36 @@ export default function EnhancedPrayerWall() {
   const [showWhosPraying, setShowWhosPraying] = useState<Map<number, boolean>>(new Map());
   const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
   
-  // Check user's church status for prayer circle limits
+  // Check user's church status for prayer circle limits and profile completeness
   const { data: userChurchStatus } = useQuery({
     queryKey: ["/api/user/church-status"],
   });
+
+  // Enhanced circle creation handler with smart guardrails
+  const handleCreateCircleClick = () => {
+    if (!userChurchStatus) {
+      toast({
+        title: "Loading...",
+        description: "Checking your profile status...",
+      });
+      return;
+    }
+
+    // Check profile verification requirements
+    if (!userChurchStatus.profileComplete) {
+      setShowProfileVerificationDialog(true);
+      return;
+    }
+
+    // If user has no church, show smart church connection prompt
+    if (!userChurchStatus.hasChurch) {
+      setShowChurchPromptDialog(true);
+      return;
+    }
+
+    // Church members can create circles directly
+    setIsCreateCircleDialogOpen(true);
+  };
 
   const form = useForm<PrayerRequestFormData>({
     defaultValues: {
@@ -1116,6 +1144,117 @@ export default function EnhancedPrayerWall() {
           <PrayerAnalyticsBadges />
         </TabsContent>
       </Tabs>
+
+      {/* Profile Verification Requirements Dialog */}
+      <Dialog open={showProfileVerificationDialog} onOpenChange={setShowProfileVerificationDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-orange-500" />
+              Profile Verification Required
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              To create prayer circles, please complete your profile verification:
+            </div>
+            <div className="space-y-2">
+              {!userChurchStatus?.profileComplete && (
+                <div className="flex items-center gap-2 text-sm">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <span>Missing: Email verification, full name, or phone number</span>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowProfileVerificationDialog(false)}>
+                Later
+              </Button>
+              <Button onClick={() => window.location.href = '/profile'} className="bg-orange-600 hover:bg-orange-700">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Complete Profile
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Smart Church Connection Prompt Dialog */}
+      <Dialog open={showChurchPromptDialog} onOpenChange={setShowChurchPromptDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Church className="w-5 h-5 text-blue-500" />
+              Prayer Circle Options
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Create unlimited prayer circles by connecting with a local church, or continue with an independent circle:
+            </div>
+            
+            <div className="grid gap-3">
+              {/* Church Connection Option */}
+              <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Church className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100">Join a Church</h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                        • Unlimited prayer circles
+                        • Pastor support and guidance
+                        • Enhanced community features
+                        • Church-wide prayer requests
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Independent Circle Option */}
+              <Card className="border-gray-200">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Users className="w-5 h-5 text-gray-600 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">Independent Circle</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        • Create up to {userChurchStatus?.circleLimit || 2} prayer circles
+                        • Self-managed community
+                        • Basic prayer features
+                        • {userChurchStatus?.independentCirclesCount || 0} of {userChurchStatus?.circleLimit || 2} used
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex justify-between gap-3">
+              <Button variant="outline" onClick={() => setShowChurchPromptDialog(false)}>
+                Cancel
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => window.location.href = '/churches'}>
+                  <Church className="w-4 h-4 mr-2" />
+                  Find Church
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setShowChurchPromptDialog(false);
+                    setIsCreateCircleDialogOpen(true);
+                  }}
+                  disabled={!userChurchStatus?.canCreateMore}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  Continue Independent
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

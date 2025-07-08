@@ -6487,11 +6487,16 @@ Return JSON with this exact structure:
       const userChurch = await storage.getUserChurch(userId);
       const userCreatedCircles = await storage.getUserCreatedCircles(userId, true);
       
+      const user = await storage.getUser(userId);
+      const userLimit = user?.independentCircleLimit || 2;
+      
       res.json({
         hasChurch: !!userChurch,
         churchName: userChurch?.name,
         independentCirclesCount: userCreatedCircles.length,
-        canCreateMore: userCreatedCircles.length < 2
+        canCreateMore: userCreatedCircles.length < userLimit,
+        circleLimit: userLimit,
+        profileComplete: !!(user?.emailVerified && user?.firstName && user?.lastName && user?.mobileNumber)
       });
     } catch (error) {
 
@@ -6546,11 +6551,17 @@ Return JSON with this exact structure:
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Check profile verification requirements for non-church members
-      if (!user.emailVerified || !user.firstName || !user.lastName) {
+      // Enhanced profile verification requirements for prayer circle creation
+      const verificationIssues = [];
+      if (!user.emailVerified) verificationIssues.push("email verification");
+      if (!user.firstName || !user.lastName) verificationIssues.push("full name");
+      if (!user.mobileNumber) verificationIssues.push("phone number");
+      
+      if (verificationIssues.length > 0) {
         return res.status(400).json({ 
-          message: "Profile verification required. Please verify your email and complete your profile before creating prayer circles.",
-          requiresVerification: true
+          message: `Profile verification required. Please complete: ${verificationIssues.join(", ")} before creating prayer circles.`,
+          requiresVerification: true,
+          missingFields: verificationIssues
         });
       }
 
@@ -6565,12 +6576,16 @@ Return JSON with this exact structure:
       if (!userChurch) {
         isIndependent = true;
         
-        // Check limits for independent circles
+        // Check limits for independent circles with user-specific limits
         const existingIndependentCircles = await storage.getUserCreatedCircles(userId, true); // independent only
-        if (existingIndependentCircles.length >= 2) {
+        const userLimit = user.independentCircleLimit || 2; // Default to 2, but configurable
+        
+        if (existingIndependentCircles.length >= userLimit) {
           return res.status(400).json({ 
-            message: "Independent members can create up to 2 prayer circles. Consider joining a local church for unlimited circles.",
-            limitReached: true
+            message: `Independent members can create up to ${userLimit} prayer circles. Consider joining a local church for unlimited circles.`,
+            limitReached: true,
+            currentCount: existingIndependentCircles.length,
+            limit: userLimit
           });
         }
       }
@@ -6581,6 +6596,9 @@ Return JSON with this exact structure:
         return res.status(400).json({ message: "Name and description are required" });
       }
 
+      // Generate unique invite code for the circle
+      const inviteCode = crypto.randomBytes(4).toString('hex').toUpperCase();
+      
       const prayerCircleData = {
         name,
         description,
@@ -6591,7 +6609,9 @@ Return JSON with this exact structure:
         churchId: userChurch ? userChurch.churchId : null, // null for independent circles
         createdBy: userId,
         isIndependent: isIndependent, // Mark independent circles
-        type: isIndependent ? 'independent' : 'church'
+        type: isIndependent ? 'independent' : 'church',
+        inviteCode: inviteCode, // Unique invite code for sharing
+        status: isIndependent ? 'active' : 'active' // Independent circles start active
       };
 
       const prayerCircle = await storage.createPrayerCircle(prayerCircleData);
@@ -6607,8 +6627,108 @@ Return JSON with this exact structure:
 
       res.status(201).json(prayerCircle);
     } catch (error) {
-
       res.status(500).json({ message: "Failed to create prayer circle", error: error.message });
+    }
+  });
+
+  // Prayer Circle Reporting and Moderation endpoints
+  app.post("/api/prayer-circles/:id/report", isAuthenticated, async (req: any, res) => {
+    try {
+      const circleId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      const { reason, description } = req.body;
+      
+      if (!reason || !description) {
+        return res.status(400).json({ message: "Reason and description are required" });
+      }
+
+      const reportData = {
+        prayerCircleId: circleId,
+        reportedBy: userId,
+        reason,
+        description,
+        status: 'pending'
+      };
+
+      const report = await storage.createPrayerCircleReport(reportData);
+      
+      // Update circle report count
+      await storage.incrementCircleReportCount(circleId);
+      
+      res.status(201).json({ message: "Report submitted successfully", reportId: report.id });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to submit report" });
+    }
+  });
+
+  // Request church connection for independent circle
+  app.post("/api/prayer-circles/:id/request-church-connection", isAuthenticated, async (req: any, res) => {
+    try {
+      const circleId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      const { churchId } = req.body;
+      
+      // Verify user is the creator of the circle
+      const circle = await storage.getPrayerCircle(circleId);
+      if (!circle || circle.createdBy !== userId) {
+        return res.status(403).json({ message: "Only circle creators can request church connections" });
+      }
+      
+      if (!circle.isIndependent) {
+        return res.status(400).json({ message: "Only independent circles can request church connections" });
+      }
+
+      await storage.updatePrayerCircle(circleId, {
+        connectToChurchRequested: true,
+        requestedChurchId: churchId,
+        status: 'pending_church_review'
+      });
+      
+      res.json({ message: "Church connection request submitted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to submit church connection request" });
+    }
+  });
+
+  // Join prayer circle by invite code
+  app.post("/api/prayer-circles/join/:inviteCode", isAuthenticated, async (req: any, res) => {
+    try {
+      const inviteCode = req.params.inviteCode.toUpperCase();
+      const userId = req.session.userId;
+      
+      const circle = await storage.getPrayerCircleByInviteCode(inviteCode);
+      if (!circle) {
+        return res.status(404).json({ message: "Invalid invite code" });
+      }
+      
+      if (circle.status !== 'active') {
+        return res.status(400).json({ message: "This prayer circle is not currently active" });
+      }
+      
+      // Check if user is already a member
+      const isAlreadyMember = await storage.isUserInPrayerCircle(circle.id, userId);
+      if (isAlreadyMember) {
+        return res.status(400).json({ message: "You are already a member of this prayer circle" });
+      }
+      
+      // Check member limit
+      if (circle.memberLimit) {
+        const currentMembers = await storage.getPrayerCircleMembers(circle.id);
+        if (currentMembers.length >= circle.memberLimit) {
+          return res.status(400).json({ message: "This prayer circle is at its member limit" });
+        }
+      }
+      
+      await storage.joinPrayerCircle({
+        prayerCircleId: circle.id,
+        userId: userId,
+        role: 'member',
+        isActive: true
+      });
+      
+      res.json({ message: "Successfully joined prayer circle", circle });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to join prayer circle" });
     }
   });
 

@@ -142,6 +142,13 @@ export const users = pgTable("users", {
   passwordResetExpires: timestamp("password_reset_expires"),
   lastLoginAt: timestamp("last_login_at"),
   hasCompletedTour: boolean("has_completed_tour").default(false),
+  // Enhanced profile verification fields for prayer circle guardrails
+  phoneVerified: boolean("phone_verified").default(false),
+  profileCompleteness: integer("profile_completeness").default(0), // Percentage 0-100
+  verificationStatus: varchar("verification_status", { length: 20 }).default("pending"), // pending, verified, incomplete
+  verificationNotes: text("verification_notes"), // Admin notes for verification
+  realNameVerified: boolean("real_name_verified").default(false), // Manual verification flag
+  independentCircleLimit: integer("independent_circle_limit").default(2), // Configurable limit per user
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -790,6 +797,14 @@ export const prayerCircles = pgTable("prayer_circles", {
   type: varchar("type", { length: 20 }).default("church"), // church, independent
   status: varchar("status", { length: 20 }).default("active"), // active, pending_moderation, suspended
   moderationNotes: text("moderation_notes"), // For reporting and moderation
+  // Enhanced guardrails and features
+  inviteCode: varchar("invite_code", { length: 8 }).unique(), // For easy sharing
+  connectToChurchRequested: boolean("connect_to_church_requested").default(false), // User wants church connection
+  requestedChurchId: integer("requested_church_id").references(() => churches.id), // Requested church affiliation
+  guestPastorEmail: varchar("guest_pastor_email", { length: 255 }), // Optional guest pastor invitation
+  answeredPrayersCount: integer("answered_prayers_count").default(0), // Track answered prayers
+  reportCount: integer("report_count").default(0), // Track reports for moderation
+  lastActivityAt: timestamp("last_activity_at").defaultNow(), // Track engagement
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -805,6 +820,34 @@ export const prayerCircleMembers = pgTable("prayer_circle_members", {
 }, (table) => [
   unique().on(table.prayerCircleId, table.userId),
 ]);
+
+// Prayer circle reports for moderation
+export const prayerCircleReports = pgTable("prayer_circle_reports", {
+  id: serial("id").primaryKey(),
+  prayerCircleId: integer("prayer_circle_id").notNull().references(() => prayerCircles.id),
+  reportedBy: varchar("reported_by").notNull().references(() => users.id),
+  reason: varchar("reason", { length: 50 }).notNull(), // inappropriate_content, spam, false_information, harassment, other
+  description: text("description").notNull(),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, reviewed, resolved, dismissed
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewNotes: text("review_notes"),
+  actionTaken: varchar("action_taken", { length: 50 }), // warning, suspension, removal, none
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Prayer circle updates/answered prayers tracking
+export const prayerCircleUpdates = pgTable("prayer_circle_updates", {
+  id: serial("id").primaryKey(),
+  prayerCircleId: integer("prayer_circle_id").notNull().references(() => prayerCircles.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  updateType: varchar("update_type", { length: 20 }).notNull(), // answered, update, request
+  title: varchar("title", { length: 200 }).notNull(),
+  content: text("content").notNull(),
+  isAnswered: boolean("is_answered").default(false),
+  prayerCount: integer("prayer_count").default(0), // Number of people praying
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 // User achievements/badges
 export const userAchievements = pgTable("user_achievements", {
@@ -3132,6 +3175,16 @@ export const insertPrayerUpdateSchema = createInsertSchema(prayerUpdates).omit({
   createdAt: true,
 });
 
+export const insertPrayerCircleUpdateSchema = createInsertSchema(prayerCircleUpdates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPrayerCircleReportSchema = createInsertSchema(prayerCircleReports).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertPrayerAssignmentSchema = createInsertSchema(prayerAssignments).omit({
   id: true,
   createdAt: true,
@@ -3194,6 +3247,12 @@ export type InsertPrayerFollowUp = typeof prayerFollowUps.$inferInsert;
 
 export type PrayerUpdate = typeof prayerUpdates.$inferSelect;
 export type InsertPrayerUpdate = typeof prayerUpdates.$inferInsert;
+
+export type PrayerCircleUpdate = typeof prayerCircleUpdates.$inferSelect;
+export type InsertPrayerCircleUpdate = typeof prayerCircleUpdates.$inferInsert;
+
+export type PrayerCircleReport = typeof prayerCircleReports.$inferSelect;
+export type InsertPrayerCircleReport = typeof prayerCircleReports.$inferInsert;
 
 export type PrayerAssignment = typeof prayerAssignments.$inferSelect;
 export type InsertPrayerAssignment = typeof prayerAssignments.$inferInsert;
