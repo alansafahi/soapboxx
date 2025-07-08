@@ -222,7 +222,7 @@ export default function EnhancedPrayerWall() {
   // Create prayer circle mutation
   const createCircleMutation = useMutation({
     mutationFn: async (data: PrayerCircleFormData) => {
-
+      console.log("Form data being submitted:", data);
       return await apiRequest("POST", "/api/prayer-circles", data);
     },
     onSuccess: () => {
@@ -977,6 +977,8 @@ export default function EnhancedPrayerWall() {
 
                   <Form {...circleForm}>
                     <form onSubmit={circleForm.handleSubmit((data) => {
+                      console.log("Form submitted with data:", data);
+                      console.log("Form errors:", circleForm.formState.errors);
                       createCircleMutation.mutate(data);
                     })} className="space-y-6">
                       <FormField

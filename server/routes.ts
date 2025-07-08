@@ -6577,8 +6577,6 @@ Return JSON with this exact structure:
 
       const { name, description, isPublic, memberLimit, focusAreas, meetingSchedule } = req.body;
 
-      console.log("Prayer circle data:", { name, description, isPublic, memberLimit, focusAreas, meetingSchedule });
-
       if (!name || !description) {
         return res.status(400).json({ message: "Name and description are required" });
       }
@@ -6595,8 +6593,6 @@ Return JSON with this exact structure:
         isIndependent: isIndependent, // Mark independent circles
         type: isIndependent ? 'independent' : 'church'
       };
-
-      console.log("Creating prayer circle with data:", prayerCircleData);
 
       const prayerCircle = await storage.createPrayerCircle(prayerCircleData);
 
