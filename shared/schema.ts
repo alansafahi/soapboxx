@@ -956,7 +956,7 @@ export const moodCheckins = pgTable("mood_checkins", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   checkInId: integer("check_in_id").references(() => checkIns.id), // Link to daily check-in
-  mood: varchar("mood", { length: 30 }).notNull(), // joyful, peaceful, anxious, lonely, tired, angry, grateful
+  mood: varchar("mood", { length: 200 }).notNull(), // Multiple mood selections: joyful, peaceful, anxious, lonely, determined, etc.
   moodEmoji: varchar("mood_emoji", { length: 10 }).notNull(), // 😇 😊 😐 😔 😭
   moodScore: integer("mood_score").notNull(), // 1-5 scale
   notes: text("notes"), // User reflection on mood
