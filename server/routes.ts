@@ -5306,7 +5306,7 @@ Return JSON with this exact structure:
       // Handle logo file upload
       let logoUrl = null;
       if (req.file) {
-        console.log('Logo file received:', req.file.originalname);
+
         // Store the uploaded file URL
         logoUrl = `/uploads/${req.file.filename}`;
       }
@@ -5626,9 +5626,7 @@ Return JSON with this exact structure:
         limit: limit ? parseInt(limit as string) : 1000
       };
       
-      console.log('Church search params:', searchParams);
       const churches = await storage.searchChurches(searchParams);
-      console.log('Churches found:', churches.length);
       res.json(churches);
     } catch (error) {
       res.status(500).json({ message: "Failed to search churches" });
@@ -6496,7 +6494,7 @@ Return JSON with this exact structure:
         canCreateMore: userCreatedCircles.length < 2
       });
     } catch (error) {
-      console.error("Error fetching church status:", error);
+
       res.json({ hasChurch: false, independentCirclesCount: 0, canCreateMore: true });
     }
   });
@@ -6542,8 +6540,6 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      console.log("Creating prayer circle for user:", userId);
-
       // Get user information and church affiliation
       const user = await storage.getUser(userId);
       if (!user) {
@@ -6563,13 +6559,11 @@ Return JSON with this exact structure:
       try {
         userChurch = await storage.getUserChurch(userId);
       } catch (error) {
-        console.error("Error getting user church:", error);
         // Continue without church - allow independent circles
       }
 
       if (!userChurch) {
         isIndependent = true;
-        console.log("Creating independent prayer circle for non-church member:", userId);
         
         // Check limits for independent circles
         const existingIndependentCircles = await storage.getUserCreatedCircles(userId, true); // independent only
@@ -6614,10 +6608,10 @@ Return JSON with this exact structure:
         isActive: true,
       });
 
-      console.log("Prayer circle created successfully:", prayerCircle);
+
       res.status(201).json(prayerCircle);
     } catch (error) {
-      console.error("Prayer circle creation error:", error);
+
       res.status(500).json({ message: "Failed to create prayer circle", error: error.message });
     }
   });

@@ -222,7 +222,7 @@ export default function EnhancedPrayerWall() {
   // Create prayer circle mutation
   const createCircleMutation = useMutation({
     mutationFn: async (data: PrayerCircleFormData) => {
-      console.log("Creating prayer circle with data:", data);
+
       return await apiRequest("POST", "/api/prayer-circles", data);
     },
     onSuccess: () => {
@@ -236,7 +236,6 @@ export default function EnhancedPrayerWall() {
       });
     },
     onError: (error: any) => {
-      console.error("Prayer circle creation error:", error);
       let errorMessage = "Failed to create prayer circle. Please try again.";
       
       if (error?.requiresVerification) {
@@ -715,7 +714,7 @@ export default function EnhancedPrayerWall() {
                                         });
                                       }
                                     } catch (error) {
-                                      console.error('Upload error:', error);
+
                                       toast({
                                         title: "Upload Error",
                                         description: "An error occurred while uploading the photo",
@@ -978,8 +977,6 @@ export default function EnhancedPrayerWall() {
 
                   <Form {...circleForm}>
                     <form onSubmit={circleForm.handleSubmit((data) => {
-                      console.log("Form submitted with data:", data);
-                      console.log("Form errors:", circleForm.formState.errors);
                       createCircleMutation.mutate(data);
                     })} className="space-y-6">
                       <FormField
