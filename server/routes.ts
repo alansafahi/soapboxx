@@ -19,10 +19,14 @@ import {
   donations,
   volunteerHours,
   messages,
-  conversations
+  conversations,
+  prayerCircles,
+  prayerCircleMembers,
+  prayerCircleReports,
+  prayerCircleUpdates
 } from "../shared/schema";
 import * as schema from "../shared/schema";
-import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull } from "drizzle-orm";
 
 // Extend session data interface to include userId
 declare module 'express-session' {
