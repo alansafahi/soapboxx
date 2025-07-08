@@ -571,7 +571,7 @@ export default function EnhancedCommunityFeed() {
                             ))}
                           </div>
                           <span>
-                            {post.reactions?.reduce((sum, r) => sum + r.count, 0) || 0} reactions
+                            {post.reactions?.reduce((sum, r) => sum + Number(r.count || 0), 0) || 0} reactions
                           </span>
                           {post.commentCount > 0 && (
                             <>

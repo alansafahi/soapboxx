@@ -6,6 +6,8 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Switch } from "../components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { 
   Smartphone, 
   MessageSquare, 
@@ -18,16 +20,104 @@ import {
   BarChart3,
   Send,
   Copy,
-  QrCode
+  QrCode,
+  CreditCard,
+  Heart,
+  Gift
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+
+// Donation amounts for different frequencies  
+const DONATION_AMOUNTS_ONETIME = [25, 50, 100, 250, 500, 1000];
+const DONATION_AMOUNTS_RECURRING = [10, 25, 50, 100, 250, 500];
+
+// Payment Form Component
+function PaymentForm({ 
+  amount, 
+  donationData, 
+  onSuccess 
+}: { 
+  amount: number; 
+  donationData: any; 
+  onSuccess: (paymentIntentId: string) => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required'
+      });
+
+      if (error) {
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        onSuccess(paymentIntent.id);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="p-4 border rounded-lg bg-gray-50">
+        <PaymentElement />
+      </div>
+      <Button 
+        type="submit" 
+        disabled={!stripe || isProcessing} 
+        className="w-full bg-blue-600 hover:bg-blue-700"
+        size="lg"
+      >
+        {isProcessing ? "Processing..." : `Complete ${donationData.isRecurring ? `${donationData.recurringFrequency} ` : ''}Donation ($${amount})`}
+      </Button>
+    </form>
+  );
+}
 
 export default function SMSGiving() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedFund, setSelectedFund] = useState("general");
   const [isSettingUp, setIsSettingUp] = useState(false);
+  
+  // Recurring donation state
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState("monthly");
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+  const [customAmount, setCustomAmount] = useState("");
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -41,14 +131,31 @@ export default function SMSGiving() {
     queryKey: ['/api/sms-giving/stats'],
   });
 
+  // Create payment intent mutation
+  const createPaymentIntent = useMutation({
+    mutationFn: async (donationData: any) => {
+      return apiRequest('POST', '/api/create-payment-intent', {
+        ...donationData,
+        recurringFrequency: isRecurring ? recurringFrequency : undefined
+      });
+    },
+    onSuccess: (data) => {
+      setClientSecret(data.clientSecret);
+      setShowPayment(true);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to initialize payment",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Send SMS giving instruction
   const sendSMSMutation = useMutation({
     mutationFn: async (data: { phoneNumber: string; amount: string; fund: string }) => {
-      return apiRequest('/api/sms-giving/send-instructions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      return apiRequest('POST', '/api/sms-giving/send-instructions', data);
     },
     onSuccess: () => {
       toast({
@@ -102,6 +209,47 @@ export default function SMSGiving() {
       amount,
       fund: selectedFund
     });
+  };
+
+  const getCurrentAmount = () => {
+    return selectedAmount || parseFloat(customAmount) || 0;
+  };
+
+  const getDonationAmounts = () => {
+    return isRecurring ? DONATION_AMOUNTS_RECURRING : DONATION_AMOUNTS_ONETIME;
+  };
+
+  const handleDonateNow = () => {
+    const amount = getCurrentAmount();
+    if (amount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid donation amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const donationData = {
+      amount,
+      isRecurring,
+      recurringFrequency: isRecurring ? recurringFrequency : undefined,
+    };
+
+    createPaymentIntent.mutate(donationData);
+  };
+
+  const handlePaymentSuccess = (paymentIntentId: string) => {
+    toast({
+      title: "Donation Successful!",
+      description: `Thank you for your ${isRecurring ? `${recurringFrequency} ` : ''}donation of $${getCurrentAmount()}`,
+    });
+    
+    // Reset form
+    setSelectedAmount(null);
+    setCustomAmount("");
+    setShowPayment(false);
+    setClientSecret(null);
   };
 
   const copyToClipboard = (text: string) => {
@@ -180,13 +328,155 @@ export default function SMSGiving() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="send" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="donate" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="donate">Donate Now</TabsTrigger>
             <TabsTrigger value="send">Send Instructions</TabsTrigger>
             <TabsTrigger value="keywords">Donation Keywords</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
+
+          {/* Donate Now Tab */}
+          <TabsContent value="donate" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Gift className="h-6 w-6 text-blue-600" />
+                  <span>Make a Donation</span>
+                </CardTitle>
+                <CardDescription>
+                  Support our mission through secure online giving
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {!showPayment ? (
+                  <>
+                    {/* Recurring Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                      <div>
+                        <Label className="text-sm font-medium">Recurring Donation</Label>
+                        <p className="text-xs text-gray-600 mt-1">Make a lasting impact with regular giving</p>
+                      </div>
+                      <Switch
+                        checked={isRecurring}
+                        onCheckedChange={setIsRecurring}
+                      />
+                    </div>
+
+                    {/* Frequency Selection */}
+                    {isRecurring && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Frequency</Label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {['weekly', 'monthly', 'quarterly', 'annually'].map((freq) => (
+                            <Button
+                              key={freq}
+                              variant={recurringFrequency === freq ? "default" : "outline"}
+                              onClick={() => setRecurringFrequency(freq)}
+                              className="text-sm"
+                            >
+                              {freq.charAt(0).toUpperCase() + freq.slice(1)}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Amount Selection */}
+                    <div className="space-y-4">
+                      <Label className="text-sm font-medium">
+                        {isRecurring ? `Suggested ${recurringFrequency} amounts for sustained impact` : 'Suggested amounts'}
+                      </Label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {getDonationAmounts().map((presetAmount) => (
+                          <Button
+                            key={presetAmount}
+                            variant={selectedAmount === presetAmount ? "default" : "outline"}
+                            onClick={() => {
+                              setSelectedAmount(presetAmount);
+                              setCustomAmount("");
+                            }}
+                            className="h-12 text-base"
+                          >
+                            ${presetAmount}
+                          </Button>
+                        ))}
+                      </div>
+
+                      {/* Custom Amount */}
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Custom Amount</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            type="number"
+                            placeholder="Enter custom amount"
+                            value={customAmount}
+                            onChange={(e) => {
+                              setCustomAmount(e.target.value);
+                              setSelectedAmount(null);
+                            }}
+                            className="pl-10"
+                            min="1"
+                            step="0.01"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Donate Button */}
+                    <Button
+                      onClick={handleDonateNow}
+                      disabled={getCurrentAmount() <= 0 || createPaymentIntent.isPending}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      size="lg"
+                    >
+                      {createPaymentIntent.isPending ? (
+                        "Processing..."
+                      ) : (
+                        <>
+                          <Heart className="h-4 w-4 mr-2" />
+                          {isRecurring ? `Set up ${recurringFrequency} donation` : 'Donate now'} 
+                          {getCurrentAmount() > 0 && ` ($${getCurrentAmount()})`}
+                        </>
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center py-4">
+                      <h3 className="text-lg font-semibold mb-2">
+                        Complete Your {isRecurring ? `${recurringFrequency.charAt(0).toUpperCase() + recurringFrequency.slice(1)} ` : ''}Donation
+                      </h3>
+                      <p className="text-2xl font-bold text-blue-600">${getCurrentAmount()}</p>
+                    </div>
+                    
+                    {clientSecret && (
+                      <Elements stripe={stripePromise} options={{ clientSecret }}>
+                        <PaymentForm
+                          amount={getCurrentAmount()}
+                          donationData={{ isRecurring, recurringFrequency }}
+                          onSuccess={handlePaymentSuccess}
+                        />
+                      </Elements>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowPayment(false);
+                        setClientSecret(null);
+                      }}
+                      className="w-full"
+                    >
+                      ← Back to donation options
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Send SMS Instructions */}
           <TabsContent value="send" className="space-y-6">

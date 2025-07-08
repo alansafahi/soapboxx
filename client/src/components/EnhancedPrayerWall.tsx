@@ -362,7 +362,7 @@ export default function EnhancedPrayerWall() {
       setReactions(prev => {
         const newMap = new Map(prev);
         const current = newMap.get(prayerId) || { praying: 3, heart: 0, fire: 0, praise: 0 }; // Start with baseline 3
-        newMap.set(prayerId, { ...current, praying: current.praying + 1 }); // Always increment by 1
+        newMap.set(prayerId, { ...current, praying: Number(current.praying || 0) + 1 }); // Always increment by 1
         return newMap;
       });
       toast({

@@ -467,7 +467,7 @@ export default function CommunityFeed() {
                             } : {}}
                             transition={{ duration: 0.3 }}
                           >
-                            {(discussion.likeCount || 0) + (likedDiscussions.has(discussion.id) ? 1 : 0)}
+                            {Number(discussion.likeCount || 0) + (likedDiscussions.has(discussion.id) ? 1 : 0)}
                           </motion.span>
                         </Button>
                       </motion.div>

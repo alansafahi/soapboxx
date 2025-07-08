@@ -1342,7 +1342,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     disabled={likeMutation.isPending}
                   >
                     <Heart className={`w-4 h-4 mr-1 ${post.isLiked ? 'fill-current' : ''}`} />
-                    {post.likeCount}
+                    {Number(post.likeCount || 0)}
                   </Button>
                   <Button 
                     variant="ghost" 
