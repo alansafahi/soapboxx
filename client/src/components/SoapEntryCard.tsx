@@ -31,6 +31,39 @@ import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import type { SoapEntry } from "../../../shared/schema";
 
+// Utility function to render HTML content with proper formatting
+const FormattedText = ({ content }: { content: string }) => {
+  const formatContent = (htmlContent: string) => {
+    return htmlContent
+      .replace(/<strong>(.*?)<\/strong>/gi, '**$1**') // Bold
+      .replace(/<b>(.*?)<\/b>/gi, '**$1**') // Bold
+      .replace(/<em>(.*?)<\/em>/gi, '*$1*') // Italic
+      .replace(/<i>(.*?)<\/i>/gi, '*$1*') // Italic
+      .replace(/<u>(.*?)<\/u>/gi, '_$1_') // Underline
+      .replace(/<br\s*\/?>/gi, '\n') // Line breaks
+      .replace(/<p>(.*?)<\/p>/gi, '$1\n') // Paragraphs
+      .replace(/<[^>]*>/g, '') // Remove any remaining HTML tags
+      .trim();
+  };
+  
+  const formattedContent = formatContent(content);
+  
+  return (
+    <span>
+      {formattedContent.split(/(\*\*.*?\*\*|\*.*?\*|_.*?_)/).map((part, index) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={index}>{part.slice(2, -2)}</strong>;
+        } else if (part.startsWith('*') && part.endsWith('*')) {
+          return <em key={index}>{part.slice(1, -1)}</em>;
+        } else if (part.startsWith('_') && part.endsWith('_')) {
+          return <u key={index}>{part.slice(1, -1)}</u>;
+        }
+        return part;
+      })}
+    </span>
+  );
+};
+
 interface SoapEntryCardProps {
   entry: SoapEntry;
   showActions?: boolean;
@@ -256,10 +289,10 @@ export function SoapEntryCard({
             )}
           </div>
           <blockquote className="border-l-4 border-primary pl-4 italic text-sm">
-            {isExpanded || entry.scripture.length <= 200 
+            <FormattedText content={isExpanded || entry.scripture.length <= 200 
               ? entry.scripture 
               : truncateText(entry.scripture, 200)
-            }
+            } />
           </blockquote>
         </div>
 
@@ -274,10 +307,10 @@ export function SoapEntryCard({
               Observation
             </div>
             <p className="text-sm text-muted-foreground">
-              {isExpanded || entry.observation.length <= 150 
+              <FormattedText content={isExpanded || entry.observation.length <= 150 
                 ? entry.observation 
                 : truncateText(entry.observation)
-              }
+              } />
             </p>
           </div>
 
@@ -288,10 +321,10 @@ export function SoapEntryCard({
               Application
             </div>
             <p className="text-sm text-muted-foreground">
-              {isExpanded || entry.application.length <= 150 
+              <FormattedText content={isExpanded || entry.application.length <= 150 
                 ? entry.application 
                 : truncateText(entry.application)
-              }
+              } />
             </p>
           </div>
 
@@ -302,10 +335,10 @@ export function SoapEntryCard({
               Prayer
             </div>
             <p className="text-sm text-muted-foreground italic">
-              {isExpanded || entry.prayer.length <= 150 
+              <FormattedText content={isExpanded || entry.prayer.length <= 150 
                 ? entry.prayer 
                 : truncateText(entry.prayer)
-              }
+              } />
             </p>
           </div>
         </div>

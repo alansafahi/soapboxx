@@ -6,6 +6,91 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { MessageCircle, Heart, Share2, ChevronDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+// Utility function to strip HTML tags and limit text to specified lines
+const stripHtmlAndLimitLines = (html: string, maxLines: number = 3): { text: string; isTruncated: boolean } => {
+  // Remove HTML tags
+  const strippedText = html.replace(/<[^>]*>/g, '').trim();
+  
+  // Split by lines and count
+  const lines = strippedText.split('\n');
+  const isTruncated = lines.length > maxLines;
+  
+  // Join back to maxLines
+  const limitedText = lines.slice(0, maxLines).join('\n');
+  
+  return { text: limitedText, isTruncated };
+};
+
+// Component to render HTML content with proper formatting
+const FormattedContent = ({ content, isExpanded = false }: { content: string; isExpanded?: boolean }) => {
+  const [showFull, setShowFull] = useState(isExpanded);
+  
+  if (!content) return null;
+  
+  const { text: limitedText, isTruncated } = stripHtmlAndLimitLines(content, 3);
+  const displayContent = showFull ? content : limitedText;
+  
+  // Convert common HTML tags to formatted text
+  const formatContent = (htmlContent: string) => {
+    return htmlContent
+      .replace(/<strong>(.*?)<\/strong>/gi, '**$1**') // Bold
+      .replace(/<b>(.*?)<\/b>/gi, '**$1**') // Bold
+      .replace(/<em>(.*?)<\/em>/gi, '*$1*') // Italic
+      .replace(/<i>(.*?)<\/i>/gi, '*$1*') // Italic
+      .replace(/<u>(.*?)<\/u>/gi, '_$1_') // Underline (using underscore)
+      .replace(/<br\s*\/?>/gi, '\n') // Line breaks
+      .replace(/<p>(.*?)<\/p>/gi, '$1\n') // Paragraphs
+      .replace(/<[^>]*>/g, '') // Remove any remaining HTML tags
+      .trim();
+  };
+  
+  const formattedContent = formatContent(displayContent);
+  
+  return (
+    <div className="space-y-2">
+      <div className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+        {/* Render formatted content with basic markdown-like styling */}
+        {formattedContent.split('\n').map((line, index) => (
+          <div key={index}>
+            {line.split(/(\*\*.*?\*\*|\*.*?\*|_.*?_)/).map((part, partIndex) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={partIndex}>{part.slice(2, -2)}</strong>;
+              } else if (part.startsWith('*') && part.endsWith('*')) {
+                return <em key={partIndex}>{part.slice(1, -1)}</em>;
+              } else if (part.startsWith('_') && part.endsWith('_')) {
+                return <u key={partIndex}>{part.slice(1, -1)}</u>;
+              }
+              return part;
+            })}
+          </div>
+        ))}
+      </div>
+      
+      {isTruncated && !showFull && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowFull(true)}
+          className="text-purple-600 dark:text-purple-400 p-0 h-auto"
+        >
+          Show more...
+        </Button>
+      )}
+      
+      {showFull && isTruncated && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowFull(false)}
+          className="text-purple-600 dark:text-purple-400 p-0 h-auto"
+        >
+          Show less
+        </Button>
+      )}
+    </div>
+  );
+};
+
 interface Post {
   id: number;
   content: string;
@@ -101,8 +186,8 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
                   </span>
                 </div>
                 
-                <div className="text-gray-900 dark:text-gray-100 mb-3 whitespace-pre-wrap">
-                  {post.content}
+                <div className="mb-3">
+                  <FormattedContent content={post.content} />
                 </div>
                 
                 {post.mood && (

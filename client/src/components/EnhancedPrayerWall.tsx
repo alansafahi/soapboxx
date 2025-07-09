@@ -79,58 +79,123 @@ interface PrayerCircleCardProps {
 function PrayerCircleCard({ circle, onJoin, onLeave, onDelete, isJoining, isLeaving, isDeleting, userCircles, currentUserId }: PrayerCircleCardProps) {
   const isUserMember = userCircles.some((uc: any) => uc.id === circle.id);
   const isCreator = circle.createdBy === currentUserId;
+  const isFull = circle.memberLimit && circle.memberCount >= circle.memberLimit;
   
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-      <div className="flex-1">
-        <div className="font-semibold">{circle.name}</div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {circle.memberCount || 0} members • {circle.activeMembers || 0} active
-          {isCreator && <span className="text-purple-600 ml-2">• Creator</span>}
-        </div>
-        {circle.description && (
-          <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {circle.description}
+    <Card className="p-4">
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-2">
+            <h4 className="font-semibold text-lg truncate">{circle.name}</h4>
+            <Badge variant={!circle.isPublic ? "default" : "outline"}>
+              {!circle.isPublic ? "Private" : "Public"}
+            </Badge>
+            {circle.isIndependent && (
+              <Badge variant="secondary" className="text-xs">
+                Independent
+              </Badge>
+            )}
           </div>
-        )}
-      </div>
-      <div className="flex items-center gap-2">
-        <Badge variant={!circle.isPublic ? "default" : "outline"}>
-          {!circle.isPublic ? "Private" : "Public"}
-        </Badge>
-        {isCreator && (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={onDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </Button>
-        )}
-        {!isCreator && (
-          isUserMember ? (
+          
+          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <span className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
+                {circle.memberCount || 0} members
+              </span>
+              {circle.memberLimit && (
+                <span>Limit: {circle.memberLimit}</span>
+              )}
+              {isCreator && <span className="text-purple-600">• Creator</span>}
+            </span>
+          </div>
+          
+          {circle.description && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+              {circle.description}
+            </p>
+          )}
+          
+          {circle.focusAreas && circle.focusAreas.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {circle.focusAreas.slice(0, 3).map((area: string, index: number) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {prayerFocusAreas.find(fa => fa.id === area)?.label || area}
+                </Badge>
+              ))}
+              {circle.focusAreas.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{circle.focusAreas.length - 3} more
+                </Badge>
+              )}
+            </div>
+          )}
+          
+          {circle.inviteCode && isCreator && (
+            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded p-2 mb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-purple-700 dark:text-purple-300">Invite Code</p>
+                  <p className="text-sm font-mono text-purple-900 dark:text-purple-100">{circle.inviteCode}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(circle.inviteCode);
+                    toast({ title: "Invite code copied!", duration: 2000 });
+                  }}
+                  className="text-purple-600 hover:text-purple-700"
+                >
+                  Copy
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex flex-col gap-2 ml-4">
+          {isCreator ? (
             <Button
-              variant="outline"
+              variant="destructive"
               size="sm"
-              onClick={onLeave}
-              disabled={isLeaving}
+              onClick={onDelete}
+              disabled={isDeleting}
             >
-              {isLeaving ? "Leaving..." : "Leave"}
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           ) : (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={onJoin}
-              disabled={isJoining || (circle.memberLimit && circle.memberCount >= circle.memberLimit)}
-            >
-              {isJoining ? "Joining..." : "Join"}
-            </Button>
-          )
-        )}
+            isUserMember ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onLeave}
+                disabled={isLeaving}
+                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+              >
+                {isLeaving ? "Leaving..." : "Leave Circle"}
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onJoin}
+                disabled={isJoining || isFull}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                {isJoining ? "Joining..." : isFull ? "Circle Full" : "Join Circle"}
+              </Button>
+            )
+          )}
+          
+          {!isUserMember && !isCreator && circle.inviteCode && (
+            <p className="text-xs text-gray-500 text-center">
+              Share code: {circle.inviteCode}
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }
 

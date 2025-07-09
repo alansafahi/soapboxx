@@ -1130,7 +1130,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                           
                           // Handle Scripture section
                           if (section.includes('📖') && section.includes('<strong>Scripture</strong>')) {
-                            const scriptureText = section.replace('📖 <strong>Scripture</strong>: ', '').trim();
+                            const scriptureText = section.replace('📖 <strong>Scripture</strong>: ', '').replace(/<[^>]*>/g, '').trim();
                             return (
                               <div key={index} className="border-l-4 border-purple-500 pl-4">
                                 <div className="flex items-start gap-2">
@@ -1146,7 +1146,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                           
                           // Handle Observation section
                           if (section.includes('🔍') && section.includes('<strong>Observation</strong>')) {
-                            const observationText = section.replace('🔍 <strong>Observation</strong>: ', '').trim();
+                            const observationText = section.replace('🔍 <strong>Observation</strong>: ', '').replace(/<[^>]*>/g, '').trim();
                             return (
                               <div key={index} className="border-l-4 border-blue-500 pl-4">
                                 <div className="flex items-start gap-2">
@@ -1162,7 +1162,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                           
                           // Handle Application section
                           if (section.includes('💡') && section.includes('<strong>Application</strong>')) {
-                            const applicationText = section.replace('💡 <strong>Application</strong>: ', '').trim();
+                            const applicationText = section.replace('💡 <strong>Application</strong>: ', '').replace(/<[^>]*>/g, '').trim();
                             return (
                               <div key={index} className="border-l-4 border-green-500 pl-4">
                                 <div className="flex items-start gap-2">
@@ -1178,7 +1178,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                           
                           // Handle Prayer section
                           if (section.includes('🙏') && section.includes('<strong>Prayer</strong>')) {
-                            const prayerText = section.replace('🙏 <strong>Prayer</strong>: ', '').trim();
+                            const prayerText = section.replace('🙏 <strong>Prayer</strong>: ', '').replace(/<[^>]*>/g, '').trim();
                             return (
                               <div key={index} className="border-l-4 border-orange-500 pl-4">
                                 <div className="flex items-start gap-2">
