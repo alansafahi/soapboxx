@@ -208,11 +208,16 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
+    // Only set up observer when we have expanded posts
+    if (allPosts.length === 0) return;
+    
     if (observerRef.current) observerRef.current.disconnect();
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
+        console.log('Intersection observed:', entries[0].isIntersecting, { hasMore, isLoadingMore, allPostsLength: allPosts.length });
         if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          console.log('Triggering loadMorePosts from intersection observer');
           loadMorePosts();
         }
       },
@@ -221,12 +226,13 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
     if (loadMoreRef.current) {
       observerRef.current.observe(loadMoreRef.current);
+      console.log('Observer attached to loadMoreRef');
     }
 
     return () => {
       if (observerRef.current) observerRef.current.disconnect();
     };
-  }, [loadMorePosts, hasMore, isLoadingMore]);
+  }, [loadMorePosts, hasMore, isLoadingMore, allPosts.length]);
 
   if (isLoading) {
     return (
@@ -387,15 +393,18 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
       {/* Infinite Scroll Trigger - Show when we have expanded posts and there might be more */}
       {allPosts.length > 0 && hasMore && (
-        <div ref={loadMoreRef} className="text-center pt-4">
+        <div ref={loadMoreRef} className="text-center pt-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           {isLoadingMore ? (
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm text-gray-500">Loading more posts...</span>
             </div>
           ) : (
-            // Invisible trigger area for intersection observer
-            <div className="h-20"></div>
+            <div className="text-center">
+              <div className="h-8 flex items-center justify-center">
+                <span className="text-xs text-gray-500">Scroll down for more posts</span>
+              </div>
+            </div>
           )}
         </div>
       )}
