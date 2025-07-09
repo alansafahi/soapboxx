@@ -76,6 +76,44 @@ export default function UpcomingEventsPreview() {
     );
   }
 
+  // Array of spiritual prompts and daily scriptures
+  const spiritualPrompts = [
+    {
+      verse: "\"For I know the plans I have for you,\" declares the Lord, \"plans to prosper you and not to harm you, to give you hope and a future.\"",
+      reference: "Jeremiah 29:11",
+      prompt: "Trust in God's perfect timing today"
+    },
+    {
+      verse: "\"Be still, and know that I am God.\"",
+      reference: "Psalm 46:10",
+      prompt: "Find peace in quiet moments with God"
+    },
+    {
+      verse: "\"The Lord your God is with you, the Mighty Warrior who saves.\"",
+      reference: "Zephaniah 3:17",
+      prompt: "You are never alone in your journey"
+    },
+    {
+      verse: "\"Trust in the Lord with all your heart and lean not on your own understanding.\"",
+      reference: "Proverbs 3:5",
+      prompt: "Let faith guide your decisions today"
+    },
+    {
+      verse: "\"I can do all things through Christ who strengthens me.\"",
+      reference: "Philippians 4:13",
+      prompt: "Draw strength from His endless love"
+    }
+  ];
+
+  // Get today's spiritual prompt based on day of year
+  const getDayOfYear = (date: Date) => {
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date.getTime() - start.getTime();
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+  };
+  
+  const todayPrompt = spiritualPrompts[getDayOfYear(new Date()) % spiritualPrompts.length] || spiritualPrompts[0];
+
   if (upcomingEvents.length === 0) {
     return (
       <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
@@ -87,10 +125,20 @@ export default function UpcomingEventsPreview() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-4">
-            <Calendar className="w-12 h-12 mx-auto mb-2 text-blue-300" />
-            <p className="text-sm text-muted-foreground mb-3">
-              No upcoming events scheduled
-            </p>
+            <div className="w-12 h-12 mx-auto mb-3 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+              <span className="text-xl">📖</span>
+            </div>
+            <div className="mb-4">
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+                {todayPrompt.prompt}
+              </p>
+              <blockquote className="text-xs italic text-blue-700 dark:text-blue-300 mb-1">
+                {todayPrompt.verse}
+              </blockquote>
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                — {todayPrompt.reference}
+              </p>
+            </div>
             <Link href="/events">
               <Button variant="outline" size="sm" className="mr-2">
                 View All Events

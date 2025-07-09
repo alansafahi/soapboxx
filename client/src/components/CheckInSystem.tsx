@@ -414,13 +414,41 @@ export default function CheckInSystem() {
               </p>
             </div>
             {streak > 0 && (
-              <div className="text-center">
-                <div className="flex items-center gap-1 text-orange-600">
-                  <Flame className="w-5 h-5" />
+              <motion.div 
+                className="text-center"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <motion.div 
+                  className="flex items-center gap-1 text-orange-600"
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    ease: "easeInOut"
+                  }}
+                >
+                  <motion.div
+                    animate={{ 
+                      rotate: [0, 10, -10, 0],
+                    }}
+                    transition={{ 
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatType: "loop",
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Flame className="w-5 h-5" />
+                  </motion.div>
                   <span className="font-bold text-lg">{streak}</span>
-                </div>
+                </motion.div>
                 <p className="text-xs text-muted-foreground">day streak</p>
-              </div>
+              </motion.div>
             )}
           </div>
         </CardHeader>
