@@ -140,6 +140,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/discussions/${commentDialogOpen}/comments`] });
       setCommentText("");
       setCommentDialogOpen(null);
       toast({
@@ -159,6 +160,40 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const { data: comments = [] } = useQuery({
     queryKey: [`/api/discussions/${commentDialogOpen}/comments`],
     enabled: !!commentDialogOpen,
+  });
+
+  // Fetch posts with pagination
+  const { data: posts = [], isLoading, error } = useQuery({
+    queryKey: ["/api/discussions", page],
+    queryFn: async () => {
+      const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch posts: ${response.status}`);
+      }
+      
+      return await response.json();
+    },
+  });
+
+  // Function to fetch comments for a post
+  const { data: allPostComments = {} } = useQuery({
+    queryKey: ['/api/discussions/all-comments'],
+    queryFn: async () => {
+      const commentData: any = {};
+      for (const post of posts) {
+        const response = await fetch(`/api/discussions/${post.id}/comments`, {
+          credentials: "include",
+        });
+        if (response.ok) {
+          commentData[post.id] = await response.json();
+        }
+      }
+      return commentData;
+    },
+    enabled: posts.length > 0,
   });
 
   // Enhanced SOAP content detection for all posts (new and legacy)
@@ -255,19 +290,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     return soapData;
   };
 
-  // Fetch posts with pagination
-  const { data: posts = [], isLoading, error } = useQuery({
-    queryKey: ["/api/discussions", page],
-    queryFn: async () => {
-      const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch posts");
-      }
-      return response.json();
-    },
-  });
+
 
   // Load more posts function
   const loadMorePosts = useCallback(async () => {
@@ -462,7 +485,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       >
                         <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-purple-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-500 group-hover:text-purple-500">
-                          {Number(post._count?.comments) || 0}
+                          {Number(post.commentCount) || 0}
                         </span>
                       </button>
                     </div>
@@ -481,6 +504,43 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       <Share2 className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                     </button>
                   </div>
+
+                  {/* Comments Section - Show comments below each post */}
+                  {allPostComments[post.id] && allPostComments[post.id].length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <div className="space-y-3">
+                        {allPostComments[post.id].slice(0, 3).map((comment: any) => (
+                          <div key={comment.id} className="flex space-x-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={comment.author?.profileImageUrl || undefined} />
+                              <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+                                {comment.author?.firstName?.[0] || comment.authorId?.[0]?.toUpperCase() || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className="font-medium text-sm text-gray-900 dark:text-white">
+                                  {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                </span>
+                              </div>
+                              <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {allPostComments[post.id].length > 3 && (
+                          <button
+                            onClick={() => setCommentDialogOpen(post.id)}
+                            className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                          >
+                            View all {allPostComments[post.id].length} comments
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -514,13 +574,16 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                 {comments.map((comment: any) => (
                   <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50">
                     <Avatar className="w-8 h-8">
+                      <AvatarImage src={comment.author?.profileImageUrl || undefined} />
                       <AvatarFallback className="bg-blue-100 text-blue-600">
-                        {comment.authorId[0]?.toUpperCase() || 'U'}
+                        {comment.author?.firstName?.[0] || comment.authorId?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-medium text-sm">Community Member</span>
+                        <span className="font-medium text-sm">
+                          {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
+                        </span>
                         <span className="text-xs text-gray-500">
                           {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                         </span>
