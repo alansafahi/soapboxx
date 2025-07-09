@@ -94,7 +94,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   return (
     <div 
       data-testid="compact-composer"
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ${isExpanded ? 'p-4' : 'p-3'} ${className}`}
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border-0 shadow-md hover:shadow-lg transition-all duration-300 ${isExpanded ? 'p-6' : 'p-4'} ${className}`}
     >
       <div className="flex space-x-3">
         <Avatar className="w-8 h-8">

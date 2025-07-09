@@ -401,7 +401,7 @@ export default function CheckInSystem() {
   return (
     <div className="space-y-6">
       {/* Main Check-In Card */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-2">
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-0 shadow-md hover:shadow-lg transition-all duration-200">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

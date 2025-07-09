@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 import SocialFeed from "../components/social-feed";
 import EventsList from "../components/events-list";
@@ -20,6 +22,45 @@ import { useQuery } from "@tanstack/react-query";
 
 interface HomeProps {
   referralCode?: string | null;
+}
+
+// Mobile Accordion Component
+interface MobileAccordionSectionProps {
+  title: string;
+  icon: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  isFirst?: boolean;
+}
+
+function MobileAccordionSection({ title, icon, children, defaultOpen = false, isFirst = false }: MobileAccordionSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <Card className={`w-full transition-all duration-200 ${isFirst ? 'border-blue-200 dark:border-blue-700' : ''}`}>
+      <CardHeader 
+        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 pb-3"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <span className="text-lg">{icon}</span>
+            <CardTitle className="text-base font-semibold">{title}</CardTitle>
+          </div>
+          {isOpen ? (
+            <ChevronUp className="w-5 h-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-500" />
+          )}
+        </div>
+      </CardHeader>
+      {isOpen && (
+        <CardContent className="pt-0">
+          {children}
+        </CardContent>
+      )}
+    </Card>
+  );
 }
 
 export default function Home({ referralCode }: HomeProps = {}) {
@@ -84,17 +125,32 @@ export default function Home({ referralCode }: HomeProps = {}) {
           </div>
         )}
         
-        {/* Spiritual Rhythm Section - Always visible on top */}
+        {/* Spiritual Rhythm Section - Mobile accordion, Desktop grid */}
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Daily Spiritual Rhythm</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            <div className="order-1">
+          
+          {/* Desktop: Grid Layout */}
+          <div className="hidden md:grid grid-cols-3 gap-6">
+            <div className="w-full">
               <CheckInSystem />
             </div>
-            <div className="order-2">
+            <div className="w-full">
               <UpcomingEventsPreview />
             </div>
-            <div className="order-3">
+            <div className="w-full">
+              <LeaderboardPreview />
+            </div>
+          </div>
+          
+          {/* Mobile: Stacked Layout with standardized card width and spacing */}
+          <div className="md:hidden space-y-4">
+            <div className="w-full">
+              <CheckInSystem />
+            </div>
+            <div className="w-full">
+              <UpcomingEventsPreview />
+            </div>
+            <div className="w-full">
               <LeaderboardPreview />
             </div>
           </div>
@@ -115,7 +171,7 @@ export default function Home({ referralCode }: HomeProps = {}) {
             {/* Latest Posts */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
-              <LimitedSocialFeed initialLimit={4} />
+              <LimitedSocialFeed initialLimit={3} />
             </div>
           </div>
           
