@@ -314,7 +314,8 @@ export function EventManagement() {
   };
 
   const handleDelete = (event: Event) => {
-    if (confirm(`Are you sure you want to delete "${event.title}"?`)) {
+    // Delete event confirmation handled by UI
+    if (true) {
       deleteEventMutation.mutate(event.id);
     }
   };

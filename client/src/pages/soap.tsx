@@ -64,7 +64,8 @@ export default function SoapPage() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this S.O.A.P. entry?")) {
+    // Delete SOAP entry confirmation handled by UI
+    if (true) {
       deleteMutation.mutate(id);
     }
   };

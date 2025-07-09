@@ -9,23 +9,10 @@ import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 
-// Utility function to strip HTML tags and limit text to specified lines
-const stripHtmlAndLimitLines = (html: string, maxLines: number = 3): { text: string; isTruncated: boolean } => {
-  // Remove HTML tags
-  const strippedText = html.replace(/<[^>]*>/g, '').trim();
-  
-  // Split by lines and count
-  const lines = strippedText.split('\n');
-  const isTruncated = lines.length > maxLines;
-  
-  // Join back to maxLines
-  const limitedText = lines.slice(0, maxLines).join('\n');
-  
-  return { text: limitedText, isTruncated };
-};
+// This utility is no longer used - content formatting handled by FormattedContent component
 
 
 
@@ -646,6 +633,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Comments</DialogTitle>
+            <DialogDescription>
+              Share your thoughts and engage with the community
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 max-h-[50vh] overflow-y-auto">
             {comments.length === 0 ? (

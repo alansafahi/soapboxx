@@ -1,6 +1,6 @@
 export default function TestPage() {
   const handleClick = () => {
-    alert('Button clicked successfully!');
+    // Button clicked successfully
   };
 
   return (

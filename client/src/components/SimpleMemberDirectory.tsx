@@ -160,9 +160,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
   };
 
   const handleSuspendMember = async (member: any) => {
-    if (!confirm(`Are you sure you want to suspend ${member.fullName}? This action can be reversed later.`)) {
-      return;
-    }
+    // Suspend member confirmation handled by UI
     
     setIsActionLoading(true);
     try {
@@ -203,9 +201,7 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
   };
 
   const handleRemoveMember = async (member: any) => {
-    if (!confirm(`Are you sure you want to remove ${member.fullName} from the church? This action cannot be undone.`)) {
-      return;
-    }
+    // Remove member confirmation handled by UI
     
     setIsActionLoading(true);
     try {

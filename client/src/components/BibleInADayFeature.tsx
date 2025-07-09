@@ -95,19 +95,19 @@ export function BibleInADayFeature() {
   const [showPauseDialog, setShowPauseDialog] = useState(false);
 
   // Fetch active session
-  const { data: activeSession, refetch: refetchActiveSession } = useQuery<any>({
+  const { data: activeSession, refetch: refetchActiveSession } = useQuery<{ id: string; currentDay: number; startDate: string; status: string } | null>({
     queryKey: ['/api/bible-in-a-day/sessions/active'],
     enabled: true,
   });
 
   // Fetch session progress
-  const { data: sessionProgress } = useQuery<any[]>({
+  const { data: sessionProgress } = useQuery<{ day: number; completed: boolean; date: string }[]>({
     queryKey: [`/api/bible-in-a-day/sessions/${activeSession?.id}/progress`],
     enabled: !!activeSession?.id,
   });
 
   // Fetch user badges
-  const { data: badges } = useQuery<any[]>({
+  const { data: badges } = useQuery<{ id: string; name: string; description: string; earned: boolean }[]>({
     queryKey: ['/api/bible-in-a-day/badges'],
   });
 
@@ -130,7 +130,7 @@ export function BibleInADayFeature() {
 
   // Create section progress mutation
   const createProgressMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: { day: number }) => {
       const response = await apiRequest('POST', '/api/bible-in-a-day/progress', data);
       return await response.json();
     },

@@ -11,7 +11,7 @@ export default function SimpleAudioTest() {
 
   const handlePlay = () => {
     if (!isSupported) {
-      alert('Speech synthesis not supported in your browser');
+      // Speech synthesis not supported
       return;
     }
 

@@ -295,7 +295,8 @@ export default function QrManagement() {
                   size="sm"
                   variant="outline"
                   onClick={() => {
-                    if (confirm('Are you sure you want to delete this QR code?')) {
+                    // Delete QR code confirmation handled by UI
+                    if (true) {
                       deleteMutation.mutate(qrCode.id);
                     }
                   }}

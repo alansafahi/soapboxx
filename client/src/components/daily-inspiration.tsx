@@ -239,7 +239,7 @@ export default function DailyInspiration() {
     });
   };
 
-  const getUserDisplayName = (user: any) => {
+  const getUserDisplayName = (user: { firstName?: string; lastName?: string; username?: string }) => {
     if (user.firstName && user.lastName) {
       return `${user.firstName} ${user.lastName}`;
     }
@@ -645,7 +645,7 @@ export default function DailyInspiration() {
                     <span>Your Friends</span>
                   </p>
                   <div className="max-h-32 overflow-y-auto space-y-2">
-                    {friends.slice(0, 5).map((friend: any) => (
+                    {friends.slice(0, 5).map((friend: { id: string; firstName?: string; lastName?: string; profileImageUrl?: string }) => (
                       <div key={friend.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                         <Checkbox
                           checked={selectedUsers.includes(friend.id)}
@@ -673,9 +673,9 @@ export default function DailyInspiration() {
                 <div className="space-y-2">
                   <p className="text-xs text-gray-500 dark:text-gray-400">Search Results</p>
                   <div className="max-h-32 overflow-y-auto space-y-2">
-                    {searchResults.slice(0, 10).filter((user: any) => 
-                      !friends?.some((friend: any) => friend.id === user.id)
-                    ).map((user: any) => (
+                    {searchResults.slice(0, 10).filter((user: { id: string; firstName?: string; lastName?: string; profileImageUrl?: string }) => 
+                      !friends?.some((friend: { id: string }) => friend.id === user.id)
+                    ).map((user: { id: string; firstName?: string; lastName?: string; profileImageUrl?: string }) => (
                       <div key={`search-${user.id}`} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                         <Checkbox
                           checked={selectedUsers.includes(user.id)}

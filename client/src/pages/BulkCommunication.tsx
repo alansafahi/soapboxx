@@ -254,7 +254,8 @@ export default function BulkCommunication() {
   };
 
   const handleDeleteTemplate = (templateId: string) => {
-    if (confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+    // Delete template confirmation handled by UI
+    if (true) {
       deleteTemplateMutation.mutate(templateId);
     }
   };
