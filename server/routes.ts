@@ -6119,8 +6119,12 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: "User authentication required" });
       }
 
+      // Parse pagination parameters
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = (page - 1) * limit;
 
-      const discussions = await storage.getDiscussions();
+      const discussions = await storage.getDiscussions(limit, offset);
 
       res.json(discussions);
     } catch (error) {

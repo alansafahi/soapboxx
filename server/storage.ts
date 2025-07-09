@@ -1715,7 +1715,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Discussion operations
-  async getDiscussions(churchId?: number): Promise<any[]> {
+  async getDiscussions(limit?: number, offset?: number, churchId?: number): Promise<any[]> {
     // Get regular discussions
     const discussionsQuery = db
       .select({
@@ -1818,9 +1818,12 @@ export class DatabaseStorage implements IStorage {
     const allPosts = [...discussionResults, ...soapResults]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     
+    // Apply pagination if specified
+    const paginatedPosts = limit ? allPosts.slice(offset || 0, (offset || 0) + limit) : allPosts;
+    
     // Add reaction data to each post
     const postsWithReactions = await Promise.all(
-      allPosts.map(async (post) => {
+      paginatedPosts.map(async (post) => {
         // Get reaction data aggregated by type
         const reactionData = await db
           .select({

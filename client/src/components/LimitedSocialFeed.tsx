@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { MessageCircle, Heart, Share2, ChevronDown } from "lucide-react";
+import { MessageCircle, Heart, Share2, ChevronDown, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
@@ -57,7 +57,12 @@ interface LimitedSocialFeedProps {
 }
 
 export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: LimitedSocialFeedProps) {
-  const [showAll, setShowAll] = useState(false);
+  const [page, setPage] = useState(1);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Enhanced SOAP content detection for all posts (new and legacy)
   const detectSoapContent = (post: any) => {
@@ -153,10 +158,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     return soapData;
   };
 
+  // Fetch posts with pagination
   const { data: posts = [], isLoading, error } = useQuery({
-    queryKey: ["/api/discussions"],
+    queryKey: ["/api/discussions", page],
     queryFn: async () => {
-      const response = await fetch("/api/discussions", {
+      const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
         credentials: "include",
       });
       if (!response.ok) {
@@ -165,6 +171,62 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       return response.json();
     },
   });
+
+  // Load more posts function
+  const loadMorePosts = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const response = await fetch(`/api/discussions?page=${page + 1}&limit=10`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch more posts");
+      
+      const newPosts = await response.json();
+      
+      if (newPosts.length === 0) {
+        setHasMore(false);
+      } else {
+        setAllPosts(prev => [...prev, ...newPosts]);
+        setPage(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error loading more posts:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [page, isLoadingMore, hasMore]);
+
+  // Initialize posts on first load
+  useEffect(() => {
+    if (posts.length > 0 && page === 1) {
+      setAllPosts(posts);
+      setHasMore(posts.length === 10); // Assume more if we got a full page
+    }
+  }, [posts, page]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [loadMorePosts, hasMore, isLoadingMore]);
 
   if (isLoading) {
     return (
@@ -195,8 +257,8 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     );
   }
 
-  const displayedPosts = showAll ? posts : posts.slice(0, initialLimit);
-  const hasMorePosts = posts.length > initialLimit;
+  const displayedPosts = allPosts.length > 0 ? allPosts : posts.slice(0, initialLimit);
+  const showInitialLoadMore = allPosts.length === 0 && posts.length > initialLimit;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -293,12 +355,12 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         );
       })}
       
-      {/* Show More Button */}
-      {hasMorePosts && !showAll && (
+      {/* Initial Show More Button */}
+      {showInitialLoadMore && (
         <div className="text-center pt-4">
           <Button
             variant="outline"
-            onClick={() => setShowAll(true)}
+            onClick={() => setAllPosts(posts)}
             className="flex items-center space-x-2"
           >
             <span>Show More Posts</span>
@@ -306,9 +368,33 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           </Button>
         </div>
       )}
+
+      {/* Infinite Scroll Trigger */}
+      {allPosts.length > 0 && hasMore && (
+        <div ref={loadMoreRef} className="text-center pt-4">
+          {isLoadingMore ? (
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm text-gray-500">Loading more posts...</span>
+            </div>
+          ) : (
+            // Invisible trigger area for intersection observer
+            <div className="h-20"></div>
+          )}
+        </div>
+      )}
+
+      {/* End of feed indicator */}
+      {allPosts.length > 0 && !hasMore && (
+        <div className="text-center pt-4 pb-8">
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            You've reached the end of the feed
+          </p>
+        </div>
+      )}
       
       {/* Empty State */}
-      {posts.length === 0 && (
+      {displayedPosts.length === 0 && !isLoading && (
         <div className="text-center py-8">
           <p className="text-gray-500 dark:text-gray-400 mb-4">No posts yet</p>
           <p className="text-sm text-gray-400 dark:text-gray-500">
