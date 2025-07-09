@@ -201,11 +201,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Initialize posts on first load
   useEffect(() => {
-    if (posts.length > 0 && page === 1 && allPosts.length === 0) {
-      // Only initialize if allPosts is empty to avoid duplicate initialization
+    if (posts.length > 0 && page === 1) {
       setHasMore(posts.length === 10); // Assume more if we got a full page
     }
-  }, [posts, page, allPosts.length]);
+  }, [posts, page]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -260,6 +259,8 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   const displayedPosts = allPosts.length > 0 ? allPosts : posts.slice(0, initialLimit);
   const showInitialLoadMore = allPosts.length === 0 && posts.length > initialLimit && showMoreClicks < 2;
+  
+
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -356,9 +357,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         );
       })}
       
-      {/* Initial Show More Button */}
-      {showInitialLoadMore && (
-        <div className="text-center pt-4">
+      {/* Initial Show More Button - Always show when we have more posts than initial limit */}
+      {allPosts.length === 0 && posts.length > initialLimit && (
+        <div className="text-center pt-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
           <Button
             variant="outline"
             onClick={() => {
@@ -376,11 +377,14 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                 // The infinite scroll will take over from here
               }
             }}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 min-w-[160px]"
           >
             <span>{showMoreClicks === 0 ? 'Show More Posts' : showMoreClicks === 1 ? 'Load More Posts' : 'Loading...'}</span>
             <ChevronDown className="w-4 h-4" />
           </Button>
+          <p className="text-xs text-gray-500 mt-2">
+            Showing {initialLimit} of {posts.length} posts
+          </p>
         </div>
       )}
 
