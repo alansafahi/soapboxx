@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { 
   Heart, 
   MessageCircle, 
@@ -76,6 +77,8 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [recentMoods, setRecentMoods] = useState<Array<{id: string; icon: string; label: string}>>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<number | null>(null);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -171,6 +174,51 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
     },
   });
 
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      try {
+        const response = await apiRequest('DELETE', `/api/discussions/${postId}`);
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      try {
+        // Safely update cache without triggering route changes
+        queryClient.setQueryData(['/api/feed'], (oldData: any) => {
+          if (!oldData || !Array.isArray(oldData)) return oldData;
+          return oldData.filter((post: any) => post.id !== postToDelete);
+        });
+        
+        // Reset dialog state first to prevent UI issues
+        setDeleteDialogOpen(false);
+        setPostToDelete(null);
+        
+        // Provide user feedback
+        setTimeout(() => {
+          toast({
+            title: "Success",
+            description: "Post deleted!",
+          });
+        }, 100);
+        
+      } catch (error) {
+        // Fallback: refresh the feed data if cache update fails
+        queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      }
+    },
+    onError: (error: any) => {
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      toast({
+        title: "Error",
+        description: `Failed to delete post: ${error.message || 'Please try again.'}`,
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleSubmit = () => {
     if (!content.trim()) return;
     
@@ -207,6 +255,17 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       
       return newSelection;
     });
+  };
+
+  const handleDeletePost = (postId: number) => {
+    setPostToDelete(postId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePost = () => {
+    if (postToDelete) {
+      deletePostMutation.mutate(postToDelete);
+    }
   };
 
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -806,6 +865,34 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deletePostMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeletePost}
+              disabled={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
