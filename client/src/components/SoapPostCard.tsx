@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface SoapPost {
   id: number;
@@ -53,17 +53,15 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
 
   const handleReaction = async (reactionType: string) => {
     try {
-      await apiRequest('POST', '/api/soap/reaction', {
-        soapId: post.id,
-        reactionType,
-        emoji: reactionType === 'amen' ? '🙏' : '❤️'
+      await apiRequest('POST', '/api/discussions/like', {
+        discussionId: post.id
       });
       toast({
-        title: "Amen!",
+        title: "Amen! 🙏",
         description: "Your prayer reaction has been added",
       });
-      // Refresh the post data to show updated counter
-      window.location.reload();
+      // Invalidate queries to refresh data without page reload
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
     } catch (error) {
       toast({
         title: "Failed to add reaction",
@@ -73,10 +71,9 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
   };
 
   const handleComment = () => {
-    // Navigate to comments or open comment dialog
     toast({
       title: "Comments",
-      description: "Comment functionality coming soon",
+      description: "Comment functionality coming soon! We're building a beautiful commenting system.",
     });
   };
 

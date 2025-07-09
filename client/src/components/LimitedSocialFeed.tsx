@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -7,6 +7,8 @@ import { MessageCircle, Heart, Share2, ChevronDown, Loader2 } from "lucide-react
 import { formatDistanceToNow } from "date-fns";
 import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 // Utility function to strip HTML tags and limit text to specified lines
 const stripHtmlAndLimitLines = (html: string, maxLines: number = 3): { text: string; isTruncated: boolean } => {
@@ -64,6 +66,51 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const [showMoreClicks, setShowMoreClicks] = useState(0);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const { toast } = useToast();
+
+  // Like mutation
+  const likeMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return apiRequest('POST', '/api/discussions/like', { discussionId: postId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      toast({
+        title: "Liked!",
+        description: "Your reaction has been added",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to like post",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Prayer reaction mutation
+  const prayMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return apiRequest('POST', '/api/discussions/reaction', { 
+        discussionId: postId, 
+        emoji: '🙏',
+        type: 'pray'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      toast({
+        title: "Praying! 🙏",
+        description: "Added to your prayer list",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to add prayer",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Enhanced SOAP content detection for all posts (new and legacy)
   const detectSoapContent = (post: any) => {
@@ -326,21 +373,47 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                   {/* Reaction Bar with enhanced styling */}
                   <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex items-center space-x-6">
-                      <button className="flex items-center space-x-2 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors">
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          likeMutation.mutate(post.id);
+                        }}
+                        disabled={likeMutation.isPending}
+                        className="flex items-center space-x-2 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+                      >
                         <Heart className="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-500 group-hover:text-red-500">
                           {Number(post._count?.likes) || 0}
                         </span>
                       </button>
                       
-                      <button className="flex items-center space-x-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors">
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          prayMutation.mutate(post.id);
+                        }}
+                        disabled={prayMutation.isPending}
+                        className="flex items-center space-x-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors"
+                      >
                         <span className="text-sm">🙏</span>
                         <span className="text-sm font-medium text-gray-500 group-hover:text-blue-500">
                           Pray
                         </span>
                       </button>
                       
-                      <button className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded-md transition-colors">
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toast({
+                            title: "Comments",
+                            description: "Comment functionality coming soon! We're building a beautiful commenting system.",
+                          });
+                        }}
+                        className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded-md transition-colors"
+                      >
                         <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-purple-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-500 group-hover:text-purple-500">
                           {Number(post._count?.comments) || 0}
@@ -348,7 +421,17 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       </button>
                     </div>
                     
-                    <button className="flex items-center space-x-1 group hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors">
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toast({
+                          title: "Share",
+                          description: "Share functionality coming soon!",
+                        });
+                      }}
+                      className="flex items-center space-x-1 group hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors"
+                    >
                       <Share2 className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                     </button>
                   </div>
