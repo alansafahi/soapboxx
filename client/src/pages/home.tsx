@@ -100,6 +100,11 @@ export default function Home({ referralCode }: HomeProps = {}) {
           </div>
         </div>
 
+        {/* Post Composer - Moved below Daily Tools */}
+        <div className="mb-6" ref={composerRef}>
+          <CompactPostComposer />
+        </div>
+
         {/* Recent Check-Ins Horizontal Strip */}
         <RecentCheckInsStrip />
 
@@ -107,11 +112,6 @@ export default function Home({ referralCode }: HomeProps = {}) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Primary Feed Column */}
           <div className="lg:col-span-3 min-w-0 space-y-6">
-            {/* Post Composer - Moved above the feed */}
-            <div ref={composerRef}>
-              <CompactPostComposer />
-            </div>
-
             {/* Latest Posts */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
