@@ -1877,14 +1877,30 @@ export class DatabaseStorage implements IStorage {
 
   // SOAP operations
   async addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<void> {
-    await db.insert(reactions).values({
-      userId,
-      targetType: 'soap',
-      targetId: soapId,
-      reactionType,
-      emoji,
-      createdAt: new Date()
-    }).onConflictDoNothing();
+    // Check if user already reacted with this type to prevent duplicates
+    const existingReaction = await db
+      .select()
+      .from(reactions)
+      .where(
+        and(
+          eq(reactions.userId, userId),
+          eq(reactions.targetType, 'soap'),
+          eq(reactions.targetId, soapId),
+          eq(reactions.reactionType, reactionType)
+        )
+      )
+      .limit(1);
+    
+    if (existingReaction.length === 0) {
+      await db.insert(reactions).values({
+        userId,
+        targetType: 'soap',
+        targetId: soapId,
+        reactionType,
+        emoji,
+        createdAt: new Date()
+      });
+    }
   }
 
   async saveSoapEntry(soapId: number, userId: string): Promise<void> {
