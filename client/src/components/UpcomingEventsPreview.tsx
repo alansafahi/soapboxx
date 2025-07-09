@@ -30,7 +30,7 @@ export default function UpcomingEventsPreview() {
           setUpcomingEvents(data);
         }
       } catch (error) {
-        console.warn('Could not fetch upcoming events');
+        // Could not fetch upcoming events - using fallback
       } finally {
         setLoading(false);
       }

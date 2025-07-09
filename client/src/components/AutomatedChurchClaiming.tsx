@@ -64,7 +64,7 @@ export default function AutomatedChurchClaiming({
         });
       }
     } catch (error) {
-      console.error('Church claiming error:', error);
+      // Church claiming error handled
       toast({
         title: "Error",
         description: "Failed to claim church. Please try again.",

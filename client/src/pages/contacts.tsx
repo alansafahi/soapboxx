@@ -67,7 +67,7 @@ function ContactsPage() {
         const response = await apiRequest("POST", "/api/invitations", data);
         return response;
       } catch (error) {
-        console.error('Invitation error:', error);
+        // Invitation error handled
         throw error;
       }
     },

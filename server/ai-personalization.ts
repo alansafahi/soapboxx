@@ -167,7 +167,7 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
         recommendations: aiResponse.recommendations || []
       };
     } catch (error) {
-      console.error('Error generating mood-based content:', error);
+      // Error generating mood-based content - fallback applied
       return this.generateFallbackMoodContent(mood, moodScore);
     }
   }
@@ -210,7 +210,7 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
       return recommendations.recommendations || [];
       
     } catch (error) {
-      console.error('AI Personalization Error:', error);
+      // AI Personalization Error - fallback applied
       return await this.generateDefaultRecommendations(userId);
     }
   }
@@ -292,7 +292,7 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
       await this.updateEngagementMetrics(userId, analysis);
       
     } catch (error) {
-      console.error('Engagement Analysis Error:', error);
+      // Engagement Analysis Error - handled
     }
   }
 
@@ -338,7 +338,7 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
       return JSON.parse(response.choices[0].message.content || '{}');
       
     } catch (error) {
-      console.error('Family Content Generation Error:', error);
+      // Family Content Generation Error - fallback applied
       return null;
     }
   }
@@ -374,7 +374,7 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
       return response.choices[0].message.content || content;
       
     } catch (error) {
-      console.error('Translation Error:', error);
+      // Translation Error - fallback applied
       return content;
     }
   }

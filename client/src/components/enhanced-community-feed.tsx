@@ -504,7 +504,7 @@ export default function EnhancedCommunityFeed() {
                           try {
                             return <VideoSharePreview post={post} />;
                           } catch (error) {
-                            console.error('VideoSharePreview error:', error);
+                            // VideoSharePreview error handled
                             return <div className="text-red-500">Error loading video preview</div>;
                           }
                         } else {

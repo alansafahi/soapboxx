@@ -291,7 +291,6 @@ export default function CheckInSystem() {
         
         await qrScannerRef.current.start();
       } catch (error) {
-        console.error('Error starting QR scanner:', error);
         toast({
           title: "Camera Error",
           description: "Unable to access camera. Please check permissions and try again.",
@@ -335,7 +334,6 @@ export default function CheckInSystem() {
         });
       }
     } catch (error) {
-      console.error('QR validation error:', error);
       toast({
         title: "Validation Error",
         description: "Failed to validate QR code. Please try again.",
@@ -375,7 +373,6 @@ export default function CheckInSystem() {
       setManualQrCode("");
       setQrValidationResult(null);
     } catch (error) {
-      console.error('QR check-in error:', error);
       toast({
         title: "Check-in Failed",
         description: "Failed to complete QR check-in. Please try again.",

@@ -21,7 +21,7 @@ try {
   const root = createRoot(container);
   root.render(<App />);
 } catch (error) {
-  console.error("Failed to render React app:", error);
+  // Failed to render React app - error handled
   const container = document.getElementById("root");
   if (container) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

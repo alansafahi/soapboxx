@@ -270,7 +270,7 @@ export default function CommunityFeed() {
       });
     },
     onError: (error) => {
-      console.error('Share API error:', error);
+      // Share API error handled
       // Fallback to clipboard sharing
       const discussion = discussions.find(d => d.id === discussionId);
       if (discussion) {
@@ -330,11 +330,11 @@ export default function CommunityFeed() {
         });
       } else {
         const errorText = await response.text();
-        console.error('Reaction failed:', errorText);
+        // Reaction failed - error handled
         throw new Error(`Failed to add reaction: ${response.status}`);
       }
     } catch (error) {
-      console.error('Reaction error:', error);
+      // Reaction error handled
       toast({
         title: "Error",
         description: "Failed to add reaction. Please try again.",

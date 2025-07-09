@@ -29,7 +29,7 @@ export default function LeaderboardPreview() {
           setTopUsers(data.slice(0, 3)); // Get top 3 users
         }
       } catch (error) {
-        console.warn('Could not fetch leaderboard preview');
+        // Could not fetch leaderboard preview - using fallback
       } finally {
         setLoading(false);
       }

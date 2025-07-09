@@ -53,7 +53,7 @@ const Leaderboard: React.FC = () => {
           }
         } catch (streakError) {
           // Don't fail if streaks API isn't available, just continue without streak data
-          console.warn('Streaks data not available:', streakError);
+          // Streaks data not available - using default
         }
         
       } catch (err) {
