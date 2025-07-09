@@ -191,42 +191,22 @@ export default function SocialFeed() {
     mutationFn: async (postId: number) => {
       return apiRequest('POST', `/api/discussions/${postId}/like`);
     },
-    onMutate: async (postId) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/feed'] });
+    onSuccess: (data, postId) => {
+      // Simply invalidate to refetch and show updated counts
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       
-      // Snapshot the previous value
-      const previousFeed = queryClient.getQueryData(['/api/feed']);
-      
-      // Optimistically update to the new value
-      queryClient.setQueryData(['/api/feed'], (old: any) => {
-        if (!old) return old;
-        return old.map((post: any) => {
-          if (post.id === postId) {
-            return {
-              ...post,
-              isLiked: !post.isLiked,
-              likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1
-            };
-          }
-          return post;
-        });
+      toast({
+        title: data.liked ? "Post liked!" : "Like removed",
+        description: data.liked ? "You liked this post" : "You removed your like",
       });
-      
-      return { previousFeed };
     },
-    onError: (err, postId, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      queryClient.setQueryData(['/api/feed'], context?.previousFeed);
+    onError: (err) => {
       toast({
         title: "Error",
-        description: "Failed to like",
+        description: "Failed to like post",
         variant: "destructive"
       });
-    },
-    onSuccess: () => {
-      // Don't invalidate immediately to preserve optimistic updates
-      // The optimistic update in onMutate already reflects the correct state
     }
   });
 

@@ -78,13 +78,13 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   // Like mutation
   const likeMutation = useMutation({
     mutationFn: async (postId: number) => {
-      return apiRequest('POST', '/api/discussions/like', { discussionId: postId });
+      return apiRequest('POST', `/api/discussions/${postId}/like`);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       toast({
-        title: "Liked!",
-        description: "Your reaction has been added",
+        title: data.liked ? "Post liked!" : "Like removed",
+        description: data.liked ? "Your reaction has been added" : "Your like has been removed",
       });
     },
     onError: () => {
