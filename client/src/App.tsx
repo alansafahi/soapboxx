@@ -38,6 +38,7 @@ const EmailVerificationPage = lazy(() => import("./pages/EmailVerification"));
 // Admin Portal Pages
 const AdminPage = lazy(() => import("./pages/admin"));
 const MembersPage = lazy(() => import("./pages/admin"));
+const QrManagementPage = lazy(() => import("./pages/qr-management"));
 const SMSGivingPage = lazy(() => import("./pages/SMSGiving_fixed"));
 const DonationAnalyticsPage = lazy(() => import("./pages/DonationAnalytics"));
 const CommunicationPage = lazy(() => import("./pages/BulkCommunication"));
@@ -144,6 +145,7 @@ function AppRouter() {
                                     {/* Admin Portal Routes */}
                                     <ProtectedRoute path="/admin" component={AdminPage} />
                                     <ProtectedRoute path="/members" component={MembersPage} />
+                                    <ProtectedRoute path="/qr-management" component={QrManagementPage} />
                                     <ProtectedRoute path="/sms-giving" component={SMSGivingPage} />
                                     <ProtectedRoute path="/donation-analytics" component={DonationAnalyticsPage} />
                                     <ProtectedRoute path="/communication" component={CommunicationPage} />

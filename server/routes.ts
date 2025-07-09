@@ -2067,6 +2067,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         location 
       } = req.body;
 
+      // Validate QR code if provided
+      if (qrCodeId) {
+        const qrValidation = await storage.validateQrCode(qrCodeId);
+        if (!qrValidation.valid) {
+          return res.status(400).json({ 
+            message: 'Invalid QR code',
+            error: 'QR code is inactive, expired, or has exceeded usage limits'
+          });
+        }
+
+        // Verify QR code belongs to user's church
+        const user = await storage.getUser(userId);
+        if (user?.churchId && qrValidation.qrCode?.churchId !== user.churchId) {
+          return res.status(403).json({ 
+            message: 'QR code access denied',
+            error: 'QR code belongs to a different church'
+          });
+        }
+      }
+
       // Create the check-in record
       const checkIn = await storage.createCheckIn({
         userId,
@@ -2152,6 +2172,201 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(insights);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch mood insights' });
+    }
+  });
+
+  // QR Code Management API Endpoints
+  // Create new QR code
+  app.post('/api/qr-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get user's church
+      const user = await storage.getUser(userId);
+      if (!user?.churchId) {
+        return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
+      }
+
+      // Check if user has admin permissions (pastor, admin, or owner)
+      if (!['pastor', 'admin', 'owner', 'soapbox_owner'].includes(user.role)) {
+        return res.status(403).json({ message: 'Insufficient permissions to create QR codes' });
+      }
+
+      const { 
+        name, 
+        description, 
+        location, 
+        eventId, 
+        maxUsesPerDay, 
+        validFrom, 
+        validUntil 
+      } = req.body;
+
+      // Generate unique QR code ID
+      const qrCodeId = crypto.randomUUID();
+      
+      const qrCode = await storage.createQrCode({
+        id: qrCodeId,
+        churchId: user.churchId,
+        eventId: eventId || null,
+        name,
+        description,
+        location,
+        isActive: true,
+        maxUsesPerDay: maxUsesPerDay || null,
+        validFrom: validFrom ? new Date(validFrom) : null,
+        validUntil: validUntil ? new Date(validUntil) : null,
+        createdBy: userId
+      });
+
+      res.json(qrCode);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to create QR code', error: (error as Error).message });
+    }
+  });
+
+  // Get QR codes for user's church
+  app.get('/api/qr-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user?.churchId) {
+        return res.status(400).json({ message: 'User must be associated with a church' });
+      }
+
+      const qrCodes = await storage.getChurchQrCodes(user.churchId);
+      res.json(qrCodes);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch QR codes' });
+    }
+  });
+
+  // Update QR code
+  app.put('/api/qr-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const qrCodeId = req.params.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get existing QR code to verify ownership
+      const existingQrCode = await storage.getQrCode(qrCodeId);
+      if (!existingQrCode) {
+        return res.status(404).json({ message: 'QR code not found' });
+      }
+
+      // Get user and verify church membership
+      const user = await storage.getUser(userId);
+      if (!user?.churchId || existingQrCode.churchId !== user.churchId) {
+        return res.status(403).json({ message: 'Access denied to this QR code' });
+      }
+
+      // Check permissions
+      if (!['pastor', 'admin', 'owner', 'soapbox_owner'].includes(user.role)) {
+        return res.status(403).json({ message: 'Insufficient permissions to update QR codes' });
+      }
+
+      const { 
+        name, 
+        description, 
+        location, 
+        isActive, 
+        maxUsesPerDay, 
+        validFrom, 
+        validUntil 
+      } = req.body;
+
+      const updates: any = {};
+      if (name !== undefined) updates.name = name;
+      if (description !== undefined) updates.description = description;
+      if (location !== undefined) updates.location = location;
+      if (isActive !== undefined) updates.isActive = isActive;
+      if (maxUsesPerDay !== undefined) updates.maxUsesPerDay = maxUsesPerDay;
+      if (validFrom !== undefined) updates.validFrom = validFrom ? new Date(validFrom) : null;
+      if (validUntil !== undefined) updates.validUntil = validUntil ? new Date(validUntil) : null;
+
+      const updatedQrCode = await storage.updateQrCode(qrCodeId, updates);
+      res.json(updatedQrCode);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update QR code', error: (error as Error).message });
+    }
+  });
+
+  // Delete QR code
+  app.delete('/api/qr-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const qrCodeId = req.params.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get existing QR code to verify ownership
+      const existingQrCode = await storage.getQrCode(qrCodeId);
+      if (!existingQrCode) {
+        return res.status(404).json({ message: 'QR code not found' });
+      }
+
+      // Get user and verify church membership
+      const user = await storage.getUser(userId);
+      if (!user?.churchId || existingQrCode.churchId !== user.churchId) {
+        return res.status(403).json({ message: 'Access denied to this QR code' });
+      }
+
+      // Check permissions
+      if (!['pastor', 'admin', 'owner', 'soapbox_owner'].includes(user.role)) {
+        return res.status(403).json({ message: 'Insufficient permissions to delete QR codes' });
+      }
+
+      await storage.deleteQrCode(qrCodeId);
+      res.json({ success: true, message: 'QR code deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete QR code', error: (error as Error).message });
+    }
+  });
+
+  // Validate QR code (for manual validation)
+  app.post('/api/qr-codes/:id/validate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const qrCodeId = req.params.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const validation = await storage.validateQrCode(qrCodeId);
+      
+      if (validation.valid && validation.qrCode) {
+        // Verify QR code belongs to user's church
+        const user = await storage.getUser(userId);
+        if (user?.churchId && validation.qrCode.churchId !== user.churchId) {
+          return res.status(403).json({ 
+            valid: false,
+            message: 'QR code belongs to a different church'
+          });
+        }
+      }
+
+      res.json({
+        valid: validation.valid,
+        qrCode: validation.qrCode,
+        message: validation.valid ? 'QR code is valid' : 'QR code is invalid, expired, or exceeded usage limits'
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to validate QR code', error: (error as Error).message });
     }
   });
 

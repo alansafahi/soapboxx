@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, isToday, startOfDay } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -48,6 +48,7 @@ import {
   Brain,
 } from "lucide-react";
 import MoodCheckIn from "./MoodCheckIn";
+import QrScanner from "qr-scanner";
 
 interface CheckIn {
   id: number;
@@ -164,6 +165,13 @@ export default function CheckInSystem() {
   const [notes, setNotes] = useState("");
   const [prayerIntent, setPrayerIntent] = useState("");
   const [customType, setCustomType] = useState("");
+  
+  // QR Scanner state
+  const [manualQrCode, setManualQrCode] = useState("");
+  const [isValidatingQr, setIsValidatingQr] = useState(false);
+  const [qrValidationResult, setQrValidationResult] = useState<any>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const qrScannerRef = useRef<QrScanner | null>(null);
 
   // Get today's check-in status
   const { data: todayCheckIn } = useQuery({
@@ -262,6 +270,133 @@ export default function CheckInSystem() {
 
     checkInMutation.mutate(checkInData);
   };
+
+  // QR Scanner Functions
+  const startQrScanner = async () => {
+    if (videoRef.current) {
+      try {
+        qrScannerRef.current = new QrScanner(
+          videoRef.current,
+          (result) => {
+            if (result?.data) {
+              handleQrCodeDetected(result.data);
+            }
+          },
+          {
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            preferredCamera: 'environment', // Use back camera on mobile
+          }
+        );
+        
+        await qrScannerRef.current.start();
+      } catch (error) {
+        console.error('Error starting QR scanner:', error);
+        toast({
+          title: "Camera Error",
+          description: "Unable to access camera. Please check permissions and try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const stopQrScanner = () => {
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop();
+      qrScannerRef.current.destroy();
+      qrScannerRef.current = null;
+    }
+  };
+
+  const handleQrCodeDetected = async (qrData: string) => {
+    setIsValidatingQr(true);
+    stopQrScanner();
+    
+    try {
+      // Validate QR code with the server
+      const response = await apiRequest("POST", "/api/qr-codes/validate", {
+        qrCodeId: qrData
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setQrValidationResult(result);
+        
+        // Auto-submit check-in if QR code is valid
+        if (result.isValid) {
+          await submitQrCheckIn(result);
+        }
+      } else {
+        toast({
+          title: "Invalid QR Code",
+          description: "This QR code is not valid for check-in.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('QR validation error:', error);
+      toast({
+        title: "Validation Error",
+        description: "Failed to validate QR code. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidatingQr(false);
+    }
+  };
+
+  const handleManualQrSubmit = async () => {
+    if (!manualQrCode.trim()) {
+      toast({
+        title: "Enter QR Code",
+        description: "Please enter a QR code to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    await handleQrCodeDetected(manualQrCode.trim());
+  };
+
+  const submitQrCheckIn = async (qrResult: any) => {
+    try {
+      const checkInData = {
+        checkInType: qrResult.eventId ? "Event Attendance" : "Church Check-In",
+        isPhysicalAttendance: true,
+        qrCodeId: qrResult.qrCodeId,
+        location: qrResult.location,
+        eventId: qrResult.eventId,
+        notes: `QR Check-in at ${qrResult.location}`,
+      };
+
+      await checkInMutation.mutateAsync(checkInData);
+      setShowQrScanner(false);
+      setManualQrCode("");
+      setQrValidationResult(null);
+    } catch (error) {
+      console.error('QR check-in error:', error);
+      toast({
+        title: "Check-in Failed",
+        description: "Failed to complete QR check-in. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Start scanner when modal opens
+  useEffect(() => {
+    if (showQrScanner) {
+      const timer = setTimeout(() => {
+        startQrScanner();
+      }, 100); // Small delay to ensure video element is rendered
+      
+      return () => {
+        clearTimeout(timer);
+        stopQrScanner();
+      };
+    }
+  }, [showQrScanner]);
 
   const canCheckInToday = !todayCheckIn;
   const streak = streakData?.streak || 0;
@@ -672,22 +807,123 @@ export default function CheckInSystem() {
 
       {/* QR Scanner Modal */}
       {showQrScanner && (
-        <Dialog open={showQrScanner} onOpenChange={setShowQrScanner}>
-          <DialogContent>
+        <Dialog open={showQrScanner} onOpenChange={(open) => {
+          if (!open) {
+            stopQrScanner();
+            setShowQrScanner(false);
+            setManualQrCode("");
+            setQrValidationResult(null);
+          }
+        }}>
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>QR Code Check-In</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <QrCode className="w-5 h-5" />
+                QR Code Check-In
+              </DialogTitle>
+              <DialogDescription>
+                Position the QR code within the camera frame or enter manually
+              </DialogDescription>
             </DialogHeader>
-            <div className="text-center py-8">
-              <Camera className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground mb-4">
-                QR code scanning would be implemented here with a camera library
-              </p>
-              <Input 
-                placeholder="Or enter QR code manually"
-                className="mb-4"
-              />
-              <Button onClick={() => setShowQrScanner(false)}>
-                Close
+            
+            <div className="space-y-4">
+              {/* Camera Scanner */}
+              <div className="relative bg-black rounded-lg overflow-hidden aspect-square">
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  playsInline
+                  muted
+                />
+                
+                {/* Scanning overlay */}
+                <div className="absolute inset-0 border-2 border-blue-500 rounded-lg">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-48 h-48 border-2 border-white rounded-lg relative">
+                      <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-blue-400 rounded-tl-lg"></div>
+                      <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-blue-400 rounded-tr-lg"></div>
+                      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-blue-400 rounded-bl-lg"></div>
+                      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-blue-400 rounded-br-lg"></div>
+                      
+                      {/* Scanning line animation */}
+                      <div className="absolute inset-x-0 top-0 h-1 bg-blue-400 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Status indicators */}
+                {isValidatingQr && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                      <p>Validating QR Code...</p>
+                    </div>
+                  </div>
+                )}
+                
+                {qrValidationResult && !qrValidationResult.isValid && (
+                  <div className="absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <p className="font-semibold">Invalid QR Code</p>
+                      <p className="text-sm">Please try scanning again</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Manual Entry */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Or enter QR code manually:</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={manualQrCode}
+                    onChange={(e) => setManualQrCode(e.target.value)}
+                    placeholder="Enter QR code here..."
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleManualQrSubmit}
+                    disabled={!manualQrCode.trim() || isValidatingQr}
+                    size="sm"
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+              
+              {/* QR Validation Result */}
+              {qrValidationResult && (
+                <div className={`p-3 rounded-lg ${qrValidationResult.isValid 
+                  ? 'bg-green-50 border border-green-200 dark:bg-green-950 dark:border-green-800' 
+                  : 'bg-red-50 border border-red-200 dark:bg-red-950 dark:border-red-800'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {qrValidationResult.isValid ? (
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-red-600" />
+                    )}
+                    <div className="flex-1">
+                      <p className={`font-medium ${qrValidationResult.isValid ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}`}>
+                        {qrValidationResult.isValid ? 'Valid QR Code' : 'Invalid QR Code'}
+                      </p>
+                      {qrValidationResult.isValid && (
+                        <p className="text-sm text-green-600 dark:text-green-300">
+                          {qrValidationResult.location}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Close Button */}
+              <Button 
+                variant="outline" 
+                onClick={() => setShowQrScanner(false)}
+                className="w-full"
+              >
+                Close Scanner
               </Button>
             </div>
           </DialogContent>
