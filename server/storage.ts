@@ -498,6 +498,11 @@ export interface IStorage {
   updateUserScore(userId: string, updates: Partial<InsertUserScore>): Promise<UserScore>;
   addPointTransaction(transaction: InsertPointTransaction): Promise<PointTransaction>;
   getLeaderboard(type: string, category: string, churchId?: number): Promise<LeaderboardEntry[]>;
+
+  // SOAP operations
+  addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<void>;
+  saveSoapEntry(soapId: number, userId: string): Promise<void>;
+  createSoapEntry(entry: any): Promise<any>;
   createLeaderboard(leaderboard: InsertLeaderboard): Promise<Leaderboard>;
   updateLeaderboardEntries(leaderboardId: number): Promise<void>;
   getUserAchievements(userId: string): Promise<UserAchievement[]>;
@@ -1852,7 +1857,31 @@ export class DatabaseStorage implements IStorage {
     return postsWithReactions;
   }
 
-  // Duplicate function removed - implementation exists elsewhere
+  // SOAP operations
+  async addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<void> {
+    await db.insert(reactions).values({
+      userId,
+      targetType: 'soap',
+      targetId: soapId,
+      reactionType,
+      emoji,
+      createdAt: new Date()
+    }).onConflictDoNothing();
+  }
+
+  async saveSoapEntry(soapId: number, userId: string): Promise<void> {
+    // Create a saved entry record (you can create a saved_soap_entries table or use bookmarks)
+    await db.insert(discussionBookmarks).values({
+      userId,
+      discussionId: soapId, // Reusing discussion bookmarks for SOAP entries
+      createdAt: new Date()
+    }).onConflictDoNothing();
+  }
+
+  async createSoapEntry(entry: any): Promise<any> {
+    const [newEntry] = await db.insert(soapEntries).values(entry).returning();
+    return newEntry;
+  }
 
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();

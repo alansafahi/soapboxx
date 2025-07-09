@@ -572,6 +572,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SOAP reaction endpoints
+  app.post("/api/soap/reaction", isAuthenticated, async (req, res) => {
+    try {
+      const { soapId, reactionType, emoji } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      // Add reaction to SOAP entry
+      await storage.addSoapReaction(soapId, userId, reactionType, emoji);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/soap/reflect", isAuthenticated, async (req, res) => {
+    try {
+      const { originalSoapId, scripture, scriptureReference, observation, application, prayer } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      // Create a personal copy of the SOAP reflection
+      await storage.createSoapEntry({
+        userId,
+        scripture,
+        scriptureReference,
+        observation,
+        application,
+        prayer,
+        isPublic: false,
+        originalSoapId,
+        churchId: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/soap/save", isAuthenticated, async (req, res) => {
+    try {
+      const { soapId } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      // Save SOAP entry to user's collection
+      await storage.saveSoapEntry(soapId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Basic test route
   app.get('/api/test', (req, res) => {
     res.json({ message: 'Server is running' });

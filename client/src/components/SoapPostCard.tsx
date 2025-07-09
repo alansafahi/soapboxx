@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface SoapPost {
   id: number;
@@ -40,12 +42,83 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
     application: false,
     prayer: false
   });
+  const { toast } = useToast();
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const handleReaction = async (reactionType: string) => {
+    try {
+      await apiRequest('POST', '/api/soap/reaction', {
+        soapId: post.id,
+        reactionType,
+        emoji: reactionType === 'amen' ? '🙏' : '❤️'
+      });
+      toast({
+        title: "Reaction added",
+        description: `You reacted with ${reactionType === 'amen' ? 'Amen' : 'Love'}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to add reaction",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleComment = () => {
+    // Navigate to comments or open comment dialog
+    toast({
+      title: "Comments",
+      description: "Comment functionality coming soon",
+    });
+  };
+
+  const handleReflect = async () => {
+    try {
+      // Copy SOAP content to user's personal journal
+      const soapData = post.soapData;
+      if (soapData) {
+        await apiRequest('POST', '/api/soap/reflect', {
+          originalSoapId: post.id,
+          scripture: soapData.scripture,
+          scriptureReference: soapData.scriptureReference,
+          observation: soapData.observation,
+          application: soapData.application,
+          prayer: soapData.prayer
+        });
+        toast({
+          title: "Copied to your journal",
+          description: "This reflection has been added to your personal S.O.A.P. journal",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to copy reflection",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      await apiRequest('POST', '/api/soap/save', {
+        soapId: post.id
+      });
+      toast({
+        title: "Saved",
+        description: "This reflection has been saved to your collection",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to save",
+        variant: "destructive",
+      });
+    }
   };
 
   const soapData = post.soapData;
@@ -192,17 +265,21 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
         {/* Spiritual Reaction Bar */}
         <div className="flex items-center justify-between pt-3 border-t border-purple-100 dark:border-purple-800">
           <div className="flex items-center space-x-4">
-            <button className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-3 py-1.5 rounded-md transition-colors">
+            <button 
+              onClick={() => handleReaction('amen')}
+              className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-3 py-1.5 rounded-md transition-colors"
+            >
               <span className="text-sm">🙏</span>
               <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600 dark:text-gray-400 dark:group-hover:text-purple-400">
                 Amen
               </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                {post._count?.likes || 0}
-              </span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{post._count?.likes || 0}</span>
             </button>
             
-            <button className="flex items-center space-x-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-md transition-colors">
+            <button 
+              onClick={() => handleComment()}
+              className="flex items-center space-x-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-md transition-colors"
+            >
               <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
               <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400">
                 Comment
@@ -214,14 +291,20 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
           </div>
           
           <div className="flex items-center space-x-2">
-            <button className="flex items-center space-x-1 group hover:bg-green-50 dark:hover:bg-green-900/20 px-2 py-1 rounded-md transition-colors">
+            <button 
+              onClick={() => handleReflect()}
+              className="flex items-center space-x-1 group hover:bg-green-50 dark:hover:bg-green-900/20 px-2 py-1 rounded-md transition-colors"
+            >
               <RotateCcw className="w-4 h-4 text-gray-500 group-hover:text-green-500 transition-colors" />
               <span className="text-xs font-medium text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400">
                 Reflect
               </span>
             </button>
             
-            <button className="flex items-center space-x-1 group hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors">
+            <button 
+              onClick={() => handleSave()}
+              className="flex items-center space-x-1 group hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors"
+            >
               <Save className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
               <span className="text-xs font-medium text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300">
                 Save

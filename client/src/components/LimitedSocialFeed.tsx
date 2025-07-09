@@ -59,6 +59,63 @@ interface LimitedSocialFeedProps {
 export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: LimitedSocialFeedProps) {
   const [showAll, setShowAll] = useState(false);
 
+  // Enhanced SOAP content detection for all posts (new and legacy)
+  const detectSoapContent = (post: any) => {
+    // Direct SOAP entries from the soapEntries table
+    if (post.type === 'soap_reflection' && post.soapData) {
+      return true;
+    }
+    
+    // Legacy SOAP detection for older discussion posts that contain SOAP structure
+    const content = post.content?.toLowerCase() || '';
+    
+    // Look for SOAP structure patterns
+    const hasScripture = content.includes('scripture:') || content.includes('📖');
+    const hasObservation = content.includes('observation:') || content.includes('🔍');
+    const hasApplication = content.includes('application:') || content.includes('💡');
+    const hasPrayer = content.includes('prayer:') || content.includes('🙏');
+    
+    // Must have at least 3 of the 4 SOAP components to be considered SOAP content
+    const soapComponentCount = [hasScripture, hasObservation, hasApplication, hasPrayer].filter(Boolean).length;
+    
+    // Also check for explicit SOAP mentions
+    const hasExplicitSoap = content.includes('soap reflection') || content.includes('s.o.a.p');
+    
+    return soapComponentCount >= 3 || hasExplicitSoap;
+  };
+
+  // Extract SOAP data from legacy posts
+  const extractLegacySoapData = (content: string) => {
+    const sections = content.split(/(?=scripture:|observation:|application:|prayer:)/i);
+    const soapData: any = {
+      scripture: '',
+      scriptureReference: '',
+      observation: '',
+      application: '',
+      prayer: ''
+    };
+    
+    sections.forEach(section => {
+      const lower = section.toLowerCase();
+      if (lower.startsWith('scripture:')) {
+        const lines = section.split('\n');
+        soapData.scripture = lines.slice(1).join('\n').trim();
+        // Try to extract reference from first line or look for verse patterns
+        const firstLine = lines[0];
+        const referenceMatch = firstLine.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/);
+        soapData.scriptureReference = referenceMatch ? referenceMatch[1] : 'Multiple Verses';
+      } else if (lower.startsWith('observation:')) {
+        soapData.observation = section.substring(section.indexOf(':') + 1).trim();
+      } else if (lower.startsWith('application:')) {
+        soapData.application = section.substring(section.indexOf(':') + 1).trim();
+      } else if (lower.startsWith('prayer:')) {
+        soapData.prayer = section.substring(section.indexOf(':') + 1).trim();
+      }
+    });
+    
+    return soapData;
+  };
+
   const { data: posts = [], isLoading, error } = useQuery({
     queryKey: ["/api/discussions"],
     queryFn: async () => {
@@ -107,12 +164,22 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Posts List */}
-      {displayedPosts.map((post: Post, index: number) => (
-        <div key={post.id}>
-          {/* Render SOAP posts with specialized component */}
-          {post.type === 'soap_reflection' ? (
-            <SoapPostCard post={post as any} />
-          ) : (
+      {displayedPosts.map((post: Post, index: number) => {
+        // Check if this is a SOAP post (either new format or legacy)
+        const isSoapPost = detectSoapContent(post);
+        
+        return (
+          <div key={post.id}>
+            {/* Render SOAP posts with specialized component */}
+            {isSoapPost ? (
+              <SoapPostCard 
+                post={{
+                  ...post,
+                  type: 'soap_reflection',
+                  soapData: post.soapData || extractLegacySoapData(post.content)
+                } as any} 
+              />
+            ) : (
             <Card className="bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-200 border-0 shadow-sm">
               <CardContent className="p-6">
               <div className="flex space-x-3">
@@ -177,16 +244,17 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
               </div>
             </CardContent>
           </Card>
-          )}
-          
-          {/* Soft divider between posts (except last) */}
-          {index < displayedPosts.length - 1 && (
-            <div className="flex justify-center my-4">
-              <div className="w-12 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
-            </div>
-          )}
-        </div>
-      ))}
+            )}
+            
+            {/* Soft divider between posts (except last) */}
+            {index < displayedPosts.length - 1 && (
+              <div className="flex justify-center my-4">
+                <div className="w-12 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
+              </div>
+            )}
+          </div>
+        );
+      })}
       
       {/* Show More Button */}
       {hasMorePosts && !showAll && (
