@@ -215,9 +215,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        console.log('Intersection observed:', entries[0].isIntersecting, { hasMore, isLoadingMore, allPostsLength: allPosts.length });
         if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          console.log('Triggering loadMorePosts from intersection observer');
           loadMorePosts();
         }
       },
@@ -226,7 +224,6 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
     if (loadMoreRef.current) {
       observerRef.current.observe(loadMoreRef.current);
-      console.log('Observer attached to loadMoreRef');
     }
 
     return () => {
@@ -374,11 +371,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               setAllPosts(posts);
               setHasMore(posts.length >= 10);
               
-              console.log('Show More clicked:', {
-                clickCount: newClickCount,
-                postsLength: posts.length,
-                hasMore: posts.length >= 10
-              });
+
             }}
             className="flex items-center space-x-2 min-w-[160px]"
           >
