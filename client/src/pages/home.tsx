@@ -14,6 +14,7 @@ import LimitedSocialFeed from "../components/LimitedSocialFeed";
 import MobileNav from "../components/mobile-nav";
 import CheckInSystem from "../components/CheckInSystem";
 import FloatingPostButton from "../components/FloatingPostButton";
+import RecentCheckInsStrip from "../components/RecentCheckInsStrip";
 import { ReferralWelcome } from "../components/ReferralWelcome";
 import { useQuery } from "@tanstack/react-query";
 
@@ -83,9 +84,9 @@ export default function Home({ referralCode }: HomeProps = {}) {
           </div>
         )}
         
-        {/* Spiritual Highlights Carousel/Grid */}
+        {/* Spiritual Rhythm Section - Always visible on top */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Spiritual Highlights</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Daily Spiritual Rhythm</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <div className="order-1">
               <CheckInSystem />
@@ -99,11 +100,14 @@ export default function Home({ referralCode }: HomeProps = {}) {
           </div>
         </div>
 
+        {/* Recent Check-Ins Horizontal Strip */}
+        <RecentCheckInsStrip />
+
         {/* Main Feed Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Primary Feed Column */}
           <div className="lg:col-span-3 min-w-0 space-y-6">
-            {/* Post Composer */}
+            {/* Post Composer - Moved above the feed */}
             <div ref={composerRef}>
               <CompactPostComposer />
             </div>

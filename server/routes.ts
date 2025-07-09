@@ -1869,6 +1869,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // No WebSocket connections - using REST endpoints only
 
 
+  // Get recent mood check-ins for horizontal strip
+  app.get("/api/mood-checkins/recent", isAuthenticated, async (req, res) => {
+    try {
+      const recentCheckIns = await storage.getRecentMoodCheckIns(10); // Get last 10 check-ins
+      res.json(recentCheckIns);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch recent check-ins" });
+    }
+  });
+
   // Mood check-in API endpoints
   app.post('/api/mood-checkins', isAuthenticated, async (req: any, res) => {
     try {

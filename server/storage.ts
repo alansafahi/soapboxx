@@ -544,6 +544,7 @@ export interface IStorage {
   // Mood check-in operations
   createMoodCheckin(moodCheckin: InsertMoodCheckin): Promise<MoodCheckin>;
   getRecentMoodCheckins(userId: string, limit?: number): Promise<MoodCheckin[]>;
+  getRecentMoodCheckIns(limit?: number): Promise<any[]>; // For horizontal strip display
   getMoodInsights(userId: string, days?: number): Promise<any>;
   
   // Personalized content operations
@@ -5775,6 +5776,29 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(moodCheckins)
       .where(eq(moodCheckins.userId, userId))
+      .orderBy(desc(moodCheckins.createdAt))
+      .limit(limit);
+  }
+
+  async getRecentMoodCheckIns(limit: number = 10): Promise<any[]> {
+    return await db
+      .select({
+        id: moodCheckins.id,
+        userId: moodCheckins.userId,
+        mood: moodCheckins.mood,
+        moodEmoji: moodCheckins.moodEmoji,
+        moodScore: moodCheckins.moodScore,
+        notes: moodCheckins.notes,
+        createdAt: moodCheckins.createdAt,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        },
+      })
+      .from(moodCheckins)
+      .innerJoin(users, eq(moodCheckins.userId, users.id))
       .orderBy(desc(moodCheckins.createdAt))
       .limit(limit);
   }
