@@ -49,16 +49,16 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
   const [commentText, setCommentText] = useState("");
   const { toast } = useToast();
 
-  // Fetch comments for this post
+  // Fetch comments for this SOAP post
   const { data: comments = [] } = useQuery({
-    queryKey: [`/api/discussions/${postId}/comments`],
+    queryKey: [`/api/soap/${postId}/comments`],
     enabled: isOpen && !!postId,
   });
 
-  // Comment mutation
+  // Comment mutation for SOAP posts
   const commentMutation = useMutation({
     mutationFn: async ({ content }: { content: string }) => {
-      const response = await fetch(`/api/discussions/${postId}/comments`, {
+      const response = await fetch(`/api/soap/${postId}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -77,7 +77,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/discussions/${postId}/comments`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/soap/${postId}/comments`] });
       setCommentText("");
       toast({
         title: "Comment added",

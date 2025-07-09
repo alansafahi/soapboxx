@@ -1160,6 +1160,18 @@ export const soapEntries = pgTable("soap_entries", {
   index("soap_entries_public_idx").on(table.isPublic),
 ]);
 
+// SOAP Comments  
+export const soapComments = pgTable("soap_comments", {
+  id: serial("id").primaryKey(),
+  soapId: integer("soap_id").notNull().references(() => soapEntries.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  parentId: integer("parent_id").references((): any => soapComments.id),
+  likeCount: integer("like_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Enhanced friend relationships are defined above
 
 // Chat conversations

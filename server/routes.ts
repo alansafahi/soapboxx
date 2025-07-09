@@ -7886,6 +7886,59 @@ Return JSON with this exact structure:
     }
   }
 
+  // SOAP Comments endpoints
+  app.get("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const soapId = parseInt(req.params.id);
+      const comments = await storage.getSoapComments(soapId);
+      res.json(comments);
+    } catch (error) {
+      console.error('Get SOAP comments error:', error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+
+  app.post("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const soapId = parseInt(req.params.id);
+      const { content } = req.body;
+      
+      console.log('SOAP comment creation attempt:', { userId, soapId, content: content?.substring(0, 50) });
+      
+      if (!userId) {
+        console.log('Authentication failed - no userId in session');
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+      
+      if (!content || !content.trim()) {
+        console.log('Content validation failed');
+        return res.status(400).json({ success: false, message: "Comment content is required" });
+      }
+      
+      // Check if SOAP entry exists
+      const soapEntry = await storage.getSoapEntry(soapId);
+      if (!soapEntry) {
+        console.log('SOAP entry not found:', soapId);
+        return res.status(404).json({ success: false, message: "SOAP entry not found" });
+      }
+      
+      console.log('SOAP entry found:', { id: soapEntry.id, scripture: soapEntry.scriptureReference });
+
+      const comment = await storage.createSoapComment({
+        soapId,
+        authorId: userId,
+        content: content.trim()
+      });
+      
+      console.log('SOAP comment created successfully:', comment.id);
+      res.status(201).json({ success: true, data: comment });
+    } catch (error) {
+      console.error('SOAP comment creation error:', error);
+      res.status(500).json({ success: false, message: "Failed to create comment", error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
   app.delete('/api/soap/:id/feature', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);

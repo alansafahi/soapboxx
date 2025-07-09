@@ -15,6 +15,7 @@ import {
   discussionLikes,
   discussionBookmarks,
   soapEntries,
+  soapComments,
   reactions,
   prayerRequests,
   prayerResponses,
@@ -2120,6 +2121,49 @@ export class DatabaseStorage implements IStorage {
       entityId: comment.discussionId,
       points: 5,
     });
+    
+    return newComment;
+  }
+
+  // SOAP Comment operations
+  async getSoapComments(soapId: number): Promise<any[]> {
+    return await db
+      .select({
+        id: soapComments.id,
+        soapId: soapComments.soapId,
+        authorId: soapComments.authorId,
+        content: soapComments.content,
+        parentId: soapComments.parentId,
+        likeCount: soapComments.likeCount,
+        createdAt: soapComments.createdAt,
+        updatedAt: soapComments.updatedAt,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(soapComments)
+      .leftJoin(users, eq(soapComments.authorId, users.id))
+      .where(eq(soapComments.soapId, soapId))
+      .orderBy(asc(soapComments.createdAt));
+  }
+
+  async createSoapComment(comment: { soapId: number; authorId: string; content: string }): Promise<any> {
+    const [newComment] = await db.insert(soapComments).values(comment).returning();
+    
+    // Track activity
+    try {
+      await this.trackUserActivity({
+        userId: comment.authorId,
+        activityType: 'soap_comment',
+        entityId: comment.soapId,
+        points: 5,
+      });
+    } catch (error) {
+      console.error("Error tracking SOAP comment activity:", error);
+    }
     
     return newComment;
   }
