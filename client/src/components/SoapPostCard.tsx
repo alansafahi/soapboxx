@@ -187,16 +187,26 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
 
   const handleReaction = async (reactionType: string) => {
     try {
-      await apiRequest('POST', '/api/soap/reaction', {
+      const response = await apiRequest('POST', '/api/soap/reaction', {
         soapId: post.id,
         reactionType,
         emoji: reactionType === 'amen' ? '🙏' : '❤️'
       });
-      toast({
-        title: "Amen! 🙏",
-        description: "Your prayer reaction has been added",
-      });
-      // Invalidate queries to refresh data without page reload
+      
+      if (response.reacted) {
+        toast({
+          title: "Amen! 🙏",
+          description: "Your prayer reaction has been added",
+        });
+      } else {
+        toast({
+          title: "Reaction removed",
+          description: "Your reaction has been removed",
+        });
+      }
+      
+      // Invalidate both feed and discussions queries to refresh reaction counts
+      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
     } catch (error) {
       toast({

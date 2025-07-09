@@ -1876,8 +1876,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // SOAP operations
-  async addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<void> {
-    // Check if user already reacted with this type to prevent duplicates
+  async addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<{ reacted: boolean; reactionCount: number }> {
+    // Check if user already reacted with this type
     const existingReaction = await db
       .select()
       .from(reactions)
@@ -1891,7 +1891,22 @@ export class DatabaseStorage implements IStorage {
       )
       .limit(1);
     
-    if (existingReaction.length === 0) {
+    let reacted: boolean;
+    if (existingReaction.length > 0) {
+      // Remove existing reaction (toggle off)
+      await db
+        .delete(reactions)
+        .where(
+          and(
+            eq(reactions.userId, userId),
+            eq(reactions.targetType, 'soap'),
+            eq(reactions.targetId, soapId),
+            eq(reactions.reactionType, reactionType)
+          )
+        );
+      reacted = false;
+    } else {
+      // Add new reaction (toggle on)
       await db.insert(reactions).values({
         userId,
         targetType: 'soap',
@@ -1900,7 +1915,24 @@ export class DatabaseStorage implements IStorage {
         emoji,
         createdAt: new Date()
       });
+      reacted = true;
     }
+    
+    // Get updated reaction count for this type
+    const reactionCountResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(reactions)
+      .where(
+        and(
+          eq(reactions.targetType, 'soap'),
+          eq(reactions.targetId, soapId),
+          eq(reactions.reactionType, reactionType)
+        )
+      );
+    
+    const reactionCount = reactionCountResult[0]?.count || 0;
+    
+    return { reacted, reactionCount };
   }
 
   async saveSoapEntry(soapId: number, userId: string): Promise<void> {
@@ -3551,6 +3583,14 @@ export class DatabaseStorage implements IStorage {
           )
         );
       liked = false;
+      
+      // Update like count in discussions table
+      await db
+        .update(discussions)
+        .set({ 
+          likeCount: sql`${discussions.likeCount} - 1`
+        })
+        .where(eq(discussions.id, discussionId));
     } else {
       // Add like
       await db
@@ -3560,6 +3600,14 @@ export class DatabaseStorage implements IStorage {
           discussionId,
         });
       liked = true;
+      
+      // Update like count in discussions table
+      await db
+        .update(discussions)
+        .set({ 
+          likeCount: sql`${discussions.likeCount} + 1`
+        })
+        .where(eq(discussions.id, discussionId));
     }
 
     // Get updated like count

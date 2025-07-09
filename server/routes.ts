@@ -582,9 +582,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      // Add reaction to SOAP entry
-      await storage.addSoapReaction(soapId, userId, reactionType, emoji);
-      res.json({ success: true });
+      // Toggle reaction to SOAP entry
+      const result = await storage.addSoapReaction(soapId, userId, reactionType, emoji);
+      res.json({ success: true, ...result });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
