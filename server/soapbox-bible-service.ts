@@ -49,7 +49,6 @@ class SoapBoxBibleService {
 
       return null;
     } catch (error) {
-      console.error('Error in SoapBox Bible verse lookup:', error);
       return null;
     }
   }
@@ -73,7 +72,6 @@ class SoapBoxBibleService {
 
       return [];
     } catch (error) {
-      console.error('Error in SoapBox Bible search:', error);
       return [];
     }
   }

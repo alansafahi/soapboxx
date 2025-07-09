@@ -283,22 +283,22 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       if (!response.ok) throw new Error("Failed to fetch more posts");
       
       const newPosts = await response.json();
-      console.log(`Loaded page ${nextPage}:`, newPosts.length, 'posts');
+
       
       if (newPosts.length === 0) {
         setHasMore(false);
-        console.log('No more posts available - reached end');
+
       } else {
         setAllPosts(prev => {
           const updated = [...prev, ...newPosts];
-          console.log(`Total posts after page ${nextPage}:`, updated.length);
+
           return updated;
         });
         setPage(nextPage);
         setHasMore(newPosts.length === 10); // Only continue if we got a full page
       }
     } catch (error) {
-      console.error("Error loading more posts:", error);
+      // Error loading more posts
     } finally {
       setIsLoadingMore(false);
     }
@@ -580,7 +580,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               setAllPosts(posts);
               setHasMore(posts.length === 10); // Only continue if we got a full first page
               setPage(1); // Reset to page 1 since we're showing the first page posts
-              console.log('Expanded to show all initial posts:', posts.length, 'hasMore:', posts.length === 10);
+
             }}
             className="flex items-center space-x-2 min-w-[160px]"
           >
@@ -610,9 +610,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                 const allDbPosts = await response.json();
                 setAllPosts(allDbPosts);
                 setHasMore(false);
-                console.log('Loaded all posts:', allDbPosts.length);
+
               } catch (error) {
-                console.error("Error loading all posts:", error);
+                // Error loading all posts
               } finally {
                 setIsLoadingMore(false);
               }

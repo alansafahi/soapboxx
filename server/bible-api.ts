@@ -41,7 +41,6 @@ async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'):
   try {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
     if (!OPENAI_API_KEY) {
-      console.error('OpenAI API key not configured');
       return null;
     }
 
@@ -69,7 +68,6 @@ async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'):
     });
 
     if (!response.ok) {
-      console.error('OpenAI API error:', response.status);
       return null;
     }
 
@@ -102,7 +100,6 @@ async function fetchVerseFromOpenAI(reference: string, version: string = 'NIV'):
       return null;
     }
   } catch (error) {
-    console.error('Error fetching verse from OpenAI:', error);
     return null;
   }
 }
@@ -147,7 +144,6 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
         };
       }
     } catch (error) {
-      console.error(`API.Bible error for ${refVariation}:`, error);
     }
   }
   
@@ -175,7 +171,6 @@ export async function searchBibleVerses(query: string, translation: string = 'NI
       }));
     }
   } catch (error) {
-    console.error('API.Bible search error:', error);
   }
   
   // No fallback for search - API.Bible only
@@ -193,7 +188,6 @@ export async function getRandomBibleVerse(translation: string = 'NIV'): Promise<
     const randomReference = popularVerses[Math.floor(Math.random() * popularVerses.length)];
     return await lookupBibleVerse(randomReference, translation);
   } catch (error) {
-    console.error('Random verse error:', error);
     return await lookupBibleVerse('John 3:16', translation);
   }
 }

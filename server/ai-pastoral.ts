@@ -99,7 +99,6 @@ Respond with JSON in this format:
       prayer: result.prayer || ''
     };
   } catch (error) {
-    console.error('Error generating SOAP suggestions:', error);
     throw new Error('Failed to generate AI suggestions. Please try again.');
   }
 }
@@ -186,7 +185,6 @@ Respond with JSON in this format:
       prayer: result.prayer || ''
     };
   } catch (error) {
-    console.error('Error generating complete SOAP entry:', error);
     throw new Error('Failed to generate complete SOAP entry');
   }
 }
@@ -335,7 +333,6 @@ Please provide enhanced versions that are more detailed, spiritually rich, and p
       enhancedPrayer: result.enhancedPrayer || prayer
     };
   } catch (error) {
-    console.error('Error enhancing SOAP entry:', error);
     throw new Error('Failed to enhance reflection. Please try again.');
   }
 }
@@ -381,7 +378,6 @@ Respond with a JSON array of question strings:
     const result = JSON.parse(response.choices[0].message.content || '{}');
     return result.questions || [];
   } catch (error) {
-    console.error('Error generating Scripture questions:', error);
     return [];
   }
 }

@@ -67,7 +67,6 @@ export class BulkCommunicationService {
 
       return message;
     } catch (error) {
-      console.error('Error creating bulk message:', error);
       throw error;
     }
   }
@@ -121,7 +120,6 @@ export class BulkCommunicationService {
 
       return recipients;
     } catch (error) {
-      console.error('Error generating recipient list:', error);
       throw error;
     }
   }
@@ -133,7 +131,6 @@ export class BulkCommunicationService {
         await storage.createMessageRecipient(recipient);
       }
     } catch (error) {
-      console.error('Error saving recipients:', error);
       throw error;
     }
   }
@@ -186,7 +183,6 @@ export class BulkCommunicationService {
 
           successCount++;
         } catch (error) {
-          console.error(`Failed to send to recipient ${recipient.userId}:`, error);
           await storage.updateMessageRecipient(recipient.id!, {
             status: 'failed'
           });
@@ -202,7 +198,6 @@ export class BulkCommunicationService {
 
 
     } catch (error) {
-      console.error('Error sending bulk message:', error);
       await storage.updateBulkMessage(messageId, { status: 'failed' });
       throw error;
     }
@@ -327,7 +322,6 @@ export class BulkCommunicationService {
 
       return { message, analytics, recipients };
     } catch (error) {
-      console.error('Error getting message analytics:', error);
       throw error;
     }
   }

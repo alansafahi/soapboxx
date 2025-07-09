@@ -79,7 +79,6 @@ async function resendVerificationEmails() {
     };
 
   } catch (error) {
-    console.error('💥 Error in resendVerificationEmails:', error);
     throw error;
   }
 }
@@ -94,7 +93,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(0);
     })
     .catch((error) => {
-      console.error('\n💥 Process failed:', error);
       process.exit(1);
     });
 }

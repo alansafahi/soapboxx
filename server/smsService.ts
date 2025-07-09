@@ -46,7 +46,6 @@ export class SMSService {
 
       return true;
     } catch (error: any) {
-      console.error('Twilio SMS error:', error);
       return false;
     }
   }

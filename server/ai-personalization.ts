@@ -399,7 +399,6 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
         topicInterests: personalization.topicInterests || [],
       };
     } catch (error) {
-      console.error('Error getting personalization data:', error);
       return null;
     }
   }
@@ -440,7 +439,6 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
         lastRecommendationUpdate: new Date(),
       });
     } catch (error) {
-      console.error('Error updating recommendations:', error);
     }
   }
 
@@ -461,7 +459,6 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
         await storage.updateUserPersonalization(userId, updatedEngagement);
       }
     } catch (error) {
-      console.error('Error updating engagement metrics:', error);
     }
   }
 }

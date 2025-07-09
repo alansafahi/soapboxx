@@ -48,7 +48,6 @@ export class NotificationScheduler {
       }
 
     } catch (error) {
-      console.error('Error initializing notifications for user:', userId, error);
     }
   }
 
@@ -127,7 +126,6 @@ export class NotificationScheduler {
 
       await this.scheduleJob(job);
     } catch (error) {
-      console.error('Error scheduling personalized notification:', error);
     }
   }
 
@@ -154,7 +152,6 @@ export class NotificationScheduler {
 
       await this.scheduleJob(job);
     } catch (error) {
-      console.error('Error scheduling event reminder:', error);
     }
   }
 
@@ -234,7 +231,6 @@ export class NotificationScheduler {
       });
 
     } catch (error) {
-      console.error('Error executing notification job:', job.id, error);
       
       // Log failed delivery
       await storage.logNotificationDelivery({

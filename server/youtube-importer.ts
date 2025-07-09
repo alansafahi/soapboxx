@@ -27,7 +27,6 @@ export class YouTubeImporter {
       const videoData = this.getVideoDataFromId(videoId);
       return videoData;
     } catch (error) {
-      console.error(`Error fetching metadata for video ${videoId}:`, error);
       return null;
     }
   }
@@ -210,7 +209,6 @@ export class YouTubeImporter {
 
       return { success: true, videoId: newVideo[0].id };
     } catch (error) {
-      console.error('Error importing video:', error);
       return { success: false, error: 'Failed to import video' };
     }
   }

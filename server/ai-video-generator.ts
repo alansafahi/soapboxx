@@ -78,7 +78,6 @@ export class AIVideoGenerator {
       };
       
     } catch (error) {
-      console.error('Error generating video content:', error);
       throw new Error('Failed to generate video content');
     }
   }
@@ -198,7 +197,6 @@ Keep the content biblically sound, spiritually enriching, and appropriate for ch
       return videoUrl;
       
     } catch (error) {
-      console.error('Error generating video file:', error);
       throw new Error('Failed to generate video file');
     }
   }
@@ -223,7 +221,6 @@ Keep the content biblically sound, spiritually enriching, and appropriate for ch
 
       return thumbnailResponse.data[0].url || '';
     } catch (error) {
-      console.error('Error generating thumbnail:', error);
       throw new Error('Failed to generate thumbnail');
     }
   }
@@ -269,7 +266,6 @@ Keep the content biblically sound, spiritually enriching, and appropriate for ch
 
       return episodes;
     } catch (error) {
-      console.error('Error generating video series:', error);
       throw new Error('Failed to generate video series');
     }
   }

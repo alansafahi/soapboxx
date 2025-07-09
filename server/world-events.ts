@@ -74,7 +74,6 @@ Respond in JSON format:
       spiritualRelevance: event.spiritualRelevance
     }));
   } catch (error) {
-    console.error('Error fetching world events:', error);
     // Return some general categories that are often relevant
     return [
       {
@@ -134,7 +133,6 @@ Respond with JSON:
     const result = JSON.parse(response.choices[0].message.content || '{}');
     return result.themes || [];
   } catch (error) {
-    console.error('Error generating spiritual themes:', error);
     return ['Hope in uncertainty', 'Peace amid chaos', 'Comfort for suffering'];
   }
 }

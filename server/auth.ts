@@ -159,7 +159,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     // If no session, return unauthorized
     return res.status(401).json({ success: false, message: "Unauthorized" });
   } catch (error) {
-    console.error("Authentication error:", error);
     return res.status(500).json({ success: false, message: "Authentication error" });
   }
 };
@@ -260,7 +259,6 @@ export function setupAuth(app: Express): void {
         });
 
       } catch (emailError) {
-        console.error('Failed to send verification email:', emailError);
         // Continue with registration even if email fails
       }
 
@@ -274,7 +272,6 @@ export function setupAuth(app: Express): void {
 
       res.status(201).json(response);
     } catch (error) {
-      console.error('Registration error:', error);
       res.status(500).json({ 
         success: false,
         message: 'Registration failed. Please try again.' 
@@ -337,7 +334,6 @@ export function setupAuth(app: Express): void {
 
       req.session.save((err: any) => {
         if (err) {
-          console.error('Session save error:', err);
           return res.status(500).json({ 
             success: false,
             message: 'Login failed. Please try again.' 
@@ -358,7 +354,6 @@ export function setupAuth(app: Express): void {
         });
       });
     } catch (error) {
-      console.error('Login error:', error);
       res.status(500).json({ 
         success: false,
         message: 'Login failed. Please try again.' 
@@ -391,7 +386,6 @@ export function setupAuth(app: Express): void {
 
       res.redirect('/email-verification?success=true');
     } catch (error) {
-      console.error('Email verification error:', error);
       res.redirect('/email-verification?error=verification_failed');
     }
   });
@@ -433,7 +427,6 @@ export function setupAuth(app: Express): void {
         message: 'Email verified successfully' 
       });
     } catch (error) {
-      console.error('Email verification error:', error);
       res.status(500).json({ 
         success: false, 
         message: 'Email verification failed' 
@@ -484,7 +477,6 @@ export function setupAuth(app: Express): void {
         message: 'Verification email sent successfully' 
       });
     } catch (error) {
-      console.error('Resend verification error:', error);
       res.status(500).json({ 
         success: false,
         message: 'Failed to resend verification email' 
@@ -523,13 +515,11 @@ export function setupAuth(app: Express): void {
         // Save session before redirect
         req.session.save((err) => {
           if (err) {
-            console.error('Session save error:', err);
             return res.redirect('/login?error=session_failed');
           }
           res.redirect('/?oauth=success');
         });
       } catch (error) {
-        console.error('Google OAuth callback error:', error);
         res.redirect('/login?error=oauth_failed');
       }
     }
@@ -566,13 +556,11 @@ export function setupAuth(app: Express): void {
         // Save session before redirect
         req.session.save((err) => {
           if (err) {
-            console.error('Session save error:', err);
             return res.redirect('/login?error=session_failed');
           }
           res.redirect('/?oauth=success');
         });
       } catch (error) {
-        console.error('Apple OAuth callback error:', error);
         res.redirect('/login?error=oauth_failed');
       }
     }
@@ -598,7 +586,6 @@ export function setupAuth(app: Express): void {
       // Destroy the session completely
       req.session.destroy(async (err: any) => {
         if (err) {
-          console.error('Session destruction error:', err);
         }
         
         // Clear session cookies
@@ -611,7 +598,6 @@ export function setupAuth(app: Express): void {
         });
       });
     } catch (error) {
-      console.error('Logout endpoint error:', error);
       res.status(500).json({ 
         success: false,
         message: 'Logout failed' 
@@ -642,7 +628,6 @@ export function setupAuth(app: Express): void {
         
         req.session.save((err: any) => {
           if (err) {
-            console.error('Session save error:', err);
             return res.status(500).json({ success: false, message: 'Session save failed' });
           }
           res.json({ success: true, message: 'Session established', userId: user.id });
@@ -651,7 +636,6 @@ export function setupAuth(app: Express): void {
         res.status(404).json({ success: false, message: 'User not found' });
       }
     } catch (error) {
-      console.error('Debug session error:', error);
       res.status(500).json({ success: false, message: 'Failed to establish session' });
     }
   });

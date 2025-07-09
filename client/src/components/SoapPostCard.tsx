@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
@@ -95,9 +95,12 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" aria-describedby="comments-dialog-description">
         <DialogHeader>
           <DialogTitle>Comments</DialogTitle>
+          <DialogDescription id="comments-dialog-description">
+            View and add comments to this S.O.A.P. reflection
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 max-h-[50vh] overflow-y-auto">
           {comments.length === 0 ? (
@@ -498,9 +501,12 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
       
       {/* Share Dialog */}
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" aria-describedby="share-dialog-description">
           <DialogHeader>
             <DialogTitle>Share S.O.A.P. Reflection</DialogTitle>
+            <DialogDescription id="share-dialog-description">
+              Choose how you'd like to share this spiritual reflection
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">

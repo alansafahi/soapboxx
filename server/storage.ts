@@ -799,7 +799,6 @@ export class DatabaseStorage implements IStorage {
       
       return user;
     } catch (error) {
-      console.error('Database error updating user profile:', error);
       throw error;
     }
   }
@@ -1140,7 +1139,6 @@ export class DatabaseStorage implements IStorage {
       
       return filteredResults;
     } catch (error) {
-      console.error('Error in searchChurches:', error);
       
       // Fallback to simple query without member counts
       try {
@@ -1156,7 +1154,6 @@ export class DatabaseStorage implements IStorage {
           distance: 0
         }));
       } catch (fallbackError) {
-        console.error('Fallback search also failed:', fallbackError);
         return [];
       }
     }
@@ -2170,7 +2167,6 @@ export class DatabaseStorage implements IStorage {
         points: 5,
       });
     } catch (error) {
-      console.error("Error tracking SOAP comment activity:", error);
     }
     
     return newComment;
@@ -2209,7 +2205,6 @@ export class DatabaseStorage implements IStorage {
         points: 10,
       });
     } catch (error) {
-      console.error("Error tracking prayer request activity:", error);
       // Continue without failing the prayer creation
     }
     
@@ -3103,7 +3098,6 @@ export class DatabaseStorage implements IStorage {
       return { success: true, church: updatedChurch };
 
     } catch (error) {
-      console.error('Error claiming church:', error);
       return { success: false, error: 'Failed to claim church' };
     }
   }
@@ -3125,7 +3119,6 @@ export class DatabaseStorage implements IStorage {
           const result = await db.insert(churches).values(batch).returning({ id: churches.id });
           totalInserted += result.length;
         } catch (error) {
-          console.error(`Error inserting batch ${Math.floor(i / batchSize) + 1}:`, error);
           // Continue with next batch
         }
       }
@@ -3133,7 +3126,6 @@ export class DatabaseStorage implements IStorage {
       return { success: true, imported: totalInserted };
 
     } catch (error) {
-      console.error('Error bulk importing churches:', error);
       return { success: false, imported: 0, error: 'Bulk import failed' };
     }
   }
@@ -3161,7 +3153,6 @@ export class DatabaseStorage implements IStorage {
       return { success: true, removed: totalRemoved };
 
     } catch (error) {
-      console.error('Error removing demo churches:', error);
       return { success: false, removed: 0, error: 'Failed to remove demo churches' };
     }
   }
@@ -3738,7 +3729,6 @@ export class DatabaseStorage implements IStorage {
       return feedPosts;
 
     } catch (error) {
-      console.error('Error fetching feed posts:', error);
       return [];
     }
   }
@@ -5495,7 +5485,6 @@ export class DatabaseStorage implements IStorage {
 
       return anyVerse || null;
     } catch (error) {
-      console.error('Error in getBibleVerseByReferenceAndTranslation:', error);
       return null;
     }
   }
@@ -5552,7 +5541,6 @@ export class DatabaseStorage implements IStorage {
 
       return anyVerse || null;
     } catch (error) {
-      console.error('Error in getBibleVerseByReferenceFlexible:', error);
       return null;
     }
   }
@@ -6257,7 +6245,6 @@ export class DatabaseStorage implements IStorage {
       
       return userChurch?.role || 'new_member';
     } catch (error) {
-      console.error('Error getting user role:', error);
       return 'new_member';
     }
   }
@@ -6292,7 +6279,6 @@ export class DatabaseStorage implements IStorage {
 
       return availableRoles.sort((a, b) => roleHierarchy[b] - roleHierarchy[a]); // Sort highest to lowest
     } catch (error) {
-      console.error('Error getting available roles:', error);
       return ['new_member'];
     }
   }
@@ -6353,7 +6339,6 @@ export class DatabaseStorage implements IStorage {
 
       return true;
     } catch (error) {
-      console.error('Error switching user role:', error);
       return false;
     }
   }

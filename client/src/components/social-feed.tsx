@@ -170,10 +170,7 @@ export default function SocialFeed() {
   // Display a limited number of posts initially
   const displayedPosts = showAllPosts ? feedPosts : feedPosts.slice(0, 5);
 
-  // Debug logging for feed posts
-  useEffect(() => {
-    // Feed data loaded
-  }, [feedPosts, isLoading, error]);
+
 
   // Search verses
   const { data: verseSearchData, isLoading: isSearchingVerses } = useQuery<{verses: Array<{id: string; reference: string; text: string}>}>({
@@ -1796,9 +1793,12 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
 
       {/* Share Dialog */}
       <Dialog open={shareDialogOpen !== null} onOpenChange={() => setShareDialogOpen(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" aria-describedby="share-post-dialog-description">
           <DialogHeader>
             <DialogTitle>Share Post</DialogTitle>
+            <DialogDescription id="share-post-dialog-description">
+              Choose how you'd like to share this post
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">

@@ -196,7 +196,6 @@ export class ScriptureAPIService {
       };
 
     } catch (error) {
-      console.error('Scripture API error:', error);
       return null;
     }
   }
@@ -242,7 +241,6 @@ export class ScriptureAPIService {
       }));
 
     } catch (error) {
-      console.error('Scripture API search error:', error);
       return [];
     }
   }

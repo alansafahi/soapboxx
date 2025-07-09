@@ -6376,15 +6376,13 @@ Return JSON with this exact structure:
       const discussionId = parseInt(req.params.id);
       const { content } = req.body;
       
-      console.log('Comment creation attempt:', { userId, discussionId, content: content?.substring(0, 50) });
+
       
       if (!userId) {
-        console.log('Authentication failed - no userId in session');
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
       if (!content || !content.trim()) {
-        console.log('Content validation failed');
         return res.status(400).json({ success: false, message: "Comment content is required" });
       }
       
@@ -6392,11 +6390,9 @@ Return JSON with this exact structure:
       const discussions = await storage.getDiscussions();
       const discussion = discussions.find(d => d.id === discussionId);
       if (!discussion) {
-        console.log('Discussion not found:', discussionId);
         return res.status(404).json({ success: false, message: "Post not found" });
       }
       
-      console.log('Discussion found:', { id: discussion.id, title: discussion.title });
 
       const comment = await storage.createDiscussionComment({
         discussionId,
@@ -6404,10 +6400,8 @@ Return JSON with this exact structure:
         content: content.trim()
       });
       
-      console.log('Comment created successfully:', comment.id);
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      console.error('Comment creation error:', error);
       res.status(500).json({ success: false, message: "Failed to create comment", error: error instanceof Error ? error.message : String(error) });
     }
   });
@@ -7160,7 +7154,6 @@ Return JSON with this exact structure:
         ].filter(Boolean)
       });
     } catch (error) {
-      console.error('Church status error:', error);
       return res.status(500).json({ message: 'Failed to get church status' });
     }
   });
@@ -7893,7 +7886,6 @@ Return JSON with this exact structure:
       const comments = await storage.getSoapComments(soapId);
       res.json(comments);
     } catch (error) {
-      console.error('Get SOAP comments error:', error);
       res.status(500).json({ message: "Failed to fetch comments" });
     }
   });
@@ -7904,26 +7896,21 @@ Return JSON with this exact structure:
       const soapId = parseInt(req.params.id);
       const { content } = req.body;
       
-      console.log('SOAP comment creation attempt:', { userId, soapId, content: content?.substring(0, 50) });
       
       if (!userId) {
-        console.log('Authentication failed - no userId in session');
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
       if (!content || !content.trim()) {
-        console.log('Content validation failed');
         return res.status(400).json({ success: false, message: "Comment content is required" });
       }
       
       // Check if SOAP entry exists
       const soapEntry = await storage.getSoapEntry(soapId);
       if (!soapEntry) {
-        console.log('SOAP entry not found:', soapId);
         return res.status(404).json({ success: false, message: "SOAP entry not found" });
       }
       
-      console.log('SOAP entry found:', { id: soapEntry.id, scripture: soapEntry.scriptureReference });
 
       const comment = await storage.createSoapComment({
         soapId,
@@ -7931,10 +7918,8 @@ Return JSON with this exact structure:
         content: content.trim()
       });
       
-      console.log('SOAP comment created successfully:', comment.id);
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      console.error('SOAP comment creation error:', error);
       res.status(500).json({ success: false, message: "Failed to create comment", error: error instanceof Error ? error.message : String(error) });
     }
   });
@@ -10157,7 +10142,6 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(userStreaks);
     } catch (error) {
-      console.error('Error fetching user streaks:', error);
       res.status(500).json({ message: 'Failed to fetch user streaks' });
     }
   });
@@ -10278,7 +10262,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const upcomingEvents = await storage.getUpcomingEvents(churchId, limit);
       res.json(upcomingEvents);
     } catch (error) {
-      console.error('Error fetching upcoming events:', error);
       res.status(500).json({ message: 'Failed to fetch upcoming events' });
     }
   });
