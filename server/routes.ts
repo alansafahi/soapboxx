@@ -6372,23 +6372,31 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-
-
-
-      
       const userId = req.session?.userId;
       const discussionId = parseInt(req.params.id);
       const { content } = req.body;
       
+      console.log('Comment creation attempt:', { userId, discussionId, content: content?.substring(0, 50) });
+      
       if (!userId) {
-
+        console.log('Authentication failed - no userId in session');
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
       
       if (!content || !content.trim()) {
+        console.log('Content validation failed');
         return res.status(400).json({ success: false, message: "Comment content is required" });
       }
       
+      // Check if discussion exists
+      const discussions = await storage.getDiscussions();
+      const discussion = discussions.find(d => d.id === discussionId);
+      if (!discussion) {
+        console.log('Discussion not found:', discussionId);
+        return res.status(404).json({ success: false, message: "Post not found" });
+      }
+      
+      console.log('Discussion found:', { id: discussion.id, title: discussion.title });
 
       const comment = await storage.createDiscussionComment({
         discussionId,
@@ -6396,10 +6404,11 @@ Return JSON with this exact structure:
         content: content.trim()
       });
       
-
+      console.log('Comment created successfully:', comment.id);
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      res.status(500).json({ success: false, message: "Failed to create comment" });
+      console.error('Comment creation error:', error);
+      res.status(500).json({ success: false, message: "Failed to create comment", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
