@@ -1826,7 +1826,7 @@ export class DatabaseStorage implements IStorage {
           .select({
             reactionType: reactions.reactionType,
             emoji: reactions.emoji,
-            count: sql<number>`count(*)`,
+            count: sql<number>`cast(count(*) as integer)`,
           })
           .from(reactions)
           .where(
@@ -1849,8 +1849,8 @@ export class DatabaseStorage implements IStorage {
           ...post,
           reactions: formattedReactions,
           _count: {
-            likes: formattedReactions.reduce((sum, r) => sum + (r.count || 0), 0),
-            comments: post.commentCount || 0
+            likes: formattedReactions.reduce((sum, r) => sum + Number(r.count || 0), 0),
+            comments: Number(post.commentCount || 0)
           }
         };
       })

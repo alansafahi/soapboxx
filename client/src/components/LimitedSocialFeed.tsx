@@ -56,7 +56,7 @@ interface LimitedSocialFeedProps {
   className?: string;
 }
 
-export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: LimitedSocialFeedProps) {
+export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: LimitedSocialFeedProps) {
   const [showAll, setShowAll] = useState(false);
 
   // Enhanced SOAP content detection for all posts (new and legacy)
@@ -254,7 +254,7 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
                       <button className="flex items-center space-x-2 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors">
                         <Heart className="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-500 group-hover:text-red-500">
-                          {post._count?.likes || 0}
+                          {Number(post._count?.likes) || 0}
                         </span>
                       </button>
                       
@@ -268,7 +268,7 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
                       <button className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded-md transition-colors">
                         <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-purple-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-500 group-hover:text-purple-500">
-                          {post._count?.comments || 0}
+                          {Number(post._count?.comments) || 0}
                         </span>
                       </button>
                     </div>

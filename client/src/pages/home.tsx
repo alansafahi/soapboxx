@@ -171,7 +171,7 @@ export default function Home({ referralCode }: HomeProps = {}) {
             {/* Latest Posts */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
-              <LimitedSocialFeed initialLimit={3} />
+              <LimitedSocialFeed initialLimit={5} />
             </div>
           </div>
           
