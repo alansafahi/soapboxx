@@ -1756,7 +1756,8 @@ export class DatabaseStorage implements IStorage {
           eq(discussions.isPublic, true),
           churchId ? eq(discussions.churchId, churchId) : undefined
         )
-      );
+      )
+      .orderBy(desc(discussions.createdAt));
 
     // Get public SOAP entries
     const soapQuery = db
@@ -1804,7 +1805,8 @@ export class DatabaseStorage implements IStorage {
           eq(soapEntries.isPublic, true),
           churchId ? eq(soapEntries.churchId, churchId) : undefined
         )
-      );
+      )
+      .orderBy(desc(soapEntries.createdAt));
 
     // Execute both queries
     const [discussionResults, soapResults] = await Promise.all([

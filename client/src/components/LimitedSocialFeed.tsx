@@ -86,7 +86,6 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
 
   // Extract SOAP data from legacy posts
   const extractLegacySoapData = (content: string) => {
-    const sections = content.split(/(?=scripture:|observation:|application:|prayer:)/i);
     const soapData: any = {
       scripture: '',
       scriptureReference: '',
@@ -95,15 +94,26 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
       prayer: ''
     };
     
+    // Look for scripture references in the entire content first
+    const referenceMatches = content.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/g);
+    if (referenceMatches && referenceMatches.length > 0) {
+      soapData.scriptureReference = referenceMatches[0];
+    }
+    
+    // Split content by SOAP sections (case insensitive)
+    const sections = content.split(/(?=scripture:|observation:|application:|prayer:)/i);
+    
     sections.forEach(section => {
-      const lower = section.toLowerCase();
+      const lower = section.toLowerCase().trim();
       if (lower.startsWith('scripture:')) {
-        const lines = section.split('\n');
-        soapData.scripture = lines.slice(1).join('\n').trim();
-        // Try to extract reference from first line or look for verse patterns
-        const firstLine = lines[0];
-        const referenceMatch = firstLine.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/);
-        soapData.scriptureReference = referenceMatch ? referenceMatch[1] : 'Multiple Verses';
+        const scriptureContent = section.substring(section.indexOf(':') + 1).trim();
+        soapData.scripture = scriptureContent;
+        
+        // If no reference found yet, try to extract from scripture section
+        if (!soapData.scriptureReference) {
+          const refMatch = scriptureContent.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/);
+          soapData.scriptureReference = refMatch ? refMatch[1] : 'Scripture Reference';
+        }
       } else if (lower.startsWith('observation:')) {
         soapData.observation = section.substring(section.indexOf(':') + 1).trim();
       } else if (lower.startsWith('application:')) {
@@ -112,6 +122,11 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
         soapData.prayer = section.substring(section.indexOf(':') + 1).trim();
       }
     });
+    
+    // Set default reference if still empty
+    if (!soapData.scriptureReference) {
+      soapData.scriptureReference = 'Scripture Reflection';
+    }
     
     return soapData;
   };

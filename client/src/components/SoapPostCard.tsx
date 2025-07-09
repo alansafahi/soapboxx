@@ -59,9 +59,11 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
         emoji: reactionType === 'amen' ? '🙏' : '❤️'
       });
       toast({
-        title: "Reaction added",
-        description: `You reacted with ${reactionType === 'amen' ? 'Amen' : 'Love'}`,
+        title: "Amen!",
+        description: "Your prayer reaction has been added",
       });
+      // Refresh the post data to show updated counter
+      window.location.reload();
     } catch (error) {
       toast({
         title: "Failed to add reaction",
@@ -92,8 +94,8 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
           prayer: soapData.prayer
         });
         toast({
-          title: "Copied to your journal",
-          description: "This reflection has been added to your personal S.O.A.P. journal",
+          title: "Copied to your S.O.A.P. journal",
+          description: "This reflection is now in your private journal for personal study",
         });
       }
     } catch (error) {
@@ -110,8 +112,8 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
         soapId: post.id
       });
       toast({
-        title: "Saved",
-        description: "This reflection has been saved to your collection",
+        title: "Saved to your collection",
+        description: "You can find this reflection in your saved items",
       });
     } catch (error) {
       toast({
