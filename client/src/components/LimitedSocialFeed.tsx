@@ -179,18 +179,26 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     
     setIsLoadingMore(true);
     try {
-      const response = await fetch(`/api/discussions?page=${page + 1}&limit=10`, {
+      const nextPage = page + 1;
+      const response = await fetch(`/api/discussions?page=${nextPage}&limit=10`, {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to fetch more posts");
       
       const newPosts = await response.json();
+      console.log(`Loaded page ${nextPage}:`, newPosts.length, 'posts');
       
       if (newPosts.length === 0) {
         setHasMore(false);
+        console.log('No more posts available - reached end');
       } else {
-        setAllPosts(prev => [...prev, ...newPosts]);
-        setPage(prev => prev + 1);
+        setAllPosts(prev => {
+          const updated = [...prev, ...newPosts];
+          console.log(`Total posts after page ${nextPage}:`, updated.length);
+          return updated;
+        });
+        setPage(nextPage);
+        setHasMore(newPosts.length === 10); // Only continue if we got a full page
       }
     } catch (error) {
       console.error("Error loading more posts:", error);
@@ -369,9 +377,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               const newClickCount = showMoreClicks + 1;
               setShowMoreClicks(newClickCount);
               setAllPosts(posts);
-              setHasMore(posts.length >= 10);
-              
-
+              setHasMore(posts.length === 10); // Only continue if we got a full first page
+              setPage(1); // Reset to page 1 since we're showing the first page posts
+              console.log('Expanded to show all initial posts:', posts.length, 'hasMore:', posts.length === 10);
             }}
             className="flex items-center space-x-2 min-w-[160px]"
           >
