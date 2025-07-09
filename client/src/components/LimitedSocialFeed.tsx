@@ -392,29 +392,56 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         </div>
       )}
 
-      {/* Infinite Scroll Trigger - Show when we have expanded posts and there might be more */}
-      {allPosts.length > 0 && hasMore && (
-        <div ref={loadMoreRef} className="text-center pt-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          {isLoadingMore ? (
-            <div className="flex items-center justify-center space-x-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-sm text-gray-500">Loading more posts...</span>
-            </div>
-          ) : (
-            <div className="text-center">
-              <div className="h-8 flex items-center justify-center">
-                <span className="text-xs text-gray-500">Scroll down for more posts</span>
-              </div>
-            </div>
-          )}
+      {/* Show All Posts Button - After initial expansion */}
+      {allPosts.length > 0 && allPosts.length < 82 && (
+        <div className="text-center pt-4">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              setIsLoadingMore(true);
+              try {
+                // Load all remaining posts at once
+                const response = await fetch(`/api/discussions?page=1&limit=100`, {
+                  credentials: "include",
+                });
+                if (!response.ok) throw new Error("Failed to fetch all posts");
+                
+                const allDbPosts = await response.json();
+                setAllPosts(allDbPosts);
+                setHasMore(false);
+                console.log('Loaded all posts:', allDbPosts.length);
+              } catch (error) {
+                console.error("Error loading all posts:", error);
+              } finally {
+                setIsLoadingMore(false);
+              }
+            }}
+            disabled={isLoadingMore}
+            className="flex items-center space-x-2 min-w-[160px]"
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Loading All Posts...</span>
+              </>
+            ) : (
+              <>
+                <span>Show All Posts ({82 - allPosts.length} more)</span>
+                <ChevronDown className="w-4 h-4" />
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-gray-500 mt-2">
+            Currently showing {allPosts.length} of 82 posts
+          </p>
         </div>
       )}
 
       {/* End of feed indicator */}
-      {allPosts.length > 0 && !hasMore && (
+      {allPosts.length >= 82 && (
         <div className="text-center pt-4 pb-8">
           <p className="text-sm text-gray-400 dark:text-gray-500">
-            You've reached the end of the feed
+            You've seen all {allPosts.length} posts in the feed
           </p>
         </div>
       )}
