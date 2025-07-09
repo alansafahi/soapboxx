@@ -599,7 +599,8 @@ export default function CheckInSystem() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            {/* Mobile: Vertical layout */}
+            <div className="lg:hidden space-y-3">
               {recentCheckIns.slice(0, 5).map((checkIn: CheckIn) => (
                 <div key={checkIn.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted">
                   <div className="flex-1">
@@ -623,6 +624,40 @@ export default function CheckInSystem() {
                     <div className="flex items-center gap-1 text-orange-600">
                       <Flame className="w-4 h-4" />
                       <span className="font-medium">{checkIn.streakCount}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      +{checkIn.pointsEarned} pts
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: Horizontal grid layout (2 columns x 2 rows) */}
+            <div className="hidden lg:grid grid-cols-2 gap-3">
+              {recentCheckIns.slice(0, 4).map((checkIn: CheckIn) => (
+                <div key={checkIn.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs">{checkIn.checkInType}</Badge>
+                      {checkIn.moodEmoji && (
+                        <span className="text-lg">{checkIn.moodEmoji}</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {format(new Date(checkIn.createdAt), "MMM d, h:mm a")}
+                      {checkIn.isPhysicalAttendance && (
+                        <Badge variant="secondary" className="ml-1 text-xs">Physical</Badge>
+                      )}
+                    </div>
+                    {checkIn.notes && (
+                      <p className="text-xs mt-1 italic truncate">"{checkIn.notes}"</p>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="flex items-center gap-1 text-orange-600">
+                      <Flame className="w-3 h-3" />
+                      <span className="font-medium text-sm">{checkIn.streakCount}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">
                       +{checkIn.pointsEarned} pts
