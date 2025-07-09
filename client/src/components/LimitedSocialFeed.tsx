@@ -84,7 +84,7 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
     return soapComponentCount >= 3 || hasExplicitSoap;
   };
 
-  // Extract SOAP data from legacy posts
+  // Extract SOAP data from legacy posts with proper HTML parsing
   const extractLegacySoapData = (content: string) => {
     const soapData: any = {
       scripture: '',
@@ -94,34 +94,70 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
       prayer: ''
     };
     
-    // Look for scripture references in the entire content first
+    // Look for scripture reference patterns - enhanced to capture more formats
     const referenceMatches = content.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/g);
     if (referenceMatches && referenceMatches.length > 0) {
       soapData.scriptureReference = referenceMatches[0];
     }
     
-    // Split content by SOAP sections (case insensitive)
-    const sections = content.split(/(?=scripture:|observation:|application:|prayer:)/i);
-    
-    sections.forEach(section => {
-      const lower = section.toLowerCase().trim();
-      if (lower.startsWith('scripture:')) {
-        const scriptureContent = section.substring(section.indexOf(':') + 1).trim();
-        soapData.scripture = scriptureContent;
-        
-        // If no reference found yet, try to extract from scripture section
-        if (!soapData.scriptureReference) {
-          const refMatch = scriptureContent.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/);
-          soapData.scriptureReference = refMatch ? refMatch[1] : 'Scripture Reference';
+    // Parse HTML-formatted SOAP content (legacy format from database)
+    const scriptureMatch = content.match(/<strong>Scripture<\/strong>:\s*([^📖🔍💡🙏]*?)(?=🔍|$)/i);
+    if (scriptureMatch) {
+      let scriptureText = scriptureMatch[1].trim();
+      // Remove any remaining HTML tags and clean up
+      scriptureText = scriptureText.replace(/<[^>]*>/g, '').trim();
+      // Extract reference from first line if it exists
+      const lines = scriptureText.split('\n');
+      if (lines.length > 1) {
+        const firstLine = lines[0].trim();
+        const refMatch = firstLine.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/i);
+        if (refMatch) {
+          soapData.scriptureReference = refMatch[1];
+          soapData.scripture = lines.slice(1).join('\n').trim();
+        } else {
+          soapData.scripture = scriptureText;
         }
-      } else if (lower.startsWith('observation:')) {
-        soapData.observation = section.substring(section.indexOf(':') + 1).trim();
-      } else if (lower.startsWith('application:')) {
-        soapData.application = section.substring(section.indexOf(':') + 1).trim();
-      } else if (lower.startsWith('prayer:')) {
-        soapData.prayer = section.substring(section.indexOf(':') + 1).trim();
+      } else {
+        soapData.scripture = scriptureText;
       }
-    });
+    }
+    
+    const observationMatch = content.match(/<strong>Observation<\/strong>:\s*([^📖🔍💡🙏]*?)(?=💡|$)/i);
+    if (observationMatch) {
+      soapData.observation = observationMatch[1].replace(/<[^>]*>/g, '').trim();
+    }
+    
+    const applicationMatch = content.match(/<strong>Application<\/strong>:\s*([^📖🔍💡🙏]*?)(?=🙏|$)/i);
+    if (applicationMatch) {
+      soapData.application = applicationMatch[1].replace(/<[^>]*>/g, '').trim();
+    }
+    
+    const prayerMatch = content.match(/<strong>Prayer<\/strong>:\s*([^📖🔍💡🙏]*?)(?=$)/i);
+    if (prayerMatch) {
+      soapData.prayer = prayerMatch[1].replace(/<[^>]*>/g, '').trim();
+    }
+    
+    // Fallback: if no HTML format detected, try basic colon format
+    if (!scriptureMatch) {
+      const sections = content.split(/(?=scripture:|observation:|application:|prayer:)/i);
+      sections.forEach(section => {
+        const lower = section.toLowerCase().trim();
+        if (lower.startsWith('scripture:')) {
+          const scriptureContent = section.substring(section.indexOf(':') + 1).trim();
+          soapData.scripture = scriptureContent.replace(/<[^>]*>/g, '');
+          if (!soapData.scriptureReference) {
+            const refMatch = scriptureContent.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/);
+            soapData.scriptureReference = refMatch ? refMatch[1] : 'Scripture Reference';
+          }
+        } else if (lower.startsWith('observation:')) {
+          soapData.observation = section.substring(section.indexOf(':') + 1).replace(/<[^>]*>/g, '').trim();
+        } else if (lower.startsWith('application:')) {
+          soapData.application = section.substring(section.indexOf(':') + 1).replace(/<[^>]*>/g, '').trim();
+        } else if (lower.startsWith('prayer:')) {
+          soapData.prayer = section.substring(section.indexOf(':') + 1).replace(/<[^>]*>/g, '').trim();
+        }
+      });
+    }
     
     // Set default reference if still empty
     if (!soapData.scriptureReference) {
