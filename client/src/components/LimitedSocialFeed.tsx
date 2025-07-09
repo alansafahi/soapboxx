@@ -61,6 +61,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [showMoreClicks, setShowMoreClicks] = useState(0);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -258,7 +259,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   }
 
   const displayedPosts = allPosts.length > 0 ? allPosts : posts.slice(0, initialLimit);
-  const showInitialLoadMore = allPosts.length === 0 && posts.length > initialLimit;
+  const showInitialLoadMore = allPosts.length === 0 && posts.length > initialLimit && showMoreClicks < 2;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -361,19 +362,30 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           <Button
             variant="outline"
             onClick={() => {
-              setAllPosts(posts);
-              setHasMore(posts.length >= 10); // Enable infinite scroll if we have enough posts
+              const newClickCount = showMoreClicks + 1;
+              setShowMoreClicks(newClickCount);
+              
+              if (newClickCount === 1) {
+                // First click: show all initial posts
+                setAllPosts(posts);
+                setHasMore(posts.length >= 10);
+              } else if (newClickCount >= 2) {
+                // Second click: enable infinite scroll mode
+                setAllPosts(posts);
+                setHasMore(posts.length >= 10);
+                // The infinite scroll will take over from here
+              }
             }}
             className="flex items-center space-x-2"
           >
-            <span>Show More Posts</span>
+            <span>{showMoreClicks === 0 ? 'Show More Posts' : showMoreClicks === 1 ? 'Load More Posts' : 'Loading...'}</span>
             <ChevronDown className="w-4 h-4" />
           </Button>
         </div>
       )}
 
       {/* Infinite Scroll Trigger - Show when we have posts displayed and there might be more */}
-      {displayedPosts.length >= initialLimit && hasMore && (
+      {displayedPosts.length >= initialLimit && hasMore && showMoreClicks >= 2 && (
         <div ref={loadMoreRef} className="text-center pt-4">
           {isLoadingMore ? (
             <div className="flex items-center justify-center space-x-2">
@@ -388,7 +400,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       )}
 
       {/* End of feed indicator */}
-      {displayedPosts.length > initialLimit && !hasMore && (
+      {displayedPosts.length > initialLimit && !hasMore && showMoreClicks >= 2 && (
         <div className="text-center pt-4 pb-8">
           <p className="text-sm text-gray-400 dark:text-gray-500">
             You've reached the end of the feed

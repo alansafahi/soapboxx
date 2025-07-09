@@ -150,6 +150,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - PERFORMANCE OPTIMIZED: Backend pagination prevents loading all posts at once, improving app responsiveness
   - TWITTER-LIKE BEHAVIOR: Feed now behaves like modern social media with continuous scrolling and automatic content loading
   - DUPLICATE POSTS ELIMINATED: Removed 2 duplicate SOAP entries and implemented deduplication logic to prevent future duplicates
+  - SOAP POST VISIBILITY FIXED: Updated SOAP entry visibility from private to public to restore proper feed display
+  - SHOW MORE TRANSITION ENHANCED: Fixed "Show More" button to transition to infinite scroll after second click as requested
 - July 9, 2025: COMPLETE SOAP FUNCTIONALITY OPERATIONAL - Successfully resolved all SOAP system issues with enhanced legacy detection, working reaction counters, proper sorting, and functional Reflect/Save destinations
   - LEGACY SOAP DETECTION ENHANCED: Improved scripture reference extraction from older posts with comprehensive pattern matching for proper expansion functionality
   - CHRONOLOGICAL SORTING VERIFIED: Database-level sorting by creation date ensures newest SOAP reflections appear first in social feed
