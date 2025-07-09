@@ -315,7 +315,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       } else {
         setAllPosts(prev => {
           const updated = [...prev, ...newPosts];
-
+          setPostsViewed(updated.length); // Track total posts viewed
           return updated;
         });
         setPage(nextPage);
@@ -391,6 +391,25 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   const displayedPosts = allPosts.length > 0 ? allPosts : posts.slice(0, initialLimit);
   const showInitialLoadMore = allPosts.length === 0 && posts.length > initialLimit && showMoreClicks < 2;
+  
+  // Track posts viewed and show reflection break after 15 posts
+  const totalPostsViewed = allPosts.length > 0 ? allPosts.length : Math.min(posts.length, initialLimit);
+  const shouldShowReflectionBreak = totalPostsViewed >= 15 && !showReflectionBreak && hasMore;
+  
+  // Generate milestone messages
+  const getMilestoneMessage = (count: number) => {
+    if (count === 10) {
+      return "You've seen 10 community reflections today 👏 Keep encouraging others!";
+    } else if (count === 20) {
+      return "Amazing! 20 posts of community wisdom 🌟 You're staying connected!";
+    } else if (count === 30) {
+      return "Incredible! 30+ community interactions 🙌 You're a true encourager!";
+    }
+    return null;
+  };
+  
+  // Show mini reflection prompt every 10 posts (but not when showing reflection break)
+  const shouldShowMiniReflection = totalPostsViewed > 0 && totalPostsViewed % 10 === 0 && totalPostsViewed >= 10 && !shouldShowReflectionBreak;
   
 
 
@@ -559,6 +578,69 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         );
       })}
 
+      {/* Reflection Break after 15 posts */}
+      {shouldShowReflectionBreak && (
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-2 border-blue-200 dark:border-blue-700">
+          <CardContent className="p-6 text-center">
+            <div className="flex items-center justify-center mb-4">
+              <span className="text-3xl mr-2">✝️</span>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Time for Reflection
+              </h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              You've spent some time in the community today. Take a moment to reflect or journal.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button 
+                onClick={() => window.location.href = '/soap'}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Go to Journal
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setShowReflectionBreak(true)}
+                className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-300 dark:hover:bg-blue-900/20"
+              >
+                See More Posts Anyway
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Mini Reflection Prompt every 10 posts */}
+      {shouldShowMiniReflection && !shouldShowReflectionBreak && (
+        <Card className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border border-green-200 dark:border-green-700">
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center mb-3">
+              <span className="text-2xl mr-2">🧘</span>
+              <p className="text-gray-700 dark:text-gray-300 font-medium">
+                What's one insight you'd apply from today's feed?
+              </p>
+            </div>
+            <Button 
+              onClick={() => window.location.href = '/soap'}
+              variant="outline"
+              size="sm"
+              className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-900/20"
+            >
+              Write it in your Journal
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Milestone Messages */}
+      {getMilestoneMessage(totalPostsViewed) && (
+        <div className="text-center py-3">
+          <p className="text-sm text-purple-600 dark:text-purple-400 font-medium bg-purple-50 dark:bg-purple-900/20 px-4 py-2 rounded-full inline-block">
+            {getMilestoneMessage(totalPostsViewed)}
+          </p>
+        </div>
+      )}
+
       {/* Comment Dialog */}
       <Dialog open={!!commentDialogOpen} onOpenChange={() => setCommentDialogOpen(null)}>
         <DialogContent className="max-w-2xl">
@@ -642,6 +724,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               const newClickCount = showMoreClicks + 1;
               setShowMoreClicks(newClickCount);
               setAllPosts(posts);
+              setPostsViewed(posts.length); // Track posts viewed after "Show More"
               setHasMore(posts.length === 10); // Only continue if we got a full first page
               setPage(1); // Reset to page 1 since we're showing the first page posts
 
@@ -673,6 +756,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                 
                 const allDbPosts = await response.json();
                 setAllPosts(allDbPosts);
+                setPostsViewed(allDbPosts.length); // Track all posts viewed
                 setHasMore(false);
 
               } catch (error) {
