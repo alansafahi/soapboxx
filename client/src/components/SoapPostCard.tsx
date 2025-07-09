@@ -29,6 +29,8 @@ interface SoapPost {
     lastName: string;
     profileImageUrl?: string;
   };
+  likeCount: number;
+  commentCount: number;
   _count?: {
     comments: number;
     likes: number;
@@ -113,13 +115,16 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
               {comments.map((comment: any) => (
                 <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50">
                   <Avatar className="w-8 h-8">
+                    <AvatarImage src={comment.author?.profileImageUrl || undefined} />
                     <AvatarFallback className="bg-blue-100 text-blue-600">
-                      {comment.authorId[0]?.toUpperCase() || 'U'}
+                      {comment.author?.firstName?.[0] || comment.authorId?.[0]?.toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium text-sm">Community Member</span>
+                      <span className="font-medium text-sm">
+                        {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
+                      </span>
                       <span className="text-xs text-gray-500">
                         {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                       </span>
@@ -177,6 +182,12 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  // Fetch comments for this SOAP post to show inline
+  const { data: inlineComments = [] } = useQuery({
+    queryKey: [`/api/soap/${post.id}/comments`],
+    enabled: !!post.id,
+  });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -451,7 +462,7 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
               <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600 dark:text-gray-400 dark:group-hover:text-purple-400">
                 Amen
               </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500">{post._count?.likes || 0}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{post.likeCount || 0}</span>
             </button>
             
             <button 
@@ -463,7 +474,7 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
                 Comment
               </span>
               <span className="text-xs text-gray-400 dark:text-gray-500">
-                {post._count?.comments || 0}
+                {post.commentCount || 0}
               </span>
             </button>
           </div>
@@ -500,6 +511,43 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
             </button>
           </div>
         </div>
+
+        {/* Comments Section - Show comments below each SOAP post */}
+        {inlineComments && inlineComments.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-purple-100 dark:border-purple-800">
+            <div className="space-y-3">
+              {inlineComments.slice(0, 3).map((comment: any) => (
+                <div key={comment.id} className="flex space-x-3">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={comment.author?.profileImageUrl || undefined} />
+                    <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+                      {comment.author?.firstName?.[0] || comment.authorId?.[0]?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="font-medium text-sm text-gray-900 dark:text-white">
+                        {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
+                  </div>
+                </div>
+              ))}
+              {inlineComments.length > 3 && (
+                <button
+                  onClick={() => setCommentDialogOpen(true)}
+                  className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                >
+                  View all {inlineComments.length} comments
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
 
       {/* Comment Dialog */}
