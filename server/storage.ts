@@ -2153,6 +2153,14 @@ export class DatabaseStorage implements IStorage {
   async createSoapComment(comment: { soapId: number; authorId: string; content: string }): Promise<any> {
     const [newComment] = await db.insert(soapComments).values(comment).returning();
     
+    // Update comment count on SOAP entry
+    await db
+      .update(soapEntries)
+      .set({ 
+        commentCount: sql`${soapEntries.commentCount} + 1`
+      })
+      .where(eq(soapEntries.id, comment.soapId));
+    
     // Track activity
     try {
       await this.trackUserActivity({

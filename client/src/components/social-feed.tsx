@@ -46,7 +46,13 @@ import {
   Search,
   Book,
   Loader2,
-  Trash2
+  Trash2,
+  Share2,
+  Copy,
+  Facebook,
+  Twitter,
+  Mail,
+  Smartphone
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -129,6 +135,8 @@ export default function SocialFeed() {
   const [visibleCommentsCount, setVisibleCommentsCount] = useState<{[key: number]: number}>({});
   const [showSoapDialog, setShowSoapDialog] = useState(false);
   const [selectedSoapEntry, setSelectedSoapEntry] = useState<any>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState<number | null>(null);
+  const [showAllPosts, setShowAllPosts] = useState(false);
   
   // Refs for click-outside functionality
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -158,6 +166,9 @@ export default function SocialFeed() {
   const { data: feedPosts = [], isLoading, error } = useQuery({
     queryKey: ['/api/feed'],
   });
+
+  // Display a limited number of posts initially
+  const displayedPosts = showAllPosts ? feedPosts : feedPosts.slice(0, 5);
 
   // Debug logging for feed posts
   useEffect(() => {
@@ -265,6 +276,50 @@ export default function SocialFeed() {
       });
     }
   });
+
+  // Handle sophisticated share functionality
+  const handleShare = async (postId: number, platform: string) => {
+    const post = feedPosts.find((p: any) => p.id === postId);
+    if (!post) return;
+    
+    const shareText = `Check out this post: ${post.content}`;
+    const shareUrl = `${window.location.origin}/home`;
+    
+    try {
+      switch (platform) {
+        case 'facebook':
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
+          navigator.clipboard.writeText(shareText);
+          toast({ title: "Text copied to clipboard", description: "Paste into your Facebook post" });
+          break;
+        case 'twitter':
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+          break;
+        case 'whatsapp':
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+          break;
+        case 'email':
+          const subject = encodeURIComponent('Check out this post');
+          const body = encodeURIComponent(`${shareText}\n\nRead more at: ${shareUrl}`);
+          window.open(`mailto:?subject=${subject}&body=${body}`);
+          break;
+        case 'sms':
+          window.open(`sms:?body=${encodeURIComponent(shareText + ' ' + shareUrl)}`);
+          break;
+        case 'copy':
+          await navigator.clipboard.writeText(shareText + ' ' + shareUrl);
+          toast({ title: "Link copied to clipboard", description: "You can now paste it anywhere" });
+          break;
+        case 'repost':
+          // Use the existing repost functionality
+          shareMutation.mutate(postId);
+          break;
+      }
+      setShareDialogOpen(null);
+    } catch (error) {
+      toast({ title: "Failed to share", variant: "destructive" });
+    }
+  };
 
   // Create post mutation
   const createPostMutation = useMutation({
@@ -1380,9 +1435,8 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => shareMutation.mutate(post.id)}
+                    onClick={() => setShareDialogOpen(post.id)}
                     className="text-gray-500 hover:text-green-500"
-                    disabled={shareMutation.isPending}
                   >
                     <RotateCw className="w-4 h-4 mr-1" />
                     {post.shareCount}
@@ -1561,6 +1615,34 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             <p className="text-gray-500 dark:text-gray-400">No posts yet. Be the first to share something!</p>
           </div>
         )}
+        
+        {/* Show All Posts Button */}
+        {!showAllPosts && feedPosts.length > 5 && (
+          <div className="text-center py-6">
+            <Button 
+              onClick={() => setShowAllPosts(true)}
+              variant="outline"
+              size="lg"
+              className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+            >
+              Show All Posts ({feedPosts.length} total)
+            </Button>
+          </div>
+        )}
+        
+        {/* Show Less Posts Button */}
+        {showAllPosts && feedPosts.length > 5 && (
+          <div className="text-center py-6">
+            <Button 
+              onClick={() => setShowAllPosts(false)}
+              variant="outline"
+              size="lg"
+              className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+            >
+              Show Less Posts
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Comment Dialog */}
@@ -1708,6 +1790,82 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             >
               Share Entry
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen !== null} onOpenChange={() => setShareDialogOpen(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Post</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => shareDialogOpen && handleShare(shareDialogOpen, 'facebook')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Facebook className="w-6 h-6 text-blue-600" />
+                <span className="text-sm">Facebook</span>
+              </Button>
+              
+              <Button
+                onClick={() => shareDialogOpen && handleShare(shareDialogOpen, 'twitter')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Twitter className="w-6 h-6 text-sky-500" />
+                <span className="text-sm">Twitter</span>
+              </Button>
+              
+              <Button
+                onClick={() => shareDialogOpen && handleShare(shareDialogOpen, 'whatsapp')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Smartphone className="w-6 h-6 text-green-600" />
+                <span className="text-sm">WhatsApp</span>
+              </Button>
+              
+              <Button
+                onClick={() => shareDialogOpen && handleShare(shareDialogOpen, 'email')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Mail className="w-6 h-6 text-gray-600" />
+                <span className="text-sm">Email</span>
+              </Button>
+              
+              <Button
+                onClick={() => shareDialogOpen && handleShare(shareDialogOpen, 'sms')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Smartphone className="w-6 h-6 text-green-600" />
+                <span className="text-sm">SMS</span>
+              </Button>
+              
+              <Button
+                onClick={() => shareDialogOpen && handleShare(shareDialogOpen, 'copy')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Copy className="w-6 h-6 text-gray-600" />
+                <span className="text-sm">Copy Link</span>
+              </Button>
+            </div>
+            
+            <div className="border-t pt-3">
+              <Button
+                onClick={() => shareDialogOpen && handleShare(shareDialogOpen, 'repost')}
+                className="w-full"
+              >
+                <RotateCw className="w-4 h-4 mr-2" />
+                Repost to Your Feed
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -1151,6 +1151,7 @@ export const soapEntries = pgTable("soap_entries", {
   isFeatured: boolean("is_featured").default(false), // Pastor can feature entries
   featuredBy: varchar("featured_by").references(() => users.id),
   featuredAt: timestamp("featured_at"),
+  commentCount: integer("comment_count").default(0), // Track comment count
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [

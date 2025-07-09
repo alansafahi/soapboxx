@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -79,6 +79,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       queryClient.invalidateQueries({ queryKey: [`/api/soap/${postId}/comments`] });
       setCommentText("");
+      onClose(); // Close dialog after successful comment
       toast({
         title: "Comment added",
         description: "Your comment has been posted",
@@ -171,6 +172,7 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
     prayer: false
   });
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -245,6 +247,42 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
         title: "Failed to save",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleShare = async (platform: string) => {
+    const shareText = `Check out this S.O.A.P. reflection: ${post.soapData?.scriptureReference || 'Scripture'} - ${post.soapData?.scripture || post.content}`;
+    const shareUrl = `${window.location.origin}/home`;
+    
+    try {
+      switch (platform) {
+        case 'facebook':
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
+          navigator.clipboard.writeText(shareText);
+          toast({ title: "Text copied to clipboard", description: "Paste into your Facebook post" });
+          break;
+        case 'twitter':
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+          break;
+        case 'whatsapp':
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+          break;
+        case 'email':
+          const subject = encodeURIComponent('S.O.A.P. Reflection - ' + (post.soapData?.scriptureReference || 'Scripture'));
+          const body = encodeURIComponent(`${shareText}\n\nRead more at: ${shareUrl}`);
+          window.open(`mailto:?subject=${subject}&body=${body}`);
+          break;
+        case 'sms':
+          window.open(`sms:?body=${encodeURIComponent(shareText + ' ' + shareUrl)}`);
+          break;
+        case 'copy':
+          await navigator.clipboard.writeText(shareText + ' ' + shareUrl);
+          toast({ title: "Link copied to clipboard", description: "You can now paste it anywhere" });
+          break;
+      }
+      setShareDialogOpen(false);
+    } catch (error) {
+      toast({ title: "Failed to share", variant: "destructive" });
     }
   };
 
@@ -437,6 +475,16 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
                 Save
               </span>
             </button>
+            
+            <button 
+              onClick={() => setShareDialogOpen(true)}
+              className="flex items-center space-x-1 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors"
+            >
+              <Share2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              <span className="text-xs font-medium text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                Share
+              </span>
+            </button>
           </div>
         </div>
       </CardContent>
@@ -447,6 +495,72 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
         onClose={() => setCommentDialogOpen(false)}
         postId={post.id}
       />
+      
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share S.O.A.P. Reflection</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => handleShare('facebook')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Facebook className="w-6 h-6 text-blue-600" />
+                <span className="text-sm">Facebook</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('twitter')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Twitter className="w-6 h-6 text-sky-500" />
+                <span className="text-sm">Twitter</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('whatsapp')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Smartphone className="w-6 h-6 text-green-600" />
+                <span className="text-sm">WhatsApp</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('email')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Mail className="w-6 h-6 text-gray-600" />
+                <span className="text-sm">Email</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('sms')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Smartphone className="w-6 h-6 text-green-600" />
+                <span className="text-sm">SMS</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('copy')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Copy className="w-6 h-6 text-gray-600" />
+                <span className="text-sm">Copy Link</span>
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
