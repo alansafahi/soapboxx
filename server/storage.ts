@@ -14,6 +14,8 @@ import {
   discussionComments,
   discussionLikes,
   discussionBookmarks,
+  soapEntries,
+  reactions,
   prayerRequests,
   prayerResponses,
   prayerBookmarks,
@@ -1709,7 +1711,8 @@ export class DatabaseStorage implements IStorage {
 
   // Discussion operations
   async getDiscussions(churchId?: number): Promise<any[]> {
-    const query = db
+    // Get regular discussions
+    const discussionsQuery = db
       .select({
         id: discussions.id,
         authorId: discussions.authorId,
@@ -1732,6 +1735,8 @@ export class DatabaseStorage implements IStorage {
         commentCount: discussions.commentCount,
         createdAt: discussions.createdAt,
         updatedAt: discussions.updatedAt,
+        type: sql<string>`'general'`,
+        soapData: sql<any>`null`,
         author: {
           id: users.id,
           firstName: users.firstName,
@@ -1746,14 +1751,69 @@ export class DatabaseStorage implements IStorage {
           eq(discussions.isPublic, true),
           churchId ? eq(discussions.churchId, churchId) : undefined
         )
-      )
-      .orderBy(desc(discussions.createdAt));
+      );
+
+    // Get public SOAP entries
+    const soapQuery = db
+      .select({
+        id: soapEntries.id,
+        authorId: soapEntries.userId,
+        churchId: soapEntries.churchId,
+        title: sql<string>`'S.O.A.P. Reflection'`,
+        content: soapEntries.scripture,
+        category: sql<string>`'soap_reflection'`,
+        isPublic: soapEntries.isPublic,
+        audience: sql<string>`'public'`,
+        mood: soapEntries.moodTag,
+        suggestedVerses: sql<any>`null`,
+        attachedMedia: sql<any>`null`,
+        linkedVerse: soapEntries.scriptureReference,
+        isPinned: sql<boolean>`false`,
+        pinnedBy: sql<string>`null`,
+        pinnedAt: sql<any>`null`,
+        pinnedUntil: sql<any>`null`,
+        pinCategory: sql<string>`null`,
+        likeCount: sql<number>`0`,
+        commentCount: sql<number>`0`,
+        createdAt: soapEntries.createdAt,
+        updatedAt: soapEntries.updatedAt,
+        type: sql<string>`'soap_reflection'`,
+        soapData: {
+          scripture: soapEntries.scripture,
+          scriptureReference: soapEntries.scriptureReference,
+          observation: soapEntries.observation,
+          application: soapEntries.application,
+          prayer: soapEntries.prayer,
+        },
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(soapEntries)
+      .leftJoin(users, eq(soapEntries.userId, users.id))
+      .where(
+        and(
+          eq(soapEntries.isPublic, true),
+          churchId ? eq(soapEntries.churchId, churchId) : undefined
+        )
+      );
+
+    // Execute both queries
+    const [discussionResults, soapResults] = await Promise.all([
+      discussionsQuery,
+      soapQuery
+    ]);
+
+    // Combine and sort by creation date
+    const allPosts = [...discussionResults, ...soapResults]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     
-    const result = await query;
-    
-    // Add reaction data to each discussion
-    const discussionsWithReactions = await Promise.all(
-      result.map(async (discussion) => {
+    // Add reaction data to each post
+    const postsWithReactions = await Promise.all(
+      allPosts.map(async (post) => {
         // Get reaction data aggregated by type
         const reactionData = await db
           .select({
@@ -1764,8 +1824,8 @@ export class DatabaseStorage implements IStorage {
           .from(reactions)
           .where(
             and(
-              eq(reactions.targetType, 'post'),
-              eq(reactions.targetId, discussion.id)
+              eq(reactions.targetType, post.type === 'soap_reflection' ? 'soap' : 'post'),
+              eq(reactions.targetId, post.id)
             )
           )
           .groupBy(reactions.reactionType, reactions.emoji);
@@ -1779,13 +1839,17 @@ export class DatabaseStorage implements IStorage {
         }));
 
         return {
-          ...discussion,
+          ...post,
           reactions: formattedReactions,
+          _count: {
+            likes: formattedReactions.reduce((sum, r) => sum + (r.count || 0), 0),
+            comments: post.commentCount || 0
+          }
         };
       })
     );
 
-    return discussionsWithReactions;
+    return postsWithReactions;
   }
 
   // Duplicate function removed - implementation exists elsewhere
