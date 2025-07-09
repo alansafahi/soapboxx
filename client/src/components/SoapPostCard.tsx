@@ -1,0 +1,235 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader } from "./ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+
+interface SoapPost {
+  id: number;
+  content: string;
+  authorId: string;
+  createdAt: string;
+  type: 'soap_reflection';
+  soapData?: {
+    scripture: string;
+    scriptureReference: string;
+    observation: string;
+    application: string;
+    prayer: string;
+  };
+  author: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    profileImageUrl?: string;
+  };
+  _count?: {
+    comments: number;
+    likes: number;
+  };
+}
+
+interface SoapPostCardProps {
+  post: SoapPost;
+}
+
+export default function SoapPostCard({ post }: SoapPostCardProps) {
+  const [expandedSections, setExpandedSections] = useState({
+    observation: false,
+    application: false,
+    prayer: false
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const soapData = post.soapData;
+  if (!soapData) return null;
+
+  return (
+    <Card className="bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-900/20 dark:to-blue-900/20 border-0 shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-400">
+      <CardHeader className="pb-3">
+        <div className="flex items-center space-x-3">
+          <Avatar className="w-8 h-8 ring-2 ring-purple-100 dark:ring-purple-900">
+            <AvatarImage src={post.author?.profileImageUrl || undefined} />
+            <AvatarFallback className="bg-purple-100 text-purple-600 font-medium text-sm">
+              {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {post.author?.firstName} {post.author?.lastName}
+              </span>
+              <span className="text-xs text-purple-600 dark:text-purple-400 font-medium bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded-full">
+                shared a S.O.A.P. Reflection
+              </span>
+            </div>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+            </span>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Scripture Section - Always Visible */}
+        <div className="bg-white/80 dark:bg-gray-800/50 rounded-lg p-4 border border-purple-100 dark:border-purple-800">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+              <span className="text-sm">📖</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2">
+                Scripture • {soapData.scriptureReference}
+              </h3>
+              <blockquote className="text-sm text-gray-700 dark:text-gray-200 italic border-l-2 border-purple-200 dark:border-purple-700 pl-3">
+                {soapData.scripture}
+              </blockquote>
+            </div>
+          </div>
+        </div>
+
+        {/* Collapsible SOAP Sections */}
+        <div className="space-y-2">
+          {/* Observation */}
+          <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-blue-100 dark:border-blue-800">
+            <button
+              onClick={() => toggleSection('observation')}
+              className="w-full p-3 flex items-center justify-between hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-colors rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  <span className="text-xs">🔍</span>
+                </div>
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  Observation
+                </span>
+              </div>
+              {expandedSections.observation ? (
+                <ChevronUp className="w-4 h-4 text-blue-500" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-blue-500" />
+              )}
+            </button>
+            
+            {expandedSections.observation && (
+              <div className="px-3 pb-3">
+                <p className="text-sm text-gray-700 dark:text-gray-200 ml-9">
+                  {soapData.observation}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Application */}
+          <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-green-100 dark:border-green-800">
+            <button
+              onClick={() => toggleSection('application')}
+              className="w-full p-3 flex items-center justify-between hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-colors rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                  <span className="text-xs">💡</span>
+                </div>
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                  Application
+                </span>
+              </div>
+              {expandedSections.application ? (
+                <ChevronUp className="w-4 h-4 text-green-500" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-green-500" />
+              )}
+            </button>
+            
+            {expandedSections.application && (
+              <div className="px-3 pb-3">
+                <p className="text-sm text-gray-700 dark:text-gray-200 ml-9">
+                  {soapData.application}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Prayer */}
+          <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-amber-100 dark:border-amber-800">
+            <button
+              onClick={() => toggleSection('prayer')}
+              className="w-full p-3 flex items-center justify-between hover:bg-amber-50/50 dark:hover:bg-amber-900/20 transition-colors rounded-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-6 h-6 bg-amber-100 dark:bg-amber-900 rounded-full flex items-center justify-center">
+                  <span className="text-xs">🙏</span>
+                </div>
+                <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                  Prayer
+                </span>
+              </div>
+              {expandedSections.prayer ? (
+                <ChevronUp className="w-4 h-4 text-amber-500" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-amber-500" />
+              )}
+            </button>
+            
+            {expandedSections.prayer && (
+              <div className="px-3 pb-3">
+                <p className="text-sm text-gray-700 dark:text-gray-200 ml-9">
+                  {soapData.prayer}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Spiritual Reaction Bar */}
+        <div className="flex items-center justify-between pt-3 border-t border-purple-100 dark:border-purple-800">
+          <div className="flex items-center space-x-4">
+            <button className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-3 py-1.5 rounded-md transition-colors">
+              <span className="text-sm">🙏</span>
+              <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600 dark:text-gray-400 dark:group-hover:text-purple-400">
+                Amen
+              </span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                {post._count?.likes || 0}
+              </span>
+            </button>
+            
+            <button className="flex items-center space-x-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-md transition-colors">
+              <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
+              <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400">
+                Comment
+              </span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                {post._count?.comments || 0}
+              </span>
+            </button>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button className="flex items-center space-x-1 group hover:bg-green-50 dark:hover:bg-green-900/20 px-2 py-1 rounded-md transition-colors">
+              <RotateCcw className="w-4 h-4 text-gray-500 group-hover:text-green-500 transition-colors" />
+              <span className="text-xs font-medium text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400">
+                Reflect
+              </span>
+            </button>
+            
+            <button className="flex items-center space-x-1 group hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors">
+              <Save className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+              <span className="text-xs font-medium text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+                Save
+              </span>
+            </button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
