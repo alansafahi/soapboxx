@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
@@ -6,7 +6,52 @@ import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
-import { ImageIcon, VideoIcon, SmileIcon, MapPinIcon, UsersIcon } from "lucide-react";
+import { Input } from "./ui/input";
+import { 
+  Heart, 
+  MessageCircle, 
+  RotateCw, 
+  Clock, 
+  MapPin, 
+  Users,
+  Church,
+  BookOpen,
+  PlusCircle,
+  Bookmark,
+  BookmarkCheck,
+  Send,
+  X,
+  Smile,
+  ChevronDown,
+  Globe,
+  Lock,
+  Eye,
+  Image as ImageIcon,
+  Video,
+  FileText,
+  BookText,
+  Mic,
+  MicOff,
+  Hash,
+  AtSign,
+  Camera,
+  Paperclip,
+  Play,
+  Pause,
+  Pin,
+  PinOff,
+  MoreHorizontal,
+  Search,
+  Book,
+  Loader2,
+  Trash2,
+  Share2,
+  Copy,
+  Facebook,
+  Twitter,
+  Mail,
+  Smartphone
+} from "lucide-react";
 
 interface CompactPostComposerProps {
   className?: string;
@@ -19,24 +64,97 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   const [content, setContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [attachedMedia, setAttachedMedia] = useState<Array<{name: string; type: string; size: number; url: string}>>([]);
+  const [linkedVerse, setLinkedVerse] = useState<{reference: string; text: string} | null>(null);
+  const [audience, setAudience] = useState<'public' | 'church' | 'private'>('public');
+  const [showMoodDropdown, setShowMoodDropdown] = useState(false);
+  const [showVerseSearch, setShowVerseSearch] = useState(false);
+  const [showAudienceDropdown, setShowAudienceDropdown] = useState(false);
+  const [verseSearchQuery, setVerseSearchQuery] = useState("");
+  const [verseSearchResults, setVerseSearchResults] = useState<Array<{reference: string; text: string}>>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recentMoods, setRecentMoods] = useState<Array<{id: string; icon: string; label: string}>>([]);
+  
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const moodDropdownRef = useRef<HTMLDivElement>(null);
+  const verseDropdownRef = useRef<HTMLDivElement>(null);
+  const audienceDropdownRef = useRef<HTMLDivElement>(null);
 
-  const moods = [
-    { emoji: "🙏", label: "Grateful" },
-    { emoji: "✝️", label: "Blessed" },
-    { emoji: "🕊️", label: "Peaceful" },
-    { emoji: "❤️", label: "Loved" },
-    { emoji: "🔥", label: "Inspired" },
-    { emoji: "🌟", label: "Hopeful" }
+  // Comprehensive mood categories from social-feed.tsx
+  const moodCategories = [
+    {
+      title: "Spiritual States",
+      description: "Your relationship with God and faith journey",
+      moods: [
+        { id: "grateful", icon: "🙏", label: "Grateful", subtitle: "Thankful for God's blessings" },
+        { id: "blessed", icon: "✝️", label: "Blessed", subtitle: "Experiencing God's favor" },
+        { id: "peaceful", icon: "🕊️", label: "Peaceful", subtitle: "Feeling God's peace" },
+        { id: "loved", icon: "❤️", label: "Loved", subtitle: "Embraced by God's love" },
+        { id: "inspired", icon: "🔥", label: "Inspired", subtitle: "Moved by the Spirit" },
+        { id: "hopeful", icon: "🌟", label: "Hopeful", subtitle: "Trusting in God's plan" },
+        { id: "faithful", icon: "🛡️", label: "Faithful", subtitle: "Standing firm in belief" },
+        { id: "worshipful", icon: "🎵", label: "Worshipful", subtitle: "In praise and adoration" }
+      ]
+    },
+    {
+      title: "Emotional Well-being",
+      description: "How you're feeling emotionally today",
+      moods: [
+        { id: "joyful", icon: "😊", label: "Joyful", subtitle: "Filled with happiness" },
+        { id: "content", icon: "😌", label: "Content", subtitle: "At peace with life" },
+        { id: "excited", icon: "🤗", label: "Excited", subtitle: "Looking forward" },
+        { id: "calm", icon: "😇", label: "Calm", subtitle: "Tranquil and serene" },
+        { id: "reflective", icon: "🤔", label: "Reflective", subtitle: "Thoughtful and pondering" },
+        { id: "energetic", icon: "⚡", label: "Energetic", subtitle: "Full of vitality" }
+      ]
+    },
+    {
+      title: "Seeking Support",
+      description: "When you need encouragement or prayer",
+      moods: [
+        { id: "struggling", icon: "😔", label: "Struggling", subtitle: "Going through difficulties" },
+        { id: "anxious", icon: "😰", label: "Anxious", subtitle: "Feeling worried or nervous" },
+        { id: "confused", icon: "😕", label: "Confused", subtitle: "Seeking clarity" },
+        { id: "lonely", icon: "😢", label: "Lonely", subtitle: "Needing connection" },
+        { id: "overwhelmed", icon: "😵", label: "Overwhelmed", subtitle: "Feeling burdened" },
+        { id: "seeking", icon: "🔍", label: "Seeking", subtitle: "Looking for answers" }
+      ]
+    },
+    {
+      title: "Life Circumstances",
+      description: "What's happening in your life right now",
+      moods: [
+        { id: "celebrating", icon: "🎉", label: "Celebrating", subtitle: "Marking a special moment" },
+        { id: "recovering", icon: "🩹", label: "Recovering", subtitle: "Healing and getting better" },
+        { id: "learning", icon: "📚", label: "Learning", subtitle: "Growing in knowledge" },
+        { id: "serving", icon: "🤝", label: "Serving", subtitle: "Helping others" },
+        { id: "traveling", icon: "✈️", label: "Traveling", subtitle: "On a journey" },
+        { id: "working", icon: "💼", label: "Working", subtitle: "Focused on tasks" }
+      ]
+    }
   ];
 
+  // Flatten all moods for backward compatibility
+  const moodOptions = moodCategories.flatMap(category => category.moods);
+
   const createPostMutation = useMutation({
-    mutationFn: async (data: { content: string; mood?: string }) => {
+    mutationFn: async (data: { 
+      content: string; 
+      mood?: string; 
+      attachedMedia?: Array<{name: string; type: string; size: number; url: string}>;
+      linkedVerse?: {reference: string; text: string};
+      audience?: string;
+    }) => {
       return apiRequest("POST", "/api/discussions", data);
     },
     onSuccess: () => {
       setContent("");
       setSelectedMoods([]);
+      setAttachedMedia([]);
+      setLinkedVerse(null);
+      setAudience('public');
       setIsExpanded(false);
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       toast({
@@ -58,7 +176,10 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
     
     createPostMutation.mutate({
       content: content.trim(),
-      mood: selectedMoods.join(", ")
+      mood: selectedMoods.join(","),
+      attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
+      linkedVerse: linkedVerse || undefined,
+      audience
     });
   };
 
@@ -66,13 +187,158 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
     setIsExpanded(true);
   };
 
-  const handleMoodToggle = (mood: string) => {
-    setSelectedMoods(prev => 
-      prev.includes(mood) 
-        ? prev.filter(m => m !== mood)
-        : [...prev, mood]
-    );
+  const toggleMoodSelection = (moodId: string) => {
+    setSelectedMoods(prev => {
+      const isSelected = prev.includes(moodId);
+      const newSelection = isSelected 
+        ? prev.filter(id => id !== moodId)
+        : [...prev, moodId];
+      
+      // Update recent moods
+      if (!isSelected) {
+        const mood = moodOptions.find(m => m.id === moodId);
+        if (mood) {
+          setRecentMoods(prevRecent => {
+            const filtered = prevRecent.filter(m => m.id !== moodId);
+            return [mood, ...filtered].slice(0, 6);
+          });
+        }
+      }
+      
+      return newSelection;
+    });
   };
+
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    const newMedia: Array<{name: string; type: string; size: number; url: string}> = [];
+
+    for (const file of Array.from(files)) {
+      // Check file size (50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: `${file.name} exceeds 50MB limit`,
+          variant: "destructive",
+        });
+        continue;
+      }
+
+      try {
+        // Convert to data URL for preview
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+
+        newMedia.push({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          url: dataUrl
+        });
+      } catch (error) {
+        toast({
+          title: "Upload failed",
+          description: `Failed to process ${file.name}`,
+          variant: "destructive",
+        });
+      }
+    }
+
+    setAttachedMedia(prev => [...prev, ...newMedia]);
+    
+    // Reset file input
+    event.target.value = '';
+  }, [toast]);
+
+  const startVoiceRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+
+        setAttachedMedia(prev => [...prev, {
+          name: `voice-message-${Date.now()}.webm`,
+          type: 'audio/webm',
+          size: blob.size,
+          url: dataUrl
+        }]);
+
+        // Clean up
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      setRecordingDuration(0);
+      recorder.start();
+
+      // Update duration counter
+      const interval = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+
+      // Store interval reference for cleanup
+      (recorder as any).durationInterval = interval;
+
+    } catch (error) {
+      toast({
+        title: "Recording failed",
+        description: "Unable to access microphone",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const stopVoiceRecording = useCallback(() => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      clearInterval((mediaRecorder as any).durationInterval);
+      setMediaRecorder(null);
+      setIsRecording(false);
+      setRecordingDuration(0);
+    }
+  }, [mediaRecorder]);
+
+  const searchBibleVerses = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setVerseSearchResults([]);
+      return;
+    }
+
+    try {
+      const response = await apiRequest("GET", `/api/bible/search?q=${encodeURIComponent(query)}&limit=5`);
+      const data = await response.json();
+      
+      if (data.verses) {
+        setVerseSearchResults(data.verses.map((verse: any) => ({
+          reference: verse.reference,
+          text: verse.text
+        })));
+      }
+    } catch (error) {
+      // Silent fail for search
+      setVerseSearchResults([]);
+    }
+  }, []);
 
   // Auto-resize textarea and expand on overflow
   useEffect(() => {
@@ -88,6 +354,34 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       textareaRef.current.style.height = scrollHeight + 'px';
     }
   }, [content, isExpanded]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moodDropdownRef.current && !moodDropdownRef.current.contains(event.target as Node)) {
+        setShowMoodDropdown(false);
+      }
+      if (verseDropdownRef.current && !verseDropdownRef.current.contains(event.target as Node)) {
+        setShowVerseSearch(false);
+      }
+      if (audienceDropdownRef.current && !audienceDropdownRef.current.contains(event.target as Node)) {
+        setShowAudienceDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Cleanup recording on unmount
+  useEffect(() => {
+    return () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        clearInterval((mediaRecorder as any).durationInterval);
+      }
+    };
+  }, [mediaRecorder]);
 
   if (!user) return null;
 
@@ -120,36 +414,356 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
 
           {isExpanded && (
             <>
-              {/* Mood Selector */}
-              <div className="flex flex-wrap gap-2">
-                {moods.map((mood) => (
-                  <button
-                    key={mood.label}
-                    onClick={() => handleMoodToggle(mood.label)}
-                    className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm transition-colors ${
-                      selectedMoods.includes(mood.label)
-                        ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 ring-1 ring-purple-300'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    <span>{mood.emoji}</span>
-                    <span>{mood.label}</span>
-                  </button>
-                ))}
-              </div>
+              {/* Linked Verse Display */}
+              {linkedVerse && (
+                <div className="mb-3 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-purple-800 dark:text-purple-200 text-sm mb-1">{linkedVerse.reference}</div>
+                      <div className="text-purple-700 dark:text-purple-300 text-sm italic">"{linkedVerse.text}"</div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setLinkedVerse(null)}
+                      className="h-6 w-6 p-0 text-purple-400 hover:text-purple-600 ml-2"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
 
-              {/* Action Buttons */}
+              {/* Attached Media Display */}
+              {attachedMedia.length > 0 && (
+                <div className="mb-3 space-y-2">
+                  {attachedMedia.map((media, index) => (
+                    <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-md">
+                      <div className="flex-shrink-0">
+                        {media.type.startsWith('image/') ? (
+                          <img src={media.url} alt={media.name} className="w-12 h-12 object-cover rounded" />
+                        ) : media.type.startsWith('audio/') ? (
+                          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded flex items-center justify-center">
+                            <Mic className="w-6 h-6 text-red-600" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded flex items-center justify-center">
+                            <FileText className="w-6 h-6 text-blue-600" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{media.name}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{(media.size / 1024 / 1024).toFixed(1)} MB</div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setAttachedMedia(prev => prev.filter((_, i) => i !== index))}
+                        className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-                <div className="flex space-x-2">
-                  <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                    <ImageIcon className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                    <VideoIcon className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                    <SmileIcon className="w-4 h-4" />
-                  </Button>
+                <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
+                  {/* Media Upload */}
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="compact-file-upload"
+                      multiple
+                      accept="image/*,video/*,audio/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => document.getElementById('compact-file-upload')?.click()}
+                      className="text-gray-600 hover:text-green-600 hover:bg-green-50 p-1.5 h-8 w-8"
+                      type="button"
+                      title="Add photo"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Audio Recording */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                      className={`relative p-1.5 h-8 w-8 ${
+                        isRecording 
+                          ? 'text-red-600 hover:text-red-700 hover:bg-red-50 animate-pulse' 
+                          : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                      }`}
+                      title={isRecording ? "Click to stop recording" : "Click to start voice recording"}
+                    >
+                      <Mic className={`w-4 h-4 ${isRecording ? 'fill-current' : ''}`} />
+                      {isRecording && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                      )}
+                    </Button>
+                    {isRecording && (
+                      <span className="text-red-600 text-xs font-medium bg-red-50 px-2 py-1 rounded">
+                        {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Mood Selector */}
+                  <div className="relative" ref={moodDropdownRef}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowMoodDropdown(!showMoodDropdown)}
+                      className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 p-1.5 h-8 w-8"
+                      title="Add feeling"
+                    >
+                      <Smile className="w-4 h-4" />
+                    </Button>
+
+                    {/* Enhanced Mood Dropdown - Mobile Responsive */}
+                    {showMoodDropdown && (
+                      <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-[480px] max-w-[95vw] max-h-[70vh] overflow-y-auto">
+                        <div className="p-3 sm:p-4">
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
+                          
+                          {/* Recently Used Section */}
+                          {recentMoods.length > 0 && (
+                            <div className="mb-4">
+                              <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Recently Used</div>
+                              <div className="flex flex-wrap gap-1">
+                                {recentMoods.map((mood) => {
+                                  const isSelected = selectedMoods.includes(mood.id);
+                                  const currentString = selectedMoods.join(',');
+                                  const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
+                                  
+                                  return (
+                                    <Button
+                                      key={`recent-${mood.id}`}
+                                      variant={isSelected ? "default" : "outline"}
+                                      size="sm"
+                                      onClick={() => toggleMoodSelection(mood.id)}
+                                      disabled={wouldExceedLimit}
+                                      className={`h-7 px-2 text-xs ${
+                                        isSelected 
+                                          ? 'bg-purple-600 hover:bg-purple-700' 
+                                          : wouldExceedLimit 
+                                          ? 'opacity-50 cursor-not-allowed' 
+                                          : ''
+                                      }`}
+                                      title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : undefined}
+                                    >
+                                      <span className="mr-1">{mood.icon}</span>
+                                      <span className="hidden sm:inline">{mood.label}</span>
+                                      <span className="sm:hidden">{mood.label.length > 8 ? mood.label.substring(0, 8) + '...' : mood.label}</span>
+                                    </Button>
+                                  );
+                                })}
+                              </div>
+                              <hr className="my-3 border-gray-200 dark:border-gray-600" />
+                            </div>
+                          )}
+
+                          {/* Categorized Moods */}
+                          <div className="space-y-4">
+                            {moodCategories.map((category) => (
+                              <div key={category.title}>
+                                <div className="mb-2">
+                                  <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{category.title}</h3>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 italic hidden sm:block">{category.description}</p>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                  {category.moods.map((mood) => {
+                                    const isSelected = selectedMoods.includes(mood.id);
+                                    const currentString = selectedMoods.join(',');
+                                    const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
+                                    
+                                    return (
+                                      <Button
+                                        key={mood.id}
+                                        variant={isSelected ? "default" : "ghost"}
+                                        size="sm"
+                                        onClick={() => toggleMoodSelection(mood.id)}
+                                        disabled={wouldExceedLimit}
+                                        className={`h-auto min-h-[3rem] p-2 justify-start text-left ${
+                                          isSelected 
+                                            ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                                            : wouldExceedLimit 
+                                            ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400'
+                                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        }`}
+                                        title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : mood.subtitle}
+                                      >
+                                        <div className="flex items-center w-full">
+                                          <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
+                                          <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.label}</span>
+                                        </div>
+                                      </Button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedMoods([])}
+                              className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
+                            >
+                              Clear All
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => setShowMoodDropdown(false)}
+                              className="bg-purple-600 hover:bg-purple-700 text-xs sm:text-sm"
+                            >
+                              Done ({selectedMoods.length})
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bible Verse Link */}
+                  <div className="relative" ref={verseDropdownRef}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowVerseSearch(!showVerseSearch)}
+                      className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 p-1.5 h-8 w-8"
+                      title="Link Bible verse"
+                    >
+                      <Book className="w-4 h-4" />
+                    </Button>
+
+                    {/* Bible Verse Search Dropdown */}
+                    {showVerseSearch && (
+                      <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-80 max-w-[95vw]">
+                        <div className="p-4">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Link Bible Verse</div>
+                          <Input
+                            placeholder="Search verses (e.g., John 3:16, love, hope...)"
+                            value={verseSearchQuery}
+                            onChange={(e) => {
+                              setVerseSearchQuery(e.target.value);
+                              searchBibleVerses(e.target.value);
+                            }}
+                            className="mb-3"
+                          />
+                          
+                          {verseSearchResults.length > 0 && (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                              {verseSearchResults.map((verse, index) => (
+                                <div
+                                  key={index}
+                                  className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer border border-gray-100 dark:border-gray-600"
+                                  onClick={() => {
+                                    setLinkedVerse(verse);
+                                    setShowVerseSearch(false);
+                                    setVerseSearchQuery("");
+                                    setVerseSearchResults([]);
+                                  }}
+                                >
+                                  <div className="font-medium text-sm text-blue-600 dark:text-blue-400">{verse.reference}</div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">{verse.text}</div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setShowVerseSearch(false);
+                                setVerseSearchQuery("");
+                                setVerseSearchResults([]);
+                              }}
+                              className="w-full text-gray-500 hover:text-gray-700"
+                            >
+                              Close
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Audience Selector */}
+                  <div className="relative" ref={audienceDropdownRef}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAudienceDropdown(!showAudienceDropdown)}
+                      className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 p-1.5 h-8 w-8"
+                      title={`Audience: ${audience}`}
+                    >
+                      {audience === 'public' ? <Globe className="w-4 h-4" /> : 
+                       audience === 'church' ? <Church className="w-4 h-4" /> : 
+                       <Lock className="w-4 h-4" />}
+                    </Button>
+
+                    {showAudienceDropdown && (
+                      <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-48">
+                        <div className="p-2">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Who can see this?</div>
+                          <div className="space-y-1">
+                            <Button
+                              variant={audience === 'public' ? 'default' : 'ghost'}
+                              size="sm"
+                              onClick={() => {
+                                setAudience('public');
+                                setShowAudienceDropdown(false);
+                              }}
+                              className="w-full justify-start"
+                            >
+                              <Globe className="w-4 h-4 mr-2" />
+                              Public
+                            </Button>
+                            <Button
+                              variant={audience === 'church' ? 'default' : 'ghost'}
+                              size="sm"
+                              onClick={() => {
+                                setAudience('church');
+                                setShowAudienceDropdown(false);
+                              }}
+                              className="w-full justify-start"
+                            >
+                              <Church className="w-4 h-4 mr-2" />
+                              Church Only
+                            </Button>
+                            <Button
+                              variant={audience === 'private' ? 'default' : 'ghost'}
+                              size="sm"
+                              onClick={() => {
+                                setAudience('private');
+                                setShowAudienceDropdown(false);
+                              }}
+                              className="w-full justify-start"
+                            >
+                              <Lock className="w-4 h-4 mr-2" />
+                              Private
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="flex space-x-2">
