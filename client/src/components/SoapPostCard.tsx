@@ -53,8 +53,10 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
 
   const handleReaction = async (reactionType: string) => {
     try {
-      await apiRequest('POST', '/api/discussions/like', {
-        discussionId: post.id
+      await apiRequest('POST', '/api/soap/reaction', {
+        soapId: post.id,
+        reactionType,
+        emoji: reactionType === 'amen' ? '🙏' : '❤️'
       });
       toast({
         title: "Amen! 🙏",
@@ -71,9 +73,10 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
   };
 
   const handleComment = () => {
+    // Since SOAP posts are now part of discussions, we can use the same comment system
     toast({
-      title: "Comments",
-      description: "Comment functionality coming soon! We're building a beautiful commenting system.",
+      title: "Comments Available",
+      description: "Click the comment button on the main post to add comments!",
     });
   };
 

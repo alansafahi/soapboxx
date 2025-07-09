@@ -9,6 +9,8 @@ import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Textarea } from "./ui/textarea";
 
 // Utility function to strip HTML tags and limit text to specified lines
 const stripHtmlAndLimitLines = (html: string, maxLines: number = 3): { text: string; isTruncated: boolean } => {
@@ -68,6 +70,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
 
+  // Comment dialog state
+  const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
+  const [commentText, setCommentText] = useState("");
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+
   // Like mutation
   const likeMutation = useMutation({
     mutationFn: async (postId: number) => {
@@ -110,6 +117,49 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         variant: "destructive",
       });
     }
+  });
+
+  // Comment mutation
+  const commentMutation = useMutation({
+    mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
+      const response = await fetch(`/api/discussions/${postId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "Referer": window.location.href,
+        },
+        credentials: "include",
+        body: JSON.stringify({ content })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to add comment: ${response.status}`);
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      setCommentText("");
+      setCommentDialogOpen(null);
+      toast({
+        title: "Comment added",
+        description: "Your comment has been posted",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to add comment",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Fetch comments for a specific post
+  const { data: comments = [] } = useQuery({
+    queryKey: [`/api/discussions/${commentDialogOpen}/comments`],
+    enabled: !!commentDialogOpen,
   });
 
   // Enhanced SOAP content detection for all posts (new and legacy)
@@ -407,10 +457,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          toast({
-                            title: "Comments",
-                            description: "Comment functionality coming soon! We're building a beautiful commenting system.",
-                          });
+                          setCommentDialogOpen(post.id);
                         }}
                         className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded-md transition-colors"
                       >
@@ -450,6 +497,77 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           </div>
         );
       })}
+
+      {/* Comment Dialog */}
+      <Dialog open={!!commentDialogOpen} onOpenChange={() => setCommentDialogOpen(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Comments</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[50vh] overflow-y-auto">
+            {comments.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((comment: any) => (
+                  <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50">
+                    <Avatar className="w-8 h-8">
+                      <AvatarFallback className="bg-blue-100 text-blue-600">
+                        {comment.authorId[0]?.toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="font-medium text-sm">Community Member</span>
+                        <span className="text-xs text-gray-500">
+                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 text-sm">{comment.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Add Comment Form */}
+          <div className="border-t pt-4">
+            <div className="space-y-3">
+              <Textarea
+                placeholder="Share your thoughts..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                className="min-h-[80px] resize-none"
+              />
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setCommentDialogOpen(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (commentText.trim() && commentDialogOpen) {
+                      commentMutation.mutate({
+                        postId: commentDialogOpen,
+                        content: commentText.trim()
+                      });
+                    }
+                  }}
+                  disabled={!commentText.trim() || commentMutation.isPending}
+                >
+                  {commentMutation.isPending ? "Posting..." : "Post Comment"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {/* Show More Button - Shows until infinite scroll is enabled */}
       {allPosts.length === 0 && posts.length > initialLimit && showMoreClicks === 0 && (
