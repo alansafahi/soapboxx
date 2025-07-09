@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
@@ -157,6 +158,9 @@ export default function RecentCheckInsStrip() {
                 </p>
               </div>
             </DialogTitle>
+            <DialogDescription>
+              View detailed information about this mood check-in
+            </DialogDescription>
           </DialogHeader>
 
           {selectedCheckIn && (
