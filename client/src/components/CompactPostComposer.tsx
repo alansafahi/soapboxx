@@ -74,13 +74,20 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
     );
   };
 
-  // Auto-resize textarea
+  // Auto-resize textarea and expand on overflow
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      
+      // Expand if content overflows 3 lines (approximately 60px)
+      if (!isExpanded && scrollHeight > 60) {
+        setIsExpanded(true);
+      }
+      
+      textareaRef.current.style.height = scrollHeight + 'px';
     }
-  }, [content]);
+  }, [content, isExpanded]);
 
   if (!user) return null;
 
@@ -105,9 +112,10 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
             onFocus={handleFocus}
             placeholder={isExpanded ? "Share your thoughts, prayers, or inspiration..." : "What's on your heart?"}
             className={`border-none resize-none bg-transparent p-0 min-h-0 focus-visible:ring-0 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 ${
-              isExpanded ? 'min-h-[80px]' : 'min-h-[40px]'
+              isExpanded ? 'min-h-[80px]' : 'min-h-[60px]'
             }`}
-            rows={isExpanded ? 3 : 1}
+            rows={isExpanded ? 4 : 3}
+            style={{ maxHeight: isExpanded ? 'none' : '60px', overflow: isExpanded ? 'visible' : 'hidden' }}
           />
 
           {isExpanded && (

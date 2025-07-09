@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 
@@ -13,6 +13,7 @@ import CompactPostComposer from "../components/CompactPostComposer";
 import LimitedSocialFeed from "../components/LimitedSocialFeed";
 import MobileNav from "../components/mobile-nav";
 import CheckInSystem from "../components/CheckInSystem";
+import FloatingPostButton from "../components/FloatingPostButton";
 import { ReferralWelcome } from "../components/ReferralWelcome";
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,12 +24,26 @@ interface HomeProps {
 export default function Home({ referralCode }: HomeProps = {}) {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const composerRef = useRef<HTMLDivElement>(null);
 
   // Get user stats
   const { data: userStats } = useQuery({
     queryKey: ["/api/users/stats"],
     enabled: !!user,
   });
+
+  const scrollToComposer = () => {
+    if (composerRef.current) {
+      composerRef.current.scrollIntoView({ behavior: 'smooth' });
+      // Focus the textarea after scrolling
+      setTimeout(() => {
+        const textarea = composerRef.current?.querySelector('textarea');
+        if (textarea) {
+          textarea.focus();
+        }
+      }, 300);
+    }
+  };
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -89,10 +104,15 @@ export default function Home({ referralCode }: HomeProps = {}) {
           {/* Primary Feed Column */}
           <div className="lg:col-span-3 min-w-0 space-y-6">
             {/* Post Composer */}
-            <CompactPostComposer />
+            <div ref={composerRef}>
+              <CompactPostComposer />
+            </div>
 
             {/* Latest Posts */}
-            <LimitedSocialFeed initialLimit={5} />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
+              <LimitedSocialFeed initialLimit={4} />
+            </div>
           </div>
           
           {/* Right Sidebar - Hidden on smaller screens */}
@@ -110,23 +130,8 @@ export default function Home({ referralCode }: HomeProps = {}) {
         </div>
       </main>
       
-      {/* Floating Post Button - Mobile Only */}
-      <div className="lg:hidden fixed bottom-20 right-4 z-40">
-        <button 
-          className="w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
-          onClick={() => {
-            const composer = document.querySelector('[data-testid="compact-composer"] textarea') as HTMLTextAreaElement;
-            if (composer) {
-              composer.focus();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          }}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </div>
+      {/* Floating Post Button for Mobile */}
+      <FloatingPostButton onClick={scrollToComposer} />
       
       <MobileNav />
     </div>

@@ -29,7 +29,7 @@ interface LimitedSocialFeedProps {
   className?: string;
 }
 
-export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: LimitedSocialFeedProps) {
+export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: LimitedSocialFeedProps) {
   const [showAll, setShowAll] = useState(false);
 
   const { data: posts = [], isLoading, error } = useQuery({
