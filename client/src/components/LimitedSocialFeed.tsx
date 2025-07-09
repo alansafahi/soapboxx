@@ -65,6 +65,8 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [showMoreClicks, setShowMoreClicks] = useState(0);
+  const [postsViewed, setPostsViewed] = useState(0);
+  const [showReflectionBreak, setShowReflectionBreak] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
