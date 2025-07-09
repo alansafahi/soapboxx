@@ -49,10 +49,9 @@ interface Post {
     lastName: string;
     profileImageUrl?: string;
   };
-  _count?: {
-    comments: number;
-    likes: number;
-  };
+  likeCount: number;
+  commentCount: number;
+  isLiked?: boolean;
 }
 
 interface LimitedSocialFeedProps {
@@ -434,7 +433,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       >
                         <Heart className="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors" />
                         <span className="text-sm font-medium text-gray-500 group-hover:text-red-500">
-                          {Number(post._count?.likes) || 0}
+                          {Number(post.likeCount) || 0}
                         </span>
                       </button>
                       
