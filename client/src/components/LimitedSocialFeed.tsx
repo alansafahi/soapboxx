@@ -66,22 +66,8 @@ export default function LimitedSocialFeed({ initialLimit = 4, className = "" }: 
       return true;
     }
     
-    // Legacy SOAP detection for older discussion posts that contain SOAP structure
-    const content = post.content?.toLowerCase() || '';
-    
-    // Look for SOAP structure patterns
-    const hasScripture = content.includes('scripture:') || content.includes('📖');
-    const hasObservation = content.includes('observation:') || content.includes('🔍');
-    const hasApplication = content.includes('application:') || content.includes('💡');
-    const hasPrayer = content.includes('prayer:') || content.includes('🙏');
-    
-    // Must have at least 3 of the 4 SOAP components to be considered SOAP content
-    const soapComponentCount = [hasScripture, hasObservation, hasApplication, hasPrayer].filter(Boolean).length;
-    
-    // Also check for explicit SOAP mentions
-    const hasExplicitSoap = content.includes('soap reflection') || content.includes('s.o.a.p');
-    
-    return soapComponentCount >= 3 || hasExplicitSoap;
+    // No legacy SOAP detection - we've cleaned up the old posts
+    return false;
   };
 
   // Extract SOAP data from legacy posts with proper HTML parsing
