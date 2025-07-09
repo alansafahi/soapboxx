@@ -1817,9 +1817,24 @@ export class DatabaseStorage implements IStorage {
     // Combine and sort by creation date
     const allPosts = [...discussionResults, ...soapResults]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Remove duplicates based on content similarity (for SOAP entries)
+    const uniquePosts = allPosts.filter((post, index, array) => {
+      // Keep all non-SOAP posts
+      if (post.type !== 'soap_reflection') return true;
+      
+      // For SOAP posts, check if this is the first occurrence of this content
+      const firstIndex = array.findIndex(p => 
+        p.type === 'soap_reflection' && 
+        p.soapData?.scripture === post.soapData?.scripture &&
+        p.soapData?.observation === post.soapData?.observation &&
+        p.authorId === post.authorId
+      );
+      return index === firstIndex;
+    });
     
     // Apply pagination if specified
-    const paginatedPosts = limit ? allPosts.slice(offset || 0, (offset || 0) + limit) : allPosts;
+    const paginatedPosts = limit ? uniquePosts.slice(offset || 0, (offset || 0) + limit) : uniquePosts;
     
     // Add reaction data to each post
     const postsWithReactions = await Promise.all(
