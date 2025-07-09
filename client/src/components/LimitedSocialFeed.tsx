@@ -200,11 +200,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Initialize posts on first load
   useEffect(() => {
-    if (posts.length > 0 && page === 1) {
-      setAllPosts(posts);
+    if (posts.length > 0 && page === 1 && allPosts.length === 0) {
+      // Only initialize if allPosts is empty to avoid duplicate initialization
       setHasMore(posts.length === 10); // Assume more if we got a full page
     }
-  }, [posts, page]);
+  }, [posts, page, allPosts.length]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -360,7 +360,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         <div className="text-center pt-4">
           <Button
             variant="outline"
-            onClick={() => setAllPosts(posts)}
+            onClick={() => {
+              setAllPosts(posts);
+              setHasMore(posts.length >= 10); // Enable infinite scroll if we have enough posts
+            }}
             className="flex items-center space-x-2"
           >
             <span>Show More Posts</span>
@@ -369,8 +372,8 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         </div>
       )}
 
-      {/* Infinite Scroll Trigger */}
-      {allPosts.length > 0 && hasMore && (
+      {/* Infinite Scroll Trigger - Show when we have posts displayed and there might be more */}
+      {displayedPosts.length >= initialLimit && hasMore && (
         <div ref={loadMoreRef} className="text-center pt-4">
           {isLoadingMore ? (
             <div className="flex items-center justify-center space-x-2">
@@ -385,7 +388,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       )}
 
       {/* End of feed indicator */}
-      {allPosts.length > 0 && !hasMore && (
+      {displayedPosts.length > initialLimit && !hasMore && (
         <div className="text-center pt-4 pb-8">
           <p className="text-sm text-gray-400 dark:text-gray-500">
             You've reached the end of the feed
