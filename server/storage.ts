@@ -1745,6 +1745,7 @@ export class DatabaseStorage implements IStorage {
           id: users.id,
           firstName: users.firstName,
           lastName: users.lastName,
+          name: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.firstName}, ${users.email})`,
           profileImageUrl: users.profileImageUrl,
         }
       })
@@ -1794,6 +1795,7 @@ export class DatabaseStorage implements IStorage {
           id: users.id,
           firstName: users.firstName,
           lastName: users.lastName,
+          name: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.firstName}, ${users.email})`,
           profileImageUrl: users.profileImageUrl,
         }
       })
@@ -5884,18 +5886,13 @@ export class DatabaseStorage implements IStorage {
       );
 
     if (existing.length > 0) {
-      // Update existing reaction
-      const [updated] = await db
-        .update(reactions)
-        .set({
-          emoji: reactionData.emoji,
-          intensity: reactionData.intensity,
-        })
-        .where(eq(reactions.id, existing[0].id))
-        .returning();
-      return updated;
+      // Toggle off - remove existing reaction
+      await db
+        .delete(reactions)
+        .where(eq(reactions.id, existing[0].id));
+      return { reacted: false, message: 'Reaction removed' };
     } else {
-      // Create new reaction
+      // Toggle on - create new reaction
       const [newReaction] = await db
         .insert(reactions)
         .values({
@@ -5905,9 +5902,10 @@ export class DatabaseStorage implements IStorage {
           reactionType: reactionData.reactionType,
           emoji: reactionData.emoji,
           intensity: reactionData.intensity || 1,
+          createdAt: new Date()
         })
         .returning();
-      return newReaction;
+      return { reacted: true, message: 'Reaction added', data: newReaction };
     }
   }
 

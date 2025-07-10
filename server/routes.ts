@@ -6233,10 +6233,13 @@ Return JSON with this exact structure:
       // Get updated prayer count for this post
       const prayCount = await storage.getReactionCount('discussion', parseInt(discussionId), 'pray');
       
+      // Check if user is still praying (after toggle)
+      const isPraying = result.reacted !== false;
+      
       res.json({ 
         success: true, 
-        message: 'Prayer reaction added successfully',
-        data: { ...result, prayCount, isPraying: true }
+        message: isPraying ? 'Prayer added successfully' : 'Prayer removed successfully',
+        data: { ...result, prayCount, isPraying }
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to add prayer reaction" });
