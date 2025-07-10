@@ -95,11 +95,11 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
   };
 
   // Sort comments
-  const sortedComments = [...comments].sort((a, b) => {
+  const sortedComments = (comments || []).slice().sort((a, b) => {
     if (sortBy === 'newest') {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     } else {
-      return b.likeCount - a.likeCount;
+      return (b.likeCount || 0) - (a.likeCount || 0);
     }
   });
 
@@ -135,7 +135,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
               Most liked
             </Button>
           </div>
-          <span className="text-sm text-gray-500">{comments.length} comments</span>
+          <span className="text-sm text-gray-500">{(comments || []).length} comments</span>
         </div>
 
         {/* Comments List */}
@@ -145,7 +145,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
               <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
               <p className="text-sm text-gray-500 mt-2">Loading comments...</p>
             </div>
-          ) : sortedComments.length > 0 ? (
+          ) : (comments && comments.length > 0) ? (
             <div className="space-y-4">
               {sortedComments.map((comment) => (
                 <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
