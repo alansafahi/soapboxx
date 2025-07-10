@@ -237,7 +237,7 @@ export default function SocialFeed() {
   const prayMutation = useMutation({
     mutationFn: async (postId: number) => {
       return apiRequest('POST', '/api/discussions/reaction', { 
-        discussionId: postId, 
+        discussionId: postId,
         emoji: '🙏',
         type: 'pray'
       });
@@ -1166,8 +1166,8 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
               <div className="flex items-start space-x-3 mb-4">
                 <Avatar className="w-10 h-10">
                   <AvatarImage 
-                    src={post.author?.profileImageUrl || post.author?.profileImage || ""} 
-                    alt={post.author?.name || 'User'}
+                    src={post.author?.profileImageUrl || ""} 
+                    alt={`${post.author?.firstName} ${post.author?.lastName}` || 'User'}
                     className="object-cover"
                   />
                   <AvatarFallback className="bg-purple-600 text-white">
