@@ -6124,7 +6124,7 @@ Return JSON with this exact structure:
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
 
-      const discussions = await storage.getDiscussions(limit, offset);
+      const discussions = await storage.getDiscussions(limit, offset, undefined, userId);
 
       res.json(discussions);
     } catch (error) {
@@ -6230,10 +6230,13 @@ Return JSON with this exact structure:
       
       const result = await storage.addReaction(reactionData);
       
+      // Get updated prayer count for this post
+      const prayCount = await storage.getReactionCount('discussion', parseInt(discussionId), 'pray');
+      
       res.json({ 
         success: true, 
         message: 'Prayer reaction added successfully',
-        data: result 
+        data: { ...result, prayCount, isPraying: true }
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to add prayer reaction" });

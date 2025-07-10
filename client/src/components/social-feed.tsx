@@ -1413,10 +1413,10 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                       prayMutation.mutate(post.id);
                     }}
                     disabled={prayMutation.isPending}
-                    className="text-gray-500 hover:text-blue-500 hover:bg-blue-50"
+                    className={`${post.isPraying ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-blue-500 hover:bg-blue-50`}
                   >
                     <span className="text-sm mr-1">🙏</span>
-                    Pray
+                    {post.prayCount ? `${post.prayCount} Praying` : 'Pray'}
                   </Button>
                   <Button 
                     variant="ghost" 

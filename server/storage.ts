@@ -641,6 +641,7 @@ export interface IStorage {
   getEnhancedCommunityFeed(userId: string, filters: any): Promise<any[]>;
   addReaction(reactionData: any): Promise<any>;
   removeReaction(userId: string, targetId: number, reactionType: string): Promise<void>;
+  getReactionCount(targetType: string, targetId: number, reactionType: string): Promise<number>;
   getCommunityGroups(userId: string): Promise<any[]>;
   createCommunityGroup(groupData: any): Promise<any>;
   joinCommunityGroup(memberData: any): Promise<void>;
@@ -1713,7 +1714,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Discussion operations
-  async getDiscussions(limit?: number, offset?: number, churchId?: number): Promise<any[]> {
+  async getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string): Promise<any[]> {
     // Get regular discussions
     const discussionsQuery = db
       .select({
@@ -1847,11 +1848,33 @@ export class DatabaseStorage implements IStorage {
           .from(reactions)
           .where(
             and(
-              eq(reactions.targetType, post.type === 'soap_reflection' ? 'soap' : 'post'),
+              eq(reactions.targetType, post.type === 'soap_reflection' ? 'soap' : 'discussion'),
               eq(reactions.targetId, post.id)
             )
           )
           .groupBy(reactions.reactionType, reactions.emoji);
+
+        // Check if current user has prayed for this post
+        let isPraying = false;
+        if (currentUserId) {
+          const userPrayerReaction = await db
+            .select()
+            .from(reactions)
+            .where(
+              and(
+                eq(reactions.userId, currentUserId),
+                eq(reactions.targetType, post.type === 'soap_reflection' ? 'soap' : 'discussion'),
+                eq(reactions.targetId, post.id),
+                eq(reactions.reactionType, 'pray')
+              )
+            )
+            .limit(1);
+          
+          isPraying = userPrayerReaction.length > 0;
+        }
+
+        // Get prayer count specifically
+        const prayCount = reactionData.find(r => r.reactionType === 'pray')?.count || 0;
 
         // Format reactions for frontend
         const formattedReactions = reactionData.map(r => ({
@@ -1864,6 +1887,8 @@ export class DatabaseStorage implements IStorage {
         return {
           ...post,
           reactions: formattedReactions,
+          prayCount,
+          isPraying,
           _count: {
             likes: formattedReactions.reduce((sum, r) => sum + Number(r.count || 0), 0),
             comments: Number(post.commentCount || 0)
@@ -5884,6 +5909,21 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return newReaction;
     }
+  }
+
+  async getReactionCount(targetType: string, targetId: number, reactionType: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(reactions)
+      .where(
+        and(
+          eq(reactions.targetType, targetType),
+          eq(reactions.targetId, targetId),
+          eq(reactions.reactionType, reactionType)
+        )
+      );
+    
+    return Number(result[0]?.count || 0);
   }
 
   async removeReaction(userId: string, targetId: number, reactionType: string): Promise<any> {
