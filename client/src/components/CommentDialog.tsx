@@ -59,6 +59,8 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         title: "Comment added!",
         description: "Your comment has been posted successfully",
       });
+      // Close dialog after successful comment submission
+      onClose();
     },
     onError: () => {
       toast({
@@ -103,7 +105,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Comments</DialogTitle>
           <DialogDescription>
@@ -137,7 +139,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         </div>
 
         {/* Comments List */}
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 pr-4 min-h-[300px] max-h-[400px]">
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>

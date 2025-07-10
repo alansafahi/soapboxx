@@ -2167,10 +2167,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Comment operations
-  async getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
+  async getDiscussionComments(discussionId: number): Promise<any[]> {
     return await db
-      .select()
+      .select({
+        id: discussionComments.id,
+        discussionId: discussionComments.discussionId,
+        authorId: discussionComments.authorId,
+        content: discussionComments.content,
+        parentId: discussionComments.parentId,
+        likeCount: discussionComments.likeCount,
+        isLiked: discussionComments.isLiked,
+        createdAt: discussionComments.createdAt,
+        updatedAt: discussionComments.updatedAt,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
       .from(discussionComments)
+      .leftJoin(users, eq(discussionComments.authorId, users.id))
       .where(eq(discussionComments.discussionId, discussionId))
       .orderBy(asc(discussionComments.createdAt));
   }
