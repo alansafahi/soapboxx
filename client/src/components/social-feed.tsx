@@ -168,7 +168,7 @@ export default function SocialFeed() {
   });
 
   // Display a limited number of posts initially
-  const displayedPosts = showAllPosts ? feedPosts : feedPosts.slice(0, 5);
+  const displayedPosts = showAllPosts ? feedPosts : feedPosts.slice(0, 3);
 
 
 
@@ -1640,8 +1640,8 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
           </div>
         )}
         
-        {/* Show All Posts Button */}
-        {!showAllPosts && feedPosts.length > 5 && (
+        {/* Show More Posts Button */}
+        {!showAllPosts && feedPosts.length > 3 && (
           <div className="text-center py-6">
             <Button 
               onClick={() => setShowAllPosts(true)}
@@ -1649,13 +1649,13 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
               size="lg"
               className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
             >
-              Show All Posts ({feedPosts.length} total)
+              Show More Posts ({feedPosts.length - 3} more)
             </Button>
           </div>
         )}
         
         {/* Show Less Posts Button */}
-        {showAllPosts && feedPosts.length > 5 && (
+        {showAllPosts && feedPosts.length > 3 && (
           <div className="text-center py-6">
             <Button 
               onClick={() => setShowAllPosts(false)}
