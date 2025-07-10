@@ -2176,7 +2176,6 @@ export class DatabaseStorage implements IStorage {
         content: discussionComments.content,
         parentId: discussionComments.parentId,
         likeCount: discussionComments.likeCount,
-        isLiked: discussionComments.isLiked,
         createdAt: discussionComments.createdAt,
         updatedAt: discussionComments.updatedAt,
         author: {
