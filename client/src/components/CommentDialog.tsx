@@ -148,16 +148,16 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
               {sortedComments.map((comment) => (
                 <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src={comment.author.profileImageUrl || ""} />
+                    <AvatarImage src={comment.author?.profileImageUrl || ""} />
                     <AvatarFallback className="bg-purple-600 text-white text-sm">
-                      {comment.author.firstName?.[0]}{comment.author.lastName?.[0]}
+                      {comment.author?.firstName?.[0]}{comment.author?.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="font-medium text-sm text-gray-900 dark:text-white">
-                          {comment.author.firstName} {comment.author.lastName}
+                          {comment.author?.firstName || 'Unknown'} {comment.author?.lastName || ''}
                         </span>
                         <span className="text-xs text-gray-500 ml-2">
                           {new Date(comment.createdAt).toLocaleDateString()}
@@ -201,8 +201,9 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         <div className="border-t pt-4 mt-4">
           <div className="flex items-start space-x-3">
             <Avatar className="w-8 h-8">
+              <AvatarImage src={user?.profileImageUrl || ""} />
               <AvatarFallback className="bg-purple-600 text-white text-sm">
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
+                {user?.firstName?.[0] || 'U'}{user?.lastName?.[0] || ''}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
