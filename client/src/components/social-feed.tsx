@@ -233,6 +233,32 @@ export default function SocialFeed() {
     }
   });
 
+  // Prayer reaction mutation
+  const prayMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return apiRequest('POST', '/api/discussions/reaction', { 
+        discussionId: postId, 
+        emoji: '🙏',
+        type: 'pray'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      toast({
+        title: "Praying! 🙏",
+        description: "Added to your prayer list",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add prayer",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Share/repost mutation
   const shareMutation = useMutation({
     mutationFn: async (postId: number) => {
@@ -1151,7 +1177,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   <div className="flex items-center space-x-2">
                     <h4 className="font-semibold text-gray-900 dark:text-white">{post.author.name}</h4>
                     <span className="text-gray-500 dark:text-gray-400 text-sm">
-                      {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(post.createdAt)).replace('about ', '~').replace(' ago', '').replace(' hours', 'hrs').replace(' hour', 'hr').replace(' minutes', 'min').replace(' days', 'd').replace(' day', 'd')}
                     </span>
                   </div>
                   <div className="text-gray-700 dark:text-gray-300 mt-2">
@@ -1382,6 +1408,20 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      prayMutation.mutate(post.id);
+                    }}
+                    disabled={prayMutation.isPending}
+                    className="text-gray-500 hover:text-blue-500 hover:bg-blue-50"
+                  >
+                    <span className="text-sm mr-1">🙏</span>
+                    Pray
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       const isExpanded = expandedComments.has(post.id);
                       // Comments toggle for post
                       
@@ -1535,7 +1575,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                                   {comment.author?.name || 'Anonymous'}
                                 </span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                  {formatDistanceToNow(new Date(comment.createdAt)).replace('about ', '~').replace(' ago', '').replace(' hours', 'hrs').replace(' hour', 'hr').replace(' minutes', 'min').replace(' days', 'd').replace(' day', 'd')}
                                 </span>
                               </div>
                               <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{comment.content}</p>

@@ -442,7 +442,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       )}
                     </div>
                     <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
-                      {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(post.createdAt)).replace('about ', '~').replace(' ago', '').replace(' hours', 'hrs').replace(' hour', 'hr').replace(' minutes', 'min').replace(' days', 'd').replace(' day', 'd')}
                     </span>
                   </div>
                   
