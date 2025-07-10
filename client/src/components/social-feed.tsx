@@ -55,6 +55,7 @@ import {
   Smartphone
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { PostInteractions } from './PostInteractions';
 
 interface FeedPost {
   id: number;
@@ -1399,72 +1400,19 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
               {/* Post Actions */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center space-x-4">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => likeMutation.mutate(post.id)}
-                    className={`${post.isLiked ? 'text-red-500' : 'text-gray-500'} hover:text-red-500`}
-                    disabled={likeMutation.isPending}
-                  >
-                    <Heart className={`w-4 h-4 mr-1 ${post.isLiked ? 'fill-current' : ''}`} />
-                    {Number(post.likeCount || 0)}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      prayMutation.mutate(post.id);
-                    }}
-                    disabled={prayMutation.isPending}
-                    className={`${post.isPraying ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-blue-500 hover:bg-blue-50`}
-                  >
-                    <span className="text-sm mr-1">🙏</span>
-                    {post.prayCount ? `${post.prayCount} Praying` : 'Pray'}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      const isExpanded = expandedComments.has(post.id);
-                      // Comments toggle for post
-                      
-                      // Create new Set and force React re-render
-                      setExpandedComments(prev => {
-                        const newSet = new Set(prev);
-                        if (isExpanded) {
-                          newSet.delete(post.id);
-                        } else {
-                          newSet.add(post.id);
-                        }
-                        return newSet;
-                      });
-                      
-                      // Simple visual feedback
-                      if (!isExpanded) {
-                        toast({
-                          title: "Comments Expanded",
-                          description: `Showing comments section`,
-                        });
-                      }
-                    }}
-                    className={`${expandedComments.has(post.id) ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-blue-500 hover:bg-blue-50`}
-                  >
-                    <MessageCircle className="w-4 h-4 mr-1" />
-                    {post.commentCount}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setShareDialogOpen(post.id)}
-                    className="text-gray-500 hover:text-green-500"
-                  >
-                    <RotateCw className="w-4 h-4 mr-1" />
-                    {post.shareCount}
-                  </Button>
+                  {/* Use the unified PostInteractions component */}
+                  <PostInteractions
+                    postId={post.id}
+                    postType="discussion"
+                    isLiked={post.isLiked || false}
+                    likeCount={post.likeCount || 0}
+                    isPraying={post.isPraying || false}
+                    prayCount={post.prayCount || 0}
+                    commentCount={post.commentCount || post.comments?.length || 0}
+                    shareCount={post.shareCount || 0}
+                    post={post}
+                  />
+
                 </div>
                 
                 {/* Delete Button - Only show for post author */}

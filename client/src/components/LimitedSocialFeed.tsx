@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
+import { PostInteractions } from './PostInteractions';
 
 // This utility is no longer used - content formatting handled by FormattedContent component
 
@@ -450,68 +451,18 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                     <FormattedContent content={post.content} />
                   </div>
                   
-                  {/* Reaction Bar with enhanced styling */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center space-x-6">
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          likeMutation.mutate(post.id);
-                        }}
-                        disabled={likeMutation.isPending}
-                        className="flex items-center space-x-2 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
-                      >
-                        <Heart className="w-4 h-4 text-gray-500 group-hover:text-red-500 transition-colors" />
-                        <span className="text-sm font-medium text-gray-500 group-hover:text-red-500">
-                          {Number(post.likeCount) || 0}
-                        </span>
-                      </button>
-                      
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          prayMutation.mutate(post.id);
-                        }}
-                        disabled={prayMutation.isPending}
-                        className="flex items-center space-x-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors"
-                      >
-                        <span className="text-sm">🙏</span>
-                        <span className="text-sm font-medium text-gray-500 group-hover:text-blue-500">
-                          Pray
-                        </span>
-                      </button>
-                      
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setCommentDialogOpen(post.id);
-                        }}
-                        className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded-md transition-colors"
-                      >
-                        <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-purple-500 transition-colors" />
-                        <span className="text-sm font-medium text-gray-500 group-hover:text-purple-500">
-                          {Number(post.commentCount) || 0}
-                        </span>
-                      </button>
-                    </div>
-                    
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toast({
-                          title: "Share",
-                          description: "Share functionality coming soon!",
-                        });
-                      }}
-                      className="flex items-center space-x-1 group hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors"
-                    >
-                      <Share2 className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
-                    </button>
-                  </div>
+                  {/* Use unified PostInteractions component */}
+                  <PostInteractions
+                    postId={post.id}
+                    postType="discussion"
+                    isLiked={post.isLiked || false}
+                    likeCount={post.likeCount || 0}
+                    isPraying={post.isPraying || false}
+                    prayCount={post.prayCount || 0}
+                    commentCount={post.commentCount || 0}
+                    shareCount={post.shareCount || 0}
+                    post={post}
+                  />
 
                   {/* Comments Section - Show comments below each post */}
                   {allPostComments[post.id] && allPostComments[post.id].length > 0 && (

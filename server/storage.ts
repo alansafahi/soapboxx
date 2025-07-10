@@ -3790,6 +3790,23 @@ export class DatabaseStorage implements IStorage {
         const likeCount = parseInt(likeCountResult.rows[0]?.like_count || 0);
         const isLiked = parseInt(userLikeResult.rows[0]?.user_liked || 0) > 0;
 
+        // Fetch prayer reaction count for this discussion
+        const prayCountResult = await pool.query(`
+          SELECT COUNT(*) as pray_count
+          FROM community_reactions
+          WHERE target_type = 'discussion' AND target_id = $1 AND reaction_type = 'pray'
+        `, [row.id]);
+
+        // Check if current user is praying for this discussion
+        const userPrayResult = await pool.query(`
+          SELECT COUNT(*) as user_praying
+          FROM community_reactions
+          WHERE target_type = 'discussion' AND target_id = $1 AND user_id = $2 AND reaction_type = 'pray'
+        `, [row.id, userId]);
+
+        const prayCount = parseInt(prayCountResult.rows[0]?.pray_count || 0);
+        const isPraying = parseInt(userPrayResult.rows[0]?.user_praying || 0) > 0;
+
       return {
           id: row.id,
           type: 'discussion',
@@ -3803,7 +3820,10 @@ export class DatabaseStorage implements IStorage {
           author: {
             id: row.author_id,
             name: authorName,
-            profileImage: row.profile_image_url || null
+            profileImage: row.profile_image_url || null,
+            firstName: row.first_name,
+            lastName: row.last_name,
+            profileImageUrl: row.profile_image_url || null
           },
           church: null,
           createdAt: row.created_at,
@@ -3811,6 +3831,8 @@ export class DatabaseStorage implements IStorage {
           commentCount: comments.length,
           shareCount: 0,
           isLiked: isLiked,
+          prayCount: prayCount,
+          isPraying: isPraying,
           isBookmarked: false,
           tags: ['discussion'],
           comments: comments
