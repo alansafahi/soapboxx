@@ -6208,6 +6208,38 @@ Return JSON with this exact structure:
     }
   });
 
+  // Prayer reaction endpoint for discussions
+  app.post("/api/discussions/reaction", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { discussionId, emoji, type } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      // For prayer reactions, we'll use the community reactions system
+      const reactionData = {
+        userId,
+        targetType: 'discussion',
+        targetId: parseInt(discussionId),
+        reactionType: type || 'pray',
+        emoji: emoji || '🙏',
+        intensity: 1
+      };
+      
+      const result = await storage.addReaction(reactionData);
+      
+      res.json({ 
+        success: true, 
+        message: 'Prayer reaction added successfully',
+        data: result 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add prayer reaction" });
+    }
+  });
+
   // Add reaction to discussion - REST endpoint  
   app.post("/api/community/reactions", isAuthenticated, async (req: any, res) => {
     try {

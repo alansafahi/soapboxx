@@ -1165,12 +1165,14 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
               <div className="flex items-start space-x-3 mb-4">
                 <Avatar className="w-10 h-10">
                   <AvatarImage 
-                    src={post.author.profileImage || ""} 
-                    alt={post.author.name}
+                    src={post.author?.profileImageUrl || post.author?.profileImage || ""} 
+                    alt={post.author?.name || 'User'}
                     className="object-cover"
                   />
                   <AvatarFallback className="bg-purple-600 text-white">
-                    {post.author.name.charAt(0)}
+                    {(post.author?.firstName?.[0] || '') + (post.author?.lastName?.[0] || '') || 
+                     post.author?.name?.charAt(0) || 
+                     post.author?.email?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
