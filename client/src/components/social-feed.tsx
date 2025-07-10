@@ -242,18 +242,19 @@ export default function SocialFeed() {
         type: 'pray'
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      const message = data?.data?.isPraying ? "Added to your prayer list" : "Removed from prayer list";
       toast({
-        title: "Praying! 🙏",
-        description: "Added to your prayer list",
+        title: data?.data?.isPraying ? "Praying! 🙏" : "Prayer removed",
+        description: message,
       });
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to add prayer",
+        description: "Failed to update prayer",
         variant: "destructive"
       });
     }
@@ -1170,14 +1171,18 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     className="object-cover"
                   />
                   <AvatarFallback className="bg-purple-600 text-white">
-                    {(post.author?.firstName?.[0] || '') + (post.author?.lastName?.[0] || '') || 
-                     post.author?.name?.charAt(0) || 
+                    {((post.author?.firstName?.[0] || '') + (post.author?.lastName?.[0] || '')) ||
                      post.author?.email?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{post.author.name}</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      {post.author?.firstName && post.author?.lastName 
+                        ? `${post.author.firstName} ${post.author.lastName}`
+                        : post.author?.firstName || post.author?.email || 'User'
+                      }
+                    </h4>
                     <span className="text-gray-500 dark:text-gray-400 text-sm">
                       {formatDistanceToNow(new Date(post.createdAt)).replace('about ', '~').replace(' ago', '').replace(' hours', 'hrs').replace(' hour', 'hr').replace(' minutes', 'min').replace(' days', 'd').replace(' day', 'd')}
                     </span>

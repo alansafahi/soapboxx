@@ -1745,7 +1745,7 @@ export class DatabaseStorage implements IStorage {
           id: users.id,
           firstName: users.firstName,
           lastName: users.lastName,
-          name: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.firstName}, ${users.email})`,
+          email: users.email,
           profileImageUrl: users.profileImageUrl,
         }
       })
@@ -1795,7 +1795,7 @@ export class DatabaseStorage implements IStorage {
           id: users.id,
           firstName: users.firstName,
           lastName: users.lastName,
-          name: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.firstName}, ${users.email})`,
+          email: users.email,
           profileImageUrl: users.profileImageUrl,
         }
       })
