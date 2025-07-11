@@ -7567,7 +7567,8 @@ Return JSON with this exact structure:
 
       
       // Validate with the schema
-      const validatedData = schema.insertSoapEntrySchema.parse(soapData);
+      const { insertSoapEntrySchema } = await import("../shared/schema.js");
+      const validatedData = insertSoapEntrySchema.parse(soapData);
 
 
       const newEntry = await storage.createSoapEntry(validatedData);
