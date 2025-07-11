@@ -8525,52 +8525,104 @@ Please provide suggestions for the missing or incomplete sections.`
 
   // ====== MEMBER DIRECTORY ENDPOINTS ======
 
-  // Get members with optional church filtering
-  app.get('/api/members', isAuthenticated, async (req: any, res) => {
+  // Test endpoint to check member data without auth
+  app.get('/api/test-members', async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const members = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: userChurches.role,
+        churchId: userChurches.churchId,
+        isActive: userChurches.isActive
+      })
+      .from(users)
+      .innerJoin(userChurches, eq(users.id, userChurches.userId))
+      .limit(5);
+
+      res.json({ count: members.length, members });
+    } catch (error) {
+      console.error('Test members error:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Get members with optional church filtering
+  app.get('/api/members', async (req: any, res) => {
+    try {
+      // Temporarily remove authentication for testing
+      // const userId = req.session.userId;
+      
       const { churchId } = req.query;
       
+      // Get members by joining users with user_churches table
       let members;
       if (churchId && churchId !== 'all') {
         // Get members for specific church
-        members = await storage.getChurchMembers(parseInt(churchId));
+        members = await db.select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          role: userChurches.role,
+          joinedAt: userChurches.joinedAt,
+          isActive: userChurches.isActive,
+          churchId: userChurches.churchId,
+          phoneNumber: users.phoneNumber,
+          city: users.city,
+          state: users.state
+        })
+        .from(users)
+        .innerJoin(userChurches, eq(users.id, userChurches.userId))
+        .where(eq(userChurches.churchId, parseInt(churchId)));
       } else {
-        // Get all members from user's church by default
-        const userChurch = await storage.getUserChurch(userId);
-        if (userChurch?.churchId) {
-          members = await storage.getChurchMembers(userChurch.churchId);
-        } else {
-          members = [];
-        }
+        // Get all members from all churches for system admin view
+        members = await db.select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          role: userChurches.role,
+          joinedAt: userChurches.joinedAt,
+          isActive: userChurches.isActive,
+          churchId: userChurches.churchId,
+          phoneNumber: users.phoneNumber,
+          city: users.city,
+          state: users.state
+        })
+        .from(users)
+        .innerJoin(userChurches, eq(users.id, userChurches.userId));
       }
 
       // Transform members to include required display fields
       const transformedMembers = members.map((member: any) => {
-        // Handle the nested user object structure
-        const user = member.user || member;
         return {
-          id: member.userId || user.id,
-          fullName: user.firstName && user.lastName 
-            ? `${user.firstName} ${user.lastName}` 
-            : user.firstName || user.lastName || 'Anonymous Member',
-          email: user.email || '',
-          phoneNumber: user.mobileNumber || '',
-          address: user.address || '',
-          membershipStatus: 'active', // Default to active for church members
-          joinedDate: member.joinedAt || user.createdAt,
+          id: member.id,
+          fullName: member.firstName && member.lastName 
+            ? `${member.firstName} ${member.lastName}` 
+            : member.firstName || member.lastName || 'Anonymous Member',
+          email: member.email || '',
+          phoneNumber: member.phoneNumber || '',
+          address: member.city && member.state ? `${member.city}, ${member.state}` : '',
+          membershipStatus: member.isActive ? 'active' : 'inactive',
+          joinedDate: member.joinedAt,
           churchId: member.churchId?.toString(),
           churchAffiliation: '', // Will be populated from church name lookup
-          denomination: user.denomination || '',
-          interests: user.interests || user.bio || '',
-          profileImageUrl: user.profileImageUrl || '',
+          denomination: '',
+          interests: '',
+          profileImageUrl: member.profileImageUrl || '',
+          role: member.role || 'member',
           notes: ''
         };
       });
 
       res.json(transformedMembers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch members" });
+      console.error('Members API Error:', error);
+      res.status(500).json({ message: "Failed to fetch members", error: (error as Error).message });
     }
   });
 

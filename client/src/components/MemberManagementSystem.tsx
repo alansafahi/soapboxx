@@ -42,17 +42,13 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
   }) as { data: any[] };
 
   const { data: members = [], isLoading, error } = useQuery({
-    queryKey: ["/api/members", "church", effectiveSelectedChurch],
+    queryKey: ["/api/members", effectiveSelectedChurch],
     queryFn: async () => {
+      // Use apiRequest instead of direct fetch for proper authentication
       const url = effectiveSelectedChurch === "all" 
         ? "/api/members" 
         : `/api/members?churchId=${effectiveSelectedChurch}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch members: ${response.statusText}`);
-      }
-      const data = await response.json();
-      return data;
+      return await apiRequest("GET", url);
     },
     staleTime: 0, // Always refetch to avoid cache issues
     gcTime: 30000, // Keep cache for 30 seconds only
