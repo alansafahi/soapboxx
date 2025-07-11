@@ -1651,8 +1651,9 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   }
                 }}
                 disabled={commentMutation.isPending || !commentText.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {commentMutation.isPending ? "Adding..." : "Add Comment"}
+                {commentMutation.isPending ? "Posting..." : "Post Comment"}
               </Button>
             </div>
           </div>
