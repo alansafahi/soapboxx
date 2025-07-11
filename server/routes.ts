@@ -7568,6 +7568,21 @@ Return JSON with this exact structure:
       
       // Validate with the schema
       const { insertSoapEntrySchema } = await import("../shared/schema.js");
+      
+      console.log('SOAP Data before validation:', JSON.stringify(soapData, null, 2));
+      
+      try {
+        const validatedData = insertSoapEntrySchema.parse(soapData);
+        console.log('SOAP validation successful:', JSON.stringify(validatedData, null, 2));
+      } catch (validationError) {
+        console.error('SOAP validation failed:', validationError);
+        return res.status(400).json({ 
+          message: 'Validation failed', 
+          error: validationError.message,
+          details: validationError.errors || validationError
+        });
+      }
+      
       const validatedData = insertSoapEntrySchema.parse(soapData);
 
 
