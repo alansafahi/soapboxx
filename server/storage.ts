@@ -428,6 +428,20 @@ export interface IStorage {
   updateCommunicationTemplate(templateId: number, updates: any): Promise<any>;
   deleteCommunicationTemplate(templateId: number): Promise<void>;
   
+  // Communication history operations
+  getCommunicationHistory(churchId: number): Promise<any[]>;
+  createCommunicationRecord(record: {
+    churchId: number;
+    sentBy: string;
+    subject: string;
+    content: string;
+    communicationType: string;
+    direction: string;
+    sentAt: Date;
+    deliveryStatus: string;
+    recipientCount?: number;
+  }): Promise<any>;
+  
   // User stats and achievements
   getUserStats(userId: string): Promise<{
     attendanceCount: number;
@@ -8484,6 +8498,94 @@ export class DatabaseStorage implements IStorage {
       console.error('Error fetching events by church:', error);
       return [];
     }
+  }
+
+  // Communication history operations
+  async getCommunicationHistory(churchId: number): Promise<any[]> {
+    const communications = await db
+      .select({
+        id: memberCommunications.id,
+        subject: memberCommunications.subject,
+        content: memberCommunications.content,
+        communicationType: memberCommunications.communicationType,
+        sentAt: memberCommunications.sentAt,
+        deliveryStatus: memberCommunications.deliveryStatus,
+        recipientCount: sql`COUNT(DISTINCT ${memberCommunications.memberId})`.as('recipientCount'),
+        senderName: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`.as('senderName'),
+        senderEmail: users.email
+      })
+      .from(memberCommunications)
+      .leftJoin(users, eq(memberCommunications.sentBy, users.id))
+      .where(eq(memberCommunications.churchId, churchId))
+      .groupBy(
+        memberCommunications.id,
+        memberCommunications.subject,
+        memberCommunications.content,
+        memberCommunications.communicationType,
+        memberCommunications.sentAt,
+        memberCommunications.deliveryStatus,
+        users.firstName,
+        users.lastName,
+        users.email
+      )
+      .orderBy(desc(memberCommunications.sentAt))
+      .limit(50);
+
+    return communications.map(comm => ({
+      id: comm.id,
+      title: comm.subject,
+      content: comm.content,
+      type: comm.communicationType,
+      sentAt: comm.sentAt,
+      status: comm.deliveryStatus,
+      recipientCount: Number(comm.recipientCount),
+      sender: {
+        name: comm.senderName,
+        email: comm.senderEmail
+      }
+    }));
+  }
+
+  async createCommunicationRecord(record: {
+    churchId: number;
+    sentBy: string;
+    subject: string;
+    content: string;
+    communicationType: string;
+    direction: string;
+    sentAt: Date;
+    deliveryStatus: string;
+    recipientCount?: number;
+  }): Promise<any> {
+    // Get all church members for this communication
+    const churchMembers = await this.getChurchMembers(record.churchId);
+    
+    // Create a communication record for each recipient
+    const communicationRecords = churchMembers.map(member => ({
+      memberId: member.userId,
+      communicationType: record.communicationType,
+      direction: record.direction,
+      subject: record.subject,
+      content: record.content,
+      sentBy: record.sentBy,
+      sentAt: record.sentAt,
+      deliveryStatus: record.deliveryStatus,
+      churchId: record.churchId
+    }));
+
+    // Insert all communication records
+    if (communicationRecords.length > 0) {
+      await db.insert(memberCommunications).values(communicationRecords);
+    }
+
+    return {
+      id: 'bulk_' + Date.now(),
+      subject: record.subject,
+      content: record.content,
+      type: record.communicationType,
+      sentAt: record.sentAt,
+      recipientCount: communicationRecords.length
+    };
   }
 }
 

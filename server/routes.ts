@@ -8174,8 +8174,15 @@ Please provide suggestions for the missing or incomplete sections.`
         }
       }
 
-      // Return empty array for now - can implement message history later
-      res.json([]);
+      // Get message history for the user's church
+      const churchId = user?.churchId;
+      
+      if (!churchId) {
+        return res.json([]);
+      }
+      
+      const messageHistory = await storage.getCommunicationHistory(churchId);
+      res.json(messageHistory);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch messages" });
     }
@@ -8305,6 +8312,23 @@ Please provide suggestions for the missing or incomplete sections.`
         }
       }
 
+      // Store communication in history
+      try {
+        await storage.createCommunicationRecord({
+          churchId: userChurch.churchId,
+          sentBy: userId,
+          subject: title,
+          content: content,
+          communicationType: 'announcement',
+          direction: 'outbound',
+          sentAt: new Date(),
+          deliveryStatus: 'sent',
+          recipientCount: successCount
+        });
+      } catch (historyError) {
+        console.error('Failed to store communication history:', historyError);
+      }
+
       // Log the successful communication
 
 
@@ -8354,6 +8378,23 @@ Please provide suggestions for the missing or incomplete sections.`
           isRead: false,
           actionUrl: '/communications'
         });
+      }
+
+      // Store emergency broadcast in communication history
+      try {
+        await storage.createCommunicationRecord({
+          churchId: userChurch.churchId,
+          sentBy: userId,
+          subject: `URGENT: ${title}`,
+          content: content,
+          communicationType: 'emergency_broadcast',
+          direction: 'outbound',
+          sentAt: new Date(),
+          deliveryStatus: 'sent',
+          recipientCount: churchMembers.length
+        });
+      } catch (historyError) {
+        console.error('Failed to store emergency broadcast history:', historyError);
       }
 
       res.status(201).json({ 

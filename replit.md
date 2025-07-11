@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 11, 2025: EMERGENCY BROADCAST MESSAGE HISTORY INTEGRATION COMPLETED - Successfully implemented emergency broadcast storage in message history alongside regular communications
+  - UNIFIED HISTORY STORAGE: Both regular messages and emergency broadcasts now appear in Message History tab using shared member_communications table
+  - STORAGE METHODS IMPLEMENTED: Added getCommunicationHistory() and createCommunicationRecord() methods for complete message tracking functionality
+  - EMERGENCY BROADCAST ENHANCEMENT: Emergency broadcasts now store communication records for each church member with proper subject prefixing ("URGENT:")
+  - MESSAGE HISTORY ENDPOINT OPERATIONAL: Fixed hardcoded empty array returns to use actual stored communication data from database
+  - COMPREHENSIVE TRACKING: All communication types (announcements, emergency broadcasts) now have complete audit trail with sender, recipients, and delivery status
 - July 11, 2025: CHURCH COMMUNICATIONS MODULE COMPLETELY FIXED - Successfully resolved "Leadership access required" error that was preventing SoapBox Owner users from sending announcements
   - ROOT CAUSE IDENTIFIED: Session cookie name mismatch between server configuration ('connect.sid') and browser cookies ('soapbox_session')
   - AUTHENTICATION PATTERN FIXED: Updated communication endpoints to use consistent session-based authentication (req.session.userId)
