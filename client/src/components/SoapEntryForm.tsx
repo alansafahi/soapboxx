@@ -52,6 +52,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [isDetectingMood, setIsDetectingMood] = useState(false);
   const [aiMoodSuggestions, setAiMoodSuggestions] = useState<string[]>([]);
   const [moodDetectionTimeout, setMoodDetectionTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [showFullMoodGrid, setShowFullMoodGrid] = useState(false);
+  const [useAiSuggestions, setUseAiSuggestions] = useState(true);
 
   const { toast } = useToast();
 
@@ -138,8 +140,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       if (suggestedMoods && suggestedMoods.length > 0) {
         setAiMoodSuggestions(suggestedMoods);
         
-        // Auto-apply AI suggestions if no moods currently selected
-        if (selectedMoods.length === 0) {
+        // Auto-apply AI suggestions if using AI mode and no moods currently selected
+        if (selectedMoods.length === 0 && useAiSuggestions) {
           setSelectedMoods(suggestedMoods);
           const moodLabels = getMoodsByIds(suggestedMoods).map(m => m.label).join(', ');
           form.setValue('moodTag', moodLabels);
@@ -646,7 +648,12 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     setSelectedMoods(aiMoodSuggestions);
     const moodLabels = getMoodsByIds(aiMoodSuggestions).map(m => m.label).join(', ');
     form.setValue('moodTag', moodLabels);
-    setAiMoodSuggestions([]); // Clear suggestions after applying
+    setUseAiSuggestions(true);
+  };
+
+  const openMoodCustomization = () => {
+    setShowFullMoodGrid(true);
+    setUseAiSuggestions(false);
   };
 
   const handleSubmit = (data: FormData) => {
@@ -1326,80 +1333,136 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* AI Suggestions */}
+              {/* Step 1: AI Suggestions (Top 2-3 Moods) */}
               {aiMoodSuggestions.length > 0 && (
-                <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-purple-800">AI Detected Moods</span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={applyAiSuggestions}
-                      className="text-purple-600 border-purple-300"
-                    >
-                      Apply Suggestions
-                    </Button>
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Brain className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm font-medium text-purple-800">AI Suggests:</span>
+                    <div className="flex items-center gap-1 text-xs text-purple-600">
+                      <Info className="h-3 w-3" />
+                      <span>Based on your scripture content</span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {aiMoodSuggestions.map(moodId => {
+                  
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {aiMoodSuggestions.slice(0, 3).map(moodId => {
                       const mood = allMoods.find(m => m.id === moodId);
                       return mood ? (
-                        <Badge key={moodId} variant="secondary" className="bg-purple-100 text-purple-800">
-                          {mood.icon} {mood.label}
-                        </Badge>
+                        <div key={moodId} className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-purple-200">
+                          <span className="text-lg">{mood.icon}</span>
+                          <span className="text-sm font-medium text-purple-800">{mood.label}</span>
+                        </div>
                       ) : null;
                     })}
                   </div>
                 </div>
               )}
 
-              {/* Mood Categories */}
-              <div className="space-y-4">
-                {moodCategories.map((category) => (
-                  <div key={category.title} className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <span className="text-lg">{category.icon}</span>
-                      {category.title}
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {category.moods.map((mood) => {
-                        const isSelected = selectedMoods.includes(mood.id);
-                        const isAiSuggested = aiMoodSuggestions.includes(mood.id);
-                        return (
-                          <Button
-                            key={mood.id}
-                            type="button"
-                            variant={isSelected ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => toggleMoodSelection(mood.id)}
-                            className={`flex items-center gap-2 justify-start text-left h-auto py-2 px-3 ${
-                              isSelected 
-                                ? "bg-blue-600 text-white hover:bg-blue-700" 
-                                : isAiSuggested
-                                ? "border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
-                                : "hover:bg-gray-50"
-                            }`}
-                          >
-                            <span className="text-base">{mood.icon}</span>
-                            <div className="text-left">
-                              <div className="text-xs font-medium">{mood.label}</div>
-                              <div className="text-xs opacity-70">{mood.subtitle}</div>
-                            </div>
-                          </Button>
-                        );
-                      })}
-                    </div>
+              {/* Step 2: User Choice */}
+              <div className="space-y-3">
+                {aiMoodSuggestions.length > 0 ? (
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant={useAiSuggestions ? "default" : "outline"}
+                      size="sm"
+                      onClick={applyAiSuggestions}
+                      className="flex items-center gap-2"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Keep AI Suggestions
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={!useAiSuggestions ? "default" : "outline"}
+                      size="sm"
+                      onClick={openMoodCustomization}
+                      className="flex items-center gap-2"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                      Edit Moods
+                    </Button>
                   </div>
-                ))}
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowFullMoodGrid(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                    Choose Your Moods
+                  </Button>
+                )}
               </div>
+
+              {/* Full Mood Grid (Expandable) */}
+              {showFullMoodGrid && (
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-gray-700">Select All That Apply</h4>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowFullMoodGrid(false)}
+                      className="text-gray-500"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                      Collapse
+                    </Button>
+                  </div>
+
+                  {/* Mood Categories with Tabs */}
+                  <div className="space-y-4">
+                    {moodCategories.map((category) => (
+                      <div key={category.title} className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-md">
+                          <span className="text-lg">{category.icon}</span>
+                          {category.title}
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                          {category.moods.map((mood) => {
+                            const isSelected = selectedMoods.includes(mood.id);
+                            const isAiSuggested = aiMoodSuggestions.includes(mood.id);
+                            return (
+                              <Button
+                                key={mood.id}
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => toggleMoodSelection(mood.id)}
+                                className={`flex items-center gap-2 justify-start text-left h-auto py-2 px-3 ${
+                                  isSelected 
+                                    ? "bg-blue-600 text-white hover:bg-blue-700" 
+                                    : isAiSuggested
+                                    ? "border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
+                                    : "hover:bg-gray-50"
+                                }`}
+                              >
+                                <span className="text-base">{mood.icon}</span>
+                                <div className="text-left">
+                                  <div className="text-xs font-medium">{mood.label}</div>
+                                  <div className="text-xs opacity-70">{mood.subtitle}</div>
+                                </div>
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Selected Moods Display */}
               {selectedMoods.length > 0 && (
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-blue-800">
-                      Selected Moods ({selectedMoods.length})
+                      Selected ({selectedMoods.length})
                     </span>
                     <Button
                       type="button"
@@ -1425,20 +1488,19 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 </div>
               )}
 
-              {/* Manual Trigger for AI Detection */}
-              <div className="flex gap-2">
+              {/* Manual AI Detection */}
+              {!isDetectingMood && aiMoodSuggestions.length === 0 && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={detectMoodFromContent}
-                  disabled={isDetectingMood}
                   className="flex items-center gap-2"
                 >
                   <Brain className="h-4 w-4" />
-                  {isDetectingMood ? 'Analyzing...' : 'Detect Mood from Content'}
+                  Get AI Mood Suggestions
                 </Button>
-              </div>
+              )}
             </CardContent>
           </Card>
 
