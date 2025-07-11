@@ -1177,7 +1177,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Church verification operations
-  async getChurchesByStatus(status?: string): Promise<Church[]> {
+  async getChurchesByStatus(status?: string): Promise<any[]> {
     let whereCondition;
     
     if (status === 'pending') {
@@ -1194,7 +1194,39 @@ export class DatabaseStorage implements IStorage {
     }
     
     const query = db
-      .select()
+      .select({
+        id: churches.id,
+        name: churches.name,
+        denomination: churches.denomination,
+        description: churches.description,
+        bio: churches.bio,
+        address: churches.address,
+        city: churches.city,
+        state: churches.state,
+        zipCode: churches.zipCode,
+        phone: churches.phone,
+        email: churches.email,
+        website: churches.website,
+        logoUrl: churches.logoUrl,
+        size: churches.size,
+        hoursOfOperation: churches.hoursOfOperation,
+        socialLinks: churches.socialLinks,
+        communityTags: churches.communityTags,
+        latitude: churches.latitude,
+        longitude: churches.longitude,
+        rating: churches.rating,
+        memberCount: churches.memberCount,
+        isActive: churches.isActive,
+        isClaimed: churches.isClaimed,
+        adminEmail: churches.adminEmail,
+        isDemo: churches.isDemo,
+        status: churches.verificationStatus, // Map verificationStatus to status for frontend
+        verifiedAt: churches.verifiedAt,
+        verifiedBy: churches.verifiedBy,
+        rejectionReason: churches.rejectionReason,
+        createdAt: churches.createdAt,
+        updatedAt: churches.updatedAt,
+      })
       .from(churches)
       .orderBy(desc(churches.createdAt));
     

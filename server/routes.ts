@@ -9744,6 +9744,26 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  app.post('/api/admin/churches/suspend', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { churchId, reason } = req.body;
+      
+      // Check if user has church management permissions
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'soapbox_owner') {
+        return res.status(403).json({ message: 'Insufficient permissions' });
+      }
+      
+      // Suspend the church with reason
+      await storage.suspendChurch(churchId, reason, userId);
+      
+      res.json({ success: true, message: 'Church suspended successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to suspend church' });
+    }
+  });
+
   // Bible Import Management API Endpoints
   
   // Get available Bible versions configuration - Limited to 6 public domain/freely available versions
