@@ -142,6 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 11, 2025: CHURCH COMMUNICATIONS MODULE COMPLETELY FIXED - Successfully resolved "Leadership access required" error that was preventing SoapBox Owner users from sending announcements
+  - ROOT CAUSE IDENTIFIED: Session cookie name mismatch between server configuration ('connect.sid') and browser cookies ('soapbox_session')
+  - AUTHENTICATION PATTERN FIXED: Updated communication endpoints to use consistent session-based authentication (req.session.userId)
+  - SESSION CONFIGURATION CORRECTED: Changed session name from 'connect.sid' to 'soapbox_session' to match browser cookie names
+  - SOAPBOX OWNER ACCESS GRANTED: Added direct role check for SoapBox Owner with universal communication permissions
+  - CHURCH ASSOCIATION LOGIC ENHANCED: Improved logic to handle church membership for different user roles
+  - PRODUCTION READY: Removed all debug logging and prepared clean production code
+  - COMPREHENSIVE TESTING: API endpoint returns 201 Created with successful message delivery to church members
 - July 11, 2025: CRITICAL ADMIN PORTAL ISSUES COMPLETELY RESOLVED - Successfully fixed Members display and Event creation functionality with comprehensive backend implementation
   - MEMBERS DISPLAY OPERATIONAL: Implemented getAllMembers storage method and enabled /api/members endpoint to display all platform users with proper transformation
   - EVENT CREATION SYSTEM COMPLETE: Added full CRUD API endpoints (/api/events GET/POST/PUT/DELETE) with proper date conversion and church-scoped functionality

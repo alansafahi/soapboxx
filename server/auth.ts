@@ -30,7 +30,7 @@ export function getSession() {
     resave: false,
     saveUninitialized: false,
     rolling: true, // Extend session on each request
-    name: 'connect.sid', // Match the cookie name being sent by browser
+    name: 'soapbox_session', // Match the cookie name being sent by browser
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

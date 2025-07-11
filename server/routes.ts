@@ -8185,6 +8185,7 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/communications/messages', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
+      
       if (!userId) {
         return res.status(401).json({ message: 'Authentication required' });
       }
@@ -8223,7 +8224,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       if (user.role === 'soapbox_owner') {
         // For SoapBox Owner, get the church from user_churches table
-        const userChurches = await db
+        const userChurchAssociations = await db
           .select()
           .from(userChurches)
           .where(and(
@@ -8232,11 +8233,11 @@ Please provide suggestions for the missing or incomplete sections.`
           ))
           .limit(1);
         
-        if (userChurches.length === 0) {
+        if (userChurchAssociations.length === 0) {
           return res.status(403).json({ message: "No church association found" });
         }
         
-        churchId = userChurches[0].churchId;
+        churchId = userChurchAssociations[0].churchId;
       } else {
         const userChurch = await storage.getUserChurch(userId);
         if (!userChurch) {
