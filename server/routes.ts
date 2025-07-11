@@ -10444,6 +10444,8 @@ Please provide suggestions for the missing or incomplete sections.`
         ...req.body,
         churchId: churchId,
         organizerId: userId,
+        eventDate: new Date(req.body.eventDate),
+        endDate: req.body.endDate ? new Date(req.body.endDate) : null,
         createdAt: new Date(),
         updatedAt: new Date()
       };
