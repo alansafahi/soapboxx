@@ -8366,28 +8366,18 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/communications/emergency-broadcast', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      console.log('🚨 EMERGENCY BROADCAST: User ID:', userId);
-      
       if (!userId) {
-        console.log('🚨 EMERGENCY BROADCAST: No user ID in session');
         return res.status(401).json({ message: "Unauthorized" });
       }
       
       const user = await storage.getUser(userId);
-      console.log('🚨 EMERGENCY BROADCAST: User role from users table:', user?.role);
-      
       const userChurch = await storage.getUserChurch(userId);
-      console.log('🚨 EMERGENCY BROADCAST: UserChurch data:', userChurch);
-      console.log('🚨 EMERGENCY BROADCAST: UserChurch role:', userChurch?.role);
       
       // Check both user.role (main table) and userChurch.role for permissions
       const isAuthorized = user?.role === 'soapbox_owner' || 
                           (userChurch && ['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userChurch.role));
       
-      console.log('🚨 EMERGENCY BROADCAST: Is authorized?', isAuthorized);
-      
       if (!isAuthorized) {
-        console.log('🚨 EMERGENCY BROADCAST: Access denied');
         return res.status(403).json({ message: "Senior leadership access required for emergency broadcasts" });
       }
 
@@ -8411,12 +8401,8 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Store emergency broadcast in communication history for each member
-      console.log('🔍 TRACKING: Starting emergency broadcast history storage for', churchMembers.length, 'members');
-      let emergencyHistoryCount = 0;
-      
       for (const member of churchMembers) {
         try {
-          console.log('🔍 TRACKING: Storing emergency broadcast record for member:', member.userId);
           await storage.createCommunicationRecord({
             churchId: userChurch.churchId,
             sentBy: userId,
@@ -8430,14 +8416,10 @@ Please provide suggestions for the missing or incomplete sections.`
             responseReceived: false,
             followUpRequired: requiresResponse || false
           });
-          emergencyHistoryCount++;
-          console.log('✅ TRACKING: Successfully stored emergency record for member:', member.userId);
         } catch (historyError) {
-          console.error('❌ TRACKING: Failed to store emergency broadcast history for member:', member.userId, historyError);
+          console.error('Failed to store emergency broadcast history for member:', member.userId, historyError);
         }
       }
-      
-      console.log('🔍 TRACKING: Emergency broadcast history storage complete.', emergencyHistoryCount, 'of', churchMembers.length, 'records stored');
 
       res.status(201).json({ 
         message: "Emergency broadcast sent successfully", 

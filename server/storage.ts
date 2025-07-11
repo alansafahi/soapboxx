@@ -8512,12 +8512,10 @@ export class DatabaseStorage implements IStorage {
 
   // Communication history operations
   async getCommunicationHistory(churchId: number): Promise<any[]> {
-    console.log('🔍 TRACKING: getCommunicationHistory called for church:', churchId);
-    
     try {
       const communications = await db
         .select({
-          id: memberCommunications.id,
+          id: sql`MIN(${memberCommunications.id})`.as('id'),
           subject: memberCommunications.subject,
           content: memberCommunications.content,
           communicationType: memberCommunications.communicationType,
@@ -8531,7 +8529,6 @@ export class DatabaseStorage implements IStorage {
         .leftJoin(users, eq(memberCommunications.sentBy, users.id))
         .where(eq(memberCommunications.churchId, churchId))
         .groupBy(
-          memberCommunications.id,
           memberCommunications.subject,
           memberCommunications.content,
           memberCommunications.communicationType,
@@ -8543,9 +8540,6 @@ export class DatabaseStorage implements IStorage {
         )
         .orderBy(desc(memberCommunications.sentAt))
         .limit(50);
-
-      console.log('🔍 TRACKING: Database query returned', communications.length, 'communication records');
-      console.log('🔍 TRACKING: Raw communications data:', communications);
 
       const mappedCommunications = communications.map(comm => ({
         id: comm.id,
@@ -8561,10 +8555,9 @@ export class DatabaseStorage implements IStorage {
         }
       }));
 
-      console.log('🔍 TRACKING: Mapped communications:', mappedCommunications);
       return mappedCommunications;
     } catch (error) {
-      console.error('❌ TRACKING: Error in getCommunicationHistory:', error);
+      console.error('Error in getCommunicationHistory:', error);
       return [];
     }
   }
@@ -8583,8 +8576,6 @@ export class DatabaseStorage implements IStorage {
     followUpRequired?: boolean;
     recipientCount?: number;
   }): Promise<any> {
-    console.log('🔍 TRACKING: createCommunicationRecord called with:', record);
-    
     try {
       // If memberId is provided, create a single record
       if (record.memberId) {
@@ -8602,9 +8593,7 @@ export class DatabaseStorage implements IStorage {
           churchId: record.churchId
         };
 
-        console.log('🔍 TRACKING: Inserting single communication record:', communicationRecord);
-        const result = await db.insert(memberCommunications).values(communicationRecord);
-        console.log('✅ TRACKING: Successfully inserted single communication record');
+        await db.insert(memberCommunications).values(communicationRecord);
         
         return {
           id: Date.now(),
@@ -8616,7 +8605,6 @@ export class DatabaseStorage implements IStorage {
         };
       } else {
         // Legacy bulk approach - get all church members for this communication
-        console.log('🔍 TRACKING: Using bulk approach for all church members');
         const churchMembers = await this.getChurchMembers(record.churchId);
         
         // Create a communication record for each recipient
@@ -8636,9 +8624,7 @@ export class DatabaseStorage implements IStorage {
 
         // Insert all communication records
         if (communicationRecords.length > 0) {
-          console.log('🔍 TRACKING: Inserting', communicationRecords.length, 'bulk communication records');
           await db.insert(memberCommunications).values(communicationRecords);
-          console.log('✅ TRACKING: Successfully inserted bulk communication records');
         }
 
         return {
@@ -8651,7 +8637,7 @@ export class DatabaseStorage implements IStorage {
         };
       }
     } catch (error) {
-      console.error('❌ TRACKING: Error in createCommunicationRecord:', error);
+      console.error('Error in createCommunicationRecord:', error);
       throw error;
     }
   }
