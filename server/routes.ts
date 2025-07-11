@@ -8292,24 +8292,16 @@ Please provide suggestions for the missing or incomplete sections.`
       // Send notifications to target members
       for (const member of targetMembers) {
         try {
-          await storage.createEventNotification({
-            eventId: 1,
-            recipientId: member.userId,
-            notificationType: type || 'announcement',
-            channelType: 'in_app',
-            message: `${title}: ${content}`,
-            data: JSON.stringify({ 
-              senderId: userId, 
-              senderName: senderName,
-              requiresResponse: requiresResponse || false,
-              title: title,
-              priority: priority || 'normal',
-              messageType: type || 'announcement',
-              channels: channels || ['in_app']
-            })
+          await storage.createNotification({
+            userId: member.userId,
+            type: type || 'announcement',
+            title: title,
+            message: content,
+            isRead: false
           });
           successCount++;
         } catch (notificationError) {
+          console.error('Failed to create notification for user:', member.userId, notificationError);
         }
       }
 
