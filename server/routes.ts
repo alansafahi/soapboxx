@@ -8175,8 +8175,10 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Get message history for the user's church
-      const churchId = user?.churchId;
-      console.log('🔍 TRACKING: Message History API - User ID:', userId, 'Church ID:', churchId);
+      console.log('🔍 TRACKING: Message History API - User ID:', userId, 'User object:', user);
+      const userChurch = await storage.getUserChurch(userId);
+      const churchId = userChurch?.churchId;
+      console.log('🔍 TRACKING: Message History API - User ID:', userId, 'Church ID:', churchId, 'UserChurch:', userChurch);
       
       if (!churchId) {
         console.log('❌ TRACKING: No church ID found for user, returning empty array');

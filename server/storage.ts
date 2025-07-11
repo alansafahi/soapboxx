@@ -1318,25 +1318,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {
+    console.log('🔍 TRACKING: getUserChurch called for user:', userId);
+    
     const [userChurch] = await db
       .select()
       .from(userChurches)
       .where(and(
         eq(userChurches.userId, userId),
         eq(userChurches.isActive, true)
-      ));
+      ))
+      .orderBy(userChurches.joinedAt); // Get the first church they joined
     
-    if (!userChurch) return undefined;
+    console.log('🔍 TRACKING: getUserChurch raw result:', userChurch);
+    
+    if (!userChurch) {
+      console.log('❌ TRACKING: No active church found for user');
+      return undefined;
+    }
     
     const [role] = await db
       .select()
       .from(roles)
       .where(eq(roles.id, userChurch.roleId));
     
-    return {
+    const result = {
       ...userChurch,
-      role: role?.name || 'member'
+      role: role?.name || userChurch.role || 'member'
     };
+    
+    console.log('🔍 TRACKING: getUserChurch final result:', result);
+    return result;
   }
 
   async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
