@@ -1665,21 +1665,22 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
         )}
       </div>
 
-      {/* Comment Dialog - Using same system as SOAP posts */}
+      {/* Comment Dialog - Mobile responsive with fixed button layout */}
       <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Comments</DialogTitle>
             <DialogDescription>
               Share your thoughts and engage with this post.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          
+          <div className="flex-1 flex flex-col space-y-4 min-h-0">
             <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Write a thoughtful comment..."
-              className="min-h-[100px] text-sm resize-none"
+              className="min-h-[80px] max-h-[200px] text-sm resize-none flex-1"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   if (commentDialogOpen && commentText.trim()) {
@@ -1691,30 +1692,35 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 }
               }}
             />
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-400">Press Cmd+Enter to post</span>
-              <div className="flex space-x-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setCommentDialogOpen(null)}
-                  disabled={commentMutation.isPending}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => {
-                    if (commentDialogOpen && commentText.trim()) {
-                      commentMutation.mutate({ 
-                        postId: commentDialogOpen, 
-                        content: commentText.trim() 
-                      });
-                    }
-                  }}
-                  disabled={commentMutation.isPending || !commentText.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                >
-                  {commentMutation.isPending ? "Posting..." : "Post Comment"}
-                </Button>
+            
+            {/* Fixed button area */}
+            <div className="flex-shrink-0 pt-2 border-t">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <span className="text-xs text-gray-400 order-2 sm:order-1">Press Cmd+Enter to post</span>
+                <div className="flex space-x-2 order-1 sm:order-2 w-full sm:w-auto">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCommentDialogOpen(null)}
+                    disabled={commentMutation.isPending}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      if (commentDialogOpen && commentText.trim()) {
+                        commentMutation.mutate({ 
+                          postId: commentDialogOpen, 
+                          content: commentText.trim() 
+                        });
+                      }
+                    }}
+                    disabled={commentMutation.isPending || !commentText.trim()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex-1 sm:flex-none"
+                  >
+                    {commentMutation.isPending ? "Posting..." : "Post Comment"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
