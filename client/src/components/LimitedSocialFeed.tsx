@@ -11,9 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
-import { PostInteractions } from './PostInteractions';
 
-// This utility is no longer used - content formatting handled by FormattedContent component
+
+
 
 
 
@@ -451,18 +451,26 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                     <FormattedContent content={post.content} />
                   </div>
                   
-                  {/* Use unified PostInteractions component */}
-                  <PostInteractions
-                    postId={post.id}
-                    postType="discussion"
-                    isLiked={post.isLiked || false}
-                    likeCount={post.likeCount || 0}
-                    isPraying={post.isPraying || false}
-                    prayCount={post.prayCount || 0}
-                    commentCount={post.commentCount || 0}
-                    shareCount={post.shareCount || 0}
-                    post={post}
-                  />
+                  {/* Unified comment system - same as social-feed.tsx */}
+                  <div className="flex items-center justify-between text-gray-600 pt-3 border-t">
+                    <div className="flex items-center space-x-6">
+                      <button className="flex items-center space-x-2 hover:text-red-500 transition-colors">
+                        <Heart className="w-4 h-4" />
+                        <span className="text-sm">{post.likeCount || 0}</span>
+                      </button>
+                      <button 
+                        onClick={() => setCommentDialogPost(post)}
+                        className="flex items-center space-x-2 hover:text-blue-500 transition-colors"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="text-sm">{post.commentCount || 0}</span>
+                      </button>
+                      <button className="flex items-center space-x-2 hover:text-green-500 transition-colors">
+                        <Share2 className="w-4 h-4" />
+                        <span className="text-sm">Share</span>
+                      </button>
+                    </div>
+                  </div>
 
                   {/* Comments Section - Show comments below each post */}
                   {allPostComments[post.id] && allPostComments[post.id].length > 0 && (

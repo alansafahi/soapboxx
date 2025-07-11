@@ -43,19 +43,10 @@ import {
   Pin,
   PinOff,
   MoreHorizontal,
-  Search,
-  Book,
-  Loader2,
   Trash2,
-  Share2,
-  Copy,
-  Facebook,
-  Twitter,
-  Mail,
-  Smartphone
+  Share2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { PostInteractions } from './PostInteractions';
 
 interface FeedPost {
   id: number;
@@ -1667,10 +1658,10 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
 
       {/* Comment Dialog - iPhone SE optimized layout */}
       <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] h-[85vh] flex flex-col p-4 m-2">
+        <DialogContent className="sm:max-w-md max-h-[85vh] h-[85vh] flex flex-col p-4 m-2" aria-describedby="comment-dialog-description">
           <DialogHeader className="flex-shrink-0 pb-2">
             <DialogTitle className="text-lg">Comments</DialogTitle>
-            <DialogDescription className="text-sm">
+            <DialogDescription id="comment-dialog-description" className="text-sm">
               Share your thoughts and engage with this post.
             </DialogDescription>
           </DialogHeader>
