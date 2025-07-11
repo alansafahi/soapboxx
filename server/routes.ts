@@ -2250,6 +2250,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Mood Detection Endpoint for SOAP Entries
+  app.post('/api/mood/detect', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, scriptureReference, observation, application, prayer } = req.body;
+
+      if (!scripture && !observation && !application && !prayer) {
+        return res.status(400).json({ message: 'At least one content field is required for mood analysis' });
+      }
+
+      // Build content string for analysis
+      const contentParts = [];
+      if (scripture) contentParts.push(`Scripture: ${scripture}`);
+      if (observation) contentParts.push(`Observation: ${observation}`);
+      if (application) contentParts.push(`Application: ${application}`);
+      if (prayer) contentParts.push(`Prayer: ${prayer}`);
+      
+      const fullContent = contentParts.join('\n\n');
+
+      // Use OpenAI to analyze mood and suggest appropriate feelings
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `You are a pastoral AI assistant that analyzes spiritual content to detect emotional and spiritual themes. Based on the user's SOAP (Scripture, Observation, Application, Prayer) reflection, suggest 2-4 appropriate mood/feeling categories from this comprehensive list:
+
+Emotional & Spiritual Support: anxious, depressed, lonely, grieving, fearful, overwhelmed, doubtful, angry
+Growth & Transformation: seeking, repentant, motivated, curious, determined, reflective, inspired, focused  
+Life Situations: celebrating, transitioning, healing, parenting, working, relationship, financial, health
+Faith & Worship: grateful, peaceful, joyful, blessed, prayerful, worshipful, hopeful, content
+
+Analyze the emotional tone, spiritual themes, and contextual needs expressed in the content. Consider:
+- The emotional tone of the scripture verse
+- The user's personal reflection and insights
+- The spiritual posture expressed in their prayer
+- Any life circumstances mentioned
+
+Respond with a JSON object containing an array of mood IDs that best match the content's emotional and spiritual themes.`
+          },
+          {
+            role: "user",
+            content: `Please analyze this SOAP reflection and suggest appropriate moods:
+
+${fullContent}
+
+Scripture Reference: ${scriptureReference || 'Not provided'}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 300,
+        temperature: 0.3
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      const suggestedMoods = result.moods || result.moodIds || [];
+
+      // Validate that suggested moods exist in our system
+      const validMoods = [
+        'anxious', 'depressed', 'lonely', 'grieving', 'fearful', 'overwhelmed', 'doubtful', 'angry',
+        'seeking', 'repentant', 'motivated', 'curious', 'determined', 'reflective', 'inspired', 'focused',
+        'celebrating', 'transitioning', 'healing', 'parenting', 'working', 'relationship', 'financial', 'health',
+        'grateful', 'peaceful', 'joyful', 'blessed', 'prayerful', 'worshipful', 'hopeful', 'content'
+      ];
+
+      const filteredMoods = suggestedMoods.filter((mood: string) => validMoods.includes(mood));
+
+      res.json({ 
+        suggestedMoods: filteredMoods,
+        confidence: result.confidence || 0.8,
+        reasoning: result.reasoning || 'AI analysis based on content emotional themes'
+      });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message || 'Failed to analyze mood from content' });
+    }
+  });
+
   // QR Code Management API Endpoints
   // Create new QR code
   app.post('/api/qr-codes', isAuthenticated, async (req: any, res) => {

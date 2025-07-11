@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -13,11 +13,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Separator } from "./ui/separator";
-import { ArrowLeft, BookOpen, Eye, Users, Lightbulb, Save, Sparkles, Calendar, Brain, Wand2, Globe, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ArrowLeft, BookOpen, Eye, Users, Lightbulb, Save, Sparkles, Calendar, Brain, Wand2, Globe, ChevronDown, ChevronUp, Info, X } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { insertSoapEntrySchema, type SoapEntry } from "../../../shared/schema";
 import { z } from "zod";
+import { moodCategories, allMoods, getMoodsByIds } from "../lib/moodCategories";
 
 const formSchema = insertSoapEntrySchema.extend({
   devotionalDate: z.string(),
@@ -31,16 +32,7 @@ interface SoapEntryFormProps {
   onSuccess: () => void;
 }
 
-const moodOptions = [
-  { value: "peaceful", label: "Peaceful", color: "bg-blue-100 text-blue-800" },
-  { value: "grateful", label: "Grateful", color: "bg-green-100 text-green-800" },
-  { value: "inspired", label: "Inspired", color: "bg-purple-100 text-purple-800" },
-  { value: "struggling", label: "Struggling", color: "bg-orange-100 text-orange-800" },
-  { value: "hopeful", label: "Hopeful", color: "bg-yellow-100 text-yellow-800" },
-  { value: "reflective", label: "Reflective", color: "bg-indigo-100 text-indigo-800" },
-  { value: "joyful", label: "Joyful", color: "bg-pink-100 text-pink-800" },
-  { value: "seeking", label: "Seeking", color: "bg-gray-100 text-gray-800" },
-];
+// Use comprehensive mood system from shared library
 
 export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps) {
   const [isLoadingAI, setIsLoadingAI] = useState(false);
@@ -54,6 +46,12 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [selectedVersion, setSelectedVersion] = useState('KJV');
   const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
+  
+  // Comprehensive mood system state
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [isDetectingMood, setIsDetectingMood] = useState(false);
+  const [aiMoodSuggestions, setAiMoodSuggestions] = useState<string[]>([]);
+  const [moodDetectionTimeout, setMoodDetectionTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const { toast } = useToast();
 
@@ -75,6 +73,18 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       estimatedReadTime: entry?.estimatedReadTime || 0,
     },
   });
+
+  // Initialize mood state from entry data
+  useEffect(() => {
+    if (entry?.moodTag) {
+      const moodIds = entry.moodTag.split(', ').map(mood => {
+        // Find mood ID by label (for backwards compatibility)
+        const foundMood = allMoods.find(m => m.label.toLowerCase() === mood.toLowerCase() || m.id === mood);
+        return foundMood?.id || mood;
+      }).filter(Boolean);
+      setSelectedMoods(moodIds);
+    }
+  }, [entry?.moodTag]);
 
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
@@ -101,6 +111,60 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     staleTime: 15 * 60 * 1000, // 15 minutes
   });
 
+  // AI Mood Detection Function
+  const detectMoodFromContent = useCallback(async () => {
+    const scripture = form.getValues('scripture');
+    const scriptureReference = form.getValues('scriptureReference');
+    const observation = form.getValues('observation');
+    const application = form.getValues('application');
+    const prayer = form.getValues('prayer');
+
+    // Only run if we have enough content
+    if (!scripture && !observation && !application && !prayer) {
+      return;
+    }
+
+    setIsDetectingMood(true);
+    try {
+      const response = await apiRequest('POST', '/api/mood/detect', {
+        scripture,
+        scriptureReference,
+        observation,
+        application,
+        prayer
+      });
+
+      const { suggestedMoods } = response;
+      if (suggestedMoods && suggestedMoods.length > 0) {
+        setAiMoodSuggestions(suggestedMoods);
+        
+        // Auto-apply AI suggestions if no moods currently selected
+        if (selectedMoods.length === 0) {
+          setSelectedMoods(suggestedMoods);
+          const moodLabels = getMoodsByIds(suggestedMoods).map(m => m.label).join(', ');
+          form.setValue('moodTag', moodLabels);
+        }
+      }
+    } catch (error) {
+      // Silently handle errors for better UX
+    } finally {
+      setIsDetectingMood(false);
+    }
+  }, [form, selectedMoods]);
+
+  // Debounced mood detection on content change
+  const triggerMoodDetection = useCallback(() => {
+    if (moodDetectionTimeout) {
+      clearTimeout(moodDetectionTimeout);
+    }
+    
+    const timeoutId = setTimeout(() => {
+      detectMoodFromContent();
+    }, 2000); // 2 second delay after user stops typing
+    
+    setMoodDetectionTimeout(timeoutId);
+  }, [detectMoodFromContent, moodDetectionTimeout]);
+
   // Auto-detect mood from recent check-ins and load contextual information
   useEffect(() => {
     if (worldEvents && liturgicalContext) {
@@ -113,14 +177,14 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       });
     }
 
-    // Auto-detect mood from most recent check-in
-    if (recentCheckins && recentCheckins.length > 0) {
+    // Fallback to recent check-in mood only if no moods selected and no AI suggestions
+    if (recentCheckins && recentCheckins.length > 0 && selectedMoods.length === 0 && aiMoodSuggestions.length === 0) {
       const latestCheckin = recentCheckins[0];
       if (latestCheckin.mood && !form.getValues('moodTag')) {
         form.setValue('moodTag', latestCheckin.mood);
       }
     }
-  }, [worldEvents, liturgicalContext, recentCheckins, form]);
+  }, [worldEvents, liturgicalContext, recentCheckins, form, selectedMoods, aiMoodSuggestions]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -559,6 +623,32 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     };
   }, [autoLookupTimeout]);
 
+  // Mood Selection Handlers
+  const toggleMoodSelection = (moodId: string) => {
+    setSelectedMoods(prev => {
+      const newMoods = prev.includes(moodId) 
+        ? prev.filter(id => id !== moodId)
+        : [...prev, moodId];
+      
+      // Update form with mood labels
+      const moodLabels = getMoodsByIds(newMoods).map(m => m.label).join(', ');
+      form.setValue('moodTag', moodLabels);
+      return newMoods;
+    });
+  };
+
+  const clearMoods = () => {
+    setSelectedMoods([]);
+    form.setValue('moodTag', '');
+  };
+
+  const applyAiSuggestions = () => {
+    setSelectedMoods(aiMoodSuggestions);
+    const moodLabels = getMoodsByIds(aiMoodSuggestions).map(m => m.label).join(', ');
+    form.setValue('moodTag', moodLabels);
+    setAiMoodSuggestions([]); // Clear suggestions after applying
+  };
+
   const handleSubmit = (data: FormData) => {
     
     // Check if all required fields are filled with meaningful content
@@ -798,6 +888,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                         rows={4}
                         disabled={isLookingUpVerse}
                         className={isAutoLookingUp ? "border-purple-300 bg-purple-50/50" : ""}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          triggerMoodDetection();
+                        }}
                       />
                     </FormControl>
                     <p className="text-xs text-muted-foreground">
@@ -918,6 +1012,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                           value={field.value || ''}
                           placeholder="What do you observe in this Scripture? What stands out to you?"
                           rows={4}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            triggerMoodDetection();
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -990,6 +1088,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                           value={field.value || ''}
                           placeholder="How will you apply this Scripture to your life today?"
                           rows={4}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            triggerMoodDetection();
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1062,6 +1164,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                           value={field.value || ''}
                           placeholder="Write your prayer response to this Scripture..."
                           rows={4}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            triggerMoodDetection();
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1087,16 +1193,18 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               <CardTitle>Settings & Sharing</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Show detected mood from check-ins */}
-              {form.getValues('moodTag') && (
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm text-muted-foreground">Detected Mood:</Label>
-                  <Badge className={moodOptions.find(m => m.value === form.getValues('moodTag'))?.color || "bg-gray-100 text-gray-800"} variant="secondary">
-                    {moodOptions.find(m => m.value === form.getValues('moodTag'))?.label || form.getValues('moodTag')}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">(from recent check-in)</span>
-                </div>
-              )}
+              {/* Show mood tag field for backwards compatibility */}
+              <FormField
+                control={form.control}
+                name="moodTag"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormControl>
+                      <Input {...field} type="hidden" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -1195,6 +1303,142 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   </div>
                 </>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Comprehensive Mood Selection */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  How are you feeling? (Optional)
+                </CardTitle>
+                {isDetectingMood && (
+                  <div className="flex items-center gap-2 text-sm text-purple-600">
+                    <div className="animate-spin h-4 w-4 border border-purple-600 border-t-transparent rounded-full"></div>
+                    Analyzing mood...
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                AI can detect your emotional and spiritual state from your reflection content.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* AI Suggestions */}
+              {aiMoodSuggestions.length > 0 && (
+                <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-purple-800">AI Detected Moods</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={applyAiSuggestions}
+                      className="text-purple-600 border-purple-300"
+                    >
+                      Apply Suggestions
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {aiMoodSuggestions.map(moodId => {
+                      const mood = allMoods.find(m => m.id === moodId);
+                      return mood ? (
+                        <Badge key={moodId} variant="secondary" className="bg-purple-100 text-purple-800">
+                          {mood.icon} {mood.label}
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Mood Categories */}
+              <div className="space-y-4">
+                {moodCategories.map((category) => (
+                  <div key={category.title} className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <span className="text-lg">{category.icon}</span>
+                      {category.title}
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {category.moods.map((mood) => {
+                        const isSelected = selectedMoods.includes(mood.id);
+                        const isAiSuggested = aiMoodSuggestions.includes(mood.id);
+                        return (
+                          <Button
+                            key={mood.id}
+                            type="button"
+                            variant={isSelected ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => toggleMoodSelection(mood.id)}
+                            className={`flex items-center gap-2 justify-start text-left h-auto py-2 px-3 ${
+                              isSelected 
+                                ? "bg-blue-600 text-white hover:bg-blue-700" 
+                                : isAiSuggested
+                                ? "border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
+                                : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-base">{mood.icon}</span>
+                            <div className="text-left">
+                              <div className="text-xs font-medium">{mood.label}</div>
+                              <div className="text-xs opacity-70">{mood.subtitle}</div>
+                            </div>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Selected Moods Display */}
+              {selectedMoods.length > 0 && (
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-blue-800">
+                      Selected Moods ({selectedMoods.length})
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={clearMoods}
+                      className="text-gray-600 border-gray-300"
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Clear All
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMoods.map(moodId => {
+                      const mood = allMoods.find(m => m.id === moodId);
+                      return mood ? (
+                        <Badge key={moodId} variant="secondary" className="bg-blue-100 text-blue-800">
+                          {mood.icon} {mood.label}
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Manual Trigger for AI Detection */}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={detectMoodFromContent}
+                  disabled={isDetectingMood}
+                  className="flex items-center gap-2"
+                >
+                  <Brain className="h-4 w-4" />
+                  {isDetectingMood ? 'Analyzing...' : 'Detect Mood from Content'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
