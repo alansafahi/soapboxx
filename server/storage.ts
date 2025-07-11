@@ -8426,6 +8426,68 @@ export class DatabaseStorage implements IStorage {
         .onConflictDoNothing();
     }
   }
+
+  // Add missing methods for members and events
+  async getAllMembers(): Promise<any[]> {
+    try {
+      const allMembers = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          phoneNumber: users.mobileNumber,
+          city: users.city,
+          state: users.state,
+          isActive: users.isActive,
+          createdAt: users.createdAt,
+          churchId: users.churchId,
+          role: users.role,
+          profileImageUrl: users.profileImageUrl,
+          churchName: churches.name
+        })
+        .from(users)
+        .leftJoin(churches, eq(users.churchId, churches.id))
+        .where(eq(users.isActive, true))
+        .orderBy(users.firstName, users.lastName);
+      
+      return allMembers;
+    } catch (error) {
+      console.error('Error fetching all members:', error);
+      return [];
+    }
+  }
+
+  async getEventsByChurch(churchId: number): Promise<any[]> {
+    try {
+      const churchEvents = await db
+        .select({
+          id: events.id,
+          title: events.title,
+          description: events.description,
+          eventDate: events.eventDate,
+          endDate: events.endDate,
+          location: events.location,
+          category: events.category,
+          priority: events.priority,
+          status: events.status,
+          churchId: events.churchId,
+          organizerId: events.organizerId,
+          createdAt: events.createdAt,
+          updatedAt: events.updatedAt,
+          organizerName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`
+        })
+        .from(events)
+        .leftJoin(users, eq(events.organizerId, users.id))
+        .where(eq(events.churchId, churchId))
+        .orderBy(desc(events.eventDate));
+      
+      return churchEvents;
+    } catch (error) {
+      console.error('Error fetching events by church:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

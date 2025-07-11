@@ -14,7 +14,7 @@ import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2 } from "lucide-react
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { queryClient } from "../lib/queryClient";
+import { queryClient, apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import { format } from "date-fns";
 
@@ -141,16 +141,7 @@ export function EventManagement() {
 
   const createEventMutation = useMutation({
     mutationFn: async (data: EventForm) => {
-      const response = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create event");
-      }
-      return response.json();
+      return await apiRequest("POST", "/api/events", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -172,13 +163,7 @@ export function EventManagement() {
 
   const updateEventMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<EventForm> }) => {
-      const response = await fetch(`/api/events/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error("Failed to update event");
-      return response.json();
+      return await apiRequest("PUT", `/api/events/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -192,11 +177,7 @@ export function EventManagement() {
 
   const deleteEventMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/events/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete event");
-      return response.json();
+      return await apiRequest("DELETE", `/api/events/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });

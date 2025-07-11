@@ -8539,35 +8539,9 @@ Please provide suggestions for the missing or incomplete sections.`
   // Get members with optional church filtering
   app.get('/api/members', async (req: any, res) => {
     try {
-      // Return empty array for now to prevent database errors
-      res.json([]);
-      return;
+      // Use storage method to get members properly
+      const members = await storage.getAllMembers();
       
-      const { churchId } = req.query;
-      
-      // Simplified query to prevent Drizzle ORM errors
-      let members = [];
-      
-      try {
-        if (churchId && churchId !== 'all') {
-          // Get members for specific church - simplified query
-          members = await db.select()
-            .from(users)
-            .innerJoin(userChurches, eq(users.id, userChurches.userId))
-            .where(eq(userChurches.churchId, parseInt(churchId)))
-            .limit(50);
-        } else {
-          // Get all members - simplified query
-          members = await db.select()
-            .from(users)
-            .innerJoin(userChurches, eq(users.id, userChurches.userId))
-            .limit(50);
-        }
-      } catch (dbError) {
-        console.error('Database query error:', dbError);
-        return res.json([]);
-      }
-
       // Transform members to include required display fields
       const transformedMembers = members.map((member: any) => {
         return {
@@ -8579,9 +8553,9 @@ Please provide suggestions for the missing or incomplete sections.`
           phoneNumber: member.phoneNumber || '',
           address: member.city && member.state ? `${member.city}, ${member.state}` : '',
           membershipStatus: member.isActive ? 'active' : 'inactive',
-          joinedDate: member.joinedAt,
-          churchId: member.churchId?.toString(),
-          churchAffiliation: '', // Will be populated from church name lookup
+          joinedDate: member.createdAt,
+          churchId: member.churchId?.toString() || '',
+          churchAffiliation: member.churchName || '',
           denomination: '',
           interests: '',
           profileImageUrl: member.profileImageUrl || '',
@@ -10422,6 +10396,87 @@ Please provide suggestions for the missing or incomplete sections.`
       res.json(upcomingEvents);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch upcoming events' });
+    }
+  });
+
+  // Events API endpoints
+  app.get('/api/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Get events for user's church
+      const userChurches = await storage.getUserChurches(userId);
+      if (!userChurches || userChurches.length === 0) {
+        return res.json([]);
+      }
+
+      const churchId = userChurches[0].churchId;
+      const events = await storage.getEventsByChurch(churchId);
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch events' });
+    }
+  });
+
+  app.post('/api/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Get user's church for event creation
+      const userChurches = await storage.getUserChurches(userId);
+      if (!userChurches || userChurches.length === 0) {
+        return res.status(400).json({ message: 'Must be affiliated with a church to create events' });
+      }
+
+      const churchId = userChurches[0].churchId;
+      
+      const eventData = {
+        ...req.body,
+        churchId: churchId,
+        organizerId: userId,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const newEvent = await storage.createEvent(eventData);
+      res.status(201).json(newEvent);
+    } catch (error) {
+      console.error('Event creation error:', error);
+      res.status(500).json({ message: 'Failed to create event' });
+    }
+  });
+
+  app.put('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      const updatedEvent = await storage.updateEvent(eventId, req.body);
+      res.json(updatedEvent);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update event' });
+    }
+  });
+
+  app.delete('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      await storage.deleteEvent(eventId);
+      res.json({ success: true, message: 'Event deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete event' });
     }
   });
 
