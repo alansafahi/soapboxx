@@ -8175,20 +8175,14 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Get message history for the user's church
-      console.log('🔍 TRACKING: Message History API - User ID:', userId, 'User object:', user);
       const userChurch = await storage.getUserChurch(userId);
       const churchId = userChurch?.churchId;
-      console.log('🔍 TRACKING: Message History API - User ID:', userId, 'Church ID:', churchId, 'UserChurch:', userChurch);
       
       if (!churchId) {
-        console.log('❌ TRACKING: No church ID found for user, returning empty array');
         return res.json([]);
       }
       
-      console.log('🔍 TRACKING: Fetching communication history for church:', churchId);
       const messageHistory = await storage.getCommunicationHistory(churchId);
-      console.log('🔍 TRACKING: Retrieved', messageHistory?.length || 0, 'message history records');
-      console.log('🔍 TRACKING: Message history data:', JSON.stringify(messageHistory, null, 2));
       
       res.json(messageHistory);
     } catch (error) {
@@ -8377,7 +8371,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
       const userChurch = await storage.getUserChurch(userId);
       
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor'].includes(userChurch.role)) {
+      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userChurch.role)) {
         return res.status(403).json({ message: "Senior leadership access required for emergency broadcasts" });
       }
 

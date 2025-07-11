@@ -1318,8 +1318,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {
-    console.log('🔍 TRACKING: getUserChurch called for user:', userId);
-    
     const [userChurch] = await db
       .select()
       .from(userChurches)
@@ -1329,25 +1327,25 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(userChurches.joinedAt); // Get the first church they joined
     
-    console.log('🔍 TRACKING: getUserChurch raw result:', userChurch);
-    
     if (!userChurch) {
-      console.log('❌ TRACKING: No active church found for user');
       return undefined;
     }
     
-    const [role] = await db
-      .select()
-      .from(roles)
-      .where(eq(roles.id, userChurch.roleId));
+    // Use the role field directly from user_churches table, fall back to roles table if needed
+    let roleName = userChurch.role;
     
-    const result = {
+    if (!roleName && userChurch.roleId) {
+      const [role] = await db
+        .select()
+        .from(roles)
+        .where(eq(roles.id, userChurch.roleId));
+      roleName = role?.name;
+    }
+    
+    return {
       ...userChurch,
-      role: role?.name || userChurch.role || 'member'
+      role: roleName || 'member'
     };
-    
-    console.log('🔍 TRACKING: getUserChurch final result:', result);
-    return result;
   }
 
   async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
