@@ -225,9 +225,9 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                 <Button
                   onClick={handleSubmitComment}
                   disabled={addCommentMutation.isPending || !commentText.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
                 >
-                  {addCommentMutation.isPending ? "Posting..." : "Comment"}
+                  {addCommentMutation.isPending ? "Posting..." : "Post Comment"}
                 </Button>
               </div>
             </div>

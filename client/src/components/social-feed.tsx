@@ -128,7 +128,6 @@ export default function SocialFeed() {
   const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
-  const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
   const [commentSort, setCommentSort] = useState<'newest' | 'most_liked'>('newest');
@@ -211,28 +210,8 @@ export default function SocialFeed() {
     }
   });
 
-  // Comment submission mutation
-  const commentMutation = useMutation({
-    mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
-      return apiRequest('POST', `/api/discussions/${postId}/comments`, { content });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-      setCommentText("");
-      setCommentDialogOpen(null);
-      toast({
-        title: "Success",
-        description: "Comment added"
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to comment",
-        variant: "destructive"
-      });
-    }
-  });
+  // Legacy comment mutation - now unused since we use PostInteractions
+  // Keeping for reference but should be removed eventually
 
   // Prayer reaction mutation
   const prayMutation = useMutation({
@@ -1617,48 +1596,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
         )}
       </div>
 
-      {/* Comment Dialog */}
-      <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add Comment</DialogTitle>
-            <DialogDescription>
-              Share your thoughts on this post.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Write your comment..."
-              className="min-h-[100px]"
-            />
-            <div className="flex justify-end space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setCommentDialogOpen(null)}
-                disabled={commentMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={() => {
-                  if (commentDialogOpen && commentText.trim()) {
-                    commentMutation.mutate({ 
-                      postId: commentDialogOpen, 
-                      content: commentText.trim() 
-                    });
-                  }
-                }}
-                disabled={commentMutation.isPending || !commentText.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {commentMutation.isPending ? "Posting..." : "Post Comment"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Legacy comment dialog removed - now using PostInteractions unified system */}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
