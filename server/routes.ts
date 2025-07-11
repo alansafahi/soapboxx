@@ -8366,12 +8366,28 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/communications/emergency-broadcast', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
+      console.log('🚨 EMERGENCY BROADCAST: User ID:', userId);
+      
       if (!userId) {
+        console.log('🚨 EMERGENCY BROADCAST: No user ID in session');
         return res.status(401).json({ message: "Unauthorized" });
       }
-      const userChurch = await storage.getUserChurch(userId);
       
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userChurch.role)) {
+      const user = await storage.getUser(userId);
+      console.log('🚨 EMERGENCY BROADCAST: User role from users table:', user?.role);
+      
+      const userChurch = await storage.getUserChurch(userId);
+      console.log('🚨 EMERGENCY BROADCAST: UserChurch data:', userChurch);
+      console.log('🚨 EMERGENCY BROADCAST: UserChurch role:', userChurch?.role);
+      
+      // Check both user.role (main table) and userChurch.role for permissions
+      const isAuthorized = user?.role === 'soapbox_owner' || 
+                          (userChurch && ['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userChurch.role));
+      
+      console.log('🚨 EMERGENCY BROADCAST: Is authorized?', isAuthorized);
+      
+      if (!isAuthorized) {
+        console.log('🚨 EMERGENCY BROADCAST: Access denied');
         return res.status(403).json({ message: "Senior leadership access required for emergency broadcasts" });
       }
 
