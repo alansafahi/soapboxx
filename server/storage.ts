@@ -8519,7 +8519,7 @@ export class DatabaseStorage implements IStorage {
           subject: memberCommunications.subject,
           content: memberCommunications.content,
           communicationType: memberCommunications.communicationType,
-          sentAt: memberCommunications.sentAt,
+          sentAt: sql`MIN(${memberCommunications.sentAt})`.as('sentAt'),
           deliveryStatus: memberCommunications.deliveryStatus,
           recipientCount: sql`COUNT(DISTINCT ${memberCommunications.memberId})`.as('recipientCount'),
           senderName: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`.as('senderName'),
@@ -8532,13 +8532,12 @@ export class DatabaseStorage implements IStorage {
           memberCommunications.subject,
           memberCommunications.content,
           memberCommunications.communicationType,
-          memberCommunications.sentAt,
           memberCommunications.deliveryStatus,
           users.firstName,
           users.lastName,
           users.email
         )
-        .orderBy(desc(memberCommunications.sentAt))
+        .orderBy(desc(sql`MIN(${memberCommunications.sentAt})`))
         .limit(50);
 
       const mappedCommunications = communications.map(comm => ({
