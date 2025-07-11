@@ -8315,7 +8315,7 @@ Please provide suggestions for the missing or incomplete sections.`
       // Store communication in history
       try {
         await storage.createCommunicationRecord({
-          churchId: userChurch.churchId,
+          churchId: churchId,
           sentBy: userId,
           subject: title,
           content: content,

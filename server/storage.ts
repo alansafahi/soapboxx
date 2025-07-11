@@ -70,6 +70,7 @@ import {
   answeredPrayerComments,
   prayerBadges,
   userBadgeProgress,
+  memberCommunications,
   type User,
   type UpsertUser,
   type DailyVerse,
