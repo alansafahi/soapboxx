@@ -8346,21 +8346,13 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Create urgent in-app notifications for all members
       for (const member of churchMembers) {
-        await storage.createEventNotification({
+        await storage.createNotification({
           userId: member.userId,
           type: 'urgent',
           title: `URGENT: ${title}`,
           message: content,
-          priority: 'urgent',
           isRead: false,
-          actionUrl: '/communications',
-          data: JSON.stringify({ 
-            senderId: userId,
-            senderName: sender?.name || 'Church Leadership',
-            churchName: church?.name || 'Church',
-            requiresResponse: requiresResponse || false,
-            isEmergency: true
-          })
+          actionUrl: '/communications'
         });
       }
 

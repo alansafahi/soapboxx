@@ -346,7 +346,7 @@ export interface IStorage {
   getEventVolunteers(eventId: number): Promise<(EventVolunteer & { user: User })[]>;
   
   // Event notifications
-  createEventNotification(notification: InsertEventNotification): Promise<EventNotification>;
+  // createEventNotification method removed - use createNotification instead
   getEventNotifications(eventId: number): Promise<EventNotification[]>;
   
   // Event updates
@@ -1637,10 +1637,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(eventVolunteers.eventId, eventId)) as any;
   }
 
-  async createEventNotification(notification: InsertEventNotification): Promise<EventNotification> {
-    const [newNotification] = await db.insert(eventNotifications).values(notification).returning();
-    return newNotification;
-  }
+  // createEventNotification method removed - use createNotification instead
 
   async getEventNotifications(eventId: number): Promise<EventNotification[]> {
     return await db
