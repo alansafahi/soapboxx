@@ -128,6 +128,7 @@ export default function SocialFeed() {
   const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+  const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
   const [commentSort, setCommentSort] = useState<'newest' | 'most_liked'>('newest');
@@ -210,8 +211,28 @@ export default function SocialFeed() {
     }
   });
 
-  // Legacy comment mutation - now unused since we use PostInteractions
-  // Keeping for reference but should be removed eventually
+  // Comment submission mutation - using same pattern as SOAP posts
+  const commentMutation = useMutation({
+    mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
+      return apiRequest('POST', `/api/discussions/${postId}/comments`, { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      setCommentText("");
+      setCommentDialogOpen(null);
+      toast({
+        title: "Comment added!",
+        description: "Your comment has been posted",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add comment",
+        variant: "destructive"
+      });
+    }
+  });
 
   // Prayer reaction mutation
   const prayMutation = useMutation({
@@ -1376,22 +1397,70 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 </div>
               )}
 
-              {/* Post Actions */}
+              {/* Post Actions - Using same system as SOAP posts */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center space-x-4">
-                  {/* Use the unified PostInteractions component */}
-                  <PostInteractions
-                    postId={post.id}
-                    postType="discussion"
-                    isLiked={post.isLiked || false}
-                    likeCount={post.likeCount || 0}
-                    isPraying={post.isPraying || false}
-                    prayCount={post.prayCount || 0}
-                    commentCount={post.commentCount || post.comments?.length || 0}
-                    shareCount={post.shareCount || 0}
-                    post={post}
-                  />
+                  {/* Love Button */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => likeMutation.mutate(post.id)}
+                    className={`group transition-all duration-200 ${
+                      post.isLiked 
+                        ? 'text-red-500 bg-red-50 dark:bg-red-900/20' 
+                        : 'text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+                    }`}
+                    disabled={likeMutation.isPending}
+                    title={post.isLiked ? "You loved this" : "Love this post"}
+                  >
+                    <Heart className={`w-4 h-4 mr-1 transition-all duration-200 ${
+                      post.isLiked ? 'fill-current scale-110' : 'group-hover:scale-110'
+                    }`} />
+                    <span className="font-medium">{post.likeCount || 0}</span>
+                  </Button>
 
+                  {/* Prayer Button */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => prayMutation.mutate(post.id)}
+                    className={`group transition-all duration-200 ${
+                      post.isPraying 
+                        ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                        : 'text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                    }`}
+                    disabled={prayMutation.isPending}
+                    title={post.isPraying ? "You are praying" : "Pray for this"}
+                  >
+                    <span className={`text-sm mr-1 transition-all duration-200 ${
+                      post.isPraying ? 'scale-110' : 'group-hover:scale-110'
+                    }`}>🙏</span>
+                    <span className="font-medium">{post.prayCount || 0}</span>
+                  </Button>
+
+                  {/* Comments Button - Using SOAP post pattern */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setCommentDialogOpen(post.id)}
+                    className="text-gray-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 group transition-all duration-200"
+                    title="View and add comments"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1 group-hover:scale-110 transition-all duration-200" />
+                    <span className="font-medium">{post.commentCount || 0}</span>
+                  </Button>
+
+                  {/* Share Button */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShareDialogOpen(post.id)}
+                    className="text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 group transition-all duration-200"
+                    title="Share this post"
+                  >
+                    <Share2 className="w-4 h-4 mr-1 group-hover:scale-110 transition-all duration-200" />
+                    {post.shareCount > 0 && <span className="font-medium">{post.shareCount}</span>}
+                  </Button>
                 </div>
                 
                 {/* Delete Button - Only show for post author */}
@@ -1596,7 +1665,61 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
         )}
       </div>
 
-      {/* Legacy comment dialog removed - now using PostInteractions unified system */}
+      {/* Comment Dialog - Using same system as SOAP posts */}
+      <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Comments</DialogTitle>
+            <DialogDescription>
+              Share your thoughts and engage with this post.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Write a thoughtful comment..."
+              className="min-h-[100px] text-sm resize-none"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                  if (commentDialogOpen && commentText.trim()) {
+                    commentMutation.mutate({ 
+                      postId: commentDialogOpen, 
+                      content: commentText.trim() 
+                    });
+                  }
+                }
+              }}
+            />
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-400">Press Cmd+Enter to post</span>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCommentDialogOpen(null)}
+                  disabled={commentMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    if (commentDialogOpen && commentText.trim()) {
+                      commentMutation.mutate({ 
+                        postId: commentDialogOpen, 
+                        content: commentText.trim() 
+                      });
+                    }
+                  }}
+                  disabled={commentMutation.isPending || !commentText.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                >
+                  {commentMutation.isPending ? "Posting..." : "Post Comment"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
