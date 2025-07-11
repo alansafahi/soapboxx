@@ -8153,11 +8153,25 @@ Please provide suggestions for the missing or incomplete sections.`
   // Get bulk messages for church leadership
   app.get('/api/communications/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
-      const userChurch = await storage.getUserChurch(userId);
-      
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
-        return res.status(403).json({ message: "Leadership access required" });
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      // SoapBox Owner has universal access
+      if (user.role === 'soapbox_owner') {
+        // Allow access - SoapBox Owner can view all communications
+      } else {
+        // Check church-specific permissions for other users
+        const userChurch = await storage.getUserChurch(userId);
+        if (!userChurch || !['church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+          return res.status(403).json({ message: "Leadership access required for your church" });
+        }
       }
 
       // Return empty array for now - can implement message history later
@@ -8170,11 +8184,25 @@ Please provide suggestions for the missing or incomplete sections.`
   // Create bulk message/announcement
   app.post('/api/communications/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
-      const userChurch = await storage.getUserChurch(userId);
-      
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
-        return res.status(403).json({ message: "Leadership access required" });
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      // SoapBox Owner has universal access
+      if (user.role === 'soapbox_owner') {
+        // Allow access - SoapBox Owner can send communications
+      } else {
+        // Check church-specific permissions for other users
+        const userChurch = await storage.getUserChurch(userId);
+        if (!userChurch || !['church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+          return res.status(403).json({ message: "Leadership access required for your church" });
+        }
       }
 
       // Validate request body
@@ -8191,13 +8219,38 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get church members based on target audience
       let targetMembers = [];
+      let churchId;
+      
+      if (user.role === 'soapbox_owner') {
+        // For SoapBox Owner, get the church from user_churches table
+        const userChurches = await db
+          .select()
+          .from(userChurches)
+          .where(and(
+            eq(userChurches.userId, userId),
+            eq(userChurches.isActive, true)
+          ))
+          .limit(1);
+        
+        if (userChurches.length === 0) {
+          return res.status(403).json({ message: "No church association found" });
+        }
+        
+        churchId = userChurches[0].churchId;
+      } else {
+        const userChurch = await storage.getUserChurch(userId);
+        if (!userChurch) {
+          return res.status(403).json({ message: "Church membership required" });
+        }
+        churchId = userChurch.churchId;
+      }
       
       if (targetAudience?.allMembers) {
         // Send to all church members
-        targetMembers = await storage.getChurchMembers(userChurch.churchId);
+        targetMembers = await storage.getChurchMembers(churchId);
       } else {
         // Get all church members first, then filter
-        const allMembers = await storage.getChurchMembers(userChurch.churchId);
+        const allMembers = await storage.getChurchMembers(churchId);
         
         // Filter by roles if specified
         if (targetAudience?.roles?.length > 0) {
