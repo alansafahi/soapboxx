@@ -108,10 +108,12 @@ export function AdminAnalyticsDashboard() {
   };
 
   const renderTrendBadge = (trend: string) => {
-    const isPositive = trend.startsWith('+');
+    // Handle NaN, null, undefined, or empty trend values
+    const safeTrend = trend && !isNaN(Number(trend.replace(/[^0-9.-]/g, ''))) ? trend : '0%';
+    const isPositive = safeTrend.startsWith('+');
     return (
       <Badge variant={isPositive ? "default" : "destructive"} className="ml-2">
-        {trend}
+        {safeTrend}
       </Badge>
     );
   };

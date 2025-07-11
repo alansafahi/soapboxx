@@ -108,7 +108,7 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Member Directory</h3>
-        <Badge variant="outline">{filteredMembers.length} members</Badge>
+        <Badge variant="outline">{isNaN(filteredMembers?.length) ? 0 : filteredMembers?.length || 0} members</Badge>
       </div>
 
       {/* Search and Filter Controls */}

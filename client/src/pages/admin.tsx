@@ -202,7 +202,7 @@ function ChurchManagementTab() {
                     {church.size && (
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        <span>{church.size}</span>
+                        <span>{isNaN(Number(church.size)) ? church.size : Number(church.size).toLocaleString()}</span>
                       </div>
                     )}
                   </div>
