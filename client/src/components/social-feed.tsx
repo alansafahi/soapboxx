@@ -1665,22 +1665,22 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
         )}
       </div>
 
-      {/* Comment Dialog - Mobile responsive with fixed button layout */}
+      {/* Comment Dialog - iPhone SE optimized layout */}
       <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle>Comments</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-md max-h-[85vh] h-[85vh] flex flex-col p-4 m-2">
+          <DialogHeader className="flex-shrink-0 pb-2">
+            <DialogTitle className="text-lg">Comments</DialogTitle>
+            <DialogDescription className="text-sm">
               Share your thoughts and engage with this post.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="flex-1 flex flex-col space-y-4 min-h-0">
+          <div className="flex-1 flex flex-col min-h-0 space-y-3">
             <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Write a thoughtful comment..."
-              className="min-h-[80px] max-h-[200px] text-sm resize-none flex-1"
+              className="min-h-[60px] max-h-[120px] text-sm resize-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   if (commentDialogOpen && commentText.trim()) {
@@ -1693,16 +1693,15 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
               }}
             />
             
-            {/* Fixed button area */}
-            <div className="flex-shrink-0 pt-2 border-t">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-                <span className="text-xs text-gray-400 order-2 sm:order-1">Press Cmd+Enter to post</span>
-                <div className="flex space-x-2 order-1 sm:order-2 w-full sm:w-auto">
+            {/* Sticky button area at bottom */}
+            <div className="flex-shrink-0 pt-3 border-t mt-auto">
+              <div className="flex flex-col gap-2">
+                <div className="flex space-x-2 w-full">
                   <Button 
                     variant="outline" 
                     onClick={() => setCommentDialogOpen(null)}
                     disabled={commentMutation.isPending}
-                    className="flex-1 sm:flex-none"
+                    className="flex-1 h-10"
                   >
                     Cancel
                   </Button>
@@ -1716,11 +1715,12 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                       }
                     }}
                     disabled={commentMutation.isPending || !commentText.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex-1 sm:flex-none"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex-1 h-10"
                   >
                     {commentMutation.isPending ? "Posting..." : "Post Comment"}
                   </Button>
                 </div>
+                <span className="text-xs text-gray-400 text-center">Press Cmd+Enter to post</span>
               </div>
             </div>
           </div>
