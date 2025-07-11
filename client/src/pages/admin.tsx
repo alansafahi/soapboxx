@@ -183,7 +183,12 @@ function ChurchManagementTab() {
                               church.status === 'suspended' ? 'outline' : 'destructive'}
                       className={church.status === 'suspended' ? 'border-orange-500 text-orange-600' : ''}
                     >
-                      {church.status?.charAt(0).toUpperCase() + church.status?.slice(1)}
+                      {(() => {
+                        const status = church.status;
+                        if (!status || status === 'NaN' || isNaN(status)) return 'Pending';
+                        if (typeof status === 'string') return status.charAt(0).toUpperCase() + status.slice(1);
+                        return String(status);
+                      })()}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
