@@ -156,7 +156,7 @@ function ChurchManagementTab() {
       </div>
 
       <div className="grid gap-6">
-        {pendingChurches?.length === 0 ? (
+        {churches?.length === 0 ? (
           <Card className="p-8 text-center">
             <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -169,7 +169,7 @@ function ChurchManagementTab() {
             </p>
           </Card>
         ) : (
-          pendingChurches?.map((church: any) => (
+          churches?.map((church: any) => (
             <Card key={church.id} className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
