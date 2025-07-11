@@ -8176,12 +8176,18 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get message history for the user's church
       const churchId = user?.churchId;
+      console.log('🔍 TRACKING: Message History API - User ID:', userId, 'Church ID:', churchId);
       
       if (!churchId) {
+        console.log('❌ TRACKING: No church ID found for user, returning empty array');
         return res.json([]);
       }
       
+      console.log('🔍 TRACKING: Fetching communication history for church:', churchId);
       const messageHistory = await storage.getCommunicationHistory(churchId);
+      console.log('🔍 TRACKING: Retrieved', messageHistory?.length || 0, 'message history records');
+      console.log('🔍 TRACKING: Message history data:', JSON.stringify(messageHistory, null, 2));
+      
       res.json(messageHistory);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch messages" });
@@ -8312,22 +8318,34 @@ Please provide suggestions for the missing or incomplete sections.`
         }
       }
 
-      // Store communication in history
-      try {
-        await storage.createCommunicationRecord({
-          churchId: churchId,
-          sentBy: userId,
-          subject: title,
-          content: content,
-          communicationType: 'announcement',
-          direction: 'outbound',
-          sentAt: new Date(),
-          deliveryStatus: 'sent',
-          recipientCount: successCount
-        });
-      } catch (historyError) {
-        console.error('Failed to store communication history:', historyError);
+      // Store communication in history for each member
+      console.log('🔍 TRACKING: Starting communication history storage for', targetMembers.length, 'members');
+      let historyStoredCount = 0;
+      
+      for (const member of targetMembers) {
+        try {
+          console.log('🔍 TRACKING: Storing communication record for member:', member.userId);
+          await storage.createCommunicationRecord({
+            churchId: churchId,
+            sentBy: userId,
+            subject: title,
+            content: content,
+            memberId: member.userId,
+            communicationType: 'announcement',
+            direction: 'outbound',
+            sentAt: new Date(),
+            deliveryStatus: 'sent',
+            responseReceived: false,
+            followUpRequired: false
+          });
+          historyStoredCount++;
+          console.log('✅ TRACKING: Successfully stored record for member:', member.userId);
+        } catch (historyError) {
+          console.error('❌ TRACKING: Failed to store communication history for member:', member.userId, historyError);
+        }
       }
+      
+      console.log('🔍 TRACKING: Communication history storage complete.', historyStoredCount, 'of', targetMembers.length, 'records stored');
 
       // Log the successful communication
 
@@ -8380,22 +8398,34 @@ Please provide suggestions for the missing or incomplete sections.`
         });
       }
 
-      // Store emergency broadcast in communication history
-      try {
-        await storage.createCommunicationRecord({
-          churchId: userChurch.churchId,
-          sentBy: userId,
-          subject: `URGENT: ${title}`,
-          content: content,
-          communicationType: 'emergency_broadcast',
-          direction: 'outbound',
-          sentAt: new Date(),
-          deliveryStatus: 'sent',
-          recipientCount: churchMembers.length
-        });
-      } catch (historyError) {
-        console.error('Failed to store emergency broadcast history:', historyError);
+      // Store emergency broadcast in communication history for each member
+      console.log('🔍 TRACKING: Starting emergency broadcast history storage for', churchMembers.length, 'members');
+      let emergencyHistoryCount = 0;
+      
+      for (const member of churchMembers) {
+        try {
+          console.log('🔍 TRACKING: Storing emergency broadcast record for member:', member.userId);
+          await storage.createCommunicationRecord({
+            churchId: userChurch.churchId,
+            sentBy: userId,
+            subject: `URGENT: ${title}`,
+            content: content,
+            memberId: member.userId,
+            communicationType: 'emergency_broadcast',
+            direction: 'outbound',
+            sentAt: new Date(),
+            deliveryStatus: 'sent',
+            responseReceived: false,
+            followUpRequired: requiresResponse || false
+          });
+          emergencyHistoryCount++;
+          console.log('✅ TRACKING: Successfully stored emergency record for member:', member.userId);
+        } catch (historyError) {
+          console.error('❌ TRACKING: Failed to store emergency broadcast history for member:', member.userId, historyError);
+        }
       }
+      
+      console.log('🔍 TRACKING: Emergency broadcast history storage complete.', emergencyHistoryCount, 'of', churchMembers.length, 'records stored');
 
       res.status(201).json({ 
         message: "Emergency broadcast sent successfully", 

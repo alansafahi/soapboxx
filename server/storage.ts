@@ -8503,48 +8503,61 @@ export class DatabaseStorage implements IStorage {
 
   // Communication history operations
   async getCommunicationHistory(churchId: number): Promise<any[]> {
-    const communications = await db
-      .select({
-        id: memberCommunications.id,
-        subject: memberCommunications.subject,
-        content: memberCommunications.content,
-        communicationType: memberCommunications.communicationType,
-        sentAt: memberCommunications.sentAt,
-        deliveryStatus: memberCommunications.deliveryStatus,
-        recipientCount: sql`COUNT(DISTINCT ${memberCommunications.memberId})`.as('recipientCount'),
-        senderName: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`.as('senderName'),
-        senderEmail: users.email
-      })
-      .from(memberCommunications)
-      .leftJoin(users, eq(memberCommunications.sentBy, users.id))
-      .where(eq(memberCommunications.churchId, churchId))
-      .groupBy(
-        memberCommunications.id,
-        memberCommunications.subject,
-        memberCommunications.content,
-        memberCommunications.communicationType,
-        memberCommunications.sentAt,
-        memberCommunications.deliveryStatus,
-        users.firstName,
-        users.lastName,
-        users.email
-      )
-      .orderBy(desc(memberCommunications.sentAt))
-      .limit(50);
+    console.log('🔍 TRACKING: getCommunicationHistory called for church:', churchId);
+    
+    try {
+      const communications = await db
+        .select({
+          id: memberCommunications.id,
+          subject: memberCommunications.subject,
+          content: memberCommunications.content,
+          communicationType: memberCommunications.communicationType,
+          sentAt: memberCommunications.sentAt,
+          deliveryStatus: memberCommunications.deliveryStatus,
+          recipientCount: sql`COUNT(DISTINCT ${memberCommunications.memberId})`.as('recipientCount'),
+          senderName: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`.as('senderName'),
+          senderEmail: users.email
+        })
+        .from(memberCommunications)
+        .leftJoin(users, eq(memberCommunications.sentBy, users.id))
+        .where(eq(memberCommunications.churchId, churchId))
+        .groupBy(
+          memberCommunications.id,
+          memberCommunications.subject,
+          memberCommunications.content,
+          memberCommunications.communicationType,
+          memberCommunications.sentAt,
+          memberCommunications.deliveryStatus,
+          users.firstName,
+          users.lastName,
+          users.email
+        )
+        .orderBy(desc(memberCommunications.sentAt))
+        .limit(50);
 
-    return communications.map(comm => ({
-      id: comm.id,
-      title: comm.subject,
-      content: comm.content,
-      type: comm.communicationType,
-      sentAt: comm.sentAt,
-      status: comm.deliveryStatus,
-      recipientCount: Number(comm.recipientCount),
-      sender: {
-        name: comm.senderName,
-        email: comm.senderEmail
-      }
-    }));
+      console.log('🔍 TRACKING: Database query returned', communications.length, 'communication records');
+      console.log('🔍 TRACKING: Raw communications data:', communications);
+
+      const mappedCommunications = communications.map(comm => ({
+        id: comm.id,
+        title: comm.subject,
+        content: comm.content,
+        type: comm.communicationType,
+        sentAt: comm.sentAt,
+        status: comm.deliveryStatus,
+        recipientCount: Number(comm.recipientCount),
+        sender: {
+          name: comm.senderName,
+          email: comm.senderEmail
+        }
+      }));
+
+      console.log('🔍 TRACKING: Mapped communications:', mappedCommunications);
+      return mappedCommunications;
+    } catch (error) {
+      console.error('❌ TRACKING: Error in getCommunicationHistory:', error);
+      return [];
+    }
   }
 
   async createCommunicationRecord(record: {
@@ -8552,41 +8565,86 @@ export class DatabaseStorage implements IStorage {
     sentBy: string;
     subject: string;
     content: string;
+    memberId?: string;
     communicationType: string;
     direction: string;
     sentAt: Date;
     deliveryStatus: string;
+    responseReceived?: boolean;
+    followUpRequired?: boolean;
     recipientCount?: number;
   }): Promise<any> {
-    // Get all church members for this communication
-    const churchMembers = await this.getChurchMembers(record.churchId);
+    console.log('🔍 TRACKING: createCommunicationRecord called with:', record);
     
-    // Create a communication record for each recipient
-    const communicationRecords = churchMembers.map(member => ({
-      memberId: member.userId,
-      communicationType: record.communicationType,
-      direction: record.direction,
-      subject: record.subject,
-      content: record.content,
-      sentBy: record.sentBy,
-      sentAt: record.sentAt,
-      deliveryStatus: record.deliveryStatus,
-      churchId: record.churchId
-    }));
+    try {
+      // If memberId is provided, create a single record
+      if (record.memberId) {
+        const communicationRecord = {
+          memberId: record.memberId,
+          communicationType: record.communicationType,
+          direction: record.direction,
+          subject: record.subject,
+          content: record.content,
+          sentBy: record.sentBy,
+          sentAt: record.sentAt,
+          deliveryStatus: record.deliveryStatus,
+          responseReceived: record.responseReceived || false,
+          followUpRequired: record.followUpRequired || false,
+          churchId: record.churchId
+        };
 
-    // Insert all communication records
-    if (communicationRecords.length > 0) {
-      await db.insert(memberCommunications).values(communicationRecords);
+        console.log('🔍 TRACKING: Inserting single communication record:', communicationRecord);
+        const result = await db.insert(memberCommunications).values(communicationRecord);
+        console.log('✅ TRACKING: Successfully inserted single communication record');
+        
+        return {
+          id: Date.now(),
+          subject: record.subject,
+          content: record.content,
+          type: record.communicationType,
+          sentAt: record.sentAt,
+          recipientCount: 1
+        };
+      } else {
+        // Legacy bulk approach - get all church members for this communication
+        console.log('🔍 TRACKING: Using bulk approach for all church members');
+        const churchMembers = await this.getChurchMembers(record.churchId);
+        
+        // Create a communication record for each recipient
+        const communicationRecords = churchMembers.map(member => ({
+          memberId: member.userId,
+          communicationType: record.communicationType,
+          direction: record.direction,
+          subject: record.subject,
+          content: record.content,
+          sentBy: record.sentBy,
+          sentAt: record.sentAt,
+          deliveryStatus: record.deliveryStatus,
+          responseReceived: record.responseReceived || false,
+          followUpRequired: record.followUpRequired || false,
+          churchId: record.churchId
+        }));
+
+        // Insert all communication records
+        if (communicationRecords.length > 0) {
+          console.log('🔍 TRACKING: Inserting', communicationRecords.length, 'bulk communication records');
+          await db.insert(memberCommunications).values(communicationRecords);
+          console.log('✅ TRACKING: Successfully inserted bulk communication records');
+        }
+
+        return {
+          id: 'bulk_' + Date.now(),
+          subject: record.subject,
+          content: record.content,
+          type: record.communicationType,
+          sentAt: record.sentAt,
+          recipientCount: communicationRecords.length
+        };
+      }
+    } catch (error) {
+      console.error('❌ TRACKING: Error in createCommunicationRecord:', error);
+      throw error;
     }
-
-    return {
-      id: 'bulk_' + Date.now(),
-      subject: record.subject,
-      content: record.content,
-      type: record.communicationType,
-      sentAt: record.sentAt,
-      recipientCount: communicationRecords.length
-    };
   }
 }
 
