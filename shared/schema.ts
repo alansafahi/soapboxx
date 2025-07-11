@@ -1138,7 +1138,7 @@ export const soapEntries = pgTable("soap_entries", {
   observation: text("observation").notNull(), // What does the passage say?
   application: text("application").notNull(), // How does this apply to my life?
   prayer: text("prayer").notNull(), // Personal prayer based on the scripture
-  moodTag: varchar("mood_tag", { length: 20 }), // peaceful, struggling, inspired, grateful, etc.
+  moodTag: varchar("mood_tag", { length: 255 }), // peaceful, struggling, inspired, grateful, etc.
   isPublic: boolean("is_public").default(false), // Share with prayer wall/feed
   isSharedWithGroup: boolean("is_shared_with_group").default(false),
   isSharedWithPastor: boolean("is_shared_with_pastor").default(false),
