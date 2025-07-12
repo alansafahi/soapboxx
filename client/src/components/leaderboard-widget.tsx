@@ -182,7 +182,7 @@ export default function LeaderboardWidget() {
           size="sm"
           className="w-full bg-white/80 hover:bg-white border-blue-200 text-blue-700 hover:text-blue-800"
         >
-          View Full Leaderboard
+          View Full Engagement Board
         </Button>
       </CardContent>
     </Card>

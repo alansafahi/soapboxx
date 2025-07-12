@@ -146,7 +146,7 @@ export default function LeaderboardPreview() {
         <div className="pt-2 border-t border-purple-200 dark:border-purple-700">
           <Link href="/leaderboard">
             <Button variant="ghost" size="sm" className="w-full justify-between text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300">
-              🔄 See Full Leaderboard
+              🔄 See Full Engagement Board
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>

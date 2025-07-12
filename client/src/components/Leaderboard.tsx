@@ -140,7 +140,7 @@ const Leaderboard: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <Trophy className="w-12 h-12 text-yellow-500 mr-3" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              Community Engagement Leaderboard
+              Community Engagement Board
             </h1>
           </div>
           <p className="text-lg text-blue-200 max-w-2xl mx-auto">
