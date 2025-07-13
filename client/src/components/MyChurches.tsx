@@ -22,7 +22,9 @@ import {
   Crown,
   Users,
   MapPin,
-  AlertTriangle
+  AlertTriangle,
+  Settings,
+  Edit
 } from "lucide-react";
 
 interface Church {
@@ -33,6 +35,7 @@ interface Church {
   state: string;
   memberCount: number;
   logoUrl?: string;
+  role?: string; // User's role in this church
 }
 
 export default function MyChurches() {
@@ -47,6 +50,18 @@ export default function MyChurches() {
     open: false,
     churches: []
   });
+
+  // Helper function to check if user has admin access to church
+  const hasChurchAdminAccess = (church: Church) => {
+    const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
+    return adminRoles.includes(church.role || '') || user?.role === 'soapbox_owner';
+  };
+
+  // Handle church edit navigation
+  const handleEditChurch = (church: Church) => {
+    // Navigate to church management page with the church ID
+    window.location.href = `/church-management/${church.id}`;
+  };
 
   // Get user's joined churches
   const { data: userChurches, isLoading } = useQuery({
@@ -251,6 +266,20 @@ export default function MyChurches() {
 
                     {/* Actions */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 min-w-0">
+                      {/* Church Admin Edit Button */}
+                      {hasChurchAdminAccess(church) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditChurch(church)}
+                          className="text-blue-600 border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20 flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+                        >
+                          <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden xs:inline">Manage</span>
+                          <span className="xs:hidden">Edit</span>
+                        </Button>
+                      )}
+                      
                       {!isPrimary && (
                         <Button
                           variant="outline"

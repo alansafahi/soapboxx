@@ -1,304 +1,326 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  Settings, 
-  Users, 
-  Heart, 
-  Video, 
-  MessageSquare, 
-  DollarSign, 
-  Church, 
-  Calendar,
-  BookOpen,
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Switch } from "./ui/switch";
+import { Badge } from "./ui/badge";
+import { useToast } from "../hooks/use-toast";
+import {
+  Settings,
+  MessageSquare,
+  DollarSign,
   Headphones,
-  Music,
-  Image,
-  Shield,
-  Mic,
-  BarChart3,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react';
-import { useChurchFeatures, useUpdateFeature, useInitializeChurchFeatures } from '../hooks/useChurchFeatures';
+  Users,
+  Calendar,
+  PrayHands,
+  VideoIcon,
+  ImageIcon,
+  MicIcon,
+  TrendingUpIcon
+} from "lucide-react";
 
-interface FeatureConfig {
-  category: string;
-  name: string;
-  displayName: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  priority: 'high' | 'medium' | 'low';
-  dependencies?: string[];
+interface ChurchFeature {
+  id: number;
+  churchId: number;
+  featureCategory: string;
+  featureName: string;
+  isEnabled: boolean;
+  configuration: {
+    priority: 'high' | 'medium' | 'low';
+    description?: string;
+  };
+  enabledBy: string;
+  enabledAt: string;
+  lastModified: string;
 }
-
-const TOGGLEABLE_FEATURES: FeatureConfig[] = [
-  // Community Features
-  { category: 'community', name: 'churches', displayName: 'Church Discovery', description: 'Allow members to discover and connect with other churches', icon: Church, priority: 'high' },
-  { category: 'community', name: 'events', displayName: 'Event Management', description: 'Create and manage church events with RSVP system', icon: Calendar, priority: 'high' },
-  { category: 'community', name: 'discussions', displayName: 'Community Discussions', description: 'Church-wide discussion forums and social feed', icon: MessageSquare, priority: 'high' },
-  { category: 'community', name: 'donation', displayName: 'Digital Donations', description: 'Integrated donation processing and giving tracking', icon: DollarSign, priority: 'medium' },
-  
-  // Spiritual Tools Features
-  { category: 'spiritual_tools', name: 'prayer_wall', displayName: 'Prayer Wall', description: 'Public prayer requests and prayer circle management', icon: Heart, priority: 'high' },
-  { category: 'spiritual_tools', name: 'audio_bible', displayName: 'Audio Bible', description: 'Built-in Bible audio with multiple translations', icon: Headphones, priority: 'medium' },
-  { category: 'spiritual_tools', name: 'audio_routines', displayName: 'Audio Routines', description: 'Guided meditation and prayer routines', icon: Music, priority: 'low' },
-  
-  // Media Contents Features
-  { category: 'media_contents', name: 'video_library', displayName: 'Video Library', description: 'Church video content and sermon archive', icon: Video, priority: 'low' },
-  { category: 'media_contents', name: 'image_gallery', displayName: 'Image Gallery', description: 'Church photo gallery and visual content sharing', icon: Image, priority: 'low' },
-  
-  // Admin Portal Features
-  { category: 'admin_portal', name: 'communication_hub', displayName: 'Communication Hub', description: 'Mass messaging and communication templates', icon: MessageSquare, priority: 'high' },
-  { category: 'admin_portal', name: 'sermon_studio', displayName: 'Sermon Studio', description: 'AI-powered sermon creation and research tools', icon: Mic, priority: 'medium' },
-];
-
-const CORE_FEATURES = [
-  'Home', 'Messages', 'Contacts', 'Engagement Board', 'Profile', 'Settings'
-];
 
 interface ChurchFeatureManagerProps {
   churchId: number;
   userRole: string;
 }
 
-export default function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManagerProps) {
-  const { toast } = useToast();
-  const [selectedCategory, setSelectedCategory] = useState('community');
-  
-  const { data: features, isLoading, error } = useChurchFeatures(churchId);
-  const updateFeature = useUpdateFeature(churchId);
-  const initializeFeatures = useInitializeChurchFeatures(churchId);
-
-  const hasAdminAccess = ['church_admin', 'owner', 'soapbox_owner'].includes(userRole);
-
-  const handleFeatureToggle = async (category: string, featureName: string, isEnabled: boolean) => {
-    if (!hasAdminAccess) {
-      toast({
-        title: "Access Denied",
-        description: "Only church administrators can modify feature settings.",
-        variant: "destructive"
-      });
-      return;
+const featureDefinitions = {
+  // Community Features
+  'community': {
+    'donation': {
+      name: 'Donation System',
+      description: 'Accept donations and manage fundraising campaigns',
+      icon: DollarSign,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50 dark:bg-green-950/20',
+      priority: 'high'
+    },
+    'events': {
+      name: 'Event Management',
+      description: 'Create and manage church events with RSVP tracking',
+      icon: Calendar,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50 dark:bg-blue-950/20',
+      priority: 'high'
+    },
+    'communication_hub': {
+      name: 'Communication Hub',
+      description: 'Send announcements and messages to members',
+      icon: MessageSquare,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50 dark:bg-purple-950/20',
+      priority: 'high'
     }
+  },
+  // Spiritual Tools
+  'spiritual_tools': {
+    'prayer_wall': {
+      name: 'Prayer Wall',
+      description: 'Community prayer requests and prayer circles',
+      icon: PrayHands,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50 dark:bg-indigo-950/20',
+      priority: 'high'
+    },
+    'audio_bible': {
+      name: 'Audio Bible',
+      description: 'Narrated Bible readings and study tools',
+      icon: Headphones,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50 dark:bg-orange-950/20',
+      priority: 'medium'
+    },
+    'audio_routines': {
+      name: 'Audio Routines',
+      description: 'Guided prayer and meditation sessions',
+      icon: MicIcon,
+      color: 'text-teal-600',
+      bgColor: 'bg-teal-50 dark:bg-teal-950/20',
+      priority: 'low'
+    }
+  },
+  // Media Contents
+  'media_contents': {
+    'video_library': {
+      name: 'Video Library',
+      description: 'Manage and share sermon videos and content',
+      icon: VideoIcon,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50 dark:bg-red-950/20',
+      priority: 'low'
+    },
+    'image_gallery': {
+      name: 'Image Gallery',
+      description: 'Photo sharing and church media gallery',
+      icon: ImageIcon,
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-50 dark:bg-pink-950/20',
+      priority: 'low'
+    }
+  },
+  // Admin Features
+  'admin_features': {
+    'sermon_studio': {
+      name: 'Sermon Studio',
+      description: 'AI-powered sermon creation and biblical research',
+      icon: MicIcon,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50 dark:bg-amber-950/20',
+      priority: 'medium'
+    },
+    'engagement_analytics': {
+      name: 'Engagement Analytics',
+      description: 'Track member engagement and church growth metrics',
+      icon: TrendingUpIcon,
+      color: 'text-violet-600',
+      bgColor: 'bg-violet-50 dark:bg-violet-950/20',
+      priority: 'medium'
+    }
+  }
+};
 
-    try {
-      await updateFeature.mutateAsync({
-        category,
-        featureName,
-        data: { isEnabled }
+export function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManagerProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Get church features
+  const { data: features, isLoading } = useQuery({
+    queryKey: ['church-features', churchId],
+    queryFn: async () => {
+      const response = await fetch(`/api/church-features/${churchId}`, { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch church features');
+      return response.json() as ChurchFeature[];
+    },
+  });
+
+  // Update feature mutation
+  const updateFeatureMutation = useMutation({
+    mutationFn: async ({ featureId, isEnabled }: { featureId: number; isEnabled: boolean }) => {
+      const response = await fetch(`/api/church-features/${featureId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ isEnabled }),
       });
       
+      if (!response.ok) {
+        throw new Error('Failed to update feature');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['church-features', churchId] });
+      queryClient.invalidateQueries({ queryKey: ['user-churches'] });
       toast({
         title: "Feature Updated",
-        description: `${featureName} has been ${isEnabled ? 'enabled' : 'disabled'}.`,
+        description: "Church feature has been updated successfully.",
       });
-    } catch (error) {
+    },
+    onError: (error: any) => {
       toast({
         title: "Update Failed",
-        description: "Failed to update feature setting. Please try again.",
+        description: error.message || "Failed to update church feature.",
         variant: "destructive"
       });
-    }
+    },
+  });
+
+  const handleFeatureToggle = (feature: ChurchFeature) => {
+    updateFeatureMutation.mutate({
+      featureId: feature.id,
+      isEnabled: !feature.isEnabled
+    });
   };
 
-  const handleInitializeFeatures = async (churchSize: string) => {
-    try {
-      await initializeFeatures.mutateAsync(churchSize);
-      toast({
-        title: "Features Initialized",
-        description: `Church features have been initialized for ${churchSize} church size.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Initialization Failed",
-        description: "Failed to initialize features. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const getFeatureStatus = (category: string, name: string): boolean => {
-    if (!features) return true; // Default to enabled if no settings
-    
-    const setting = features.find(f => f.featureCategory === category && f.featureName === name);
-    return setting?.isEnabled ?? true;
-  };
-
-  const getCategorizedFeatures = (category: string) => {
-    return TOGGLEABLE_FEATURES.filter(f => f.category === category);
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  // Check if user has admin access
+  const hasAdminAccess = () => {
+    const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
+    return adminRoles.includes(userRole);
   };
 
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-          </div>
+        <CardContent className="text-center py-8">
+          <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading features...</p>
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  if (!hasAdminAccess()) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Failed to load church feature settings. Please refresh the page.
-        </AlertDescription>
-      </Alert>
+      <Card>
+        <CardContent className="text-center py-8">
+          <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Admin Access Required
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300">
+            You need admin permissions to manage church features.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
+
+  const categorizedFeatures = features?.reduce((acc, feature) => {
+    if (!acc[feature.featureCategory]) {
+      acc[feature.featureCategory] = [];
+    }
+    acc[feature.featureCategory].push(feature);
+    return acc;
+  }, {} as Record<string, ChurchFeature[]>) || {};
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Church Feature Management
+            <Settings className="w-5 h-5" />
+            Feature Configuration
           </CardTitle>
-          <CardDescription>
-            Configure which SoapBox features are available to your church members.
-            Disable features you already have solutions for to avoid confusion.
-          </CardDescription>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Enable or disable SoapBox features for your church. Changes take effect immediately for all members.
+          </p>
         </CardHeader>
-        <CardContent>
-          {!hasAdminAccess && (
-            <Alert className="mb-4">
-              <Shield className="h-4 w-4" />
-              <AlertDescription>
-                You have read-only access to feature settings. Contact your church administrator to make changes.
-              </AlertDescription>
-            </Alert>
-          )}
+      </Card>
 
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="community">Community</TabsTrigger>
-              <TabsTrigger value="spiritual_tools">Spiritual Tools</TabsTrigger>
-              <TabsTrigger value="media_contents">Media</TabsTrigger>
-              <TabsTrigger value="admin_portal">Admin</TabsTrigger>
-            </TabsList>
+      {Object.entries(featureDefinitions).map(([categoryKey, categoryFeatures]) => {
+        const categoryName = categoryKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const categoryFeatureList = categorizedFeatures[categoryKey] || [];
 
-            {['community', 'spiritual_tools', 'media_contents', 'admin_portal'].map(category => (
-              <TabsContent key={category} value={category} className="space-y-4">
-                <div className="grid gap-4">
-                  {getCategorizedFeatures(category).map(feature => {
-                    const FeatureIcon = feature.icon;
-                    const isEnabled = getFeatureStatus(feature.category, feature.name);
-                    
-                    return (
-                      <Card key={`${feature.category}-${feature.name}`} className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <FeatureIcon className="h-5 w-5 text-muted-foreground" />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{feature.displayName}</h3>
-                                <Badge variant="outline" className={getPriorityColor(feature.priority)}>
-                                  {feature.priority}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
-                            </div>
+        return (
+          <Card key={categoryKey}>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                {categoryName}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {Object.entries(categoryFeatures).map(([featureKey, featureDefinition]) => {
+                  const feature = categoryFeatureList.find(f => f.featureName === featureKey);
+                  const IconComponent = featureDefinition.icon;
+                  
+                  return (
+                    <div 
+                      key={featureKey}
+                      className={`p-4 rounded-lg border ${featureDefinition.bgColor} ${
+                        feature?.isEnabled ? 'border-green-200 dark:border-green-800' : 'border-gray-200 dark:border-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm`}>
+                            <IconComponent className={`w-5 h-5 ${featureDefinition.color}`} />
                           </div>
-                          <div className="flex items-center gap-2">
-                            {isEnabled ? (
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                            ) : (
-                              <AlertCircle className="h-4 w-4 text-gray-400" />
-                            )}
-                            <Switch
-                              checked={isEnabled}
-                              onCheckedChange={(checked) => handleFeatureToggle(feature.category, feature.name, checked)}
-                              disabled={!hasAdminAccess || updateFeature.isPending}
-                            />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-gray-900 dark:text-white">
+                                {featureDefinition.name}
+                              </h4>
+                              <Badge 
+                                variant={featureDefinition.priority === 'high' ? 'default' : 'secondary'}
+                                className="text-xs"
+                              >
+                                {featureDefinition.priority} priority
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              {featureDefinition.description}
+                            </p>
                           </div>
                         </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-
-          <div className="mt-6 pt-6 border-t">
-            <h3 className="font-medium mb-2">Core Features (Always Available)</h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              These essential features cannot be disabled and are always available to your members.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {CORE_FEATURES.map(feature => (
-                <Badge key={feature} variant="secondary" className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" />
-                  {feature}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {hasAdminAccess && (
-            <div className="mt-6 pt-6 border-t">
-              <h3 className="font-medium mb-2">Quick Setup</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Initialize feature settings based on your church size for optimal configuration.
-              </p>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleInitializeFeatures('small')}
-                  disabled={initializeFeatures.isPending}
-                >
-                  Small Church (&lt;100)
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleInitializeFeatures('medium')}
-                  disabled={initializeFeatures.isPending}
-                >
-                  Medium Church (100-499)
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleInitializeFeatures('large')}
-                  disabled={initializeFeatures.isPending}
-                >
-                  Large Church (500-1999)
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleInitializeFeatures('mega')}
-                  disabled={initializeFeatures.isPending}
-                >
-                  Mega Church (2000+)
-                </Button>
+                        <div className="flex items-center gap-3">
+                          <Badge variant={feature?.isEnabled ? 'default' : 'outline'}>
+                            {feature?.isEnabled ? 'Enabled' : 'Disabled'}
+                          </Badge>
+                          <Switch
+                            checked={feature?.isEnabled || false}
+                            onCheckedChange={() => feature && handleFeatureToggle(feature)}
+                            disabled={updateFeatureMutation.isPending || !feature}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          )}
+            </CardContent>
+          </Card>
+        );
+      })}
+
+      <Card>
+        <CardContent className="text-center py-6">
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="mb-2">
+              <strong>Core Features:</strong> Home, Messages, Contacts, S.O.A.P. Journal, Leaderboard, Profile, and Settings are always available.
+            </p>
+            <p>
+              Feature changes apply to all church members immediately and affect navigation menu visibility.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

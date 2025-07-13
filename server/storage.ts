@@ -1364,6 +1364,52 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
+    const [userChurch] = await db
+      .select()
+      .from(userChurches)
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.churchId, churchId),
+        eq(userChurches.isActive, true)
+      ));
+
+    if (!userChurch) {
+      return undefined;
+    }
+
+    // Get role name
+    let roleName: string | undefined;
+    if (userChurch.roleId) {
+      const [role] = await db
+        .select()
+        .from(roles)
+        .where(eq(roles.id, userChurch.roleId));
+      roleName = role?.name;
+    }
+    
+    return {
+      role: roleName || 'member'
+    };
+  }
+
+  async getChurchFeature(featureId: number): Promise<any> {
+    const [feature] = await db
+      .select()
+      .from(churchFeatures)
+      .where(eq(churchFeatures.id, featureId));
+    return feature;
+  }
+
+  async updateChurchFeature(featureId: number, updates: any): Promise<any> {
+    const [updatedFeature] = await db
+      .update(churchFeatures)
+      .set(updates)
+      .where(eq(churchFeatures.id, featureId))
+      .returning();
+    return updatedFeature;
+  }
+
   async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
     return await db
       .select({
@@ -2962,13 +3008,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // User church connections
-  async getUserChurches(userId: string): Promise<Church[]> {
-    // Get church ordering info
+  async getUserChurches(userId: string): Promise<(Church & { role: string })[]> {
+    // Get church ordering info with roles
     const orderingInfo = await db
       .select({
         churchId: userChurches.churchId,
         lastAccessedAt: userChurches.lastAccessedAt,
         joinedAt: userChurches.joinedAt,
+        roleId: userChurches.roleId,
         name: churches.name
       })
       .from(userChurches)
@@ -2979,7 +3026,7 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(sql`COALESCE(${userChurches.lastAccessedAt}, ${userChurches.joinedAt})`));
     
-    // Get full church data in correct order
+    // Get full church data with roles in correct order
     const churchIds = orderingInfo.map(o => o.churchId);
     
     const result = await db
@@ -3008,13 +3055,35 @@ export class DatabaseStorage implements IStorage {
         adminEmail: churches.adminEmail,
         isDemo: churches.isDemo,
         createdAt: churches.createdAt,
-        updatedAt: churches.updatedAt
+        updatedAt: churches.updatedAt,
+        roleId: userChurches.roleId,
       })
       .from(churches)
-      .where(inArray(churches.id, churchIds));
+      .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
+      .where(and(
+        inArray(churches.id, churchIds),
+        eq(userChurches.userId, userId),
+        eq(userChurches.isActive, true)
+      ));
     
-    // Sort in the correct order manually
-    const sortedResult = churchIds.map(id => result.find(c => c.id === id)).filter(Boolean) as Church[];
+    // Get role names for each church
+    const rolesData = await db.select().from(roles);
+    const rolesMap = rolesData.reduce((acc, role) => {
+      acc[role.id] = role.name;
+      return acc;
+    }, {} as Record<number, string>);
+    
+    // Sort according to original ordering and add role names
+    const sortedResult = churchIds.map(id => {
+      const church = result.find(church => church.id === id);
+      if (!church) return null;
+      
+      const { roleId, ...churchData } = church;
+      return {
+        ...churchData,
+        role: rolesMap[roleId] || 'member'
+      };
+    }).filter(Boolean) as (Church & { role: string })[];
     
     return sortedResult;
   }

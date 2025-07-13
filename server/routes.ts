@@ -5932,21 +5932,150 @@ Return JSON with this exact structure:
     try {
       const userId = req.session.userId;
       
-      console.log(`[CHURCH DEBUG] API called for user: ${userId}`);
-      
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       const userChurches = await storage.getUserChurches(userId);
-      console.log(`[CHURCH DEBUG] Backend returns churches in order:`, 
-        userChurches?.slice(0, 3).map(c => ({ id: c.id, name: c.name }))
-      );
-      
       res.json(userChurches);
     } catch (error) {
-      console.error('[CHURCH DEBUG] Error in getUserChurches:', error);
+      console.error('Error in getUserChurches:', error);
       res.status(500).json({ error: 'Failed to get user churches' });
+    }
+  });
+
+  // Get specific church details for church management
+  app.get('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const church = await storage.getChurch(churchId);
+      if (!church) {
+        return res.status(404).json({ error: 'Church not found' });
+      }
+
+      res.json(church);
+    } catch (error) {
+      console.error('Error getting church details:', error);
+      res.status(500).json({ error: 'Failed to get church details' });
+    }
+  });
+
+  // Get user's role in a specific church
+  app.get('/api/users/churches/:churchId/role', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const userChurch = await storage.getUserChurchRole(userId, churchId);
+      if (!userChurch) {
+        return res.status(404).json({ error: 'User not associated with this church' });
+      }
+
+      res.json({ role: userChurch.role });
+    } catch (error) {
+      console.error('Error getting user church role:', error);
+      res.status(500).json({ error: 'Failed to get user role' });
+    }
+  });
+
+  // Update church profile (church admins only)
+  app.put('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has admin access to this church
+      const userChurch = await storage.getUserChurchRole(userId, churchId);
+      const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
+      
+      const user = await storage.getUser(userId);
+      if (!userChurch || (!adminRoles.includes(userChurch.role) && user?.role !== 'soapbox_owner')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const updates = req.body;
+      const updatedChurch = await storage.updateChurch(churchId, updates);
+      
+      res.json(updatedChurch);
+    } catch (error) {
+      console.error('Error updating church:', error);
+      res.status(500).json({ error: 'Failed to update church' });
+    }
+  });
+
+  // Get church features for feature management
+  app.get('/api/church-features/:churchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has access to this church
+      const userChurch = await storage.getUserChurchRole(userId, churchId);
+      if (!userChurch) {
+        return res.status(403).json({ error: 'Access denied to this church' });
+      }
+
+      const features = await storage.getChurchFeatures(churchId);
+      res.json(features);
+    } catch (error) {
+      console.error('Error getting church features:', error);
+      res.status(500).json({ error: 'Failed to get church features' });
+    }
+  });
+
+  // Update a specific church feature
+  app.put('/api/church-features/:featureId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const featureId = parseInt(req.params.featureId);
+      const { isEnabled } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get the feature to check church access
+      const feature = await storage.getChurchFeature(featureId);
+      if (!feature) {
+        return res.status(404).json({ error: 'Feature not found' });
+      }
+
+      // Check if user has admin access to this church
+      const userChurch = await storage.getUserChurchRole(userId, feature.churchId);
+      const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
+      
+      const user = await storage.getUser(userId);
+      if (!userChurch || (!adminRoles.includes(userChurch.role) && user?.role !== 'soapbox_owner')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const updatedFeature = await storage.updateChurchFeature(featureId, {
+        isEnabled,
+        lastModified: new Date()
+      });
+      
+      res.json(updatedFeature);
+    } catch (error) {
+      console.error('Error updating church feature:', error);
+      res.status(500).json({ error: 'Failed to update church feature' });
     }
   });
 

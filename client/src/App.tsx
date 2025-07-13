@@ -45,6 +45,7 @@ const CommunicationPage = lazy(() => import("./pages/BulkCommunication"));
 const SermonStudioPage = lazy(() => import("./pages/SermonStudioPage"));
 const ContentDistributionPage = lazy(() => import("./pages/ContentDistributionPage"));
 const EngagementAnalyticsPage = lazy(() => import("./pages/EngagementAnalyticsPage"));
+const ChurchManagementPage = lazy(() => import("./pages/church-management"));
 
 const PersonalizedGuidancePage = lazy(() => import("./pages/PersonalizedGuidance"));
 const SourceAttributionPage = lazy(() => import("./pages/SourceAttribution"));
@@ -130,6 +131,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/social-feed" component={SocialFeedPage} />
                                     <ProtectedRoute path="/churches" component={Churches} />
                                     <ProtectedRoute path="/church-claiming" component={ChurchClaiming} />
+                                    <ProtectedRoute path="/church-management/:churchId" component={ChurchManagementPage} />
                                     <ProtectedRoute path="/events" component={Events} />
                                     <ProtectedRoute path="/prayer" component={Prayer} />
                                     <ProtectedRoute path="/prayer-wall" component={Prayer} />
