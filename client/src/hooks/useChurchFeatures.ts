@@ -3,12 +3,13 @@ import { queryClient } from '../lib/queryClient';
 import { useAuth } from './useAuth';
 import type { ChurchFeatureSetting } from '../../../shared/schema';
 
-// Force refresh church data cache immediately
-setTimeout(() => {
-  console.log('Forcing complete cache reset...');
-  queryClient.clear(); // Clear ALL cached data
-  window.location.reload(); // Force page reload to completely reset cache
-}, 2000);
+// Force refresh church data to pick up new ordering
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    console.log('Refreshing church cache for new ordering...');
+    queryClient.invalidateQueries({ queryKey: ['user-churches'] });
+  }, 1000);
+}
 
 interface FeatureToggleData {
   isEnabled: boolean;
@@ -129,8 +130,8 @@ export function useIsFeatureEnabled() {
     queryKey: ['user-churches', user?.id],
     queryFn: () => fetch('/api/users/churches', { credentials: 'include' }).then(res => res.json()),
     enabled: !!user,
-    staleTime: 0, // Always refetch to ensure fresh church ordering
-    refetchOnWindowFocus: true
+    staleTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: false
   });
   
   // Use the most recently accessed church (first in the ordered list)
@@ -143,7 +144,10 @@ export function useIsFeatureEnabled() {
     // Extract the key from href (e.g., "/donation-demo" -> "donation")
     const key = href.replace('/', '').replace('-demo', '');
     
-    // Debug logging
+    // Debug logging with first 3 churches
+    if (key === 'donation') {  // Only log once to avoid spam
+      console.log('Full church order:', userChurches?.slice(0, 3).map(c => ({id: c.id, name: c.name})));
+    }
     console.log(`Feature check for ${key}:`, {
       href,
       key,
