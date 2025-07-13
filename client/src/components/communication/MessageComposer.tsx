@@ -23,6 +23,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { CommunicationState } from './UnifiedCommunicationHub';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface MessageComposerProps {
   state: CommunicationState;
@@ -47,6 +48,7 @@ export default function MessageComposer({
   templatesLoading, 
   onApplyTemplate 
 }: MessageComposerProps) {
+  const queryClient = useQueryClient();
   const { message, templates } = state;
 
   const updateMessage = (updates: Partial<typeof message>) => {
@@ -238,7 +240,7 @@ export default function MessageComposer({
                           }
                           
                           try {
-                            const response = await fetch('/api/communication/templates', {
+                            const response = await fetch('/api/communications/templates', {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -260,8 +262,8 @@ export default function MessageComposer({
                                   newTemplate: undefined
                                 } 
                               });
-                              // Refresh templates
-                              window.location.reload();
+                              // Refresh templates using React Query
+                              queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
                             } else {
                               alert('Failed to save template');
                             }
