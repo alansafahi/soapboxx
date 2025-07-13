@@ -72,7 +72,7 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     description: 'Integrated donation processing and giving tracking',
     icon: DollarSign,
     priority: 'medium',
-    defaultEnabled: false,
+    defaultEnabled: true,
     recommendedFor: ['small', 'medium']
   },
   { 
@@ -83,7 +83,7 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     icon: Heart,
     priority: 'high',
     defaultEnabled: true,
-    recommendedFor: ['small', 'medium']
+    recommendedFor: ['all']
   },
   { 
     category: 'spiritual_tools', 
@@ -93,7 +93,7 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     icon: Headphones,
     priority: 'medium',
     defaultEnabled: true,
-    recommendedFor: ['small', 'medium']
+    recommendedFor: ['all']
   },
   { 
     category: 'spiritual_tools', 
@@ -102,8 +102,8 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     description: 'Guided meditation and prayer routines',
     icon: Music,
     priority: 'low',
-    defaultEnabled: false,
-    recommendedFor: ['small']
+    defaultEnabled: true,
+    recommendedFor: ['all']
   },
   { 
     category: 'media_contents', 
@@ -112,8 +112,8 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     description: 'Church video content and sermon archive',
     icon: Video,
     priority: 'low',
-    defaultEnabled: false,
-    recommendedFor: ['small']
+    defaultEnabled: true,
+    recommendedFor: ['all']
   },
   { 
     category: 'media_contents', 
@@ -122,8 +122,8 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     description: 'Church photo gallery and visual content sharing',
     icon: Image,
     priority: 'low',
-    defaultEnabled: false,
-    recommendedFor: ['small']
+    defaultEnabled: true,
+    recommendedFor: ['all']
   },
   { 
     category: 'admin_portal', 
@@ -132,8 +132,8 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     description: 'Mass messaging and communication templates',
     icon: MessageSquare,
     priority: 'high',
-    defaultEnabled: false,
-    recommendedFor: ['small', 'medium']
+    defaultEnabled: true,
+    recommendedFor: ['all']
   },
   { 
     category: 'admin_portal', 
@@ -143,7 +143,7 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
     icon: Mic,
     priority: 'medium',
     defaultEnabled: true,
-    recommendedFor: ['small', 'medium']
+    recommendedFor: ['all']
   },
 ];
 
@@ -164,11 +164,10 @@ export default function ChurchFeatureSetupDialog({
 }: ChurchFeatureSetupDialogProps) {
   const { toast } = useToast();
   const [features, setFeatures] = useState<Record<string, boolean>>(() => {
-    // Initialize features based on church size recommendations
+    // Initialize all features as enabled by default - churches can turn off what they don't need
     const initialFeatures: Record<string, boolean> = {};
     CONFIGURABLE_FEATURES.forEach(feature => {
-      const isRecommended = feature.recommendedFor.includes(churchSize) || feature.recommendedFor.includes('all');
-      initialFeatures[`${feature.category}-${feature.name}`] = isRecommended && feature.defaultEnabled;
+      initialFeatures[`${feature.category}-${feature.name}`] = feature.defaultEnabled;
     });
     return initialFeatures;
   });
@@ -253,10 +252,7 @@ export default function ChurchFeatureSetupDialog({
   };
 
   const getRecommendationText = (feature: FeatureConfig) => {
-    if (feature.recommendedFor.includes(churchSize)) {
-      return feature.defaultEnabled ? 'Recommended for your church size' : 'Optional for your church size';
-    }
-    return 'Not typically needed for your church size';
+    return feature.defaultEnabled ? 'Enabled by default - turn off if not needed' : 'Available to enable if desired';
   };
 
   const enabledCount = Object.values(features).filter(Boolean).length;
@@ -270,7 +266,7 @@ export default function ChurchFeatureSetupDialog({
             Configure SoapBox Features for {churchName}
           </DialogTitle>
           <DialogDescription>
-            Choose which SoapBox features you'd like to enable for your church. You can always adjust these settings later in the admin portal.
+            All SoapBox features are enabled by default. Disable any features you already have solutions for or don't want your members to see.
           </DialogDescription>
         </DialogHeader>
 
@@ -278,11 +274,11 @@ export default function ChurchFeatureSetupDialog({
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Settings className="h-4 w-4 text-blue-600" />
-              <span className="font-medium text-blue-900 dark:text-blue-100">Church Size: {churchSize.charAt(0).toUpperCase() + churchSize.slice(1)}</span>
+              <span className="font-medium text-blue-900 dark:text-blue-100">Feature Configuration Approach</span>
             </div>
             <p className="text-sm text-blue-700 dark:text-blue-200">
-              We've pre-selected features typically used by {churchSize} churches. Enable only what you need - 
-              features you already have solutions for can be disabled to avoid confusion.
+              All features start enabled to give you full SoapBox functionality. Turn off features you already have solutions for 
+              or don't want visible to your members. You can always adjust these settings later in the admin portal.
             </p>
           </div>
 
@@ -305,9 +301,9 @@ export default function ChurchFeatureSetupDialog({
                             <Badge variant="outline" className={getPriorityColor(feature.priority)}>
                               {feature.priority}
                             </Badge>
-                            {isRecommended && (
+                            {feature.defaultEnabled && (
                               <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                Recommended
+                                Default On
                               </Badge>
                             )}
                           </div>
