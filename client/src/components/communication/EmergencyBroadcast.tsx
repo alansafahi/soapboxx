@@ -7,13 +7,15 @@ import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import { Alert, AlertDescription } from '../ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { useToast } from '../../hooks/use-toast';
 import { apiRequest } from '../../lib/queryClient';
-import { Shield, AlertTriangle, Clock, Zap } from 'lucide-react';
+import { Shield, AlertTriangle, Clock, Zap, CheckCircle, XCircle } from 'lucide-react';
 
 export default function EmergencyBroadcast() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const [emergencyForm, setEmergencyForm] = useState({
     title: '',
@@ -51,10 +53,12 @@ export default function EmergencyBroadcast() {
       return;
     }
 
-    // Confirm emergency broadcast
-    if (confirm('Are you sure you want to send this emergency broadcast? This will immediately notify ALL church members.')) {
-      emergencyBroadcastMutation.mutate(emergencyForm);
-    }
+    setShowConfirmDialog(true);
+  };
+
+  const confirmAndSendBroadcast = () => {
+    setShowConfirmDialog(false);
+    emergencyBroadcastMutation.mutate(emergencyForm);
   };
 
   return (
@@ -160,6 +164,71 @@ export default function EmergencyBroadcast() {
           </div>
         )}
       </CardContent>
+
+      {/* Improved Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Emergency Broadcast Confirmation
+            </DialogTitle>
+            <DialogDescription>
+              Please confirm this urgent broadcast will be sent to all church members immediately.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
+                🚨 {emergencyForm.title}
+              </h4>
+              <p className="text-sm text-red-700 dark:text-red-300 line-clamp-3">
+                {emergencyForm.content}
+              </p>
+            </div>
+
+            <div className="bg-orange-50 dark:bg-orange-950 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-orange-800 dark:text-orange-200">
+                  <div className="font-medium mb-1">This emergency broadcast will:</div>
+                  <ul className="space-y-0.5 text-xs">
+                    <li>• Notify ALL church members instantly</li>
+                    <li>• Send via email, push, and in-app notifications</li>
+                    <li>• Mark as high priority and urgent</li>
+                    <li>• Cannot be recalled once sent</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+              className="flex items-center gap-2"
+            >
+              <XCircle className="w-4 h-4" />
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmAndSendBroadcast}
+              disabled={emergencyBroadcastMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              {emergencyBroadcastMutation.isPending ? (
+                <Clock className="w-4 h-4 animate-spin" />
+              ) : (
+                <CheckCircle className="w-4 h-4" />
+              )}
+              {emergencyBroadcastMutation.isPending ? 'Sending...' : 'Send Emergency Broadcast'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
