@@ -184,7 +184,7 @@ export default function UnifiedCommunicationHub() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="unified" className="flex items-center gap-1 text-xs sm:text-sm">
             <Send className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Compose & Templates</span>
+            <span className="hidden sm:inline">Compose</span>
             <span className="sm:hidden">Compose</span>
           </TabsTrigger>
           <TabsTrigger value="emergency" className="flex items-center gap-1 text-xs sm:text-sm">
