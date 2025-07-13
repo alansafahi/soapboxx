@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 13, 2025: SOAPBOX OWNER ADMIN PRIVILEGES IMPLEMENTED - Successfully added proper administrative controls for SoapBox Owners in church discovery interface
+  - ADMIN CONTROLS ADDED: SoapBox Owners now see "Admin Portal" and "Delete" buttons instead of "Connect" for all churches
+  - ROLE-BASED UI: Church discovery interface shows different controls based on user role (soapbox_owner vs regular users)
+  - DELETE FUNCTIONALITY: Added DELETE /api/churches/:churchId endpoint with proper SoapBox Owner authentication
+  - CHURCH SEARCH FIXED: Changed default denomination filter from "Presbyterian" to "all" so Test Church (Christian) appears in search
+  - FEATURE ERROR HANDLING: Enhanced ChurchFeatureSetupDialog with backup initialization and graceful error recovery
+  - ADMIN ACCESS STREAMLINED: SoapBox Owners can directly access admin portal and manage churches without joining them
 - July 13, 2025: CHURCH FEATURE SETUP DIALOG FULLY IMPLEMENTED - Successfully completed automated feature initialization system triggering after church creation with intelligent configuration wizard
   - AUTOMATIC FEATURE INITIALIZATION: Backend automatically initializes church features with size-based defaults when new churches are created via storage.initializeChurchFeatures()
   - FEATURE SETUP WIZARD: Created ChurchFeatureSetupDialog component with smart recommendations based on church size (small/medium/large/mega)

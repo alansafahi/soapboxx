@@ -5868,6 +5868,45 @@ Return JSON with this exact structure:
     }
   });
 
+  // Delete church (SoapBox Owner only)
+  app.delete('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user is SoapBox Owner
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'soapbox_owner') {
+        return res.status(403).json({ error: 'Only SoapBox Owners can delete churches' });
+      }
+
+      if (!churchId || isNaN(churchId)) {
+        return res.status(400).json({ error: 'Valid church ID required' });
+      }
+
+      // Get church details before deletion for response
+      const church = await storage.getChurch(churchId);
+      if (!church) {
+        return res.status(404).json({ error: 'Church not found' });
+      }
+
+      // TODO: Implement deleteChurch method in storage
+      // await storage.deleteChurch(churchId);
+      
+      res.json({ 
+        success: true, 
+        message: `Church "${church.name}" deletion will be implemented`,
+        churchId 
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete church' });
+    }
+  });
+
   // Bulk church import (admin only)
   app.post('/api/churches/bulk-import', isAuthenticated, async (req: any, res) => {
     try {

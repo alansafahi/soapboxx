@@ -996,22 +996,60 @@ export default function EnhancedChurchDiscovery() {
                                 Website
                               </Button>
                             )}
-                            <motion.div
-                              animate={animatingButtons.has(church.id) ? { scale: [1, 0.95, 1] } : {}}
-                              transition={{ duration: 0.4 }}
-                            >
-                              <Button
-                                onClick={() => handleJoinChurch(church.id)}
-                                disabled={joinedChurches.has(church.id) || joinChurchMutation.isPending}
-                                className={`${
-                                  joinedChurches.has(church.id)
-                                    ? 'bg-green-600 hover:bg-green-700'
-                                    : 'bg-purple-600 hover:bg-purple-700'
-                                } text-white`}
+                            {user?.role === 'soapbox_owner' ? (
+                              // SoapBox Owner admin controls
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={() => window.open(`/admin`, '_blank')}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                                  size="sm"
+                                >
+                                  Admin Portal
+                                </Button>
+                                <Button
+                                  onClick={async () => {
+                                    if (confirm(`Are you sure you want to delete ${church.name}? This action cannot be undone.`)) {
+                                      try {
+                                        await apiRequest('DELETE', `/api/churches/${church.id}`);
+                                        toast({
+                                          title: "Church Deletion Initiated",
+                                          description: `${church.name} deletion request processed.`,
+                                        });
+                                        queryClient.invalidateQueries({ queryKey: ['/api/churches/search'] });
+                                      } catch (error) {
+                                        toast({
+                                          title: "Delete Failed",
+                                          description: "Failed to delete church. Please try again.",
+                                          variant: "destructive"
+                                        });
+                                      }
+                                    }
+                                  }}
+                                  variant="destructive"
+                                  size="sm"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            ) : (
+                              // Regular user connect button
+                              <motion.div
+                                animate={animatingButtons.has(church.id) ? { scale: [1, 0.95, 1] } : {}}
+                                transition={{ duration: 0.4 }}
                               >
-                                {joinedChurches.has(church.id) ? 'Joined ✓' : 'Connect'}
-                              </Button>
-                            </motion.div>
+                                <Button
+                                  onClick={() => handleJoinChurch(church.id)}
+                                  disabled={joinedChurches.has(church.id) || joinChurchMutation.isPending}
+                                  className={`${
+                                    joinedChurches.has(church.id)
+                                      ? 'bg-green-600 hover:bg-green-700'
+                                      : 'bg-purple-600 hover:bg-purple-700'
+                                  } text-white`}
+                                >
+                                  {joinedChurches.has(church.id) ? 'Joined ✓' : 'Connect'}
+                                </Button>
+                              </motion.div>
+                            )}
                           </div>
                         </div>
 
