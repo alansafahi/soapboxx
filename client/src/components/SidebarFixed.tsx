@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -178,14 +178,7 @@ export default function SidebarFixed() {
       
       // Then check church feature settings - use proper feature key mapping
       const featureKey = item.href.replace('/', '').replace('-demo', '');
-      const isEnabled = isFeatureEnabled(featureKey);
-      
-      // Debug logging for Prayer Wall and Donation specifically
-      if (featureKey === 'prayer-wall' || featureKey === 'donation') {
-        console.log(`[SIDEBAR] ${item.label} (${featureKey}): isEnabled = ${isEnabled}`);
-      }
-      
-      return isEnabled;
+      return isFeatureEnabled(featureKey);
     });
     
     return {
@@ -194,8 +187,7 @@ export default function SidebarFixed() {
     };
   }).filter(group => {
     // Only show groups that have items after filtering
-    const hasItems = group.items.length > 0;
-    return hasItems;
+    return group.items.length > 0;
   });
 
   const toggleGroup = (groupLabel: string) => {
