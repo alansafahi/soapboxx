@@ -38,7 +38,7 @@ export default function EnhancedChurchDiscovery() {
   const [displayedCount, setDisplayedCount] = useState(10);
   const [pageSize, setPageSize] = useState(10); // User-configurable page size
   const [filters, setFilters] = useState<FilterState>({
-    denomination: "Presbyterian", // Default to Presbyterian to show all 1,892 churches
+    denomination: "all", // Default to show all churches of all denominations
     location: "",
     size: "all",
     proximity: 25, // Default 25 miles
