@@ -5,6 +5,7 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   History, 
   Search, 
@@ -17,7 +18,8 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Eye
+  Eye,
+  RefreshCw
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -29,6 +31,18 @@ interface MessageHistoryProps {
 export default function MessageHistory({ messages, isLoading }: MessageHistoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['/api/communications/messages'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/communications/messages'] });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Filter messages based on search term and type
   const filteredMessages = (messages || []).filter((message: any) => {
@@ -79,10 +93,22 @@ export default function MessageHistory({ messages, isLoading }: MessageHistoryPr
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <History className="w-5 h-5" />
-          Message History
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <History className="w-5 h-5" />
+            Message History
+          </CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
         
         {/* Filter and Search Controls */}
         <div className="flex items-center gap-3 pt-2">

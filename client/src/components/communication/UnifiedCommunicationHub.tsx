@@ -108,12 +108,18 @@ export default function UnifiedCommunicationHub() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: (data: any) => apiRequest('POST', '/api/communications/messages', data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Message sent successfully",
         description: "Your announcement has been delivered to the selected recipients."
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/communications/messages'] });
+      
+      // Force refresh the message history with a slight delay to ensure database write completion
+      setTimeout(async () => {
+        await queryClient.invalidateQueries({ queryKey: ['/api/communications/messages'] });
+        await queryClient.refetchQueries({ queryKey: ['/api/communications/messages'] });
+      }, 500);
+      
       // Reset message form
       updateState({
         message: {
