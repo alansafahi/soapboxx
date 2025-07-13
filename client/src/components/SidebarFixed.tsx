@@ -80,11 +80,22 @@ export default function SidebarFixed() {
 
   // Check if user has admin role in any church
   const hasChurchAdminRole = useMemo(() => {
-    if (!userChurches.length) return false;
+    console.log('hasChurchAdminRole calculation:', { userChurches, userChurchesLength: userChurches?.length });
+    
+    if (!userChurches || !userChurches.length) {
+      console.log('No user churches found, returning false');
+      return false;
+    }
     
     const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
+    
+    // Check each church role individually
+    userChurches.forEach((uc: any, index: number) => {
+      console.log(`Church ${index + 1} (${uc.name}):`, { role: uc.role, isAdmin: adminRoles.includes(uc.role) });
+    });
+    
     const hasRole = userChurches.some((uc: any) => adminRoles.includes(uc.role));
-    console.log('Church admin role check:', { userChurches, adminRoles, hasRole });
+    console.log('Final church admin role check result:', { hasRole });
     return hasRole;
   }, [userChurches]);
 
