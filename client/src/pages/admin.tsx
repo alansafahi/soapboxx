@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
+import { useChurchFeatures } from "../hooks/useChurchFeatures";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -380,17 +381,39 @@ function ChurchManagementTab() {
 
 function MembersPage() {
   const { user } = useAuth();
+  const { hasChurchAdminRole } = useChurchFeatures();
   const [selectedChurch, setSelectedChurch] = useState<number | null>(null);
 
-  // Only allow soapbox_owner role to access admin features
-  if (user?.role !== 'soapbox_owner') {
+  // Allow church administrators and SoapBox owners to access member directory
+  const allowedRoles = ['soapbox_owner', 'church_admin', 'pastor', 'lead_pastor', 'admin', 'system_admin'];
+  const hasGlobalAccess = allowedRoles.includes(user?.role || '') || user?.role === 'soapbox_owner';
+  const hasAccess = hasGlobalAccess || hasChurchAdminRole;
+
+  if (!hasAccess) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Card className="p-8 text-center">
           <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
-          <p className="text-gray-600">This page is only accessible to SoapBox administrators.</p>
+          <p className="text-gray-600">This page is only accessible to church administrators and SoapBox administrators.</p>
         </Card>
+      </div>
+    );
+  }
+
+  // Show simplified member directory for church admins, full admin for soapbox owners
+  if (hasChurchAdminRole && user?.role !== 'soapbox_owner') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Member Directory</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Manage church members and their information
+            </p>
+          </div>
+          <MemberManagementSystem selectedChurch={selectedChurch} />
+        </main>
       </div>
     );
   }
