@@ -25,6 +25,7 @@ import { SimpleMemberDirectory } from "../components/SimpleMemberDirectory";
 import { SessionsManagement } from "../components/SessionsManagement";
 import SermonCreationStudio from "../components/SermonCreationStudio";
 import RoleSwitcher from "../components/RoleSwitcher";
+import ChurchFeatureSetupDialog from "../components/ChurchFeatureSetupDialog";
 
 const churchFormSchema = insertChurchSchema;
 const eventFormSchema = insertEventSchema;
@@ -45,6 +46,10 @@ export default function EnhancedAdminPortal() {
   const [isChurchDialogOpen, setIsChurchDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isDevotionalDialogOpen, setIsDevotionalDialogOpen] = useState(false);
+  
+  // Feature Setup Dialog State
+  const [showFeatureSetup, setShowFeatureSetup] = useState(false);
+  const [newlyCreatedChurch, setNewlyCreatedChurch] = useState<{ id: number; name: string; size?: string } | null>(null);
 
   const { data: churches = [], isLoading: churchesLoading } = useQuery({
     queryKey: ["/api/churches/created"],
@@ -115,13 +120,25 @@ export default function EnhancedAdminPortal() {
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const createdChurch = data.church;
+      const formData = churchForm.getValues();
+      
       queryClient.invalidateQueries({ queryKey: ["/api/churches"] });
       setIsChurchDialogOpen(false);
+      
+      // Store the newly created church info and show feature setup
+      setNewlyCreatedChurch({
+        id: createdChurch.id,
+        name: createdChurch.name,
+        size: formData.size || 'small'
+      });
+      setShowFeatureSetup(true);
+      
       churchForm.reset();
       toast({
         title: "Success",
-        description: "Church created successfully",
+        description: "Church created successfully. Now let's configure features.",
       });
     },
     onError: (error: any) => {
@@ -729,6 +746,20 @@ export default function EnhancedAdminPortal() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Church Feature Setup Dialog */}
+      {newlyCreatedChurch && (
+        <ChurchFeatureSetupDialog
+          isOpen={showFeatureSetup}
+          onClose={() => {
+            setShowFeatureSetup(false);
+            setNewlyCreatedChurch(null);
+          }}
+          churchId={newlyCreatedChurch.id}
+          churchName={newlyCreatedChurch.name}
+          churchSize={newlyCreatedChurch.size}
+        />
+      )}
     </div>
   );
 }

@@ -5775,10 +5775,27 @@ Return JSON with this exact structure:
       // Make user a member of the church they created
       await storage.joinChurch(req.session.userId, newChurch.id);
 
+      // Initialize church features with default settings based on church size
+      const churchSize = size?.toLowerCase() || 'small';
+      const sizeMapping = {
+        'small': 'small',
+        'medium': 'medium', 
+        'large': 'large',
+        'mega': 'mega'
+      };
+      
+      try {
+        await storage.initializeChurchFeatures(newChurch.id, sizeMapping[churchSize as keyof typeof sizeMapping] || 'small');
+      } catch (error) {
+        // Continue even if feature initialization fails
+        console.error('Failed to initialize church features:', error);
+      }
+
       res.json({
         success: true,
         message: 'Church created successfully',
-        church: newChurch
+        church: newChurch,
+        featuresInitialized: true
       });
 
     } catch (error: any) {

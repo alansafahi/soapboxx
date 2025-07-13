@@ -15,6 +15,7 @@ import { Textarea } from "./ui/textarea";
 import { Star, MapPin, Phone, Globe, Users, Search, Filter, ChevronDown, Building, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Church } from "../../../shared/schema";
+import ChurchFeatureSetupDialog from "./ChurchFeatureSetupDialog";
 
 interface FilterState {
   denomination: string;
@@ -58,6 +59,10 @@ export default function EnhancedChurchDiscovery() {
   const [showAddChurchModal, setShowAddChurchModal] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
+  
+  // Feature Setup Dialog State
+  const [showFeatureSetup, setShowFeatureSetup] = useState(false);
+  const [newlyCreatedChurch, setNewlyCreatedChurch] = useState<{ id: number; name: string; size?: string } | null>(null);
   const [newChurchData, setNewChurchData] = useState({
     name: '',
     denomination: '',
@@ -303,12 +308,25 @@ export default function EnhancedChurchDiscovery() {
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const createdChurch = data.church;
+      
       toast({
         title: "Church Added Successfully",
-        description: "Your church has been added and is pending verification.",
+        description: "Now let's configure which SoapBox features you'd like to use.",
       });
+      
       setShowAddChurchModal(false);
+      
+      // Store the newly created church info and show feature setup
+      setNewlyCreatedChurch({
+        id: createdChurch.id,
+        name: createdChurch.name,
+        size: newChurchData.size || 'small'
+      });
+      setShowFeatureSetup(true);
+      
+      // Reset form data
       setNewChurchData({
         name: '',
         denomination: '',
@@ -340,6 +358,9 @@ export default function EnhancedChurchDiscovery() {
           linkedin: ''
         }
       });
+      setLogoFile(null);
+      setLogoPreview('');
+      
       queryClient.invalidateQueries({ queryKey: ['/api/churches'] });
     },
     onError: (error: any) => {
@@ -1399,6 +1420,20 @@ export default function EnhancedChurchDiscovery() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Church Feature Setup Dialog */}
+      {newlyCreatedChurch && (
+        <ChurchFeatureSetupDialog
+          isOpen={showFeatureSetup}
+          onClose={() => {
+            setShowFeatureSetup(false);
+            setNewlyCreatedChurch(null);
+          }}
+          churchId={newlyCreatedChurch.id}
+          churchName={newlyCreatedChurch.name}
+          churchSize={newlyCreatedChurch.size}
+        />
+      )}
     </div>
   );
 }
