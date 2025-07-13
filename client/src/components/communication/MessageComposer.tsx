@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { 
   Send, 
   Users, 
@@ -52,6 +53,7 @@ export default function MessageComposer({
   const queryClient = useQueryClient();
   const { message, templates } = state;
   const [expandedTemplates, setExpandedTemplates] = React.useState<{[key: number]: boolean}>({});
+  const [deleteDialog, setDeleteDialog] = React.useState<{open: boolean, template: any | null}>({open: false, template: null});
 
   const updateMessage = (updates: Partial<typeof message>) => {
     updateState({ message: { ...message, ...updates } });
@@ -341,26 +343,8 @@ export default function MessageComposer({
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={async () => {
-                                  if (confirm('Are you sure you want to delete this template?')) {
-                                    try {
-                                      const response = await fetch(`/api/communications/templates/${template.id}`, {
-                                        method: 'DELETE',
-                                        credentials: 'include'
-                                      });
-                                      
-                                      if (response.ok) {
-                                        await queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
-                                        alert('Template deleted successfully!');
-                                      } else {
-                                        alert('Failed to delete template');
-                                      }
-                                    } catch (error) {
-                                      alert('Error deleting template');
-                                    }
-                                  }
-                                }}
-                                className="shrink-0 text-xs text-red-600 hover:text-red-700"
+                                onClick={() => setDeleteDialog({open: true, template})}
+                                className="shrink-0 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>
@@ -621,5 +605,63 @@ export default function MessageComposer({
         )}
       </CardContent>
     </Card>
+
+    {/* Delete Confirmation Dialog */}
+    <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({open, template: null})}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-600" />
+            Delete Template
+          </DialogTitle>
+          <DialogDescription>
+            Are you sure you want to permanently delete the template "{deleteDialog.template?.name}"? 
+            This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 my-4">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-yellow-800">
+              <strong>Warning:</strong> Deleting this template will permanently remove it from your library. 
+              Any future communications will no longer have access to this template.
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setDeleteDialog({open: false, template: null})}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              try {
+                const response = await fetch(`/api/communications/templates/${deleteDialog.template?.id}`, {
+                  method: 'DELETE',
+                  credentials: 'include'
+                });
+                
+                if (response.ok) {
+                  await queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
+                  setDeleteDialog({open: false, template: null});
+                  // Could add a toast notification here instead of alert
+                } else {
+                  alert('Failed to delete template');
+                }
+              } catch (error) {
+                alert('Error deleting template');
+              }
+            }}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete Template
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
