@@ -5967,6 +5967,64 @@ Return JSON with this exact structure:
     }
   });
 
+  // Disconnect user from a church
+  app.post('/api/users/churches/:churchId/disconnect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get user's churches before disconnecting to check if this is primary
+      const userChurches = await storage.getUserChurches(userId);
+      const isPrimaryChurch = userChurches.length > 0 && userChurches[0].id === churchId;
+      
+      // Disconnect from church
+      await storage.removeMember(churchId, userId);
+      
+      // If this was the primary church and user has other churches, update access time for next church
+      if (isPrimaryChurch && userChurches.length > 1) {
+        const nextPrimaryChurch = userChurches[1];
+        await storage.updateChurchAccess(userId, nextPrimaryChurch.id);
+      }
+      
+      res.json({ 
+        success: true,
+        wasPrimary: isPrimaryChurch,
+        remainingChurches: userChurches.length - 1
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to disconnect from church' });
+    }
+  });
+
+  // Set a church as primary by updating access timestamp
+  app.post('/api/users/churches/:churchId/set-primary', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Verify user is member of this church
+      const userChurch = await storage.getUserChurch(userId, churchId);
+      if (!userChurch) {
+        return res.status(403).json({ error: 'Not a member of this church' });
+      }
+
+      // Update access timestamp to make this church primary
+      await storage.updateChurchAccess(userId, churchId);
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to set primary church' });
+    }
+  });
+
   // User profile update endpoint
   app.put('/api/users/profile', isAuthenticated, async (req: any, res) => {
     try {
