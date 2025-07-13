@@ -161,9 +161,12 @@ export function useIsFeatureEnabled() {
       return true;
     }
     
-    // Always show admin features to SoapBox Owner
-    if (user?.role === 'soapbox_owner') {
-      console.log(`${key} showing to SoapBox Owner`);
+    // Check if SoapBox Owner wants to test church feature filtering
+    // We'll check for a special flag or always respect church settings for better testing
+    const respectChurchSettings = true; // Allow SoapBox Owners to see filtered features for testing
+    
+    if (user?.role === 'soapbox_owner' && !respectChurchSettings) {
+      console.log(`${key} showing to SoapBox Owner (admin override)`);
       return true;
     }
     
