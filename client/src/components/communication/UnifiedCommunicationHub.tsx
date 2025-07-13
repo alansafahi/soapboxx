@@ -37,6 +37,7 @@ export interface CommunicationState {
     activePanel: 'compose' | 'templates';
     showPreview: boolean;
     suggestions: any[];
+    showTemplates: boolean;
   };
 }
 
@@ -69,7 +70,8 @@ export default function UnifiedCommunicationHub() {
     ui: {
       activePanel: 'compose',
       showPreview: false,
-      suggestions: []
+      suggestions: [],
+      showTemplates: false
     }
   });
 
@@ -198,19 +200,24 @@ export default function UnifiedCommunicationHub() {
         </TabsList>
 
         <TabsContent value="unified" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-            {/* Message Composer - Left Panel */}
-            <div className="space-y-6 w-full">
-              <MessageComposer
-                state={communicationState}
-                updateState={updateState}
-                onSendMessage={handleSendMessage}
-                isLoading={sendMessageMutation.isPending}
-              />
-            </div>
+          <div className="space-y-6">
+            {/* Message Composer - Always Visible */}
+            <MessageComposer
+              state={communicationState}
+              updateState={updateState}
+              onSendMessage={handleSendMessage}
+              isLoading={sendMessageMutation.isPending}
+              onToggleTemplates={() => updateState({ 
+                ui: { 
+                  ...communicationState.ui, 
+                  showTemplates: !communicationState.ui.showTemplates 
+                } 
+              })}
+              showTemplates={communicationState.ui.showTemplates}
+            />
 
-            {/* Template Library - Right Panel */}
-            <div className="space-y-6 w-full">
+            {/* Template Library - Accordion Style */}
+            {communicationState.ui.showTemplates && (
               <TemplateLibrary
                 state={communicationState}
                 updateState={updateState}
@@ -218,7 +225,7 @@ export default function UnifiedCommunicationHub() {
                 isLoading={templatesLoading}
                 onApplyTemplate={applyTemplate}
               />
-            </div>
+            )}
           </div>
         </TabsContent>
 

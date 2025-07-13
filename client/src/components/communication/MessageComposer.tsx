@@ -15,7 +15,9 @@ import {
   MessageSquare, 
   Target,
   Clock,
-  AlertTriangle 
+  AlertTriangle,
+  FileText,
+  Plus
 } from 'lucide-react';
 import { CommunicationState } from './UnifiedCommunicationHub';
 
@@ -24,9 +26,11 @@ interface MessageComposerProps {
   updateState: (updates: Partial<CommunicationState>) => void;
   onSendMessage: () => void;
   isLoading?: boolean;
+  onToggleTemplates?: () => void;
+  showTemplates?: boolean;
 }
 
-export default function MessageComposer({ state, updateState, onSendMessage, isLoading }: MessageComposerProps) {
+export default function MessageComposer({ state, updateState, onSendMessage, isLoading, onToggleTemplates, showTemplates }: MessageComposerProps) {
   const { message, templates } = state;
 
   const updateMessage = (updates: Partial<typeof message>) => {
@@ -64,15 +68,43 @@ export default function MessageComposer({ state, updateState, onSendMessage, isL
   return (
     <Card className="h-fit w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
-          Message Builder
-          {templates.active && (
-            <Badge variant="outline" className="ml-auto">
-              Using: {templates.active.name}
-            </Badge>
-          )}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            Message Builder
+            {templates.active && (
+              <Badge variant="outline" className="ml-2">
+                Using: {templates.active.name}
+              </Badge>
+            )}
+          </CardTitle>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onToggleTemplates}
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              {showTemplates ? 'Hide Templates' : 'Template Library'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updateState({ 
+                templates: { 
+                  ...templates, 
+                  creating: !templates.creating 
+                } 
+              })}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Message Type Selector */}
