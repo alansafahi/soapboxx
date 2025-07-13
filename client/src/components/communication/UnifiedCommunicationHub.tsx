@@ -200,33 +200,22 @@ export default function UnifiedCommunicationHub() {
         </TabsList>
 
         <TabsContent value="unified" className="space-y-6">
-          <div className="space-y-6">
-            {/* Message Composer - Always Visible */}
-            <MessageComposer
-              state={communicationState}
-              updateState={updateState}
-              onSendMessage={handleSendMessage}
-              isLoading={sendMessageMutation.isPending}
-              onToggleTemplates={() => updateState({ 
-                ui: { 
-                  ...communicationState.ui, 
-                  showTemplates: !communicationState.ui.showTemplates 
-                } 
-              })}
-              showTemplates={communicationState.ui.showTemplates}
-            />
-
-            {/* Template Library - Accordion Style */}
-            {communicationState.ui.showTemplates && (
-              <TemplateLibrary
-                state={communicationState}
-                updateState={updateState}
-                templates={templates}
-                isLoading={templatesLoading}
-                onApplyTemplate={applyTemplate}
-              />
-            )}
-          </div>
+          <MessageComposer
+            state={communicationState}
+            updateState={updateState}
+            onSendMessage={handleSendMessage}
+            isLoading={sendMessageMutation.isPending}
+            onToggleTemplates={() => updateState({ 
+              ui: { 
+                ...communicationState.ui, 
+                showTemplates: !communicationState.ui.showTemplates 
+              } 
+            })}
+            showTemplates={communicationState.ui.showTemplates}
+            templates={templates}
+            templatesLoading={templatesLoading}
+            onApplyTemplate={applyTemplate}
+          />
         </TabsContent>
 
         <TabsContent value="emergency">
