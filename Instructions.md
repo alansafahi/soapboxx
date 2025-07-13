@@ -313,7 +313,7 @@ These are modules that compete with existing tools used by large churches, or re
 | **Communication Hub** | Churches may use Mailchimp, Planning Center, or Breeze. |
 | **Sermon Studio** | May already have sermon archiving elsewhere. |
 | **Prayer Wall** | Some churches prefer closed/prayer team-based systems. |
-| **Leaderboard / Engagement Board** | May not align with culture of every church. |
+
 | **Audio Bible** | May prefer directing members to existing apps (YouVersion, Dwell, etc.). |
 | **Audio Routines** | Optional use case; may not apply to all church communities. |
 | **Video Library** | Churches may already host videos on YouTube/Vimeo. |
@@ -338,5 +338,6 @@ These are core user/account features and should always remain accessible:
 | **Home** | Central dashboard; required for navigation. |
 | **Messages** | Core 1:1 communication—should stay available. |
 | **Contacts** | Required for managing interactions. |
+| **Engagement Board** | Crucial feature for SoapBox growth and user retention - always visible. |
 | **Profile** | Needed for all users. |
 | **Settings** | Required to manage app-level preferences. |
