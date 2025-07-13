@@ -83,7 +83,9 @@ export default function SidebarFixed() {
     if (!userChurches.length) return false;
     
     const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
-    return userChurches.some((uc: any) => adminRoles.includes(uc.role));
+    const hasRole = userChurches.some((uc: any) => adminRoles.includes(uc.role));
+    console.log('Church admin role check:', { userChurches, adminRoles, hasRole });
+    return hasRole;
   }, [userChurches]);
 
   // Responsive sidebar behavior
@@ -189,6 +191,20 @@ export default function SidebarFixed() {
         // Check if user has required global role OR church admin role
         const hasGlobalRole = item.roles.includes(user.role || '');
         const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
+        
+        // Debug logging for admin portal items
+        if (item.label === 'Member Directory') {
+          console.log('Admin portal access check:', {
+            itemLabel: item.label,
+            userRole: user.role,
+            hasGlobalRole,
+            hasChurchAdminRole,
+            hasChurchRole,
+            itemRoles: item.roles,
+            shouldShow: hasGlobalRole || hasChurchRole
+          });
+        }
+        
         if (!hasGlobalRole && !hasChurchRole) return false;
       }
       

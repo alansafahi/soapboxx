@@ -3009,26 +3009,7 @@ export class DatabaseStorage implements IStorage {
 
   // User church connections
   async getUserChurches(userId: string): Promise<(Church & { role: string })[]> {
-    // Get church ordering info with roles
-    const orderingInfo = await db
-      .select({
-        churchId: userChurches.churchId,
-        lastAccessedAt: userChurches.lastAccessedAt,
-        joinedAt: userChurches.joinedAt,
-        roleId: userChurches.roleId,
-        name: churches.name
-      })
-      .from(userChurches)
-      .innerJoin(churches, eq(churches.id, userChurches.churchId))
-      .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true)
-      ))
-      .orderBy(desc(sql`COALESCE(${userChurches.lastAccessedAt}, ${userChurches.joinedAt})`));
-    
-    // Get full church data with roles in correct order
-    const churchIds = orderingInfo.map(o => o.churchId);
-    
+    // Get full church data with roles directly from user_churches table
     const result = await db
       .select({
         id: churches.id,
@@ -3056,36 +3037,22 @@ export class DatabaseStorage implements IStorage {
         isDemo: churches.isDemo,
         createdAt: churches.createdAt,
         updatedAt: churches.updatedAt,
-        roleId: userChurches.roleId,
+        role: userChurches.role,
+        lastAccessedAt: userChurches.lastAccessedAt,
+        joinedAt: userChurches.joinedAt,
       })
       .from(churches)
       .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
       .where(and(
-        inArray(churches.id, churchIds),
         eq(userChurches.userId, userId),
         eq(userChurches.isActive, true)
-      ));
+      ))
+      .orderBy(desc(sql`COALESCE(${userChurches.lastAccessedAt}, ${userChurches.joinedAt})`));
     
-    // Get role names for each church
-    const rolesData = await db.select().from(roles);
-    const rolesMap = rolesData.reduce((acc, role) => {
-      acc[role.id] = role.name;
-      return acc;
-    }, {} as Record<number, string>);
-    
-    // Sort according to original ordering and add role names
-    const sortedResult = churchIds.map(id => {
-      const church = result.find(church => church.id === id);
-      if (!church) return null;
-      
-      const { roleId, ...churchData } = church;
-      return {
-        ...churchData,
-        role: rolesMap[roleId] || 'member'
-      };
-    }).filter(Boolean) as (Church & { role: string })[];
-    
-    return sortedResult;
+    return result.map(({ lastAccessedAt, joinedAt, ...church }) => ({
+      ...church,
+      role: church.role || 'member'
+    }));
   }
 
   async getUserCreatedChurches(userId: string): Promise<Church[]> {
