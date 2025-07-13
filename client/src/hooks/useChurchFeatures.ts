@@ -3,12 +3,13 @@ import { queryClient } from '../lib/queryClient';
 import { useAuth } from './useAuth';
 import type { ChurchFeatureSetting } from '../../../shared/schema';
 
-// Force refresh church data to test new backend ordering fix
+// Force refresh after database timestamp update
 if (typeof window !== 'undefined') {
   setTimeout(() => {
-    console.log('[DEBUG] Testing new backend ordering fix...');
+    console.log('[DEBUG] Refreshing after database timestamp update...');
+    queryClient.clear(); // Clear all cache
     queryClient.invalidateQueries({ queryKey: ['user-churches'] });
-  }, 1000);
+  }, 500);
 }
 
 interface FeatureToggleData {
