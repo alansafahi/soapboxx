@@ -3,6 +3,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { useState } from 'react';
 import { 
   History, 
@@ -104,6 +105,16 @@ export default function MessageHistory({ messages, isLoading }: MessageHistoryPr
             </SelectContent>
           </Select>
         </div>
+        
+        {/* Info about recipient counts */}
+        {filteredMessages.length > 0 && (
+          <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p className="text-xs text-blue-700 dark:text-blue-300 flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              Recipient counts show active church members who received the message. Click the eye icon to view message details.
+            </p>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent>
@@ -158,9 +169,78 @@ export default function MessageHistory({ messages, isLoading }: MessageHistoryPr
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" title="View message details">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            {getMessageIcon(message.communicationType)}
+                            {message.subject || 'No Subject'}
+                          </DialogTitle>
+                          <DialogDescription>
+                            Message details and delivery information
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="space-y-4">
+                          {/* Message Content */}
+                          <div>
+                            <h4 className="font-medium text-sm mb-2">Message Content</h4>
+                            <div className="p-3 bg-muted rounded-lg">
+                              <p className="text-sm">{message.content}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Delivery Information */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <h4 className="font-medium text-sm mb-2">Delivery Details</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Status:</span>
+                                  <span>{getStatusBadge(message.deliveryStatus)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Recipients:</span>
+                                  <span>{message.recipientCount} members</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Type:</span>
+                                  <span className="capitalize">{message.communicationType.replace('_', ' ')}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Sent:</span>
+                                  <span>
+                                    {message.sentAt ? 
+                                      formatDistanceToNow(new Date(message.sentAt), { addSuffix: true }) : 
+                                      'Unknown'
+                                    }
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-medium text-sm mb-2">Sender Information</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Name:</span>
+                                  <span>{message.senderName || 'Unknown'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Email:</span>
+                                  <span className="text-xs">{message.sender?.email || 'N/A'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </div>

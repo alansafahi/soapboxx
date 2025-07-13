@@ -142,7 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- July 12, 2025: SUBJECT LINE BUG COMPLETELY FIXED - Successfully resolved critical "No Subject" display issue in Message History by correcting field mapping in getCommunicationHistory storage method
+- July 12, 2025: MESSAGE HISTORY ENHANCEMENTS COMPLETED - Successfully resolved subject line bug and enhanced user interface with detailed message view functionality
+  - SUBJECT LINE BUG FIXED: Corrected field mapping in getCommunicationHistory storage method to properly display subject lines
+  - EYE ICON FUNCTIONALITY ADDED: Implemented detailed message view dialog showing full content, delivery information, and sender details
+  - RECIPIENT COUNT CLARIFICATION: Added informational note explaining recipient counts reflect active church members (currently 2 members)
+  - ENHANCED MESSAGE DETAILS: Dialog displays message content, delivery status, recipient count, type, send time, and sender information
+  - USER EXPERIENCE IMPROVED: Clear tooltips and contextual information help users understand message history interface
   - ROOT CAUSE IDENTIFIED: Backend getCommunicationHistory method mapped database 'subject' field to 'title' but MessageHistory component expected 'subject' field
   - FIELD MAPPING CORRECTED: Enhanced storage method to return both 'subject' and 'title' fields ensuring proper display compatibility
   - DATABASE VERIFICATION: Communication records now properly store and display subject lines in Message History tab
