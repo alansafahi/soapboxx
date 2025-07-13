@@ -37,7 +37,7 @@ export default function MessageHistory({ messages, isLoading }: MessageHistoryPr
       message.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.senderName?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesType = filterType === 'all' || message.communicationType === filterType;
+    const matchesType = filterType === 'all' || message.communicationType === filterType || message.type === filterType;
     
     return matchesSearch && matchesType;
   });

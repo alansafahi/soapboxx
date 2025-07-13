@@ -52,7 +52,42 @@ export default function TemplateLibrary({
     category: 'announcements'
   });
 
-  const { templates: templateState } = state;
+  const { templates: templateState, message } = state;
+
+  // Smart template suggestions based on message content and type
+  const getSmartSuggestions = () => {
+    if (!templates?.length) return [];
+    
+    const allTemplates = [
+      ...(templates.announcements || []),
+      ...(templates.emergencies || []),
+      ...(templates.prayers || []),
+      ...(templates.custom || [])
+    ];
+
+    // Filter by message type first
+    let suggestions = allTemplates.filter(template => {
+      if (message.type === 'prayer_request') return template.category === 'prayers';
+      if (message.type === 'urgent') return template.category === 'emergencies';
+      if (message.type === 'event') return template.name?.toLowerCase().includes('event');
+      return template.category === 'announcements';
+    });
+
+    // If we have content, do keyword matching
+    if (message.content || message.title) {
+      const keywords = (message.content + ' ' + message.title).toLowerCase();
+      suggestions = suggestions.filter(template => {
+        const templateText = (template.content + ' ' + template.subject + ' ' + template.name).toLowerCase();
+        return keywords.split(' ').some(word => 
+          word.length > 3 && templateText.includes(word)
+        );
+      });
+    }
+
+    return suggestions.slice(0, 3); // Return top 3 suggestions
+  };
+
+  const smartSuggestions = getSmartSuggestions();
 
   // Create template mutation
   const createTemplateMutation = useMutation({

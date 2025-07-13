@@ -8327,7 +8327,7 @@ Please provide suggestions for the missing or incomplete sections.`
             subject: title,
             content: content,
             memberId: member.userId,
-            communicationType: 'announcement',
+            communicationType: type || 'announcement',
             direction: 'outbound',
             sentAt: new Date(),
             deliveryStatus: 'sent',
