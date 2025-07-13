@@ -326,3 +326,5 @@ export function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManage
     </div>
   );
 }
+
+export default ChurchFeatureManager;
