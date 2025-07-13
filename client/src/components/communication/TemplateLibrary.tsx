@@ -203,27 +203,7 @@ export default function TemplateLibrary({
     });
   };
 
-  // Get smart suggestions based on current message content
-  const getSmartSuggestions = () => {
-    if (!templates || !state.message.content) return [];
-    
-    const allTemplates = [
-      ...(templates.announcements || []),
-      ...(templates.emergencies || []),
-      ...(templates.prayers || [])
-    ];
 
-    // Simple keyword matching for suggestions
-    const messageWords = state.message.content.toLowerCase().split(' ');
-    const suggestions = allTemplates.filter((template: any) => {
-      const templateWords = (template.content + ' ' + template.name).toLowerCase();
-      return messageWords.some(word => word.length > 3 && templateWords.includes(word));
-    }).slice(0, 3);
-
-    return suggestions;
-  };
-
-  const smartSuggestions = getSmartSuggestions();
 
   // Get all templates in a flat array
   const allTemplates = templates && typeof templates === 'object' ? [
