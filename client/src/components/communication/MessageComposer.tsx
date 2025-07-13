@@ -241,7 +241,6 @@ export default function MessageComposer({
                           const newTemplate = templates.newTemplate;
                           
                           if (!newTemplate?.name || !newTemplate?.content) {
-                            alert('Please fill in template name and content');
                             return;
                           }
                           
@@ -262,7 +261,7 @@ export default function MessageComposer({
                             
                             if (response.ok) {
                               const result = await response.json();
-                              console.log('Template saved successfully:', result);
+                              
                               updateState({ 
                                 templates: { 
                                   ...templates, 
@@ -272,15 +271,15 @@ export default function MessageComposer({
                               });
                               // Refresh templates using React Query
                               await queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
-                              alert('Template saved successfully!');
+                              // Template saved successfully
                             } else {
                               const error = await response.text();
-                              console.error('Failed to save template:', error);
-                              alert('Failed to save template: ' + error);
+                              
+                              // Failed to save template
                             }
                           } catch (error) {
-                            console.error('Error saving template:', error);
-                            alert('Error saving template: ' + (error as Error).message);
+                            
+                            // Error saving template
                           }
                         }}
                       >
@@ -651,10 +650,10 @@ export default function MessageComposer({
                   setDeleteDialog({open: false, template: null});
                   // Could add a toast notification here instead of alert
                 } else {
-                  alert('Failed to delete template');
+                  // Failed to delete template
                 }
               } catch (error) {
-                alert('Error deleting template');
+                // Error deleting template
               }
             }}
             className="flex items-center gap-2"

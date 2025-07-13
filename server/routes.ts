@@ -8310,17 +8310,15 @@ Please provide suggestions for the missing or incomplete sections.`
           });
           successCount++;
         } catch (notificationError) {
-          console.error('Failed to create notification for user:', member.userId, notificationError);
+          // Failed to create notification - continue silently
         }
       }
 
       // Store communication in history for each member
-      console.log('🔍 TRACKING: Starting communication history storage for', targetMembers.length, 'members');
       let historyStoredCount = 0;
       
       for (const member of targetMembers) {
         try {
-          console.log('🔍 TRACKING: Storing communication record for member:', member.userId);
           await storage.createCommunicationRecord({
             churchId: churchId,
             sentBy: userId,
@@ -8335,13 +8333,10 @@ Please provide suggestions for the missing or incomplete sections.`
             followUpRequired: false
           });
           historyStoredCount++;
-          console.log('✅ TRACKING: Successfully stored record for member:', member.userId);
         } catch (historyError) {
-          console.error('❌ TRACKING: Failed to store communication history for member:', member.userId, historyError);
+          // Failed to store communication history - continue silently
         }
       }
-      
-      console.log('🔍 TRACKING: Communication history storage complete.', historyStoredCount, 'of', targetMembers.length, 'records stored');
 
       // Log the successful communication
 
@@ -8417,7 +8412,7 @@ Please provide suggestions for the missing or incomplete sections.`
             followUpRequired: requiresResponse || false
           });
         } catch (historyError) {
-          console.error('Failed to store emergency broadcast history for member:', member.userId, historyError);
+          // Failed to store emergency broadcast history - continue silently
         }
       }
 
@@ -8634,7 +8629,7 @@ Please provide suggestions for the missing or incomplete sections.`
       // Return empty response to prevent database errors
       res.json({ count: 0, members: [], message: "Members endpoint temporarily disabled" });
     } catch (error) {
-      console.error('Test members error:', error);
+      
       res.status(500).json({ error: (error as Error).message });
     }
   });
@@ -8669,7 +8664,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(transformedMembers);
     } catch (error) {
-      console.error('Members API Error:', error);
+      
       res.status(500).json({ message: "Failed to fetch members", error: (error as Error).message });
     }
   });
@@ -10556,7 +10551,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const newEvent = await storage.createEvent(eventData);
       res.status(201).json(newEvent);
     } catch (error) {
-      console.error('Event creation error:', error);
       res.status(500).json({ message: 'Failed to create event' });
     }
   });

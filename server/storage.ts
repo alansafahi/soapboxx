@@ -8474,7 +8474,7 @@ export class DatabaseStorage implements IStorage {
       
       return allMembers;
     } catch (error) {
-      console.error('Error fetching all members:', error);
+      
       return [];
     }
   }
@@ -8505,7 +8505,7 @@ export class DatabaseStorage implements IStorage {
       
       return churchEvents;
     } catch (error) {
-      console.error('Error fetching events by church:', error);
+      
       return [];
     }
   }
@@ -8560,7 +8560,7 @@ export class DatabaseStorage implements IStorage {
 
       return mappedCommunications;
     } catch (error) {
-      console.error('Error in getCommunicationHistory:', error);
+      
       return [];
     }
   }
@@ -8640,7 +8640,7 @@ export class DatabaseStorage implements IStorage {
         };
       }
     } catch (error) {
-      console.error('Error in createCommunicationRecord:', error);
+      
       throw error;
     }
   }
