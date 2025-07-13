@@ -301,3 +301,42 @@ This feature toggle system addresses a genuine market need with manageable techn
 4. Advanced configuration options (Future iteration)
 
 The system will position SoapBox as the most flexible church platform in the market while opening new revenue streams from churches that previously couldn't justify full platform migration.
+
+## Feature Toggle Priority Analysis
+
+### HIGHLY RECOMMENDED for Hide/Show Control
+These are modules that compete with existing tools used by large churches, or represent major independent feature sets:
+
+| Menu Item | Reason to Make Toggleable |
+|-----------|---------------------------|
+| **Donation** | Many churches already use platforms like Pushpay, Tithe.ly, etc. |
+| **Communication Hub** | Churches may use Mailchimp, Planning Center, or Breeze. |
+| **Sermon Studio** | May already have sermon archiving elsewhere. |
+| **Prayer Wall** | Some churches prefer closed/prayer team-based systems. |
+| **Leaderboard / Engagement Board** | May not align with culture of every church. |
+| **Audio Bible** | May prefer directing members to existing apps (YouVersion, Dwell, etc.). |
+| **Audio Routines** | Optional use case; may not apply to all church communities. |
+| **Video Library** | Churches may already host videos on YouTube/Vimeo. |
+| **Image Gallery** | Redundant if churches use Instagram/Facebook or Planning Center. |
+| **QR Code Management** | May be internal and not needed by every church. |
+| **Church Management** | Larger orgs may want to disable this and handle management outside SoapBox. |
+
+### OPTIONAL (Consider making toggleable, but with caution)
+These features should be carefully evaluated as most churches expect them:
+
+| Menu Item | Reason to Consider Optional |
+|-----------|----------------------------|
+| **Events** | Most churches will want this, but may already use Planning Center or Google Calendar. |
+| **Discussions** | Could be seen as "unmoderated" or risky by large churches with strict communication policies. |
+| **Member Directory** | Some churches already have custom CRMs or may have privacy concerns. |
+
+### NOT Recommended to Make Toggleable
+These are core user/account features and should always remain accessible:
+
+| Menu Item | Reason |
+|-----------|---------|
+| **Home** | Central dashboard; required for navigation. |
+| **Messages** | Core 1:1 communication—should stay available. |
+| **Contacts** | Required for managing interactions. |
+| **Profile** | Needed for all users. |
+| **Settings** | Required to manage app-level preferences. |
