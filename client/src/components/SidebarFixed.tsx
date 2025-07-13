@@ -82,7 +82,7 @@ export default function SidebarFixed() {
   const hasChurchAdminRole = useMemo(() => {
     if (!userChurches.length) return false;
     
-    const adminRoles = ['church_admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
+    const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
     return userChurches.some((uc: any) => adminRoles.includes(uc.role));
   }, [userChurches]);
 
@@ -188,7 +188,7 @@ export default function SidebarFixed() {
         
         // Check if user has required global role OR church admin role
         const hasGlobalRole = item.roles.includes(user.role || '');
-        const hasChurchRole = hasChurchAdminRole && item.roles.includes('church-admin');
+        const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
         if (!hasGlobalRole && !hasChurchRole) return false;
       }
       
