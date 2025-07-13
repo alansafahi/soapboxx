@@ -212,8 +212,8 @@ export default function MyChurches() {
                       : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center space-x-4 flex-1 min-w-0">
                       {/* Church Avatar */}
                       <Avatar className="w-12 h-12">
                         <AvatarImage src={church.logoUrl} alt={church.name} />
@@ -223,44 +223,45 @@ export default function MyChurches() {
                       </Avatar>
 
                       {/* Church Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                             {church.name}
                           </h3>
                           {isPrimary && (
-                            <Badge variant="default" className="bg-purple-600 hover:bg-purple-700 text-white">
+                            <Badge variant="default" className="bg-purple-600 hover:bg-purple-700 text-white w-fit">
                               <Crown className="w-3 h-3 mr-1" />
                               Primary
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                           <span className="font-medium">{church.denomination}</span>
                           <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            {church.city}, {church.state}
+                            <span className="truncate">{church.city}, {church.state}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="w-3 h-3" />
-                            {church.memberCount} members
+                            <span>{church.memberCount} members</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 min-w-0">
                       {!isPrimary && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleSetPrimary(church.id)}
                           disabled={setPrimaryMutation.isPending}
-                          className="text-purple-600 border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/20"
+                          className="text-purple-600 border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/20 flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
                         >
-                          <Star className="w-4 h-4 mr-1" />
-                          Set Primary
+                          <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden xs:inline">Set Primary</span>
+                          <span className="xs:hidden">Primary</span>
                         </Button>
                       )}
                       
@@ -269,10 +270,11 @@ export default function MyChurches() {
                         size="sm"
                         onClick={() => handleDisconnect(church)}
                         disabled={disconnectMutation.isPending}
-                        className="text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                        className="text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
                       >
-                        <X className="w-4 h-4 mr-1" />
-                        Disconnect
+                        <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                        <span className="hidden xs:inline">Disconnect</span>
+                        <span className="xs:hidden">Leave</span>
                       </Button>
                     </div>
                   </div>

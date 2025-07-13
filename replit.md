@@ -142,6 +142,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 13, 2025: SOAPBOX OWNER FEATURE FILTERING BYPASS RESOLVED - Successfully identified and fixed issue preventing church feature filtering testing by modifying SoapBox Owners to respect church settings
+  - ROOT CAUSE IDENTIFIED: SoapBox Owner users (alan@soapboxsuperapp.com) were bypassing ALL feature filtering for admin access
+  - TESTING BYPASS ENABLED: Modified useIsFeatureEnabled hook to respect church settings even for SoapBox Owners when respectChurchSettings=true
+  - FEATURE FILTERING VERIFIED: Prayer Wall correctly detected as disabled (isEnabled:false) in SGA Church (ID: 2807)
+  - MOBILE RESPONSIVENESS ENHANCED: All church management buttons now fully responsive with proper text wrapping and responsive sizing
+  - FEATURE MAPPING CONFIRMED: donation-demo → donation, prayer-wall → prayer_wall mapping working correctly
+  - USER CONFUSION RESOLVED: Distinguished between alan@safahi.com (member) and alan@soapboxsuperapp.com (soapbox_owner) roles
+  - PRIMARY CHURCH ORDERING: SGA Church (ID: 2807) is current primary church with donation=false and prayer_wall=false for testing
 - July 13, 2025: CHURCH FEATURE FILTERING SYSTEM PRODUCTION READY - Successfully resolved all cache ordering issues and deployed comprehensive church admin toggle system allowing mega churches to selectively activate/deactivate SoapBox features
   - FEATURE FILTERING HOOKS IMPLEMENTED: Created useIsFeatureEnabled hook that checks user church associations and church feature settings to control navigation visibility
   - NAVIGATION INTEGRATION COMPLETE: Updated SidebarFixed component to filter menu items based on church admin toggles using feature mapping system
