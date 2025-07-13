@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Link } from "wouter";
+import { useIsFeatureEnabled } from "../hooks/useChurchFeatures";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -69,6 +70,7 @@ export default function SidebarFixed() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const isFeatureEnabled = useIsFeatureEnabled();
 
   // Responsive sidebar behavior
   useEffect(() => {
@@ -162,16 +164,20 @@ export default function SidebarFixed() {
     }
   ];
 
-  // Filter groups based on user role - Wait for user data to load before filtering
+  // Filter groups based on user role and church features
   const visibleGroups = navigationGroups.map(group => {
     const filteredItems = group.items.filter(item => {
-      if (!item.roles) return true;
+      // First check role-based access
+      if (item.roles) {
+        // If user data is still loading, show all items to prevent flickering
+        if (!user) return true;
+        
+        // Check if user has required role
+        if (!item.roles.includes(user.role || '')) return false;
+      }
       
-      // If user data is still loading, show all items to prevent flickering
-      if (!user) return true;
-      
-      // Check if user has required role
-      return item.roles.includes(user.role || '');
+      // Then check church feature settings
+      return isFeatureEnabled(item.href);
     });
     
     return {

@@ -5927,6 +5927,22 @@ Return JSON with this exact structure:
 
   // Demo churches route removed to reduce app size
 
+  // Get user's churches for feature filtering
+  app.get('/api/users/churches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const userChurches = await storage.getUserChurches(userId);
+      res.json(userChurches);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get user churches' });
+    }
+  });
+
   // User profile update endpoint
   app.put('/api/users/profile', isAuthenticated, async (req: any, res) => {
     try {
