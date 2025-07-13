@@ -176,8 +176,16 @@ export default function SidebarFixed() {
         if (!item.roles.includes(user.role || '')) return false;
       }
       
-      // Then check church feature settings
-      return isFeatureEnabled(item.href);
+      // Then check church feature settings - use proper feature key mapping
+      const featureKey = item.href.replace('/', '').replace('-demo', '');
+      const isEnabled = isFeatureEnabled(featureKey);
+      
+      // Debug logging for Prayer Wall and Donation specifically
+      if (featureKey === 'prayer-wall' || featureKey === 'donation') {
+        console.log(`[SIDEBAR] ${item.label} (${featureKey}): isEnabled = ${isEnabled}`);
+      }
+      
+      return isEnabled;
     });
     
     return {

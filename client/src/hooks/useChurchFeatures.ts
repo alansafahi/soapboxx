@@ -121,7 +121,7 @@ export function useIsFeatureEnabled() {
   
   // Get user's church ID from their church associations (ordered by most recently accessed)
   const { data: userChurches } = useQuery({
-    queryKey: ['user-churches', user?.id],
+    queryKey: ['user-churches'], // Match the cache key used elsewhere
     queryFn: async () => {
       const response = await fetch('/api/users/churches', { credentials: 'include' });
       const data = await response.json();
@@ -142,13 +142,9 @@ export function useIsFeatureEnabled() {
   const { data: churchFeatures } = useChurchFeatures(primaryChurchId);
   
   return (href: string): boolean => {
-    // Extract the key from href (e.g., "/donation-demo" -> "donation")
+    // Extract the key from href (e.g., "/donation-demo" -> "donation", "/prayer-wall" -> "prayer-wall")
     const key = href.replace('/', '').replace('-demo', '');
     
-    // Debug logging with first 3 churches
-    if (key === 'donation') {  // Only log once to avoid spam
-      console.log('Full church order:', userChurches?.slice(0, 3).map(c => ({id: c.id, name: c.name})));
-    }
     console.log(`Feature check for ${key}:`, {
       href,
       key,
@@ -173,7 +169,7 @@ export function useIsFeatureEnabled() {
     
     // If no church joined, show all menu items (all features enabled)
     if (!userChurches || userChurches.length === 0) {
-      console.log(`${key} showing - no churches joined`);
+      console.log(`${key} showing - no churches joined (userChurches: ${userChurches?.length})`);
       return true;
     }
     
