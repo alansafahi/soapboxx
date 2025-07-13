@@ -12,7 +12,7 @@ import {
   Headphones,
   Users,
   Calendar,
-  PrayHands,
+  Heart,
   VideoIcon,
   ImageIcon,
   MicIcon,
@@ -72,7 +72,7 @@ const featureDefinitions = {
     'prayer_wall': {
       name: 'Prayer Wall',
       description: 'Community prayer requests and prayer circles',
-      icon: PrayHands,
+      icon: Heart,
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50 dark:bg-indigo-950/20',
       priority: 'high'

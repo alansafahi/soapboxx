@@ -10,7 +10,7 @@ export function forceRefreshChurchData() {
   queryClient.removeQueries({ queryKey: ['user-churches'] });
   queryClient.removeQueries({ queryKey: ['church-features'] });
   
-  console.log('Forced refresh of church data cache');
+
 }
 
 // Auto-refresh on window focus to pick up church changes
