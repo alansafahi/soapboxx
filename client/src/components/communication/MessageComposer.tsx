@@ -50,6 +50,7 @@ export default function MessageComposer({
 }: MessageComposerProps) {
   const queryClient = useQueryClient();
   const { message, templates } = state;
+  const [expandedTemplates, setExpandedTemplates] = React.useState<{[key: number]: boolean}>({});
 
   const updateMessage = (updates: Partial<typeof message>) => {
     updateState({ message: { ...message, ...updates } });
@@ -255,6 +256,8 @@ export default function MessageComposer({
                             });
                             
                             if (response.ok) {
+                              const result = await response.json();
+                              console.log('Template saved successfully:', result);
                               updateState({ 
                                 templates: { 
                                   ...templates, 
@@ -263,12 +266,16 @@ export default function MessageComposer({
                                 } 
                               });
                               // Refresh templates using React Query
-                              queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
+                              await queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
+                              alert('Template saved successfully!');
                             } else {
-                              alert('Failed to save template');
+                              const error = await response.text();
+                              console.error('Failed to save template:', error);
+                              alert('Failed to save template: ' + error);
                             }
                           } catch (error) {
-                            alert('Error saving template');
+                            console.error('Error saving template:', error);
+                            alert('Error saving template: ' + (error as Error).message);
                           }
                         }}
                       >
@@ -288,19 +295,27 @@ export default function MessageComposer({
                     ...(templatesData.announcements || []),
                     ...(templatesData.emergencies || []),
                     ...(templatesData.prayers || []),
+                    ...(templatesData.events || []),
+                    ...(templatesData.ministries || []),
+                    ...(templatesData.devotional || []),
+                    ...(templatesData.volunteer || []),
+                    ...(templatesData.outreach || []),
                     ...(templatesData.custom || [])
                   ].map((template: any, index: number) => {
-                    const [expanded, setExpanded] = React.useState(false);
+                    const expanded = expandedTemplates[index] || false;
+                    const setExpanded = (value: boolean) => {
+                      setExpandedTemplates(prev => ({ ...prev, [index]: value }));
+                    };
                     
                     return (
                       <div key={index} className="border rounded-lg hover:bg-muted/50 transition-colors">
                         {/* Collapsed Header */}
-                        <div className="p-3 flex items-center justify-between">
+                        <div className="p-3 flex items-center justify-between gap-2">
                           <div 
                             className="flex items-center gap-2 flex-1 cursor-pointer"
                             onClick={() => setExpanded(!expanded)}
                           >
-                            <span className="font-medium text-sm">{template.name}</span>
+                            <span className="font-medium text-sm truncate">{template.name}</span>
                             {template.category && (
                               <Badge variant="outline" className="text-xs">
                                 {template.category}
@@ -316,7 +331,7 @@ export default function MessageComposer({
                             variant="outline"
                             size="sm"
                             onClick={() => onApplyTemplate?.(template)}
-                            className="ml-2"
+                            className="ml-2 shrink-0 min-w-[60px] text-xs"
                           >
                             Use
                           </Button>
