@@ -88,6 +88,7 @@ export default function MessageComposer({
   };
 
   return (
+    <>
     <Card className="h-fit w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -663,5 +664,6 @@ export default function MessageComposer({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
