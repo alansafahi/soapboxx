@@ -28,6 +28,7 @@ import VolunteerManagementSystem from "../components/VolunteerManagementSystem";
 import ChurchAdminDashboard from "../components/ChurchAdminDashboard";
 import ContentManagementSystem from "../components/ContentManagementSystem";
 import { AnalyticsTab } from "../components/AnalyticsTab";
+import ChurchFeatureManager from "../components/ChurchFeatureManager";
 
 // Church Management Component
 function ChurchManagementTab() {
@@ -405,9 +406,10 @@ function MembersPage() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="soapbox-admin" className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">SoapBox Admin</TabsTrigger>
+            <TabsTrigger value="features">Features</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="content" className="hidden lg:block">Content</TabsTrigger>
@@ -503,6 +505,27 @@ function MembersPage() {
               </p>
             </div>
             <ChurchManagementTab />
+          </TabsContent>
+
+          <TabsContent value="features" className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Settings className="h-6 w-6" />
+                Church Feature Management
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Configure which SoapBox features are available to church members. Perfect for mega churches that want to use only specific SoapBox features while maintaining their existing systems.
+              </p>
+            </div>
+            {user?.role === 'soapbox_owner' ? (
+              <ChurchFeatureManager churchId={3} userRole={user.role} />
+            ) : (
+              <Card className="p-8 text-center">
+                <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+                <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
+                <p className="text-gray-600">Feature management is only accessible to SoapBox administrators.</p>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="members" className="space-y-6">

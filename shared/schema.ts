@@ -3754,3 +3754,53 @@ export const insertFamilyContentSchema = createInsertSchema(familyContent).omit(
   createdAt: true,
   updatedAt: true,
 });
+
+// Church Feature Toggle System
+export const churchFeatureSettings = pgTable("church_feature_settings", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  featureCategory: varchar("feature_category", { length: 50 }).notNull(), // 'community', 'spiritual_tools', 'media_contents', 'admin_portal'
+  featureName: varchar("feature_name", { length: 50 }).notNull(), // 'prayer_wall', 'donation', 'sermon_studio'
+  isEnabled: boolean("is_enabled").default(true),
+  configuration: jsonb("configuration"), // Feature-specific settings
+  enabledBy: varchar("enabled_by").references(() => users.id), // Who enabled it
+  enabledAt: timestamp("enabled_at").defaultNow(),
+  lastModified: timestamp("last_modified").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  churchFeatureUnique: unique().on(table.churchId, table.featureCategory, table.featureName),
+  churchFeatureSettingsChurchIdx: index().on(table.churchId),
+  churchFeatureSettingsCategoryIdx: index().on(table.featureCategory),
+}));
+
+// Default feature settings for new churches based on size
+export const defaultFeatureSettings = pgTable("default_feature_settings", {
+  id: serial("id").primaryKey(),
+  churchSize: varchar("church_size", { length: 20 }).notNull(), // 'small', 'medium', 'large', 'mega'
+  featureCategory: varchar("feature_category", { length: 50 }).notNull(),
+  featureName: varchar("feature_name", { length: 50 }).notNull(),
+  isEnabledByDefault: boolean("is_enabled_by_default").default(true),
+  configuration: jsonb("configuration"), // Default feature-specific settings
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  defaultFeatureUnique: unique().on(table.churchSize, table.featureCategory, table.featureName),
+  defaultFeatureSettingsSizeIdx: index().on(table.churchSize),
+}));
+
+// Type exports for church feature toggle system
+export const insertChurchFeatureSettingSchema = createInsertSchema(churchFeatureSettings).omit({
+  id: true,
+  createdAt: true,
+  enabledAt: true,
+  lastModified: true,
+});
+
+export const insertDefaultFeatureSettingSchema = createInsertSchema(defaultFeatureSettings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ChurchFeatureSetting = typeof churchFeatureSettings.$inferSelect;
+export type InsertChurchFeatureSetting = z.infer<typeof insertChurchFeatureSettingSchema>;
+export type DefaultFeatureSetting = typeof defaultFeatureSettings.$inferSelect;
+export type InsertDefaultFeatureSetting = z.infer<typeof insertDefaultFeatureSettingSchema>;

@@ -71,8 +71,14 @@ import {
   prayerBadges,
   userBadgeProgress,
   memberCommunications,
+  churchFeatureSettings,
+  defaultFeatureSettings,
   type User,
   type UpsertUser,
+  type ChurchFeatureSetting,
+  type InsertChurchFeatureSetting,
+  type DefaultFeatureSetting,
+  type InsertDefaultFeatureSetting,
   type DailyVerse,
   type InsertDailyVerse,
   type UserBibleStreak,
@@ -442,6 +448,16 @@ export interface IStorage {
     deliveryStatus: string;
     recipientCount?: number;
   }): Promise<any>;
+
+  // Church feature toggle operations
+  getChurchFeatureSettings(churchId: number): Promise<ChurchFeatureSetting[]>;
+  updateChurchFeatureSetting(setting: InsertChurchFeatureSetting): Promise<ChurchFeatureSetting>;
+  enableChurchFeature(churchId: number, category: string, featureName: string, enabledBy: string, configuration?: any): Promise<ChurchFeatureSetting>;
+  disableChurchFeature(churchId: number, category: string, featureName: string): Promise<void>;
+  isFeatureEnabledForChurch(churchId: number, category: string, featureName: string): Promise<boolean>;
+  getDefaultFeatureSettings(churchSize: string): Promise<DefaultFeatureSetting[]>;
+  createDefaultFeatureSetting(setting: InsertDefaultFeatureSetting): Promise<DefaultFeatureSetting>;
+  initializeChurchFeatures(churchId: number, churchSize: string): Promise<void>;
   
   // User stats and achievements
   getUserStats(userId: string): Promise<{
@@ -8643,6 +8659,126 @@ export class DatabaseStorage implements IStorage {
       
       throw error;
     }
+  }
+
+  // Church feature toggle operations
+  async getChurchFeatureSettings(churchId: number): Promise<ChurchFeatureSetting[]> {
+    return await db.select().from(churchFeatureSettings).where(eq(churchFeatureSettings.churchId, churchId));
+  }
+
+  async updateChurchFeatureSetting(setting: InsertChurchFeatureSetting): Promise<ChurchFeatureSetting> {
+    const existingSetting = await db.select().from(churchFeatureSettings)
+      .where(and(
+        eq(churchFeatureSettings.churchId, setting.churchId),
+        eq(churchFeatureSettings.featureCategory, setting.featureCategory),
+        eq(churchFeatureSettings.featureName, setting.featureName)
+      )).limit(1);
+
+    if (existingSetting.length > 0) {
+      // Update existing setting
+      const [updated] = await db.update(churchFeatureSettings)
+        .set({
+          isEnabled: setting.isEnabled,
+          configuration: setting.configuration,
+          enabledBy: setting.enabledBy,
+          lastModified: new Date()
+        })
+        .where(and(
+          eq(churchFeatureSettings.churchId, setting.churchId),
+          eq(churchFeatureSettings.featureCategory, setting.featureCategory),
+          eq(churchFeatureSettings.featureName, setting.featureName)
+        ))
+        .returning();
+      return updated;
+    } else {
+      // Create new setting
+      const [created] = await db.insert(churchFeatureSettings).values(setting).returning();
+      return created;
+    }
+  }
+
+  async enableChurchFeature(churchId: number, category: string, featureName: string, enabledBy: string, configuration?: any): Promise<ChurchFeatureSetting> {
+    return await this.updateChurchFeatureSetting({
+      churchId,
+      featureCategory: category,
+      featureName,
+      isEnabled: true,
+      configuration,
+      enabledBy
+    });
+  }
+
+  async disableChurchFeature(churchId: number, category: string, featureName: string): Promise<void> {
+    await db.update(churchFeatureSettings)
+      .set({
+        isEnabled: false,
+        lastModified: new Date()
+      })
+      .where(and(
+        eq(churchFeatureSettings.churchId, churchId),
+        eq(churchFeatureSettings.featureCategory, category),
+        eq(churchFeatureSettings.featureName, featureName)
+      ));
+  }
+
+  async isFeatureEnabledForChurch(churchId: number, category: string, featureName: string): Promise<boolean> {
+    const setting = await db.select().from(churchFeatureSettings)
+      .where(and(
+        eq(churchFeatureSettings.churchId, churchId),
+        eq(churchFeatureSettings.featureCategory, category),
+        eq(churchFeatureSettings.featureName, featureName)
+      )).limit(1);
+
+    if (setting.length === 0) {
+      // If no setting exists, check default based on church size
+      const church = await this.getChurch(churchId);
+      if (!church) return true; // Default to enabled if church not found
+
+      const churchSize = this.determineChurchSize(church.memberCount || 0);
+      const defaultSetting = await db.select().from(defaultFeatureSettings)
+        .where(and(
+          eq(defaultFeatureSettings.churchSize, churchSize),
+          eq(defaultFeatureSettings.featureCategory, category),
+          eq(defaultFeatureSettings.featureName, featureName)
+        )).limit(1);
+
+      return defaultSetting.length > 0 ? defaultSetting[0].isEnabledByDefault : true;
+    }
+
+    return setting[0].isEnabled;
+  }
+
+  async getDefaultFeatureSettings(churchSize: string): Promise<DefaultFeatureSetting[]> {
+    return await db.select().from(defaultFeatureSettings).where(eq(defaultFeatureSettings.churchSize, churchSize));
+  }
+
+  async createDefaultFeatureSetting(setting: InsertDefaultFeatureSetting): Promise<DefaultFeatureSetting> {
+    const [created] = await db.insert(defaultFeatureSettings).values(setting).returning();
+    return created;
+  }
+
+  async initializeChurchFeatures(churchId: number, churchSize: string): Promise<void> {
+    const defaultSettings = await this.getDefaultFeatureSettings(churchSize);
+    
+    const featureSettings = defaultSettings.map(defaultSetting => ({
+      churchId,
+      featureCategory: defaultSetting.featureCategory,
+      featureName: defaultSetting.featureName,
+      isEnabled: defaultSetting.isEnabledByDefault,
+      configuration: defaultSetting.configuration,
+      enabledBy: 'system'
+    }));
+
+    if (featureSettings.length > 0) {
+      await db.insert(churchFeatureSettings).values(featureSettings);
+    }
+  }
+
+  private determineChurchSize(memberCount: number): string {
+    if (memberCount >= 2000) return 'mega';
+    if (memberCount >= 500) return 'large';
+    if (memberCount >= 100) return 'medium';
+    return 'small';
   }
 }
 

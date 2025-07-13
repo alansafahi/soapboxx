@@ -9952,6 +9952,142 @@ Please provide suggestions for the missing or incomplete sections.`
   });
 
   // Admin role assignment endpoint
+  // Church Feature Toggle System API Endpoints
+  app.get('/api/church/:churchId/features', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.params;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has access to this church
+      const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
+      if (!userChurch) {
+        return res.status(403).json({ error: 'Access denied to this church' });
+      }
+
+      const features = await storage.getChurchFeatureSettings(parseInt(churchId));
+      res.json(features);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to retrieve church features' });
+    }
+  });
+
+  app.put('/api/church/:churchId/features/:category/:featureName', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId, category, featureName } = req.params;
+      const { isEnabled, configuration } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has admin access to this church
+      const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
+      if (!userChurch || !['church_admin', 'owner', 'soapbox_owner'].includes(userChurch.role)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const updatedSetting = await storage.updateChurchFeatureSetting({
+        churchId: parseInt(churchId),
+        featureCategory: category,
+        featureName,
+        isEnabled,
+        configuration,
+        enabledBy: userId
+      });
+
+      res.json(updatedSetting);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update feature setting' });
+    }
+  });
+
+  app.get('/api/church/:churchId/features/:category/:featureName/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId, category, featureName } = req.params;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const isEnabled = await storage.isFeatureEnabledForChurch(parseInt(churchId), category, featureName);
+      res.json({ isEnabled });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to check feature status' });
+    }
+  });
+
+  app.post('/api/church/:churchId/features/initialize', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchId } = req.params;
+      const { churchSize } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has admin access to this church
+      const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
+      if (!userChurch || !['church_admin', 'owner', 'soapbox_owner'].includes(userChurch.role)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      await storage.initializeChurchFeatures(parseInt(churchId), churchSize);
+      res.json({ success: true, message: 'Church features initialized successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to initialize church features' });
+    }
+  });
+
+  app.get('/api/default-features/:churchSize', isAuthenticated, async (req: any, res) => {
+    try {
+      const { churchSize } = req.params;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Only allow SoapBox owners or system admins to view default settings
+      const user = await storage.getUser(userId);
+      if (!user || !['soapbox_owner', 'system_admin'].includes(user.role)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const defaultSettings = await storage.getDefaultFeatureSettings(churchSize);
+      res.json(defaultSettings);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to retrieve default feature settings' });
+    }
+  });
+
+  app.post('/api/default-features', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Only allow SoapBox owners or system admins to create default settings
+      const user = await storage.getUser(userId);
+      if (!user || !['soapbox_owner', 'system_admin'].includes(user.role)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const defaultSetting = await storage.createDefaultFeatureSetting(req.body);
+      res.json(defaultSetting);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create default feature setting' });
+    }
+  });
+
   app.post('/api/admin/assign-role', isAuthenticated, async (req: any, res) => {
     try {
       const currentUserRole = req.session?.user?.role || 'member';
