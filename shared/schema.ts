@@ -224,7 +224,8 @@ export const userChurches = pgTable("user_churches", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   churchId: integer("church_id").notNull().references(() => churches.id),
-  roleId: integer("role_id").notNull().references(() => roles.id),
+  role: varchar("role").default("member"), // Direct role assignment (simpler approach)
+  roleId: integer("role_id").references(() => roles.id), // Optional reference to roles table
   title: varchar("title", { length: 100 }), // Custom title like "Youth Leader", "Worship Director"
   department: varchar("department", { length: 100 }), // Youth Ministry, Music Ministry, etc.
   bio: text("bio"), // Role-specific bio

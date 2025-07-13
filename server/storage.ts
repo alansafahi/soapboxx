@@ -3009,6 +3009,8 @@ export class DatabaseStorage implements IStorage {
 
   // User church connections
   async getUserChurches(userId: string): Promise<(Church & { role: string })[]> {
+    console.log('DEBUG: getUserChurches called for userId:', userId);
+    
     // Get full church data with roles directly from user_churches table
     const result = await db
       .select({
@@ -3037,9 +3039,7 @@ export class DatabaseStorage implements IStorage {
         isDemo: churches.isDemo,
         createdAt: churches.createdAt,
         updatedAt: churches.updatedAt,
-        role: userChurches.role,
-        lastAccessedAt: userChurches.lastAccessedAt,
-        joinedAt: userChurches.joinedAt,
+        userRole: userChurches.role,
       })
       .from(churches)
       .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
@@ -3049,9 +3049,11 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(sql`COALESCE(${userChurches.lastAccessedAt}, ${userChurches.joinedAt})`));
     
-    return result.map(({ lastAccessedAt, joinedAt, ...church }) => ({
+    console.log('DEBUG: getUserChurches query result:', result);
+    
+    return result.map(({ userRole, ...church }) => ({
       ...church,
-      role: church.role || 'member'
+      role: userRole || 'member'
     }));
   }
 
