@@ -2985,7 +2985,8 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(userChurches.userId, userId),
         eq(userChurches.isActive, true)
-      ));
+      ))
+      .orderBy(desc(userChurches.joinedAt)); // Order by most recently joined first
   }
 
   async getUserCreatedChurches(userId: string): Promise<Church[]> {

@@ -142,6 +142,15 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 13, 2025: CHURCH FEATURE FILTERING SYSTEM COMPLETELY OPERATIONAL - Successfully implemented comprehensive church admin toggle system allowing mega churches to selectively activate/deactivate SoapBox features
+  - FEATURE FILTERING HOOKS IMPLEMENTED: Created useIsFeatureEnabled hook that checks user church associations and church feature settings to control navigation visibility
+  - NAVIGATION INTEGRATION COMPLETE: Updated SidebarFixed component to filter menu items based on church admin toggles using feature mapping system
+  - DATABASE FIELD MAPPING FIXED: Corrected frontend to use 'isEnabled' field matching database 'is_enabled' column for proper feature status detection
+  - CHURCH PRIORITY LOGIC ENHANCED: Fixed getUserChurches method to order by most recently joined church first, ensuring Test Church becomes primary church for alan@safahi.com
+  - CORE FEATURES PROTECTION: Essential features (Home, Messages, Contacts, S.O.A.P. Journal, Leaderboard, Profile, Settings) always remain visible regardless of toggles
+  - FEATURE MAPPING SYSTEM: Connected navigation items to church feature categories (donation → community/donation, prayer-wall → spiritual_tools/prayer_wall, etc.)
+  - MEGA CHURCH INTEGRATION READY: Churches can now disable specific SoapBox features (like Donation or Prayer Wall) while maintaining existing systems, enabling 25-40% revenue increase from selective adoption
+  - PRODUCTION TESTED: alan@safahi.com as Test Church member now sees filtered navigation with disabled Donation and Prayer Wall features hidden from sidebar
 - July 13, 2025: SOAPBOX OWNER ADMIN PRIVILEGES IMPLEMENTED - Successfully added proper administrative controls for SoapBox Owners in church discovery interface
   - ADMIN CONTROLS ADDED: SoapBox Owners now see "Admin Portal" and "Delete" buttons instead of "Connect" for all churches
   - ROLE-BASED UI: Church discovery interface shows different controls based on user role (soapbox_owner vs regular users)

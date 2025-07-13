@@ -13,7 +13,8 @@ export function useChurchFeatures(churchId: number) {
     queryKey: ['church-features', churchId],
     queryFn: () => fetch(`/api/church/${churchId}/features`, {
       credentials: 'include'
-    }).then(res => res.json()) as Promise<ChurchFeatureSetting[]>
+    }).then(res => res.json()) as Promise<ChurchFeatureSetting[]>,
+    enabled: !!churchId
   });
 }
 
@@ -142,7 +143,8 @@ export function useIsFeatureEnabled() {
     );
     
     // Return enabled status (default to true if not found)
-    return feature?.enabled ?? true;
+    // Note: Database field is 'is_enabled', not 'enabled'
+    return feature?.isEnabled ?? true;
   };
 }
 
