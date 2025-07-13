@@ -5943,6 +5943,23 @@ Return JSON with this exact structure:
     }
   });
 
+  // Update church access timestamp when user connects/visits a church
+  app.post('/api/users/churches/:churchId/access', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const churchId = parseInt(req.params.churchId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      await storage.updateChurchAccess(userId, churchId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update church access' });
+    }
+  });
+
   // User profile update endpoint
   app.put('/api/users/profile', isAuthenticated, async (req: any, res) => {
     try {

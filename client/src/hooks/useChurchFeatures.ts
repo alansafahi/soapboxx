@@ -3,6 +3,13 @@ import { queryClient } from '../lib/queryClient';
 import { useAuth } from './useAuth';
 import type { ChurchFeatureSetting } from '../../../shared/schema';
 
+// Force refresh church data cache immediately
+setTimeout(() => {
+  console.log('Forcing church data cache refresh...');
+  queryClient.invalidateQueries({ queryKey: ['user-churches'] });
+  queryClient.removeQueries({ queryKey: ['user-churches'] });
+}, 1000);
+
 interface FeatureToggleData {
   isEnabled: boolean;
   configuration?: any;
@@ -96,17 +103,37 @@ const CORE_FEATURES = [
 ];
 
 // Hook to check if a navigation item should be visible
+// Hook to update church access timestamp
+export function useUpdateChurchAccess() {
+  return useMutation({
+    mutationFn: async (churchId: number) => {
+      const response = await fetch(`/api/users/churches/${churchId}/access`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to update church access');
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate user churches cache to refresh with new order
+      queryClient.invalidateQueries({ queryKey: ['user-churches'] });
+    }
+  });
+}
+
 export function useIsFeatureEnabled() {
   const { user } = useAuth();
   
-  // Get user's church ID from their church associations (ordered by most recently joined)
+  // Get user's church ID from their church associations (ordered by most recently accessed)
   const { data: userChurches } = useQuery({
     queryKey: ['user-churches', user?.id],
     queryFn: () => fetch('/api/users/churches', { credentials: 'include' }).then(res => res.json()),
-    enabled: !!user
+    enabled: !!user,
+    staleTime: 0, // Always refetch to ensure fresh church ordering
+    refetchOnWindowFocus: true
   });
   
-  // Use the most recently joined church (first in the ordered list)
+  // Use the most recently accessed church (first in the ordered list)
   const primaryChurchId = userChurches?.[0]?.id;
   
   // Get church features if user has a church
@@ -122,6 +149,7 @@ export function useIsFeatureEnabled() {
       key,
       userChurches: userChurches?.length,
       primaryChurchId,
+      primaryChurchName: userChurches?.[0]?.name,
       churchFeaturesLength: churchFeatures?.length,
       userRole: user?.role
     });

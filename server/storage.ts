@@ -2950,6 +2950,17 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Update last accessed timestamp for a church
+  async updateChurchAccess(userId: string, churchId: number): Promise<void> {
+    await db
+      .update(userChurches)
+      .set({ lastAccessedAt: new Date() })
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.churchId, churchId)
+      ));
+  }
+
   // User church connections
   async getUserChurches(userId: string): Promise<Church[]> {
     return await db
