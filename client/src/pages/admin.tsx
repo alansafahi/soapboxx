@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
-import { useChurchFeatures } from "../hooks/useChurchFeatures";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -381,8 +380,19 @@ function ChurchManagementTab() {
 
 function MembersPage() {
   const { user } = useAuth();
-  const { hasChurchAdminRole } = useChurchFeatures();
   const [selectedChurch, setSelectedChurch] = useState<number | null>(null);
+
+  // Get user's churches to check for admin roles
+  const { data: userChurches = [] } = useQuery({
+    queryKey: ["/api/users/churches"],
+    enabled: !!user,
+  });
+
+  // Check if user has admin role in any church
+  const hasChurchAdminRole = userChurches.some((uc: any) => {
+    const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder', 'system_admin'];
+    return adminRoles.includes(uc.role);
+  });
 
   // Allow church administrators and SoapBox owners to access member directory
   const allowedRoles = ['soapbox_owner', 'church_admin', 'pastor', 'lead_pastor', 'admin', 'system_admin'];
