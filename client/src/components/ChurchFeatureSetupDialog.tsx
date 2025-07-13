@@ -185,22 +185,42 @@ export default function ChurchFeatureSetupDialog({
     setIsSubmitting(true);
     
     try {
+      // First ensure features are initialized for this church
+      try {
+        await fetch(`/api/church/${churchId}/features/initialize`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ churchSize }),
+        });
+      } catch (initError) {
+        // Continue even if initialization fails (features might already exist)
+        console.warn('Feature initialization warning:', initError);
+      }
+
       // Update all feature settings
-      const updatePromises = CONFIGURABLE_FEATURES.map(feature => {
+      const updatePromises = CONFIGURABLE_FEATURES.map(async feature => {
         const key = `${feature.category}-${feature.name}`;
         const isEnabled = features[key];
         
-        return updateFeature.mutateAsync({
-          category: feature.category,
-          featureName: feature.name,
-          data: { 
-            isEnabled,
-            configuration: { 
-              priority: feature.priority,
-              setupMethod: 'wizard'
+        try {
+          return await updateFeature.mutateAsync({
+            category: feature.category,
+            featureName: feature.name,
+            data: { 
+              isEnabled,
+              configuration: { 
+                priority: feature.priority,
+                setupMethod: 'wizard'
+              }
             }
-          }
-        });
+          });
+        } catch (featureError) {
+          console.warn(`Failed to update feature ${feature.category}-${feature.name}:`, featureError);
+          return null;
+        }
       });
 
       await Promise.all(updatePromises);
@@ -212,9 +232,10 @@ export default function ChurchFeatureSetupDialog({
       
       onClose();
     } catch (error) {
+      console.error('Feature configuration error:', error);
       toast({
         title: "Configuration Failed",
-        description: "Failed to configure features. Please try again.",
+        description: "Failed to configure features. You can adjust them later in the admin portal.",
         variant: "destructive"
       });
     } finally {

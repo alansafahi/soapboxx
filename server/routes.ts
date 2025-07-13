@@ -5785,7 +5785,7 @@ Return JSON with this exact structure:
       };
       
       try {
-        await storage.initializeChurchFeatures(newChurch.id, sizeMapping[churchSize as keyof typeof sizeMapping] || 'small');
+        await storage.initializeChurchFeatures(newChurch.id, sizeMapping[churchSize as keyof typeof sizeMapping] || 'small', req.session.userId);
       } catch (error) {
         // Continue even if feature initialization fails
         console.error('Failed to initialize church features:', error);
@@ -10055,7 +10055,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(403).json({ error: 'Admin access required' });
       }
 
-      await storage.initializeChurchFeatures(parseInt(churchId), churchSize);
+      await storage.initializeChurchFeatures(parseInt(churchId), churchSize, userId);
       res.json({ success: true, message: 'Church features initialized successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to initialize church features' });

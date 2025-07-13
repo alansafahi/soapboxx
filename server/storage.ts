@@ -8757,7 +8757,7 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async initializeChurchFeatures(churchId: number, churchSize: string): Promise<void> {
+  async initializeChurchFeatures(churchId: number, churchSize: string, enabledBy: string): Promise<void> {
     const defaultSettings = await this.getDefaultFeatureSettings(churchSize);
     
     const featureSettings = defaultSettings.map(defaultSetting => ({
@@ -8766,7 +8766,7 @@ export class DatabaseStorage implements IStorage {
       featureName: defaultSetting.featureName,
       isEnabled: defaultSetting.isEnabledByDefault,
       configuration: defaultSetting.configuration,
-      enabledBy: 'system'
+      enabledBy
     }));
 
     if (featureSettings.length > 0) {
