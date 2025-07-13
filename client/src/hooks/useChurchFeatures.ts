@@ -5,10 +5,10 @@ import type { ChurchFeatureSetting } from '../../../shared/schema';
 
 // Force refresh church data cache immediately
 setTimeout(() => {
-  console.log('Forcing church data cache refresh...');
-  queryClient.invalidateQueries({ queryKey: ['user-churches'] });
-  queryClient.removeQueries({ queryKey: ['user-churches'] });
-}, 1000);
+  console.log('Forcing complete cache reset...');
+  queryClient.clear(); // Clear ALL cached data
+  window.location.reload(); // Force page reload to completely reset cache
+}, 2000);
 
 interface FeatureToggleData {
   isEnabled: boolean;
