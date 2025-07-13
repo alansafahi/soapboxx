@@ -5955,6 +5955,10 @@ Return JSON with this exact structure:
         return res.status(401).json({ error: 'Authentication required' });
       }
 
+      if (isNaN(churchId)) {
+        return res.status(400).json({ error: 'Invalid church ID' });
+      }
+
       const church = await storage.getChurch(churchId);
       if (!church) {
         return res.status(404).json({ error: 'Church not found' });
@@ -5975,6 +5979,10 @@ Return JSON with this exact structure:
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      if (isNaN(churchId)) {
+        return res.status(400).json({ error: 'Invalid church ID' });
       }
 
       const userChurch = await storage.getUserChurchRole(userId, churchId);

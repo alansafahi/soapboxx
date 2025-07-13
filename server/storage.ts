@@ -3009,7 +3009,6 @@ export class DatabaseStorage implements IStorage {
 
   // User church connections
   async getUserChurches(userId: string): Promise<(Church & { role: string })[]> {
-    console.log('DEBUG: getUserChurches called for userId:', userId);
     
     // Get full church data with roles directly from user_churches table
     const result = await db
