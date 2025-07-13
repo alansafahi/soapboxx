@@ -20,7 +20,8 @@ import {
   FileText,
   Plus,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Trash2
 } from 'lucide-react';
 import { CommunicationState } from './UnifiedCommunicationHub';
 import { useQueryClient } from '@tanstack/react-query';
@@ -327,14 +328,44 @@ export default function MessageComposer({
                               <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
                             )}
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onApplyTemplate?.(template)}
-                            className="ml-2 shrink-0 min-w-[60px] text-xs"
-                          >
-                            Use
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onApplyTemplate?.(template)}
+                              className="shrink-0 min-w-[60px] text-xs"
+                            >
+                              Use
+                            </Button>
+                            {template.isCustom && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={async () => {
+                                  if (confirm('Are you sure you want to delete this template?')) {
+                                    try {
+                                      const response = await fetch(`/api/communications/templates/${template.id}`, {
+                                        method: 'DELETE',
+                                        credentials: 'include'
+                                      });
+                                      
+                                      if (response.ok) {
+                                        await queryClient.invalidateQueries({ queryKey: ['/api/communications/templates'] });
+                                        alert('Template deleted successfully!');
+                                      } else {
+                                        alert('Failed to delete template');
+                                      }
+                                    } catch (error) {
+                                      alert('Error deleting template');
+                                    }
+                                  }
+                                }}
+                                className="shrink-0 text-xs text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
                         
                         {/* Expanded Details */}
