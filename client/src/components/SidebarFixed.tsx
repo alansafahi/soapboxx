@@ -73,9 +73,18 @@ export default function SidebarFixed() {
   const isFeatureEnabled = useIsFeatureEnabled();
 
   // Get user's churches to check for admin roles
-  const { data: userChurches = [] } = useQuery({
+  const { data: userChurches = [], isLoading: churchesLoading, error: churchesError } = useQuery({
     queryKey: ["/api/users/churches"],
     enabled: !!user,
+  });
+  
+  // Immediate logging to debug data reception
+  console.log('SidebarFixed userChurches query state:', { 
+    userChurches, 
+    churchesLoading, 
+    churchesError, 
+    userChurchesType: typeof userChurches,
+    userChurchesLength: userChurches?.length 
   });
 
   // Check if user has admin role in any church
@@ -224,13 +233,32 @@ export default function SidebarFixed() {
       return isFeatureEnabled(featureKey);
     });
     
-    return {
+    const finalGroup = {
       ...group,
       items: filteredItems
     };
+    
+    // Debug logging for ADMIN PORTAL group
+    if (group.label === 'ADMIN PORTAL') {
+      console.log('ADMIN PORTAL group filtering:', {
+        originalItemsCount: group.items.length,
+        filteredItemsCount: filteredItems.length,
+        filteredItems: filteredItems.map(item => ({ label: item.label, href: item.href })),
+        willShowGroup: filteredItems.length > 0
+      });
+    }
+    
+    return finalGroup;
   }).filter(group => {
     // Only show groups that have items after filtering
-    return group.items.length > 0;
+    const shouldShow = group.items.length > 0;
+    
+    // Debug logging for group visibility decision
+    if (group.label === 'ADMIN PORTAL') {
+      console.log('ADMIN PORTAL final visibility decision:', { shouldShow, itemsCount: group.items.length });
+    }
+    
+    return shouldShow;
   });
 
   const toggleGroup = (groupLabel: string) => {
