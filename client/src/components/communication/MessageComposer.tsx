@@ -91,26 +91,27 @@ export default function MessageComposer({
     <>
     <Card className="h-fit w-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
             Message Builder
             {templates.active && (
-              <Badge variant="outline" className="ml-2">
+              <Badge variant="outline" className="ml-2 hidden sm:inline-flex">
                 Using: {templates.active.name}
               </Badge>
             )}
           </CardTitle>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
               onClick={onToggleTemplates}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs sm:text-sm"
             >
               <FileText className="w-4 h-4" />
-              {showTemplates ? 'Hide Templates' : 'Template Library'}
+              <span className="hidden sm:inline">{showTemplates ? 'Hide Templates' : 'Template Library'}</span>
+              <span className="sm:hidden">Templates</span>
             </Button>
             <Button
               variant="outline"
@@ -125,7 +126,7 @@ export default function MessageComposer({
                   showTemplates: true
                 }
               })}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs sm:text-sm"
             >
               <Plus className="w-4 h-4" />
               Create
