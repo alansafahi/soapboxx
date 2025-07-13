@@ -3,10 +3,10 @@ import { queryClient } from '../lib/queryClient';
 import { useAuth } from './useAuth';
 import type { ChurchFeatureSetting } from '../../../shared/schema';
 
-// Force refresh church data to pick up new ordering
+// Force refresh church data to test new backend ordering fix
 if (typeof window !== 'undefined') {
   setTimeout(() => {
-    console.log('Refreshing church cache for new ordering...');
+    console.log('[DEBUG] Testing new backend ordering fix...');
     queryClient.invalidateQueries({ queryKey: ['user-churches'] });
   }, 1000);
 }
@@ -128,7 +128,14 @@ export function useIsFeatureEnabled() {
   // Get user's church ID from their church associations (ordered by most recently accessed)
   const { data: userChurches } = useQuery({
     queryKey: ['user-churches', user?.id],
-    queryFn: () => fetch('/api/users/churches', { credentials: 'include' }).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch('/api/users/churches', { credentials: 'include' });
+      const data = await response.json();
+      console.log('[FRONTEND DEBUG] Received churches from API:', 
+        data?.slice(0, 3).map(c => ({ id: c.id, name: c.name }))
+      );
+      return data;
+    },
     enabled: !!user,
     staleTime: 30000, // Cache for 30 seconds
     refetchOnWindowFocus: false

@@ -5932,13 +5932,20 @@ Return JSON with this exact structure:
     try {
       const userId = req.session.userId;
       
+      console.log(`[CHURCH DEBUG] API called for user: ${userId}`);
+      
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       const userChurches = await storage.getUserChurches(userId);
+      console.log(`[CHURCH DEBUG] Backend returns churches in order:`, 
+        userChurches?.slice(0, 3).map(c => ({ id: c.id, name: c.name }))
+      );
+      
       res.json(userChurches);
     } catch (error) {
+      console.error('[CHURCH DEBUG] Error in getUserChurches:', error);
       res.status(500).json({ error: 'Failed to get user churches' });
     }
   });

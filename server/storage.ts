@@ -2963,7 +2963,30 @@ export class DatabaseStorage implements IStorage {
 
   // User church connections
   async getUserChurches(userId: string): Promise<Church[]> {
-    return await db
+    console.log(`[STORAGE DEBUG] getUserChurches called for user: ${userId}`);
+    
+    // First get the ordering info for debugging
+    const orderingInfo = await db
+      .select({
+        churchId: userChurches.churchId,
+        lastAccessedAt: userChurches.lastAccessedAt,
+        joinedAt: userChurches.joinedAt,
+        name: churches.name
+      })
+      .from(userChurches)
+      .innerJoin(churches, eq(churches.id, userChurches.churchId))
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.isActive, true)
+      ))
+      .orderBy(desc(sql`COALESCE(${userChurches.lastAccessedAt}, ${userChurches.joinedAt})`));
+    
+    console.log(`[STORAGE DEBUG] Church ordering:`, orderingInfo.slice(0, 3));
+    
+    // Now get the full church data in the same order
+    const churchIds = orderingInfo.map(o => o.churchId);
+    
+    const result = await db
       .select({
         id: churches.id,
         name: churches.name,
@@ -2989,15 +3012,19 @@ export class DatabaseStorage implements IStorage {
         adminEmail: churches.adminEmail,
         isDemo: churches.isDemo,
         createdAt: churches.createdAt,
-        updatedAt: churches.updatedAt,
+        updatedAt: churches.updatedAt
       })
       .from(churches)
-      .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
-      .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true)
-      ))
-      .orderBy(desc(sql`COALESCE(${userChurches.lastAccessedAt}, ${userChurches.joinedAt})`)); // Order by most recently accessed, fallback to joined date
+      .where(inArray(churches.id, churchIds));
+    
+    // Sort in the correct order manually
+    const sortedResult = churchIds.map(id => result.find(c => c.id === id)).filter(Boolean) as Church[];
+    
+    console.log(`[STORAGE DEBUG] Final sorted result:`, 
+      sortedResult.slice(0, 3).map(c => ({ id: c.id, name: c.name }))
+    );
+    
+    return sortedResult;
   }
 
   async getUserCreatedChurches(userId: string): Promise<Church[]> {
