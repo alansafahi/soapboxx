@@ -3049,14 +3049,11 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(sql`COALESCE(${userChurches.lastAccessedAt}, ${userChurches.joinedAt})`));
     
-    console.log('DEBUG: getUserChurches query result:', result);
-    
     const mappedResult = result.map(({ userRole, ...church }) => ({
       ...church,
       role: userRole || 'member'
     }));
     
-    console.log('DEBUG: Final mapped getUserChurches result:', mappedResult);
     return mappedResult;
   }
 
