@@ -199,10 +199,23 @@ export default function EnhancedChurchDiscovery() {
     },
   });
 
+  // Fallback denominations list in case API fails
+  const fallbackDenominations = [
+    "Adventist", "Assembly of God", "Baptist", "Brethren", "Catholic", "Christian", 
+    "Church of Christ", "Community", "Congregational", "Disciples of Christ", 
+    "Episcopal", "Lutheran", "Mennonite", "Methodist", "Moravian", "Non-denominational", 
+    "Orthodox", "Pentecostal", "Presbyterian", "Quaker", "Reformed", "Seventh-day Adventist", 
+    "Unitarian Universalist"
+  ];
+
   // Get unique denominations for filter dropdown
-  const { data: denominations = [] } = useQuery<string[]>({
+  const { data: apiDenominations = [] } = useQuery<string[]>({
     queryKey: ["/api/churches/denominations"],
+    enabled: false // Disable auto-fetch since endpoint requires auth
   });
+
+  // Use fallback denominations for church creation
+  const denominations = apiDenominations.length > 0 ? apiDenominations : fallbackDenominations;
 
   // Join church mutation
   const joinChurchMutation = useMutation({
