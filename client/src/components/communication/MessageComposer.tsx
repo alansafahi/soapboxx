@@ -148,11 +148,26 @@ export default function MessageComposer({
                           id="template-name"
                           placeholder="e.g., Weekly Newsletter"
                           className="h-8 text-sm"
+                          value={templates.newTemplate?.name || ''}
+                          onChange={(e) => updateState({
+                            templates: {
+                              ...templates,
+                              newTemplate: { ...templates.newTemplate, name: e.target.value }
+                            }
+                          })}
                         />
                       </div>
                       <div>
                         <Label htmlFor="template-category" className="text-xs">Category</Label>
-                        <Select defaultValue="announcements">
+                        <Select 
+                          value={templates.newTemplate?.category || 'announcements'}
+                          onValueChange={(value) => updateState({
+                            templates: {
+                              ...templates,
+                              newTemplate: { ...templates.newTemplate, category: value }
+                            }
+                          })}
+                        >
                           <SelectTrigger className="h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
@@ -160,6 +175,11 @@ export default function MessageComposer({
                             <SelectItem value="announcements">Announcements</SelectItem>
                             <SelectItem value="emergencies">Emergencies</SelectItem>
                             <SelectItem value="prayers">Prayers</SelectItem>
+                            <SelectItem value="events">Events</SelectItem>
+                            <SelectItem value="ministries">Ministries</SelectItem>
+                            <SelectItem value="devotional">Devotional</SelectItem>
+                            <SelectItem value="volunteer">Volunteer</SelectItem>
+                            <SelectItem value="outreach">Outreach</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -170,6 +190,13 @@ export default function MessageComposer({
                         id="template-subject"
                         placeholder="e.g., This Week at Our Church"
                         className="h-8 text-sm"
+                        value={templates.newTemplate?.subject || ''}
+                        onChange={(e) => updateState({
+                          templates: {
+                            ...templates,
+                            newTemplate: { ...templates.newTemplate, subject: e.target.value }
+                          }
+                        })}
                       />
                     </div>
                     <div>
@@ -178,6 +205,13 @@ export default function MessageComposer({
                         id="template-content"
                         placeholder="Enter your template message content..."
                         className="min-h-[60px] text-sm"
+                        value={templates.newTemplate?.content || ''}
+                        onChange={(e) => updateState({
+                          templates: {
+                            ...templates,
+                            newTemplate: { ...templates.newTemplate, content: e.target.value }
+                          }
+                        })}
                       />
                     </div>
                     <div className="flex justify-end gap-2">
@@ -195,14 +229,45 @@ export default function MessageComposer({
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => {
-                          // Template save logic would go here
-                          updateState({ 
-                            templates: { 
-                              ...templates, 
-                              creating: false 
-                            } 
-                          });
+                        onClick={async () => {
+                          const newTemplate = templates.newTemplate;
+                          
+                          if (!newTemplate?.name || !newTemplate?.content) {
+                            alert('Please fill in template name and content');
+                            return;
+                          }
+                          
+                          try {
+                            const response = await fetch('/api/communication/templates', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              credentials: 'include',
+                              body: JSON.stringify({
+                                name: newTemplate.name,
+                                category: newTemplate.category || 'announcements',
+                                subject: newTemplate.subject || '',
+                                content: newTemplate.content
+                              })
+                            });
+                            
+                            if (response.ok) {
+                              updateState({ 
+                                templates: { 
+                                  ...templates, 
+                                  creating: false,
+                                  newTemplate: undefined
+                                } 
+                              });
+                              // Refresh templates
+                              window.location.reload();
+                            } else {
+                              alert('Failed to save template');
+                            }
+                          } catch (error) {
+                            alert('Error saving template');
+                          }
                         }}
                       >
                         Save Template

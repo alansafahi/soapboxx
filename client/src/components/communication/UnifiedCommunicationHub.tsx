@@ -32,6 +32,12 @@ export interface CommunicationState {
     editing: any | null;
     filter: string;
     searchTerm: string;
+    newTemplate?: {
+      name?: string;
+      category?: string;
+      subject?: string;
+      content?: string;
+    };
   };
   ui: {
     activePanel: 'compose' | 'templates';
