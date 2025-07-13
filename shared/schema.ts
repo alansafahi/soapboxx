@@ -233,6 +233,7 @@ export const userChurches = pgTable("user_churches", {
   assignedBy: varchar("assigned_by").references(() => users.id), // Who assigned this role
   assignedAt: timestamp("assigned_at").defaultNow(),
   joinedAt: timestamp("joined_at").defaultNow(),
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
   isActive: boolean("is_active").default(true),
   expiresAt: timestamp("expires_at"), // Optional role expiration
 }, (table) => ({

@@ -99,13 +99,14 @@ const CORE_FEATURES = [
 export function useIsFeatureEnabled() {
   const { user } = useAuth();
   
-  // Get user's church ID from their church associations
+  // Get user's church ID from their church associations (ordered by most recently joined)
   const { data: userChurches } = useQuery({
     queryKey: ['user-churches', user?.id],
     queryFn: () => fetch('/api/users/churches', { credentials: 'include' }).then(res => res.json()),
     enabled: !!user
   });
   
+  // Use the most recently joined church (first in the ordered list)
   const primaryChurchId = userChurches?.[0]?.id;
   
   // Get church features if user has a church
@@ -115,35 +116,60 @@ export function useIsFeatureEnabled() {
     // Extract the key from href (e.g., "/donation-demo" -> "donation")
     const key = href.replace('/', '').replace('-demo', '');
     
+    // Debug logging
+    console.log(`Feature check for ${key}:`, {
+      href,
+      key,
+      userChurches: userChurches?.length,
+      primaryChurchId,
+      churchFeaturesLength: churchFeatures?.length,
+      userRole: user?.role
+    });
+    
     // Always show core features
     if (CORE_FEATURES.includes(key)) {
+      console.log(`${key} is core feature, showing`);
       return true;
     }
     
     // Always show admin features to SoapBox Owner
     if (user?.role === 'soapbox_owner') {
+      console.log(`${key} showing to SoapBox Owner`);
       return true;
     }
     
-    // If no church context, show all features (fallback)
+    // If no church joined, show all menu items (all features enabled)
+    if (!userChurches || userChurches.length === 0) {
+      console.log(`${key} showing - no churches joined`);
+      return true;
+    }
+    
+    // If user has churches but no primary church ID or features loaded yet, show all (loading state)
     if (!primaryChurchId || !churchFeatures) {
+      console.log(`${key} showing - loading state`);
       return true;
     }
     
     // Check if this navigation item maps to a toggleable feature
     const featureMapping = NAVIGATION_FEATURE_MAP[key];
     if (!featureMapping) {
+      console.log(`${key} not mapped, showing`);
       return true; // Show if not mapped (safety fallback)
     }
     
-    // Find the feature in church settings
+    // Find the feature in church settings for the most recently accessed church
     const feature = churchFeatures.find(f => 
       f.featureCategory === featureMapping.category && 
       f.featureName === featureMapping.name
     );
     
-    // Return enabled status (default to true if not found)
-    // Note: Database field is 'is_enabled', not 'enabled'
+    console.log(`${key} feature check:`, {
+      mapping: featureMapping,
+      foundFeature: feature,
+      isEnabled: feature?.isEnabled ?? true
+    });
+    
+    // Return enabled status for the most recent church (default to true if not found)
     return feature?.isEnabled ?? true;
   };
 }
