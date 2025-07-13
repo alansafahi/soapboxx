@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { 
@@ -589,6 +589,9 @@ export function SimpleMemberDirectory({ selectedChurch }: SimpleMemberDirectoryP
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Manage Member: {selectedMember.fullName}</DialogTitle>
+              <DialogDescription>
+                View and manage member information, contact details, and membership status.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-6 py-4">
               {/* Member Info Summary */}

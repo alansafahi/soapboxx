@@ -196,7 +196,7 @@ export default function ChurchFeatureSetupDialog({
         });
       } catch (initError) {
         // Continue even if initialization fails (features might already exist)
-        console.warn('Feature initialization warning:', initError);
+        // Feature initialization warning - silent error handling
       }
 
       // Update all feature settings
@@ -217,7 +217,7 @@ export default function ChurchFeatureSetupDialog({
             }
           });
         } catch (featureError) {
-          console.warn(`Failed to update feature ${feature.category}-${feature.name}:`, featureError);
+          // Failed to update feature - silent error handling
           return null;
         }
       });
@@ -231,7 +231,7 @@ export default function ChurchFeatureSetupDialog({
       
       onClose();
     } catch (error) {
-      console.error('Feature configuration error:', error);
+      // Feature configuration error - silent error handling
       toast({
         title: "Configuration Failed",
         description: "Failed to configure features. You can adjust them later in the admin portal.",

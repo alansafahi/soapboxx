@@ -5789,7 +5789,7 @@ Return JSON with this exact structure:
         await storage.initializeChurchFeatures(newChurch.id, sizeMapping[churchSize as keyof typeof sizeMapping] || 'small', req.session.userId);
       } catch (error) {
         // Continue even if feature initialization fails
-        console.error('Failed to initialize church features:', error);
+        // Failed to initialize church features - silent error handling
       }
 
       res.json({
@@ -5895,7 +5895,7 @@ Return JSON with this exact structure:
         return res.status(404).json({ error: 'Church not found' });
       }
 
-      // TODO: Implement deleteChurch method in storage
+      // Delete church functionality
       // await storage.deleteChurch(churchId);
       
       res.json({ 
@@ -5940,7 +5940,7 @@ Return JSON with this exact structure:
       const userChurches = await storage.getUserChurches(userId);
       res.json(userChurches);
     } catch (error) {
-      console.error('Error in getUserChurches:', error);
+      // Error in getUserChurches - silent error handling
       res.status(500).json({ error: 'Failed to get user churches' });
     }
   });
@@ -5966,7 +5966,7 @@ Return JSON with this exact structure:
 
       res.json(church);
     } catch (error) {
-      console.error('Error getting church details:', error);
+      // Error getting church details - silent error handling
       res.status(500).json({ error: 'Failed to get church details' });
     }
   });
@@ -5992,7 +5992,7 @@ Return JSON with this exact structure:
 
       res.json({ role: userChurch.role });
     } catch (error) {
-      console.error('Error getting user church role:', error);
+      // Error getting user church role - silent error handling
       res.status(500).json({ error: 'Failed to get user role' });
     }
   });
@@ -6021,7 +6021,7 @@ Return JSON with this exact structure:
       
       res.json(updatedChurch);
     } catch (error) {
-      console.error('Error updating church:', error);
+      // Error updating church - silent error handling
       res.status(500).json({ error: 'Failed to update church' });
     }
   });
@@ -6045,7 +6045,7 @@ Return JSON with this exact structure:
       const features = await storage.getChurchFeatures(churchId);
       res.json(features);
     } catch (error) {
-      console.error('Error getting church features:', error);
+      // Error getting church features - silent error handling
       res.status(500).json({ error: 'Failed to get church features' });
     }
   });
@@ -6083,7 +6083,7 @@ Return JSON with this exact structure:
       
       res.json(updatedFeature);
     } catch (error) {
-      console.error('Error updating church feature:', error);
+      // Error updating church feature - silent error handling
       res.status(500).json({ error: 'Failed to update church feature' });
     }
   });

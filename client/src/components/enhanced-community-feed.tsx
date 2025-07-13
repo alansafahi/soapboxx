@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
@@ -371,6 +371,9 @@ export default function EnhancedCommunityFeed() {
                   <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                     Start a New Discussion
                   </DialogTitle>
+                  <DialogDescription>
+                    Share your thoughts, questions, or spiritual insights with the community.
+                  </DialogDescription>
                 </DialogHeader>
                 <CreateDiscussionForm onSuccess={() => setShowCreateDialog(false)} />
               </DialogContent>
@@ -386,6 +389,9 @@ export default function EnhancedCommunityFeed() {
                 <DialogContent className="max-w-md">
                   <DialogHeader>
                     <DialogTitle>Filter Community Feed</DialogTitle>
+                    <DialogDescription>
+                      Filter posts by type, mood, or author to find the content you're looking for.
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
