@@ -78,34 +78,16 @@ export default function SidebarFixed() {
     enabled: !!user,
   });
   
-  // Immediate logging to debug data reception
-  console.log('SidebarFixed userChurches query state:', { 
-    userChurches, 
-    churchesLoading, 
-    churchesError, 
-    userChurchesType: typeof userChurches,
-    userChurchesLength: userChurches?.length 
-  });
+
 
   // Check if user has admin role in any church
   const hasChurchAdminRole = useMemo(() => {
-    console.log('hasChurchAdminRole calculation:', { userChurches, userChurchesLength: userChurches?.length });
-    
     if (!userChurches || !userChurches.length) {
-      console.log('No user churches found, returning false');
       return false;
     }
     
     const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
-    
-    // Check each church role individually
-    userChurches.forEach((uc: any, index: number) => {
-      console.log(`Church ${index + 1} (${uc.name}):`, { role: uc.role, isAdmin: adminRoles.includes(uc.role) });
-    });
-    
-    const hasRole = userChurches.some((uc: any) => adminRoles.includes(uc.role));
-    console.log('Final church admin role check result:', { hasRole });
-    return hasRole;
+    return userChurches.some((uc: any) => adminRoles.includes(uc.role));
   }, [userChurches]);
 
   // Responsive sidebar behavior
@@ -212,18 +194,7 @@ export default function SidebarFixed() {
         const hasGlobalRole = item.roles.includes(user.role || '');
         const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
         
-        // Debug logging for admin portal items
-        if (item.label === 'Member Directory') {
-          console.log('Admin portal access check:', {
-            itemLabel: item.label,
-            userRole: user.role,
-            hasGlobalRole,
-            hasChurchAdminRole,
-            hasChurchRole,
-            itemRoles: item.roles,
-            shouldShow: hasGlobalRole || hasChurchRole
-          });
-        }
+
         
         if (!hasGlobalRole && !hasChurchRole) return false;
       }
@@ -238,27 +209,10 @@ export default function SidebarFixed() {
       items: filteredItems
     };
     
-    // Debug logging for ADMIN PORTAL group
-    if (group.label === 'ADMIN PORTAL') {
-      console.log('ADMIN PORTAL group filtering:', {
-        originalItemsCount: group.items.length,
-        filteredItemsCount: filteredItems.length,
-        filteredItems: filteredItems.map(item => ({ label: item.label, href: item.href })),
-        willShowGroup: filteredItems.length > 0
-      });
-    }
-    
     return finalGroup;
   }).filter(group => {
     // Only show groups that have items after filtering
-    const shouldShow = group.items.length > 0;
-    
-    // Debug logging for group visibility decision
-    if (group.label === 'ADMIN PORTAL') {
-      console.log('ADMIN PORTAL final visibility decision:', { shouldShow, itemsCount: group.items.length });
-    }
-    
-    return shouldShow;
+    return group.items.length > 0;
   });
 
   const toggleGroup = (groupLabel: string) => {
@@ -342,9 +296,10 @@ export default function SidebarFixed() {
         {!isCollapsed ? (
           // Expanded Navigation - Full Groups
           visibleGroups.map((group) => {
-            // Ensure admin groups are always expanded for soapbox_owner users
+            // Ensure admin groups are always expanded for soapbox_owner users OR users with church admin roles
             const isExpanded = expandedGroups.has(group.label) || 
-              (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL'));
+              (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
+              (hasChurchAdminRole && group.label === 'ADMIN PORTAL');
             
             return (
               <div key={group.label}>
