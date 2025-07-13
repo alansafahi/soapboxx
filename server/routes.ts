@@ -5772,8 +5772,9 @@ Return JSON with this exact structure:
         updatedAt: new Date()
       });
 
-      // Make user a member of the church they created
+      // Make user a church admin of the church they created
       await storage.joinChurch(req.session.userId, newChurch.id);
+      await storage.updateUserChurchRole(req.session.userId, newChurch.id, 'church_admin');
 
       // Initialize church features with default settings based on church size
       const churchSize = size?.toLowerCase() || 'small';

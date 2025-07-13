@@ -72,6 +72,20 @@ export default function SidebarFixed() {
   const { theme, toggleTheme } = useTheme();
   const isFeatureEnabled = useIsFeatureEnabled();
 
+  // Get user's churches to check for admin roles
+  const { data: userChurches = [] } = useQuery({
+    queryKey: ["/api/users/churches"],
+    enabled: !!user,
+  });
+
+  // Check if user has admin role in any church
+  const hasChurchAdminRole = useMemo(() => {
+    if (!userChurches.length) return false;
+    
+    const adminRoles = ['church_admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
+    return userChurches.some((uc: any) => adminRoles.includes(uc.role));
+  }, [userChurches]);
+
   // Responsive sidebar behavior
   useEffect(() => {
     const handleResize = () => {
@@ -172,8 +186,10 @@ export default function SidebarFixed() {
         // If user data is still loading, show all items to prevent flickering
         if (!user) return true;
         
-        // Check if user has required role
-        if (!item.roles.includes(user.role || '')) return false;
+        // Check if user has required global role OR church admin role
+        const hasGlobalRole = item.roles.includes(user.role || '');
+        const hasChurchRole = hasChurchAdminRole && item.roles.includes('church-admin');
+        if (!hasGlobalRole && !hasChurchRole) return false;
       }
       
       // Then check church feature settings - use proper feature key mapping

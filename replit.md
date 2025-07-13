@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 13, 2025: CHURCH ADMIN AUTO-ASSIGNMENT SYSTEM IMPLEMENTED - Successfully configured automatic church admin role assignment for church creators and fixed admin portal access logic
+  - CHURCH CREATOR ADMIN RIGHTS: Users who create churches now automatically become church_admin for that church instead of just members
+  - CHURCH ADMIN ACCESS FIXED: Updated sidebar navigation to check both global roles AND church-specific admin roles for Admin Portal access
+  - ROLE CHECKING ENHANCEMENT: Users with church_admin role in any church now see Admin Portal sections (Member Directory, Communication Hub, etc.)
+  - DATABASE VERIFICATION: alan@safahi.com confirmed as church_admin for Test Church (ID: 2806) enabling proper admin access
+  - FUTURE CHURCH CREATORS: All future church creators will automatically receive church_admin privileges for their created churches
 - July 13, 2025: SOAPBOX OWNER FEATURE FILTERING BYPASS RESOLVED - Successfully identified and fixed issue preventing church feature filtering testing by modifying SoapBox Owners to respect church settings
   - ROOT CAUSE IDENTIFIED: SoapBox Owner users (alan@soapboxsuperapp.com) were bypassing ALL feature filtering for admin access
   - TESTING BYPASS ENABLED: Modified useIsFeatureEnabled hook to respect church settings even for SoapBox Owners when respectChurchSettings=true
