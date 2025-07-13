@@ -47,6 +47,7 @@ import {
   Share2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import ExpirationSettings from "./ExpirationSettings";
 
 interface FeedPost {
   id: number;
@@ -129,6 +130,13 @@ export default function SocialFeed() {
   const [selectedSoapEntry, setSelectedSoapEntry] = useState<any>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState<number | null>(null);
   const [showAllPosts, setShowAllPosts] = useState(false);
+  const [expirationSettings, setExpirationSettings] = useState<{
+    expiresAt: Date | null;
+    allowsExpiration: boolean;
+  }>({
+    expiresAt: null,
+    allowsExpiration: false,
+  });
   
   // Refs for click-outside functionality
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -328,6 +336,7 @@ export default function SocialFeed() {
       setSelectedMoods([]);
       setLinkedVerse(null);
       setAttachedMedia([]);
+      setExpirationSettings({ expiresAt: null, allowsExpiration: false });
       toast({
         title: "Success",
         description: "Post shared!",
@@ -419,6 +428,9 @@ export default function SocialFeed() {
         url: media.url,
         filename: media.filename
       })) : null,
+      // Expiration settings
+      expiresAt: expirationSettings.expiresAt,
+      allowsExpiration: expirationSettings.allowsExpiration,
     };
 
     createPostMutation.mutate(postData);
@@ -1145,6 +1157,15 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
               >
                 <Send className="w-4 h-4 text-white" />
               </Button>
+            </div>
+
+            {/* Expiration Settings Section */}
+            <div className="mt-4">
+              <ExpirationSettings
+                contentType="social post"
+                settings={expirationSettings}
+                onSettingsChange={setExpirationSettings}
+              />
             </div>
           </CardContent>
         </Card>

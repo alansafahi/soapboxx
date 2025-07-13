@@ -19,6 +19,7 @@ import { apiRequest, queryClient } from "../lib/queryClient";
 import { insertSoapEntrySchema, type SoapEntry } from "../../../shared/schema";
 import { z } from "zod";
 import { moodCategories, allMoods, getMoodsByIds } from "../lib/moodCategories";
+import ExpirationSettings from "./ExpirationSettings";
 
 const formSchema = insertSoapEntrySchema.extend({
   devotionalDate: z.string(),
@@ -54,6 +55,15 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [moodDetectionTimeout, setMoodDetectionTimeout] = useState<NodeJS.Timeout | null>(null);
   const [showFullMoodGrid, setShowFullMoodGrid] = useState(false);
   const [useAiSuggestions, setUseAiSuggestions] = useState(true);
+  
+  // Expiration settings state
+  const [expirationSettings, setExpirationSettings] = useState<{
+    expiresAt: Date | null;
+    allowsExpiration: boolean;
+  }>({
+    expiresAt: entry?.expiresAt ? new Date(entry.expiresAt) : null,
+    allowsExpiration: entry?.allowsExpiration || false,
+  });
 
   const { toast } = useToast();
 
@@ -196,6 +206,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         churchId: user?.churchId || 1,
         devotionalDate: new Date(data.devotionalDate),
         tags: data.tags || [],
+        expiresAt: expirationSettings.expiresAt,
+        allowsExpiration: expirationSettings.allowsExpiration,
       };
 
 
@@ -1503,6 +1515,13 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               )}
             </CardContent>
           </Card>
+
+          {/* Expiration Settings */}
+          <ExpirationSettings
+            contentType="S.O.A.P. entry"
+            settings={expirationSettings}
+            onSettingsChange={setExpirationSettings}
+          />
 
           {/* Submit Button */}
           <div className="flex justify-end gap-3">

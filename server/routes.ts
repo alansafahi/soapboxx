@@ -6843,6 +6843,8 @@ Return JSON with this exact structure:
       const prayerData = {
         ...req.body,
         authorId: userId,
+        expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
+        allowsExpiration: req.body.allowsExpiration || false,
       };
       
 
@@ -7889,7 +7891,7 @@ Return JSON with this exact structure:
       }
       
       // Enhanced validation before schema parsing
-      const { scripture, observation, application, prayer, scriptureReference } = req.body;
+      const { scripture, observation, application, prayer, scriptureReference, expiresAt, allowsExpiration } = req.body;
       
       // Check for missing required fields
       const missingFields: string[] = [];
@@ -11004,6 +11006,107 @@ Please provide suggestions for the missing or incomplete sections.`
       res.json({ success: true, message: 'Event deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete event' });
+    }
+  });
+
+  // Content expiration privacy endpoints
+  app.post('/api/content/process-expired', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      // Only allow admin users to process expired content
+      if (!user || !['soapbox_owner', 'system_admin'].includes(user.role)) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const result = await storage.processExpiredContent();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process expired content' });
+    }
+  });
+
+  app.get('/api/content/expiring', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      // Only allow admin users to view expiring content
+      if (!user || !['soapbox_owner', 'system_admin', 'church_admin', 'admin', 'pastor'].includes(user.role)) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const daysAhead = parseInt(req.query.days as string) || 7;
+      const beforeDate = new Date();
+      beforeDate.setDate(beforeDate.getDate() + daysAhead);
+
+      const result = await storage.getExpiringContent(beforeDate);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch expiring content' });
+    }
+  });
+
+  app.post('/api/content/:type/:id/expire', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      const { type, id } = req.params;
+      
+      // Only allow admin users to manually expire content
+      if (!user || !['soapbox_owner', 'system_admin', 'church_admin', 'admin', 'pastor'].includes(user.role)) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      if (!['discussion', 'prayer', 'soap'].includes(type)) {
+        return res.status(400).json({ message: 'Invalid content type' });
+      }
+
+      await storage.markContentAsExpired(type as 'discussion' | 'prayer' | 'soap', parseInt(id));
+      res.json({ success: true, message: 'Content marked as expired' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to expire content' });
+    }
+  });
+
+  app.post('/api/content/:type/:id/restore', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      const { type, id } = req.params;
+      
+      // Only allow admin users to restore expired content
+      if (!user || !['soapbox_owner', 'system_admin', 'church_admin', 'admin', 'pastor'].includes(user.role)) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      if (!['discussion', 'prayer', 'soap'].includes(type)) {
+        return res.status(400).json({ message: 'Invalid content type' });
+      }
+
+      await storage.restoreExpiredContent(type as 'discussion' | 'prayer' | 'soap', parseInt(id));
+      res.json({ success: true, message: 'Content restored from expiration' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to restore content' });
+    }
+  });
+
+  app.get('/api/content/expired-summary', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      // Only allow admin users to view expired content summary
+      if (!user || !['soapbox_owner', 'system_admin', 'church_admin', 'admin', 'pastor'].includes(user.role)) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      const churchId = req.query.churchId ? parseInt(req.query.churchId as string) : undefined;
+      const result = await storage.getExpiredContentSummary(churchId);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch expired content summary' });
     }
   });
 

@@ -14,6 +14,7 @@ import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Heart, MessageCircle, Share, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink } from 'lucide-react';
+import ExpirationSettings from './ExpirationSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -30,6 +31,8 @@ const prayerRequestSchema = z.object({
   isPublic: z.boolean().default(true),
   isUrgent: z.boolean().default(false),
   isSilent: z.boolean().default(false),
+  expiresAt: z.date().optional(),
+  allowsExpiration: z.boolean().default(false),
 });
 
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
@@ -213,6 +216,15 @@ export default function EnhancedPrayerWall() {
   const [showWhosPraying, setShowWhosPraying] = useState<Map<number, boolean>>(new Map());
   const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
   
+  // Expiration settings state
+  const [expirationSettings, setExpirationSettings] = useState<{
+    expiresAt: Date | null;
+    allowsExpiration: boolean;
+  }>({
+    expiresAt: null,
+    allowsExpiration: false,
+  });
+  
   // Check user's church status for prayer circle limits and profile completeness
   const { data: userChurchStatus } = useQuery({
     queryKey: ["/api/user/church-status"],
@@ -295,12 +307,18 @@ export default function EnhancedPrayerWall() {
   // Create prayer request mutation
   const createPrayerMutation = useMutation({
     mutationFn: async (data: PrayerRequestFormData) => {
-      return await apiRequest("POST", "/api/prayers", data);
+      const requestData = {
+        ...data,
+        expiresAt: expirationSettings.expiresAt,
+        allowsExpiration: expirationSettings.allowsExpiration,
+      };
+      return await apiRequest("POST", "/api/prayers", requestData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
       setIsCreateDialogOpen(false);
       form.reset();
+      setExpirationSettings({ expiresAt: null, allowsExpiration: false });
       toast({
         title: "Prayer Request Posted",
         description: "Your prayer request has been shared with the community.",
@@ -682,6 +700,14 @@ export default function EnhancedPrayerWall() {
                             )}
                           />
                         </div>
+
+                        {/* Privacy & Expiration Settings */}
+                        <ExpirationSettings
+                          contentType="prayer"
+                          allowsExpiration={expirationSettings.allowsExpiration}
+                          initialExpiresAt={expirationSettings.expiresAt}
+                          onSettingsChange={setExpirationSettings}
+                        />
 
                         <Button 
                           type="submit" 

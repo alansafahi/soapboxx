@@ -742,6 +742,13 @@ export interface IStorage {
   markNotificationAsRead(notificationId: number, userId: string): Promise<void>;
   markAllNotificationsAsRead(userId: string): Promise<void>;
   createNotification(notification: InsertNotification): Promise<Notification>;
+
+  // Content expiration privacy operations
+  processExpiredContent(): Promise<{ expiredCount: number; processedTypes: string[] }>;
+  getExpiringContent(beforeDate: Date): Promise<{ discussions: any[]; prayerRequests: any[]; soapEntries: any[] }>;
+  markContentAsExpired(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void>;
+  restoreExpiredContent(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void>;
+  getExpiredContentSummary(churchId?: number): Promise<{ totalExpired: number; byType: { [key: string]: number } }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1869,6 +1876,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(discussions.isPublic, true),
+          isNull(discussions.expiredAt), // Exclude expired content
           churchId ? eq(discussions.churchId, churchId) : undefined
         )
       )
@@ -1919,6 +1927,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(soapEntries.isPublic, true),
+          isNull(soapEntries.expiredAt), // Exclude expired content
           churchId ? eq(soapEntries.churchId, churchId) : undefined
         )
       )
@@ -2386,6 +2395,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(prayerRequests.isPublic, true),
+          isNull(prayerRequests.expiredAt), // Exclude expired content
           churchId ? eq(prayerRequests.churchId, churchId) : undefined
         )
       )
@@ -3888,6 +3898,7 @@ export class DatabaseStorage implements IStorage {
           u.profile_image_url
         FROM discussions d
         LEFT JOIN users u ON d.author_id = u.id
+        WHERE d.expired_at IS NULL
         ORDER BY d.created_at DESC
         LIMIT 10
       `);
@@ -8847,6 +8858,211 @@ export class DatabaseStorage implements IStorage {
     if (memberCount >= 500) return 'large';
     if (memberCount >= 100) return 'medium';
     return 'small';
+  }
+
+  // Content expiration privacy methods implementation
+  async processExpiredContent(): Promise<{ expiredCount: number; processedTypes: string[] }> {
+    const now = new Date();
+    let expiredCount = 0;
+    const processedTypes: string[] = [];
+
+    try {
+      // Process expired discussions
+      const expiredDiscussions = await db
+        .update(discussions)
+        .set({ expiredAt: now })
+        .where(
+          and(
+            isNotNull(discussions.expiresAt),
+            lte(discussions.expiresAt, now),
+            isNull(discussions.expiredAt)
+          )
+        )
+        .returning({ id: discussions.id });
+
+      if (expiredDiscussions.length > 0) {
+        expiredCount += expiredDiscussions.length;
+        processedTypes.push('discussions');
+      }
+
+      // Process expired prayer requests
+      const expiredPrayers = await db
+        .update(prayerRequests)
+        .set({ expiredAt: now })
+        .where(
+          and(
+            isNotNull(prayerRequests.expiresAt),
+            lte(prayerRequests.expiresAt, now),
+            isNull(prayerRequests.expiredAt)
+          )
+        )
+        .returning({ id: prayerRequests.id });
+
+      if (expiredPrayers.length > 0) {
+        expiredCount += expiredPrayers.length;
+        processedTypes.push('prayerRequests');
+      }
+
+      // Process expired SOAP entries
+      const expiredSoap = await db
+        .update(soapEntries)
+        .set({ expiredAt: now })
+        .where(
+          and(
+            isNotNull(soapEntries.expiresAt),
+            lte(soapEntries.expiresAt, now),
+            isNull(soapEntries.expiredAt)
+          )
+        )
+        .returning({ id: soapEntries.id });
+
+      if (expiredSoap.length > 0) {
+        expiredCount += expiredSoap.length;
+        processedTypes.push('soapEntries');
+      }
+
+      return { expiredCount, processedTypes };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getExpiringContent(beforeDate: Date): Promise<{ discussions: any[]; prayerRequests: any[]; soapEntries: any[] }> {
+    const expiringDiscussions = await db
+      .select({
+        id: discussions.id,
+        title: discussions.title,
+        authorId: discussions.authorId,
+        expiresAt: discussions.expiresAt,
+        createdAt: discussions.createdAt
+      })
+      .from(discussions)
+      .where(
+        and(
+          isNotNull(discussions.expiresAt),
+          lte(discussions.expiresAt, beforeDate),
+          isNull(discussions.expiredAt)
+        )
+      );
+
+    const expiringPrayers = await db
+      .select({
+        id: prayerRequests.id,
+        title: prayerRequests.title,
+        authorId: prayerRequests.authorId,
+        expiresAt: prayerRequests.expiresAt,
+        createdAt: prayerRequests.createdAt
+      })
+      .from(prayerRequests)
+      .where(
+        and(
+          isNotNull(prayerRequests.expiresAt),
+          lte(prayerRequests.expiresAt, beforeDate),
+          isNull(prayerRequests.expiredAt)
+        )
+      );
+
+    const expiringSoap = await db
+      .select({
+        id: soapEntries.id,
+        scriptureReference: soapEntries.scriptureReference,
+        userId: soapEntries.userId,
+        expiresAt: soapEntries.expiresAt,
+        createdAt: soapEntries.createdAt
+      })
+      .from(soapEntries)
+      .where(
+        and(
+          isNotNull(soapEntries.expiresAt),
+          lte(soapEntries.expiresAt, beforeDate),
+          isNull(soapEntries.expiredAt)
+        )
+      );
+
+    return {
+      discussions: expiringDiscussions,
+      prayerRequests: expiringPrayers,
+      soapEntries: expiringSoap
+    };
+  }
+
+  async markContentAsExpired(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void> {
+    const now = new Date();
+
+    switch (contentType) {
+      case 'discussion':
+        await db
+          .update(discussions)
+          .set({ expiredAt: now })
+          .where(eq(discussions.id, contentId));
+        break;
+      case 'prayer':
+        await db
+          .update(prayerRequests)
+          .set({ expiredAt: now })
+          .where(eq(prayerRequests.id, contentId));
+        break;
+      case 'soap':
+        await db
+          .update(soapEntries)
+          .set({ expiredAt: now })
+          .where(eq(soapEntries.id, contentId));
+        break;
+    }
+  }
+
+  async restoreExpiredContent(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void> {
+    switch (contentType) {
+      case 'discussion':
+        await db
+          .update(discussions)
+          .set({ expiredAt: null })
+          .where(eq(discussions.id, contentId));
+        break;
+      case 'prayer':
+        await db
+          .update(prayerRequests)
+          .set({ expiredAt: null })
+          .where(eq(prayerRequests.id, contentId));
+        break;
+      case 'soap':
+        await db
+          .update(soapEntries)
+          .set({ expiredAt: null })
+          .where(eq(soapEntries.id, contentId));
+        break;
+    }
+  }
+
+  async getExpiredContentSummary(churchId?: number): Promise<{ totalExpired: number; byType: { [key: string]: number } }> {
+    const whereClause = churchId ? and(isNotNull(discussions.expiredAt), eq(discussions.churchId, churchId)) : isNotNull(discussions.expiredAt);
+    const prayerWhereClause = churchId ? and(isNotNull(prayerRequests.expiredAt), eq(prayerRequests.churchId, churchId)) : isNotNull(prayerRequests.expiredAt);
+    const soapWhereClause = churchId ? and(isNotNull(soapEntries.expiredAt), eq(soapEntries.churchId, churchId)) : isNotNull(soapEntries.expiredAt);
+
+    const [discussionCount] = await db
+      .select({ count: count() })
+      .from(discussions)
+      .where(whereClause);
+
+    const [prayerCount] = await db
+      .select({ count: count() })
+      .from(prayerRequests)
+      .where(prayerWhereClause);
+
+    const [soapCount] = await db
+      .select({ count: count() })
+      .from(soapEntries)
+      .where(soapWhereClause);
+
+    const byType = {
+      discussions: discussionCount.count,
+      prayerRequests: prayerCount.count,
+      soapEntries: soapCount.count
+    };
+
+    const totalExpired = byType.discussions + byType.prayerRequests + byType.soapEntries;
+
+    return { totalExpired, byType };
   }
 }
 

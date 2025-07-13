@@ -690,6 +690,9 @@ export const discussions = pgTable("discussions", {
   pinCategory: varchar("pin_category", { length: 30 }), // 'announcement', 'sermon', 'weekly_encouragement', 'call_to_action'
   likeCount: integer("like_count").default(0),
   commentCount: integer("comment_count").default(0),
+  // Data expiration privacy fields
+  expiresAt: timestamp("expires_at"), // When content should be hidden for privacy
+  expiredAt: timestamp("expired_at"), // When content was actually marked as expired (soft deletion)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -735,6 +738,11 @@ export const prayerRequests = pgTable("prayer_requests", {
   lastFollowUpAt: timestamp("last_follow_up_at"),
   isUrgent: boolean("is_urgent").default(false),
   tags: text("tags").array(),
+  // Data expiration privacy fields
+  expiresAt: timestamp("expires_at"), // When content should be hidden for privacy
+  expiredAt: timestamp("expired_at"), // When content was actually marked as expired (soft deletion)
+  allowsExpiration: boolean("allows_expiration").default(false), // User permission for content expiration
+  expirationReminderSent: boolean("expiration_reminder_sent").default(false), // Track reminder notifications
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1154,6 +1162,10 @@ export const soapEntries = pgTable("soap_entries", {
   featuredBy: varchar("featured_by").references(() => users.id),
   featuredAt: timestamp("featured_at"),
   commentCount: integer("comment_count").default(0), // Track comment count
+  // Data expiration privacy fields
+  expiresAt: timestamp("expires_at"), // When content should be hidden for privacy
+  allowsExpiration: boolean("allows_expiration").default(false), // Whether user has enabled expiration feature
+  expiredAt: timestamp("expired_at"), // When content was actually marked as expired (soft deletion)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
@@ -1161,6 +1173,7 @@ export const soapEntries = pgTable("soap_entries", {
   index("soap_entries_church_idx").on(table.churchId),
   index("soap_entries_date_idx").on(table.devotionalDate),
   index("soap_entries_public_idx").on(table.isPublic),
+  index("soap_entries_expires_idx").on(table.expiresAt), // Index for expiration queries
 ]);
 
 // SOAP Comments  
