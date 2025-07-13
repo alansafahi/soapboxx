@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -17,7 +18,9 @@ import {
   Clock,
   AlertTriangle,
   FileText,
-  Plus
+  Plus,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { CommunicationState } from './UnifiedCommunicationHub';
 
@@ -213,44 +216,63 @@ export default function MessageComposer({
                 <div className="text-sm text-muted-foreground">Loading templates...</div>
               ) : (
                 <div className="space-y-3">
-                  {/* Template Grid */}
+                  {/* Template Grid - Collapsible */}
                   {templatesData && typeof templatesData === 'object' && [
                     ...(templatesData.announcements || []),
                     ...(templatesData.emergencies || []),
                     ...(templatesData.prayers || []),
                     ...(templatesData.custom || [])
-                  ].map((template: any, index: number) => (
-                    <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center gap-2">
+                  ].map((template: any, index: number) => {
+                    const [expanded, setExpanded] = React.useState(false);
+                    
+                    return (
+                      <div key={index} className="border rounded-lg hover:bg-muted/50 transition-colors">
+                        {/* Collapsed Header */}
+                        <div className="p-3 flex items-center justify-between">
+                          <div 
+                            className="flex items-center gap-2 flex-1 cursor-pointer"
+                            onClick={() => setExpanded(!expanded)}
+                          >
                             <span className="font-medium text-sm">{template.name}</span>
                             {template.category && (
                               <Badge variant="outline" className="text-xs">
                                 {template.category}
                               </Badge>
                             )}
+                            {expanded ? (
+                              <ChevronUp className="w-4 h-4 text-muted-foreground ml-auto" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
+                            )}
                           </div>
-                          {template.subject && (
-                            <div className="text-xs text-muted-foreground">
-                              Subject: {template.subject}
-                            </div>
-                          )}
-                          <div className="text-xs text-muted-foreground line-clamp-2">
-                            {template.content}
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onApplyTemplate?.(template)}
+                            className="ml-2"
+                          >
+                            Use
+                          </Button>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onApplyTemplate?.(template)}
-                          className="ml-2"
-                        >
-                          Use
-                        </Button>
+                        
+                        {/* Expanded Details */}
+                        {expanded && (
+                          <div className="px-3 pb-3 pt-0 border-t bg-muted/20">
+                            <div className="space-y-2">
+                              {template.subject && (
+                                <div className="text-xs text-muted-foreground">
+                                  <span className="font-medium">Subject:</span> {template.subject}
+                                </div>
+                              )}
+                              <div className="text-xs text-muted-foreground">
+                                <span className="font-medium">Content:</span> {template.content}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   
                   {(!templatesData || Object.keys(templatesData).length === 0) && (
                     <div className="text-sm text-muted-foreground text-center py-4">
