@@ -180,22 +180,25 @@ export default function UnifiedCommunicationHub() {
 
       <Tabs defaultValue="unified" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="unified" className="flex items-center gap-2">
-            <Send className="w-4 h-4" />
-            Compose & Templates
+          <TabsTrigger value="unified" className="flex items-center gap-1 text-xs sm:text-sm">
+            <Send className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Compose & Templates</span>
+            <span className="sm:hidden">Compose</span>
           </TabsTrigger>
-          <TabsTrigger value="emergency" className="flex items-center gap-2">
-            <Zap className="w-4 h-4" />
-            Emergency Broadcast
+          <TabsTrigger value="emergency" className="flex items-center gap-1 text-xs sm:text-sm">
+            <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Emergency Broadcast</span>
+            <span className="sm:hidden">Emergency</span>
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2">
-            <History className="w-4 h-4" />
-            Message History
+          <TabsTrigger value="history" className="flex items-center gap-1 text-xs sm:text-sm">
+            <History className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Message History</span>
+            <span className="sm:hidden">History</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="unified" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Message Composer - Left Panel */}
             <div className="space-y-6">
               <MessageComposer
