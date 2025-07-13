@@ -3051,10 +3051,13 @@ export class DatabaseStorage implements IStorage {
     
     console.log('DEBUG: getUserChurches query result:', result);
     
-    return result.map(({ userRole, ...church }) => ({
+    const mappedResult = result.map(({ userRole, ...church }) => ({
       ...church,
       role: userRole || 'member'
     }));
+    
+    console.log('DEBUG: Final mapped getUserChurches result:', mappedResult);
+    return mappedResult;
   }
 
   async getUserCreatedChurches(userId: string): Promise<Church[]> {
