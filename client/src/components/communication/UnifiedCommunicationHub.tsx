@@ -198,9 +198,9 @@ export default function UnifiedCommunicationHub() {
         </TabsList>
 
         <TabsContent value="unified" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
             {/* Message Composer - Left Panel */}
-            <div className="space-y-6">
+            <div className="space-y-6 w-full">
               <MessageComposer
                 state={communicationState}
                 updateState={updateState}
@@ -210,7 +210,7 @@ export default function UnifiedCommunicationHub() {
             </div>
 
             {/* Template Library - Right Panel */}
-            <div className="space-y-6">
+            <div className="space-y-6 w-full">
               <TemplateLibrary
                 state={communicationState}
                 updateState={updateState}

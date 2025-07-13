@@ -220,7 +220,7 @@ export default function TemplateLibrary({
   );
 
   return (
-    <Card className="h-fit">
+    <Card className="h-fit w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5" />

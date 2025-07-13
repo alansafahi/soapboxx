@@ -62,7 +62,7 @@ export default function MessageComposer({ state, updateState, onSendMessage, isL
   };
 
   return (
-    <Card className="h-fit">
+    <Card className="h-fit w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5" />
