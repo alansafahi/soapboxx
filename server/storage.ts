@@ -8542,12 +8542,16 @@ export class DatabaseStorage implements IStorage {
 
       const mappedCommunications = communications.map(comm => ({
         id: comm.id,
+        subject: comm.subject,
         title: comm.subject,
         content: comm.content,
+        communicationType: comm.communicationType,
         type: comm.communicationType,
         sentAt: comm.sentAt,
+        deliveryStatus: comm.deliveryStatus,
         status: comm.deliveryStatus,
         recipientCount: Number(comm.recipientCount),
+        senderName: comm.senderName,
         sender: {
           name: comm.senderName,
           email: comm.senderEmail

@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 12, 2025: SUBJECT LINE BUG COMPLETELY FIXED - Successfully resolved critical "No Subject" display issue in Message History by correcting field mapping in getCommunicationHistory storage method
+  - ROOT CAUSE IDENTIFIED: Backend getCommunicationHistory method mapped database 'subject' field to 'title' but MessageHistory component expected 'subject' field
+  - FIELD MAPPING CORRECTED: Enhanced storage method to return both 'subject' and 'title' fields ensuring proper display compatibility
+  - DATABASE VERIFICATION: Communication records now properly store and display subject lines in Message History tab
+  - TEMPLATE APPLICATION PRESERVED: Subject line properly flows from template application through message composition to history storage
+  - PRODUCTION READY: Subject line tracking now operational across entire communication workflow
+- July 12, 2025: UNIFIED COMMUNICATION INTERFACE COMPLETELY IMPLEMENTED - Successfully redesigned church communication system eliminating UX/UI fragmentation with side-by-side layout merging message composition and template management
 - July 11, 2025: EMERGENCY BROADCAST SYSTEM COMPLETELY OPERATIONAL - Successfully resolved all authentication and message history issues for emergency broadcasts
   - AUTHENTICATION FIXED: Emergency broadcast permissions now properly recognize 'soapbox_owner' role alongside church leadership roles
   - MESSAGE HISTORY INTEGRATION: Emergency broadcasts now appear in Message History tab with "URGENT:" prefix for clear identification
