@@ -46,12 +46,16 @@ export default function MessageHistory({ messages, isLoading }: MessageHistoryPr
     switch (type) {
       case 'emergency_broadcast':
         return <Bell className="w-4 h-4 text-red-500" />;
+      case 'urgent':
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
       case 'announcement':
         return <MessageSquare className="w-4 h-4 text-blue-500" />;
       case 'prayer_request':
         return <MessageSquare className="w-4 h-4 text-purple-500" />;
       case 'event':
         return <Calendar className="w-4 h-4 text-green-500" />;
+      case 'general':
+        return <Mail className="w-4 h-4 text-gray-500" />;
       default:
         return <Mail className="w-4 h-4 text-gray-500" />;
     }
@@ -99,9 +103,11 @@ export default function MessageHistory({ messages, isLoading }: MessageHistoryPr
             <SelectContent>
               <SelectItem value="all">All Messages</SelectItem>
               <SelectItem value="announcement">Announcements</SelectItem>
+              <SelectItem value="urgent">Urgent Messages</SelectItem>
               <SelectItem value="emergency_broadcast">Emergency Broadcasts</SelectItem>
               <SelectItem value="prayer_request">Prayer Requests</SelectItem>
               <SelectItem value="event">Events</SelectItem>
+              <SelectItem value="general">General</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 12, 2025: MESSAGE TYPE CORRELATION SYSTEM COMPLETED - Successfully clarified and fixed correlation between message composer types and message history filters
+  - MESSAGE TYPE MAPPING DOCUMENTED: Regular messages (announcement, urgent, event, prayer_request, general) vs Emergency broadcasts (emergency_broadcast)
+  - URGENT MESSAGES FILTER ADDED: Added "Urgent Messages" filter option to Message History to display regular urgent messages separately from emergency broadcasts  
+  - TYPE CORRELATION CLARIFIED: Message Composer "urgent" type maps to "Urgent Messages" filter, Emergency Broadcast tab maps to "Emergency Broadcasts" filter
+  - COMPREHENSIVE FILTERING: Message History now supports all message types: announcement, urgent, emergency_broadcast, prayer_request, event, general
+  - ICON MAPPING ENHANCED: Added AlertCircle icon for urgent messages to distinguish from emergency broadcast Bell icon
 - July 12, 2025: COMMUNICATION INTERFACE CRITICAL FIXES COMPLETED - Successfully resolved layout, message type storage, and filtering issues with enhanced smart template suggestions
   - SIDE-BY-SIDE LAYOUT IMPLEMENTED: Fixed layout to display Message Composer (left) and Template Library (right) using flex layout with xl:flex-row for proper desktop display
   - MESSAGE TYPE STORAGE FIXED: Corrected backend to save actual message type (prayer_request, event, urgent, announcement) instead of hardcoded 'announcement'
