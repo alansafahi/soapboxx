@@ -399,7 +399,7 @@ export default function EventsList() {
       <Card>
         <CardContent className="p-8 text-center">
           <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Loading events...</p>
+          <p>{t('events.loadingEvents')}</p>
         </CardContent>
       </Card>
     );

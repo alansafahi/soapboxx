@@ -219,7 +219,7 @@ export default function MessagesPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t('pages.messages')}</h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">Connect with your faith community</p>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">{t('pages.connectWithFaith')}</p>
           </div>
 
           <Dialog open={showNewMessageDialog} onOpenChange={setShowNewMessageDialog}>
@@ -311,7 +311,7 @@ export default function MessagesPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Search conversations..."
+                  placeholder={t('messages.searchConversations')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"

@@ -29,7 +29,7 @@ export default function EventsPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto"></div>
-          <p className="mt-4 text-gray-300">Loading events...</p>
+          <p className="mt-4 text-gray-300">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -50,12 +50,12 @@ export default function EventsPage() {
                 {t('pages.communityEvents')}
               </h1>
               <p className="text-gray-300 dark:text-gray-300 mt-2 text-lg">
-                Discover upcoming events and connect with your faith community
+                {t('events.discoverEventsDescription')}
               </p>
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-gray-400">Today</p>
+                <p className="text-sm text-gray-400">{t('common.today')}</p>
                 <p className="font-semibold text-gray-200">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</p>
               </div>
             </div>
