@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
+import { useLanguage } from "../contexts/LanguageContext";
 
 
 
@@ -53,6 +54,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [showMoreClicks, setShowMoreClicks] = useState(0);
+  const { t } = useLanguage();
   const [postsViewed, setPostsViewed] = useState(0);
   const [showReflectionBreak, setShowReflectionBreak] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -372,7 +374,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   if (error) {
     return (
       <div className={`text-center py-8 ${className}`}>
-        <p className="text-gray-500 dark:text-gray-400">Unable to load posts</p>
+        <p className="text-gray-500 dark:text-gray-400">{t('posts.unableToLoadPosts') || 'Unable to load posts'}</p>
       </div>
     );
   }
@@ -633,7 +635,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           <div className="border-t pt-4">
             <div className="space-y-3">
               <Textarea
-                placeholder="Share your thoughts..."
+                placeholder={t('posts.pleaseShareThoughts')}
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 className="min-h-[80px] resize-none"
@@ -680,7 +682,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
             }}
             className="flex items-center space-x-2 min-w-[160px]"
           >
-            <span>Show More Posts</span>
+            <span>{t('posts.showMorePosts')}</span>
             <ChevronDown className="w-4 h-4" />
           </Button>
           <p className="text-xs text-gray-500 mt-2">
