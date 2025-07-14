@@ -426,7 +426,7 @@ export default function EventsList() {
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
                 <Input
-                  placeholder="Search events by name, location, or description..."
+                  placeholder={t('events.searchEvents')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-12 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 focus:ring-purple-200 rounded-lg shadow-sm dark:text-white"
@@ -436,7 +436,7 @@ export default function EventsList() {
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 rounded-lg shadow-sm dark:text-white">
                     <Filter className="w-4 h-4 mr-2 text-purple-400" />
-                    <SelectValue placeholder="Category" />
+                    <SelectValue placeholder={t('events.category')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('events.allCategories')}</SelectItem>
@@ -452,13 +452,13 @@ export default function EventsList() {
                 <Select value={timeFilter} onValueChange={setTimeFilter}>
                   <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 rounded-lg shadow-sm dark:text-white">
                     <Clock className="w-4 h-4 mr-2 text-purple-400" />
-                    <SelectValue placeholder="Time" />
+                    <SelectValue placeholder={t('events.time')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('events.allTime')}</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="this_week">This Week</SelectItem>
-                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="today">{t('events.today')}</SelectItem>
+                    <SelectItem value="this_week">{t('events.thisWeek')}</SelectItem>
+                    <SelectItem value="this_month">{t('events.thisMonth')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

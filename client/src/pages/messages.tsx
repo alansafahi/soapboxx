@@ -484,10 +484,10 @@ export default function MessagesPage() {
                 <CardContent className="p-0">
                   <ScrollArea className="h-[calc(100vh-420px)] p-4">
                     {messagesLoading ? (
-                      <div className="text-center text-gray-500">Loading messages...</div>
+                      <div className="text-center text-gray-500">{t('common.loading')}</div>
                     ) : messages.length === 0 ? (
                       <div className="text-center text-gray-500">
-                        No messages yet. Start the conversation!
+                        {t('messages.connectWithCommunity')}
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -535,7 +535,7 @@ export default function MessagesPage() {
                   <div className="p-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex gap-3">
                       <Textarea
-                        placeholder="Type your message..."
+                        placeholder={t('common.send') + '...'}  
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={(e) => {

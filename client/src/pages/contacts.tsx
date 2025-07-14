@@ -484,7 +484,7 @@ function ContactsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Contacts</p>
+                  <p className="text-sm font-medium text-gray-600">{t('contacts.totalContacts')}</p>
                   <p className="text-3xl font-bold text-gray-900">{contacts.length}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -498,7 +498,7 @@ function ContactsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Successful Referrals</p>
+                  <p className="text-sm font-medium text-gray-600">{t('contacts.successfulReferrals')}</p>
                   <p className="text-3xl font-bold text-gray-900">{referralStats?.successful || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
@@ -515,7 +515,7 @@ function ContactsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Invites</p>
+                  <p className="text-sm font-medium text-gray-600">{t('contacts.pendingInvites')}</p>
                   <p className="text-3xl font-bold text-gray-900">{pendingInvites.length}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -529,7 +529,7 @@ function ContactsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Referral Points</p>
+                  <p className="text-sm font-medium text-gray-600">{t('contacts.referralPoints')}</p>
                   <p className="text-3xl font-bold text-gray-900">{referralStats?.points || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">

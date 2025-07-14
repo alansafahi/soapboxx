@@ -82,18 +82,18 @@ export default function BiblePage() {
           <CardHeader className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <BookOpen className="w-6 h-6 text-blue-600" />
-              <CardTitle className="text-xl text-gray-900">Daily Verse</CardTitle>
+              <CardTitle className="text-xl text-gray-900">{t('bible.dailyVerse')}</CardTitle>
             </div>
             <Badge variant="secondary" className="mx-auto">
-              {currentVerse?.theme || "Daily Inspiration"}
+              {currentVerse?.theme || t('bible.dailyInspiration')}
             </Badge>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <blockquote className="text-lg italic text-gray-700 leading-relaxed">
-              "{currentVerse?.verseText || "Loading today's verse..."}"
+              "{currentVerse?.verseText || t('bible.loadingVerse')}"
             </blockquote>
             <p className="font-semibold text-blue-600">
-              {currentVerse?.verseReference || "Loading..."}
+              {currentVerse?.verseReference || t('common.loading')}
             </p>
             
             {/* Personalization indicator */}
@@ -113,13 +113,13 @@ export default function BiblePage() {
                 className="flex items-center justify-center gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2"
                 onClick={() => {
                   toast({
-                    title: "Reflection Started",
-                    description: "Take a moment to reflect on this verse and its meaning in your life."
+                    title: t('bible.reflectionStarted'),
+                    description: t('bible.reflectionDescription')
                   });
                 }}
               >
                 <Heart className="w-4 h-4" />
-                Reflect
+                {t('bible.reflect')}
               </Button>
               <Button 
                 variant="outline" 
@@ -128,21 +128,21 @@ export default function BiblePage() {
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
-                      title: 'Daily Verse',
+                      title: t('bible.dailyVerse'),
                       text: `"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}`,
                       url: window.location.href
                     });
                   } else {
                     navigator.clipboard.writeText(`"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}"`);
                     toast({
-                      title: "Copied to clipboard",
-                      description: "The verse has been copied to your clipboard."
+                      title: t('bible.copiedToClipboard'),
+                      description: t('bible.verseCopied')
                     });
                   }
                 }}
               >
                 <Share2 className="w-4 h-4" />
-                Share
+                {t('bible.share')}
               </Button>
             </div>
           </CardContent>
@@ -153,19 +153,19 @@ export default function BiblePage() {
           <Card className="text-center border-0 shadow-md bg-white/70 backdrop-blur-sm">
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-blue-600">7</div>
-              <p className="text-sm text-gray-600">Day Streak</p>
+              <p className="text-sm text-gray-600">{t('bible.dayStreak')}</p>
             </CardContent>
           </Card>
           <Card className="text-center border-0 shadow-md bg-white/70 backdrop-blur-sm">
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-green-600">42</div>
-              <p className="text-sm text-gray-600">Verses Read</p>
+              <p className="text-sm text-gray-600">{t('bible.versesRead')}</p>
             </CardContent>
           </Card>
           <Card className="text-center border-0 shadow-md bg-white/70 backdrop-blur-sm">
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-purple-600">3</div>
-              <p className="text-sm text-gray-600">Badges Earned</p>
+              <p className="text-sm text-gray-600">{t('bible.badgesEarned')}</p>
             </CardContent>
           </Card>
         </div>
@@ -175,14 +175,14 @@ export default function BiblePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
-              Reading Plan
+              {t('bible.readingPlan')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <span className="font-medium">Daily Devotional</span>
-                <Badge variant="secondary">Active</Badge>
+                <span className="font-medium">{t('bible.dailyDevotional')}</span>
+                <Badge variant="secondary">{t('bible.active')}</Badge>
               </div>
               <p className="text-sm text-gray-600">
                 Continue your spiritual journey with daily scripture readings and reflections.
@@ -191,12 +191,12 @@ export default function BiblePage() {
                 className="w-full mt-4"
                 onClick={() => {
                   toast({
-                    title: "Reading Plan Active",
-                    description: "Daily content personalized to your mood and activities. Return tomorrow for new verse!"
+                    title: t('bible.readingPlanActive'),
+                    description: t('bible.dailyContentPersonalized')
                   });
                 }}
               >
-                Continue Reading Plan
+                {t('bible.continueReading')}
               </Button>
             </div>
           </CardContent>
