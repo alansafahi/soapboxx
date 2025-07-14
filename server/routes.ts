@@ -6382,6 +6382,46 @@ Return JSON with this exact structure:
     }
   });
 
+  // User statistics endpoint
+  app.get('/api/users/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const stats = await storage.getUserStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error('Get user stats error:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch user statistics',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // User achievements endpoint
+  app.get('/api/users/achievements', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const achievements = await storage.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error('Get user achievements error:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch user achievements',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Church routes
   app.get('/api/churches', async (req, res) => {
     try {

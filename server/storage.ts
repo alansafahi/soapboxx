@@ -297,6 +297,10 @@ export interface IStorage {
   getUserNotificationPreferences(userId: string): Promise<any>;
   updateUserNotificationPreferences(userId: string, preferences: any): Promise<any>;
   
+  // User statistics and achievements
+  getUserStats(userId: string): Promise<any>;
+  getUserAchievements(userId: string): Promise<any>;
+  
   // Email verification operations
   setEmailVerificationToken(userId: string, token: string): Promise<void>;
   getEmailVerificationToken(userId: string): Promise<string | null>;
@@ -946,10 +950,23 @@ export class DatabaseStorage implements IStorage {
     console.log('Storage: Preferences data:', JSON.stringify(preferences, null, 2));
     
     try {
-      const updateData = {
-        ...preferences,
+      // Map frontend field names to database column names
+      const updateData: any = {
         updatedAt: new Date(),
       };
+      
+      // Map each field correctly
+      if (preferences.language !== undefined) updateData.language = preferences.language;
+      if (preferences.timezone !== undefined) updateData.timezone = preferences.timezone;
+      if (preferences.theme !== undefined) updateData.theme = preferences.theme;
+      if (preferences.fontSize !== undefined) updateData.fontSize = preferences.fontSize;
+      if (preferences.readingSpeed !== undefined) updateData.readingSpeed = preferences.readingSpeed;
+      if (preferences.audioEnabled !== undefined) updateData.audioEnabled = preferences.audioEnabled;
+      if (preferences.audioSpeed !== undefined) updateData.audioSpeed = preferences.audioSpeed;
+      if (preferences.familyMode !== undefined) updateData.familyMode = preferences.familyMode;
+      if (preferences.offlineMode !== undefined) updateData.offlineMode = preferences.offlineMode;
+      if (preferences.syncEnabled !== undefined) updateData.syncEnabled = preferences.syncEnabled;
+      if (preferences.notificationsEnabled !== undefined) updateData.notificationsEnabled = preferences.notificationsEnabled;
       
       const [updatedPrefs] = await db
         .update(userPreferences)
@@ -958,11 +975,26 @@ export class DatabaseStorage implements IStorage {
         .returning();
       
       if (!updatedPrefs) {
-        // If no existing preferences, create them
+        // If no existing preferences, create them with defaults
+        const defaultPrefs = {
+          language: 'en',
+          timezone: 'UTC',
+          theme: 'light',
+          fontSize: 'medium',
+          readingSpeed: 'normal',
+          audioEnabled: true,
+          audioSpeed: 1.0,
+          familyMode: false,
+          offlineMode: false,
+          syncEnabled: true,
+          notificationsEnabled: true,
+        };
+        
         const [newPrefs] = await db
           .insert(userPreferences)
           .values({
             userId,
+            ...defaultPrefs,
             ...updateData,
           })
           .returning();
@@ -1031,10 +1063,21 @@ export class DatabaseStorage implements IStorage {
     console.log('Storage: Notification preferences data:', JSON.stringify(preferences, null, 2));
     
     try {
-      const updateData = {
-        ...preferences,
+      // Map frontend field names to database column names
+      const updateData: any = {
         updatedAt: new Date(),
       };
+      
+      // Map each field correctly
+      if (preferences.dailyReading !== undefined) updateData.dailyReading = preferences.dailyReading;
+      if (preferences.prayerReminders !== undefined) updateData.prayerReminders = preferences.prayerReminders;
+      if (preferences.communityUpdates !== undefined) updateData.communityUpdates = preferences.communityUpdates;
+      if (preferences.eventReminders !== undefined) updateData.eventReminders = preferences.eventReminders;
+      if (preferences.friendActivity !== undefined) updateData.friendActivity = preferences.friendActivity;
+      if (preferences.dailyReadingTime !== undefined) updateData.dailyReadingTime = preferences.dailyReadingTime;
+      if (preferences.prayerTimes !== undefined) updateData.prayerTimes = preferences.prayerTimes;
+      if (preferences.quietHours !== undefined) updateData.quietHours = preferences.quietHours;
+      if (preferences.weekendPreferences !== undefined) updateData.weekendPreferences = preferences.weekendPreferences;
       
       const [updatedPrefs] = await db
         .update(notificationPreferences)
@@ -1043,11 +1086,31 @@ export class DatabaseStorage implements IStorage {
         .returning();
       
       if (!updatedPrefs) {
-        // If no existing preferences, create them
+        // If no existing preferences, create them with defaults
+        const defaultPrefs = {
+          dailyReading: true,
+          prayerReminders: true,
+          communityUpdates: true,
+          eventReminders: true,
+          friendActivity: false,
+          dailyReadingTime: "08:00",
+          prayerTimes: ["06:00", "12:00", "18:00"],
+          quietHours: {
+            enabled: false,
+            start: "22:00",
+            end: "07:00",
+          },
+          weekendPreferences: {
+            differentSchedule: false,
+            weekendReadingTime: "09:00",
+          },
+        };
+        
         const [newPrefs] = await db
           .insert(notificationPreferences)
           .values({
             userId,
+            ...defaultPrefs,
             ...updateData,
           })
           .returning();
@@ -1059,6 +1122,118 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Storage updateUserNotificationPreferences error:', error);
       throw error;
+    }
+  }
+
+  // User statistics operations
+  async getUserStats(userId: string): Promise<any> {
+    console.log('Storage: Getting user stats for user:', userId);
+    
+    try {
+      // Count prayers offered (prayer requests created by user)
+      const prayerCount = await db
+        .select({ count: count() })
+        .from(prayerRequests)
+        .where(eq(prayerRequests.userId, userId));
+
+      // Count discussions created by user
+      const discussionCount = await db
+        .select({ count: count() })
+        .from(discussions)
+        .where(eq(discussions.userId, userId));
+
+      // Count events attended (RSVPs)
+      const attendanceCount = await db
+        .select({ count: count() })
+        .from(eventRsvps)
+        .where(and(
+          eq(eventRsvps.userId, userId),
+          eq(eventRsvps.status, 'attending')
+        ));
+
+      // Count user connections/contacts
+      const connectionCount = await db
+        .select({ count: count() })
+        .from(contacts)
+        .where(and(
+          eq(contacts.userId, userId),
+          eq(contacts.status, 'connected')
+        ));
+
+      // Count SOAP entries (inspirations read)
+      const soapCount = await db
+        .select({ count: count() })
+        .from(soapEntries)
+        .where(eq(soapEntries.userId, userId));
+
+      // Count prayer reactions (prayers offered to others)
+      const prayerReactionCount = await db
+        .select({ count: count() })
+        .from(prayerReactions)
+        .where(eq(prayerReactions.userId, userId));
+
+      const stats = {
+        prayerCount: prayerCount[0]?.count || 0,
+        discussionCount: discussionCount[0]?.count || 0,
+        attendanceCount: attendanceCount[0]?.count || 0,
+        connectionCount: connectionCount[0]?.count || 0,
+        inspirationsRead: soapCount[0]?.count || 0,
+        prayersOffered: prayerReactionCount[0]?.count || 0,
+      };
+
+      console.log('Storage: User stats retrieved:', stats);
+      return stats;
+    } catch (error) {
+      console.error('Storage getUserStats error:', error);
+      throw error;
+    }
+  }
+
+  async getUserAchievements(userId: string): Promise<any> {
+    console.log('Storage: Getting user achievements for user:', userId);
+    
+    try {
+      // Get user badge progress/achievements
+      const achievements = await db
+        .select({
+          id: userBadgeProgress.id,
+          badgeId: userBadgeProgress.badgeId,
+          currentProgress: userBadgeProgress.currentProgress,
+          maxProgress: userBadgeProgress.maxProgress,
+          isUnlocked: userBadgeProgress.isUnlocked,
+          unlockedAt: userBadgeProgress.unlockedAt,
+          badgeName: prayerBadges.name,
+          badgeDescription: prayerBadges.description,
+          badgeIcon: prayerBadges.icon,
+          badgeColor: prayerBadges.color,
+          badgeCategory: prayerBadges.category,
+        })
+        .from(userBadgeProgress)
+        .leftJoin(prayerBadges, eq(userBadgeProgress.badgeId, prayerBadges.id))
+        .where(and(
+          eq(userBadgeProgress.userId, userId),
+          eq(userBadgeProgress.isUnlocked, true)
+        ))
+        .orderBy(desc(userBadgeProgress.unlockedAt));
+
+      // Transform achievements for frontend
+      const transformedAchievements = achievements.map(achievement => ({
+        id: achievement.id,
+        achievementType: achievement.badgeName,
+        achievementLevel: Math.ceil((achievement.currentProgress / achievement.maxProgress) * 100),
+        description: achievement.badgeDescription,
+        icon: achievement.badgeIcon,
+        color: achievement.badgeColor,
+        category: achievement.badgeCategory,
+        unlockedAt: achievement.unlockedAt,
+      }));
+
+      console.log('Storage: User achievements retrieved:', transformedAchievements.length);
+      return transformedAchievements;
+    } catch (error) {
+      console.error('Storage getUserAchievements error:', error);
+      // Return empty array if no achievements table exists yet
+      return [];
     }
   }
 

@@ -271,7 +271,6 @@ export const notificationPreferences = pgTable("notification_preferences", {
   friendActivity: boolean("friend_activity").default(false),
   dailyReadingTime: varchar("daily_reading_time").default("08:00"), // HH:MM format
   prayerTimes: text("prayer_times").array().default([]), // Array of HH:MM times
-  customSchedules: jsonb("custom_schedules"), // Complex scheduling rules
   quietHours: jsonb("quiet_hours"), // Start/end times for no notifications
   weekendPreferences: jsonb("weekend_preferences"), // Different settings for weekends
   createdAt: timestamp("created_at").defaultNow(),
