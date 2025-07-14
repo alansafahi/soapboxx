@@ -3,10 +3,12 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 import EventsList from "../components/events-list";
 import MobileNav from "../components/mobile-nav";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function EventsPage() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -45,7 +47,7 @@ export default function EventsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                Community Events
+                {t('pages.communityEvents')}
               </h1>
               <p className="text-gray-300 dark:text-gray-300 mt-2 text-lg">
                 Discover upcoming events and connect with your faith community

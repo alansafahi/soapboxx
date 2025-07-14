@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { PrayerRequest } from "../../../shared/schema";
 import SmartScriptureTextarea from "./SmartScriptureTextarea";
 import { ScriptureExpandedText } from "./ScriptureExpandedText";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
@@ -62,6 +63,7 @@ const prayerCategories = [
 export default function PrayerWall() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedTab, setSelectedTab] = useState('prayers');
@@ -456,7 +458,7 @@ export default function PrayerWall() {
         <CardHeader className="text-center pb-4">
           <CardTitle className="flex items-center justify-center space-x-2 text-2xl font-bold text-gray-900 dark:text-white">
             <Hand className="w-6 h-6 text-purple-600" />
-            <span>Prayer Wall</span>
+            <span>{t('pages.prayerWall')}</span>
           </CardTitle>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
             Share your prayer requests and pray for others in our community
@@ -464,7 +466,7 @@ export default function PrayerWall() {
           <div className="flex items-center justify-center space-x-6 mt-4 text-sm text-gray-500">
             <div className="flex items-center space-x-1">
               <Users className="w-4 h-4" />
-              <span>{prayerRequests?.length || 0} requests</span>
+              <span>{prayerRequests?.length || 0} {t('pages.prayerRequests')}</span>
             </div>
             <div className="flex items-center space-x-1">
               <Hand className="w-4 h-4" />

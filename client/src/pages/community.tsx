@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
+import { useLanguage } from "../contexts/LanguageContext";
 import CommunityFeed from "../components/community-feed";
 import EnhancedCommunityFeed from "../components/enhanced-community-feed";
 import MobileNav from "../components/mobile-nav";
@@ -13,6 +14,7 @@ export default function CommunityPage() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
+  const { t } = useLanguage();
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function CommunityPage() {
 
   // Determine page title based on route
   const isDiscussionsPage = location === '/discussions';
-  const pageTitle = isDiscussionsPage ? 'Discussions' : 'Community';
+  const pageTitle = isDiscussionsPage ? t('pages.discussions') : 'Community';
   const pageDescription = isDiscussionsPage 
     ? 'Join meaningful conversations with fellow believers' 
     : 'Connect with fellow believers and share your faith journey';

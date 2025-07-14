@@ -29,6 +29,7 @@ import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
 import { useLocation } from "wouter";
+import { useLanguage } from "../contexts/LanguageContext";
 
 function ContactsPage() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -45,6 +46,7 @@ function ContactsPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const { t } = useLanguage();
 
   // Fetch user's contacts and referral stats
   const { data: contacts = [], isLoading: contactsLoading, refetch: refetchContacts } = useQuery({
@@ -349,7 +351,7 @@ function ContactsPage() {
             <Users className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Community Connections
+            {t('pages.communityConnections')}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Build meaningful relationships and share your faith journey with friends and family

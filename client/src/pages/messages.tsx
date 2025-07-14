@@ -28,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface Message {
   id: number;
@@ -84,6 +85,7 @@ export default function MessagesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [location] = useLocation();
+  const { t } = useLanguage();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
@@ -216,7 +218,7 @@ export default function MessagesPage() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Messages</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t('pages.messages')}</h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">Connect with your faith community</p>
           </div>
 
@@ -303,7 +305,7 @@ export default function MessagesPage() {
           <Card className="lg:col-span-1">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Conversations</CardTitle>
+                <CardTitle className="text-lg">{t('pages.conversations')}</CardTitle>
                 <Users className="w-5 h-5 text-purple-600" />
               </div>
               <div className="relative">
