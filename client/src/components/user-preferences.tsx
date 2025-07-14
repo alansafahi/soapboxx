@@ -737,6 +737,7 @@ export default function UserPreferences() {
                       <SelectItem value="ko">한국어</SelectItem>
                       <SelectItem value="ja">日本語</SelectItem>
                       <SelectItem value="ar">العربية</SelectItem>
+                      <SelectItem value="fa">فارسی</SelectItem>
                       <SelectItem value="hi">हिन्दी</SelectItem>
                     </SelectContent>
                   </Select>
