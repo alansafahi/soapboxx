@@ -120,10 +120,7 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
-      const response = await apiRequest("/api/users/profile", {
-        method: "PUT",
-        body: data,
-      });
+      const response = await apiRequest("PUT", "/api/users/profile", data);
       return response;
     },
     onMutate: async (updatedData) => {
