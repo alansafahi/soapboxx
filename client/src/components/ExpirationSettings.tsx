@@ -219,7 +219,7 @@ export default function ExpirationSettings({
             )}
 
             {/* Current Settings Display */}
-            {(selectedOption && selectedOption !== "custom") || customDate ? (
+            {((selectedOption && selectedOption !== "custom") || customDate) && (
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
