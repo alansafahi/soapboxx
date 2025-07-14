@@ -33,10 +33,14 @@ const fallbackTranslations: Record<string, string> = {
 };
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [language, setLanguageState] = useState<string>(() => {
-    // Get language from localStorage or default to English
-    return localStorage.getItem('soapbox_language') || 'en';
-  });
+  const [language, setLanguageState] = useState<string>('en');
+  
+  // Initialize language from localStorage on component mount
+  useEffect(() => {
+    const savedLang = localStorage.getItem('soapbox_language') || 'en';
+    console.log('Loading language from localStorage:', savedLang);
+    setLanguageState(savedLang);
+  }, []);
 
   const queryClient = useQueryClient();
 
@@ -56,6 +60,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
         if (response.ok) {
           const data = await response.json();
           console.log('Translations loaded:', data.translations ? Object.keys(data.translations).length : 0, 'keys');
+          console.log('Sample translations:', data.translations ? Object.keys(data.translations).slice(0, 3) : 'none');
+          console.log('First translation:', data.translations ? Object.entries(data.translations)[0] : 'none');
           return data.translations || {};
         }
         throw new Error(`Failed to fetch translations: ${response.status}`);
@@ -83,16 +89,25 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
         queryKey: ['/api/translations', newLanguage]
       });
       
+      // Force immediate update
+      console.log('Language changed to:', newLanguage, 'localStorage will be:', newLanguage);
+      
       // Force a page refresh to ensure all components re-render with new translations
       setTimeout(() => {
+        console.log('Reloading page for language change...');
         window.location.reload();
-      }, 100);
+      }, 200);
     } catch (error) {
       console.error('Error setting language:', error);
     }
   };
 
   const t = (key: string): string => {
+    // Debug logging to see what's happening
+    if (key === 'nav.home' || key === 'home.dailySpiritualRhythm') {
+      console.log(`Looking up "${key}":`, translations?.[key], 'Language:', language);
+    }
+    
     if (translations && translations[key]) {
       return translations[key];
     }
@@ -102,7 +117,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       return fallbackTranslations[key];
     }
     
-    // Return key as last resort
+    // Return key as last resort (this is what causes the keys to show)
+    console.warn(`Translation key not found: "${key}" for language "${language}"`);
     return key;
   };
 
