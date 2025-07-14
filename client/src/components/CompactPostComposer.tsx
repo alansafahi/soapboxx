@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useLanguage } from "../contexts/LanguageContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
@@ -61,6 +62,7 @@ interface CompactPostComposerProps {
 export default function CompactPostComposer({ className = "" }: CompactPostComposerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -161,8 +163,8 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       setIsExpanded(false);
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       toast({
-        title: "Post shared!",
-        description: "Your post has been shared with your community.",
+        title: t('posts.postShared') || "Post shared!",
+        description: t('posts.sharedWithCommunity') || "Your post has been shared with your community.",
       });
     },
     onError: () => {
@@ -593,7 +595,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                     {showMoodDropdown && (
                       <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-[480px] max-w-[95vw] max-h-[70vh] overflow-y-auto">
                         <div className="p-3 sm:p-4">
-                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">{t('posts.howAreYouFeeling') || 'How are you feeling?'}</div>
                           
                           {/* Recently Used Section */}
                           {recentMoods.length > 0 && (
