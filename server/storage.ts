@@ -805,6 +805,9 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserProfile(userId: string, profileData: Partial<User>): Promise<User> {
     try {
+      console.log('Storage updateUserProfile called for userId:', userId);
+      console.log('Storage received profileData:', JSON.stringify(profileData, null, 2));
+      
       // Build update object with proper field validation
       const updateData: any = {};
       
@@ -826,6 +829,8 @@ export class DatabaseStorage implements IStorage {
       // Always update timestamp
       updateData.updatedAt = new Date();
 
+      console.log('Storage final updateData:', JSON.stringify(updateData, null, 2));
+      
       const [user] = await db
         .update(users)
         .set(updateData)
@@ -833,12 +838,21 @@ export class DatabaseStorage implements IStorage {
         .returning();
         
       if (!user) {
+        console.error('Storage: No user returned after update - user may not exist');
         throw new Error(`User not found with ID: ${userId}`);
       }
       
+      console.log('Storage: Profile update successful for user:', userId);
       return user;
     } catch (error) {
       console.error('Storage updateUserProfile error:', error);
+      console.error('Storage updateUserProfile error details:', {
+        name: (error as any).name,
+        message: (error as any).message,
+        code: (error as any).code,
+        detail: (error as any).detail,
+        stack: (error as any).stack
+      });
       throw error;
     }
   }

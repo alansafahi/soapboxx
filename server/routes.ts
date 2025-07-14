@@ -6174,6 +6174,24 @@ Return JSON with this exact structure:
 
       console.log('Profile update request for user:', userId);
       console.log('Request body:', JSON.stringify(req.body, null, 2));
+      console.log('Mapped updateData will be:', JSON.stringify({
+        firstName: req.body.firstName || req.body.first_name,
+        lastName: req.body.lastName || req.body.last_name,
+        email: req.body.email,
+        mobileNumber: req.body.mobileNumber || req.body.mobile_number || req.body.phoneNumber,
+        address: req.body.address,
+        city: req.body.city,
+        state: req.body.state,
+        zipCode: req.body.zipCode || req.body.zip_code,
+        country: req.body.country,
+        bio: req.body.bio,
+        profileImageUrl: req.body.profileImageUrl || req.body.profile_image_url,
+        interests: Array.isArray(req.body.spiritualInterests) ? req.body.spiritualInterests : 
+                  Array.isArray(req.body.interests) ? req.body.interests : 
+                  typeof req.body.spiritualInterests === 'string' ? [req.body.spiritualInterests] :
+                  typeof req.body.interests === 'string' ? [req.body.interests] : [],
+        denomination: req.body.denomination
+      }, null, 2));
 
 
 
