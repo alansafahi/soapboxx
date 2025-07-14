@@ -354,7 +354,7 @@ function ContactsPage() {
             {t('pages.communityConnections')}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Build meaningful relationships and share your faith journey with friends and family
+            {t('pages.communityConnectionsDescription')}
           </p>
         </div>
 
