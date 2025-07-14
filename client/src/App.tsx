@@ -7,6 +7,7 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { useImmediateAuth } from "./lib/immediateAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 import SidebarFixed from "./components/SidebarFixed";
 import TopHeader from "./components/TopHeader";
@@ -174,12 +175,14 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <ThemeProvider>
-                <TooltipProvider>
-                    <WouterRouter>
-                        <AppRouter />
-                        <Toaster />
-                    </WouterRouter>
-                </TooltipProvider>
+                <LanguageProvider>
+                    <TooltipProvider>
+                        <WouterRouter>
+                            <AppRouter />
+                            <Toaster />
+                        </WouterRouter>
+                    </TooltipProvider>
+                </LanguageProvider>
             </ThemeProvider>
         </QueryClientProvider>
     );
