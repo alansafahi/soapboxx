@@ -192,25 +192,25 @@ export default function TopHeader() {
             <Link href="/churches">
               <DropdownMenuItem className="cursor-pointer">
                 <Users className="w-4 h-4 mr-2" />
-                Churches
+                {t('nav.churches')}
               </DropdownMenuItem>
             </Link>
             <Link href="/events">
               <DropdownMenuItem className="cursor-pointer">
                 <Calendar className="w-4 h-4 mr-2" />
-                Events
+                {t('nav.events')}
               </DropdownMenuItem>
             </Link>
             <Link href="/discussions">
               <DropdownMenuItem className="cursor-pointer">
                 <MessageSquare className="w-4 h-4 mr-2" />
-                Discussions
+                {t('nav.discussions')}
               </DropdownMenuItem>
             </Link>
             <Link href="/sms-giving">
               <DropdownMenuItem className="cursor-pointer">
                 <DollarSign className="w-4 h-4 mr-2" />
-                Donation
+                {t('nav.donation')}
               </DropdownMenuItem>
             </Link>
             
@@ -316,12 +316,12 @@ export default function TopHeader() {
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  SoapBox Portal
+                  {t('sections.soapboxPortal')}
                 </div>
                 <Link href="/admin">
                   <DropdownMenuItem className="cursor-pointer">
                     <Settings className="w-4 h-4 mr-2" />
-                    Church Management
+{t('nav.churchManagement')}
                   </DropdownMenuItem>
                 </Link>
               </>
@@ -331,18 +331,18 @@ export default function TopHeader() {
             
             {/* Account Section */}
             <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Account
+              {t('sections.account')}
             </div>
             <Link href="/profile">
               <DropdownMenuItem className="cursor-pointer">
                 <User className="w-4 h-4 mr-2" />
-                Profile
+                {t('nav.profile')}
               </DropdownMenuItem>
             </Link>
             <Link href="/settings">
               <DropdownMenuItem className="cursor-pointer">
                 <Settings className="w-4 h-4 mr-2" />
-                Settings
+                {t('nav.settings')}
               </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>
