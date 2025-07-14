@@ -45,12 +45,20 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     queryKey: ['/api/translations', language],
     queryFn: async () => {
       try {
-        const response = await apiRequest(`/api/translations/${language}`);
+        const response = await fetch(`/api/translations/${language}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('Translations loaded:', data.translations ? Object.keys(data.translations).length : 0, 'keys');
           return data.translations || {};
         }
-        throw new Error('Failed to fetch translations');
+        throw new Error(`Failed to fetch translations: ${response.status}`);
       } catch (error) {
         console.warn('Database translations unavailable, using fallback:', error);
         return fallbackTranslations;
