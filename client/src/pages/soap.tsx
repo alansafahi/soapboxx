@@ -11,11 +11,13 @@ import { SoapEntryCard } from "../components/SoapEntryCard";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import type { SoapEntry } from "../../../shared/schema";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function SoapPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<SoapEntry | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   // Fetch user's S.O.A.P. entries
@@ -102,14 +104,14 @@ export default function SoapPage() {
       {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">S.O.A.P. Journal</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('nav.soapJournal')}</h1>
           <p className="text-muted-foreground">
             Scripture • Observation • Application • Prayer
           </p>
         </div>
         <Button onClick={() => setShowForm(true)} className="gap-2">
           <Plus className="h-4 w-4" />
-          New Entry
+          {t('common.new')} Entry
         </Button>
       </div>
 

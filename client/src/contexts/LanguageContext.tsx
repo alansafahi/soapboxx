@@ -71,6 +71,7 @@ const translations = {
     'nav.communicationHub': 'Communication Hub',
     'nav.sermonStudio': 'Sermon Studio',
     'nav.engagementAnalytics': 'Engagement Analytics',
+    'nav.engagementBoard': 'Community Engagement Board',
     'nav.profile': 'Profile',
     'nav.settings': 'Settings',
     'sections.community': 'COMMUNITY',

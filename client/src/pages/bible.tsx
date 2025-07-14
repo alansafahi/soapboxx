@@ -8,10 +8,12 @@ import { Badge } from "../components/ui/badge";
 import { BookOpen, Calendar, Heart, Share2 } from "lucide-react";
 import MobileNav from "../components/mobile-nav";
 import { useToast } from "../hooks/use-toast";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function BiblePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
 
   // Fetch daily verse from API
@@ -63,7 +65,7 @@ export default function BiblePage() {
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">
-            Today's Reading
+            {t('nav.todaysReading')}
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
             {new Date().toLocaleDateString('en-US', { 
