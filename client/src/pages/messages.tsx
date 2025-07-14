@@ -226,7 +226,7 @@ export default function MessagesPage() {
             <DialogTrigger asChild>
               <Button className="bg-purple-600 hover:bg-purple-700">
                 <Plus className="w-4 h-4 mr-2" />
-                New Message
+                {t('buttons.newMessage')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">

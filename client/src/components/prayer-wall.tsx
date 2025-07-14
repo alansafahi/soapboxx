@@ -49,21 +49,22 @@ type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
 type CommentFormData = z.infer<typeof commentSchema>;
 type UpdateFormData = z.infer<typeof updateSchema>;
 
-const prayerCategories = [
-  { id: 'all', label: 'All Prayers', icon: '🙏', color: 'gray' },
-  { id: 'health', label: 'Health', icon: '💊', color: 'red' },
-  { id: 'career', label: 'Career', icon: '💼', color: 'blue' },
-  { id: 'relationships', label: 'Relationships', icon: '❤️', color: 'pink' },
-  { id: 'spiritual', label: 'Spiritual Growth', icon: '✝️', color: 'purple' },
-  { id: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦', color: 'green' },
-  { id: 'urgent', label: 'Urgent', icon: '⚡', color: 'yellow' },
-  { id: 'general', label: 'General', icon: '🤲', color: 'gray' },
+const getPrayerCategories = (t: (key: string) => string) => [
+  { id: 'all', label: t('prayerWall.allPrayers'), icon: '🙏', color: 'gray' },
+  { id: 'health', label: t('prayerWall.health'), icon: '💊', color: 'red' },
+  { id: 'career', label: t('prayerWall.career'), icon: '💼', color: 'blue' },
+  { id: 'relationships', label: t('prayerWall.relationships'), icon: '❤️', color: 'pink' },
+  { id: 'spiritual', label: t('prayerWall.spiritualGrowth'), icon: '✝️', color: 'purple' },
+  { id: 'family', label: t('prayerWall.family'), icon: '👨‍👩‍👧‍👦', color: 'green' },
+  { id: 'urgent', label: t('prayerWall.urgent'), icon: '⚡', color: 'yellow' },
+  { id: 'general', label: t('prayerWall.general'), icon: '🤲', color: 'gray' },
 ];
 
 export default function PrayerWall() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const prayerCategories = getPrayerCategories(t);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedTab, setSelectedTab] = useState('prayers');
@@ -458,7 +459,7 @@ export default function PrayerWall() {
         <CardHeader className="text-center pb-4">
           <CardTitle className="flex items-center justify-center space-x-2 text-2xl font-bold text-gray-900 dark:text-white">
             <Hand className="w-6 h-6 text-purple-600" />
-            <span>{t('pages.prayerWall')}</span>
+            <span>{t('prayerWall.title')}</span>
           </CardTitle>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
             Share your prayer requests and pray for others in our community
@@ -493,7 +494,7 @@ export default function PrayerWall() {
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 px-4 text-base md:text-lg h-auto min-h-[60px] whitespace-normal"
         >
           <Plus className="w-5 h-5 mr-2 flex-shrink-0" />
-          <span className="text-center">Add Prayer Request</span>
+          <span className="text-center">{t('prayerWall.newPrayerRequest')}</span>
         </Button>
       </div>
 
