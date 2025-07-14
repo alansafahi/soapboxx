@@ -322,7 +322,7 @@ export default function UserPreferences() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="readingSpeed">Reading Speed</Label>
+                    <Label htmlFor="readingSpeed">{t('readingSpeed.label')}</Label>
                     <Select
                       value={preferences.readingSpeed}
                       onValueChange={(value) => handlePreferenceChange("readingSpeed", value)}
@@ -331,15 +331,15 @@ export default function UserPreferences() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="slow">Slow</SelectItem>
-                        <SelectItem value="normal">Normal</SelectItem>
-                        <SelectItem value="fast">Fast</SelectItem>
+                        <SelectItem value="slow">{t('readingSpeed.slow')}</SelectItem>
+                        <SelectItem value="normal">{t('readingSpeed.medium')}</SelectItem>
+                        <SelectItem value="fast">{t('readingSpeed.fast')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
+                    <Label htmlFor="timezone">{t('timezone.label')}</Label>
                     <Select
                       value={preferences.timezone}
                       onValueChange={(value) => handlePreferenceChange("timezone", value)}
@@ -363,8 +363,8 @@ export default function UserPreferences() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Audio Enabled</Label>
-                      <p className="text-sm text-gray-500">Enable audio narration for readings</p>
+                      <Label>{t('audioEnabled.label')}</Label>
+                      <p className="text-sm text-gray-500">{t('audioEnabled.description')}</p>
                     </div>
                     <Switch
                       checked={preferences.audioEnabled}
@@ -374,7 +374,7 @@ export default function UserPreferences() {
 
                   {preferences.audioEnabled && (
                     <div className="space-y-2">
-                      <Label>Audio Speed: {preferences.audioSpeed}x</Label>
+                      <Label>{t('audioSpeed.label')}: {preferences.audioSpeed}x</Label>
                       <Slider
                         value={[preferences.audioSpeed]}
                         onValueChange={([value]) => handlePreferenceChange("audioSpeed", value)}
@@ -388,8 +388,8 @@ export default function UserPreferences() {
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Family Mode</Label>
-                      <p className="text-sm text-gray-500">Show child-friendly content and illustrations</p>
+                      <Label>{t('familyMode.label')}</Label>
+                      <p className="text-sm text-gray-500">{t('familyMode.description')}</p>
                     </div>
                     <Switch
                       checked={preferences.familyMode}

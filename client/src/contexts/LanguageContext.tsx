@@ -479,7 +479,24 @@ const translations = {
     'buttons.share': 'مشاركة',
     'posts.howAreYouFeeling': 'كيف تشعر؟',
     'posts.postShared': 'تم مشاركة المنشور!',
-    'posts.sharedWithCommunity': 'تم مشاركة منشورك مع مجتمعك.'
+    'posts.sharedWithCommunity': 'تم مشاركة منشورك مع مجتمعك.',
+    'readingSpeed.label': 'سرعة القراءة',
+    'timezone.label': 'المنطقة الزمنية',
+    'audioSpeed.label': 'سرعة الصوت',
+    'familyMode.label': 'وضع العائلة',
+    'familyMode.description': 'إظهار محتوى ورسوم توضيحية مناسبة للأطفال',
+    'audioEnabled.label': 'تمكين الصوت',
+    'audioEnabled.description': 'تمكين السرد الصوتي للقراءات',
+    'posts.postedBy': 'نشر بواسطة',
+    'posts.timeAgo.justNow': 'الآن',
+    'posts.timeAgo.minutesAgo': 'منذ دقائق',
+    'posts.timeAgo.hoursAgo': 'منذ ساعات',
+    'posts.timeAgo.daysAgo': 'منذ أيام',
+    'posts.timeAgo.weeksAgo': 'منذ أسابيع',
+    'posts.expand': 'توسيع',
+    'posts.collapse': 'طي',
+    'posts.readMore': 'اقرأ المزيد',
+    'posts.showLess': 'عرض أقل'
   }
 };
 
