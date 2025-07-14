@@ -75,8 +75,18 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       
       // Invalidate translations query to fetch new language
       await queryClient.invalidateQueries({
-        queryKey: ['/api/translations']
+        queryKey: ['/api/translations', language]
       });
+      
+      // Also invalidate the new language query
+      await queryClient.invalidateQueries({
+        queryKey: ['/api/translations', newLanguage]
+      });
+      
+      // Force a page refresh to ensure all components re-render with new translations
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       console.error('Error setting language:', error);
     }
