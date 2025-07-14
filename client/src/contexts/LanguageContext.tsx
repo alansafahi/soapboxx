@@ -83,12 +83,28 @@ const translations = {
     'posts.recentCheckIns': 'Recent Check-Ins',
     'posts.latestPosts': 'Latest Posts',
     'posts.showMorePosts': 'Show More Posts',
+    'nav.todaysReading': "Today's Reading",
+    'nav.prayerWall': 'Prayer Wall',
+    'nav.soapJournal': 'S.O.A.P. Journal',
+    'nav.audioBible': 'Audio Bible',
+    'nav.audioRoutines': 'Audio Routines',
+    'nav.videoLibrary': 'Video Library',
+    'nav.imageGallery': 'Image Gallery',
+    'nav.memberDirectory': 'Member Directory',
+    'nav.donationAnalytics': 'Donation Analytics',
+    'nav.communicationHub': 'Communication Hub',
+    'nav.sermonStudio': 'Sermon Studio',
+    'nav.engagementAnalytics': 'Engagement Analytics',
     'posts.pleaseShareThoughts': 'Please share your thoughts...',
     'posts.testPost': 'Test post',
     'posts.unableToLoadPosts': 'Unable to load posts',
     'posts.loading': 'Loading...',
     'posts.noPostsYet': 'No posts yet',
     'posts.beFirstToShare': 'Be the first to share something',
+    'home.dailySpiritualRhythm': 'Daily Spiritual Rhythm',
+    'home.latestPosts': 'Latest Posts',
+    'home.topCommunityMembers': 'Top Community Members',
+    'home.upcomingEvents': 'Upcoming Events',
     'common.cancel': 'Cancel',
     'common.save': 'Save',
     'common.edit': 'Edit',
@@ -1458,8 +1474,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return currentTranslations[key as keyof typeof currentTranslations] || key;
   };
 
+  const updateLanguage = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    // Auto-refresh page to show all items in new language
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, t, setLanguage }}>
+    <LanguageContext.Provider value={{ language, t, setLanguage: updateLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
