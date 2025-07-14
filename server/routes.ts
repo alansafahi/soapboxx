@@ -11302,5 +11302,142 @@ Please provide suggestions for the missing or incomplete sections.`
     });
   });
 
+  // Translation API endpoints
+  app.get('/api/translations/:language', async (req, res) => {
+    try {
+      const { language } = req.params;
+      
+      if (!language) {
+        return res.status(400).json({ message: 'Language parameter is required' });
+      }
+
+      const translations = await storage.getTranslations(language);
+      res.json(translations);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to fetch translations',
+        details: errorMessage 
+      });
+    }
+  });
+
+  app.post('/api/translations', async (req, res) => {
+    try {
+      const { language, key, value } = req.body;
+      
+      if (!language || !key || !value) {
+        return res.status(400).json({ 
+          message: 'Language, key, and value parameters are required' 
+        });
+      }
+
+      await storage.setTranslation(language, key, value);
+      res.status(201).json({ message: 'Translation saved successfully' });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to save translation',
+        details: errorMessage 
+      });
+    }
+  });
+
+  app.put('/api/translations/:language/:key', async (req, res) => {
+    try {
+      const { language, key } = req.params;
+      const { value } = req.body;
+      
+      if (!language || !key || !value) {
+        return res.status(400).json({ 
+          message: 'Language, key, and value parameters are required' 
+        });
+      }
+
+      await storage.setTranslation(language, key, value);
+      res.json({ message: 'Translation updated successfully' });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to update translation',
+        details: errorMessage 
+      });
+    }
+  });
+
+  app.delete('/api/translations/:language/:key', async (req, res) => {
+    try {
+      const { language, key } = req.params;
+      
+      if (!language || !key) {
+        return res.status(400).json({ 
+          message: 'Language and key parameters are required' 
+        });
+      }
+
+      await storage.deleteTranslation(language, key);
+      res.json({ message: 'Translation deleted successfully' });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to delete translation',
+        details: errorMessage 
+      });
+    }
+  });
+
+  app.get('/api/translations/:language/keys', async (req, res) => {
+    try {
+      const { language } = req.params;
+      
+      if (!language) {
+        return res.status(400).json({ message: 'Language parameter is required' });
+      }
+
+      const keys = await storage.getTranslationKeys(language);
+      res.json(keys);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to fetch translation keys',
+        details: errorMessage 
+      });
+    }
+  });
+
+  app.post('/api/translations/bulk', async (req, res) => {
+    try {
+      const { language, translations } = req.body;
+      
+      if (!language || !translations || typeof translations !== 'object') {
+        return res.status(400).json({ 
+          message: 'Language and translations object are required' 
+        });
+      }
+
+      await storage.setBulkTranslations(language, translations);
+      res.status(201).json({ message: 'Bulk translations saved successfully' });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to save bulk translations',
+        details: errorMessage 
+      });
+    }
+  });
+
+  app.get('/api/translations/languages', async (req, res) => {
+    try {
+      const languages = await storage.getSupportedLanguages();
+      res.json(languages);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      res.status(500).json({ 
+        error: 'Failed to fetch supported languages',
+        details: errorMessage 
+      });
+    }
+  });
+
   return httpServer;
 }

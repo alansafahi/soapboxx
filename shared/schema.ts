@@ -27,6 +27,31 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// Centralized translation system
+export const translations = pgTable(
+  "translations",
+  {
+    id: serial("id").primaryKey(),
+    translationKey: varchar("translation_key", { length: 100 }).notNull(),
+    language: varchar("language", { length: 5 }).notNull(),
+    value: text("value").notNull(),
+    component: varchar("component", { length: 50 }),
+    category: varchar("category", { length: 30 }), // ui, navigation, content, error, etc.
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    unique().on(table.translationKey, table.language),
+    index("idx_translations_key").on(table.translationKey),
+    index("idx_translations_language").on(table.language),
+    index("idx_translations_component").on(table.component),
+  ]
+);
+
+// Translation types
+export type Translation = typeof translations.$inferSelect;
+export type InsertTranslation = typeof translations.$inferInsert;
+
 // Note: Bible verse caching removed - using API.Bible direct lookup with ChatGPT fallback
 
 // Prayer analytics and badges schema
@@ -3303,6 +3328,16 @@ export type InsertLeaderboard = typeof leaderboards.$inferInsert;
 export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
 export type InsertLeaderboardEntry = typeof leaderboardEntries.$inferInsert;
 
+// Translation system types
+export const insertTranslationSchema = createInsertSchema(translations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Translation = typeof translations.$inferSelect;
+export type InsertTranslation = typeof translations.$inferInsert;
+
 export type Streak = typeof streaks.$inferSelect;
 export type InsertStreak = typeof streaks.$inferInsert;
 
@@ -3818,3 +3853,7 @@ export type ChurchFeatureSetting = typeof churchFeatureSettings.$inferSelect;
 export type InsertChurchFeatureSetting = z.infer<typeof insertChurchFeatureSettingSchema>;
 export type DefaultFeatureSetting = typeof defaultFeatureSettings.$inferSelect;
 export type InsertDefaultFeatureSetting = z.infer<typeof insertDefaultFeatureSettingSchema>;
+
+// SOAP Entry Types
+export type SoapEntry = typeof soapEntries.$inferSelect;
+export type InsertSoapEntry = typeof soapEntries.$inferInsert;

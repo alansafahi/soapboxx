@@ -73,8 +73,11 @@ import {
   memberCommunications,
   churchFeatureSettings,
   defaultFeatureSettings,
+  translations,
   type User,
   type UpsertUser,
+  type Translation,
+  type InsertTranslation,
   type ChurchFeatureSetting,
   type InsertChurchFeatureSetting,
   type DefaultFeatureSetting,
@@ -186,9 +189,6 @@ import {
   type InsertGalleryImageComment,
   type GalleryImageSave,
   type InsertGalleryImageSave,
-  soapEntries,
-  type SoapEntry,
-  type InsertSoapEntry,
   dailyInspirations,
   userInspirationPreferences,
   userInspirationHistory,
@@ -266,9 +266,6 @@ import {
   type InsertVideoContentDB,
   type Notification,
   type InsertNotification,
-  reactions,
-  type Reaction,
-  type InsertReaction,
   communicationTemplates,
   userPreferences,
   type UserPreferences,
@@ -765,6 +762,14 @@ export interface IStorage {
   markContentAsExpired(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void>;
   restoreExpiredContent(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void>;
   getExpiredContentSummary(churchId?: number): Promise<{ totalExpired: number; byType: { [key: string]: number } }>;
+
+  // Translation operations
+  getTranslations(language: string): Promise<Translation[]>;
+  setTranslation(language: string, key: string, value: string): Promise<Translation>;
+  updateTranslation(id: number, value: string): Promise<Translation>;
+  deleteTranslation(id: number): Promise<void>;
+  getLanguages(): Promise<string[]>;
+  getTranslationByKey(language: string, key: string): Promise<Translation | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -9431,6 +9436,71 @@ export class DatabaseStorage implements IStorage {
     const totalExpired = byType.discussions + byType.prayerRequests + byType.soapEntries;
 
     return { totalExpired, byType };
+  }
+
+  // Translation operations implementation
+  async getTranslations(language: string): Promise<Translation[]> {
+    const translationsList = await db
+      .select()
+      .from(translations)
+      .where(eq(translations.language, language))
+      .orderBy(translations.key);
+    
+    return translationsList;
+  }
+
+  async setTranslation(language: string, key: string, value: string): Promise<Translation> {
+    const [translation] = await db
+      .insert(translations)
+      .values({
+        language,
+        key,
+        value,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    
+    return translation;
+  }
+
+  async updateTranslation(id: number, value: string): Promise<Translation> {
+    const [translation] = await db
+      .update(translations)
+      .set({ 
+        value,
+        updatedAt: new Date()
+      })
+      .where(eq(translations.id, id))
+      .returning();
+    
+    return translation;
+  }
+
+  async deleteTranslation(id: number): Promise<void> {
+    await db
+      .delete(translations)
+      .where(eq(translations.id, id));
+  }
+
+  async getLanguages(): Promise<string[]> {
+    const languages = await db
+      .selectDistinct({ language: translations.language })
+      .from(translations);
+    
+    return languages.map(l => l.language);
+  }
+
+  async getTranslationByKey(language: string, key: string): Promise<Translation | undefined> {
+    const [translation] = await db
+      .select()
+      .from(translations)
+      .where(and(
+        eq(translations.language, language),
+        eq(translations.key, key)
+      ));
+    
+    return translation;
   }
 }
 
