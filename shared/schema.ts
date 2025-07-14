@@ -3854,6 +3854,4 @@ export type InsertChurchFeatureSetting = z.infer<typeof insertChurchFeatureSetti
 export type DefaultFeatureSetting = typeof defaultFeatureSettings.$inferSelect;
 export type InsertDefaultFeatureSetting = z.infer<typeof insertDefaultFeatureSettingSchema>;
 
-// SOAP Entry Types
-export type SoapEntry = typeof soapEntries.$inferSelect;
-export type InsertSoapEntry = typeof soapEntries.$inferInsert;
+

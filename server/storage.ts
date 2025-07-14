@@ -273,6 +273,8 @@ import {
   notificationPreferences,
   type NotificationPreferences,
   type InsertNotificationPreferences,
+  type SoapEntry,
+  type InsertSoapEntry,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt } from "drizzle-orm";
