@@ -367,19 +367,19 @@ function ContactsPage() {
             className="gap-2 bg-white/80 backdrop-blur-sm hover:bg-white/90 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800"
           >
             <Users className="h-4 w-4" />
-            {isImportingContacts ? "Importing..." : "Import Contacts"}
+            {isImportingContacts ? t('common.loading') : t('buttons.importContacts')}
           </Button>
           
           <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
             <DialogTrigger asChild>
               <Button className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg">
                 <UserPlus className="h-4 w-4" />
-                Invite Friends
+                {t('buttons.inviteFriends')}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Invite Friends to SoapBox</DialogTitle>
+                <DialogTitle>{t('buttons.inviteFriends')} to SoapBox</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -407,7 +407,7 @@ function ContactsPage() {
                   className="w-full" 
                   disabled={inviteMutation.isPending}
                 >
-                  {inviteMutation.isPending ? "Sending..." : "Send Invitation"}
+                  {inviteMutation.isPending ? t('common.loading') : t('buttons.sendInvitation')}
                 </Button>
               </div>
             </DialogContent>
@@ -417,7 +417,7 @@ function ContactsPage() {
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2 bg-white/80 backdrop-blur-sm hover:bg-white/90 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800">
                 <Share2 className="h-4 w-4" />
-                Share SoapBox
+                {t('buttons.shareSoapBox')}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -545,15 +545,15 @@ function ContactsPage() {
           <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border-0 p-1 h-14">
             <TabsTrigger value="contacts" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Users className="h-4 w-4" />
-              My Contacts
+              {t('buttons.myContacts')}
             </TabsTrigger>
             <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Clock className="h-4 w-4" />
-              Pending Invites
+              {t('buttons.pendingInvites')}
             </TabsTrigger>
             <TabsTrigger value="referrals" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Crown className="h-4 w-4" />
-              Referral Program
+              {t('buttons.referralProgram')}
             </TabsTrigger>
           </TabsList>
 
@@ -584,7 +584,7 @@ function ContactsPage() {
                       className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg px-8 py-3"
                     >
                       <UserPlus className="h-5 w-5" />
-                      Send Your First Invitation
+                      {t('buttons.sendInvitation')}
                     </Button>
                   </div>
                 </CardContent>
@@ -636,7 +636,7 @@ function ContactsPage() {
                             }}
                           >
                             <MessageCircle className="h-4 w-4" />
-                            Message
+                            {t('buttons.sendMessage')}
                           </Button>
                         </div>
                       </div>
@@ -667,7 +667,7 @@ function ContactsPage() {
                       className="gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg px-8 py-3"
                     >
                       <UserPlus className="h-5 w-5" />
-                      Send More Invitations
+                      {t('buttons.sendInvitation')}
                     </Button>
                   </div>
                 </CardContent>
