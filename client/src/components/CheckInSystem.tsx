@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
+import { useLanguage } from "../contexts/LanguageContext";
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -144,23 +145,24 @@ const moodOptions = moodCategories.flatMap(category =>
   }))
 );
 
-const checkInTypes = [
-  { value: "Sunday Service", icon: Users, description: "Attending Sunday Service" },
-  { value: "Daily Devotional", icon: Sunrise, description: "Starting Daily Devotional" },
-  { value: "Prayer Time", icon: Heart, description: "Prayer Time" },
-  { value: "Spiritual Check-In", icon: Star, description: "Spiritual Check-In (mood-based)" },
-  { value: "Custom", icon: MessageCircle, description: "Custom Check-In" },
+const getCheckInTypes = (t: (key: string) => string) => [
+  { value: t('checkin.sundayService'), icon: Users, description: t('checkin.attendingSundayService') },
+  { value: t('checkin.dailyDevotional'), icon: Sunrise, description: t('checkin.startingDailyDevotional') },
+  { value: t('checkin.prayerTime'), icon: Heart, description: t('checkin.prayerTime') },
+  { value: t('checkin.spiritualCheckIn'), icon: Star, description: t('checkin.spiritualCheckInMood') },
+  { value: t('checkin.custom'), icon: MessageCircle, description: t('checkin.customCheckIn') },
 ];
 
 export default function CheckInSystem() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
   const [showMoodCheckIn, setShowMoodCheckIn] = useState(false);
-  const [selectedType, setSelectedType] = useState("Spiritual Check-In");
+  const [selectedType, setSelectedType] = useState(t('checkin.spiritualCheckIn'));
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [prayerIntent, setPrayerIntent] = useState("");
@@ -407,10 +409,10 @@ export default function CheckInSystem() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="w-6 h-6 text-blue-600" />
-                Daily Check-In
+                {t('checkin.dailyCheckIn')}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Share your spiritual journey today
+                {t('checkin.shareJourney')}
               </p>
             </div>
             {streak > 0 && (
@@ -447,7 +449,7 @@ export default function CheckInSystem() {
                   </motion.div>
                   <span className="font-bold text-lg">{streak}</span>
                 </motion.div>
-                <p className="text-xs text-muted-foreground">day streak</p>
+                <p className="text-xs text-muted-foreground">{t('checkin.dayStreak')}</p>
               </motion.div>
             )}
           </div>
@@ -465,24 +467,24 @@ export default function CheckInSystem() {
                     >
                       <div className="text-center">
                         <CheckCircle className="w-6 h-6 mx-auto mb-1" />
-                        <div>Virtual Check-In</div>
+                        <div>{t('checkin.virtualCheckIn')}</div>
                       </div>
                     </Button>
                   </DialogTrigger>
                   
                   <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>Daily Spiritual Check-In</DialogTitle>
+                      <DialogTitle>{t('checkin.dailySpiritualCheckIn')}</DialogTitle>
                     </DialogHeader>
                     
                     <div className="space-y-4">
                       {/* Check-In Type Selection */}
                       <div>
                         <label className="text-sm font-medium mb-3 block">
-                          What are you checking in for?
+                          {t('checkin.whatCheckingInFor')}
                         </label>
                         <div className="grid grid-cols-1 gap-2">
-                          {checkInTypes.map((type) => {
+                          {getCheckInTypes(t).map((type) => {
                             const Icon = type.icon;
                             return (
                               <button
@@ -643,7 +645,7 @@ export default function CheckInSystem() {
                 >
                   <div className="text-center">
                     <QrCode className="w-6 h-6 mx-auto mb-1" />
-                    <div>QR Check-In</div>
+                    <div>{t('checkin.qrCheckIn')}</div>
                   </div>
                 </Button>
 
@@ -661,16 +663,16 @@ export default function CheckInSystem() {
               </div>
               
               <p className="text-sm text-center text-muted-foreground">
-                Check in once daily to build your spiritual journey streak
+                {t('checkin.buildStreak')}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="text-center py-6">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                <h3 className="font-medium text-lg mb-2">Already Checked In Today!</h3>
+                <h3 className="font-medium text-lg mb-2">{t('checkin.alreadyCheckedIn')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  You checked in {format(new Date(todayCheckIn.createdAt), "h:mm a")}
+                  {t('checkin.checkedInAt')} {format(new Date(todayCheckIn.createdAt), "h:mm a")}
                 </p>
                 <Badge variant="secondary" className="mb-2">
                   {todayCheckIn.checkInType}
