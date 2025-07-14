@@ -35,12 +35,47 @@ const fallbackTranslations: Record<string, string> = {
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguageState] = useState<string>('en');
   
-  // Initialize language from localStorage on component mount
+  // EXTREME LANGUAGE MONITORING
   useEffect(() => {
-    const savedLang = localStorage.getItem('soapbox_language') || 'en';
-    console.log('Loading language from localStorage:', savedLang);
-    setLanguageState(savedLang);
-  }, []);
+    const initLanguage = () => {
+      // Check URL params first (highest priority)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang');
+      
+      if (urlLang && urlLang !== language) {
+        console.log('🎯 URL LANGUAGE DETECTED:', urlLang);
+        localStorage.setItem('soapbox_language', urlLang);
+        setLanguageState(urlLang);
+        return;
+      }
+      
+      // Check multiple storage locations
+      const storedLang = localStorage.getItem('soapbox_language') || 
+                        sessionStorage.getItem('soapbox_language') || 
+                        localStorage.getItem('soapbox_lang_backup') || 'en';
+      
+      console.log('🔍 LANGUAGE DETECTION - URL:', urlLang, 'Storage:', storedLang, 'Current:', language);
+      
+      // EMERGENCY OVERRIDE: If user manually set to Farsi, force it immediately
+      if (storedLang === 'fa' && language !== 'fa') {
+        console.log('🚨 EMERGENCY FARSI OVERRIDE DETECTED');
+        document.documentElement.setAttribute('lang', 'fa');
+        document.documentElement.setAttribute('dir', 'rtl');
+      }
+      
+      if (storedLang !== language) {
+        console.log('🔄 FORCING LANGUAGE SYNC:', storedLang);
+        setLanguageState(storedLang);
+      }
+    };
+    
+    initLanguage();
+    
+    // Monitor for changes every 100ms (aggressive polling)
+    const interval = setInterval(initLanguage, 100);
+    
+    return () => clearInterval(interval);
+  }, [language]);
 
   const queryClient = useQueryClient();
 
@@ -76,29 +111,33 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setLanguage = async (newLanguage: string) => {
     try {
-      setLanguageState(newLanguage);
+      console.log('🚀 AGGRESSIVE LANGUAGE FORCE-CHANGE to:', newLanguage);
+      
+      // NUCLEAR OPTION: Force immediate page navigation with language in URL
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', newLanguage);
+      
+      // Set in multiple storage locations
       localStorage.setItem('soapbox_language', newLanguage);
+      localStorage.setItem('soapbox_lang_backup', newLanguage);
+      sessionStorage.setItem('soapbox_language', newLanguage);
       
-      // Invalidate translations query to fetch new language
-      await queryClient.invalidateQueries({
-        queryKey: ['/api/translations', language]
-      });
+      // Force immediate state
+      setLanguageState(newLanguage);
       
-      // Also invalidate the new language query
-      await queryClient.invalidateQueries({
-        queryKey: ['/api/translations', newLanguage]
-      });
+      // Clear all caches aggressively
+      await queryClient.clear();
       
-      // Force immediate update
-      console.log('Language changed to:', newLanguage, 'localStorage will be:', newLanguage);
+      console.log('💥 FORCING NAVIGATION RELOAD with lang:', newLanguage);
       
-      // Force a page refresh to ensure all components re-render with new translations
-      setTimeout(() => {
-        console.log('Reloading page for language change...');
-        window.location.reload();
-      }, 200);
+      // Force navigation to trigger complete component remount
+      window.location.href = url.toString();
+      
     } catch (error) {
       console.error('Error setting language:', error);
+      // Emergency fallback
+      localStorage.setItem('soapbox_language', newLanguage);
+      window.location.reload();
     }
   };
 
