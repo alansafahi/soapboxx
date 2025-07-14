@@ -16,6 +16,7 @@ import { Star, MapPin, Phone, Globe, Users, Search, Filter, ChevronDown, Buildin
 import { motion, AnimatePresence } from "framer-motion";
 import type { Church } from "../../../shared/schema";
 import ChurchFeatureSetupDialog from "./ChurchFeatureSetupDialog";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface FilterState {
   denomination: string;
@@ -33,6 +34,7 @@ interface ChurchWithDistance extends Church {
 export default function EnhancedChurchDiscovery() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [joinedChurches, setJoinedChurches] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
   const [displayedCount, setDisplayedCount] = useState(10);
@@ -618,7 +620,7 @@ export default function EnhancedChurchDiscovery() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-                Discover Churches
+                {t('churches.discoverChurches')}
               </CardTitle>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
                 Find churches by denomination, location, or size - showing top 10 by proximity
@@ -631,7 +633,7 @@ export default function EnhancedChurchDiscovery() {
                 className="flex items-center gap-2"
               >
                 <Filter className="w-4 h-4" />
-                Filters
+                {t('churches.filters')}
                 <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
               </Button>
               <Button
@@ -639,7 +641,7 @@ export default function EnhancedChurchDiscovery() {
                 className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white"
               >
                 <Plus className="w-4 h-4" />
-                Add Church
+                {t('churches.addChurch')}
               </Button>
               <Button
                 variant="outline"
@@ -647,7 +649,7 @@ export default function EnhancedChurchDiscovery() {
                 className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
               >
                 <Building className="w-4 h-4" />
-                Claim Church
+                {t('churches.claimChurch')}
               </Button>
             </div>
           </div>
