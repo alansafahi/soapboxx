@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
+import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Label } from "./ui/label";
@@ -64,6 +65,7 @@ export default function UserPreferences() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { setTheme, setFontSize } = useTheme();
 
   const [preferences, setPreferences] = useState<UserPreferences>({
     language: "en",
@@ -163,8 +165,15 @@ export default function UserPreferences() {
   useEffect(() => {
     if (userPrefs) {
       setPreferences(userPrefs);
+      // Apply saved theme and font size to context
+      if (userPrefs.theme) {
+        setTheme(userPrefs.theme);
+      }
+      if (userPrefs.fontSize) {
+        setFontSize(userPrefs.fontSize);
+      }
     }
-  }, [userPrefs]);
+  }, [userPrefs, setTheme, setFontSize]);
 
   useEffect(() => {
     if (notificationSettings) {
@@ -175,6 +184,14 @@ export default function UserPreferences() {
   const handlePreferenceChange = (key: keyof UserPreferences, value: any) => {
     const newPrefs = { ...preferences, [key]: value };
     setPreferences(newPrefs);
+    
+    // Apply changes immediately to UI
+    if (key === 'theme') {
+      setTheme(value);
+    } else if (key === 'fontSize') {
+      setFontSize(value);
+    }
+    
     updatePreferencesMutation.mutate({ [key]: value });
   };
 

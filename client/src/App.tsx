@@ -6,6 +6,7 @@ import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { useImmediateAuth } from "./lib/immediateAuth";
 import { AnimatePresence, motion } from "framer-motion";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 import SidebarFixed from "./components/SidebarFixed";
 import TopHeader from "./components/TopHeader";
@@ -172,12 +173,14 @@ function AppRouter() {
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-                <WouterRouter>
-                    <AppRouter />
-                    <Toaster />
-                </WouterRouter>
-            </TooltipProvider>
+            <ThemeProvider>
+                <TooltipProvider>
+                    <WouterRouter>
+                        <AppRouter />
+                        <Toaster />
+                    </WouterRouter>
+                </TooltipProvider>
+            </ThemeProvider>
         </QueryClientProvider>
     );
 }

@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Font size variables */
+.font-small {
+  --font-size-base: 0.875rem;
+  --font-size-sm: 0.75rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.125rem;
+  --font-size-2xl: 1.25rem;
+}
+
+.font-medium {
+  --font-size-base: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+}
+
+.font-large {
+  --font-size-base: 1.125rem;
+  --font-size-sm: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.875rem;
+}
+
+/* Apply font sizes */
+.font-small .text-base,
+.font-medium .text-base,
+.font-large .text-base {
+  font-size: var(--font-size-base);
+}
+
+.font-small .text-sm,
+.font-medium .text-sm,
+.font-large .text-sm {
+  font-size: var(--font-size-sm);
+}
+
+.font-small .text-lg,
+.font-medium .text-lg,
+.font-large .text-lg {
+  font-size: var(--font-size-lg);
+}
+
+.font-small .text-xl,
+.font-medium .text-xl,
+.font-large .text-xl {
+  font-size: var(--font-size-xl);
+}
+
+.font-small .text-2xl,
+.font-medium .text-2xl,
+.font-large .text-2xl {
+  font-size: var(--font-size-2xl);
+}
+
 :root {
   --background: hsl(210, 40%, 98%);
   --foreground: hsl(222, 84%, 4.9%);

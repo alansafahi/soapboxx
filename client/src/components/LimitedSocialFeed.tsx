@@ -459,7 +459,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                         <span className="text-sm">{post.likeCount || 0}</span>
                       </button>
                       <button 
-                        onClick={() => setCommentDialogPost(post)}
+                        onClick={() => setCommentDialogOpen(post.id)}
                         className="flex items-center space-x-2 hover:text-blue-500 transition-colors"
                       >
                         <MessageCircle className="w-4 h-4" />
