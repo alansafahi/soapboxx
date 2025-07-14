@@ -227,38 +227,41 @@ export default function UserPreferences() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings & Preferences</h1>
-          <p className="text-gray-600">Customize your spiritual journey experience</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Settings & Preferences</h1>
+          <p className="text-gray-600 dark:text-gray-400">Customize your spiritual journey experience</p>
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="general" className="flex items-center space-x-2">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+            <TabsTrigger value="general" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Settings className="h-4 w-4" />
-              <span>General</span>
+              <span className="hidden sm:inline">General</span>
+              <span className="sm:hidden">Gen</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center space-x-2">
+            <TabsTrigger value="notifications" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Bell className="h-4 w-4" />
-              <span>Notifications</span>
+              <span className="hidden sm:inline">Notifications</span>
+              <span className="sm:hidden">Notif</span>
             </TabsTrigger>
-            <TabsTrigger value="offline" className="flex items-center space-x-2">
+            <TabsTrigger value="offline" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Download className="h-4 w-4" />
               <span>Offline</span>
             </TabsTrigger>
-            <TabsTrigger value="sync" className="flex items-center space-x-2">
+            <TabsTrigger value="sync" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <RefreshCw className="h-4 w-4" />
               <span>Sync</span>
             </TabsTrigger>
-            <TabsTrigger value="personalization" className="flex items-center space-x-2">
+            <TabsTrigger value="personalization" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Brain className="h-4 w-4" />
               <span>AI</span>
             </TabsTrigger>
-            <TabsTrigger value="language" className="flex items-center space-x-2">
+            <TabsTrigger value="language" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Globe className="h-4 w-4" />
-              <span>Language</span>
+              <span className="hidden sm:inline">Language</span>
+              <span className="sm:hidden">Lang</span>
             </TabsTrigger>
           </TabsList>
 
@@ -424,7 +427,7 @@ export default function UserPreferences() {
                         type="time"
                         value={notificationPrefs.dailyReadingTime}
                         onChange={(e) => handleNotificationChange("dailyReadingTime", e.target.value)}
-                        className="w-32"
+                        className="w-full sm:w-32"
                       />
                     </div>
                   )}
@@ -444,23 +447,29 @@ export default function UserPreferences() {
                     <div className="ml-4 space-y-3">
                       <Label>Prayer Times</Label>
                       {notificationPrefs.prayerTimes.map((time, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+                        <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                           <Input
                             type="time"
                             value={time}
                             onChange={(e) => updatePrayerTime(index, e.target.value)}
-                            className="w-32"
+                            className="w-full sm:w-32"
                           />
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => removePrayerTime(index)}
+                            className="w-full sm:w-auto"
                           >
                             Remove
                           </Button>
                         </div>
                       ))}
-                      <Button variant="outline" size="sm" onClick={addPrayerTime}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={addPrayerTime}
+                        className="w-full sm:w-auto"
+                      >
                         Add Prayer Time
                       </Button>
                     </div>
@@ -520,7 +529,7 @@ export default function UserPreferences() {
                   </div>
 
                   {notificationPrefs.quietHours.enabled && (
-                    <div className="ml-4 grid grid-cols-2 gap-4">
+                    <div className="ml-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Start Time</Label>
                         <Input
@@ -532,6 +541,7 @@ export default function UserPreferences() {
                               start: e.target.value,
                             })
                           }
+                          className="w-full"
                         />
                       </div>
                       <div className="space-y-2">
@@ -545,6 +555,7 @@ export default function UserPreferences() {
                               end: e.target.value,
                             })
                           }
+                          className="w-full"
                         />
                       </div>
                     </div>
