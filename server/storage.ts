@@ -270,6 +270,12 @@ import {
   type Reaction,
   type InsertReaction,
   communicationTemplates,
+  userPreferences,
+  type UserPreferences,
+  type InsertUserPreferences,
+  notificationPreferences,
+  type NotificationPreferences,
+  type InsertNotificationPreferences,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt } from "drizzle-orm";
@@ -284,6 +290,12 @@ export interface IStorage {
   updateUserProfile(userId: string, profileData: Partial<User>): Promise<User>;
   searchUsers(query: string): Promise<User[]>;
   completeOnboarding(userId: string, onboardingData: any): Promise<void>;
+  
+  // User preferences operations
+  getUserPreferences(userId: string): Promise<any>;
+  updateUserPreferences(userId: string, preferences: any): Promise<any>;
+  getUserNotificationPreferences(userId: string): Promise<any>;
+  updateUserNotificationPreferences(userId: string, preferences: any): Promise<any>;
   
   // Email verification operations
   setEmailVerificationToken(userId: string, token: string): Promise<void>;
@@ -882,6 +894,172 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
+  }
+
+  // User preferences operations
+  async getUserPreferences(userId: string): Promise<any> {
+    console.log('Storage: Getting user preferences for user:', userId);
+    
+    try {
+      const [prefs] = await db
+        .select()
+        .from(userPreferences)
+        .where(eq(userPreferences.userId, userId));
+      
+      if (!prefs) {
+        // Return default preferences if none exist
+        const defaultPrefs = {
+          language: "en",
+          timezone: "UTC",
+          theme: "light",
+          fontSize: "medium",
+          readingSpeed: "normal",
+          audioEnabled: true,
+          audioSpeed: 1.0,
+          familyMode: false,
+          offlineMode: false,
+          syncEnabled: true,
+          notificationsEnabled: true,
+        };
+        
+        // Create default preferences for the user
+        const [newPrefs] = await db
+          .insert(userPreferences)
+          .values({
+            userId,
+            ...defaultPrefs,
+          })
+          .returning();
+        
+        return newPrefs;
+      }
+      
+      return prefs;
+    } catch (error) {
+      console.error('Storage getUserPreferences error:', error);
+      throw error;
+    }
+  }
+
+  async updateUserPreferences(userId: string, preferences: any): Promise<any> {
+    console.log('Storage: Updating user preferences for user:', userId);
+    console.log('Storage: Preferences data:', JSON.stringify(preferences, null, 2));
+    
+    try {
+      const updateData = {
+        ...preferences,
+        updatedAt: new Date(),
+      };
+      
+      const [updatedPrefs] = await db
+        .update(userPreferences)
+        .set(updateData)
+        .where(eq(userPreferences.userId, userId))
+        .returning();
+      
+      if (!updatedPrefs) {
+        // If no existing preferences, create them
+        const [newPrefs] = await db
+          .insert(userPreferences)
+          .values({
+            userId,
+            ...updateData,
+          })
+          .returning();
+        
+        return newPrefs;
+      }
+      
+      return updatedPrefs;
+    } catch (error) {
+      console.error('Storage updateUserPreferences error:', error);
+      throw error;
+    }
+  }
+
+  async getUserNotificationPreferences(userId: string): Promise<any> {
+    console.log('Storage: Getting notification preferences for user:', userId);
+    
+    try {
+      const [prefs] = await db
+        .select()
+        .from(notificationPreferences)
+        .where(eq(notificationPreferences.userId, userId));
+      
+      if (!prefs) {
+        // Return default notification preferences if none exist
+        const defaultPrefs = {
+          dailyReading: true,
+          prayerReminders: true,
+          communityUpdates: true,
+          eventReminders: true,
+          friendActivity: false,
+          dailyReadingTime: "08:00",
+          prayerTimes: ["06:00", "12:00", "18:00"],
+          quietHours: {
+            enabled: false,
+            start: "22:00",
+            end: "07:00",
+          },
+          weekendPreferences: {
+            differentSchedule: false,
+            weekendReadingTime: "09:00",
+          },
+        };
+        
+        // Create default notification preferences for the user
+        const [newPrefs] = await db
+          .insert(notificationPreferences)
+          .values({
+            userId,
+            ...defaultPrefs,
+          })
+          .returning();
+        
+        return newPrefs;
+      }
+      
+      return prefs;
+    } catch (error) {
+      console.error('Storage getUserNotificationPreferences error:', error);
+      throw error;
+    }
+  }
+
+  async updateUserNotificationPreferences(userId: string, preferences: any): Promise<any> {
+    console.log('Storage: Updating notification preferences for user:', userId);
+    console.log('Storage: Notification preferences data:', JSON.stringify(preferences, null, 2));
+    
+    try {
+      const updateData = {
+        ...preferences,
+        updatedAt: new Date(),
+      };
+      
+      const [updatedPrefs] = await db
+        .update(notificationPreferences)
+        .set(updateData)
+        .where(eq(notificationPreferences.userId, userId))
+        .returning();
+      
+      if (!updatedPrefs) {
+        // If no existing preferences, create them
+        const [newPrefs] = await db
+          .insert(notificationPreferences)
+          .values({
+            userId,
+            ...updateData,
+          })
+          .returning();
+        
+        return newPrefs;
+      }
+      
+      return updatedPrefs;
+    } catch (error) {
+      console.error('Storage updateUserNotificationPreferences error:', error);
+      throw error;
+    }
   }
 
   // Email verification operations

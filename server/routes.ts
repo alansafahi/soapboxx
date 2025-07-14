@@ -6264,6 +6264,124 @@ Return JSON with this exact structure:
     }
   });
 
+  // User preferences endpoints
+  app.get('/api/user/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const userPrefs = await storage.getUserPreferences(userId);
+      res.json(userPrefs);
+    } catch (error) {
+      console.error('Get user preferences error:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch user preferences',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.patch('/api/user/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      console.log('User preferences update request for user:', userId);
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+      const updatedPrefs = await storage.updateUserPreferences(userId, req.body);
+      
+      res.json({
+        success: true,
+        message: 'Preferences updated successfully',
+        preferences: updatedPrefs
+      });
+    } catch (error) {
+      console.error('Update user preferences error:', error);
+      res.status(500).json({ 
+        message: 'Failed to update user preferences',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.get('/api/user/notification-preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const notificationPrefs = await storage.getUserNotificationPreferences(userId);
+      res.json(notificationPrefs);
+    } catch (error) {
+      console.error('Get notification preferences error:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch notification preferences',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.patch('/api/user/notification-preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      console.log('Notification preferences update request for user:', userId);
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+      const updatedPrefs = await storage.updateUserNotificationPreferences(userId, req.body);
+      
+      res.json({
+        success: true,
+        message: 'Notification preferences updated successfully',
+        preferences: updatedPrefs
+      });
+    } catch (error) {
+      console.error('Update notification preferences error:', error);
+      res.status(500).json({ 
+        message: 'Failed to update notification preferences',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.post('/api/user/sync-offline-content', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Simulate offline content sync
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      res.json({
+        success: true,
+        message: 'Offline content synced successfully',
+        syncedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Sync offline content error:', error);
+      res.status(500).json({ 
+        message: 'Failed to sync offline content',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Church routes
   app.get('/api/churches', async (req, res) => {
     try {

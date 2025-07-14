@@ -112,10 +112,7 @@ export default function UserPreferences() {
   // Update preferences mutation
   const updatePreferencesMutation = useMutation({
     mutationFn: (data: Partial<UserPreferences>) =>
-      apiRequest("/api/user/preferences", {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      }),
+      apiRequest("PATCH", "/api/user/preferences", data),
     onSuccess: () => {
       toast({
         title: "Preferences Updated",
@@ -135,10 +132,7 @@ export default function UserPreferences() {
   // Update notification preferences mutation
   const updateNotificationsMutation = useMutation({
     mutationFn: (data: Partial<NotificationPreferences>) =>
-      apiRequest("/api/user/notification-preferences", {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      }),
+      apiRequest("PATCH", "/api/user/notification-preferences", data),
     onSuccess: () => {
       toast({
         title: "Notifications Updated",
@@ -157,7 +151,7 @@ export default function UserPreferences() {
 
   // Sync offline content mutation
   const syncOfflineContentMutation = useMutation({
-    mutationFn: () => apiRequest("/api/user/sync-offline-content", { method: "POST" }),
+    mutationFn: () => apiRequest("POST", "/api/user/sync-offline-content", {}),
     onSuccess: () => {
       toast({
         title: "Content Synced",
