@@ -348,11 +348,11 @@ export default function UserPreferences() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="UTC">UTC</SelectItem>
-                        <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                        <SelectItem value="America/Chicago">Central Time</SelectItem>
-                        <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                        <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                        <SelectItem value="UTC">{t('timezone.utc')}</SelectItem>
+                        <SelectItem value="America/New_York">{t('timezone.eastern')}</SelectItem>
+                        <SelectItem value="America/Chicago">{t('timezone.central')}</SelectItem>
+                        <SelectItem value="America/Denver">{t('timezone.mountain')}</SelectItem>
+                        <SelectItem value="America/Los_Angeles">{t('timezone.pacific')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

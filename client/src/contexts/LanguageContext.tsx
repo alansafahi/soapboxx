@@ -496,7 +496,15 @@ const translations = {
     'posts.expand': 'توسيع',
     'posts.collapse': 'طي',
     'posts.readMore': 'اقرأ المزيد',
-    'posts.showLess': 'عرض أقل'
+    'posts.showLess': 'عرض أقل',
+    'timezone.utc': 'التوقيت العالمي المنسق',
+    'timezone.eastern': 'التوقيت الشرقي',
+    'timezone.central': 'التوقيت المركزي',
+    'timezone.mountain': 'التوقيت الجبلي',
+    'timezone.pacific': 'توقيت المحيط الهادئ',
+    'readingSpeed.slow': 'بطيء',
+    'readingSpeed.medium': 'عادي',
+    'readingSpeed.fast': 'سريع'
   }
 };
 
