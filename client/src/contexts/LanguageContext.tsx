@@ -60,7 +60,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       if (storedLang === 'fa' && language !== 'fa') {
         console.log('🚨 EMERGENCY FARSI OVERRIDE DETECTED');
         document.documentElement.setAttribute('lang', 'fa');
-        document.documentElement.setAttribute('dir', 'rtl');
+        // DON'T set dir=rtl to avoid layout flipping
       }
       
       if (storedLang !== language) {

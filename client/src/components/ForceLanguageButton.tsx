@@ -16,7 +16,7 @@ export const ForceLanguageButton = () => {
     
     // STEP 2: DOM manipulation
     document.documentElement.setAttribute('lang', 'fa');
-    document.documentElement.setAttribute('dir', 'rtl');
+    // Remove RTL direction to prevent layout flipping
     
     // STEP 3: Direct text replacement in the DOM
     const replaceTextInDOM = () => {
