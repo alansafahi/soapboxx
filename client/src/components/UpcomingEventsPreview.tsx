@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Link } from 'wouter';
 import { format, isToday, isTomorrow, parseISO } from 'date-fns';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Event {
   id: number;
@@ -18,6 +19,7 @@ interface Event {
 export default function UpcomingEventsPreview() {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
@@ -56,7 +58,7 @@ export default function UpcomingEventsPreview() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Calendar className="h-5 w-5 text-blue-600" />
-            📅 Upcoming Events
+            📅 {t('events.upcomingEvents')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -120,7 +122,7 @@ export default function UpcomingEventsPreview() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Calendar className="h-5 w-5 text-blue-600" />
-            📅 Upcoming Events
+            📅 {t('events.upcomingEvents')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -141,13 +143,13 @@ export default function UpcomingEventsPreview() {
             </div>
             <Link href="/events">
               <Button variant="outline" size="sm" className="mr-2">
-                View All Events
+                {t('events.viewAllEvents')}
               </Button>
             </Link>
             <Link href="/events/create">
               <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-1" />
-                Create Event
+                {t('events.createEvent')}
               </Button>
             </Link>
           </div>
@@ -161,7 +163,7 @@ export default function UpcomingEventsPreview() {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Calendar className="h-5 w-5 text-blue-600" />
-          📅 Upcoming Events
+          📅 {t('events.upcomingEvents')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -200,7 +202,7 @@ export default function UpcomingEventsPreview() {
         <div className="pt-2 border-t border-blue-200 dark:border-blue-700">
           <Link href="/events">
             <Button variant="ghost" size="sm" className="w-full justify-between text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
-              ➕ View All Events
+              ➕ {t('events.viewAllEvents')}
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>

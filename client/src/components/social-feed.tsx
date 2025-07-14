@@ -1715,7 +1715,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     disabled={commentMutation.isPending}
                     className="flex-1 h-10"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button 
                     onClick={() => {
@@ -1729,7 +1729,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     disabled={commentMutation.isPending || !commentText.trim()}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex-1 h-10"
                   >
-                    {commentMutation.isPending ? "Posting..." : "Post Comment"}
+                    {commentMutation.isPending ? t('posts.posting') : t('buttons.postComment')}
                   </Button>
                 </div>
                 <span className="text-xs text-gray-400 text-center">Press Cmd+Enter to post</span>
