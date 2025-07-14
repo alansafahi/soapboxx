@@ -838,6 +838,7 @@ export class DatabaseStorage implements IStorage {
       
       return user;
     } catch (error) {
+      console.error('Storage updateUserProfile error:', error);
       throw error;
     }
   }

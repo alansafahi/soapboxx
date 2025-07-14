@@ -6172,6 +6172,9 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
+      console.log('Profile update request for user:', userId);
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+
 
 
       // Map all possible frontend field names to database schema
@@ -6196,7 +6199,10 @@ Return JSON with this exact structure:
         profileImageUrl: req.body.profileImageUrl || req.body.profile_image_url,
         
         // Spiritual fields
-        interests: req.body.spiritualInterests || req.body.interests || [],
+        interests: Array.isArray(req.body.spiritualInterests) ? req.body.spiritualInterests : 
+                  Array.isArray(req.body.interests) ? req.body.interests : 
+                  typeof req.body.spiritualInterests === 'string' ? [req.body.spiritualInterests] :
+                  typeof req.body.interests === 'string' ? [req.body.interests] : [],
         denomination: req.body.denomination,
         
         // Other fields
@@ -6232,6 +6238,7 @@ Return JSON with this exact structure:
       });
 
     } catch (error) {
+      console.error('Profile update error:', error);
       res.status(500).json({ 
         message: 'Failed to update profile',
         error: error instanceof Error ? error.message : String(error)
