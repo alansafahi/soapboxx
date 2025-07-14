@@ -106,12 +106,12 @@ export default function SoapPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{t('nav.soapJournal')}</h1>
           <p className="text-muted-foreground">
-            Scripture • Observation • Application • Prayer
+            {t('soap.subtitle')}
           </p>
         </div>
         <Button onClick={() => setShowForm(true)} className="gap-2">
           <Plus className="h-4 w-4" />
-          {t('common.new')} Entry
+          {t('soap.newEntry')}
         </Button>
       </div>
 
@@ -122,8 +122,8 @@ export default function SoapPage() {
             <div className="flex items-center space-x-2">
               <Calendar className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Current Streak</p>
-                <p className="text-2xl font-bold">{streakData?.streak || 0} days</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('soap.currentStreak')}</p>
+                <p className="text-2xl font-bold">{streakData?.streak || 0} {t('soap.days')}</p>
               </div>
             </div>
           </CardContent>
@@ -134,7 +134,7 @@ export default function SoapPage() {
             <div className="flex items-center space-x-2">
               <BookOpen className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Entries</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('soap.totalEntries')}</p>
                 <p className="text-2xl font-bold">{userEntries.length}</p>
               </div>
             </div>
@@ -146,7 +146,7 @@ export default function SoapPage() {
             <div className="flex items-center space-x-2">
               <Share2 className="h-5 w-5 text-purple-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Shared Entries</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('soap.sharedEntries')}</p>
                 <p className="text-2xl font-bold">
                   {userEntries.filter(entry => entry.isPublic).length}
                 </p>
@@ -161,11 +161,11 @@ export default function SoapPage() {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="my-entries" className="gap-2">
             <BookOpen className="h-4 w-4" />
-            My Entries
+            {t('soap.myEntries')}
           </TabsTrigger>
           <TabsTrigger value="community" className="gap-2">
             <Heart className="h-4 w-4" />
-            Community
+            {t('soap.community')}
           </TabsTrigger>
         </TabsList>
 
