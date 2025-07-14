@@ -9446,7 +9446,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(translations)
       .where(eq(translations.language, language))
-      .orderBy(translations.key);
+      .orderBy(translations.translationKey);
     
     return translationsList;
   }
@@ -9456,7 +9456,7 @@ export class DatabaseStorage implements IStorage {
       .insert(translations)
       .values({
         language,
-        key,
+        translationKey: key,
         value,
         createdAt: new Date(),
         updatedAt: new Date()

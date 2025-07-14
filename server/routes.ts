@@ -11311,8 +11311,15 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(400).json({ message: 'Language parameter is required' });
       }
 
-      const translations = await storage.getTranslations(language);
-      res.json(translations);
+      const translationsList = await storage.getTranslations(language);
+      
+      // Convert array to key-value object
+      const translations = translationsList.reduce((acc, translation) => {
+        acc[translation.translationKey] = translation.value;
+        return acc;
+      }, {} as Record<string, string>);
+      
+      res.json({ translations });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
       res.status(500).json({ 
