@@ -48,6 +48,7 @@ import {
   ChevronRight,
   UserPlus,
   Sparkles,
+  Languages,
   Trophy,
   QrCode
 } from "lucide-react";
@@ -173,6 +174,7 @@ export default function SidebarFixed() {
       label: "SOAPBOX PORTAL",
       items: [
         { label: "Church Management", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
+        { label: "AI Translation Admin", href: "/ai-translation-admin", icon: Languages, roles: ['soapbox_owner', 'system_admin'] },
       ]
     },
     {

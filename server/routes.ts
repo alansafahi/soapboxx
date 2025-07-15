@@ -43,6 +43,7 @@ interface RequestWithSession extends express.Request {
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import { lookupBibleVerse } from "./bible-api.js";
+import { aiTranslationService } from "./ai-translation-service";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import multer from "multer";
@@ -11441,6 +11442,100 @@ Please provide suggestions for the missing or incomplete sections.`
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
       res.status(500).json({ 
         error: 'Failed to fetch supported languages',
+        details: errorMessage 
+      });
+    }
+  });
+
+  // AI Translation Service Endpoints
+  
+  // Auto-translate all interface elements using OpenAI API
+  app.post('/api/translations/ai-translate-all', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.session?.user?.role;
+      if (userRole !== 'soapbox_owner' && userRole !== 'system_admin') {
+        return res.status(403).json({ message: 'Admin access required for AI translation' });
+      }
+
+      console.log('Starting AI-powered translation for all languages...');
+      const results = await aiTranslationService.translateAllLanguages();
+      
+      res.json({
+        success: true,
+        message: 'AI translation completed for all languages',
+        results: results,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'AI translation failed';
+      res.status(500).json({ 
+        error: 'Failed to complete AI translation',
+        details: errorMessage 
+      });
+    }
+  });
+
+  // Get translation statistics across all languages
+  app.get('/api/translations/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const stats = await aiTranslationService.getTranslationStats();
+      
+      res.json({
+        translationStats: stats,
+        totalLanguages: Object.keys(stats).length,
+        generatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get translation stats';
+      res.status(500).json({ 
+        error: 'Failed to fetch translation statistics',
+        details: errorMessage 
+      });
+    }
+  });
+
+  // Translate specific language using OpenAI API
+  app.post('/api/translations/ai-translate/:language', isAuthenticated, async (req: any, res) => {
+    try {
+      const userRole = req.session?.user?.role;
+      if (userRole !== 'soapbox_owner' && userRole !== 'system_admin') {
+        return res.status(403).json({ message: 'Admin access required for AI translation' });
+      }
+
+      const { language } = req.params;
+      const languageMap = {
+        'es': 'Spanish',
+        'fr': 'French', 
+        'ko': 'Korean',
+        'ar': 'Arabic',
+        'fa': 'Farsi/Persian',
+        'de': 'German',
+        'pt': 'Portuguese',
+        'zh': 'Chinese (Simplified)',
+        'ja': 'Japanese',
+        'hi': 'Hindi'
+      };
+
+      const languageName = languageMap[language as keyof typeof languageMap];
+      if (!languageName) {
+        return res.status(400).json({ message: 'Unsupported language code' });
+      }
+
+      console.log(`Starting AI translation for ${languageName}...`);
+      const translatedMap = await aiTranslationService.translateToLanguage(language, languageName);
+      await aiTranslationService.saveTranslations(language, translatedMap);
+      
+      res.json({
+        success: true,
+        language: languageName,
+        translationCount: Object.keys(translatedMap).length,
+        message: `AI translation completed for ${languageName}`,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'AI translation failed';
+      res.status(500).json({ 
+        error: `Failed to translate to ${req.params.language}`,
         details: errorMessage 
       });
     }
