@@ -79,12 +79,10 @@ export default function SidebarFixed() {
     enabled: !!user,
   });
 
-  // Force update navigation when user churches change
+  // Force update navigation when user churches change or feature filtering changes
   useEffect(() => {
-    if (userChurches && userChurches.length > 0) {
-      setForceUpdate(prev => prev + 1);
-    }
-  }, [userChurches]);
+    setForceUpdate(prev => prev + 1);
+  }, [userChurches, user?.email]);
   
 
 
@@ -191,7 +189,11 @@ export default function SidebarFixed() {
   ];
 
   // Filter groups based on user role and church features - Force re-render with dependencies
-  const visibleGroups = useMemo(() => navigationGroups.map(group => {
+  const visibleGroups = useMemo(() => {
+    console.log('🔄 REBUILDING NAVIGATION - Force Update:', forceUpdate);
+    console.log('👤 User:', user?.email, 'Church Admin:', hasChurchAdminRole);
+    
+    return navigationGroups.map(group => {
     const filteredItems = group.items.filter(item => {
       // First check role-based access
       if (item.roles) {
@@ -210,7 +212,7 @@ export default function SidebarFixed() {
       // Then check church feature settings - use proper feature key mapping
       const featureKey = item.href.replace('/', '').replace('-demo', '');
       const isEnabled = isFeatureEnabled(item.href);
-      // Church feature filtering applied
+      console.log(`🎯 FINAL FILTER: ${item.label} (${item.href}) → ${isEnabled ? 'SHOW' : 'HIDE'}`);
       return isEnabled;
     });
     
@@ -219,11 +221,15 @@ export default function SidebarFixed() {
       items: filteredItems
     };
     
+    console.log(`📊 Group "${group.label}": ${group.items.length} → ${filteredItems.length} items`);
     return finalGroup;
   }).filter(group => {
     // Only show groups that have items after filtering
-    return group.items.length > 0;
-  }), [user?.email, user?.role, hasChurchAdminRole, isFeatureEnabled, forceUpdate]);
+    const hasItems = group.items.length > 0;
+    console.log(`✅ Group "${group.label}" included: ${hasItems} (${group.items.length} items)`);
+    return hasItems;
+  });
+  }, [user?.email, user?.role, hasChurchAdminRole, isFeatureEnabled, forceUpdate]);
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
@@ -323,11 +329,11 @@ export default function SidebarFixed() {
                 
                 {isExpanded && (
                   <div className="space-y-1">
-                    {group.items.map((item) => {
+                    {group.items.map((item, itemIdx) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
                       return (
-                        <Link key={item.href} href={item.href}>
+                        <Link key={`${item.href}-${itemIdx}-${forceUpdate}`} href={item.href}>
                           <Button
                             variant={isActive ? "default" : "ghost"}
                             className={`w-full justify-start h-auto py-2 px-3 ${
