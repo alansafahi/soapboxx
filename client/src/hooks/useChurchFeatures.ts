@@ -87,6 +87,7 @@ const CORE_FEATURES = [
   'contacts',
   'bible', // Today's Reading / S.O.A.P. Journal
   'soap',
+  'bookmarked-prayers', // Bookmarked Prayers - always available spiritual feature
   'leaderboard', // Engagement Board - moved to core feature
   'profile',
   'settings',

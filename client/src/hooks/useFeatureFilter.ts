@@ -33,6 +33,7 @@ const CORE_FEATURES = [
   'profile',
   'settings',
   'today-reading', // S.O.A.P. Journal - always available for spiritual growth
+  'bookmarked-prayers', // Bookmarked Prayers - always available spiritual feature
   'member-directory', // Always needed for admin
   'donation-analytics', // Always needed for admin
   'engagement-analytics', // Always needed for admin
