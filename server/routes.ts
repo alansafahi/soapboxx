@@ -261,6 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     '/api/bible/contextual-selection',
     '/api/bible/random',
     '/api/bible/stats',
+    '/api/bible/daily-verse',
     '/api/test'
   ];
 
@@ -2866,51 +2867,66 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
-  // Bible API endpoints
-  app.get('/api/bible/daily-verse', isAuthenticated, async (req: any, res) => {
+  // Bible API endpoints - Fixed to use cache-free API lookup system (Public Access)
+  app.get('/api/bible/daily-verse', async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      
+      // Import the Bible API lookup function
+      const { lookupBibleVerse } = await import('./bible-api');
       
       // Get daily verse that rotates based on the day of year
       const today = new Date();
       const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
       
-      // Get a random verse from the database based on the day of year
-      const verses = await storage.getBibleVersesPaginated({
-        limit: 1,
-        offset: dayOfYear % 100 // Rotate through different verses based on day
-      });
+      // Curated list of inspirational verses for daily rotation
+      const dailyVerses = [
+        "Philippians 4:13", "Jeremiah 29:11", "Romans 8:28", "Psalm 23:4", 
+        "Isaiah 40:31", "Proverbs 3:5-6", "Matthew 19:26", "1 Corinthians 10:13",
+        "Psalm 46:10", "2 Corinthians 12:9", "Joshua 1:9", "Ephesians 2:8-9",
+        "John 3:16", "Romans 6:23", "1 John 1:9", "Psalm 119:105",
+        "Isaiah 55:11", "Hebrews 11:1", "Romans 12:2", "Galatians 5:22-23",
+        "1 Peter 5:7", "Matthew 11:28-30", "Psalm 37:4", "2 Timothy 1:7",
+        "1 Thessalonians 5:16-18", "James 1:2-3", "Colossians 3:23", "Psalm 139:14",
+        "Matthew 6:26", "Isaiah 43:2", "Psalm 34:18", "Romans 15:13"
+      ];
       
-      if (verses.length === 0) {
-        // Fallback verse if database is empty
-        const fallbackVerse = {
-          id: 1,
+      // Select verse based on day of year
+      const selectedReference = dailyVerses[dayOfYear % dailyVerses.length];
+      
+      // Lookup verse using API-first approach
+      const verseData = await lookupBibleVerse(selectedReference, 'NIV');
+      
+      if (verseData) {
+        const verse = {
+          id: dayOfYear + 1,
           date: today,
-          verseReference: "Philippians 4:13",
-          verseText: "I can do all this through him who gives me strength.",
-          theme: "Strength and Perseverance",
-          reflectionPrompt: "How can God's strength help you face today's challenges?",
-          guidedPrayer: "Lord, help me to rely on Your strength in all circumstances. Amen.",
+          verseReference: verseData.reference,
+          verseText: verseData.text,
+          theme: "Daily Inspiration",
+          reflectionPrompt: `How does this verse from ${verseData.reference} speak to your heart today?`,
+          guidedPrayer: `Lord, thank You for Your word in ${verseData.reference}. Help me to live by this truth today. Amen.`,
           backgroundImageUrl: null,
-          audioUrl: null
+          audioUrl: null,
+          source: verseData.source
         };
-        return res.json(fallbackVerse);
+        return res.json(verse);
       }
       
-      const dbVerse = verses[0];
-      const verse = {
-        id: dbVerse.id,
+      // Ultimate fallback if API is unavailable
+      const fallbackVerse = {
+        id: 1,
         date: today,
-        verseReference: dbVerse.reference,
-        verseText: dbVerse.text,
-        theme: dbVerse.category || "Daily Inspiration",
-        reflectionPrompt: `How does this verse from ${dbVerse.reference} speak to your heart today?`,
-        guidedPrayer: `Lord, thank You for Your word in ${dbVerse.reference}. Help me to live by this truth today. Amen.`,
+        verseReference: "Philippians 4:13",
+        verseText: "I can do all this through him who gives me strength.",
+        theme: "Strength and Perseverance",
+        reflectionPrompt: "How can God's strength help you face today's challenges?",
+        guidedPrayer: "Lord, help me to rely on Your strength in all circumstances. Amen.",
         backgroundImageUrl: null,
-        audioUrl: null
+        audioUrl: null,
+        source: "Fallback"
       };
       
-      res.json(verse);
+      res.json(fallbackVerse);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch daily verse" });
     }
