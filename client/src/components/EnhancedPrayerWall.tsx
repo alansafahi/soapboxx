@@ -528,6 +528,27 @@ export default function EnhancedPrayerWall() {
     mutationFn: async (prayerId: number) => {
       return await apiRequest("POST", `/api/prayers/${prayerId}/bookmark`, {});
     },
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers/bookmarked"] });
+      toast({
+        title: response.bookmarked ? "Prayer Bookmarked" : "Bookmark Removed",
+        description: response.message,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to bookmark prayer. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Bookmark prayer mutation
+  const bookmarkPrayerMutation = useMutation({
+    mutationFn: async (prayerId: number) => {
+      return await apiRequest("POST", `/api/prayers/${prayerId}/bookmark`, {});
+    },
     onSuccess: (_, prayerId) => {
       setBookmarkedRequests(prev => {
         const newSet = new Set(Array.from(prev));
@@ -1043,6 +1064,17 @@ export default function EnhancedPrayerWall() {
                             <Users className="w-4 h-4" />
                             <Eye className="w-4 h-4" />
                             Who's Praying
+                          </Button>
+                          
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                            onClick={() => bookmarkPrayerMutation.mutate(prayer.id)}
+                            title="Bookmark this prayer"
+                          >
+                            <Bookmark className="w-4 h-4" />
+                            Bookmark
                           </Button>
                         </div>
 
