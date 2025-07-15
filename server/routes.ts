@@ -2878,56 +2878,111 @@ app.post('/api/invitations', async (req: any, res) => {
       const today = new Date();
       const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
       
-      // Expanded curated list of inspirational verses for yearly rotation (120 verses)
+      // Comprehensive yearly verse collection (360 verses) - One for each day
       const dailyVerses = [
-        // Core Faith & Salvation (20 verses)
+        // Core Faith & Salvation (40 verses)
         "John 3:16", "Romans 6:23", "Ephesians 2:8-9", "1 John 1:9", "Romans 10:9",
         "Acts 16:31", "2 Corinthians 5:17", "John 14:6", "Romans 5:8", "1 Peter 3:18",
         "John 1:12", "Titus 3:5", "Romans 3:23", "Isaiah 53:6", "1 Timothy 2:5",
         "Hebrews 9:27", "John 5:24", "Romans 8:1", "Galatians 2:16", "1 Peter 1:18-19",
+        "Acts 4:12", "Romans 1:16", "1 Corinthians 15:3-4", "2 Peter 3:9", "John 10:28",
+        "Romans 8:38-39", "1 John 5:13", "John 6:37", "Romans 8:16", "Galatians 3:26",
+        "1 John 3:1", "John 14:1-3", "Revelation 3:20", "2 Corinthians 6:2", "Acts 2:21",
+        "Romans 5:1", "Ephesians 1:7", "Colossians 1:14", "Hebrews 10:17", "Isaiah 1:18",
         
-        // Strength & Perseverance (20 verses)
+        // Strength & Perseverance (40 verses)
         "Philippians 4:13", "Isaiah 40:31", "2 Corinthians 12:9", "Joshua 1:9", "Psalm 46:10",
         "1 Corinthians 10:13", "Romans 8:28", "2 Timothy 1:7", "Nehemiah 8:10", "Isaiah 41:10",
         "Psalm 27:1", "Deuteronomy 31:6", "Psalm 118:6", "2 Chronicles 20:15", "Exodus 14:14",
         "1 Peter 5:10", "James 1:2-4", "Romans 5:3-5", "2 Corinthians 4:16-18", "Hebrews 12:1-2",
+        "Isaiah 35:4", "Psalm 31:24", "1 Chronicles 16:11", "Psalm 138:3", "Habakkuk 3:19",
+        "2 Samuel 22:33", "Psalm 18:32", "Joel 3:10", "Isaiah 12:2", "Psalm 28:7",
+        "2 Corinthians 1:21-22", "Ephesians 6:10", "1 John 4:4", "Philippians 1:6", "Romans 8:31",
+        "2 Timothy 4:17", "Psalm 84:5", "Isaiah 54:17", "Jeremiah 20:11", "Micah 7:8",
         
-        // Peace & Comfort (20 verses)
+        // Peace & Comfort (40 verses)
         "John 14:27", "Philippians 4:6-7", "Matthew 11:28-30", "Psalm 23:4", "Isaiah 26:3",
         "1 Peter 5:7", "Psalm 34:18", "2 Corinthians 1:3-4", "Romans 15:13", "John 16:33",
         "Psalm 46:1", "Psalm 91:1-2", "Isaiah 43:2", "Psalm 121:1-2", "Matthew 6:26",
         "Psalm 55:22", "Deuteronomy 33:27", "Psalm 62:1-2", "Isaiah 54:10", "Lamentations 3:22-23",
+        "Psalm 4:8", "Isaiah 32:17", "Colossians 3:15", "2 Thessalonians 3:16", "Numbers 6:26",
+        "Psalm 29:11", "Isaiah 9:6", "Psalm 119:165", "Romans 5:1", "Ephesians 2:14",
+        "Psalm 85:8", "Isaiah 57:2", "John 20:19", "Luke 2:14", "1 Corinthians 14:33",
+        "Psalm 37:37", "Isaiah 48:18", "Jeremiah 6:14", "Ezekiel 34:25", "Haggai 2:9",
         
-        // Wisdom & Guidance (20 verses)
+        // Wisdom & Guidance (40 verses)
         "Proverbs 3:5-6", "James 1:5", "Psalm 119:105", "Proverbs 16:9", "Isaiah 55:8-9",
         "Jeremiah 29:11", "Psalm 32:8", "Proverbs 27:17", "Ecclesiastes 3:1", "Proverbs 19:21",
         "1 Corinthians 2:9", "Romans 11:33", "Proverbs 2:6", "Psalm 25:9", "Proverbs 1:7",
         "2 Timothy 3:16-17", "Hebrews 4:12", "Psalm 119:11", "Matthew 7:7-8", "John 16:13",
+        "Proverbs 9:10", "Ecclesiastes 12:13", "Job 28:28", "Psalm 111:10", "Proverbs 8:13",
+        "Daniel 2:21", "1 Kings 3:9", "Proverbs 4:7", "Colossians 2:3", "Ephesians 1:17",
+        "Proverbs 15:22", "Proverbs 11:14", "Proverbs 20:18", "Isaiah 28:29", "Psalm 73:24",
+        "Proverbs 3:13", "Ecclesiastes 2:26", "1 Corinthians 1:30", "Proverbs 14:8", "James 3:17",
         
-        // Love & Relationships (20 verses)
+        // Love & Relationships (40 verses)
         "1 Corinthians 13:4-8", "1 John 4:19", "John 13:34-35", "Romans 12:10", "Ephesians 4:32",
         "1 John 4:7-8", "Colossians 3:14", "Matthew 22:37-39", "Galatians 5:22-23", "1 Peter 4:8",
         "Romans 13:8", "1 Corinthians 16:14", "Ephesians 5:1-2", "1 John 3:16", "Mark 12:31",
         "Romans 12:9", "Philippians 2:3-4", "1 Thessalonians 4:9", "Hebrews 13:1", "1 John 4:11",
+        "John 15:12", "1 John 2:10", "Romans 13:10", "1 Peter 1:22", "2 John 1:5",
+        "1 John 3:18", "Ephesians 4:2", "Colossians 3:12", "1 Thessalonians 3:12", "2 Peter 1:7",
+        "John 15:13", "Romans 5:5", "1 Corinthians 13:13", "Galatians 5:13", "Ephesians 5:25",
+        "1 John 4:12", "Philippians 1:9", "1 Timothy 1:5", "Deuteronomy 6:5", "Leviticus 19:18",
         
-        // Purpose & Service (20 verses)
+        // Purpose & Service (40 verses)
         "Jeremiah 1:5", "Ephesians 2:10", "1 Peter 4:10", "Romans 12:6-8", "Matthew 28:19-20",
         "Colossians 3:23", "1 Corinthians 10:31", "2 Timothy 2:15", "Acts 20:24", "Philippians 1:6",
         "Romans 8:29", "Galatians 6:9", "2 Corinthians 9:8", "1 Corinthians 15:58", "Ephesians 4:11-12",
-        "Matthew 5:16", "2 Timothy 4:7", "1 Peter 2:9", "Revelation 3:8", "Matthew 25:21"
+        "Matthew 5:16", "2 Timothy 4:7", "1 Peter 2:9", "Revelation 3:8", "Matthew 25:21",
+        "1 Corinthians 12:7", "Romans 12:4-5", "Ephesians 4:12", "1 Timothy 4:14", "2 Timothy 1:6",
+        "Acts 13:2", "Romans 1:1", "1 Corinthians 7:17", "Galatians 1:15", "Ephesians 1:4",
+        "2 Thessalonians 1:11", "Hebrews 13:21", "1 Peter 3:15", "2 Timothy 2:21", "Titus 2:14",
+        "James 1:17", "Romans 11:29", "1 Corinthians 4:2", "Matthew 20:26", "Mark 10:43",
+        
+        // Prayer & Worship (40 verses)
+        "1 Thessalonians 5:17", "Philippians 4:6", "Matthew 6:9-11", "Luke 18:1", "James 5:16",
+        "1 John 5:14", "Matthew 21:22", "John 14:13", "Psalm 145:18", "Jeremiah 33:3",
+        "Hebrews 4:16", "1 Timothy 2:8", "Romans 8:26", "Ephesians 6:18", "Colossians 4:2",
+        "Psalm 62:8", "Psalm 95:6", "John 4:24", "Psalm 100:4", "Psalm 150:6",
+        "1 Chronicles 16:29", "Psalm 29:2", "Revelation 4:11", "Psalm 96:9", "Hebrews 13:15",
+        "Psalm 34:1", "Psalm 103:1", "Psalm 135:1", "Ephesians 5:19", "Colossians 3:16",
+        "Psalm 22:22", "Psalm 40:3", "Isaiah 12:5", "Psalm 9:11", "Psalm 47:6",
+        "Psalm 66:4", "Psalm 86:9", "Psalm 117:1", "Romans 15:11", "Revelation 15:4",
+        
+        // Hope & Faith (40 verses)
+        "Romans 15:13", "Hebrews 11:1", "1 Peter 1:3", "Romans 8:24-25", "Hebrews 6:19",
+        "Psalm 39:7", "Jeremiah 14:8", "Lamentations 3:24", "Romans 4:18", "Titus 2:13",
+        "1 John 3:3", "Colossians 1:27", "1 Timothy 1:1", "Hebrews 7:19", "1 Peter 1:21",
+        "Romans 5:5", "2 Corinthians 3:12", "Ephesians 2:12", "1 Thessalonians 4:13", "Hebrews 11:6",
+        "Mark 9:23", "Luke 1:37", "Romans 10:17", "2 Corinthians 5:7", "Galatians 2:20",
+        "Ephesians 3:12", "Philippians 1:6", "2 Timothy 1:12", "Hebrews 10:23", "1 John 5:4",
+        "Matthew 17:20", "Mark 11:24", "Luke 17:6", "John 11:40", "Acts 27:25",
+        "Romans 1:17", "Galatians 3:11", "Ephesians 6:16", "1 Timothy 6:12", "James 1:6",
+        
+        // Joy & Thanksgiving (40 verses)
+        "Nehemiah 8:10", "Psalm 16:11", "John 15:11", "Romans 14:17", "Galatians 5:22",
+        "Philippians 4:4", "1 Thessalonians 5:16", "James 1:2", "1 Peter 1:8", "Psalm 126:3",
+        "Isaiah 12:3", "Jeremiah 15:16", "Habakkuk 3:18", "Luke 2:10", "John 16:22",
+        "Acts 13:52", "Romans 15:13", "2 Corinthians 8:2", "Philippians 1:4", "Colossians 1:11",
+        "1 Thessalonians 5:18", "Ephesians 5:20", "Colossians 3:17", "Psalm 100:4", "Psalm 107:1",
+        "1 Chronicles 16:34", "2 Chronicles 20:21", "Psalm 118:1", "Psalm 136:1", "Daniel 2:23",
+        "Luke 17:16", "Romans 1:21", "1 Corinthians 15:57", "2 Corinthians 9:15", "Ephesians 1:16",
+        "Philippians 1:3", "Colossians 1:3", "1 Thessalonians 1:2", "2 Timothy 1:3", "Hebrews 12:28"
       ];
       
-      // Enhanced selection algorithm for better yearly variety
-      // Combines day of year with month for better distribution across the 120 verses
+      // Optimized selection for 360-verse yearly cycle
+      // Provides near-daily unique verses with yearly variation
       const month = today.getMonth() + 1; // 1-12
       const dayOfMonth = today.getDate(); // 1-31
       
-      // Create a seed that changes throughout the year but remains consistent for each date
-      const yearSeed = today.getFullYear() * 137; // Prime number for better distribution
-      const dateSeed = (month * 31) + dayOfMonth + yearSeed;
+      // Primary selection based on day of year for consistency
+      let selectedIndex = dayOfYear % dailyVerses.length;
       
-      // Select verse ensuring different patterns each year and good distribution
-      const selectedIndex = (dayOfYear + dateSeed) % dailyVerses.length;
+      // Add yearly variation using prime number multiplication
+      const yearVariation = (today.getFullYear() * 19) % dailyVerses.length;
+      selectedIndex = (selectedIndex + yearVariation) % dailyVerses.length;
+      
       const selectedReference = dailyVerses[selectedIndex];
       
       // Lookup verse using API-first approach

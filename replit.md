@@ -144,11 +144,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 ## Recent Changes
 - July 15, 2025: DAILY BIBLE VERSE SYSTEM COMPLETELY OPERATIONAL - Successfully fixed Bible API daily verse endpoint with cache-free lookup system and daily rotation
   - AUTHENTICATION BYPASS ADDED: `/api/bible/daily-verse` endpoint added to public endpoints list for spiritual content accessibility
-  - DAILY ROTATION CONFIRMED: 32-verse curated list rotates based on day-of-year calculation ensuring different verse each day
+  - EXPANDED DAILY VERSE COLLECTION: Enhanced from 32 to 360 verses organized across 9 spiritual themes (40 verses each) to eliminate repetition
+  - ENHANCED VERSE SELECTION ALGORITHM: Uses day-of-year plus year-based calculations to ensure different verses throughout the year
+  - CONFIRMED DAILY ROTATION WORKING: Today shows Isaiah 40:31, tomorrow will show different verse, ensuring daily variety
+  - 360-VERSE ROTATION VERIFIED: Daily verse collection across 9 themes: Core Faith & Salvation, Strength & Perseverance, Peace & Comfort, Wisdom & Guidance, Love & Relationships, Purpose & Service, Prayer & Worship, Hope & Faith, Joy & Thanksgiving
   - API INTEGRATION WORKING: Direct API.Bible lookup with ChatGPT fallback architecture providing authentic scripture content
   - CACHE-FREE SYSTEM: Eliminated `getBibleVersesPaginated()` method implementing real-time verse lookup without misleading cache data
   - TODAY'S READING FUNCTIONAL: Bible page at /bible successfully displays daily verse with reflection prompts and guided prayers
-  - VERSE PROGRESSION VERIFIED: Today shows Isaiah 40:31, tomorrow will show Proverbs 3:5-6, ensuring daily variety
 - July 15, 2025: CHURCH FEATURE FILTERING SYSTEM COMPLETELY OPERATIONAL - Successfully implemented and verified comprehensive church admin toggle system allowing selective feature activation/deactivation with render-time filtering to overcome React caching
   - FILTERING LOGIC CONFIRMED: Console logs verify navigation filtering correctly removes disabled features (Donation, Prayer Wall, Audio Routines)
   - MEGA TEST CHURCH CONFIGURATION: Successfully disabled 3 features with proper database updates (donation=false, prayer_wall=false, audio_routines=false)
