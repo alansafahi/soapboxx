@@ -421,6 +421,7 @@ export interface IStorage {
   getPrayerRequests(churchId?: number): Promise<PrayerRequest[]>;
   getPrayerRequest(id: number): Promise<PrayerRequest | undefined>;
   createPrayerRequest(prayer: InsertPrayerRequest): Promise<PrayerRequest>;
+  updatePrayerRequestAttachment(prayerId: number, userId: string, attachmentUrl: string): Promise<void>;
   prayForRequest(response: InsertPrayerResponse): Promise<PrayerResponse>;
   getUserPrayerResponse(prayerRequestId: number, userId: string): Promise<PrayerResponse | undefined>;
   removePrayerResponse(prayerRequestId: number, userId: string): Promise<void>;
@@ -2820,6 +2821,7 @@ export class DatabaseStorage implements IStorage {
         authorId: prayerRequests.authorId,
         churchId: prayerRequests.churchId,
         prayerCount: prayerRequests.prayerCount,
+        attachmentUrl: prayerRequests.attachmentUrl,
         createdAt: prayerRequests.createdAt,
         updatedAt: prayerRequests.updatedAt,
         expiredAt: prayerRequests.expiredAt,
@@ -2864,6 +2866,27 @@ export class DatabaseStorage implements IStorage {
     }
     
     return newPrayer;
+  }
+
+  async updatePrayerRequestAttachment(prayerId: number, userId: string, attachmentUrl: string): Promise<void> {
+    // First verify the user has permission to update this prayer request
+    const [prayer] = await db
+      .select({ authorId: prayerRequests.authorId })
+      .from(prayerRequests)
+      .where(eq(prayerRequests.id, prayerId));
+    
+    if (!prayer || prayer.authorId !== userId) {
+      throw new Error('Unauthorized to update this prayer request');
+    }
+    
+    // Update the prayer request with the attachment URL
+    await db
+      .update(prayerRequests)
+      .set({ 
+        attachmentUrl: attachmentUrl,
+        updatedAt: new Date()
+      })
+      .where(eq(prayerRequests.id, prayerId));
   }
 
   async prayForRequest(response: InsertPrayerResponse): Promise<PrayerResponse> {

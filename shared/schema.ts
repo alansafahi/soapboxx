@@ -737,6 +737,7 @@ export const prayerRequests = pgTable("prayer_requests", {
   lastFollowUpAt: timestamp("last_follow_up_at"),
   isUrgent: boolean("is_urgent").default(false),
   tags: text("tags").array(),
+  attachmentUrl: text("attachment_url"), // Photo attachment URL (base64 or file path)
   // Data expiration privacy fields
   expiresAt: timestamp("expires_at"), // When content should be hidden for privacy
   expiredAt: timestamp("expired_at"), // When content was actually marked as expired (soft deletion)

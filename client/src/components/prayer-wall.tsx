@@ -771,6 +771,18 @@ export default function PrayerWall() {
                       {prayer.content}
                     </p>
                     
+                    {/* Display attached photo if present */}
+                    {prayer.attachmentUrl && (
+                      <div className="mt-4">
+                        <img 
+                          src={prayer.attachmentUrl} 
+                          alt="Prayer request attachment"
+                          className="rounded-lg max-w-full h-auto border border-gray-200 dark:border-gray-700"
+                          style={{ maxHeight: '300px', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+                    
                     {/* Action Buttons */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                       <div className="flex space-x-4">

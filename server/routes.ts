@@ -7333,13 +7333,14 @@ Return JSON with this exact structure:
       // Clean up uploaded file
       fs.unlinkSync(req.file.path);
       
-      // For now, return success with the base64 image data
-      // In a full implementation, you would store this in the prayer request record
+      // Save the photo to the prayer request
+      await storage.updatePrayerRequestAttachment(prayerId, userId, base64Image);
+      
       res.json({
         success: true,
         prayerId,
         photoUrl: base64Image,
-        message: 'Photo uploaded successfully'
+        message: 'Photo uploaded and attached to prayer request successfully'
       });
     } catch (error) {
       res.status(500).json({ message: 'Failed to upload photo' });

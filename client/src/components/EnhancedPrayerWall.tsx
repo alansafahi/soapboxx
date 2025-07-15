@@ -930,6 +930,18 @@ export default function EnhancedPrayerWall() {
                             </div>
                           )}
                         </div>
+                        
+                        {/* Display attached photo if present */}
+                        {prayer.attachmentUrl && (
+                          <div className="mt-4">
+                            <img 
+                              src={prayer.attachmentUrl} 
+                              alt="Prayer request attachment"
+                              className="rounded-lg max-w-full h-auto border border-gray-200 dark:border-gray-700"
+                              style={{ maxHeight: '300px', objectFit: 'contain' }}
+                            />
+                          </div>
+                        )}
 
                         {/* Rich Reactions */}
                         <div className="flex items-center justify-between pt-2 border-t dark:border-gray-700">
