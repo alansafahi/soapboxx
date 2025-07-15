@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 15, 2025: CHURCH FEATURE TOGGLE API ENDPOINTS COMPLETELY FIXED - Successfully resolved non-responsive admin feature toggles by fixing API endpoint mismatches and database table references
+  - API ENDPOINT MISMATCH RESOLVED: Updated frontend to use correct `/api/churches/{churchId}/features` and `/api/churches/features/{featureId}` endpoints
+  - BACKEND ROUTES CREATED: Added missing API routes matching frontend expectations for church feature management
+  - DATABASE METHOD INTEGRATION: Connected API endpoints to use `getChurchFeatureSettings` and `updateChurchFeatureSetting` methods
+  - MISSING FEATURE ADDED: Added `engagement_analytics` feature to admin_portal category in church_feature_settings table
+  - INTERFACE METHOD ADDED: Added `getChurchFeatureSettingById` method to storage interface for individual feature updates
+  - ADMIN TOGGLES OPERATIONAL: Communication Hub, Sermon Studio, and Engagement Analytics toggles now properly enable/disable features
 - July 15, 2025: CHURCH ADMIN EDIT/DELETE FUNCTIONALITY COMPLETELY IMPLEMENTED - Successfully added comprehensive church management system allowing church administrators to edit and delete churches they created
   - BACKEND CHURCH MANAGEMENT: Added deleteChurch and getUserCreatedChurches methods to storage interface with soft delete functionality
   - CHURCH ADMIN PERMISSIONS: Updated DELETE endpoint to allow church admins to delete their own churches alongside existing SoapBox Owner permissions

@@ -142,7 +142,7 @@ export function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManage
   const { data: features, isLoading } = useQuery({
     queryKey: ['church-features', churchId],
     queryFn: async () => {
-      const response = await fetch(`/api/church-features/${churchId}`, { credentials: 'include' });
+      const response = await fetch(`/api/churches/${churchId}/features`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch church features');
       return response.json() as ChurchFeature[];
     },
@@ -151,7 +151,7 @@ export function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManage
   // Update feature mutation
   const updateFeatureMutation = useMutation({
     mutationFn: async ({ featureId, isEnabled }: { featureId: number; isEnabled: boolean }) => {
-      const response = await fetch(`/api/church-features/${featureId}`, {
+      const response = await fetch(`/api/churches/features/${featureId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -6063,8 +6063,8 @@ Return JSON with this exact structure:
     }
   });
 
-  // Get church features for feature management
-  app.get('/api/church-features/:churchId', isAuthenticated, async (req: any, res) => {
+  // Get church features for feature management (correct endpoint)
+  app.get('/api/churches/:churchId/features', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
@@ -6102,8 +6102,8 @@ Return JSON with this exact structure:
     }
   });
 
-  // Update a specific church feature
-  app.put('/api/church-features/:featureId', isAuthenticated, async (req: any, res) => {
+  // Update a specific church feature (correct endpoint)
+  app.put('/api/churches/features/:featureId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
       const featureId = parseInt(req.params.featureId);
