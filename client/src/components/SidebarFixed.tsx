@@ -79,10 +79,12 @@ export default function SidebarFixed() {
     enabled: !!user,
   });
 
-  // Force update navigation when user churches change or feature filtering changes
+  // Update force counter when user context changes
   useEffect(() => {
-    setForceUpdate(prev => prev + 1);
-  }, [userChurches, user?.email]);
+    if (userChurches && user?.email) {
+      setForceUpdate(prev => prev + 1);
+    }
+  }, [userChurches?.length, user?.email]);
   
 
 
@@ -188,48 +190,8 @@ export default function SidebarFixed() {
     }
   ];
 
-  // Filter groups based on user role and church features - Force re-render with dependencies
-  const visibleGroups = useMemo(() => {
-    console.log('🔄 REBUILDING NAVIGATION - Force Update:', forceUpdate);
-    console.log('👤 User:', user?.email, 'Church Admin:', hasChurchAdminRole);
-    
-    return navigationGroups.map(group => {
-    const filteredItems = group.items.filter(item => {
-      // First check role-based access
-      if (item.roles) {
-        // If user data is still loading, show all items to prevent flickering
-        if (!user) return true;
-        
-        // Check if user has required global role OR church admin role
-        const hasGlobalRole = item.roles.includes(user.role || '');
-        const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
-        
-
-        
-        if (!hasGlobalRole && !hasChurchRole) return false;
-      }
-      
-      // Then check church feature settings - use proper feature key mapping
-      const featureKey = item.href.replace('/', '').replace('-demo', '');
-      const isEnabled = isFeatureEnabled(item.href);
-      console.log(`🎯 FINAL FILTER: ${item.label} (${item.href}) → ${isEnabled ? 'SHOW' : 'HIDE'}`);
-      return isEnabled;
-    });
-    
-    const finalGroup = {
-      ...group,
-      items: filteredItems
-    };
-    
-    console.log(`📊 Group "${group.label}": ${group.items.length} → ${filteredItems.length} items`);
-    return finalGroup;
-  }).filter(group => {
-    // Only show groups that have items after filtering
-    const hasItems = group.items.length > 0;
-    console.log(`✅ Group "${group.label}" included: ${hasItems} (${group.items.length} items)`);
-    return hasItems;
-  });
-  }, [user?.email, user?.role, hasChurchAdminRole, isFeatureEnabled, forceUpdate]);
+  // Use navigation groups directly - filtering happens at render time
+  const visibleGroups = navigationGroups;
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
@@ -332,6 +294,26 @@ export default function SidebarFixed() {
                     {group.items.map((item, itemIdx) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
+                      
+                      // DIRECT feature check at render time - bypasses all caching
+                      const shouldRender = (() => {
+                        // Check role-based access first
+                        if (item.roles) {
+                          if (!user) return true;
+                          const hasGlobalRole = item.roles.includes(user.role || '');
+                          const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
+                          if (!hasGlobalRole && !hasChurchRole) return false;
+                        }
+                        
+                        // Then check feature settings directly
+                        return isFeatureEnabled(item.href);
+                      })();
+                      
+                      // Return null for filtered items - they won't render
+                      if (!shouldRender) {
+                        return null;
+                      }
+                      
                       return (
                         <Link key={`${item.href}-${itemIdx}-${forceUpdate}`} href={item.href}>
                           <Button

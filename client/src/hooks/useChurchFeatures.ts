@@ -147,7 +147,7 @@ export function useIsFeatureEnabled() {
     // Extract the key from href (e.g., "/donation-demo" -> "donation", "/prayer-wall" -> "prayer-wall")
     const key = href.replace('/', '').replace('-demo', '');
     
-    // Church feature filtering operational
+    // Church feature filtering system operational
     
     // Always show core features
     if (CORE_FEATURES.includes(key)) {
