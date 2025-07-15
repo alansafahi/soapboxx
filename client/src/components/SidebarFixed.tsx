@@ -68,6 +68,14 @@ export default function SidebarFixed() {
   const [location] = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
   const [forceUpdate, setForceUpdate] = useState(0);
+  
+  // Force re-render every 2 seconds to overcome React caching issues
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setForceUpdate(prev => prev + 1);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -79,12 +87,8 @@ export default function SidebarFixed() {
     enabled: !!user,
   });
 
-  // Update force counter when user context changes
-  useEffect(() => {
-    if (userChurches && user?.email) {
-      setForceUpdate(prev => prev + 1);
-    }
-  }, [userChurches?.length, user?.email]);
+  // Remove problematic useEffect that causes infinite loops
+  // Feature filtering now happens directly at render time
   
 
 
@@ -272,8 +276,9 @@ export default function SidebarFixed() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-6">
         {!isCollapsed ? (
-          // Expanded Navigation - Filtered Groups
+          // Expanded Navigation - Filtered Groups  
           visibleGroups.map((group, idx) => {
+            console.log(`🔄 EXPANDED GROUP: ${group.label} with ${group.items.length} items, isCollapsed=${isCollapsed}`);
             // Ensure admin groups are always expanded for soapbox_owner users OR users with church admin roles
             const isExpanded = expandedGroups.has(group.label) || 
               (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
@@ -291,31 +296,29 @@ export default function SidebarFixed() {
                 
                 {isExpanded && (
                   <div className="space-y-1">
-                    {group.items.map((item, itemIdx) => {
+                    {group.items.filter((item) => {
+                      // Apply role-based filtering first  
+                      if (item.roles) {
+                        if (!user) return false;
+                        const hasGlobalRole = item.roles.includes(user.role || '');
+                        const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
+                        if (!hasGlobalRole && !hasChurchRole) return false;
+                      }
+                      
+                      // Apply direct church feature filtering to bypass React caching
+                      const featureEnabled = isFeatureEnabled(item.href);
+                      console.log(`🔍 EXPANDED FILTER CHECK: ${item.label} (${item.href}) - Enabled: ${featureEnabled}`);
+                      if (!featureEnabled) {
+                        console.log(`🚫 EXPANDED FILTERED OUT: ${item.label} (${item.href}) - Feature disabled`);
+                      }
+                      return featureEnabled;
+                    }).map((item, itemIdx) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
                       
-                      // DIRECT feature check at render time - bypasses all caching
-                      const shouldRender = (() => {
-                        // Check role-based access first
-                        if (item.roles) {
-                          if (!user) return true;
-                          const hasGlobalRole = item.roles.includes(user.role || '');
-                          const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
-                          if (!hasGlobalRole && !hasChurchRole) return false;
-                        }
-                        
-                        // Then check feature settings directly
-                        return isFeatureEnabled(item.href);
-                      })();
-                      
-                      // Return null for filtered items - they won't render
-                      if (!shouldRender) {
-                        return null;
-                      }
-                      
+                      console.log(`✅ EXPANDED RENDERING: ${item.label} (${item.href})`);
                       return (
-                        <Link key={`${item.href}-${itemIdx}-${forceUpdate}`} href={item.href}>
+                        <Link key={`expanded-${item.href}-${itemIdx}-${forceUpdate}-${Date.now()}`} href={item.href}>
                           <Button
                             variant={isActive ? "default" : "ghost"}
                             className={`w-full justify-start h-auto py-2 px-3 ${
@@ -341,9 +344,24 @@ export default function SidebarFixed() {
             );
           })
         ) : (
-          // Collapsed Navigation - Icons Only
+          // Collapsed Navigation - Icons Only with Feature Filtering
           <div className="space-y-2">
             {visibleGroups.flatMap(group => group.items).map((item) => {
+              // Apply same filtering logic as expanded view
+              if (item.roles) {
+                if (!user) return null;
+                const hasGlobalRole = item.roles.includes(user.role || '');
+                const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
+                if (!hasGlobalRole && !hasChurchRole) return null;
+              }
+              
+              // Apply church feature filtering with debug  
+              const featureEnabled = isFeatureEnabled(item.href);
+              if (!featureEnabled) {
+                console.log(`🚫 COLLAPSED FILTERED: ${item.label} (${item.href}) - Feature disabled`);
+                return null;
+              }
+              
               const Icon = item.icon;
               const isActive = location === item.href;
               return (
@@ -367,7 +385,7 @@ export default function SidebarFixed() {
                   </Button>
                 </Link>
               );
-            })}
+            }).filter(item => item !== null)}
           </div>
         )}
       </nav>
