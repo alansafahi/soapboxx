@@ -3,8 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { MessageCircle, Heart, Share2, ChevronDown, Loader2, Copy, Mail } from "lucide-react";
-import { FaFacebook, FaTwitter, FaWhatsapp } from "react-icons/fa";
+import { MessageCircle, Heart, Share2, ChevronDown, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
@@ -12,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
+import ShareDialog from "./ShareDialog";
 
 
 
@@ -112,68 +112,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     }
   });
 
-  // Share handler function
-  const handleShare = async (platform: string, post: Post) => {
-    const shareText = `Check out this post: ${post.content.substring(0, 100)}${post.content.length > 100 ? '...' : ''}`;
-    const shareUrl = `${window.location.origin}/home`;
-    
-    try {
-      switch (platform) {
-        case 'copy':
-          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
-          toast({
-            title: "Link copied!",
-            description: "The post link has been copied to your clipboard",
-          });
-          break;
-          
-        case 'facebook':
-          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
-          await navigator.clipboard.writeText(shareText);
-          toast({
-            title: "Opening Facebook",
-            description: "Text copied to clipboard - paste into your Facebook post",
-          });
-          break;
-          
-        case 'twitter':
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`, '_blank');
-          toast({
-            title: "Opening X (Twitter)",
-            description: "Share window opened in new tab",
-          });
-          break;
-          
-        case 'whatsapp':
-          window.open(`https://wa.me/?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`, '_blank');
-          toast({
-            title: "Opening WhatsApp",
-            description: "Share window opened in new tab",
-          });
-          break;
-          
-        case 'email':
-          const emailSubject = "Inspiring Post from SoapBox Super App";
-          const emailBody = `Hi,\n\nI wanted to share this inspiring post with you:\n\n"${shareText}"\n\nView the full post here: ${shareUrl}\n\nBlessings!`;
-          window.open(`mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`, '_self');
-          toast({
-            title: "Opening Email",
-            description: "Email composer opened",
-          });
-          break;
-          
-        default:
-          break;
-      }
-      setShareDialogOpen(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to share. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
+
 
   // Comment mutation
   const commentMutation = useMutation({
@@ -738,56 +677,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       </Dialog>
 
       {/* Share Dialog */}
-      <Dialog open={shareDialogOpen !== null} onOpenChange={() => setShareDialogOpen(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Share Post</DialogTitle>
-            <DialogDescription>Choose how you'd like to share this post</DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <Button
-              variant="outline"
-              onClick={() => shareDialogOpen && handleShare('copy', displayedPosts.find(p => p.id === shareDialogOpen)!)}
-              className="flex items-center justify-center space-x-2 h-12"
-            >
-              <Copy className="w-4 h-4" />
-              <span>Copy URL</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => shareDialogOpen && handleShare('facebook', displayedPosts.find(p => p.id === shareDialogOpen)!)}
-              className="flex items-center justify-center space-x-2 h-12"
-            >
-              <FaFacebook className="w-4 h-4 text-blue-600" />
-              <span>Facebook</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => shareDialogOpen && handleShare('twitter', displayedPosts.find(p => p.id === shareDialogOpen)!)}
-              className="flex items-center justify-center space-x-2 h-12"
-            >
-              <FaTwitter className="w-4 h-4 text-blue-400" />
-              <span>X (Twitter)</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => shareDialogOpen && handleShare('whatsapp', displayedPosts.find(p => p.id === shareDialogOpen)!)}
-              className="flex items-center justify-center space-x-2 h-12"
-            >
-              <FaWhatsapp className="w-4 h-4 text-green-500" />
-              <span>WhatsApp</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => shareDialogOpen && handleShare('email', displayedPosts.find(p => p.id === shareDialogOpen)!)}
-              className="flex items-center justify-center space-x-2 h-12 col-span-2"
-            >
-              <Mail className="w-4 h-4" />
-              <span>Email</span>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ShareDialog 
+        isOpen={shareDialogOpen !== null}
+        onClose={() => setShareDialogOpen(null)}
+        content={shareDialogOpen ? displayedPosts.find(p => p.id === shareDialogOpen)?.content || '' : ''}
+      />
       
       {/* Show More Button - Shows until infinite scroll is enabled */}
       {allPosts.length === 0 && posts.length > initialLimit && showMoreClicks === 0 && (

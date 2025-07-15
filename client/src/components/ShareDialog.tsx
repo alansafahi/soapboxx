@@ -1,51 +1,24 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Copy, Mail, MessageSquare, RotateCw } from 'lucide-react';
-import { FaFacebook, FaTwitter, FaWhatsapp } from 'react-icons/fa';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Copy, Mail, MessageSquare, X } from "lucide-react";
+import { FaFacebook, FaWhatsapp, FaInstagram, FaDiscord, FaSlack, FaYoutube, FaFacebookMessenger, FaSignal } from "react-icons/fa";
+import { useToast } from "@/hooks/use-toast";
 
 interface ShareDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  post?: any;
-  postId: number;
+  title?: string;
+  content: string;
+  url?: string;
 }
 
-export function ShareDialog({ isOpen, onClose, post, postId }: ShareDialogProps) {
+export default function ShareDialog({ isOpen, onClose, title = "Share Post", content, url }: ShareDialogProps) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Internal repost mutation
-  const repostMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest('POST', `/api/discussions/${postId}/share`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-      toast({
-        title: "Post shared!",
-        description: "The post has been shared to your feed",
-      });
-      onClose();
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to share post",
-        variant: "destructive"
-      });
-    }
-  });
+  
+  const shareUrl = url || `${window.location.origin}/home`;
+  const shareText = `Check out this post: ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}`;
 
   const handleShare = async (platform: string) => {
-    if (!post) return;
-    
-    const shareText = `Check out this inspiring post: ${post.content?.substring(0, 100)}${post.content?.length > 100 ? '...' : ''}`;
-    const shareUrl = `${window.location.origin}/home`;
-    
     try {
       switch (platform) {
         case 'copy':
@@ -81,6 +54,65 @@ export function ShareDialog({ isOpen, onClose, post, postId }: ShareDialogProps)
           });
           break;
           
+        case 'instagram':
+          // Instagram doesn't support direct sharing URLs, so we copy the content
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({
+            title: "Content copied!",
+            description: "Paste into Instagram - link copied to clipboard",
+          });
+          break;
+          
+        case 'discord':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({
+            title: "Content copied!",
+            description: "Paste into Discord - link copied to clipboard",
+          });
+          break;
+          
+        case 'slack':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({
+            title: "Content copied!",
+            description: "Paste into Slack - link copied to clipboard",
+          });
+          break;
+          
+        case 'signal':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({
+            title: "Content copied!",
+            description: "Paste into Signal - link copied to clipboard",
+          });
+          break;
+          
+        case 'youtube':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({
+            title: "Content copied!",
+            description: "Paste into YouTube comments - link copied to clipboard",
+          });
+          break;
+          
+        case 'messenger':
+          window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=your_app_id`, '_blank');
+          await navigator.clipboard.writeText(shareText);
+          toast({
+            title: "Opening Messenger",
+            description: "Text copied to clipboard",
+          });
+          break;
+          
+        case 'sms':
+          const smsBody = `${shareText}\n\n${shareUrl}`;
+          window.open(`sms:?body=${encodeURIComponent(smsBody)}`, '_self');
+          toast({
+            title: "Opening SMS",
+            description: "SMS composer opened",
+          });
+          break;
+          
         case 'email':
           const emailSubject = "Inspiring Post from SoapBox Super App";
           const emailBody = `Hi,\n\nI wanted to share this inspiring post with you:\n\n"${shareText}"\n\nView the full post here: ${shareUrl}\n\nBlessings!`;
@@ -91,22 +123,10 @@ export function ShareDialog({ isOpen, onClose, post, postId }: ShareDialogProps)
           });
           break;
           
-        case 'sms':
-          const smsText = `${shareText}\n\n${shareUrl}`;
-          window.open(`sms:?body=${encodeURIComponent(smsText)}`, '_self');
-          toast({
-            title: "Opening SMS",
-            description: "Text message composer opened",
-          });
-          break;
-          
-        case 'repost':
-          repostMutation.mutate();
-          break;
-          
         default:
           break;
       }
+      onClose();
     } catch (error) {
       toast({
         title: "Error",
@@ -118,85 +138,121 @@ export function ShareDialog({ isOpen, onClose, post, postId }: ShareDialogProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Share This Post</DialogTitle>
-          <DialogDescription>
-            Spread inspiration and connect with others
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>Choose how you'd like to share this content</DialogDescription>
         </DialogHeader>
-
-        <div className="grid grid-cols-2 gap-3 py-4">
-          {/* Copy Link */}
+        
+        <div className="grid grid-cols-3 gap-3 py-4">
+          {/* Copy URL - Most used */}
           <Button
+            variant="outline"
             onClick={() => handleShare('copy')}
-            variant="outline"
-            className="flex flex-col items-center space-y-2 h-auto p-4 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="flex flex-col items-center justify-center h-16 space-y-1"
           >
-            <Copy className="w-6 h-6 text-gray-600" />
-            <span className="text-sm font-medium">Copy Link</span>
+            <Copy className="w-5 h-5" />
+            <span className="text-xs">Copy URL</span>
           </Button>
 
-          {/* Facebook */}
+          {/* Social Media Platforms */}
           <Button
+            variant="outline"
             onClick={() => handleShare('facebook')}
-            variant="outline"
-            className="flex flex-col items-center space-y-2 h-auto p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            className="flex flex-col items-center justify-center h-16 space-y-1"
           >
-            <FaFacebook className="w-6 h-6 text-blue-600" />
-            <span className="text-sm font-medium">Facebook</span>
+            <FaFacebook className="w-5 h-5 text-blue-600" />
+            <span className="text-xs">Facebook</span>
           </Button>
-
-          {/* X (Twitter) */}
+          
           <Button
+            variant="outline"
             onClick={() => handleShare('twitter')}
-            variant="outline"
-            className="flex flex-col items-center space-y-2 h-auto p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            className="flex flex-col items-center justify-center h-16 space-y-1"
           >
-            <FaTwitter className="w-6 h-6 text-blue-400" />
-            <span className="text-sm font-medium">X (Twitter)</span>
+            <X className="w-5 h-5 text-black dark:text-white" />
+            <span className="text-xs">X (Twitter)</span>
           </Button>
-
-          {/* WhatsApp */}
+          
           <Button
+            variant="outline"
             onClick={() => handleShare('whatsapp')}
-            variant="outline"
-            className="flex flex-col items-center space-y-2 h-auto p-4 hover:bg-green-50 dark:hover:bg-green-900/20"
+            className="flex flex-col items-center justify-center h-16 space-y-1"
           >
-            <FaWhatsapp className="w-6 h-6 text-green-500" />
-            <span className="text-sm font-medium">WhatsApp</span>
+            <FaWhatsapp className="w-5 h-5 text-green-500" />
+            <span className="text-xs">WhatsApp</span>
           </Button>
-
-          {/* Email */}
+          
           <Button
-            onClick={() => handleShare('email')}
             variant="outline"
-            className="flex flex-col items-center space-y-2 h-auto p-4 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+            onClick={() => handleShare('instagram')}
+            className="flex flex-col items-center justify-center h-16 space-y-1"
           >
-            <Mail className="w-6 h-6 text-purple-600" />
-            <span className="text-sm font-medium">Email</span>
+            <FaInstagram className="w-5 h-5 text-pink-500" />
+            <span className="text-xs">Instagram</span>
           </Button>
-
-          {/* SMS */}
+          
           <Button
+            variant="outline"
+            onClick={() => handleShare('messenger')}
+            className="flex flex-col items-center justify-center h-16 space-y-1"
+          >
+            <FaFacebookMessenger className="w-5 h-5 text-blue-500" />
+            <span className="text-xs">Messenger</span>
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={() => handleShare('discord')}
+            className="flex flex-col items-center justify-center h-16 space-y-1"
+          >
+            <FaDiscord className="w-5 h-5 text-indigo-500" />
+            <span className="text-xs">Discord</span>
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={() => handleShare('slack')}
+            className="flex flex-col items-center justify-center h-16 space-y-1"
+          >
+            <FaSlack className="w-5 h-5 text-purple-500" />
+            <span className="text-xs">Slack</span>
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={() => handleShare('signal')}
+            className="flex flex-col items-center justify-center h-16 space-y-1"
+          >
+            <FaSignal className="w-5 h-5 text-blue-500" />
+            <span className="text-xs">Signal</span>
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={() => handleShare('youtube')}
+            className="flex flex-col items-center justify-center h-16 space-y-1"
+          >
+            <FaYoutube className="w-5 h-5 text-red-500" />
+            <span className="text-xs">YouTube</span>
+          </Button>
+          
+          <Button
+            variant="outline"
             onClick={() => handleShare('sms')}
-            variant="outline"
-            className="flex flex-col items-center space-y-2 h-auto p-4 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+            className="flex flex-col items-center justify-center h-16 space-y-1"
           >
-            <MessageSquare className="w-6 h-6 text-orange-600" />
-            <span className="text-sm font-medium">SMS</span>
+            <MessageSquare className="w-5 h-5 text-green-600" />
+            <span className="text-xs">SMS</span>
           </Button>
-        </div>
-
-        {/* Internal Repost */}
-        <div className="border-t pt-4">
+          
           <Button
-            onClick={() => handleShare('repost')}
-            disabled={repostMutation.isPending}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+            variant="outline"
+            onClick={() => handleShare('email')}
+            className="flex flex-col items-center justify-center h-16 space-y-1"
           >
-            <RotateCw className="w-4 h-4 mr-2" />
-            {repostMutation.isPending ? "Sharing..." : "Repost to Your Feed"}
+            <Mail className="w-5 h-5 text-gray-600" />
+            <span className="text-xs">Email</span>
           </Button>
         </div>
       </DialogContent>
