@@ -1486,17 +1486,8 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 </div>
                 
                 {/* Delete Button - Only show for post author */}
-                {user && post.author && (() => {
-                  const isAuthor = String(user.id) === String(post.author.id) || user.email === post.author.email;
-                  console.log(`Delete button check for post ${post.id}:`, {
-                    userId: user.id,
-                    userEmail: user.email,
-                    authorId: post.author.id,
-                    authorEmail: post.author.email,
-                    isAuthor
-                  });
-                  return isAuthor;
-                })() && (
+                {user && post.author && (
+                  (String(user.id) === String(post.author.id) || user.email === post.author.email) && (
                     <Button 
                       variant="ghost" 
                       size="sm" 
