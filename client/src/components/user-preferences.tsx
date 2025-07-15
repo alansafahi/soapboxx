@@ -672,7 +672,7 @@ export default function UserPreferences() {
             <Card>
               <CardHeader>
                 <CardTitle>{t('ai.title')}</CardTitle>
-<parameter name="old_str">                <CardDescription>
+                <CardDescription>
                   {t('ai.description')}
                 </CardDescription>
               </CardHeader>
