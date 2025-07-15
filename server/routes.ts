@@ -11117,43 +11117,15 @@ Please provide suggestions for the missing or incomplete sections.`
       // Get all church members' streak information
       const churchMembers = await storage.getChurchMembers(churchId);
       
-      // Calculate streaks for each member (simplified - using check-in activity)
+      // Calculate streaks for each member using the same logic as getUserStats
       const userStreaks = [];
       
       for (const member of churchMembers) {
         try {
-          // Get recent check-ins for streak calculation
-          const recentCheckIns = await storage.getUserCheckIns(member.userId, 30); // Last 30 days
-          
-          let currentStreak = 0;
-          let isActive = false;
-          
-          if (recentCheckIns && recentCheckIns.length > 0) {
-            // Sort by date descending
-            const sortedCheckIns = recentCheckIns.sort((a: any, b: any) => 
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-            
-            // Calculate consecutive days
-            const today = new Date();
-            let checkDate = new Date(today);
-            
-            for (const checkIn of sortedCheckIns) {
-              const checkInDate = new Date(checkIn.createdAt);
-              checkInDate.setHours(0, 0, 0, 0);
-              checkDate.setHours(0, 0, 0, 0);
-              
-              const daysDiff = Math.floor((checkDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-              
-              if (daysDiff === currentStreak) {
-                currentStreak++;
-                checkDate.setDate(checkDate.getDate() - 1);
-                isActive = currentStreak >= 3; // 3+ day streak is considered active
-              } else {
-                break;
-              }
-            }
-          }
+          // Use getUserStats to get consistent streak calculation based on user_activities
+          const stats = await storage.getUserStats(member.userId);
+          const currentStreak = stats.currentStreak || 0;
+          const isActive = currentStreak >= 3; // 3+ day streak is considered active
           
           userStreaks.push({
             userId: member.userId,
@@ -11162,6 +11134,11 @@ Please provide suggestions for the missing or incomplete sections.`
           });
         } catch (error) {
           // If we can't calculate for this user, skip them
+          userStreaks.push({
+            userId: member.userId,
+            currentStreak: 0,
+            isActive: false
+          });
           continue;
         }
       }

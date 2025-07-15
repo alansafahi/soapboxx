@@ -3294,28 +3294,31 @@ export class DatabaseStorage implements IStorage {
 
     let currentStreak = 0;
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of day
+    
     const uniqueDays = new Set();
     
-    // Group activities by day and calculate streak
+    // Group activities by day (using only date part, not time)
     for (const activity of recentActivities) {
       if (activity.createdAt) {
         const activityDate = new Date(activity.createdAt.toString());
-        const dayKey = activityDate.toDateString();
+        activityDate.setHours(0, 0, 0, 0); // Normalize to start of day
+        const dayKey = activityDate.getTime(); // Use timestamp for consistent comparison
         uniqueDays.add(dayKey);
       }
     }
 
-    const sortedDays = Array.from(uniqueDays).sort((a, b) => new Date(b as string).getTime() - new Date(a as string).getTime());
+    // Convert to sorted array of timestamps (most recent first)
+    const sortedDays = Array.from(uniqueDays).sort((a, b) => b - a);
     
+    // Calculate consecutive days starting from today working backwards
     for (let i = 0; i < sortedDays.length; i++) {
-      const dayDate = new Date(sortedDays[i] as string);
-      const expectedDate = new Date(today);
-      expectedDate.setDate(today.getDate() - i);
+      const expectedTimestamp = today.getTime() - (i * 24 * 60 * 60 * 1000); // i days ago
       
-      if (dayDate.toDateString() === expectedDate.toDateString()) {
+      if (sortedDays[i] === expectedTimestamp) {
         currentStreak++;
       } else {
-        break;
+        break; // Break streak if we find a gap
       }
     }
 
