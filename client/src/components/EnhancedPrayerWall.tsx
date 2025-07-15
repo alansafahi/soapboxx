@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from '../lib/queryClient';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
@@ -781,9 +782,12 @@ export default function EnhancedPrayerWall() {
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                              {prayer.isAnonymous ? '?' : getInitials(authorName)}
-                            </div>
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={prayer.isAnonymous ? undefined : prayer.authorProfileImageUrl} />
+                              <AvatarFallback className="bg-blue-500 text-white">
+                                {prayer.isAnonymous ? '?' : getInitials(authorName)}
+                              </AvatarFallback>
+                            </Avatar>
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="font-semibold">
@@ -1006,8 +1010,10 @@ export default function EnhancedPrayerWall() {
                               </span>
                             </div>
                             <div className="text-sm text-blue-700 dark:text-blue-300">
-                              {/* Mock data for demo - would be replaced with actual praying users */}
-                              Sarah M., Pastor Tom, Maria G., +{Math.max(0, currentReactions.praying - 3)} others
+                              {currentReactions.praying > 0 
+                                ? `${currentReactions.praying} people are praying for this request` 
+                                : "Be the first to pray for this request"
+                              }
                             </div>
                           </motion.div>
                         )}
