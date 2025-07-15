@@ -201,7 +201,7 @@ export default function SidebarFixed() {
       
       // Then check church feature settings - use proper feature key mapping
       const featureKey = item.href.replace('/', '').replace('-demo', '');
-      return isFeatureEnabled(featureKey);
+      return isFeatureEnabled(item.href);
     });
     
     const finalGroup = {

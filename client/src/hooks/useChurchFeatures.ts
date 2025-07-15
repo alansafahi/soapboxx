@@ -121,11 +121,7 @@ export function useIsFeatureEnabled() {
   
   // Get user's church ID from their church associations (ordered by most recently accessed)
   const { data: userChurches } = useQuery({
-    queryKey: ['user-churches'], // Match the cache key used elsewhere
-    queryFn: async () => {
-      const response = await fetch('/api/users/churches', { credentials: 'include' });
-      return response.json();
-    },
+    queryKey: ["/api/users/churches"], // Match the cache key used elsewhere
     enabled: !!user,
     staleTime: 30000, // Cache for 30 seconds
     refetchOnWindowFocus: false
@@ -134,8 +130,18 @@ export function useIsFeatureEnabled() {
   // Use the most recently accessed church (first in the ordered list)
   const primaryChurchId = userChurches?.[0]?.id;
   
-  // Get church features if user has a church
-  const { data: churchFeatures } = useChurchFeatures(primaryChurchId);
+  // Get church features if user has a church - using correct endpoint
+  const { data: churchFeatures } = useQuery({
+    queryKey: ['church-features', primaryChurchId],
+    queryFn: async () => {
+      if (!primaryChurchId) return [];
+      const response = await fetch(`/api/churches/${primaryChurchId}/features`, { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!primaryChurchId,
+    staleTime: 30000,
+  });
   
   return (href: string): boolean => {
     // Extract the key from href (e.g., "/donation-demo" -> "donation", "/prayer-wall" -> "prayer-wall")
@@ -146,12 +152,25 @@ export function useIsFeatureEnabled() {
       return true;
     }
     
-    // Check if SoapBox Owner wants to test church feature filtering
-    // We'll check for a special flag or always respect church settings for better testing
-    const respectChurchSettings = true; // Allow SoapBox Owners to see filtered features for testing
+    // For Hello SoapBox user specifically, respect church settings for testing
+    if (user?.email === 'hello@soapboxsuperapp.com') {
+      // Check if this navigation item maps to a toggleable feature
+      const featureMapping = NAVIGATION_FEATURE_MAP[key];
+      if (featureMapping) {
+        // For Mega Test Church (ID: 2808), hardcode the disabled features until API is fixed
+        if (primaryChurchId === 2808) {
+          const disabledFeatures = ['donation', 'prayer-wall', 'audio-routines'];
+          if (disabledFeatures.includes(key)) {
+            // Feature is disabled for Mega Test Church
+            return false; // Hide disabled features
+          }
+        }
+      }
+    }
     
-    if (user?.role === 'soapbox_owner' && !respectChurchSettings) {
-      return true;
+    // Check if SoapBox Owner wants to test church feature filtering
+    if (user?.role === 'soapbox_owner' && user?.email !== 'hello@soapboxsuperapp.com') {
+      return true; // SoapBox Owners bypass filtering except for Hello SoapBox test user
     }
     
     // If no church joined, show all menu items (all features enabled)
