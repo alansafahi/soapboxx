@@ -331,6 +331,7 @@ export interface IStorage {
   getChurchByAdminEmail(email: string): Promise<Church | undefined>;
   createChurch(church: InsertChurch): Promise<Church>;
   updateChurch(id: number, updates: Partial<Church>): Promise<Church>;
+  deleteChurch(id: number): Promise<void>;
   getUserCreatedChurches(userId: string): Promise<Church[]>;
   searchChurches(params: { denomination?: string; location?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]>;
   getChurchDenominations(): Promise<string[]>;
@@ -1706,6 +1707,51 @@ export class DatabaseStorage implements IStorage {
       .where(eq(churches.id, id))
       .returning();
     return updatedChurch;
+  }
+
+  async deleteChurch(id: number): Promise<void> {
+    // Soft delete by marking as inactive
+    await db
+      .update(churches)
+      .set({ 
+        isActive: false,
+        updatedAt: new Date()
+      })
+      .where(eq(churches.id, id));
+  }
+
+  async getUserCreatedChurches(userId: string): Promise<Church[]> {
+    return await db
+      .select({
+        id: churches.id,
+        name: churches.name,
+        denomination: churches.denomination,
+        address: churches.address,
+        city: churches.city,
+        state: churches.state,
+        country: churches.country,
+        zipCode: churches.zipCode,
+        phone: churches.phone,
+        email: churches.email,
+        website: churches.website,
+        description: churches.description,
+        imageUrl: churches.imageUrl,
+        capacity: churches.capacity,
+        status: churches.status,
+        isActive: churches.isActive,
+        createdAt: churches.createdAt,
+        updatedAt: churches.updatedAt,
+        adminEmail: churches.adminEmail,
+      })
+      .from(churches)
+      .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.role, 'church_admin'),
+        eq(churches.isActive, true),
+        eq(userChurches.isActive, true)
+      ))
+      .orderBy(desc(churches.createdAt));
   }
 
   async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {

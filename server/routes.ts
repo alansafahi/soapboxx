@@ -5879,12 +5879,6 @@ Return JSON with this exact structure:
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      // Check if user is SoapBox Owner
-      const user = await storage.getUser(userId);
-      if (!user || user.role !== 'soapbox_owner') {
-        return res.status(403).json({ error: 'Only SoapBox Owners can delete churches' });
-      }
-
       if (!churchId || isNaN(churchId)) {
         return res.status(400).json({ error: 'Valid church ID required' });
       }
@@ -5895,12 +5889,24 @@ Return JSON with this exact structure:
         return res.status(404).json({ error: 'Church not found' });
       }
 
-      // Delete church functionality
-      // await storage.deleteChurch(churchId);
+      const user = await storage.getUser(userId);
+      const userChurchRole = await storage.getUserChurchRole(userId, churchId);
+      
+      // Check if user has permission to delete church
+      const canDelete = user?.role === 'soapbox_owner' || 
+                       userChurchRole?.role === 'church_admin' ||
+                       userChurchRole?.role === 'owner';
+
+      if (!canDelete) {
+        return res.status(403).json({ error: 'Insufficient permissions to delete church' });
+      }
+
+      // Soft delete church
+      await storage.deleteChurch(churchId);
       
       res.json({ 
         success: true, 
-        message: `Church "${church.name}" deletion will be implemented`,
+        message: `Church "${church.name}" has been successfully deleted`,
         churchId 
       });
     } catch (error) {
@@ -5994,6 +6000,22 @@ Return JSON with this exact structure:
     } catch (error) {
       // Error getting user church role - silent error handling
       res.status(500).json({ error: 'Failed to get user role' });
+    }
+  });
+
+  // Get churches created by user (church admin)
+  app.get('/api/users/created-churches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const churches = await storage.getUserCreatedChurches(userId);
+      res.json(churches);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get created churches' });
     }
   });
 
