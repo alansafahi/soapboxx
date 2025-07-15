@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "../contexts/LanguageContext";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
@@ -50,6 +51,7 @@ interface CommentDialogProps {
 function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
   const [commentText, setCommentText] = useState("");
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Fetch comments for this SOAP post
   const { data: comments = [] } = useQuery({
@@ -108,7 +110,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
           {comments.length === 0 ? (
             <div className="text-center py-8">
               <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
+              <p className="text-gray-600">{t('comments.noCommentsYet')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -141,7 +143,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
         <div className="border-t pt-4">
           <div className="space-y-3">
             <Textarea
-              placeholder="Share your thoughts..."
+              placeholder={t('comments.shareThoughts')}
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               className="min-h-[80px] resize-none"
@@ -151,7 +153,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
                 variant="outline"
                 onClick={onClose}
               >
-                Cancel
+{t('buttons.cancel')}
               </Button>
               <Button
                 onClick={() => {
@@ -163,7 +165,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
                 }}
                 disabled={!commentText.trim() || commentMutation.isPending}
               >
-                {commentMutation.isPending ? "Posting..." : "Post Comment"}
+{commentMutation.isPending ? t('buttons.posting') : t('buttons.postComment')}
               </Button>
             </div>
           </div>
@@ -182,6 +184,7 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Fetch comments for this SOAP post to show inline
   const { data: inlineComments = [] } = useQuery({
@@ -542,7 +545,7 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
                   onClick={() => setCommentDialogOpen(true)}
                   className="text-sm text-purple-600 hover:text-purple-800 font-medium"
                 >
-                  View all {inlineComments.length} comments
+{t('comments.viewAllCount').replace('{count}', inlineComments.length.toString())}
                 </button>
               )}
             </div>

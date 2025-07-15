@@ -86,7 +86,7 @@ export default function RecentCheckInsStrip() {
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t('posts.recentCheckIns')}</h3>
         <div className="text-center py-4">
-          <p className="text-gray-500 dark:text-gray-400 text-sm">No recent check-ins to show</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">{t('posts.noRecentCheckIns')}</p>
         </div>
       </div>
     );

@@ -504,7 +504,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                             onClick={() => setCommentDialogOpen(post.id)}
                             className="text-sm text-purple-600 hover:text-purple-800 font-medium"
                           >
-                            View all {allPostComments[post.id].length} comments
+{t('comments.viewAllCount').replace('{count}', allPostComments[post.id].length.toString())}
                           </button>
                         )}
                       </div>
