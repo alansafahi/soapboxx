@@ -4,8 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, Shield, Clock, Info } from "lucide-react";
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
@@ -85,7 +84,7 @@ export default function ExpirationSettings({
         setCustomDate(initialExpiresAt);
       }
     }
-  }, [initialExpiresAt]);
+  }, []);
 
   const handleEnableChange = (enabled: boolean) => {
     setIsEnabled(enabled);
@@ -154,25 +153,25 @@ export default function ExpirationSettings({
         {/* Enable/Disable Toggle */}
         <div 
           className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-muted/50 transition-colors"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleEnableChange(!isEnabled);
-          }}
+          onClick={() => handleEnableChange(!isEnabled)}
         >
-          <Checkbox
-            id="enable-expiration"
-            checked={isEnabled}
-            onCheckedChange={() => {}} // Disabled to prevent conflicts
-            className="cursor-pointer pointer-events-none"
+          <div 
+            className={`h-4 w-4 border rounded cursor-pointer flex items-center justify-center transition-colors ${
+              isEnabled 
+                ? 'bg-primary border-primary text-primary-foreground' 
+                : 'border-input bg-background'
+            }`}
             data-testid="privacy-checkbox"
-          />
-          <Label 
-            htmlFor="enable-expiration" 
-            className="text-sm font-medium cursor-pointer select-none pointer-events-none"
           >
+            {isEnabled && (
+              <svg className="h-3 w-3 fill-current" viewBox="0 0 20 20">
+                <path d="M8.294 16.998c-.435 0-.847-.203-1.111-.553L3.61 11.724a1.392 1.392 0 0 1 .27-1.951 1.392 1.392 0 0 1 1.953.27l2.351 3.104 5.911-9.492a1.396 1.396 0 0 1 1.964-.328 1.393 1.393 0 0 1 .328 1.964l-6.32 10.15a1.396 1.396 0 0 1-1.125.557h-.038z"/>
+              </svg>
+            )}
+          </div>
+          <span className="text-sm font-medium cursor-pointer select-none">
             Enable content expiration
-          </Label>
+          </span>
         </div>
 
         {isEnabled && (
