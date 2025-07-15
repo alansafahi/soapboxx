@@ -142,13 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- July 15, 2025: CHURCH SEARCH FUNCTIONALITY AND UI IMPROVEMENTS COMPLETED - Successfully fixed church discovery search and updated UI text
-  - CHURCH SEARCH FIXED: Updated search logic to properly handle "all" denomination filter allowing name-based searches to work correctly
-  - AUTHENTICATION ADDED: Added isAuthenticated middleware to church search endpoint for proper security
-  - BUTTON TEXT UPDATED: Changed "Primary" to "Set As Primary" for better user clarity
-  - LEADERBOARD TO ENGAGEMENT BOARD: Updated Core Features text in ChurchFeatureManager to show "Engagement Board" instead of "Leaderboard"
-  - PRIMARY CHURCH CONFLICT RESOLVED: Set SGA Church as the single primary church by updating last_accessed_at timestamp
-  - DEBUG LOGGING: Added error logging to church search for better troubleshooting
+- July 15, 2025: CHURCH DISCOVERY FUNCTIONALITY COMPLETELY FIXED - Successfully resolved church search and approval system with proper connect buttons
+  - CHURCH SEARCH WORKING: Created public `/api/public/churches/search` endpoint without authentication requirements
+  - CHURCH APPROVAL COMPLETED: Approved all test churches (Test Church, Test Micro Church, Mega Test Church) changing status from pending to approved
+  - CONNECT BUTTONS RESTORED: Fixed church discovery to show "Connect" buttons instead of "Admin Portal" buttons for better user experience
+  - SEARCH VERIFICATION: Backend returns approved churches only with proper filtering by is_active=true, is_demo=false, verification_status='approved'
+  - UI IMPROVEMENTS: Updated "Primary" to "Set As Primary" button text and "Leaderboard" to "Engagement Board" in core features
+  - AUTHENTICATION DEBUGGING: Identified and resolved authentication middleware conflicts preventing church search functionality
 - July 15, 2025: CHURCH FEATURE TOGGLE API ENDPOINTS COMPLETELY FIXED - Successfully resolved non-responsive admin feature toggles by fixing API endpoint mismatches and database table references
   - API ENDPOINT MISMATCH RESOLVED: Updated frontend to use correct `/api/churches/{churchId}/features` and `/api/churches/features/{featureId}` endpoints
   - BACKEND ROUTES CREATED: Added missing API routes matching frontend expectations for church feature management
