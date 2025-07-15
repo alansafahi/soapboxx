@@ -51,6 +51,13 @@ export const CORE_TRANSLATION_KEYS = [
   // Home page
   'home.dailySpiritualRhythm', 'home.latestPosts', 'home.topCommunityMembers', 'home.upcomingEvents',
   
+  // Page titles
+  'pages.messages', 'pages.conversations', 'pages.connectWithFaith',
+  
+  // Messages system
+  'messages.searchConversations', 'messages.title', 'messages.conversations', 
+  'messages.searchPlaceholder', 'messages.newMessage',
+  
   // Events
   'events.upcomingEvents', 'events.viewAllEvents', 'events.createEvent',
   
