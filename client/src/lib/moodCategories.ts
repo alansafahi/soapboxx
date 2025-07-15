@@ -1,31 +1,32 @@
 // Shared mood categories for both Check-In and SOAP systems
-export const moodCategories = [
+// Note: Labels use translation keys, actual translations are provided via useLanguage hook
+export const getMoodCategories = (t: (key: string) => string) => [
   {
     title: "Emotional & Spiritual Support",
     icon: "💙",
     moods: [
-      { id: "anxious", label: "Anxious", icon: "😰", subtitle: "peace, comfort" },
-      { id: "depressed", label: "Depressed", icon: "😞", subtitle: "hope, light" },
-      { id: "lonely", label: "Lonely", icon: "😔", subtitle: "fellowship, connection" },
-      { id: "grieving", label: "Grieving", icon: "💔", subtitle: "comfort, healing" },
-      { id: "fearful", label: "Fearful", icon: "😨", subtitle: "courage, protection" },
-      { id: "overwhelmed", label: "Overwhelmed", icon: "😵", subtitle: "rest, peace" },
-      { id: "doubtful", label: "Doubtful", icon: "🤔", subtitle: "faith, assurance" },
-      { id: "angry", label: "Angry", icon: "😠", subtitle: "patience, forgiveness" },
+      { id: "anxious", label: t('moods.anxious'), icon: "😰", subtitle: "peace, comfort" },
+      { id: "depressed", label: t('moods.depressed'), icon: "😞", subtitle: "hope, light" },
+      { id: "lonely", label: t('moods.lonely'), icon: "😔", subtitle: "fellowship, connection" },
+      { id: "grieving", label: t('moods.grieving'), icon: "💔", subtitle: "comfort, healing" },
+      { id: "fearful", label: t('moods.fearful'), icon: "😨", subtitle: "courage, protection" },
+      { id: "overwhelmed", label: t('moods.overwhelmed'), icon: "😵", subtitle: "rest, peace" },
+      { id: "doubtful", label: t('moods.doubtful'), icon: "🤔", subtitle: "faith, assurance" },
+      { id: "angry", label: t('moods.angry'), icon: "😠", subtitle: "patience, forgiveness" },
     ]
   },
   {
     title: "Growth & Transformation",
     icon: "🌱",
     moods: [
-      { id: "seeking", label: "Seeking Direction", icon: "🧭", subtitle: "guidance, wisdom" },
-      { id: "repentant", label: "Repentant", icon: "🙏", subtitle: "forgiveness, renewal" },
-      { id: "motivated", label: "Motivated", icon: "🔥", subtitle: "purpose, strength" },
-      { id: "curious", label: "Curious", icon: "🤓", subtitle: "knowledge, understanding" },
-      { id: "determined", label: "Determined", icon: "💪", subtitle: "perseverance, victory" },
-      { id: "reflective", label: "Reflective", icon: "🤲", subtitle: "wisdom, insight" },
-      { id: "inspired", label: "Inspired", icon: "✨", subtitle: "creativity, vision" },
-      { id: "focused", label: "Focused", icon: "🎯", subtitle: "clarity, purpose" },
+      { id: "seeking", label: t('moods.seeking'), icon: "🧭", subtitle: "guidance, wisdom" },
+      { id: "repentant", label: t('moods.repentant'), icon: "🙏", subtitle: "forgiveness, renewal" },
+      { id: "motivated", label: t('moods.motivated'), icon: "🔥", subtitle: "purpose, strength" },
+      { id: "curious", label: t('moods.curious'), icon: "🤓", subtitle: "knowledge, understanding" },
+      { id: "determined", label: t('moods.determined'), icon: "💪", subtitle: "perseverance, victory" },
+      { id: "reflective", label: t('moods.reflective'), icon: "🤲", subtitle: "wisdom, insight" },
+      { id: "inspired", label: t('moods.inspired'), icon: "✨", subtitle: "creativity, vision" },
+      { id: "focused", label: t('moods.focused'), icon: "🎯", subtitle: "clarity, purpose" },
     ]
   },
   {
@@ -46,22 +47,30 @@ export const moodCategories = [
     title: "Faith & Worship",
     icon: "⛪",
     moods: [
-      { id: "grateful", label: "Grateful", icon: "🙌", subtitle: "thanksgiving, praise" },
-      { id: "peaceful", label: "Peaceful", icon: "🕊️", subtitle: "rest, serenity" },
-      { id: "joyful", label: "Joyful", icon: "😊", subtitle: "celebration, praise" },
-      { id: "blessed", label: "Blessed", icon: "😇", subtitle: "gratitude, testimony" },
-      { id: "prayerful", label: "Prayerful", icon: "🙏", subtitle: "communion, intercession" },
-      { id: "worshipful", label: "Worshipful", icon: "🎵", subtitle: "adoration, praise" },
-      { id: "hopeful", label: "Hopeful", icon: "🌅", subtitle: "faith, expectation" },
-      { id: "content", label: "Content", icon: "😌", subtitle: "satisfaction, peace" },
+      { id: "grateful", label: t('moods.grateful'), icon: "🙌", subtitle: "thanksgiving, praise" },
+      { id: "peaceful", label: t('moods.peaceful'), icon: "🕊️", subtitle: "rest, serenity" },
+      { id: "joyful", label: t('moods.joyful'), icon: "😊", subtitle: "celebration, praise" },
+      { id: "blessed", label: t('moods.blessed'), icon: "😇", subtitle: "gratitude, testimony" },
+      { id: "prayerful", label: t('moods.praying'), icon: "🙏", subtitle: "communion, intercession" },
+      { id: "worshipful", label: t('moods.worshipful'), icon: "🎵", subtitle: "adoration, praise" },
+      { id: "hopeful", label: t('moods.hopeful'), icon: "🌅", subtitle: "faith, expectation" },
+      { id: "content", label: t('moods.content'), icon: "😌", subtitle: "satisfaction, peace" },
     ]
   }
 ];
 
+// Legacy export for backward compatibility - components should update to use getMoodCategories(t) 
+export const moodCategories = getMoodCategories((key: string) => key);
+
 // Flatten all moods for easy lookup
-export const allMoods = moodCategories.flatMap(category => 
-  category.moods.map(mood => ({ ...mood, category: category.title }))
-);
+export const getAllMoods = (t: (key: string) => string) => {
+  return getMoodCategories(t).flatMap(category => 
+    category.moods.map(mood => ({ ...mood, category: category.title }))
+  );
+};
+
+// Legacy backward compatibility
+export const allMoods = getAllMoods((key: string) => key);
 
 // Get mood by ID
 export const getMoodById = (id: string) => {

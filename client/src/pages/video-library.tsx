@@ -582,8 +582,8 @@ export default function VideoLibrary() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Video Library</h1>
-            <p className="text-gray-600 dark:text-gray-300">Spiritual content and devotionals for your faith journey</p>
+            <h1 className="text-3xl font-bold mb-2">{t('videoLibrary.title')}</h1>
+            <p className="text-gray-600 dark:text-gray-300">{t('videoLibrary.subtitle')}</p>
           </div>
           
           {/* Upload and Import buttons for admin/pastor users */}
