@@ -7301,12 +7301,13 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
-      // For now, return success - in full implementation you would toggle bookmark in database
+      const result = await storage.togglePrayerBookmark(prayerRequestId, userId);
+      
       res.json({ 
         success: true, 
-        bookmarked: true,
+        bookmarked: result.bookmarked,
         prayerId: prayerRequestId,
-        message: "Prayer bookmarked successfully" 
+        message: result.bookmarked ? "Prayer bookmarked successfully" : "Prayer bookmark removed" 
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to bookmark prayer" });

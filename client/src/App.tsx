@@ -51,6 +51,7 @@ const ChurchManagementPage = lazy(() => import("./pages/church-management"));
 const PersonalizedGuidancePage = lazy(() => import("./pages/PersonalizedGuidance"));
 const SourceAttributionPage = lazy(() => import("./pages/SourceAttribution"));
 const SocialFeedPage = lazy(() => import("./pages/social-feed"));
+const BookmarkedPrayersPage = lazy(() => import("./pages/BookmarkedPrayersPage"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -136,6 +137,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/events" component={Events} />
                                     <ProtectedRoute path="/prayer" component={Prayer} />
                                     <ProtectedRoute path="/prayer-wall" component={Prayer} />
+                                    <ProtectedRoute path="/bookmarked-prayers" component={BookmarkedPrayersPage} />
                                     <ProtectedRoute path="/soap" component={SoapPage} />
                                     <ProtectedRoute path="/soap-journal" component={SoapPage} />
                                     <ProtectedRoute path="/messages" component={Messages} />

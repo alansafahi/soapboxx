@@ -187,9 +187,7 @@ import {
   type InsertGalleryImageComment,
   type GalleryImageSave,
   type InsertGalleryImageSave,
-  soapEntries,
-  type SoapEntry,
-  type InsertSoapEntry,
+
   dailyInspirations,
   userInspirationPreferences,
   userInspirationHistory,
@@ -267,7 +265,6 @@ import {
   type InsertVideoContentDB,
   type Notification,
   type InsertNotification,
-  reactions,
   type Reaction,
   type InsertReaction,
   communicationTemplates,
@@ -447,6 +444,10 @@ export interface IStorage {
   getPrayerCircleMembers(circleId: number): Promise<(PrayerCircleMember & { user: User })[]>;
   getUserPrayerCircles(userId: string): Promise<(PrayerCircleMember & { prayerCircle: PrayerCircle })[]>;
   isUserInPrayerCircle(circleId: number, userId: string): Promise<boolean>;
+  
+  // Prayer bookmark operations
+  togglePrayerBookmark(prayerId: number, userId: string): Promise<{ bookmarked: boolean }>;
+  getUserBookmarkedPrayers(userId: string, churchId?: number): Promise<PrayerRequest[]>;
   
   // Template management operations
   getCommunicationTemplates(userId: string, churchId?: number): Promise<any[]>;
@@ -3258,6 +3259,74 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(prayerCircles.id, circleId));
+  }
+
+  // Prayer bookmark operations
+  async togglePrayerBookmark(prayerId: number, userId: string): Promise<{ bookmarked: boolean }> {
+    const existingBookmark = await db
+      .select()
+      .from(prayerBookmarks)
+      .where(and(
+        eq(prayerBookmarks.prayerId, prayerId),
+        eq(prayerBookmarks.userId, userId)
+      ))
+      .limit(1);
+
+    if (existingBookmark.length > 0) {
+      // Remove bookmark
+      await db
+        .delete(prayerBookmarks)
+        .where(and(
+          eq(prayerBookmarks.prayerId, prayerId),
+          eq(prayerBookmarks.userId, userId)
+        ));
+      return { bookmarked: false };
+    } else {
+      // Add bookmark
+      await db
+        .insert(prayerBookmarks)
+        .values({
+          prayerId,
+          userId,
+          createdAt: new Date()
+        });
+      return { bookmarked: true };
+    }
+  }
+
+  async getUserBookmarkedPrayers(userId: string, churchId?: number): Promise<PrayerRequest[]> {
+    const query = db
+      .select({
+        id: prayerRequests.id,
+        title: prayerRequests.title,
+        content: prayerRequests.content,
+        category: prayerRequests.category,
+        isAnonymous: prayerRequests.isAnonymous,
+        isPublic: prayerRequests.isPublic,
+        isUrgent: prayerRequests.isUrgent,
+        isAnswered: prayerRequests.isAnswered,
+        authorId: prayerRequests.authorId,
+        churchId: prayerRequests.churchId,
+        prayerCount: prayerRequests.prayerCount,
+        createdAt: prayerRequests.createdAt,
+        updatedAt: prayerRequests.updatedAt,
+        attachmentUrl: prayerRequests.attachmentUrl,
+        // Include author information
+        authorFirstName: users.firstName,
+        authorLastName: users.lastName,
+        authorEmail: users.email,
+        authorProfileImageUrl: users.profileImageUrl
+      })
+      .from(prayerBookmarks)
+      .innerJoin(prayerRequests, eq(prayerBookmarks.prayerId, prayerRequests.id))
+      .leftJoin(users, eq(prayerRequests.authorId, users.id))
+      .where(eq(prayerBookmarks.userId, userId));
+
+    if (churchId) {
+      query.where(eq(prayerRequests.churchId, churchId));
+    }
+
+    return await query.orderBy(desc(prayerBookmarks.createdAt));
   }
 
   // Template management operations
