@@ -725,14 +725,28 @@ export default function PrayerWall() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src="/placeholder-avatar.png" />
+                          <AvatarImage src={prayer.isAnonymous ? undefined : prayer.authorProfileImageUrl} />
                           <AvatarFallback className="bg-purple-100 text-purple-600">
-                            {prayer.isAnonymous ? "?" : "U"}
+                            {prayer.isAnonymous 
+                              ? "?" 
+                              : prayer.authorFirstName 
+                                ? prayer.authorFirstName[0].toUpperCase()
+                                : prayer.authorEmail 
+                                  ? prayer.authorEmail[0].toUpperCase()
+                                  : "U"
+                            }
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-semibold text-gray-900 dark:text-white">
-                            {prayer.isAnonymous ? "Anonymous" : "Community Member"}
+                            {prayer.isAnonymous 
+                              ? "Anonymous" 
+                              : (prayer.authorFirstName && prayer.authorLastName) 
+                                ? `${prayer.authorFirstName} ${prayer.authorLastName}`
+                                : prayer.authorEmail 
+                                  ? prayer.authorEmail.split('@')[0]
+                                  : "Community Member"
+                            }
                           </div>
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <Clock className="w-3 h-3" />

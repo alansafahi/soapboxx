@@ -756,7 +756,13 @@ export default function EnhancedPrayerWall() {
                 };
                 const isExpanded = expandedCards.has(prayer.id);
                 const showingWhosPraying = showWhosPraying.get(prayer.id) || false;
-                const authorName = prayer.isAnonymous ? 'Anonymous' : (prayer.authorId ? 'Community Member' : 'Anonymous');
+                const authorName = prayer.isAnonymous 
+                  ? 'Anonymous' 
+                  : (prayer.authorFirstName && prayer.authorLastName) 
+                    ? `${prayer.authorFirstName} ${prayer.authorLastName}`
+                    : prayer.authorEmail 
+                      ? prayer.authorEmail.split('@')[0]
+                      : 'Community Member';
                 const churchName = prayer.churchId ? 'Local Church' : 'Community Prayer';
 
                 return (

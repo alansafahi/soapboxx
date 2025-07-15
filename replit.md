@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 15, 2025: PRAYER WALL USERNAME DISPLAY BUG COMPLETELY FIXED - Successfully resolved issue where non-anonymous prayer requests showed "Community Member" instead of actual usernames
+  - BACKEND USER DATA INTEGRATION: Updated getPrayerRequests method to include user information (firstName, lastName, email, profileImageUrl) via LEFT JOIN with users table
+  - FRONTEND DISPLAY LOGIC ENHANCED: Updated prayer wall components to display actual usernames with fallback hierarchy (firstName+lastName → email prefix → Community Member)
+  - AVATAR IMPROVEMENTS: Added proper profile image display and user initials in avatar fallbacks for better user identification
+  - BOTH PRAYER COMPONENTS FIXED: Updated both prayer-wall.tsx and EnhancedPrayerWall.tsx to use consistent user display logic
+  - USER EXPERIENCE IMPROVED: Non-anonymous prayer requests now properly show the actual user's name instead of generic "Community Member" label
 - July 15, 2025: S.O.A.P. COMMUNITY TAB DISPLAY COMPLETELY FIXED - Successfully resolved issue where Community tab showed current user's entries instead of other users' public entries
   - COMMUNITY FEED CORRECTED: getPublicSoapEntries method now properly excludes current user's entries using new excludeUserId parameter
   - PROFILE IMAGES IMPLEMENTED: S.O.A.P. entries now display proper profile images instead of initials-only fallbacks

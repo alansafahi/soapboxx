@@ -2808,8 +2808,29 @@ export class DatabaseStorage implements IStorage {
   // Prayer request operations
   async getPrayerRequests(churchId?: number): Promise<PrayerRequest[]> {
     const query = db
-      .select()
+      .select({
+        id: prayerRequests.id,
+        title: prayerRequests.title,
+        content: prayerRequests.content,
+        category: prayerRequests.category,
+        isAnonymous: prayerRequests.isAnonymous,
+        isPublic: prayerRequests.isPublic,
+        isUrgent: prayerRequests.isUrgent,
+        isAnswered: prayerRequests.isAnswered,
+        authorId: prayerRequests.authorId,
+        churchId: prayerRequests.churchId,
+        prayerCount: prayerRequests.prayerCount,
+        createdAt: prayerRequests.createdAt,
+        updatedAt: prayerRequests.updatedAt,
+        expiredAt: prayerRequests.expiredAt,
+        // User information for display
+        authorFirstName: users.firstName,
+        authorLastName: users.lastName,
+        authorEmail: users.email,
+        authorProfileImageUrl: users.profileImageUrl,
+      })
       .from(prayerRequests)
+      .leftJoin(users, eq(prayerRequests.authorId, users.id))
       .where(
         and(
           eq(prayerRequests.isPublic, true),
