@@ -836,6 +836,8 @@ export default function EnhancedPrayerWall() {
                                       
                                       if (response.ok) {
                                         const result = await response.json();
+                                        // Invalidate cache to refresh prayer requests with new photo
+                                        queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
                                         toast({
                                           title: "Photo Uploaded",
                                           description: "Your photo has been uploaded successfully!",
