@@ -54,7 +54,8 @@ export default function MyChurches() {
   // Helper function to check if user has admin access to church
   const hasChurchAdminAccess = (church: Church) => {
     const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
-    return adminRoles.includes(church.role || '') || user?.role === 'soapbox_owner';
+    // Only check church-specific role, not global platform role
+    return adminRoles.includes(church.role || '');
   };
 
   // Handle church edit navigation

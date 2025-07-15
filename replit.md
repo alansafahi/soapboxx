@@ -142,6 +142,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 15, 2025: CHURCH ADMIN PERMISSIONS SECURITY FIX - Fixed overprivileged SoapBox Owner role allowing inappropriate church edit access
+  - ADMIN ACCESS RESTRICTED: Removed global SoapBox Owner privilege to edit all churches in user's "My Churches" list
+  - CHURCH-SPECIFIC PERMISSIONS: Edit buttons now only appear based on user's role within that specific church (church_admin, pastor, etc.)
+  - SECURITY IMPROVEMENT: SoapBox Owner role now properly limited to platform administration, not individual church management
+  - ROLE BASED ACCESS: Church edit access properly restricted to users with church-specific admin roles only
 - July 15, 2025: CHURCH DISCOVERY FUNCTIONALITY COMPLETELY FIXED - Successfully resolved church search and approval system with proper connect buttons
   - CHURCH SEARCH WORKING: Created public `/api/public/churches/search` endpoint without authentication requirements
   - CHURCH APPROVAL COMPLETED: Approved all test churches (Test Church, Test Micro Church, Mega Test Church) changing status from pending to approved
