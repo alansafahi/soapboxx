@@ -7,8 +7,6 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { useImmediateAuth } from "./lib/immediateAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
-
 
 import SidebarFixed from "./components/SidebarFixed";
 import TopHeader from "./components/TopHeader";
@@ -49,7 +47,6 @@ const SermonStudioPage = lazy(() => import("./pages/SermonStudioPage"));
 const ContentDistributionPage = lazy(() => import("./pages/ContentDistributionPage"));
 const EngagementAnalyticsPage = lazy(() => import("./pages/EngagementAnalyticsPage"));
 const ChurchManagementPage = lazy(() => import("./pages/church-management"));
-const AITranslationAdminPage = lazy(() => import("./pages/ai-translation-admin"));
 
 const PersonalizedGuidancePage = lazy(() => import("./pages/PersonalizedGuidance"));
 const SourceAttributionPage = lazy(() => import("./pages/SourceAttribution"));
@@ -158,7 +155,6 @@ function AppRouter() {
                                     <ProtectedRoute path="/sermon-studio" component={SermonStudioPage} />
                                     <ProtectedRoute path="/content-distribution" component={ContentDistributionPage} />
                                     <ProtectedRoute path="/engagement-analytics" component={EngagementAnalyticsPage} />
-                                    <ProtectedRoute path="/ai-translation-admin" component={AITranslationAdminPage} />
 
                                     <ProtectedRoute path="/ai-guidance" component={PersonalizedGuidancePage} />
                                     <ProtectedRoute path="/source-attribution" component={SourceAttributionPage} />
@@ -178,15 +174,12 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <ThemeProvider>
-                <LanguageProvider>
-                    <TooltipProvider>
-                        <WouterRouter>
-                            <AppRouter />
-                            <Toaster />
-
-                        </WouterRouter>
-                    </TooltipProvider>
-                </LanguageProvider>
+                <TooltipProvider>
+                    <WouterRouter>
+                        <AppRouter />
+                        <Toaster />
+                    </WouterRouter>
+                </TooltipProvider>
             </ThemeProvider>
         </QueryClientProvider>
     );

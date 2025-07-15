@@ -10,7 +10,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../hooks/useAuth";
-import { useLanguage } from "../contexts/LanguageContext";
 import {
   Dialog,
   DialogContent,
@@ -56,7 +55,6 @@ interface VideoContent {
 export default function VideoLibrary() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,21 +69,6 @@ export default function VideoLibrary() {
 
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [youtubeUrls, setYoutubeUrls] = useState('');
-
-  // Video categories with translation
-  const getVideoCategories = (t: (key: string) => string) => [
-    { value: 'all', label: t('videoLibrary.allVideos') },
-    { value: 'sermons', label: t('videoLibrary.sermons') },
-    { value: 'devotionals', label: t('videoLibrary.devotionals') },
-    { value: 'worship', label: t('videoLibrary.worship') },
-    { value: 'bible-study', label: t('videoLibrary.bibleStudy') },
-    { value: 'prayer', label: t('videoLibrary.prayer') },
-    { value: 'testimonies', label: t('videoLibrary.testimonies') },
-    { value: 'youth', label: t('videoLibrary.youth') },
-    { value: 'training', label: t('videoLibrary.training') },
-  ];
-
-  const categories = getVideoCategories(t);
 
   // Fetch videos from API
   const { data: videos = [], isLoading } = useQuery({
@@ -293,6 +276,19 @@ export default function VideoLibrary() {
     }
   };
 
+  const categories = [
+    { value: 'all', label: 'All Categories' },
+    { value: 'sermons', label: 'Sermons' },
+    { value: 'devotionals', label: 'Devotionals' },
+    { value: 'bible-studies', label: 'Bible Studies' },
+    { value: 'worship', label: 'Worship' },
+    { value: 'testimonies', label: 'Testimonies' },
+    { value: 'youth', label: 'Youth' },
+    { value: 'children', label: 'Children' },
+    { value: 'prayer', label: 'Prayer' },
+    { value: 'conference', label: 'Conference' },
+  ];
+
   // Map database fields to frontend interface and filter videos
   const mappedVideos = videos.map((video: any) => ({
     ...video,
@@ -350,11 +346,11 @@ export default function VideoLibrary() {
               <div className="flex items-center gap-3 mb-3">
                 <Video className="w-8 h-8 text-purple-400" />
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                  {t('videoLibrary.title')}
+                  Video Library
                 </h1>
               </div>
               <p className="text-lg text-gray-300 max-w-2xl">
-                {t('videoLibrary.subtitle')}
+                Spiritual videos, devotionals, and community content to deepen your journey with God.
               </p>
             </div>
             
@@ -584,8 +580,8 @@ export default function VideoLibrary() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{t('videoLibrary.title')}</h1>
-            <p className="text-gray-600 dark:text-gray-300">{t('videoLibrary.subtitle')}</p>
+            <h1 className="text-3xl font-bold mb-2">Video Library</h1>
+            <p className="text-gray-600 dark:text-gray-300">Spiritual content and devotionals for your faith journey</p>
           </div>
           
           {/* Upload and Import buttons for admin/pastor users */}

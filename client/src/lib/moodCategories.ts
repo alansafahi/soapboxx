@@ -1,76 +1,67 @@
 // Shared mood categories for both Check-In and SOAP systems
-// Note: Labels use translation keys, actual translations are provided via useLanguage hook
-export const getMoodCategories = (t: (key: string) => string) => [
+export const moodCategories = [
   {
-    title: t('moodCategories.emotionalSupport'),
+    title: "Emotional & Spiritual Support",
     icon: "💙",
     moods: [
-      { id: "anxious", label: t('moods.anxious'), icon: "😰", subtitle: t('moods.anxious.tooltip') },
-      { id: "depressed", label: t('moods.depressed'), icon: "😞", subtitle: t('moods.depressed.tooltip') },
-      { id: "lonely", label: t('moods.lonely'), icon: "😔", subtitle: t('moods.lonely.tooltip') },
-      { id: "grieving", label: t('moods.grieving'), icon: "💔", subtitle: t('moods.grieving.tooltip') },
-      { id: "fearful", label: t('moods.fearful'), icon: "😨", subtitle: t('moods.fearful.tooltip') },
-      { id: "overwhelmed", label: t('moods.overwhelmed'), icon: "😵", subtitle: t('moods.overwhelmed.tooltip') },
-      { id: "doubtful", label: t('moods.doubtful'), icon: "🤔", subtitle: t('moods.doubtful.tooltip') },
-      { id: "angry", label: t('moods.angry'), icon: "😠", subtitle: t('moods.angry.tooltip') },
+      { id: "anxious", label: "Anxious", icon: "😰", subtitle: "peace, comfort" },
+      { id: "depressed", label: "Depressed", icon: "😞", subtitle: "hope, light" },
+      { id: "lonely", label: "Lonely", icon: "😔", subtitle: "fellowship, connection" },
+      { id: "grieving", label: "Grieving", icon: "💔", subtitle: "comfort, healing" },
+      { id: "fearful", label: "Fearful", icon: "😨", subtitle: "courage, protection" },
+      { id: "overwhelmed", label: "Overwhelmed", icon: "😵", subtitle: "rest, peace" },
+      { id: "doubtful", label: "Doubtful", icon: "🤔", subtitle: "faith, assurance" },
+      { id: "angry", label: "Angry", icon: "😠", subtitle: "patience, forgiveness" },
     ]
   },
   {
-    title: t('moodCategories.growthTransformation'),
+    title: "Growth & Transformation",
     icon: "🌱",
     moods: [
-      { id: "seeking", label: t('moods.seeking'), icon: "🧭", subtitle: t('moods.seeking.tooltip') },
-      { id: "repentant", label: t('moods.repentant'), icon: "🙏", subtitle: t('moods.repentant.tooltip') },
-      { id: "motivated", label: t('moods.motivated'), icon: "🔥", subtitle: t('moods.motivated.tooltip') },
-      { id: "curious", label: t('moods.curious'), icon: "🤓", subtitle: t('moods.curious.tooltip') },
-      { id: "determined", label: t('moods.determined'), icon: "💪", subtitle: t('moods.determined.tooltip') },
-      { id: "reflective", label: t('moods.reflective'), icon: "🤲", subtitle: t('moods.reflective.tooltip') },
-      { id: "inspired", label: t('moods.inspired'), icon: "✨", subtitle: t('moods.inspired.tooltip') },
-      { id: "focused", label: t('moods.focused'), icon: "🎯", subtitle: t('moods.focused.tooltip') },
+      { id: "seeking", label: "Seeking Direction", icon: "🧭", subtitle: "guidance, wisdom" },
+      { id: "repentant", label: "Repentant", icon: "🙏", subtitle: "forgiveness, renewal" },
+      { id: "motivated", label: "Motivated", icon: "🔥", subtitle: "purpose, strength" },
+      { id: "curious", label: "Curious", icon: "🤓", subtitle: "knowledge, understanding" },
+      { id: "determined", label: "Determined", icon: "💪", subtitle: "perseverance, victory" },
+      { id: "reflective", label: "Reflective", icon: "🤲", subtitle: "wisdom, insight" },
+      { id: "inspired", label: "Inspired", icon: "✨", subtitle: "creativity, vision" },
+      { id: "focused", label: "Focused", icon: "🎯", subtitle: "clarity, purpose" },
     ]
   },
   {
-    title: t('moodCategories.lifeSituations'),
+    title: "Life Situations",
     icon: "🏠",
     moods: [
-      { id: "celebrating", label: t('moods.celebrating'), icon: "🎉", subtitle: t('moods.celebrating.tooltip') },
-      { id: "transitioning", label: t('moods.transitioning'), icon: "🚪", subtitle: t('moods.transitioning.tooltip') },
-      { id: "healing", label: t('moods.healing'), icon: "🩹", subtitle: t('moods.healing.tooltip') },
-      { id: "parenting", label: t('moods.parenting'), icon: "👨‍👩‍👧‍👦", subtitle: t('moods.parenting.tooltip') },
-      { id: "working", label: t('moods.working'), icon: "💼", subtitle: t('moods.working.tooltip') },
-      { id: "relationship", label: t('moods.relationship'), icon: "💕", subtitle: t('moods.relationship.tooltip') },
-      { id: "financial", label: t('moods.financial'), icon: "💰", subtitle: t('moods.financial.tooltip') },
-      { id: "health", label: t('moods.health'), icon: "🏥", subtitle: t('moods.health.tooltip') },
+      { id: "celebrating", label: "Celebrating", icon: "🎉", subtitle: "gratitude, praise" },
+      { id: "transitioning", label: "In Transition", icon: "🚪", subtitle: "guidance, stability" },
+      { id: "healing", label: "Healing", icon: "🩹", subtitle: "restoration, wholeness" },
+      { id: "parenting", label: "Parenting Challenges", icon: "👨‍👩‍👧‍👦", subtitle: "wisdom, patience" },
+      { id: "working", label: "Work Stress", icon: "💼", subtitle: "balance, provision" },
+      { id: "relationship", label: "Relationship Issues", icon: "💕", subtitle: "love, reconciliation" },
+      { id: "financial", label: "Financial Concerns", icon: "💰", subtitle: "provision, trust" },
+      { id: "health", label: "Health Concerns", icon: "🏥", subtitle: "healing, strength" },
     ]
   },
   {
-    title: t('moodCategories.faithWorship'),
+    title: "Faith & Worship",
     icon: "⛪",
     moods: [
-      { id: "grateful", label: t('moods.grateful'), icon: "🙌", subtitle: t('moods.grateful.tooltip') },
-      { id: "peaceful", label: t('moods.peaceful'), icon: "🕊️", subtitle: t('moods.peaceful.tooltip') },
-      { id: "joyful", label: t('moods.joyful'), icon: "😊", subtitle: t('moods.joyful.tooltip') },
-      { id: "blessed", label: t('moods.blessed'), icon: "😇", subtitle: t('moods.blessed.tooltip') },
-      { id: "prayerful", label: t('moods.praying'), icon: "🙏", subtitle: t('moods.prayerful.tooltip') },
-      { id: "worshipful", label: t('moods.worshipful'), icon: "🎵", subtitle: t('moods.worshipful.tooltip') },
-      { id: "hopeful", label: t('moods.hopeful'), icon: "🌅", subtitle: t('moods.hopeful.tooltip') },
-      { id: "content", label: t('moods.content'), icon: "😌", subtitle: t('moods.content.tooltip') },
+      { id: "grateful", label: "Grateful", icon: "🙌", subtitle: "thanksgiving, praise" },
+      { id: "peaceful", label: "Peaceful", icon: "🕊️", subtitle: "rest, serenity" },
+      { id: "joyful", label: "Joyful", icon: "😊", subtitle: "celebration, praise" },
+      { id: "blessed", label: "Blessed", icon: "😇", subtitle: "gratitude, testimony" },
+      { id: "prayerful", label: "Prayerful", icon: "🙏", subtitle: "communion, intercession" },
+      { id: "worshipful", label: "Worshipful", icon: "🎵", subtitle: "adoration, praise" },
+      { id: "hopeful", label: "Hopeful", icon: "🌅", subtitle: "faith, expectation" },
+      { id: "content", label: "Content", icon: "😌", subtitle: "satisfaction, peace" },
     ]
   }
 ];
 
-// Legacy export for backward compatibility - components should update to use getMoodCategories(t) 
-export const moodCategories = getMoodCategories((key: string) => key);
-
 // Flatten all moods for easy lookup
-export const getAllMoods = (t: (key: string) => string) => {
-  return getMoodCategories(t).flatMap(category => 
-    category.moods.map(mood => ({ ...mood, category: category.title }))
-  );
-};
-
-// Legacy backward compatibility
-export const allMoods = getAllMoods((key: string) => key);
+export const allMoods = moodCategories.flatMap(category => 
+  category.moods.map(mood => ({ ...mood, category: category.title }))
+);
 
 // Get mood by ID
 export const getMoodById = (id: string) => {

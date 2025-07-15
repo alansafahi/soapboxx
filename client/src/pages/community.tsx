@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
-import { useLanguage } from "../contexts/LanguageContext";
 import CommunityFeed from "../components/community-feed";
 import EnhancedCommunityFeed from "../components/enhanced-community-feed";
 import MobileNav from "../components/mobile-nav";
@@ -14,7 +13,6 @@ export default function CommunityPage() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
-  const { t } = useLanguage();
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -48,9 +46,9 @@ export default function CommunityPage() {
 
   // Determine page title based on route
   const isDiscussionsPage = location === '/discussions';
-  const pageTitle = isDiscussionsPage ? t('discussions.title') : 'Community';
+  const pageTitle = isDiscussionsPage ? 'Discussions' : 'Community';
   const pageDescription = isDiscussionsPage 
-    ? t('discussions.joinMeaningful') 
+    ? 'Join meaningful conversations with fellow believers' 
     : 'Connect with fellow believers and share your faith journey';
 
   return (
@@ -70,7 +68,7 @@ export default function CommunityPage() {
             <div className="hidden md:flex items-center space-x-4">
               <Button variant="outline" size="sm" className="border-purple-600 hover:bg-purple-800 text-purple-300 hover:text-white">
                 <Users className="h-4 w-4 mr-2 text-purple-400" />
-                {t('discussions.startDiscussions')}
+                Groups
               </Button>
             </div>
           </div>
@@ -82,11 +80,11 @@ export default function CommunityPage() {
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="enhanced" className="flex items-center space-x-2">
               <Sparkles className="h-4 w-4" />
-              <span>{t('discussions.enhancedFeed')}</span>
+              <span>Enhanced Feed</span>
             </TabsTrigger>
             <TabsTrigger value="classic" className="flex items-center space-x-2">
               <MessageCircle className="h-4 w-4" />
-              <span>{t('discussions.classicView')}</span>
+              <span>Classic View</span>
             </TabsTrigger>
           </TabsList>
           

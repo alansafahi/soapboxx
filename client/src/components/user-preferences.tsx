@@ -13,7 +13,6 @@ import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Separator } from "./ui/separator";
 import { useToast } from "../hooks/use-toast";
-import { useLanguage } from "../contexts/LanguageContext";
 import { 
   Settings, 
   Bell, 
@@ -66,7 +65,6 @@ export default function UserPreferences() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { t } = useLanguage();
   const { setTheme, setFontSize } = useTheme();
 
   const [preferences, setPreferences] = useState<UserPreferences>({
@@ -194,26 +192,6 @@ export default function UserPreferences() {
       setFontSize(value);
     }
     
-    // Handle language change with automatic refresh
-    if (key === "language") {
-      updatePreferencesMutation.mutate({ [key]: value }, {
-        onSuccess: () => {
-          // Set language in localStorage for immediate effect
-          localStorage.setItem('soapbox_language', value);
-          // Show success message
-          toast({
-            title: "Language Updated",
-            description: "Page will refresh to apply language changes.",
-          });
-          // Refresh page after short delay to apply language change
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        }
-      });
-      return;
-    }
-    
     updatePreferencesMutation.mutate({ [key]: value });
   };
 
@@ -252,53 +230,53 @@ export default function UserPreferences() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t('settings.title')}</h1>
-          <p className="text-gray-600 dark:text-gray-400">{t('settings.description')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Settings & Preferences</h1>
+          <p className="text-gray-600 dark:text-gray-400">Customize your spiritual journey experience</p>
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             <TabsTrigger value="general" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('general')}</span>
+              <span className="hidden sm:inline">General</span>
               <span className="sm:hidden">Gen</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Bell className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('notifications')}</span>
-              <span className="sm:hidden">{t('notifications')}</span>
+              <span className="hidden sm:inline">Notifications</span>
+              <span className="sm:hidden">Notif</span>
             </TabsTrigger>
             <TabsTrigger value="offline" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Download className="h-4 w-4" />
-              <span>{t('offline')}</span>
+              <span>Offline</span>
             </TabsTrigger>
             <TabsTrigger value="sync" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <RefreshCw className="h-4 w-4" />
-              <span>{t('sync')}</span>
+              <span>Sync</span>
             </TabsTrigger>
             <TabsTrigger value="personalization" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Brain className="h-4 w-4" />
-              <span>{t('ai')}</span>
+              <span>AI</span>
             </TabsTrigger>
             <TabsTrigger value="language" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
               <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('language')}</span>
-              <span className="sm:hidden">{t('language')}</span>
+              <span className="hidden sm:inline">Language</span>
+              <span className="sm:hidden">Lang</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
             <Card>
               <CardHeader>
-                <CardTitle>{t('settings.generalPreferences')}</CardTitle>
+                <CardTitle>General Preferences</CardTitle>
                 <CardDescription>
-                  {t('settings.generalDescription')}
+                  Customize your reading experience and interface preferences
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="theme">{t('theme.label')}</Label>
+                    <Label htmlFor="theme">Theme</Label>
                     <Select
                       value={preferences.theme}
                       onValueChange={(value) => handlePreferenceChange("theme", value)}
@@ -310,22 +288,22 @@ export default function UserPreferences() {
                         <SelectItem value="light">
                           <div className="flex items-center space-x-2">
                             <Sun className="h-4 w-4" />
-                            <span>{t('theme.light')}</span>
+                            <span>Light</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="dark">
                           <div className="flex items-center space-x-2">
                             <Moon className="h-4 w-4" />
-                            <span>{t('theme.dark')}</span>
+                            <span>Dark</span>
                           </div>
                         </SelectItem>
-                        <SelectItem value="auto">{t('theme.auto')}</SelectItem>
+                        <SelectItem value="auto">Auto</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="fontSize">{t('fontSize.label')}</Label>
+                    <Label htmlFor="fontSize">Font Size</Label>
                     <Select
                       value={preferences.fontSize}
                       onValueChange={(value) => handlePreferenceChange("fontSize", value)}
@@ -334,15 +312,15 @@ export default function UserPreferences() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="small">{t('fontSize.small')}</SelectItem>
-                        <SelectItem value="medium">{t('fontSize.medium')}</SelectItem>
-                        <SelectItem value="large">{t('fontSize.large')}</SelectItem>
+                        <SelectItem value="small">Small</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="readingSpeed">{t('readingSpeed.label')}</Label>
+                    <Label htmlFor="readingSpeed">Reading Speed</Label>
                     <Select
                       value={preferences.readingSpeed}
                       onValueChange={(value) => handlePreferenceChange("readingSpeed", value)}
@@ -351,15 +329,15 @@ export default function UserPreferences() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="slow">{t('readingSpeed.slow')}</SelectItem>
-                        <SelectItem value="normal">{t('readingSpeed.medium')}</SelectItem>
-                        <SelectItem value="fast">{t('readingSpeed.fast')}</SelectItem>
+                        <SelectItem value="slow">Slow</SelectItem>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="fast">Fast</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="timezone">{t('timezone.label')}</Label>
+                    <Label htmlFor="timezone">Timezone</Label>
                     <Select
                       value={preferences.timezone}
                       onValueChange={(value) => handlePreferenceChange("timezone", value)}
@@ -368,11 +346,11 @@ export default function UserPreferences() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="UTC">{t('timezone.utc')}</SelectItem>
-                        <SelectItem value="America/New_York">{t('timezone.eastern')}</SelectItem>
-                        <SelectItem value="America/Chicago">{t('timezone.central')}</SelectItem>
-                        <SelectItem value="America/Denver">{t('timezone.mountain')}</SelectItem>
-                        <SelectItem value="America/Los_Angeles">{t('timezone.pacific')}</SelectItem>
+                        <SelectItem value="UTC">UTC</SelectItem>
+                        <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                        <SelectItem value="America/Chicago">Central Time</SelectItem>
+                        <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -383,8 +361,8 @@ export default function UserPreferences() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>{t('audioEnabled.label')}</Label>
-                      <p className="text-sm text-gray-500">{t('audioEnabled.description')}</p>
+                      <Label>Audio Enabled</Label>
+                      <p className="text-sm text-gray-500">Enable audio narration for readings</p>
                     </div>
                     <Switch
                       checked={preferences.audioEnabled}
@@ -394,7 +372,7 @@ export default function UserPreferences() {
 
                   {preferences.audioEnabled && (
                     <div className="space-y-2">
-                      <Label>{t('audioSpeed.label')}: {preferences.audioSpeed}x</Label>
+                      <Label>Audio Speed: {preferences.audioSpeed}x</Label>
                       <Slider
                         value={[preferences.audioSpeed]}
                         onValueChange={([value]) => handlePreferenceChange("audioSpeed", value)}
@@ -408,8 +386,8 @@ export default function UserPreferences() {
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>{t('familyMode.label')}</Label>
-                      <p className="text-sm text-gray-500">{t('familyMode.description')}</p>
+                      <Label>Family Mode</Label>
+                      <p className="text-sm text-gray-500">Show child-friendly content and illustrations</p>
                     </div>
                     <Switch
                       checked={preferences.familyMode}
@@ -598,8 +576,8 @@ export default function UserPreferences() {
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>{t('offline.enableLabel')}</Label>
-                    <p className="text-sm text-gray-500">{t('offline.downloadDescription')}</p>
+                    <Label>Enable Offline Mode</Label>
+                    <p className="text-sm text-gray-500">Download content automatically for offline access</p>
                   </div>
                   <Switch
                     checked={preferences.offlineMode}
@@ -645,16 +623,16 @@ export default function UserPreferences() {
           <TabsContent value="sync">
             <Card>
               <CardHeader>
-                <CardTitle>{t('sync.title')}</CardTitle>
+                <CardTitle>Cross-Platform Sync</CardTitle>
                 <CardDescription>
-                  {t('sync.subtitle')}
+                  Seamlessly sync your progress across all devices
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>{t('sync.enableLabel')}</Label>
-                    <p className="text-sm text-gray-500">{t('sync.enableDescription')}</p>
+                    <Label>Enable Sync</Label>
+                    <p className="text-sm text-gray-500">Synchronize reading progress, notes, and preferences</p>
                   </div>
                   <Switch
                     checked={preferences.syncEnabled}
@@ -665,22 +643,22 @@ export default function UserPreferences() {
                 {preferences.syncEnabled && (
                   <div className="space-y-4">
                     <div className="text-sm text-gray-500">
-                      <p>{t('sync.description')}</p>
+                      <p>Your data is automatically synced across:</p>
                       <ul className="list-disc list-inside mt-2 space-y-1">
-                        <li>{t('sync.readingProgress')}</li>
-                        <li>{t('sync.personalNotes')}</li>
-                        <li>{t('sync.prayerRequests')}</li>
-                        <li>{t('sync.settingsPreferences')}</li>
-                        <li>{t('sync.offlineContent')}</li>
+                        <li>Reading progress and bookmarks</li>
+                        <li>Personal notes and highlights</li>
+                        <li>Prayer requests and reflections</li>
+                        <li>Settings and preferences</li>
+                        <li>Offline content selections</li>
                       </ul>
                     </div>
                     
                     <div className="p-4 bg-blue-50 rounded-lg">
                       <div className="flex items-center space-x-2 text-blue-800">
                         <RefreshCw className="h-4 w-4" />
-                        <span className="font-medium">{t('sync.lastSynced')}</span>
+                        <span className="font-medium">Last synced: Just now</span>
                       </div>
-                      <p className="text-sm text-blue-600 mt-1">{t('sync.upToDate')}</p>
+                      <p className="text-sm text-blue-600 mt-1">All your devices are up to date</p>
                     </div>
                   </div>
                 )}
@@ -691,37 +669,38 @@ export default function UserPreferences() {
           <TabsContent value="personalization">
             <Card>
               <CardHeader>
-                <CardTitle>{t('ai.title')}</CardTitle>
+                <CardTitle>AI Personalization</CardTitle>
                 <CardDescription>
-                  {t('ai.description')}
+                  Let AI help personalize your spiritual journey with intelligent recommendations
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
                   <div className="flex items-center space-x-2 text-purple-800 mb-2">
                     <Brain className="h-5 w-5" />
-                    <span className="font-medium">{t('ai.poweredRecommendations')}</span>
+                    <span className="font-medium">AI-Powered Recommendations</span>
                   </div>
                   <p className="text-sm text-purple-600">
-                    {t('ai.analysisDescription')}
+                    Our AI analyzes your reading patterns, interests, and spiritual growth to provide
+                    personalized scripture recommendations, devotionals, and study topics.
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="text-sm text-gray-500">
-                    <p>{t('ai.personalizationIncludes')}</p>
+                    <p>AI personalization includes:</p>
                     <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>{t('ai.personalizedVerses')}</li>
-                      <li>{t('ai.suggestedPlans')}</li>
-                      <li>{t('ai.adaptiveProgression')}</li>
-                      <li>{t('ai.topicRecommendations')}</li>
-                      <li>{t('ai.optimalTiming')}</li>
+                      <li>Personalized daily verse recommendations</li>
+                      <li>Suggested reading plans based on your interests</li>
+                      <li>Adaptive content difficulty progression</li>
+                      <li>Topic recommendations from your engagement patterns</li>
+                      <li>Optimal reading time suggestions</li>
                     </ul>
                   </div>
                   
                   <Button className="w-full" variant="outline">
                     <Brain className="h-4 w-4 mr-2" />
-                    {t('ai.generateRecommendations')}
+                    Generate New Recommendations
                   </Button>
                 </div>
               </CardContent>
@@ -731,14 +710,14 @@ export default function UserPreferences() {
           <TabsContent value="language">
             <Card>
               <CardHeader>
-                <CardTitle>{t('language.title')}</CardTitle>
+                <CardTitle>Language & Region</CardTitle>
                 <CardDescription>
-                  {t('language.description')}
+                  Select your preferred language and regional settings
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="language">{t('language.label')}</Label>
+                  <Label htmlFor="language">Language</Label>
                   <Select
                     value={preferences.language}
                     onValueChange={(value) => handlePreferenceChange("language", value)}
@@ -747,72 +726,16 @@ export default function UserPreferences() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">
-                        <div className="flex items-center space-x-2">
-                          <span>🇺🇸</span>
-                          <span>English</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="es">
-                        <div className="flex items-center space-x-2">
-                          <span>🇪🇸</span>
-                          <span>Español</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="fr">
-                        <div className="flex items-center space-x-2">
-                          <span>🇫🇷</span>
-                          <span>Français</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="de">
-                        <div className="flex items-center space-x-2">
-                          <span>🇩🇪</span>
-                          <span>Deutsch</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="pt">
-                        <div className="flex items-center space-x-2">
-                          <span>🇵🇹</span>
-                          <span>Português</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="zh">
-                        <div className="flex items-center space-x-2">
-                          <span>🇨🇳</span>
-                          <span>中文</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="ko">
-                        <div className="flex items-center space-x-2">
-                          <span>🇰🇷</span>
-                          <span>한국어</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="ja">
-                        <div className="flex items-center space-x-2">
-                          <span>🇯🇵</span>
-                          <span>日本語</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="ar">
-                        <div className="flex items-center space-x-2">
-                          <span>🇸🇦</span>
-                          <span>العربية</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="fa">
-                        <div className="flex items-center space-x-2">
-                          <span>🇮🇷</span>
-                          <span>فارسی</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="hi">
-                        <div className="flex items-center space-x-2">
-                          <span>🇮🇳</span>
-                          <span>हिन्दी</span>
-                        </div>
-                      </SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                      <SelectItem value="fr">Français</SelectItem>
+                      <SelectItem value="de">Deutsch</SelectItem>
+                      <SelectItem value="pt">Português</SelectItem>
+                      <SelectItem value="zh">中文</SelectItem>
+                      <SelectItem value="ko">한국어</SelectItem>
+                      <SelectItem value="ja">日本語</SelectItem>
+                      <SelectItem value="ar">العربية</SelectItem>
+                      <SelectItem value="hi">हिन्दी</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -820,10 +743,11 @@ export default function UserPreferences() {
                 <div className="p-4 bg-green-50 rounded-lg">
                   <div className="flex items-center space-x-2 text-green-800 mb-2">
                     <Globe className="h-5 w-5" />
-                    <span className="font-medium">{t('multilingual.title')}</span>
+                    <span className="font-medium">Multilingual Content</span>
                   </div>
                   <p className="text-sm text-green-600">
-                    {t('multilingual.description')}
+                    Content is automatically translated to your preferred language while maintaining
+                    theological accuracy and cultural sensitivity.
                   </p>
                 </div>
               </CardContent>

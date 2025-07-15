@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
-import { useLanguage } from "../contexts/LanguageContext";
 import { 
   ChevronDown, ChevronRight, Users, Calendar, MessageSquare, Heart, 
   BookOpen, Volume2, Headphones, PlayCircle, Settings, UserCog,
@@ -35,7 +34,6 @@ interface UserGroup {
 }
 
 export default function FeatureCatalog() {
-  const { t } = useLanguage();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     members: true,
     church: false

@@ -37,7 +37,6 @@ import {
   Monitor
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
-import { useLanguage } from "../contexts/LanguageContext";
 
 interface NavigationItem {
   label: string;
@@ -55,7 +54,6 @@ export default function AppHeader() {
   const { user } = useAuth();
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Get user role data
@@ -72,41 +70,41 @@ export default function AppHeader() {
 
   const navigationGroups: NavigationGroup[] = [
     {
-      label: t('sections.community'),
+      label: "COMMUNITY",
       items: [
-        { label: t('nav.home'), href: "/", icon: Home },
-        { label: t('nav.messages'), href: "/messages", icon: Mail },
-        { label: t('nav.churches'), href: "/churches", icon: Users },
-        { label: t('nav.events'), href: "/events", icon: Calendar },
-        { label: t('nav.discussions'), href: "/discussions", icon: MessageSquare },
-        { label: t('nav.donation'), href: "/donation-demo", icon: DollarSign },
+        { label: "Home", href: "/", icon: Home },
+        { label: "Messages", href: "/messages", icon: Mail },
+        { label: "Churches", href: "/churches", icon: Users },
+        { label: "Events", href: "/events", icon: Calendar },
+        { label: "Discussions", href: "/discussions", icon: MessageSquare },
+        { label: "Donation", href: "/donation-demo", icon: DollarSign },
       ]
     },
     {
-      label: t('sections.spiritualTools'),
+      label: "SPIRITUAL TOOLS",
       items: [
-        { label: t('nav.todaysReading'), href: "/bible", icon: BookOpen },
-        { label: t('nav.prayerWall'), href: "/prayer-wall", icon: Heart },
-        { label: t('nav.soapJournal'), href: "/soap", icon: PenTool },
-        { label: t('nav.audioBible'), href: "/audio-bible", icon: Play },
-        { label: t('nav.audioRoutines'), href: "/audio-routines", icon: Mic },
+        { label: "Today's Reading", href: "/bible", icon: BookOpen },
+        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
+        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+        { label: "Audio Bible", href: "/audio-bible", icon: Play },
+        { label: "Audio Routines", href: "/audio-routines", icon: Mic },
       ]
     },
     {
-      label: t('sections.mediaContents'),
+      label: "MEDIA CONTENTS",
       items: [
-        { label: t('nav.videoLibrary'), href: "/video-library", icon: Video },
-        { label: t('nav.imageGallery'), href: "/image-gallery", icon: Video },
+        { label: "Video Library", href: "/video-library", icon: Video },
+        { label: "Image Gallery", href: "/image-gallery", icon: Video },
       ]
     },
     {
-      label: t('sections.adminPortal'),
+      label: "ADMIN PORTAL",
       items: [
-        { label: t('nav.memberDirectory'), href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.donationAnalytics'), href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.communicationHub'), href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.sermonStudio'), href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.engagementAnalytics'), href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
       ]
     },
     {
@@ -116,10 +114,10 @@ export default function AppHeader() {
       ]
     },
     {
-      label: t('sections.account'),
+      label: "ACCOUNT",
       items: [
-        { label: t('nav.profile'), href: "/profile", icon: User },
-        { label: t('nav.settings'), href: "/settings", icon: Settings },
+        { label: "Profile", href: "/profile", icon: User },
+        { label: "Settings", href: "/settings", icon: Settings },
       ]
     }
   ];

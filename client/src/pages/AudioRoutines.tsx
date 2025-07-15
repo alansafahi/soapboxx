@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/ui/collapsible";
 import { Play, Square, Clock, Headphones, Pause, Book, Heart, ChevronDown, ChevronRight } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
-import { useLanguage } from "../contexts/LanguageContext";
 
 interface AudioRoutine {
   id: number;
@@ -69,7 +68,6 @@ export default function AudioRoutines() {
     "Life Challenges": false
   });
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   // Toggle function for mood categories
   const toggleMoodCategory = (category: string) => {
@@ -1972,10 +1970,10 @@ export default function AudioRoutines() {
       <div className="text-center">
         <Headphones className="h-12 w-12 mx-auto mb-4 text-purple-600" />
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {t('audioRoutines.title')}
+          Audio Routines
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
-          {t('audioRoutines.subtitle')}
+          Guided spiritual experiences with premium AI narration and peaceful background music
         </p>
       </div>
 

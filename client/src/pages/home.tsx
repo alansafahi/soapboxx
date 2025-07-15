@@ -19,7 +19,6 @@ import FloatingPostButton from "../components/FloatingPostButton";
 import RecentCheckInsStrip from "../components/RecentCheckInsStrip";
 import { ReferralWelcome } from "../components/ReferralWelcome";
 import { useQuery } from "@tanstack/react-query";
-import { useLanguage } from "../contexts/LanguageContext";
 
 interface HomeProps {
   referralCode?: string | null;
@@ -67,7 +66,6 @@ function MobileAccordionSection({ title, icon, children, defaultOpen = false, is
 export default function Home({ referralCode }: HomeProps = {}) {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
-  const { t } = useLanguage();
   const composerRef = useRef<HTMLDivElement>(null);
 
   // Get user stats
@@ -111,7 +109,7 @@ export default function Home({ referralCode }: HomeProps = {}) {
           <div className="w-16 h-16 bg-soapbox-purple rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
             <div className="w-8 h-8 bg-white rounded-full"></div>
           </div>
-          <p className="text-gray-600">{t('home.loadingCommunity')}</p>
+          <p className="text-gray-600">Loading your faith community...</p>
         </div>
       </div>
     );
@@ -129,7 +127,7 @@ export default function Home({ referralCode }: HomeProps = {}) {
         
         {/* Spiritual Rhythm Section - Mobile accordion, Desktop grid */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t('home.dailySpiritualRhythm')}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Daily Spiritual Rhythm</h2>
           
           {/* Desktop: Grid Layout */}
           <div className="hidden md:grid grid-cols-3 gap-6">
@@ -172,7 +170,7 @@ export default function Home({ referralCode }: HomeProps = {}) {
           <div className="lg:col-span-3 min-w-0 space-y-6">
             {/* Latest Posts */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 {t('home.latestPosts')}</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
               <LimitedSocialFeed initialLimit={5} />
             </div>
           </div>

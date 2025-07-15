@@ -18,9 +18,8 @@ import { useToast } from "../hooks/use-toast";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { insertSoapEntrySchema, type SoapEntry } from "../../../shared/schema";
 import { z } from "zod";
-import { getMoodCategories, getAllMoods, getMoodsByIds } from "../lib/moodCategories";
+import { moodCategories, allMoods, getMoodsByIds } from "../lib/moodCategories";
 import ExpirationSettings from "./ExpirationSettings";
-import { useLanguage } from "../contexts/LanguageContext";
 
 const formSchema = insertSoapEntrySchema.extend({
   devotionalDate: z.string(),
@@ -37,9 +36,6 @@ interface SoapEntryFormProps {
 // Use comprehensive mood system from shared library
 
 export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps) {
-  const { t } = useLanguage();
-  const moodCategories = getMoodCategories(t);
-  const allMoods = getAllMoods(t);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<any>(null);
@@ -790,16 +786,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
           </Button>
           <div>
             <h1 className="text-2xl font-bold">
-              {entry ? 'Edit S.O.A.P. Entry' : t('soap.createEntry')}
+              {entry ? 'Edit S.O.A.P. Entry' : 'Create S.O.A.P. Entry'}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {t('soap.scripture')} • {t('soap.observation')} • {t('soap.application')} • {t('soap.prayer')}
+              Scripture • Observation • Application • Prayer
             </p>
           </div>
         </div>
         <Badge variant="secondary" className="flex items-center gap-1">
           <BookOpen className="h-3 w-3" />
-          {t('soap.spiritualReflection')}
+          Spiritual Reflection
         </Badge>
       </div>
 
@@ -814,7 +810,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                {t('soap.scripture')}
+                Scripture
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -824,7 +820,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   name="scriptureReference"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>{t('soap.scriptureReference')}</FormLabel>
+                      <FormLabel>Scripture Reference</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -858,7 +854,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 />
 
                 <FormItem>
-                  <FormLabel>{t('soap.lookUpWith')}</FormLabel>
+                  <FormLabel>Look Up With</FormLabel>
                   <Select value={selectedVersion} onValueChange={(value) => {
                     setSelectedVersion(value);
                     // Force immediate lookup when version is changed if there's a reference
@@ -891,7 +887,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      {t('soap.scriptureText')}
+                      Scripture Text
                       {(isLookingUpVerse || isAutoLookingUp) && (
                         <span className="text-xs text-purple-600 font-normal flex items-center gap-1">
                           <div className="animate-spin h-3 w-3 border border-purple-600 border-t-transparent rounded-full"></div>
@@ -906,7 +902,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                         placeholder={
                           isLookingUpVerse ? "Looking up verse..." : 
                           isAutoLookingUp ? "Auto-loading NIV text..." :
-                          t('soap.enterScripture')
+                          "Enter the Scripture passage you're reflecting on..."
                         }
                         rows={4}
                         disabled={isLookingUpVerse}
@@ -942,7 +938,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   className="flex items-center gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {isLoadingAI ? t('soap.generating') : t('soap.generateComplete')}
+                  {isLoadingAI ? 'Generating...' : 'Generate Complete S.O.A.P.'}
                 </Button>
                 <Button
                   type="button"
@@ -988,7 +984,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <Eye className="h-5 w-5" />
-                      {t('soap.observation')}
+                      Observation
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -1064,7 +1060,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <Users className="h-5 w-5" />
-                      {t('soap.application')}
+                      Application
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -1140,7 +1136,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <Sparkles className="h-5 w-5" />
-                      {t('soap.prayer')}
+                      Prayer
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -1213,7 +1209,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
           {/* Settings and Metadata */}
           <Card>
             <CardHeader>
-              <CardTitle>{t('soap.settingsSharing')}</CardTitle>
+              <CardTitle>Settings & Sharing</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Show mood tag field for backwards compatibility */}
@@ -1250,9 +1246,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   render={({ field }) => (
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label>{t('soap.shareWithCommunity')}</Label>
+                        <Label>Share with Community</Label>
                         <p className="text-sm text-muted-foreground">
-                          {t('soap.makeEntryVisible')}
+                          Make this entry visible in the community feed
                         </p>
                       </div>
                       <FormControl>
@@ -1272,7 +1268,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label className={!churchAffiliation?.hasChurch ? "text-muted-foreground" : ""}>
-                          {t('soap.shareWithPastor')}
+                          Share with Pastor
                         </Label>
                         {churchAffiliation?.hasChurch ? (
                           churchAffiliation.hasPastors ? (
@@ -1335,7 +1331,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Brain className="h-5 w-5" />
-                  {t('soap.howAreYouFeeling')} {t('soap.optional')}
+                  How are you feeling? (Optional)
                 </CardTitle>
                 {isDetectingMood && (
                   <div className="flex items-center gap-2 text-sm text-purple-600">
@@ -1345,7 +1341,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                {t('soap.aiDetectEmotional')}
+                AI can detect your emotional and spiritual state from your reflection content.
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -1409,7 +1405,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     className="flex items-center gap-2"
                   >
                     <ChevronDown className="h-4 w-4" />
-                    {t('soap.chooseYourMoods')}
+                    Choose Your Moods
                   </Button>
                 )}
               </div>
@@ -1418,7 +1414,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               {showFullMoodGrid && (
                 <div className="space-y-4 border-t pt-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-gray-700">{t('soap.selectAllThatApply')}</h4>
+                    <h4 className="text-sm font-medium text-gray-700">Select All That Apply</h4>
                     <Button
                       type="button"
                       variant="ghost"
@@ -1427,7 +1423,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       className="text-gray-500"
                     >
                       <ChevronUp className="h-4 w-4" />
-                      {t('soap.collapse')}
+                      Collapse
                     </Button>
                   </div>
 
@@ -1514,7 +1510,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   className="flex items-center gap-2"
                 >
                   <Brain className="h-4 w-4" />
-                  {t('soap.getAiMoodSuggestions')}
+                  Get AI Mood Suggestions
                 </Button>
               )}
             </CardContent>
@@ -1530,7 +1526,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
           {/* Submit Button */}
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={onClose}>
-              {t('soap.cancel')}
+              Cancel
             </Button>
             <Button 
               type="submit" 
@@ -1553,7 +1549,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               }}
             >
               <Save className="h-4 w-4" />
-              {saveMutation.isPending ? t('soap.saving') : entry ? t('soap.updateEntry') : t('soap.saveEntry')}
+              {saveMutation.isPending ? 'Saving...' : entry ? 'Update Entry' : 'Save Entry'}
             </Button>
           </div>
         </form>

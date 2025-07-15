@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import { Play, Pause, Volume2, Settings, RefreshCw, Heart, Star, BookOpen, Headphones, Square } from "lucide-react";
-import { useLanguage } from "../contexts/LanguageContext";
 
 interface BibleVerse {
   id: number;
@@ -41,7 +40,6 @@ export default function FreshAudioBible() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const audioRef = useRef<HTMLAudioElement>(null);
-  const { t } = useLanguage();
   
   // State management
   const [selectedMood, setSelectedMood] = useState<string>("");
@@ -158,46 +156,46 @@ export default function FreshAudioBible() {
       title: "Emotional & Spiritual Support",
       icon: "💔",
       moods: [
-        { id: "lonely", label: t('moods.lonely'), color: "bg-blue-100 text-blue-800", icon: "🤗", theme: "God's presence and companionship" },
-        { id: "overwhelmed", label: t('moods.overwhelmed'), color: "bg-purple-100 text-purple-800", icon: "😰", theme: "anxiety and fatigue relief" },
-        { id: "angry", label: t('moods.angry'), color: "bg-red-100 text-red-800", icon: "💔", theme: "forgiveness, grace, redemption" },
-        { id: "doubtful", label: t('moods.doubtful'), color: "bg-gray-100 text-gray-800", icon: "❓", theme: "wrestling with God, questions" },
-        { id: "seeking", label: t('moods.seeking'), color: "bg-pink-100 text-pink-800", icon: "🙏", theme: "grace and mercy" },
-        { id: "struggling", label: t('moods.struggling'), color: "bg-orange-100 text-orange-800", icon: "⚖️", theme: "temptation, accountability, renewal" }
+        { id: "lonely", label: "Feeling Lonely", color: "bg-blue-100 text-blue-800", icon: "🤗", theme: "God's presence and companionship" },
+        { id: "overwhelmed", label: "Overwhelmed", color: "bg-purple-100 text-purple-800", icon: "😰", theme: "anxiety and fatigue relief" },
+        { id: "shame", label: "Shame or Guilt", color: "bg-red-100 text-red-800", icon: "💔", theme: "forgiveness, grace, redemption" },
+        { id: "doubting", label: "Doubting Faith", color: "bg-gray-100 text-gray-800", icon: "❓", theme: "wrestling with God, questions" },
+        { id: "needing-forgiveness", label: "Needing Forgiveness", color: "bg-pink-100 text-pink-800", icon: "🙏", theme: "grace and mercy" },
+        { id: "struggling-sin", label: "Struggling with Sin", color: "bg-orange-100 text-orange-800", icon: "⚖️", theme: "temptation, accountability, renewal" }
       ]
     },
     {
       title: "Growth & Transformation", 
       icon: "🌿",
       moods: [
-        { id: "seeking", label: t('moods.seeking'), color: "bg-indigo-100 text-indigo-800", icon: "🎯", theme: "identity in Christ, calling, direction" },
-        { id: "hopeful", label: t('moods.hopeful'), color: "bg-green-100 text-green-800", icon: "🌱", theme: "new beginnings, transformation" },
-        { id: "learning", label: t('moods.learning'), color: "bg-teal-100 text-teal-800", icon: "📈", theme: "wisdom, discipline, sanctification" },
-        { id: "confident", label: t('moods.confident'), color: "bg-yellow-100 text-yellow-800", icon: "💪", theme: "strength, courage, fearlessness" },
-        { id: "wise", label: t('moods.wise'), color: "bg-amber-100 text-amber-800", icon: "🦉", theme: "Proverbs, guidance, discernment" },
-        { id: "serving", label: t('moods.serving'), color: "bg-emerald-100 text-emerald-800", icon: "🤝", theme: "compassion, generosity, humility" }
+        { id: "seeking-purpose", label: "Seeking Purpose", color: "bg-indigo-100 text-indigo-800", icon: "🎯", theme: "identity in Christ, calling, direction" },
+        { id: "starting-over", label: "Starting Over", color: "bg-green-100 text-green-800", icon: "🌱", theme: "new beginnings, transformation" },
+        { id: "wanting-growth", label: "Wanting to Grow", color: "bg-teal-100 text-teal-800", icon: "📈", theme: "wisdom, discipline, sanctification" },
+        { id: "building-confidence", label: "Building Confidence", color: "bg-yellow-100 text-yellow-800", icon: "💪", theme: "strength, courage, fearlessness" },
+        { id: "desiring-wisdom", label: "Desiring Wisdom", color: "bg-amber-100 text-amber-800", icon: "🦉", theme: "Proverbs, guidance, discernment" },
+        { id: "serving-others", label: "Serving Others", color: "bg-emerald-100 text-emerald-800", icon: "🤝", theme: "compassion, generosity, humility" }
       ]
     },
     {
       title: "Life Situations",
       icon: "🌎", 
       moods: [
-        { id: "reflective", label: t('moods.reflective'), color: "bg-violet-100 text-violet-800", icon: "🤔", theme: "discernment scriptures" },
-        { id: "patient", label: t('moods.patient'), color: "bg-slate-100 text-slate-800", icon: "⏰", theme: "patience, faith in timing" },
-        { id: "loving", label: t('moods.loving'), color: "bg-rose-100 text-rose-800", icon: "💕", theme: "family, marriage, forgiveness" },
-        { id: "adaptable", label: t('moods.adaptable'), color: "bg-cyan-100 text-cyan-800", icon: "🔄", theme: "transitions, new seasons" },
-        { id: "courageous", label: t('moods.courageous'), color: "bg-red-100 text-red-800", icon: "⚖️", theme: "encouragement in trials" },
-        { id: "healing", label: t('moods.healing'), color: "bg-blue-100 text-blue-800", icon: "🩺", theme: "healing, peace in hardship" }
+        { id: "big-decision", label: "Before a Big Decision", color: "bg-violet-100 text-violet-800", icon: "🤔", theme: "discernment scriptures" },
+        { id: "waiting", label: "Waiting on God", color: "bg-slate-100 text-slate-800", icon: "⏰", theme: "patience, faith in timing" },
+        { id: "relationships", label: "Struggling in Relationships", color: "bg-rose-100 text-rose-800", icon: "💕", theme: "family, marriage, forgiveness" },
+        { id: "change", label: "Navigating Change", color: "bg-cyan-100 text-cyan-800", icon: "🔄", theme: "transitions, new seasons" },
+        { id: "injustice", label: "Dealing with Injustice", color: "bg-red-100 text-red-800", icon: "⚖️", theme: "encouragement in trials" },
+        { id: "illness", label: "Facing Illness", color: "bg-blue-100 text-blue-800", icon: "🩺", theme: "healing, peace in hardship" }
       ]
     },
     {
       title: "Faith & Worship",
       icon: "🙏",
       moods: [
-        { id: "spiritual", label: t('moods.spiritual'), color: "bg-purple-100 text-purple-800", icon: "🔥", theme: "spiritual thirst, revival, intimacy" },
-        { id: "worshipful", label: t('moods.worshipful'), color: "bg-gold-100 text-gold-800", icon: "🎵", theme: "psalms, adoration, joy" },
-        { id: "focused", label: t('moods.focused'), color: "bg-indigo-100 text-indigo-800", icon: "🕯️", theme: "intensified seeking" },
-        { id: "grateful", label: t('moods.grateful'), color: "bg-green-100 text-green-800", icon: "💚", theme: "thanksgiving and praise" }
+        { id: "hungry-for-god", label: "Hungry for God", color: "bg-purple-100 text-purple-800", icon: "🔥", theme: "spiritual thirst, revival, intimacy" },
+        { id: "worshipful", label: "Worshipful Heart", color: "bg-gold-100 text-gold-800", icon: "🎵", theme: "psalms, adoration, joy" },
+        { id: "fasting-prayer", label: "Fasting/Prayer Mode", color: "bg-indigo-100 text-indigo-800", icon: "🕯️", theme: "intensified seeking" },
+        { id: "grateful", label: "Grateful Heart", color: "bg-green-100 text-green-800", icon: "💚", theme: "thanksgiving and praise" }
       ]
     }
   ];
@@ -689,8 +687,8 @@ export default function FreshAudioBible() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-2 sm:py-4 md:py-6 lg:py-8">
       <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6">
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{t('audioBible.title')}</h1>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300">{t('audioBible.subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">Audio Bible Experience</h1>
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300">AI-powered personalized scripture listening with premium voices</p>
         </div>
 
         <Tabs defaultValue="mood-selection" className="space-y-3 sm:space-y-4 md:space-y-6">

@@ -8,12 +8,10 @@ import { Badge } from "../components/ui/badge";
 import { BookOpen, Calendar, Heart, Share2 } from "lucide-react";
 import MobileNav from "../components/mobile-nav";
 import { useToast } from "../hooks/use-toast";
-import { useLanguage } from "../contexts/LanguageContext";
 
 export default function BiblePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const [, setLocation] = useLocation();
 
   // Fetch daily verse from API
@@ -65,7 +63,7 @@ export default function BiblePage() {
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">
-            {t('nav.todaysReading')}
+            Today's Reading
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
             {new Date().toLocaleDateString('en-US', { 
@@ -82,18 +80,18 @@ export default function BiblePage() {
           <CardHeader className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <BookOpen className="w-6 h-6 text-blue-600" />
-              <CardTitle className="text-xl text-gray-900">{t('bible.dailyVerse')}</CardTitle>
+              <CardTitle className="text-xl text-gray-900">Daily Verse</CardTitle>
             </div>
             <Badge variant="secondary" className="mx-auto">
-              {currentVerse?.theme || t('bible.dailyInspiration')}
+              {currentVerse?.theme || "Daily Inspiration"}
             </Badge>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <blockquote className="text-lg italic text-gray-700 leading-relaxed">
-              "{currentVerse?.verseText || t('bible.loadingVerse')}"
+              "{currentVerse?.verseText || "Loading today's verse..."}"
             </blockquote>
             <p className="font-semibold text-blue-600">
-              {currentVerse?.verseReference || t('common.loading')}
+              {currentVerse?.verseReference || "Loading..."}
             </p>
             
             {/* Personalization indicator */}
@@ -113,13 +111,13 @@ export default function BiblePage() {
                 className="flex items-center justify-center gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2"
                 onClick={() => {
                   toast({
-                    title: t('bible.reflectionStarted'),
-                    description: t('bible.reflectionDescription')
+                    title: "Reflection Started",
+                    description: "Take a moment to reflect on this verse and its meaning in your life."
                   });
                 }}
               >
                 <Heart className="w-4 h-4" />
-                {t('bible.reflect')}
+                Reflect
               </Button>
               <Button 
                 variant="outline" 
@@ -128,21 +126,21 @@ export default function BiblePage() {
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
-                      title: t('bible.dailyVerse'),
+                      title: 'Daily Verse',
                       text: `"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}`,
                       url: window.location.href
                     });
                   } else {
                     navigator.clipboard.writeText(`"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}"`);
                     toast({
-                      title: t('bible.copiedToClipboard'),
-                      description: t('bible.verseCopied')
+                      title: "Copied to clipboard",
+                      description: "The verse has been copied to your clipboard."
                     });
                   }
                 }}
               >
                 <Share2 className="w-4 h-4" />
-                {t('bible.share')}
+                Share
               </Button>
             </div>
           </CardContent>
@@ -153,19 +151,19 @@ export default function BiblePage() {
           <Card className="text-center border-0 shadow-md bg-white/70 backdrop-blur-sm">
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-blue-600">7</div>
-              <p className="text-sm text-gray-600">{t('bible.dayStreak')}</p>
+              <p className="text-sm text-gray-600">Day Streak</p>
             </CardContent>
           </Card>
           <Card className="text-center border-0 shadow-md bg-white/70 backdrop-blur-sm">
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-green-600">42</div>
-              <p className="text-sm text-gray-600">{t('bible.versesRead')}</p>
+              <p className="text-sm text-gray-600">Verses Read</p>
             </CardContent>
           </Card>
           <Card className="text-center border-0 shadow-md bg-white/70 backdrop-blur-sm">
             <CardContent className="pt-6">
               <div className="text-2xl font-bold text-purple-600">3</div>
-              <p className="text-sm text-gray-600">{t('bible.badgesEarned')}</p>
+              <p className="text-sm text-gray-600">Badges Earned</p>
             </CardContent>
           </Card>
         </div>
@@ -175,14 +173,14 @@ export default function BiblePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
-              {t('bible.readingPlan')}
+              Reading Plan
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <span className="font-medium">{t('bible.dailyDevotional')}</span>
-                <Badge variant="secondary">{t('bible.active')}</Badge>
+                <span className="font-medium">Daily Devotional</span>
+                <Badge variant="secondary">Active</Badge>
               </div>
               <p className="text-sm text-gray-600">
                 Continue your spiritual journey with daily scripture readings and reflections.
@@ -191,12 +189,12 @@ export default function BiblePage() {
                 className="w-full mt-4"
                 onClick={() => {
                   toast({
-                    title: t('bible.readingPlanActive'),
-                    description: t('bible.dailyContentPersonalized')
+                    title: "Reading Plan Active",
+                    description: "Daily content personalized to your mood and activities. Return tomorrow for new verse!"
                   });
                 }}
               >
-                {t('bible.continueReading')}
+                Continue Reading Plan
               </Button>
             </div>
           </CardContent>

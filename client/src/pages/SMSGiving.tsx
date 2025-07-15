@@ -29,7 +29,6 @@ import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useLanguage } from "../contexts/LanguageContext";
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
@@ -121,7 +120,6 @@ export default function SMSGiving() {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { t } = useLanguage();
 
   // Fetch SMS giving configuration
   const { data: smsConfig, isLoading } = useQuery({
@@ -275,9 +273,9 @@ export default function SMSGiving() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">{t('donation.title')}</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Donation</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-{t('donation.enableConvenientMobile')} {t('donation.textMessages')}. {t('donation.perfectForTechForward')}
+            Enable convenient mobile giving through text messages. Perfect for tech-forward churches.
           </p>
         </div>
 
@@ -286,15 +284,15 @@ export default function SMSGiving() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Smartphone className="h-6 w-6 text-blue-600" />
-              <span>{t('donation.serviceStatus')}</span>
+              <span>Donation Service Status</span>
               {smsConfig?.isActive ? (
                 <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
               ) : (
-                <Badge variant="secondary">{t('donation.inactive')}</Badge>
+                <Badge variant="secondary">Inactive</Badge>
               )}
             </CardTitle>
             <CardDescription>
-{t('donation.currentStatus')} of your {t('donation.smsGiving')} service and {t('donation.configuration')}
+              Current status of your donation service and configuration
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -316,8 +314,8 @@ export default function SMSGiving() {
             ) : (
               <div className="text-center py-8">
                 <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">{t('donation.notConfigured')}</h3>
-                <p className="text-gray-600 mb-4">{t('donation.setUpSmsGiving')} {t('donation.enableMobileDonations')}</p>
+                <h3 className="text-lg font-semibold mb-2">Donation Service Not Configured</h3>
+                <p className="text-gray-600 mb-4">Set up donation service to enable mobile donations</p>
                 <Button 
                   onClick={() => setIsSettingUp(true)}
                   className="bg-blue-600 hover:bg-blue-700"

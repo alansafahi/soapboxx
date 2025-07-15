@@ -2,7 +2,6 @@ import { Bell, Heart, Menu, MessageCircle, Check, Moon, Sun } from "lucide-react
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 import { useTheme } from "../hooks/useTheme";
-import { useLanguage } from "../contexts/LanguageContext";
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -18,7 +17,6 @@ export default function Navigation() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { theme, toggleTheme } = useTheme();
-  const { t } = useLanguage();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -225,12 +223,12 @@ export default function Navigation() {
                     className="text-xs h-6 px-2"
                   >
                     <Check className="w-3 h-3 mr-1" />
-{t('notifications.markAllRead')}
+                    Mark all read
                   </Button>
                 </div>
                 {notifications.filter(n => n.unread).length === 0 ? (
                   <div className="p-4 text-center text-gray-500 text-sm">
-{t('notifications.noNewNotifications')}
+                    No new notifications
                   </div>
                 ) : (
                   notifications.filter(n => n.unread).map((notification) => (
@@ -257,7 +255,7 @@ export default function Navigation() {
                   onClick={() => window.location.href = '/messages'}
                   className="p-3 text-center text-sm text-blue-600 hover:text-blue-700"
                 >
-{t('common.viewAllMessages')}
+                  View all messages
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -288,11 +286,11 @@ export default function Navigation() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
-{t('nav.profile')}
+                  Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>{t('nav.settings')}</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
-{t('nav.signOut')}
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -3,12 +3,10 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 import EventsList from "../components/events-list";
 import MobileNav from "../components/mobile-nav";
-import { useLanguage } from "../contexts/LanguageContext";
 
 export default function EventsPage() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
-  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -29,7 +27,7 @@ export default function EventsPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto"></div>
-          <p className="mt-4 text-gray-300">{t('common.loading')}</p>
+          <p className="mt-4 text-gray-300">Loading events...</p>
         </div>
       </div>
     );
@@ -47,15 +45,15 @@ export default function EventsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                {t('pages.communityEvents')}
+                Community Events
               </h1>
               <p className="text-gray-300 dark:text-gray-300 mt-2 text-lg">
-                {t('events.discoverEventsDescription')}
+                Discover upcoming events and connect with your faith community
               </p>
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-gray-400">{t('common.today')}</p>
+                <p className="text-sm text-gray-400">Today</p>
                 <p className="font-semibold text-gray-200">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</p>
               </div>
             </div>

@@ -8,7 +8,6 @@ import { Textarea } from "./ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../hooks/useAuth";
-import { useLanguage } from "../contexts/LanguageContext";
 import { apiRequest } from "../lib/queryClient";
 import { 
   Heart, 
@@ -101,7 +100,6 @@ interface FeedPost {
 export default function SocialFeed() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const queryClient = useQueryClient();
   
   const [newPost, setNewPost] = useState("");
@@ -726,7 +724,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 <Textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  placeholder={t('posts.shareThoughts')}
+                  placeholder="Share your thoughts, prayers, or reflections..."
                   className="w-full border-0 p-0 text-base resize-none focus:ring-0 bg-transparent"
                   rows={3}
                 />
@@ -771,7 +769,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                       onClick={clearMoods}
                       className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
                     >
-{t('general.clearAll')}
+                      Clear all
                     </Button>
                   )}
                 </div>
@@ -899,7 +897,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   {showMoodDropdown && (
                     <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-[480px] max-w-[95vw] max-h-[70vh] overflow-y-auto">
                       <div className="p-3 sm:p-4">
-                        <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">{t('moodCheckin.howAreYouFeeling')}</div>
+                        <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
                         
                         {/* Recently Used Section */}
                         {recentMoods.length > 0 && (
@@ -1155,7 +1153,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 onClick={handleCreatePost}
                 disabled={!newPost.trim() || createPostMutation.isPending}
                 className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium p-2 h-8 w-8 border-0 flex-shrink-0 ml-2"
-                title={createPostMutation.isPending ? t('posts.posting') : t('buttons.share')}
+                title={createPostMutation.isPending ? 'Posting...' : 'Share post'}
               >
                 <Send className="w-4 h-4 text-white" />
               </Button>
@@ -1683,9 +1681,9 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
       <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
         <DialogContent className="sm:max-w-md max-h-[85vh] h-[85vh] flex flex-col p-4 m-2" aria-describedby="comment-dialog-description">
           <DialogHeader className="flex-shrink-0 pb-2">
-            <DialogTitle className="text-lg">{t('comments.title')}</DialogTitle>
+            <DialogTitle className="text-lg">Comments</DialogTitle>
             <DialogDescription id="comment-dialog-description" className="text-sm">
-              {t('comments.shareThoughts')}
+              Share your thoughts and engage with this post.
             </DialogDescription>
           </DialogHeader>
           
@@ -1693,7 +1691,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              placeholder={t('comments.placeholder')}
+              placeholder="Write a thoughtful comment..."
               className="min-h-[60px] max-h-[120px] text-sm resize-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -1717,7 +1715,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     disabled={commentMutation.isPending}
                     className="flex-1 h-10"
                   >
-                    {t('buttons.cancel')}
+                    Cancel
                   </Button>
                   <Button 
                     onClick={() => {
@@ -1731,7 +1729,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     disabled={commentMutation.isPending || !commentText.trim()}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex-1 h-10"
                   >
-                    {commentMutation.isPending ? t('posts.posting') : t('buttons.postComment')}
+                    {commentMutation.isPending ? "Posting..." : "Post Comment"}
                   </Button>
                 </div>
                 <span className="text-xs text-gray-400 text-center">Press Cmd+Enter to post</span>

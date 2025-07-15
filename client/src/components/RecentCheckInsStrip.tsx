@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { useLanguage } from "../contexts/LanguageContext";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -47,7 +46,6 @@ const moodEmojis: { [key: string]: string } = {
 export default function RecentCheckInsStrip() {
   const [selectedCheckIn, setSelectedCheckIn] = useState<CheckIn | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { t } = useLanguage();
 
   const { data: recentCheckIns = [], isLoading } = useQuery({
     queryKey: ["/api/mood-checkins/recent"],
@@ -68,7 +66,7 @@ export default function RecentCheckInsStrip() {
   if (isLoading) {
     return (
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t('posts.recentCheckIns')}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Recent Check-Ins</h3>
         <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="flex-shrink-0 animate-pulse">
@@ -84,9 +82,9 @@ export default function RecentCheckInsStrip() {
   if (recentCheckIns.length === 0) {
     return (
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t('posts.recentCheckIns')}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Recent Check-Ins</h3>
         <div className="text-center py-4">
-          <p className="text-gray-500 dark:text-gray-400 text-sm">{t('posts.noRecentCheckIns')}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">No recent check-ins to show</p>
         </div>
       </div>
     );
@@ -95,7 +93,7 @@ export default function RecentCheckInsStrip() {
   return (
     <>
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t('posts.recentCheckIns')}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Recent Check-Ins</h3>
         <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-2">
           {recentCheckIns.map((checkIn: CheckIn) => {
             const mood = checkIn.mood?.split(',')[0]?.trim().toLowerCase() || 'peaceful';

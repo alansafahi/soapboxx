@@ -28,7 +28,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { useLanguage } from "../contexts/LanguageContext";
 
 interface Message {
   id: number;
@@ -85,7 +84,6 @@ export default function MessagesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [location] = useLocation();
-  const { t } = useLanguage();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
@@ -218,15 +216,15 @@ export default function MessagesPage() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t('pages.messages')}</h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">{t('pages.connectWithFaith')}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Messages</h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">Connect with your faith community</p>
           </div>
 
           <Dialog open={showNewMessageDialog} onOpenChange={setShowNewMessageDialog}>
             <DialogTrigger asChild>
               <Button className="bg-purple-600 hover:bg-purple-700">
                 <Plus className="w-4 h-4 mr-2" />
-                {t('buttons.newMessage')}
+                New Message
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
@@ -305,13 +303,13 @@ export default function MessagesPage() {
           <Card className="lg:col-span-1">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{t('pages.conversations')}</CardTitle>
+                <CardTitle className="text-lg">Conversations</CardTitle>
                 <Users className="w-5 h-5 text-purple-600" />
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder={t('messages.searchConversations')}
+                  placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -484,10 +482,10 @@ export default function MessagesPage() {
                 <CardContent className="p-0">
                   <ScrollArea className="h-[calc(100vh-420px)] p-4">
                     {messagesLoading ? (
-                      <div className="text-center text-gray-500">{t('common.loading')}</div>
+                      <div className="text-center text-gray-500">Loading messages...</div>
                     ) : messages.length === 0 ? (
                       <div className="text-center text-gray-500">
-                        {t('messages.connectWithCommunity')}
+                        No messages yet. Start the conversation!
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -535,7 +533,7 @@ export default function MessagesPage() {
                   <div className="p-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex gap-3">
                       <Textarea
-                        placeholder={t('common.send') + '...'}  
+                        placeholder="Type your message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={(e) => {

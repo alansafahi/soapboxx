@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Medal, Award, Crown, Flame, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useLanguage } from '../contexts/LanguageContext';
 
 // Define the structure of our leaderboard data
 interface LeaderboardEntry {
@@ -23,7 +22,6 @@ interface UserStreak {
 
 const Leaderboard: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userStreaks, setUserStreaks] = useState<UserStreak[]>([]);
   const [loading, setLoading] = useState(true);
@@ -142,7 +140,7 @@ const Leaderboard: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <Trophy className="w-12 h-12 text-yellow-500 mr-3" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              {t('nav.engagementBoard')}
+              Community Engagement Board
             </h1>
           </div>
           <p className="text-lg text-blue-200 max-w-2xl mx-auto">

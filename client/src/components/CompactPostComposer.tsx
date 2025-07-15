@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useLanguage } from "../contexts/LanguageContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
@@ -62,7 +61,6 @@ interface CompactPostComposerProps {
 export default function CompactPostComposer({ className = "" }: CompactPostComposerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -93,50 +91,50 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       title: "Spiritual States",
       description: "Your relationship with God and faith journey",
       moods: [
-        { id: "grateful", icon: "🙏", label: t('moods.grateful'), subtitle: "Thankful for God's blessings" },
-        { id: "blessed", icon: "✝️", label: t('moods.blessed'), subtitle: "Experiencing God's favor" },
-        { id: "peaceful", icon: "🕊️", label: t('moods.peaceful'), subtitle: "Feeling God's peace" },
-        { id: "loved", icon: "❤️", label: t('moods.loved'), subtitle: "Embraced by God's love" },
-        { id: "inspired", icon: "🔥", label: t('moods.inspired'), subtitle: "Moved by the Spirit" },
-        { id: "hopeful", icon: "🌟", label: t('moods.hopeful'), subtitle: "Trusting in God's plan" },
-        { id: "faithful", icon: "🛡️", label: t('moods.faithful'), subtitle: "Standing firm in belief" },
-        { id: "worshipful", icon: "🎵", label: t('moods.worshipful'), subtitle: "In praise and adoration" }
+        { id: "grateful", icon: "🙏", label: "Grateful", subtitle: "Thankful for God's blessings" },
+        { id: "blessed", icon: "✝️", label: "Blessed", subtitle: "Experiencing God's favor" },
+        { id: "peaceful", icon: "🕊️", label: "Peaceful", subtitle: "Feeling God's peace" },
+        { id: "loved", icon: "❤️", label: "Loved", subtitle: "Embraced by God's love" },
+        { id: "inspired", icon: "🔥", label: "Inspired", subtitle: "Moved by the Spirit" },
+        { id: "hopeful", icon: "🌟", label: "Hopeful", subtitle: "Trusting in God's plan" },
+        { id: "faithful", icon: "🛡️", label: "Faithful", subtitle: "Standing firm in belief" },
+        { id: "worshipful", icon: "🎵", label: "Worshipful", subtitle: "In praise and adoration" }
       ]
     },
     {
       title: "Emotional Well-being",
       description: "How you're feeling emotionally today",
       moods: [
-        { id: "joyful", icon: "😊", label: t('moods.joyful'), subtitle: "Filled with happiness" },
-        { id: "content", icon: "😌", label: t('moods.content'), subtitle: "At peace with life" },
-        { id: "excited", icon: "🤗", label: t('moods.excited'), subtitle: "Looking forward" },
-        { id: "calm", icon: "😇", label: t('moods.calm'), subtitle: "Tranquil and serene" },
-        { id: "reflective", icon: "🤔", label: t('moods.reflective'), subtitle: "Thoughtful and pondering" },
-        { id: "energetic", icon: "⚡", label: t('moods.energetic'), subtitle: "Full of vitality" }
+        { id: "joyful", icon: "😊", label: "Joyful", subtitle: "Filled with happiness" },
+        { id: "content", icon: "😌", label: "Content", subtitle: "At peace with life" },
+        { id: "excited", icon: "🤗", label: "Excited", subtitle: "Looking forward" },
+        { id: "calm", icon: "😇", label: "Calm", subtitle: "Tranquil and serene" },
+        { id: "reflective", icon: "🤔", label: "Reflective", subtitle: "Thoughtful and pondering" },
+        { id: "energetic", icon: "⚡", label: "Energetic", subtitle: "Full of vitality" }
       ]
     },
     {
       title: "Seeking Support",
       description: "When you need encouragement or prayer",
       moods: [
-        { id: "struggling", icon: "😔", label: t('moods.struggling'), subtitle: "Going through difficulties" },
-        { id: "anxious", icon: "😰", label: t('moods.anxious'), subtitle: "Feeling worried or nervous" },
-        { id: "confused", icon: "😕", label: t('moods.confused'), subtitle: "Seeking clarity" },
-        { id: "lonely", icon: "😢", label: t('moods.lonely'), subtitle: "Needing connection" },
-        { id: "overwhelmed", icon: "😵", label: t('moods.overwhelmed'), subtitle: "Feeling burdened" },
-        { id: "seeking", icon: "🔍", label: t('moods.seeking'), subtitle: "Looking for answers" }
+        { id: "struggling", icon: "😔", label: "Struggling", subtitle: "Going through difficulties" },
+        { id: "anxious", icon: "😰", label: "Anxious", subtitle: "Feeling worried or nervous" },
+        { id: "confused", icon: "😕", label: "Confused", subtitle: "Seeking clarity" },
+        { id: "lonely", icon: "😢", label: "Lonely", subtitle: "Needing connection" },
+        { id: "overwhelmed", icon: "😵", label: "Overwhelmed", subtitle: "Feeling burdened" },
+        { id: "seeking", icon: "🔍", label: "Seeking", subtitle: "Looking for answers" }
       ]
     },
     {
       title: "Life Circumstances",
       description: "What's happening in your life right now",
       moods: [
-        { id: "celebrating", icon: "🎉", label: t('moods.celebrating'), subtitle: "Marking a special moment" },
-        { id: "recovering", icon: "🩹", label: t('moods.recovering'), subtitle: "Healing and getting better" },
-        { id: "learning", icon: "📚", label: t('moods.learning'), subtitle: "Growing in knowledge" },
-        { id: "serving", icon: "🤝", label: t('moods.serving'), subtitle: "Helping others" },
-        { id: "traveling", icon: "✈️", label: t('moods.traveling'), subtitle: "On a journey" },
-        { id: "working", icon: "💼", label: t('moods.working'), subtitle: "Focused on tasks" }
+        { id: "celebrating", icon: "🎉", label: "Celebrating", subtitle: "Marking a special moment" },
+        { id: "recovering", icon: "🩹", label: "Recovering", subtitle: "Healing and getting better" },
+        { id: "learning", icon: "📚", label: "Learning", subtitle: "Growing in knowledge" },
+        { id: "serving", icon: "🤝", label: "Serving", subtitle: "Helping others" },
+        { id: "traveling", icon: "✈️", label: "Traveling", subtitle: "On a journey" },
+        { id: "working", icon: "💼", label: "Working", subtitle: "Focused on tasks" }
       ]
     }
   ];
@@ -163,8 +161,8 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       setIsExpanded(false);
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       toast({
-        title: t('posts.postShared') || "Post shared!",
-        description: t('posts.sharedWithCommunity') || "Your post has been shared with your community.",
+        title: "Post shared!",
+        description: "Your post has been shared with your community.",
       });
     },
     onError: () => {
@@ -595,7 +593,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                     {showMoodDropdown && (
                       <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-[480px] max-w-[95vw] max-h-[70vh] overflow-y-auto">
                         <div className="p-3 sm:p-4">
-                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">{t('posts.howAreYouFeeling') || 'How are you feeling?'}</div>
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
                           
                           {/* Recently Used Section */}
                           {recentMoods.length > 0 && (

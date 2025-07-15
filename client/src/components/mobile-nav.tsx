@@ -1,40 +1,38 @@
 import { useLocation, Link } from "wouter";
 import { Home, Users, Calendar, Hand, User } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useLanguage } from "../contexts/LanguageContext";
 
 export default function MobileNav() {
   const [location] = useLocation();
-  const { t } = useLanguage();
 
   const navItems = [
     {
       icon: Home,
-      label: t('nav.home'),
+      label: "Home",
       path: "/",
       isActive: location === "/",
     },
     {
       icon: Users,
-      label: t('nav.community'),
+      label: "Community",
       path: "/community",
       isActive: location === "/community",
     },
     {
       icon: Calendar,
-      label: t('nav.events'),
+      label: "Events",
       path: "/events",
       isActive: location === "/events",
     },
     {
       icon: Hand,
-      label: t('nav.prayer'),
+      label: "Prayer",
       path: "/prayer",
       isActive: location === "/prayer",
     },
     {
       icon: User,
-      label: t('nav.profile'),
+      label: "Profile",
       path: "/profile",
       isActive: location === "/profile",
     },

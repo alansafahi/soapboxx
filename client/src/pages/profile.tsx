@@ -32,7 +32,6 @@ import {
   Edit2
 } from "lucide-react";
 import { format } from "date-fns";
-import { useLanguage } from "../contexts/LanguageContext";
 
 interface UserProfile {
   id: string;
@@ -96,7 +95,6 @@ const SPIRITUAL_INTERESTS = [
 export default function ProfilePage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -283,7 +281,7 @@ export default function ProfilePage() {
         
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('profile.title')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile</h1>
           <div className="flex gap-2">
             {isEditing && (
               <Button
@@ -307,7 +305,7 @@ export default function ProfilePage() {
               ) : (
                 <>
                   <Edit2 className="h-4 w-4" />
-                  {t('profile.editProfile')}
+                  Edit Profile
                 </>
               )}
             </Button>
@@ -316,9 +314,9 @@ export default function ProfilePage() {
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile">{t('profile.title')}</TabsTrigger>
-            <TabsTrigger value="stats">{t('profile.statistics')}</TabsTrigger>
-            <TabsTrigger value="achievements">{t('profile.achievements')}</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="stats">Statistics</TabsTrigger>
+            <TabsTrigger value="achievements">Achievements</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
@@ -407,7 +405,7 @@ export default function ProfilePage() {
                         )}
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          {t('profile.memberSince')} {profile?.createdAt ? format(new Date(profile.createdAt), "MMMM yyyy") : "Unknown"}
+                          Member since {profile?.createdAt ? format(new Date(profile.createdAt), "MMMM yyyy") : "Unknown"}
                         </div>
                       </>
                     )}
@@ -421,7 +419,7 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Phone className="h-5 w-5" />
-                  {t('profile.contactInformation')}
+                  Contact Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">

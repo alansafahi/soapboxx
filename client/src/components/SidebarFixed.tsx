@@ -16,7 +16,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useTheme } from "../hooks/useTheme";
-import { useLanguage } from "../contexts/LanguageContext";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 import {
   Home, 
@@ -48,7 +47,6 @@ import {
   ChevronRight,
   UserPlus,
   Sparkles,
-  Languages,
   Trophy,
   QrCode
 } from "lucide-react";
@@ -72,7 +70,6 @@ export default function SidebarFixed() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { t } = useLanguage();
   const isFeatureEnabled = useIsFeatureEnabled();
 
   // Get user's churches to check for admin roles
@@ -127,61 +124,60 @@ export default function SidebarFixed() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // EXACT navigation structure as specified by user - now with translations
+  // EXACT navigation structure as specified by user
   const navigationGroups: NavigationGroup[] = [
     {
-      label: t('sections.community'),
+      label: "COMMUNITY",
       items: [
-        { label: t('nav.home'), href: "/", icon: Home },
-        { label: t('nav.messages'), href: "/messages", icon: Mail },
-        { label: t('nav.contacts'), href: "/contacts", icon: UserPlus },
-        { label: t('nav.churches'), href: "/churches", icon: Users },
-        { label: t('nav.events'), href: "/events", icon: Calendar },
-        { label: t('nav.donation'), href: "/donation-demo", icon: DollarSign },
-        { label: t('nav.discussions'), href: "/discussions", icon: MessageSquare },
+        { label: "Home", href: "/", icon: Home },
+        { label: "Messages", href: "/messages", icon: Mail },
+        { label: "Contacts", href: "/contacts", icon: UserPlus },
+        { label: "Churches", href: "/churches", icon: Users },
+        { label: "Events", href: "/events", icon: Calendar },
+        { label: "Donation", href: "/donation-demo", icon: DollarSign },
+        { label: "Discussions", href: "/discussions", icon: MessageSquare },
       ]
     },
     {
-      label: t('sections.spiritualTools'),
+      label: "SPIRITUAL TOOLS",
       items: [
-        { label: t('nav.todaysReading'), href: "/bible", icon: BookOpen },
-        { label: t('nav.prayerWall'), href: "/prayer-wall", icon: Heart },
-        { label: t('nav.engagementBoard'), href: "/leaderboard", icon: Trophy },
-        { label: t('nav.soapJournal'), href: "/soap", icon: PenTool },
-        { label: t('nav.audioBible'), href: "/audio-bible", icon: Play },
-        { label: t('nav.audioRoutines'), href: "/audio-routines", icon: Mic },
+        { label: "Today's Reading", href: "/bible", icon: BookOpen },
+        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
+        { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
+        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+        { label: "Audio Bible", href: "/audio-bible", icon: Play },
+        { label: "Audio Routines", href: "/audio-routines", icon: Mic },
       ]
     },
     {
-      label: t('sections.mediaContents'),
+      label: "MEDIA CONTENTS",
       items: [
-        { label: t('nav.videoLibrary'), href: "/video-library", icon: Video },
-        { label: t('nav.imageGallery'), href: "/image-gallery", icon: ImageIcon },
+        { label: "Video Library", href: "/video-library", icon: Video },
+        { label: "Image Gallery", href: "/image-gallery", icon: ImageIcon },
       ]
     },
     {
-      label: t('sections.adminPortal'),
+      label: "ADMIN PORTAL",
       items: [
-        { label: t('nav.memberDirectory'), href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.qrCodeManagement'), href: "/qr-management", icon: QrCode, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.donationAnalytics'), href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.communicationHub'), href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.sermonStudio'), href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: t('nav.engagementAnalytics'), href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "QR Code Management", href: "/qr-management", icon: QrCode, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
       ]
     },
     {
-      label: t('sections.soapboxPortal'),
+      label: "SOAPBOX PORTAL",
       items: [
-        { label: t('nav.churchManagement'), href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
-        { label: t('nav.aiTranslationAdmin'), href: "/ai-translation-admin", icon: Languages, roles: ['soapbox_owner', 'system_admin'] },
+        { label: "Church Management", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
       ]
     },
     {
-      label: t('sections.account'),
+      label: "ACCOUNT",
       items: [
-        { label: t('nav.profile'), href: "/profile", icon: User },
-        { label: t('nav.settings'), href: "/settings", icon: Settings },
+        { label: "Profile", href: "/profile", icon: User },
+        { label: "Settings", href: "/settings", icon: Settings },
       ]
     }
   ];

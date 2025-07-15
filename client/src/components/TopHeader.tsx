@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Badge } from "./ui/badge";
-import { useLanguage } from "../contexts/LanguageContext";
 
 interface User {
   id?: string;
@@ -41,7 +40,6 @@ export default function TopHeader() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useImmediateAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
   
   // Fetch complete user profile data with profile image
   const { data: profileUser } = useQuery({
@@ -169,48 +167,48 @@ export default function TopHeader() {
           <DropdownMenuContent align="start" className="w-64 max-h-96 overflow-y-auto">
             {/* Community Section */}
             <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {t('sections.community')}
+              Community
             </div>
             <Link href="/">
               <DropdownMenuItem className="cursor-pointer">
                 <Home className="w-4 h-4 mr-2" />
-                {t('nav.home')}
+                Home
               </DropdownMenuItem>
             </Link>
             <Link href="/messages">
               <DropdownMenuItem className="cursor-pointer">
                 <MessageSquare className="w-4 h-4 mr-2" />
-                {t('nav.messages')}
+                Messages
               </DropdownMenuItem>
             </Link>
             <Link href="/contacts">
               <DropdownMenuItem className="cursor-pointer">
                 <UserPlus className="w-4 h-4 mr-2" />
-                {t('nav.contacts')}
+                Contacts
               </DropdownMenuItem>
             </Link>
             <Link href="/churches">
               <DropdownMenuItem className="cursor-pointer">
                 <Users className="w-4 h-4 mr-2" />
-                {t('nav.churches')}
+                Churches
               </DropdownMenuItem>
             </Link>
             <Link href="/events">
               <DropdownMenuItem className="cursor-pointer">
                 <Calendar className="w-4 h-4 mr-2" />
-                {t('nav.events')}
+                Events
               </DropdownMenuItem>
             </Link>
             <Link href="/discussions">
               <DropdownMenuItem className="cursor-pointer">
                 <MessageSquare className="w-4 h-4 mr-2" />
-                {t('nav.discussions')}
+                Discussions
               </DropdownMenuItem>
             </Link>
             <Link href="/sms-giving">
               <DropdownMenuItem className="cursor-pointer">
                 <DollarSign className="w-4 h-4 mr-2" />
-                {t('nav.donation')}
+                Donation
               </DropdownMenuItem>
             </Link>
             
@@ -218,36 +216,36 @@ export default function TopHeader() {
             
             {/* Spiritual Tools Section */}
             <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {t('sections.spiritualTools')}
+              Spiritual Tools
             </div>
             <Link href="/bible">
               <DropdownMenuItem className="cursor-pointer">
                 <BookOpen className="w-4 h-4 mr-2" />
-{t('nav.todaysReading')}
+                Today's Reading
               </DropdownMenuItem>
             </Link>
             <Link href="/prayer-wall">
               <DropdownMenuItem className="cursor-pointer">
                 <Heart className="w-4 h-4 mr-2" />
-{t('nav.prayerWall')}
+                Prayer Wall
               </DropdownMenuItem>
             </Link>
             <Link href="/soap">
               <DropdownMenuItem className="cursor-pointer">
                 <PenTool className="w-4 h-4 mr-2" />
-{t('nav.soapJournal')}
+                S.O.A.P. Journal
               </DropdownMenuItem>
             </Link>
             <Link href="/audio-bible">
               <DropdownMenuItem className="cursor-pointer">
                 <Play className="w-4 h-4 mr-2" />
-{t('nav.audioBible')}
+                Audio Bible
               </DropdownMenuItem>
             </Link>
             <Link href="/audio-routines">
               <DropdownMenuItem className="cursor-pointer">
                 <Mic className="w-4 h-4 mr-2" />
-{t('nav.audioRoutines')}
+                Audio Routines
               </DropdownMenuItem>
             </Link>
             
@@ -255,18 +253,18 @@ export default function TopHeader() {
             
             {/* Media Contents Section */}
             <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {t('sections.mediaContents')}
+              Media Contents
             </div>
             <Link href="/video-library">
               <DropdownMenuItem className="cursor-pointer">
                 <Video className="w-4 h-4 mr-2" />
-{t('nav.videoLibrary')}
+                Video Library
               </DropdownMenuItem>
             </Link>
             <Link href="/image-gallery">
               <DropdownMenuItem className="cursor-pointer">
                 <Image className="w-4 h-4 mr-2" />
-{t('nav.imageGallery')}
+                Image Gallery
               </DropdownMenuItem>
             </Link>
             
@@ -275,36 +273,36 @@ export default function TopHeader() {
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('sections.adminPortal')}
+                  Admin Portal
                 </div>
                 <Link href="/members">
                   <DropdownMenuItem className="cursor-pointer">
                     <Users className="w-4 h-4 mr-2" />
-{t('nav.memberDirectory')}
+                    Member Directory
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/donation-analytics">
                   <DropdownMenuItem className="cursor-pointer">
                     <BarChart3 className="w-4 h-4 mr-2" />
-{t('nav.donationAnalytics')}
+                    Donation Analytics
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/communication">
                   <DropdownMenuItem className="cursor-pointer">
                     <Megaphone className="w-4 h-4 mr-2" />
-{t('nav.communicationHub')}
+                    Communication Hub
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/sermon-studio">
                   <DropdownMenuItem className="cursor-pointer">
                     <PenTool className="w-4 h-4 mr-2" />
-{t('nav.sermonStudio')}
+                    Sermon Studio
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/engagement-analytics">
                   <DropdownMenuItem className="cursor-pointer">
                     <TrendingUp className="w-4 h-4 mr-2" />
-{t('nav.engagementAnalytics')}
+                    Engagement Analytics
                   </DropdownMenuItem>
                 </Link>
 
@@ -316,12 +314,12 @@ export default function TopHeader() {
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('sections.soapboxPortal')}
+                  SoapBox Portal
                 </div>
                 <Link href="/admin">
                   <DropdownMenuItem className="cursor-pointer">
                     <Settings className="w-4 h-4 mr-2" />
-{t('nav.churchManagement')}
+                    Church Management
                   </DropdownMenuItem>
                 </Link>
               </>
@@ -331,18 +329,18 @@ export default function TopHeader() {
             
             {/* Account Section */}
             <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {t('sections.account')}
+              Account
             </div>
             <Link href="/profile">
               <DropdownMenuItem className="cursor-pointer">
                 <User className="w-4 h-4 mr-2" />
-                {t('nav.profile')}
+                Profile
               </DropdownMenuItem>
             </Link>
             <Link href="/settings">
               <DropdownMenuItem className="cursor-pointer">
                 <Settings className="w-4 h-4 mr-2" />
-                {t('nav.settings')}
+                Settings
               </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>

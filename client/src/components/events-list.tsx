@@ -5,7 +5,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
-import { useLanguage } from "../contexts/LanguageContext";
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -83,7 +82,6 @@ export default function EventsList() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { t } = useLanguage();
 
   // State
   const [searchTerm, setSearchTerm] = useState("");
@@ -399,7 +397,7 @@ export default function EventsList() {
       <Card>
         <CardContent className="p-8 text-center">
           <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>{t('events.loadingEvents')}</p>
+          <p>Loading events...</p>
         </CardContent>
       </Card>
     );
@@ -415,7 +413,7 @@ export default function EventsList() {
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              {t('events.upcomingEvents')}
+              Upcoming Events
             </span>
           </CardTitle>
         </CardHeader>
@@ -426,7 +424,7 @@ export default function EventsList() {
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
                 <Input
-                  placeholder={t('events.searchEvents')}
+                  placeholder="Search events by name, location, or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-12 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 focus:ring-purple-200 rounded-lg shadow-sm dark:text-white"
@@ -436,10 +434,10 @@ export default function EventsList() {
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 rounded-lg shadow-sm dark:text-white">
                     <Filter className="w-4 h-4 mr-2 text-purple-400" />
-                    <SelectValue placeholder={t('events.category')} />
+                    <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('events.allCategories')}</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     <SelectItem value="service">🙏 Service</SelectItem>
                     <SelectItem value="bible_study">📖 Bible Study</SelectItem>
                     <SelectItem value="community_service">🤝 Community Service</SelectItem>
@@ -452,13 +450,13 @@ export default function EventsList() {
                 <Select value={timeFilter} onValueChange={setTimeFilter}>
                   <SelectTrigger className="w-full sm:w-48 h-12 bg-white/80 dark:bg-gray-700/80 border-purple-200 dark:border-purple-600 focus:border-purple-400 rounded-lg shadow-sm dark:text-white">
                     <Clock className="w-4 h-4 mr-2 text-purple-400" />
-                    <SelectValue placeholder={t('events.time')} />
+                    <SelectValue placeholder="Time" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('events.allTime')}</SelectItem>
-                    <SelectItem value="today">{t('events.today')}</SelectItem>
-                    <SelectItem value="this_week">{t('events.thisWeek')}</SelectItem>
-                    <SelectItem value="this_month">{t('events.thisMonth')}</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -472,7 +470,7 @@ export default function EventsList() {
                   className={viewMode === "list" ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg" : "bg-white/80 hover:bg-white border-purple-200"}
                 >
                   <List className="w-4 h-4 mr-2" />
-                  {t('events.list')}
+                  List
                 </Button>
                 <Button
                   variant={viewMode === "calendar" ? "default" : "outline"}
@@ -481,7 +479,7 @@ export default function EventsList() {
                   className={viewMode === "calendar" ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg" : "bg-white/80 hover:bg-white border-purple-200"}
                 >
                   <Grid className="w-4 h-4 mr-2" />
-                  {t('events.calendar')}
+                  Calendar
                 </Button>
               </div>
               {(searchTerm || categoryFilter !== "all" || timeFilter !== "all") && (
@@ -495,7 +493,7 @@ export default function EventsList() {
                   }}
                   className="text-purple-600 hover:text-purple-800 hover:bg-purple-100"
                 >
-                  {t('common.clearFilters')}
+                  Clear Filters
                 </Button>
               )}
             </div>

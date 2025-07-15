@@ -5,7 +5,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
-import { useLanguage } from "../contexts/LanguageContext";
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -77,51 +76,91 @@ interface Event {
   isOnline?: boolean;
 }
 
-// Import shared mood system
-import { getMoodCategories as getSharedMoodCategories } from "../lib/moodCategories";
+// 4-Pillar Comprehensive Mood System matching AI Check-In
+const moodCategories = [
+  {
+    title: "💙 Emotional & Spiritual Support",
+    description: "Express your struggles and need for comfort",
+    moods: [
+      { value: "anxious", emoji: "😰", label: "Anxious" },
+      { value: "depressed", emoji: "😞", label: "Depressed" },
+      { value: "lonely", emoji: "😔", label: "Lonely" },
+      { value: "grieving", emoji: "💔", label: "Grieving" },
+      { value: "fearful", emoji: "😨", label: "Fearful" },
+      { value: "overwhelmed", emoji: "😵", label: "Overwhelmed" },
+      { value: "doubtful", emoji: "🤔", label: "Doubtful" },
+      { value: "angry", emoji: "😠", label: "Angry" },
+    ]
+  },
+  {
+    title: "🌱 Growth & Transformation",
+    description: "Mark your spiritual formation journey",
+    moods: [
+      { value: "seeking-direction", emoji: "🧭", label: "Seeking Direction" },
+      { value: "repentant", emoji: "🙏", label: "Repentant" },
+      { value: "motivated", emoji: "🔥", label: "Motivated" },
+      { value: "curious", emoji: "🤓", label: "Curious" },
+      { value: "determined", emoji: "💪", label: "Determined" },
+      { value: "reflective", emoji: "🤲", label: "Reflective" },
+      { value: "inspired", emoji: "✨", label: "Inspired" },
+      { value: "focused", emoji: "🎯", label: "Focused" },
+    ]
+  },
+  {
+    title: "🏠 Life Situations",
+    description: "Navigate life's challenges with faith",
+    moods: [
+      { value: "celebrating", emoji: "🎉", label: "Celebrating" },
+      { value: "in-transition", emoji: "🚪", label: "In Transition" },
+      { value: "healing", emoji: "🩹", label: "Healing" },
+      { value: "parenting-challenges", emoji: "👨‍👩‍👧‍👦", label: "Parenting Challenges" },
+      { value: "work-stress", emoji: "💼", label: "Work Stress" },
+      { value: "relationship-issues", emoji: "💕", label: "Relationship Issues" },
+      { value: "financial-concerns", emoji: "💰", label: "Financial Concerns" },
+      { value: "health-concerns", emoji: "🏥", label: "Health Concerns" },
+    ]
+  },
+  {
+    title: "⛪ Faith & Worship",
+    description: "Express your spiritual state and connection",
+    moods: [
+      { value: "grateful", emoji: "🙌", label: "Grateful" },
+      { value: "peaceful", emoji: "🕊️", label: "Peaceful" },
+      { value: "joyful", emoji: "😊", label: "Joyful" },
+      { value: "blessed", emoji: "😇", label: "Blessed" },
+      { value: "prayerful", emoji: "🙏", label: "Prayerful" },
+      { value: "worshipful", emoji: "🎵", label: "Worshipful" },
+      { value: "hopeful", emoji: "🌅", label: "Hopeful" },
+      { value: "content", emoji: "😌", label: "Content" },
+    ]
+  }
+];
 
-// Adapt shared mood system for CheckInSystem with value field instead of id
-const getMoodCategories = (t: (key: string) => string) => 
-  getSharedMoodCategories(t).map(category => ({
-    title: category.title,
-    description: category.title, // Use title as description for now
-    moods: category.moods.map(mood => ({
-      value: mood.id,
-      emoji: mood.icon,
-      label: mood.label
-    }))
-  }));
-
-// Flattened mood options for easier access - function to get translated moods
-const getMoodOptions = (t: (key: string) => string) => getMoodCategories(t).flatMap(category => 
+// Flattened mood options for easier access
+const moodOptions = moodCategories.flatMap(category => 
   category.moods.map(mood => ({
     ...mood,
     category: category.title
   }))
 );
 
-const getCheckInTypes = (t: (key: string) => string) => [
-  { value: t('checkin.sundayService'), icon: Users, description: t('checkin.attendingSundayService') },
-  { value: t('checkin.dailyDevotional'), icon: Sunrise, description: t('checkin.startingDailyDevotional') },
-  { value: t('checkin.prayerTime'), icon: Heart, description: t('checkin.prayerTime') },
-  { value: t('checkin.spiritualCheckIn'), icon: Star, description: t('checkin.spiritualCheckInMood') },
-  { value: t('checkin.custom'), icon: MessageCircle, description: t('checkin.customCheckIn') },
+const checkInTypes = [
+  { value: "Sunday Service", icon: Users, description: "Attending Sunday Service" },
+  { value: "Daily Devotional", icon: Sunrise, description: "Starting Daily Devotional" },
+  { value: "Prayer Time", icon: Heart, description: "Prayer Time" },
+  { value: "Spiritual Check-In", icon: Star, description: "Spiritual Check-In (mood-based)" },
+  { value: "Custom", icon: MessageCircle, description: "Custom Check-In" },
 ];
 
 export default function CheckInSystem() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const queryClient = useQueryClient();
-
-  // Get translated mood categories and options
-  const moodCategories = getMoodCategories(t);
-  const moodOptions = getMoodOptions(t);
 
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
   const [showMoodCheckIn, setShowMoodCheckIn] = useState(false);
-  const [selectedType, setSelectedType] = useState(t('checkin.spiritualCheckIn'));
+  const [selectedType, setSelectedType] = useState("Spiritual Check-In");
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [prayerIntent, setPrayerIntent] = useState("");
@@ -368,10 +407,10 @@ export default function CheckInSystem() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="w-6 h-6 text-blue-600" />
-                {t('checkin.dailyCheckIn')}
+                Daily Check-In
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                {t('checkin.shareJourney')}
+                Share your spiritual journey today
               </p>
             </div>
             {streak > 0 && (
@@ -408,7 +447,7 @@ export default function CheckInSystem() {
                   </motion.div>
                   <span className="font-bold text-lg">{streak}</span>
                 </motion.div>
-                <p className="text-xs text-muted-foreground">{t('checkin.dayStreak')}</p>
+                <p className="text-xs text-muted-foreground">day streak</p>
               </motion.div>
             )}
           </div>
@@ -426,24 +465,24 @@ export default function CheckInSystem() {
                     >
                       <div className="text-center">
                         <CheckCircle className="w-6 h-6 mx-auto mb-1" />
-                        <div>{t('checkin.virtualCheckIn')}</div>
+                        <div>Virtual Check-In</div>
                       </div>
                     </Button>
                   </DialogTrigger>
                   
                   <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>{t('checkin.dailySpiritualCheckIn')}</DialogTitle>
+                      <DialogTitle>Daily Spiritual Check-In</DialogTitle>
                     </DialogHeader>
                     
                     <div className="space-y-4">
                       {/* Check-In Type Selection */}
                       <div>
                         <label className="text-sm font-medium mb-3 block">
-                          {t('checkin.whatCheckingInFor')}
+                          What are you checking in for?
                         </label>
                         <div className="grid grid-cols-1 gap-2">
-                          {getCheckInTypes(t).map((type) => {
+                          {checkInTypes.map((type) => {
                             const Icon = type.icon;
                             return (
                               <button
@@ -482,14 +521,14 @@ export default function CheckInSystem() {
                       {/* Comprehensive Mood Selection */}
                       <div>
                         <label className="text-sm font-medium mb-3 block">
-                          {t('moodCheckin.howAreYouFeeling')} ({t('general.optional')})
+                          How are you feeling? (Optional)
                         </label>
                         
                         {/* Selected moods display */}
                         {selectedMoods.length > 0 && (
                           <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                             <div className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                              {t('general.selected')} ({selectedMoods.join(', ').length}/150 {t('general.characters')}):
+                              Selected feelings ({selectedMoods.join(', ').length}/150 characters):
                             </div>
                             <div className="flex flex-wrap gap-1">
                               {selectedMoods.map((moodValue) => {
@@ -512,7 +551,7 @@ export default function CheckInSystem() {
                                 onClick={() => setSelectedMoods([])}
                                 className="text-xs text-blue-600 hover:text-blue-800 mt-2"
                               >
-                                {t('general.clearAll')}
+                                Clear all
                               </button>
                             )}
                           </div>
@@ -604,7 +643,7 @@ export default function CheckInSystem() {
                 >
                   <div className="text-center">
                     <QrCode className="w-6 h-6 mx-auto mb-1" />
-                    <div>{t('checkin.qrCheckIn')}</div>
+                    <div>QR Check-In</div>
                   </div>
                 </Button>
 
@@ -616,22 +655,22 @@ export default function CheckInSystem() {
                 >
                   <div className="text-center">
                     <Brain className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-purple-700">{t('moodCheckin.aiMoodCheckin')}</div>
+                    <div className="text-purple-700">AI Mood Check-In</div>
                   </div>
                 </Button>
               </div>
               
               <p className="text-sm text-center text-muted-foreground">
-                {t('checkin.buildStreak')}
+                Check in once daily to build your spiritual journey streak
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="text-center py-6">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                <h3 className="font-medium text-lg mb-2">{t('checkin.alreadyCheckedIn')}</h3>
+                <h3 className="font-medium text-lg mb-2">Already Checked In Today!</h3>
                 <p className="text-muted-foreground mb-4">
-                  {t('checkin.checkedInAt')} {format(new Date(todayCheckIn.createdAt), "h:mm a")}
+                  You checked in {format(new Date(todayCheckIn.createdAt), "h:mm a")}
                 </p>
                 <Badge variant="secondary" className="mb-2">
                   {todayCheckIn.checkInType}
@@ -661,13 +700,13 @@ export default function CheckInSystem() {
                 >
                   <div className="text-center">
                     <Brain className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-purple-700">{t('moodCheckin.aiMoodCheckin')}</div>
+                    <div className="text-purple-700">AI Mood Check-In</div>
                   </div>
                 </Button>
               </div>
               
               <p className="text-sm text-center text-muted-foreground">
-                {t('moodCheckin.availableAnytime')}
+                AI Mood Check-In is available anytime for personalized spiritual guidance
               </p>
             </div>
           )}
@@ -726,10 +765,10 @@ export default function CheckInSystem() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <QrCode className="w-5 h-5" />
-                {t('checkin.qrCheckIn')}
+                QR Code Check-In
               </DialogTitle>
               <DialogDescription>
-                {t('qr.positionCode')} {t('qr.orEnterManually')}
+                Position the QR code within the camera frame or enter manually
               </DialogDescription>
             </DialogHeader>
             
@@ -780,7 +819,7 @@ export default function CheckInSystem() {
               
               {/* Manual Entry */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('qr.enterManually')}</label>
+                <label className="text-sm font-medium">Or enter QR code manually:</label>
                 <div className="flex gap-2">
                   <Input
                     value={manualQrCode}
@@ -842,9 +881,9 @@ export default function CheckInSystem() {
         <Dialog open={showMoodCheckIn} onOpenChange={setShowMoodCheckIn}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{t('moodCheckin.aiMoodCheckin')}</DialogTitle>
+              <DialogTitle>AI Mood Check-In</DialogTitle>
               <DialogDescription>
-                {t('moodCheckin.shareYourMood')}
+                Share how you're feeling to receive personalized spiritual guidance
               </DialogDescription>
             </DialogHeader>
             <MoodCheckIn 

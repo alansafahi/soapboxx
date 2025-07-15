@@ -25,7 +25,6 @@ import { formatDistanceToNow } from "date-fns";
 import type { PrayerRequest } from "../../../shared/schema";
 import SmartScriptureTextarea from "./SmartScriptureTextarea";
 import { ScriptureExpandedText } from "./ScriptureExpandedText";
-import { useLanguage } from "../contexts/LanguageContext";
 
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
@@ -49,22 +48,20 @@ type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
 type CommentFormData = z.infer<typeof commentSchema>;
 type UpdateFormData = z.infer<typeof updateSchema>;
 
-const getPrayerCategories = (t: (key: string) => string) => [
-  { id: 'all', label: t('prayerWall.allPrayers'), icon: '🙏', color: 'gray' },
-  { id: 'health', label: t('prayerWall.health'), icon: '💊', color: 'red' },
-  { id: 'career', label: t('prayerWall.career'), icon: '💼', color: 'blue' },
-  { id: 'relationships', label: t('prayerWall.relationships'), icon: '❤️', color: 'pink' },
-  { id: 'spiritual', label: t('prayerWall.spiritualGrowth'), icon: '✝️', color: 'purple' },
-  { id: 'family', label: t('prayerWall.family'), icon: '👨‍👩‍👧‍👦', color: 'green' },
-  { id: 'urgent', label: t('prayerWall.urgent'), icon: '⚡', color: 'yellow' },
-  { id: 'general', label: t('prayerWall.general'), icon: '🤲', color: 'gray' },
+const prayerCategories = [
+  { id: 'all', label: 'All Prayers', icon: '🙏', color: 'gray' },
+  { id: 'health', label: 'Health', icon: '💊', color: 'red' },
+  { id: 'career', label: 'Career', icon: '💼', color: 'blue' },
+  { id: 'relationships', label: 'Relationships', icon: '❤️', color: 'pink' },
+  { id: 'spiritual', label: 'Spiritual Growth', icon: '✝️', color: 'purple' },
+  { id: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦', color: 'green' },
+  { id: 'urgent', label: 'Urgent', icon: '⚡', color: 'yellow' },
+  { id: 'general', label: 'General', icon: '🤲', color: 'gray' },
 ];
 
 export default function PrayerWall() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
-  const prayerCategories = getPrayerCategories(t);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedTab, setSelectedTab] = useState('prayers');
@@ -459,19 +456,19 @@ export default function PrayerWall() {
         <CardHeader className="text-center pb-4">
           <CardTitle className="flex items-center justify-center space-x-2 text-2xl font-bold text-gray-900 dark:text-white">
             <Hand className="w-6 h-6 text-purple-600" />
-            <span>{t('prayerWall.title')}</span>
+            <span>Prayer Wall</span>
           </CardTitle>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            {t('prayerWall.shareRequests')} {t('prayerWall.prayForOthers')} {t('prayerWall.buildCommunity')}
+            Share your prayer requests and pray for others in our community
           </p>
           <div className="flex items-center justify-center space-x-6 mt-4 text-sm text-gray-500">
             <div className="flex items-center space-x-1">
               <Users className="w-4 h-4" />
-              <span>{prayerRequests?.length || 0} {t('pages.prayerRequests')}</span>
+              <span>{prayerRequests?.length || 0} requests</span>
             </div>
             <div className="flex items-center space-x-1">
               <Hand className="w-4 h-4" />
-              <span>{t('prayerWall.communityPrayers')}</span>
+              <span>Community prayers</span>
             </div>
           </div>
         </CardHeader>
@@ -494,7 +491,7 @@ export default function PrayerWall() {
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-6 px-4 text-base md:text-lg h-auto min-h-[60px] whitespace-normal"
         >
           <Plus className="w-5 h-5 mr-2 flex-shrink-0" />
-          <span className="text-center">{t('prayerWall.newPrayerRequest')}</span>
+          <span className="text-center">Add Prayer Request</span>
         </Button>
       </div>
 

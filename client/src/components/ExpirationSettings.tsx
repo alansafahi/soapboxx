@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLanguage } from "../contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,7 +26,6 @@ export default function ExpirationSettings({
   allowsExpiration = false,
   onSettingsChange
 }: ExpirationSettingsProps) {
-  const { t } = useLanguage();
   const [isEnabled, setIsEnabled] = useState(allowsExpiration);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
@@ -64,13 +62,6 @@ export default function ExpirationSettings({
           title: "Discussion Post Privacy",
           description: "Community posts with automatic cleanup after time",
           recommended: ["90d", "365d"],
-          icon: <Shield className="h-4 w-4" />
-        };
-      default:
-        return {
-          title: "Content Privacy",
-          description: "Set expiration for automatic content cleanup",
-          recommended: ["30d", "90d"],
           icon: <Shield className="h-4 w-4" />
         };
     }
@@ -168,7 +159,7 @@ export default function ExpirationSettings({
             onCheckedChange={handleEnableChange}
           />
           <Label htmlFor="enable-expiration" className="text-sm font-medium">
-            {t('soap.enableContentExpiration')}
+            Enable content expiration
           </Label>
         </div>
 

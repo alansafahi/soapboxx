@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useLanguage } from "../contexts/LanguageContext";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Textarea } from "./ui/textarea";
@@ -14,17 +13,13 @@ interface MoodCheckInProps {
   onComplete?: () => void;
 }
 
-import { getMoodCategories, getAllMoods } from "../lib/moodCategories";
+import { moodCategories, allMoods } from "../lib/moodCategories";
 
 export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
-  const { t } = useLanguage();
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [shareWithStaff, setShareWithStaff] = useState(false);
   const [personalizedContent, setPersonalizedContent] = useState<any>(null);
-  
-  const moodCategories = getMoodCategories(t);
-  const allMoods = getAllMoods(t);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -198,22 +193,22 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <Heart className="h-5 w-5 text-purple-600" />
-          {t('checkin.howFeeling')}
+          How are you feeling today?
         </CardTitle>
         <CardDescription>
-          {t('moodCheckin.shareYourMood')}
+          Share your mood to receive personalized spiritual content
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Selected Moods Display */}
         {selectedMoods.length > 0 && (
           <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('checkin.selectedFeelings')}</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Selected feelings:</div>
             <div className="flex flex-wrap gap-2">
               {getSelectedMoodsData().map((mood) => (
                 <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
                   <span className="text-sm">{mood.icon}</span>
-                  <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{t(mood.label)}</span>
+                  <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{mood.label}</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -231,7 +226,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
                   onClick={clearMoods}
                   className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
                 >
-                  {t('general.clearAll')}
+                  Clear all
                 </Button>
               )}
             </div>
@@ -247,10 +242,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
                 <div className={`flex items-center gap-2 pb-2 border-b ${hasSelectedMood ? 'border-purple-300 dark:border-purple-600' : 'border-gray-200 dark:border-gray-600'}`}>
                   <span className="text-lg">{category.icon}</span>
                   <h3 className={`font-semibold text-sm ${hasSelectedMood ? 'text-purple-700 dark:text-purple-300' : 'text-gray-800 dark:text-white'}`}>
-                    {t(category.title)}
+                    {category.title}
                     {hasSelectedMood && (
                       <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
-                        {t('general.selected')}
+                        Selected
                       </span>
                     )}
                   </h3>
@@ -286,10 +281,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            {t('checkin.personalReflection')}
+            What's on your heart? (optional)
           </label>
           <Textarea
-            placeholder={t('checkin.shareHeart')}
+            placeholder="Share what's on your mind..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[80px]"
@@ -306,7 +301,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
             htmlFor="share-staff"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            {t('moodCheckin.shareWithStaff')}
+            Share with church staff for prayer support
           </label>
         </div>
 
@@ -315,7 +310,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
           disabled={selectedMoods.length === 0 || submitMoodMutation.isPending}
           className="w-full bg-purple-600 hover:bg-purple-700"
         >
-          {submitMoodMutation.isPending ? t('moodCheckin.recording') : t('moodCheckin.getPersonalized')}
+          {submitMoodMutation.isPending ? "Recording..." : "Get Personalized Content"}
         </Button>
       </CardContent>
     </Card>
