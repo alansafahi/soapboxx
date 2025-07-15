@@ -203,9 +203,9 @@ export default function ExpirationSettings({
             {/* Custom Date Picker */}
             {selectedOption === "custom" && (
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
+                <span className="text-xs font-medium text-muted-foreground">
                   Select custom expiration date
-                </Label>
+                </span>
                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button

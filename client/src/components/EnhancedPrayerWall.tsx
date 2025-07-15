@@ -585,7 +585,7 @@ export default function EnhancedPrayerWall() {
                       New Prayer Request
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-md">
+                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Share a Prayer Request</DialogTitle>
                     </DialogHeader>
