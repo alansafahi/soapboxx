@@ -445,7 +445,8 @@ export default function EnhancedPrayerWall() {
       // Update reaction count simply - just increment by 1
       setReactions(prev => {
         const newMap = new Map(prev);
-        const current = newMap.get(prayerId) || { praying: 3, heart: 0, fire: 0, praise: 0 }; // Start with baseline 3
+        const prayer = prayerRequests.find(p => p.id === prayerId);
+        const current = newMap.get(prayerId) || { praying: prayer?.prayerCount || 0, heart: 0, fire: 0, praise: 0 }; // Use actual database count
         newMap.set(prayerId, { ...current, praying: Number(current.praying || 0) + 1 }); // Always increment by 1
         return newMap;
       });
@@ -750,7 +751,7 @@ export default function EnhancedPrayerWall() {
               {filteredPrayers.map((prayer) => {
                 // Calculate prayer count consistently
                 const currentReactions = reactions.get(prayer.id) || { 
-                  praying: 3, // Start with baseline of 3 (Sarah M., Pastor Tom, Maria G.)
+                  praying: prayer.prayerCount || 0, // Use actual database count
                   heart: 0, 
                   fire: 0, 
                   praise: 0 
