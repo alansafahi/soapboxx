@@ -88,6 +88,7 @@ export default function ExpirationSettings({
   }, [initialExpiresAt]);
 
   const handleEnableChange = (enabled: boolean) => {
+    console.log('ExpirationSettings: handleEnableChange called with:', enabled);
     setIsEnabled(enabled);
     if (!enabled) {
       setSelectedOption("");
@@ -157,8 +158,14 @@ export default function ExpirationSettings({
             id="enable-expiration"
             checked={isEnabled}
             onCheckedChange={handleEnableChange}
+            className="cursor-pointer"
+            data-testid="privacy-checkbox"
           />
-          <Label htmlFor="enable-expiration" className="text-sm font-medium">
+          <Label 
+            htmlFor="enable-expiration" 
+            className="text-sm font-medium cursor-pointer select-none"
+            onClick={() => handleEnableChange(!isEnabled)}
+          >
             Enable content expiration
           </Label>
         </div>
