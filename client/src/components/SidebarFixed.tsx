@@ -309,16 +309,11 @@ export default function SidebarFixed() {
                       
                       // Apply direct church feature filtering to bypass React caching
                       const featureEnabled = isFeatureEnabled(item.href);
-                      console.log(`🔍 EXPANDED FILTER CHECK: ${item.label} (${item.href}) - Enabled: ${featureEnabled}`);
-                      if (!featureEnabled) {
-                        console.log(`🚫 EXPANDED FILTERED OUT: ${item.label} (${item.href}) - Feature disabled`);
-                      }
                       return featureEnabled;
                     }).map((item, itemIdx) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
                       
-                      console.log(`✅ EXPANDED RENDERING: ${item.label} (${item.href})`);
                       return (
                         <Link key={`expanded-${item.href}-${itemIdx}-${forceUpdate}-${Date.now()}`} href={item.href}>
                           <Button
