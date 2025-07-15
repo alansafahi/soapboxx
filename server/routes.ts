@@ -7267,33 +7267,53 @@ Return JSON with this exact structure:
 
   app.post('/api/prayers/:id/react', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('🔥 Prayer Reaction Request:', {
+        prayerId: req.params.id,
+        userId: req.session.userId,
+        body: req.body,
+        sessionId: req.sessionID
+      });
+      
       const prayerRequestId = parseInt(req.params.id);
       const userId = req.session.userId;
       const { reaction } = req.body;
       
       if (!userId) {
+        console.log('❌ No userId in session');
         return res.status(401).json({ message: 'User authentication required' });
       }
       
       if (!reaction || !['heart', 'fire', 'praise'].includes(reaction)) {
+        console.log('❌ Invalid reaction type:', reaction);
         return res.status(400).json({ message: 'Valid reaction type required (heart, fire, praise)' });
       }
+      
+      console.log('✅ Calling togglePrayerReaction...', { prayerRequestId, userId, reaction });
       
       // Toggle the reaction in the database
       const result = await storage.togglePrayerReaction(prayerRequestId, userId, reaction);
       
+      console.log('✅ Toggle result:', result);
+      
       // Get updated reaction counts
       const reactionCounts = await storage.getPrayerReactions(prayerRequestId);
       
-      res.json({ 
+      console.log('✅ Reaction counts:', reactionCounts);
+      
+      const response = { 
         success: true, 
         reaction, 
         prayerId: prayerRequestId,
         reacted: result.reacted,
         reactionCounts,
         message: result.reacted ? `${reaction} reaction added successfully` : `${reaction} reaction removed successfully` 
-      });
+      };
+      
+      console.log('✅ Sending response:', response);
+      
+      res.json(response);
     } catch (error) {
+      console.log('❌ Prayer reaction error:', error);
       res.status(500).json({ message: "Failed to add reaction" });
     }
   });
