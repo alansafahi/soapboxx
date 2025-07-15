@@ -462,7 +462,7 @@ export default function PrayerWall() {
             <span>{t('prayerWall.title')}</span>
           </CardTitle>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            {t('prayerWall.shareRequests')}
+            {t('prayerWall.shareRequests')} {t('prayerWall.prayForOthers')} {t('prayerWall.buildCommunity')}
           </p>
           <div className="flex items-center justify-center space-x-6 mt-4 text-sm text-gray-500">
             <div className="flex items-center space-x-1">
