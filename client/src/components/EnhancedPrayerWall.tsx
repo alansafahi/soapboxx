@@ -544,29 +544,7 @@ export default function EnhancedPrayerWall() {
     },
   });
 
-  // Bookmark prayer mutation
-  const bookmarkPrayerMutation = useMutation({
-    mutationFn: async (prayerId: number) => {
-      return await apiRequest("POST", `/api/prayers/${prayerId}/bookmark`, {});
-    },
-    onSuccess: (_, prayerId) => {
-      setBookmarkedRequests(prev => {
-        const newSet = new Set(Array.from(prev));
-        if (newSet.has(prayerId)) {
-          newSet.delete(prayerId);
-        } else {
-          newSet.add(prayerId);
-        }
-        return newSet;
-      });
-      toast({
-        title: bookmarkedRequests.has(prayerId) ? "Bookmark Removed" : "Prayer Bookmarked",
-        description: bookmarkedRequests.has(prayerId) 
-          ? "Prayer removed from your bookmarks." 
-          : "Prayer saved to your bookmarks for follow-up.",
-      });
-    },
-  });
+
 
   const toggleExpandCard = (prayerId: number) => {
     setExpandedCards(prev => {
