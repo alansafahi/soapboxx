@@ -154,12 +154,16 @@ export default function ExpirationSettings({
         {/* Enable/Disable Toggle */}
         <div 
           className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-muted/50 transition-colors"
-          onClick={() => handleEnableChange(!isEnabled)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleEnableChange(!isEnabled);
+          }}
         >
           <Checkbox
             id="enable-expiration"
             checked={isEnabled}
-            onCheckedChange={handleEnableChange}
+            onCheckedChange={() => {}} // Disabled to prevent conflicts
             className="cursor-pointer pointer-events-none"
             data-testid="privacy-checkbox"
           />
