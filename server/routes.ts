@@ -6075,7 +6075,22 @@ Return JSON with this exact structure:
 
       // Check if user has access to this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
-      if (!userChurch) {
+      const user = await storage.getUser(userId);
+      
+      // Allow access for global admins or church creators
+      let hasAccess = false;
+      
+      if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
+        hasAccess = true;
+      } else if (userChurch) {
+        hasAccess = true;
+      } else {
+        // Check if user created this church
+        const adminChurches = await storage.getUserCreatedChurches(userId);
+        hasAccess = adminChurches.some(church => church.id === churchId);
+      }
+      
+      if (!hasAccess) {
         return res.status(403).json({ error: 'Access denied to this church' });
       }
 
@@ -6109,7 +6124,21 @@ Return JSON with this exact structure:
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
-      if (!userChurch || (!adminRoles.includes(userChurch.role) && user?.role !== 'soapbox_owner')) {
+      
+      // Check if user has admin access through role or is global admin
+      let hasAccess = false;
+      
+      if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
+        hasAccess = true;
+      } else if (userChurch && adminRoles.includes(userChurch.role)) {
+        hasAccess = true;
+      } else {
+        // Check if user created this church by looking for admin churches
+        const adminChurches = await storage.getUserCreatedChurches(userId);
+        hasAccess = adminChurches.some(church => church.id === feature.churchId);
+      }
+      
+      if (!hasAccess) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
