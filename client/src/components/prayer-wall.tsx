@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock, Send, ChevronDown, ChevronUp, Share, Bookmark, Eye, MapPin, Award, TrendingUp, Zap, Filter, Sparkles, Lightbulb, Pin, PinOff } from "lucide-react";
+import { Heart, Hand, Plus, CheckCircle, MessageCircle, Users, Clock, Send, ChevronDown, ChevronUp, Share, Bookmark, Eye, MapPin, Award, TrendingUp, Zap, Filter, Sparkles, Lightbulb, Pin, PinOff, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -324,6 +324,38 @@ export default function PrayerWall() {
     },
   });
 
+  // Delete prayer request mutation
+  const deletePrayerMutation = useMutation({
+    mutationFn: async (prayerId: number) => {
+      await apiRequest("DELETE", `/api/prayers/${prayerId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      toast({
+        title: "Prayer Deleted",
+        description: "Your prayer request has been removed from the Prayer Wall.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete prayer request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // AI Prayer Assistance function
   const getAIPrayerAssistance = async () => {
     setIsLoadingAI(true);
@@ -421,6 +453,12 @@ export default function PrayerWall() {
 
   const handleLikePrayer = (prayerRequestId: number) => {
     likePrayerMutation.mutate(prayerRequestId);
+  };
+
+  const handleDeletePrayer = (prayerId: number) => {
+    if (window.confirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
+      deletePrayerMutation.mutate(prayerId);
+    }
   };
 
   const handleCreatePrayer = (data: PrayerRequestFormData) => {
@@ -871,6 +909,21 @@ export default function PrayerWall() {
                           </CollapsibleTrigger>
                         </Collapsible>
                       </div>
+                      
+                      {/* Delete Button - Only show for prayer author */}
+                      {user && prayer.authorEmail && (
+                        (String(user.id) === String(prayer.authorId) || user.email === prayer.authorEmail) && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDeletePrayer(prayer.id)}
+                            className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            title="Delete prayer request"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )
+                      )}
                     </div>
 
                     {/* Collapsible Comments Section */}

@@ -419,6 +419,7 @@ export interface IStorage {
   getPrayerRequests(churchId?: number): Promise<PrayerRequest[]>;
   getPrayerRequest(id: number): Promise<PrayerRequest | undefined>;
   createPrayerRequest(prayer: InsertPrayerRequest): Promise<PrayerRequest>;
+  deletePrayerRequest(prayerId: number, userId: string): Promise<void>;
   updatePrayerRequestAttachment(prayerId: number, userId: string, attachmentUrl: string): Promise<void>;
   prayForRequest(response: InsertPrayerResponse): Promise<PrayerResponse>;
   getUserPrayerResponse(prayerRequestId: number, userId: string): Promise<PrayerResponse | undefined>;
@@ -2843,6 +2844,42 @@ export class DatabaseStorage implements IStorage {
     }
     
     return newPrayer;
+  }
+
+  async deletePrayerRequest(prayerId: number, userId: string): Promise<void> {
+    // First check if the user is the author of the prayer request
+    const [prayerRequest] = await db
+      .select()
+      .from(prayerRequests)
+      .where(eq(prayerRequests.id, prayerId));
+    
+    if (!prayerRequest) {
+      throw new Error('Prayer request not found');
+    }
+    
+    if (prayerRequest.authorId !== userId) {
+      throw new Error('Only the author can delete this prayer request');
+    }
+    
+    // Delete related responses first
+    await db
+      .delete(prayerResponses)
+      .where(eq(prayerResponses.prayerRequestId, prayerId));
+    
+    // Delete related bookmarks
+    await db
+      .delete(prayerBookmarks)
+      .where(eq(prayerBookmarks.prayerId, prayerId));
+    
+    // Delete related reactions
+    await db
+      .delete(prayerReactions)
+      .where(eq(prayerReactions.prayerRequestId, prayerId));
+    
+    // Finally delete the prayer request
+    await db
+      .delete(prayerRequests)
+      .where(eq(prayerRequests.id, prayerId));
   }
 
   async updatePrayerRequestAttachment(prayerId: number, userId: string, attachmentUrl: string): Promise<void> {

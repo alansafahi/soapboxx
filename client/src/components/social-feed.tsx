@@ -1450,11 +1450,21 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     <span className="font-medium">{post.prayCount || 0}</span>
                   </Button>
 
-                  {/* Comments Button - Using SOAP post pattern */}
+                  {/* Comments Button - Toggle inline comments */}
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => setCommentDialogOpen(post.id)}
+                    onClick={() => {
+                      setExpandedComments(prev => {
+                        const newSet = new Set(prev);
+                        if (newSet.has(post.id)) {
+                          newSet.delete(post.id);
+                        } else {
+                          newSet.add(post.id);
+                        }
+                        return newSet;
+                      });
+                    }}
                     className="text-gray-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 group transition-all duration-200"
                     title="View and add comments"
                   >
@@ -1476,16 +1486,18 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 </div>
                 
                 {/* Delete Button - Only show for post author */}
-                {user && typeof user === 'object' && 'id' in user && post.author.id === (user as any).id && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleDeletePost(post.id)}
-                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    title="Delete post"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                {user && post.author && (
+                  (String(user.id) === String(post.author.id) || user.email === post.author.id) && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDeletePost(post.id)}
+                      className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="Delete post"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )
                 )}
               </div>
 

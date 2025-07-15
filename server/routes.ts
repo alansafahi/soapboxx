@@ -7227,6 +7227,25 @@ Return JSON with this exact structure:
     }
   });
 
+  app.delete('/api/prayers/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      await storage.deletePrayerRequest(prayerId, userId);
+      res.json({ message: "Prayer request deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Failed to delete prayer request",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   app.post('/api/prayers/:id/react', isAuthenticated, async (req: any, res) => {
     try {
       const prayerRequestId = parseInt(req.params.id);

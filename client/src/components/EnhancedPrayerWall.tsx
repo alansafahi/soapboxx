@@ -14,7 +14,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Heart, MessageCircle, Share2, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink, Trash2 } from 'lucide-react';
 import ExpirationSettings from './ExpirationSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -498,6 +498,27 @@ export default function EnhancedPrayerWall() {
     },
   });
 
+  // Delete prayer request mutation
+  const deletePrayerMutation = useMutation({
+    mutationFn: async (prayerId: number) => {
+      await apiRequest("DELETE", `/api/prayers/${prayerId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      toast({
+        title: "Prayer Deleted",
+        description: "Your prayer request has been removed from the Prayer Wall.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete prayer request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // React to prayer mutation
   const reactToPrayerMutation = useMutation({
     mutationFn: async ({ prayerId, reaction }: { prayerId: number, reaction: string }) => {
@@ -577,6 +598,12 @@ export default function EnhancedPrayerWall() {
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const handleDeletePrayer = (prayerId: number) => {
+    if (window.confirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
+      deletePrayerMutation.mutate(prayerId);
+    }
   };
 
   if (isLoading) {
@@ -930,6 +957,21 @@ export default function EnhancedPrayerWall() {
                             >
                               <Share2 className="w-4 h-4" />
                             </Button>
+                            
+                            {/* Delete Button - Only show for prayer author */}
+                            {user && prayer.authorEmail && (
+                              (String(user.id) === String(prayer.authorId) || user.email === prayer.authorEmail) && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleDeletePrayer(prayer.id)}
+                                  className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                  title="Delete prayer request"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )
+                            )}
                           </div>
                         </div>
                       </CardHeader>
