@@ -661,7 +661,7 @@ export default function CheckInSystem() {
                 >
                   <div className="text-center">
                     <Brain className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-purple-700">AI Mood Check-In</div>
+                    <div className="text-purple-700">{t('moodCheckin.aiMoodCheckin')}</div>
                   </div>
                 </Button>
               </div>
@@ -706,7 +706,7 @@ export default function CheckInSystem() {
                 >
                   <div className="text-center">
                     <Brain className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-purple-700">AI Mood Check-In</div>
+                    <div className="text-purple-700">{t('moodCheckin.aiMoodCheckin')}</div>
                   </div>
                 </Button>
               </div>
@@ -887,9 +887,9 @@ export default function CheckInSystem() {
         <Dialog open={showMoodCheckIn} onOpenChange={setShowMoodCheckIn}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>AI Mood Check-In</DialogTitle>
+              <DialogTitle>{t('moodCheckin.aiMoodCheckin')}</DialogTitle>
               <DialogDescription>
-                Share how you're feeling to receive personalized spiritual guidance
+                {t('moodCheckin.shareYourMood')}
               </DialogDescription>
             </DialogHeader>
             <MoodCheckIn 

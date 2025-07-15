@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Textarea } from "./ui/textarea";
@@ -16,6 +17,7 @@ interface MoodCheckInProps {
 import { moodCategories, allMoods } from "../lib/moodCategories";
 
 export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
+  const { t } = useLanguage();
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [shareWithStaff, setShareWithStaff] = useState(false);
@@ -193,10 +195,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <Heart className="h-5 w-5 text-purple-600" />
-          How are you feeling today?
+          {t('moodCheckin.howFeeling')}
         </CardTitle>
         <CardDescription>
-          Share your mood to receive personalized spiritual content
+          {t('moodCheckin.shareYourMood')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -281,10 +283,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            What's on your heart? (optional)
+            {t('moodCheckin.whatsOnHeart')}
           </label>
           <Textarea
-            placeholder="Share what's on your mind..."
+            placeholder={t('moodCheckin.shareWhatsOnMind')}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[80px]"
@@ -301,7 +303,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
             htmlFor="share-staff"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Share with church staff for prayer support
+            {t('moodCheckin.shareWithStaff')}
           </label>
         </div>
 
@@ -310,7 +312,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
           disabled={selectedMoods.length === 0 || submitMoodMutation.isPending}
           className="w-full bg-purple-600 hover:bg-purple-700"
         >
-          {submitMoodMutation.isPending ? "Recording..." : "Get Personalized Content"}
+          {submitMoodMutation.isPending ? "Recording..." : t('moodCheckin.getPersonalized')}
         </Button>
       </CardContent>
     </Card>

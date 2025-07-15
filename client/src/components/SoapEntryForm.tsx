@@ -1512,7 +1512,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   className="flex items-center gap-2"
                 >
                   <Brain className="h-4 w-4" />
-                  Get AI Mood Suggestions
+                  {t('soap.getAiMoodSuggestions')}
                 </Button>
               )}
             </CardContent>
