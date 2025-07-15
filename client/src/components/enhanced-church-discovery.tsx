@@ -183,7 +183,7 @@ export default function EnhancedChurchDiscovery() {
 
   // Fetch churches with filtering
   const { data: allChurches = [], isLoading } = useQuery<ChurchWithDistance[]>({
-    queryKey: ["/api/churches/search", filters],
+    queryKey: ["/api/public/churches/search", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filters.denomination && filters.denomination !== "all") params.append('denomination', filters.denomination);
@@ -194,7 +194,7 @@ export default function EnhancedChurchDiscovery() {
       params.append('proximity', filters.proximity.toString());
       params.append('limit', '2000'); // Get all churches for client-side pagination
       
-      const response = await apiRequest("GET", `/api/churches/search?${params}`);
+      const response = await apiRequest("GET", `/api/public/churches/search?${params}`);
       return response as ChurchWithDistance[];
     },
   });

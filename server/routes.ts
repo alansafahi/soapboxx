@@ -6527,9 +6527,10 @@ Return JSON with this exact structure:
     }
   });
 
-  // Enhanced church search with filtering
-  app.get('/api/churches/search', isAuthenticated, async (req: any, res) => {
+  // Public church search endpoint (no auth required)
+  app.get('/api/public/churches/search', async (req: any, res) => {
     try {
+      console.log('Church search endpoint hit with params:', req.query);
       const { denomination, location, churchName, size, proximity, limit } = req.query;
       
       const searchParams = {
@@ -6541,11 +6542,13 @@ Return JSON with this exact structure:
         limit: limit ? parseInt(limit as string) : 1000
       };
       
-      // Log search parameters for debugging
+      console.log('Calling storage.searchChurches with:', searchParams);
       const churches = await storage.searchChurches(searchParams);
+      console.log('Search returned:', churches.length, 'churches');
       res.json(churches);
     } catch (error) {
-      res.status(500).json({ message: "Failed to search churches" });
+      console.error('Church search error:', error);
+      res.status(500).json({ message: "Failed to search churches", error: error.message });
     }
   });
 
