@@ -178,9 +178,9 @@ export default function ExpirationSettings({
           <>
             {/* Expiration Options */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
+              <span className="text-xs font-medium text-muted-foreground">
                 Choose expiration period
-              </Label>
+              </span>
               <Select value={selectedOption} onValueChange={handleOptionChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select expiration time..." />
