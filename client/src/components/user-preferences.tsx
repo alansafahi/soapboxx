@@ -270,9 +270,9 @@ export default function UserPreferences() {
           <TabsContent value="general">
             <Card>
               <CardHeader>
-                <CardTitle>{t('general.title')}</CardTitle>
+                <CardTitle>{t('settings.generalPreferences')}</CardTitle>
                 <CardDescription>
-                  {t('general.description')}
+                  {t('settings.generalDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -578,8 +578,8 @@ export default function UserPreferences() {
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Enable Offline Mode</Label>
-                    <p className="text-sm text-gray-500">Download content automatically for offline access</p>
+                    <Label>{t('offline.enableLabel')}</Label>
+                    <p className="text-sm text-gray-500">{t('offline.downloadDescription')}</p>
                   </div>
                   <Switch
                     checked={preferences.offlineMode}
@@ -625,16 +625,16 @@ export default function UserPreferences() {
           <TabsContent value="sync">
             <Card>
               <CardHeader>
-                <CardTitle>Cross-Platform Sync</CardTitle>
+                <CardTitle>{t('sync.title')}</CardTitle>
                 <CardDescription>
-                  Seamlessly sync your progress across all devices
+                  {t('sync.subtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Enable Sync</Label>
-                    <p className="text-sm text-gray-500">Synchronize reading progress, notes, and preferences</p>
+                    <Label>{t('sync.enableLabel')}</Label>
+                    <p className="text-sm text-gray-500">{t('sync.enableDescription')}</p>
                   </div>
                   <Switch
                     checked={preferences.syncEnabled}
@@ -645,22 +645,22 @@ export default function UserPreferences() {
                 {preferences.syncEnabled && (
                   <div className="space-y-4">
                     <div className="text-sm text-gray-500">
-                      <p>Your data is automatically synced across:</p>
+                      <p>{t('sync.description')}</p>
                       <ul className="list-disc list-inside mt-2 space-y-1">
-                        <li>Reading progress and bookmarks</li>
-                        <li>Personal notes and highlights</li>
-                        <li>Prayer requests and reflections</li>
-                        <li>Settings and preferences</li>
-                        <li>Offline content selections</li>
+                        <li>{t('sync.readingProgress')}</li>
+                        <li>{t('sync.personalNotes')}</li>
+                        <li>{t('sync.prayerRequests')}</li>
+                        <li>{t('sync.settingsPreferences')}</li>
+                        <li>{t('sync.offlineContent')}</li>
                       </ul>
                     </div>
                     
                     <div className="p-4 bg-blue-50 rounded-lg">
                       <div className="flex items-center space-x-2 text-blue-800">
                         <RefreshCw className="h-4 w-4" />
-                        <span className="font-medium">Last synced: Just now</span>
+                        <span className="font-medium">{t('sync.lastSynced')}</span>
                       </div>
-                      <p className="text-sm text-blue-600 mt-1">All your devices are up to date</p>
+                      <p className="text-sm text-blue-600 mt-1">{t('sync.upToDate')}</p>
                     </div>
                   </div>
                 )}
@@ -671,38 +671,37 @@ export default function UserPreferences() {
           <TabsContent value="personalization">
             <Card>
               <CardHeader>
-                <CardTitle>AI Personalization</CardTitle>
-                <CardDescription>
-                  Let AI help personalize your spiritual journey with intelligent recommendations
+                <CardTitle>{t('ai.title')}</CardTitle>
+<parameter name="old_str">                <CardDescription>
+                  {t('ai.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
                   <div className="flex items-center space-x-2 text-purple-800 mb-2">
                     <Brain className="h-5 w-5" />
-                    <span className="font-medium">AI-Powered Recommendations</span>
+                    <span className="font-medium">{t('ai.poweredRecommendations')}</span>
                   </div>
                   <p className="text-sm text-purple-600">
-                    Our AI analyzes your reading patterns, interests, and spiritual growth to provide
-                    personalized scripture recommendations, devotionals, and study topics.
+                    {t('ai.analysisDescription')}
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="text-sm text-gray-500">
-                    <p>AI personalization includes:</p>
+                    <p>{t('ai.personalizationIncludes')}</p>
                     <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>Personalized daily verse recommendations</li>
-                      <li>Suggested reading plans based on your interests</li>
-                      <li>Adaptive content difficulty progression</li>
-                      <li>Topic recommendations from your engagement patterns</li>
-                      <li>Optimal reading time suggestions</li>
+                      <li>{t('ai.personalizedVerses')}</li>
+                      <li>{t('ai.suggestedPlans')}</li>
+                      <li>{t('ai.adaptiveProgression')}</li>
+                      <li>{t('ai.topicRecommendations')}</li>
+                      <li>{t('ai.optimalTiming')}</li>
                     </ul>
                   </div>
                   
                   <Button className="w-full" variant="outline">
                     <Brain className="h-4 w-4 mr-2" />
-                    Generate New Recommendations
+                    {t('ai.generateRecommendations')}
                   </Button>
                 </div>
               </CardContent>
