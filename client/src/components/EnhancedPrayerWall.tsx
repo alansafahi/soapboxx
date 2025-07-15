@@ -1044,16 +1044,7 @@ export default function EnhancedPrayerWall() {
                             Who's Praying
                           </Button>
                           
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-                            onClick={() => bookmarkPrayerMutation.mutate(prayer.id)}
-                            title="Bookmark this prayer"
-                          >
-                            <Bookmark className="w-4 h-4" />
-                            Bookmark
-                          </Button>
+
                         </div>
 
                         {/* Who's Praying Display */}
