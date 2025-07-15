@@ -147,7 +147,7 @@ export function useIsFeatureEnabled() {
     // Extract the key from href (e.g., "/donation-demo" -> "donation", "/prayer-wall" -> "prayer-wall")
     const key = href.replace('/', '').replace('-demo', '');
     
-    // Debug logging (remove in production)
+    // Church feature filtering operational
     
     // Always show core features
     if (CORE_FEATURES.includes(key)) {
@@ -160,6 +160,7 @@ export function useIsFeatureEnabled() {
       if (primaryChurchId === 2808) {
         const disabledFeatures = ['donation', 'prayer-wall', 'audio-routines'];
         if (disabledFeatures.includes(key)) {
+          // Feature is disabled for this church
           return false; // Hide disabled features
         }
       }

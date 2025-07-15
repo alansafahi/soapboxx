@@ -67,6 +67,7 @@ export default function SidebarFixed() {
   const { user } = useAuth();
   const [location] = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
+  const [forceUpdate, setForceUpdate] = useState(0);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -77,6 +78,13 @@ export default function SidebarFixed() {
     queryKey: ["/api/users/churches"],
     enabled: !!user,
   });
+
+  // Force update navigation when user churches change
+  useEffect(() => {
+    if (userChurches && userChurches.length > 0) {
+      setForceUpdate(prev => prev + 1);
+    }
+  }, [userChurches]);
   
 
 
@@ -182,8 +190,8 @@ export default function SidebarFixed() {
     }
   ];
 
-  // Filter groups based on user role and church features
-  const visibleGroups = navigationGroups.map(group => {
+  // Filter groups based on user role and church features - Force re-render with dependencies
+  const visibleGroups = useMemo(() => navigationGroups.map(group => {
     const filteredItems = group.items.filter(item => {
       // First check role-based access
       if (item.roles) {
@@ -202,7 +210,7 @@ export default function SidebarFixed() {
       // Then check church feature settings - use proper feature key mapping
       const featureKey = item.href.replace('/', '').replace('-demo', '');
       const isEnabled = isFeatureEnabled(item.href);
-      // Debug: Feature filtering working correctly
+      // Church feature filtering applied
       return isEnabled;
     });
     
@@ -215,7 +223,7 @@ export default function SidebarFixed() {
   }).filter(group => {
     // Only show groups that have items after filtering
     return group.items.length > 0;
-  });
+  }), [user?.email, user?.role, hasChurchAdminRole, isFeatureEnabled, forceUpdate]);
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
@@ -296,15 +304,15 @@ export default function SidebarFixed() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-6">
         {!isCollapsed ? (
-          // Expanded Navigation - Full Groups
-          visibleGroups.map((group) => {
+          // Expanded Navigation - Filtered Groups
+          visibleGroups.map((group, idx) => {
             // Ensure admin groups are always expanded for soapbox_owner users OR users with church admin roles
             const isExpanded = expandedGroups.has(group.label) || 
               (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
               (hasChurchAdminRole && group.label === 'ADMIN PORTAL');
             
             return (
-              <div key={group.label}>
+              <div key={`${group.label}-${group.items.length}-${idx}`}>
                 <button
                   onClick={() => toggleGroup(group.label)}
                   className="flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400"
