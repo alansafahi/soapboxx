@@ -771,10 +771,10 @@ export default function CheckInSystem() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <QrCode className="w-5 h-5" />
-                QR Code Check-In
+                {t('checkin.qrCheckIn')}
               </DialogTitle>
               <DialogDescription>
-                Position the QR code within the camera frame or enter manually
+                {t('qr.positionCode')} {t('qr.orEnterManually')}
               </DialogDescription>
             </DialogHeader>
             
@@ -825,7 +825,7 @@ export default function CheckInSystem() {
               
               {/* Manual Entry */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Or enter QR code manually:</label>
+                <label className="text-sm font-medium">{t('qr.enterManually')}</label>
                 <div className="flex gap-2">
                   <Input
                     value={manualQrCode}

@@ -195,7 +195,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <Heart className="h-5 w-5 text-purple-600" />
-          {t('moodCheckin.howFeeling')}
+          {t('checkin.howFeeling')}
         </CardTitle>
         <CardDescription>
           {t('moodCheckin.shareYourMood')}
@@ -205,7 +205,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
         {/* Selected Moods Display */}
         {selectedMoods.length > 0 && (
           <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Selected feelings:</div>
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('checkin.selectedFeelings')}</div>
             <div className="flex flex-wrap gap-2">
               {getSelectedMoodsData().map((mood) => (
                 <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
@@ -283,10 +283,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            {t('moodCheckin.whatsOnHeart')}
+            {t('checkin.personalReflection')}
           </label>
           <Textarea
-            placeholder={t('moodCheckin.shareWhatsOnMind')}
+            placeholder={t('checkin.shareHeart')}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[80px]"
