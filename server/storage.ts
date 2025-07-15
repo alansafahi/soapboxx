@@ -2874,13 +2874,33 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     if (newResponse) {
-      // Update prayer count
-      await db
-        .update(prayerRequests)
-        .set({ 
-          prayerCount: sql`${prayerRequests.prayerCount} + 1`
-        })
+      // Get prayer request to find author
+      const [prayerRequest] = await db
+        .select({ authorId: prayerRequests.authorId })
+        .from(prayerRequests)
         .where(eq(prayerRequests.id, response.prayerRequestId));
+      
+      if (prayerRequest) {
+        // Calculate proper prayer count: count unique users excluding prayer author
+        const uniquePrayerCount = await db
+          .selectDistinct({ userId: prayerResponses.userId })
+          .from(prayerResponses)
+          .where(
+            and(
+              eq(prayerResponses.prayerRequestId, response.prayerRequestId),
+              eq(prayerResponses.responseType, 'prayed'),
+              ne(prayerResponses.userId, prayerRequest.authorId) // Exclude prayer author
+            )
+          );
+        
+        // Update prayer count with actual unique count
+        await db
+          .update(prayerRequests)
+          .set({ 
+            prayerCount: uniquePrayerCount.length
+          })
+          .where(eq(prayerRequests.id, response.prayerRequestId));
+      }
       
       // Track activity
       await this.trackUserActivity({
@@ -2913,18 +2933,38 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(prayerResponses.prayerRequestId, prayerRequestId),
         eq(prayerResponses.userId, userId),
-        eq(prayerResponses.responseType, 'prayer')
+        eq(prayerResponses.responseType, 'prayed')
       ))
       .returning();
     
     if (deletedResponse.length > 0) {
-      // Decrease prayer count
-      await db
-        .update(prayerRequests)
-        .set({ 
-          prayerCount: sql`GREATEST(${prayerRequests.prayerCount} - 1, 0)`
-        })
+      // Get prayer request to find author
+      const [prayerRequest] = await db
+        .select({ authorId: prayerRequests.authorId })
+        .from(prayerRequests)
         .where(eq(prayerRequests.id, prayerRequestId));
+      
+      if (prayerRequest) {
+        // Recalculate proper prayer count: count unique users excluding prayer author
+        const uniquePrayerCount = await db
+          .selectDistinct({ userId: prayerResponses.userId })
+          .from(prayerResponses)
+          .where(
+            and(
+              eq(prayerResponses.prayerRequestId, prayerRequestId),
+              eq(prayerResponses.responseType, 'prayed'),
+              ne(prayerResponses.userId, prayerRequest.authorId) // Exclude prayer author
+            )
+          );
+        
+        // Update prayer count with actual unique count
+        await db
+          .update(prayerRequests)
+          .set({ 
+            prayerCount: uniquePrayerCount.length
+          })
+          .where(eq(prayerRequests.id, prayerRequestId));
+      }
     }
   }
 
