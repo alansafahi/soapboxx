@@ -88,7 +88,6 @@ export default function ExpirationSettings({
   }, [initialExpiresAt]);
 
   const handleEnableChange = (enabled: boolean) => {
-    console.log('ExpirationSettings: handleEnableChange called with:', enabled);
     setIsEnabled(enabled);
     if (!enabled) {
       setSelectedOption("");
@@ -153,18 +152,20 @@ export default function ExpirationSettings({
       
       <CardContent className="space-y-4">
         {/* Enable/Disable Toggle */}
-        <div className="flex items-center space-x-2">
+        <div 
+          className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-muted/50 transition-colors"
+          onClick={() => handleEnableChange(!isEnabled)}
+        >
           <Checkbox
             id="enable-expiration"
             checked={isEnabled}
             onCheckedChange={handleEnableChange}
-            className="cursor-pointer"
+            className="cursor-pointer pointer-events-none"
             data-testid="privacy-checkbox"
           />
           <Label 
             htmlFor="enable-expiration" 
-            className="text-sm font-medium cursor-pointer select-none"
-            onClick={() => handleEnableChange(!isEnabled)}
+            className="text-sm font-medium cursor-pointer select-none pointer-events-none"
           >
             Enable content expiration
           </Label>
