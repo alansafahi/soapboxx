@@ -289,8 +289,8 @@ export default function MyChurches() {
                           className="text-purple-600 border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/20 flex-shrink-0 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
                         >
                           <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                          <span className="hidden xs:inline">Set Primary</span>
-                          <span className="xs:hidden">Primary</span>
+                          <span className="hidden xs:inline">Set As Primary</span>
+                          <span className="xs:hidden">Set Primary</span>
                         </Button>
                       )}
                       
@@ -388,7 +388,7 @@ export default function MyChurches() {
                   className="bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <Crown className="w-4 h-4 mr-1" />
-                  Set Primary
+                  Set As Primary
                 </Button>
               </div>
             ))}
