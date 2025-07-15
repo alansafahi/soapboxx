@@ -160,10 +160,8 @@ export function useIsFeatureEnabled() {
       // For Mega Test Church (ID: 2808), hardcode the disabled features until API is fixed
       if (primaryChurchId === 2808) {
         const disabledFeatures = ['donation', 'prayer-wall', 'audio-routines'];
-        console.log(`🎯 HELLO SOAPBOX CHECK: key=${key}, disabled=${disabledFeatures.includes(key)}`);
         if (disabledFeatures.includes(key)) {
           // Feature is disabled for this church
-          console.log(`❌ RETURNING FALSE for ${key}`);
           return false; // Hide disabled features
         }
       }

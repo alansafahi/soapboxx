@@ -831,8 +831,6 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserProfile(userId: string, profileData: Partial<User>): Promise<User> {
     try {
-      console.log('Storage updateUserProfile called for userId:', userId);
-      console.log('Storage received profileData:', JSON.stringify(profileData, null, 2));
       
       // Build update object with proper field validation
       const updateData: any = {};
@@ -855,7 +853,6 @@ export class DatabaseStorage implements IStorage {
       // Always update timestamp
       updateData.updatedAt = new Date();
 
-      console.log('Storage final updateData:', JSON.stringify(updateData, null, 2));
       
       const [user] = await db
         .update(users)
@@ -864,21 +861,11 @@ export class DatabaseStorage implements IStorage {
         .returning();
         
       if (!user) {
-        console.error('Storage: No user returned after update - user may not exist');
         throw new Error(`User not found with ID: ${userId}`);
       }
       
-      console.log('Storage: Profile update successful for user:', userId);
       return user;
     } catch (error) {
-      console.error('Storage updateUserProfile error:', error);
-      console.error('Storage updateUserProfile error details:', {
-        name: (error as any).name,
-        message: (error as any).message,
-        code: (error as any).code,
-        detail: (error as any).detail,
-        stack: (error as any).stack
-      });
       throw error;
     }
   }
@@ -912,7 +899,6 @@ export class DatabaseStorage implements IStorage {
 
   // User preferences operations
   async getUserPreferences(userId: string): Promise<any> {
-    console.log('Storage: Getting user preferences for user:', userId);
     
     try {
       const [prefs] = await db
@@ -950,14 +936,11 @@ export class DatabaseStorage implements IStorage {
       
       return prefs;
     } catch (error) {
-      console.error('Storage getUserPreferences error:', error);
       throw error;
     }
   }
 
   async updateUserPreferences(userId: string, preferences: any): Promise<any> {
-    console.log('Storage: Updating user preferences for user:', userId);
-    console.log('Storage: Preferences data:', JSON.stringify(preferences, null, 2));
     
     try {
       // Map frontend field names to database column names
@@ -1014,13 +997,11 @@ export class DatabaseStorage implements IStorage {
       
       return updatedPrefs;
     } catch (error) {
-      console.error('Storage updateUserPreferences error:', error);
       throw error;
     }
   }
 
   async getUserNotificationPreferences(userId: string): Promise<any> {
-    console.log('Storage: Getting notification preferences for user:', userId);
     
     try {
       const [prefs] = await db
@@ -1063,14 +1044,11 @@ export class DatabaseStorage implements IStorage {
       
       return prefs;
     } catch (error) {
-      console.error('Storage getUserNotificationPreferences error:', error);
       throw error;
     }
   }
 
   async updateUserNotificationPreferences(userId: string, preferences: any): Promise<any> {
-    console.log('Storage: Updating notification preferences for user:', userId);
-    console.log('Storage: Notification preferences data:', JSON.stringify(preferences, null, 2));
     
     try {
       // Map frontend field names to database column names
@@ -1130,14 +1108,12 @@ export class DatabaseStorage implements IStorage {
       
       return updatedPrefs;
     } catch (error) {
-      console.error('Storage updateUserNotificationPreferences error:', error);
       throw error;
     }
   }
 
   // User statistics operations
   async getUserStats(userId: string): Promise<any> {
-    console.log('Storage: Getting user stats for user:', userId);
     
     try {
       // Count prayers offered (prayer requests created by user)
@@ -1191,16 +1167,13 @@ export class DatabaseStorage implements IStorage {
         prayersOffered: prayerReactionCount[0]?.count || 0,
       };
 
-      console.log('Storage: User stats retrieved:', stats);
       return stats;
     } catch (error) {
-      console.error('Storage getUserStats error:', error);
       throw error;
     }
   }
 
   async getUserAchievements(userId: string): Promise<any> {
-    console.log('Storage: Getting user achievements for user:', userId);
     
     try {
       // Get user badge progress/achievements
@@ -1238,10 +1211,8 @@ export class DatabaseStorage implements IStorage {
         unlockedAt: achievement.unlockedAt,
       }));
 
-      console.log('Storage: User achievements retrieved:', transformedAchievements.length);
       return transformedAchievements;
     } catch (error) {
-      console.error('Storage getUserAchievements error:', error);
       // Return empty array if no achievements table exists yet
       return [];
     }
@@ -1557,7 +1528,6 @@ export class DatabaseStorage implements IStorage {
       
       return filteredResults;
     } catch (error) {
-      console.error('Search churches error:', error);
       
       // Fallback to simple query without member counts
       try {

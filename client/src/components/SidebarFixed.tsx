@@ -360,7 +360,6 @@ export default function SidebarFixed() {
               // Apply church feature filtering with debug  
               const featureEnabled = isFeatureEnabled(item.href);
               if (!featureEnabled) {
-                console.log(`🚫 COLLAPSED FILTERED: ${item.label} (${item.href}) - Feature disabled`);
                 return null;
               }
               

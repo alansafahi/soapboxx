@@ -6350,28 +6350,6 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      console.log('Profile update request for user:', userId);
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
-      console.log('Mapped updateData will be:', JSON.stringify({
-        firstName: req.body.firstName || req.body.first_name,
-        lastName: req.body.lastName || req.body.last_name,
-        email: req.body.email,
-        mobileNumber: req.body.mobileNumber || req.body.mobile_number || req.body.phoneNumber,
-        address: req.body.address,
-        city: req.body.city,
-        state: req.body.state,
-        zipCode: req.body.zipCode || req.body.zip_code,
-        country: req.body.country,
-        bio: req.body.bio,
-        profileImageUrl: req.body.profileImageUrl || req.body.profile_image_url,
-        interests: Array.isArray(req.body.spiritualInterests) ? req.body.spiritualInterests : 
-                  Array.isArray(req.body.interests) ? req.body.interests : 
-                  typeof req.body.spiritualInterests === 'string' ? [req.body.spiritualInterests] :
-                  typeof req.body.interests === 'string' ? [req.body.interests] : [],
-        denomination: req.body.denomination
-      }, null, 2));
-
-
 
       // Map all possible frontend field names to database schema
       const updateData = {
@@ -6434,7 +6412,6 @@ Return JSON with this exact structure:
       });
 
     } catch (error) {
-      console.error('Profile update error:', error);
       res.status(500).json({ 
         message: 'Failed to update profile',
         error: error instanceof Error ? error.message : String(error)
@@ -6454,7 +6431,6 @@ Return JSON with this exact structure:
       const userPrefs = await storage.getUserPreferences(userId);
       res.json(userPrefs);
     } catch (error) {
-      console.error('Get user preferences error:', error);
       res.status(500).json({ 
         message: 'Failed to fetch user preferences',
         error: error instanceof Error ? error.message : String(error)
@@ -6470,8 +6446,6 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      console.log('User preferences update request for user:', userId);
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
 
       const updatedPrefs = await storage.updateUserPreferences(userId, req.body);
       
@@ -6481,7 +6455,6 @@ Return JSON with this exact structure:
         preferences: updatedPrefs
       });
     } catch (error) {
-      console.error('Update user preferences error:', error);
       res.status(500).json({ 
         message: 'Failed to update user preferences',
         error: error instanceof Error ? error.message : String(error)
@@ -6500,7 +6473,6 @@ Return JSON with this exact structure:
       const notificationPrefs = await storage.getUserNotificationPreferences(userId);
       res.json(notificationPrefs);
     } catch (error) {
-      console.error('Get notification preferences error:', error);
       res.status(500).json({ 
         message: 'Failed to fetch notification preferences',
         error: error instanceof Error ? error.message : String(error)
@@ -6516,8 +6488,6 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      console.log('Notification preferences update request for user:', userId);
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
 
       const updatedPrefs = await storage.updateUserNotificationPreferences(userId, req.body);
       
@@ -6527,7 +6497,6 @@ Return JSON with this exact structure:
         preferences: updatedPrefs
       });
     } catch (error) {
-      console.error('Update notification preferences error:', error);
       res.status(500).json({ 
         message: 'Failed to update notification preferences',
         error: error instanceof Error ? error.message : String(error)
@@ -6552,7 +6521,6 @@ Return JSON with this exact structure:
         syncedAt: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Sync offline content error:', error);
       res.status(500).json({ 
         message: 'Failed to sync offline content',
         error: error instanceof Error ? error.message : String(error)
@@ -6572,7 +6540,6 @@ Return JSON with this exact structure:
       const stats = await storage.getUserStats(userId);
       res.json(stats);
     } catch (error) {
-      console.error('Get user stats error:', error);
       res.status(500).json({ 
         message: 'Failed to fetch user statistics',
         error: error instanceof Error ? error.message : String(error)
@@ -6592,7 +6559,6 @@ Return JSON with this exact structure:
       const achievements = await storage.getUserAchievements(userId);
       res.json(achievements);
     } catch (error) {
-      console.error('Get user achievements error:', error);
       res.status(500).json({ 
         message: 'Failed to fetch user achievements',
         error: error instanceof Error ? error.message : String(error)
@@ -6638,7 +6604,6 @@ Return JSON with this exact structure:
   // Public church search endpoint (no auth required)
   app.get('/api/public/churches/search', async (req: any, res) => {
     try {
-      console.log('Church search endpoint hit with params:', req.query);
       const { denomination, location, churchName, size, proximity, limit } = req.query;
       
       const searchParams = {
@@ -6650,12 +6615,9 @@ Return JSON with this exact structure:
         limit: limit ? parseInt(limit as string) : 1000
       };
       
-      console.log('Calling storage.searchChurches with:', searchParams);
       const churches = await storage.searchChurches(searchParams);
-      console.log('Search returned:', churches.length, 'churches');
       res.json(churches);
     } catch (error) {
-      console.error('Church search error:', error);
       res.status(500).json({ message: "Failed to search churches", error: error.message });
     }
   });
