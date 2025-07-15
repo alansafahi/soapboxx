@@ -1462,8 +1462,8 @@ export class DatabaseStorage implements IStorage {
         eq(churches.isDemo, false) // Only show production churches, not demo churches
       ];
       
-      // Filter by denomination
-      if (params.denomination) {
+      // Filter by denomination (only if not "all")
+      if (params.denomination && params.denomination !== "all") {
         whereConditions.push(eq(churches.denomination, params.denomination));
       }
       
@@ -1475,8 +1475,8 @@ export class DatabaseStorage implements IStorage {
         );
       }
       
-      // Filter by location (search in city, state, or zip code) - only if no denomination filter
-      if (params.location && params.location.trim() && !params.denomination) {
+      // Filter by location (search in city, state, or zip code) - only if no specific denomination filter
+      if (params.location && params.location.trim() && (!params.denomination || params.denomination === "all")) {
         const locationTerm = `%${params.location.trim()}%`;
         whereConditions.push(
           sql`(${churches.city} ILIKE ${locationTerm} OR ${churches.state} ILIKE ${locationTerm} OR ${churches.zipCode} ILIKE ${locationTerm})`
