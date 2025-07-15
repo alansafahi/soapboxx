@@ -36,8 +36,17 @@ export const CORE_TRANSLATION_KEYS = [
   'bible.title', 'bible.share', 'bible.reflect', 'bible.loading',
   
   // Check-ins
-  'checkin.dailyCheckIn', 'checkin.howAreYouFeeling', 'posts.recentCheckIns',
-  'posts.noRecentCheckIns',
+  'checkin.dailyCheckIn', 'checkin.howAreYouFeeling', 'checkin.shareJourney', 'checkin.buildStreak',
+  'moodCheckin.aiMoodCheckIn', 'posts.recentCheckIns', 'posts.noRecentCheckIns',
+  
+  // Home page
+  'home.dailySpiritualRhythm', 'home.latestPosts', 'home.topCommunityMembers', 'home.upcomingEvents',
+  
+  // Events
+  'events.upcomingEvents', 'events.viewAllEvents', 'events.createEvent',
+  
+  // Posts
+  'posts.whatsOnYourHeart', 'posts.shareThoughts',
   
   // Audio/Media
   'audioBible.title', 'audioRoutines.title', 'imageGallery.title',
