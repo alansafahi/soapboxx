@@ -13,6 +13,7 @@ import { useToast } from '../hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../lib/queryClient';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getMoodCategories } from '../lib/moodCategories';
 
 interface GalleryImage {
   id: number;
@@ -32,21 +33,21 @@ interface GalleryImage {
   churchId?: number;
 }
 
-const categories = [
-  { value: 'all', label: 'All Images', icon: '🖼️' },
-  { value: 'worship', label: 'Moments of Worship', icon: '🙏' },
-  { value: 'testimonies', label: 'User Testimonies', icon: '✨' },
-  { value: 'events', label: 'Events & Gatherings', icon: '📅' },
-  { value: 'sacred-spaces', label: 'Sacred Spaces', icon: '⛪' },
-  { value: 'verses', label: 'Visual Verse Cards', icon: '📖' },
-  { value: 'art', label: 'Art & Creativity', icon: '🎨' },
-  { value: 'daily-inspiration', label: 'Daily Inspiration', icon: '🌅' },
+const getImageCategories = (t: (key: string) => string) => [
+  { value: 'all', label: t('imageGallery.allImages'), icon: '🖼️' },
+  { value: 'worship', label: t('imageGallery.momentsOfWorship'), icon: '🙏' },
+  { value: 'testimonies', label: t('imageGallery.userTestimonies'), icon: '✨' },
+  { value: 'events', label: t('imageGallery.eventsGatherings'), icon: '📅' },
+  { value: 'sacred-spaces', label: t('imageGallery.sacredSpaces'), icon: '⛪' },
+  { value: 'verses', label: t('imageGallery.visualVerseCards'), icon: '📖' },
+  { value: 'art', label: t('imageGallery.artCreativity'), icon: '🎨' },
+  { value: 'daily-inspiration', label: t('imageGallery.dailyInspiration'), icon: '🌅' },
 ];
 
-const sortOptions = [
-  { value: 'recent', label: 'Most Recent' },
-  { value: 'popular', label: 'Most Liked' },
-  { value: 'staff-picks', label: 'Staff Picks' },
+const getSortOptions = (t: (key: string) => string) => [
+  { value: 'recent', label: t('imageGallery.mostRecent') },
+  { value: 'popular', label: t('imageGallery.mostLiked') },
+  { value: 'staff-picks', label: t('imageGallery.staffPicks') },
 ];
 
 export default function ImageGallery() {
@@ -62,11 +63,16 @@ export default function ImageGallery() {
     description: '',
     category: '',
     tags: '',
-    visibility: 'church'
+    visibility: 'church',
+    selectedMoods: [] as string[]
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useLanguage();
+
+  // Get translated categories and sort options
+  const categories = getImageCategories(t);
+  const sortOptions = getSortOptions(t);
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ['/api/gallery/images', selectedCategory, sortBy, searchQuery],
@@ -113,7 +119,8 @@ export default function ImageGallery() {
         description: '',
         category: '',
         tags: '',
-        visibility: 'church'
+        visibility: 'church',
+        selectedMoods: []
       });
       toast({ title: 'Image uploaded successfully!' });
     },
@@ -301,6 +308,40 @@ export default function ImageGallery() {
                         <SelectItem value="private">Private</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  
+                  {/* Mood Selection */}
+                  <div>
+                    <Label>{t('imageGallery.selectMoods')}</Label>
+                    <div className="mt-2 space-y-3 max-h-48 overflow-y-auto">
+                      {getMoodCategories(t).map((category) => (
+                        <div key={category.title} className="space-y-2">
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{category.title}</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {category.moods.map((mood) => (
+                              <Badge
+                                key={mood.id}
+                                variant={uploadForm.selectedMoods.includes(mood.id) ? "default" : "outline"}
+                                className={`cursor-pointer transition-all ${
+                                  uploadForm.selectedMoods.includes(mood.id)
+                                    ? 'bg-purple-600 text-white'
+                                    : 'hover:bg-purple-100 dark:hover:bg-purple-900'
+                                }`}
+                                onClick={() => {
+                                  const newMoods = uploadForm.selectedMoods.includes(mood.id)
+                                    ? uploadForm.selectedMoods.filter(m => m !== mood.id)
+                                    : [...uploadForm.selectedMoods, mood.id];
+                                  setUploadForm(prev => ({ ...prev, selectedMoods: newMoods }));
+                                }}
+                              >
+                                {mood.icon} {mood.label}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">{t('imageGallery.moodsDescription')}</p>
                   </div>
                   <Button type="submit" className="w-full" disabled={uploadMutation.isPending}>
                     {uploadMutation.isPending ? 'Uploading...' : 'Share Image'}

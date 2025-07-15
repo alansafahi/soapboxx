@@ -72,6 +72,21 @@ export default function VideoLibrary() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [youtubeUrls, setYoutubeUrls] = useState('');
 
+  // Video categories with translation
+  const getVideoCategories = (t: (key: string) => string) => [
+    { value: 'all', label: t('videoLibrary.allVideos') },
+    { value: 'sermons', label: t('videoLibrary.sermons') },
+    { value: 'devotionals', label: t('videoLibrary.devotionals') },
+    { value: 'worship', label: t('videoLibrary.worship') },
+    { value: 'bible-study', label: t('videoLibrary.bibleStudy') },
+    { value: 'prayer', label: t('videoLibrary.prayer') },
+    { value: 'testimonies', label: t('videoLibrary.testimonies') },
+    { value: 'youth', label: t('videoLibrary.youth') },
+    { value: 'training', label: t('videoLibrary.training') },
+  ];
+
+  const categories = getVideoCategories(t);
+
   // Fetch videos from API
   const { data: videos = [], isLoading } = useQuery({
     queryKey: ['/api/videos'],
@@ -277,19 +292,6 @@ export default function VideoLibrary() {
       setUploadForm(prev => ({ ...prev, file }));
     }
   };
-
-  const categories = [
-    { value: 'all', label: 'All Categories' },
-    { value: 'sermons', label: 'Sermons' },
-    { value: 'devotionals', label: 'Devotionals' },
-    { value: 'bible-studies', label: 'Bible Studies' },
-    { value: 'worship', label: 'Worship' },
-    { value: 'testimonies', label: 'Testimonies' },
-    { value: 'youth', label: 'Youth' },
-    { value: 'children', label: 'Children' },
-    { value: 'prayer', label: 'Prayer' },
-    { value: 'conference', label: 'Conference' },
-  ];
 
   // Map database fields to frontend interface and filter videos
   const mappedVideos = videos.map((video: any) => ({
