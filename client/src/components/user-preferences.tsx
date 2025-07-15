@@ -747,17 +747,72 @@ export default function UserPreferences() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Español</SelectItem>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="de">Deutsch</SelectItem>
-                      <SelectItem value="pt">Português</SelectItem>
-                      <SelectItem value="zh">中文</SelectItem>
-                      <SelectItem value="ko">한국어</SelectItem>
-                      <SelectItem value="ja">日本語</SelectItem>
-                      <SelectItem value="ar">العربية</SelectItem>
-                      <SelectItem value="fa">فارسی</SelectItem>
-                      <SelectItem value="hi">हिन्दी</SelectItem>
+                      <SelectItem value="en">
+                        <div className="flex items-center space-x-2">
+                          <span>🇺🇸</span>
+                          <span>English</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="es">
+                        <div className="flex items-center space-x-2">
+                          <span>🇪🇸</span>
+                          <span>Español</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="fr">
+                        <div className="flex items-center space-x-2">
+                          <span>🇫🇷</span>
+                          <span>Français</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="de">
+                        <div className="flex items-center space-x-2">
+                          <span>🇩🇪</span>
+                          <span>Deutsch</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="pt">
+                        <div className="flex items-center space-x-2">
+                          <span>🇵🇹</span>
+                          <span>Português</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="zh">
+                        <div className="flex items-center space-x-2">
+                          <span>🇨🇳</span>
+                          <span>中文</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="ko">
+                        <div className="flex items-center space-x-2">
+                          <span>🇰🇷</span>
+                          <span>한국어</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="ja">
+                        <div className="flex items-center space-x-2">
+                          <span>🇯🇵</span>
+                          <span>日本語</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="ar">
+                        <div className="flex items-center space-x-2">
+                          <span>🇸🇦</span>
+                          <span>العربية</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="fa">
+                        <div className="flex items-center space-x-2">
+                          <span>🇮🇷</span>
+                          <span>فارسی</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="hi">
+                        <div className="flex items-center space-x-2">
+                          <span>🇮🇳</span>
+                          <span>हिन्दी</span>
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
