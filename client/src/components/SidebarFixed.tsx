@@ -158,7 +158,7 @@ export default function SidebarFixed() {
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
-        { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Bookmark },
+        { label: "🔖 Bookmarked Prayers", href: "/bookmarked-prayers", icon: Bookmark },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
       ]
@@ -309,10 +309,21 @@ export default function SidebarFixed() {
                       
                       // Apply direct church feature filtering to bypass React caching
                       const featureEnabled = isFeatureEnabled(item.href);
+                      
+                      // Special debug for bookmarked prayers
+                      if (item.href === '/bookmarked-prayers') {
+                        console.log(`🎯 BOOKMARKED PRAYERS FILTER: ${item.label} - roles: ${item.roles}, enabled: ${featureEnabled}`);
+                      }
+                      
                       return featureEnabled;
                     }).map((item, itemIdx) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
+                      
+                      // Debug which items are actually being rendered
+                      if (group.label === 'SPIRITUAL TOOLS') {
+                        console.log(`🔧 SPIRITUAL TOOLS RENDERING: ${item.label} (${item.href})`);
+                      }
                       
                       return (
                         <Link key={`expanded-${item.href}-${itemIdx}-${forceUpdate}-${Date.now()}`} href={item.href}>
