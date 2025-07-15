@@ -712,7 +712,7 @@ export default function CheckInSystem() {
               </div>
               
               <p className="text-sm text-center text-muted-foreground">
-                AI Mood Check-In is available anytime for personalized spiritual guidance
+                {t('moodCheckin.availableAnytime')}
               </p>
             </div>
           )}

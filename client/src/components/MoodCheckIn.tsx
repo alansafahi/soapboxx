@@ -312,7 +312,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
           disabled={selectedMoods.length === 0 || submitMoodMutation.isPending}
           className="w-full bg-purple-600 hover:bg-purple-700"
         >
-          {submitMoodMutation.isPending ? "Recording..." : t('moodCheckin.getPersonalized')}
+          {submitMoodMutation.isPending ? t('moodCheckin.recording') : t('moodCheckin.getPersonalized')}
         </Button>
       </CardContent>
     </Card>

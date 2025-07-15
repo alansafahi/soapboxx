@@ -2,7 +2,7 @@
 // Note: Labels use translation keys, actual translations are provided via useLanguage hook
 export const getMoodCategories = (t: (key: string) => string) => [
   {
-    title: "Emotional & Spiritual Support",
+    title: t('moodCategories.emotionalSupport'),
     icon: "💙",
     moods: [
       { id: "anxious", label: t('moods.anxious'), icon: "😰", subtitle: "peace, comfort" },
@@ -16,7 +16,7 @@ export const getMoodCategories = (t: (key: string) => string) => [
     ]
   },
   {
-    title: "Growth & Transformation",
+    title: t('moodCategories.growthTransformation'),
     icon: "🌱",
     moods: [
       { id: "seeking", label: t('moods.seeking'), icon: "🧭", subtitle: "guidance, wisdom" },
@@ -30,21 +30,21 @@ export const getMoodCategories = (t: (key: string) => string) => [
     ]
   },
   {
-    title: "Life Situations",
+    title: t('moodCategories.lifeSituations'),
     icon: "🏠",
     moods: [
-      { id: "celebrating", label: "Celebrating", icon: "🎉", subtitle: "gratitude, praise" },
-      { id: "transitioning", label: "In Transition", icon: "🚪", subtitle: "guidance, stability" },
-      { id: "healing", label: "Healing", icon: "🩹", subtitle: "restoration, wholeness" },
-      { id: "parenting", label: "Parenting Challenges", icon: "👨‍👩‍👧‍👦", subtitle: "wisdom, patience" },
-      { id: "working", label: "Work Stress", icon: "💼", subtitle: "balance, provision" },
-      { id: "relationship", label: "Relationship Issues", icon: "💕", subtitle: "love, reconciliation" },
-      { id: "financial", label: "Financial Concerns", icon: "💰", subtitle: "provision, trust" },
-      { id: "health", label: "Health Concerns", icon: "🏥", subtitle: "healing, strength" },
+      { id: "celebrating", label: t('moods.celebrating'), icon: "🎉", subtitle: "gratitude, praise" },
+      { id: "transitioning", label: t('moods.transitioning'), icon: "🚪", subtitle: "guidance, stability" },
+      { id: "healing", label: t('moods.healing'), icon: "🩹", subtitle: "restoration, wholeness" },
+      { id: "parenting", label: t('moods.parenting'), icon: "👨‍👩‍👧‍👦", subtitle: "wisdom, patience" },
+      { id: "working", label: t('moods.working'), icon: "💼", subtitle: "balance, provision" },
+      { id: "relationship", label: t('moods.relationship'), icon: "💕", subtitle: "love, reconciliation" },
+      { id: "financial", label: t('moods.financial'), icon: "💰", subtitle: "provision, trust" },
+      { id: "health", label: t('moods.health'), icon: "🏥", subtitle: "healing, strength" },
     ]
   },
   {
-    title: "Faith & Worship",
+    title: t('moodCategories.faithWorship'),
     icon: "⛪",
     moods: [
       { id: "grateful", label: t('moods.grateful'), icon: "🙌", subtitle: "thanksgiving, praise" },
