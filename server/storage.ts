@@ -4951,37 +4951,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserCheckInStreak(userId: string): Promise<number> {
-    const userCheckIns = await db
-      .select()
-      .from(checkIns)
-      .where(eq(checkIns.userId, userId))
-      .orderBy(desc(checkIns.createdAt))
-      .limit(365); // Look back up to a year
+    // Use the same streak calculation logic as getUserStats for consistency
+    // Get recent activities from user_activities table instead of just check-ins
+    const recentActivities = await db
+      .select({ 
+        createdAt: userActivities.createdAt 
+      })
+      .from(userActivities)
+      .where(eq(userActivities.userId, userId))
+      .orderBy(desc(userActivities.createdAt))
+      .limit(30); // Check last 30 days
 
-    if (userCheckIns.length === 0) return 0;
-
-    let streak = 0;
-    let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    for (const checkIn of userCheckIns) {
-      const checkInDate = new Date(checkIn.createdAt || new Date());
-      checkInDate.setHours(0, 0, 0, 0);
-      
-      const diffTime = currentDate.getTime() - checkInDate.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0 || diffDays === 1) {
-        if (diffDays === 1 || streak === 0) {
-          streak++;
-          currentDate = checkInDate;
-        }
-      } else {
-        break;
+    let currentStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of day
+    
+    const uniqueDays = new Set();
+    
+    // Group activities by day (using only date part, not time)
+    for (const activity of recentActivities) {
+      if (activity.createdAt) {
+        const activityDate = new Date(activity.createdAt.toString());
+        activityDate.setHours(0, 0, 0, 0); // Normalize to start of day
+        const dayKey = activityDate.getTime(); // Use timestamp for consistent comparison
+        uniqueDays.add(dayKey);
       }
     }
 
-    return streak;
+    // Convert to sorted array of timestamps (most recent first)
+    const sortedDays = Array.from(uniqueDays).sort((a, b) => b - a);
+    
+    // Calculate consecutive days starting from today working backwards
+    for (let i = 0; i < sortedDays.length; i++) {
+      const expectedTimestamp = today.getTime() - (i * 24 * 60 * 60 * 1000); // i days ago
+      
+      if (sortedDays[i] === expectedTimestamp) {
+        currentStreak++;
+      } else {
+        break; // Break streak
+      }
+    }
+
+    return currentStreak;
   }
 
   async getChurchCheckIns(churchId: number, date = new Date()): Promise<(CheckIn & { user: User })[]> {
