@@ -8397,14 +8397,28 @@ Return JSON with this exact structure:
     }
   });
 
-  app.get('/api/soap/public', async (req, res) => {
+  app.get('/api/soap/public', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.session.userId;
       const { churchId, limit = 20, offset = 0 } = req.query;
 
+      // Get user's church if not specified
+      let userChurchId = churchId ? parseInt(churchId as string) : undefined;
+      if (!userChurchId) {
+        const user = await storage.getUser(userId);
+        if (user) {
+          const userChurches = await storage.getUserChurches(userId);
+          if (userChurches.length > 0) {
+            userChurchId = userChurches[0].id; // Use primary church
+          }
+        }
+      }
+
       const entries = await storage.getPublicSoapEntries(
-        churchId ? parseInt(churchId as string) : undefined,
+        userChurchId,
         parseInt(limit as string),
-        parseInt(offset as string)
+        parseInt(offset as string),
+        userId // Exclude current user's entries
       );
       res.json(entries);
     } catch (error) {

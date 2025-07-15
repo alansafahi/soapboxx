@@ -278,7 +278,7 @@ import {
   type InsertNotificationPreferences,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -708,7 +708,7 @@ export interface IStorage {
   updateSoapEntry(id: number, updates: Partial<SoapEntry>): Promise<SoapEntry>;
   deleteSoapEntry(id: number): Promise<void>;
   getUserSoapStreak(userId: string): Promise<number>;
-  getPublicSoapEntries(churchId?: number, limit?: number, offset?: number): Promise<SoapEntry[]>;
+  getPublicSoapEntries(churchId?: number, limit?: number, offset?: number, excludeUserId?: string): Promise<any[]>;
   featureSoapEntry(id: number, featuredBy: string): Promise<SoapEntry>;
   unfeatureSoapEntry(id: number): Promise<SoapEntry>;
   getChurchPastors(churchId: number): Promise<{ id: string; firstName: string; lastName: string; email: string; role: string }[]>;
@@ -8235,12 +8235,42 @@ export class DatabaseStorage implements IStorage {
     return streak;
   }
 
-  async getPublicSoapEntries(churchId?: number, limit?: number, offset?: number): Promise<SoapEntry[]> {
-    let query = db.select().from(soapEntries).where(eq(soapEntries.isPublic, true));
-
-    if (churchId) {
-      query = query.where(eq(soapEntries.churchId, churchId));
-    }
+  async getPublicSoapEntries(churchId?: number, limit?: number, offset?: number, excludeUserId?: string): Promise<any[]> {
+    let query = db
+      .select({
+        id: soapEntries.id,
+        userId: soapEntries.userId,
+        churchId: soapEntries.churchId,
+        scripture: soapEntries.scripture,
+        scriptureReference: soapEntries.scriptureReference,
+        observation: soapEntries.observation,
+        application: soapEntries.application,
+        prayer: soapEntries.prayer,
+        moodTag: soapEntries.moodTag,
+        isPublic: soapEntries.isPublic,
+        devotionalDate: soapEntries.devotionalDate,
+        createdAt: soapEntries.createdAt,
+        updatedAt: soapEntries.updatedAt,
+        expiredAt: soapEntries.expiredAt,
+        // Include user data with profile image
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(soapEntries)
+      .innerJoin(users, eq(soapEntries.userId, users.id))
+      .where(
+        and(
+          eq(soapEntries.isPublic, true),
+          isNull(soapEntries.expiredAt), // Exclude expired content
+          excludeUserId ? ne(soapEntries.userId, excludeUserId) : undefined, // Exclude current user's entries
+          churchId ? eq(soapEntries.churchId, churchId) : undefined
+        )
+      );
 
     query = query.orderBy(desc(soapEntries.createdAt));
 

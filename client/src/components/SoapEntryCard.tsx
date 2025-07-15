@@ -64,8 +64,18 @@ const FormattedText = ({ content }: { content: string }) => {
   );
 };
 
+interface ExtendedSoapEntry extends SoapEntry {
+  author?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImageUrl: string;
+  };
+}
+
 interface SoapEntryCardProps {
-  entry: SoapEntry;
+  entry: ExtendedSoapEntry;
   showActions?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -103,9 +113,18 @@ export function SoapEntryCard({
   
   // Determine if this is the current user's entry to show proper name
   const isCurrentUserEntry = currentUser && entry.userId === currentUser.id;
-  const displayName = isCurrentUserEntry 
-    ? `${currentUser.firstName || currentUser.username || 'You'}`
-    : entry.userId;
+  
+  // Use author data if available (for community entries), otherwise fallback to current user logic
+  const getDisplayName = () => {
+    if (entry.author) {
+      return `${entry.author.firstName || ''} ${entry.author.lastName || ''}`.trim() || 'Anonymous';
+    }
+    return isCurrentUserEntry 
+      ? `${currentUser.firstName || currentUser.username || 'You'}`
+      : 'Anonymous';
+  };
+  
+  const displayName = getDisplayName();
   
   const formatDate = (date: Date | string | null) => {
     if (!date) return "Today";
@@ -182,11 +201,13 @@ export function SoapEntryCard({
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="" />
+              <AvatarImage src={entry.author?.profileImageUrl || (isCurrentUserEntry ? currentUser?.profileImageUrl : '') || ''} />
               <AvatarFallback>
-                {isCurrentUserEntry && currentUser?.firstName && currentUser?.lastName
+                {entry.author?.firstName && entry.author?.lastName
+                  ? `${entry.author.firstName.charAt(0)}${entry.author.lastName.charAt(0)}`.toUpperCase()
+                  : isCurrentUserEntry && currentUser?.firstName && currentUser?.lastName
                   ? `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase()
-                  : entry.userId?.substring(0, 2).toUpperCase() || 'U'}
+                  : (entry.author?.firstName?.charAt(0) || currentUser?.firstName?.charAt(0) || 'A').toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">

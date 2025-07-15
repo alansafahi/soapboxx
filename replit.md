@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 15, 2025: S.O.A.P. COMMUNITY TAB DISPLAY COMPLETELY FIXED - Successfully resolved issue where Community tab showed current user's entries instead of other users' public entries
+  - COMMUNITY FEED CORRECTED: getPublicSoapEntries method now properly excludes current user's entries using new excludeUserId parameter
+  - PROFILE IMAGES IMPLEMENTED: S.O.A.P. entries now display proper profile images instead of initials-only fallbacks
+  - AUTHOR DATA STRUCTURE: Enhanced SoapEntryCard component to handle new author object with firstName, lastName, email, and profileImageUrl
+  - PROPER USER FILTERING: Updated backend query to exclude current user from community feed while including proper user joins for profile data
+  - TYPESCRIPT INTERFACES: Extended SoapEntryCardProps with ExtendedSoapEntry interface to support new author property structure
+  - DATABASE OPTIMIZATION: Added proper LEFT JOIN with users table to include profile image URLs in community S.O.A.P. entries
 - July 15, 2025: STREAK CALCULATION CONSISTENCY BUG COMPLETELY FIXED - Successfully resolved critical inconsistency where Daily Check-In system showed different streak values than main user stats
   - ROOT CAUSE IDENTIFIED: Two separate streak calculation systems - getUserStats() using user_activities table vs getUserCheckInStreak() using only check-ins table
   - DUAL METHOD SYNCHRONIZATION: Updated getUserCheckInStreak() method to use same comprehensive user_activities table logic as getUserStats() method
