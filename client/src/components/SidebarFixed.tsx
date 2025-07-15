@@ -48,7 +48,8 @@ import {
   UserPlus,
   Sparkles,
   Trophy,
-  QrCode
+  QrCode,
+  Bookmark
 } from "lucide-react";
 
 interface NavigationItem {
@@ -155,6 +156,7 @@ export default function SidebarFixed() {
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
+        { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Bookmark },
         { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },

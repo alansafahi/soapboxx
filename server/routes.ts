@@ -7279,16 +7279,45 @@ Return JSON with this exact structure:
         return res.status(400).json({ message: 'Valid reaction type required (heart, fire, praise)' });
       }
       
-      // For now, return success with a simple response
-      // In a full implementation, you would store the reaction in a reactions table
+      // Toggle the reaction in the database
+      const result = await storage.togglePrayerReaction(prayerRequestId, userId, reaction);
+      
+      // Get updated reaction counts
+      const reactionCounts = await storage.getPrayerReactions(prayerRequestId);
+      
       res.json({ 
         success: true, 
         reaction, 
         prayerId: prayerRequestId,
-        message: `${reaction} reaction added successfully` 
+        reacted: result.reacted,
+        reactionCounts,
+        message: result.reacted ? `${reaction} reaction added successfully` : `${reaction} reaction removed successfully` 
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to add reaction" });
+    }
+  });
+
+  // Get prayer reactions
+  app.get('/api/prayers/:id/reactions', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const reactionCounts = await storage.getPrayerReactions(prayerRequestId);
+      const userReactions = await storage.getUserPrayerReactions(prayerRequestId, userId);
+      
+      res.json({ 
+        success: true, 
+        reactionCounts,
+        userReactions
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reactions" });
     }
   });
 

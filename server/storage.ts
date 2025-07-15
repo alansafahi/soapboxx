@@ -445,6 +445,11 @@ export interface IStorage {
   getUserPrayerCircles(userId: string): Promise<(PrayerCircleMember & { prayerCircle: PrayerCircle })[]>;
   isUserInPrayerCircle(circleId: number, userId: string): Promise<boolean>;
   
+  // Prayer reaction operations
+  togglePrayerReaction(prayerRequestId: number, userId: string, reactionType: string): Promise<{ reacted: boolean }>;
+  getPrayerReactions(prayerRequestId: number): Promise<Record<string, number>>;
+  getUserPrayerReactions(prayerRequestId: number, userId: string): Promise<string[]>;
+  
   // Prayer bookmark operations
   togglePrayerBookmark(prayerId: number, userId: string): Promise<{ bookmarked: boolean }>;
   getUserBookmarkedPrayers(userId: string, churchId?: number): Promise<PrayerRequest[]>;
@@ -3259,6 +3264,80 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(prayerCircles.id, circleId));
+  }
+
+  // Prayer reaction operations
+  async togglePrayerReaction(prayerRequestId: number, userId: string, reactionType: string): Promise<{ reacted: boolean }> {
+    const existingReaction = await db
+      .select()
+      .from(prayerReactions)
+      .where(and(
+        eq(prayerReactions.prayerRequestId, prayerRequestId),
+        eq(prayerReactions.userId, userId),
+        eq(prayerReactions.reactionType, reactionType)
+      ))
+      .limit(1);
+
+    if (existingReaction.length > 0) {
+      // Remove reaction
+      await db
+        .delete(prayerReactions)
+        .where(and(
+          eq(prayerReactions.prayerRequestId, prayerRequestId),
+          eq(prayerReactions.userId, userId),
+          eq(prayerReactions.reactionType, reactionType)
+        ));
+      return { reacted: false };
+    } else {
+      // Add reaction
+      await db
+        .insert(prayerReactions)
+        .values({
+          prayerRequestId,
+          userId,
+          reactionType,
+          createdAt: new Date()
+        });
+      return { reacted: true };
+    }
+  }
+
+  async getPrayerReactions(prayerRequestId: number): Promise<Record<string, number>> {
+    const reactions = await db
+      .select({
+        reactionType: prayerReactions.reactionType,
+        count: count(prayerReactions.id)
+      })
+      .from(prayerReactions)
+      .where(eq(prayerReactions.prayerRequestId, prayerRequestId))
+      .groupBy(prayerReactions.reactionType);
+
+    // Create an object with reaction counts, defaulting to 0
+    const reactionCounts: Record<string, number> = {
+      heart: 0,
+      fire: 0,
+      praise: 0
+    };
+
+    reactions.forEach(reaction => {
+      reactionCounts[reaction.reactionType] = reaction.count;
+    });
+
+    return reactionCounts;
+  }
+
+  async getUserPrayerReactions(prayerRequestId: number, userId: string): Promise<string[]> {
+    const reactions = await db
+      .select({
+        reactionType: prayerReactions.reactionType
+      })
+      .from(prayerReactions)
+      .where(and(
+        eq(prayerReactions.prayerRequestId, prayerRequestId),
+        eq(prayerReactions.userId, userId)
+      ));
+
+    return reactions.map(r => r.reactionType);
   }
 
   // Prayer bookmark operations

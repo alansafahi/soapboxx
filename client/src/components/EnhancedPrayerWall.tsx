@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/use-toast';
@@ -286,6 +286,45 @@ export default function EnhancedPrayerWall() {
     queryKey: ["/api/prayers"],
   });
 
+  // Load initial reaction counts for all prayers
+  useEffect(() => {
+    const loadReactionCounts = async () => {
+      if (prayerRequests.length === 0) return;
+      
+      const reactionPromises = prayerRequests.map(async (prayer: any) => {
+        try {
+          const response = await fetch(`/api/prayers/${prayer.id}/reactions`, {
+            credentials: 'include',
+          });
+          if (response.ok) {
+            const data = await response.json();
+            return { prayerId: prayer.id, reactions: data.reactionCounts };
+          }
+        } catch (error) {
+          // Silently handle errors
+        }
+        return { prayerId: prayer.id, reactions: { heart: 0, fire: 0, praise: 0 } };
+      });
+      
+      const results = await Promise.all(reactionPromises);
+      setReactions(prev => {
+        const newMap = new Map(prev);
+        results.forEach(({ prayerId, reactions }) => {
+          const current = newMap.get(prayerId) || { praying: 0, heart: 0, fire: 0, praise: 0 };
+          newMap.set(prayerId, { 
+            ...current, 
+            heart: reactions.heart || 0,
+            fire: reactions.fire || 0,
+            praise: reactions.praise || 0
+          });
+        });
+        return newMap;
+      });
+    };
+    
+    loadReactionCounts();
+  }, [prayerRequests]);
+
   // Fetch prayer circles with error handling
   const { data: prayerCircles = [], isLoading: circlesLoading, error: circlesError } = useQuery({
     queryKey: ["/api/prayer-circles"],
@@ -464,15 +503,22 @@ export default function EnhancedPrayerWall() {
     mutationFn: async ({ prayerId, reaction }: { prayerId: number, reaction: string }) => {
       return await apiRequest("POST", `/api/prayers/${prayerId}/react`, { reaction });
     },
-    onSuccess: (_, { prayerId, reaction }) => {
+    onSuccess: (response, { prayerId, reaction }) => {
       setReactions(prev => {
         const newMap = new Map(prev);
         const current = newMap.get(prayerId) || { praying: 0, heart: 0, fire: 0, praise: 0 };
         newMap.set(prayerId, { 
           ...current, 
-          [reaction]: current[reaction as keyof typeof current] + 1 
+          heart: response.reactionCounts?.heart || 0,
+          fire: response.reactionCounts?.fire || 0,
+          praise: response.reactionCounts?.praise || 0
         });
         return newMap;
+      });
+      
+      toast({
+        title: response.reacted ? "Reaction Added" : "Reaction Removed",
+        description: response.message,
       });
     },
   });
