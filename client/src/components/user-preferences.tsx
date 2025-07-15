@@ -194,6 +194,26 @@ export default function UserPreferences() {
       setFontSize(value);
     }
     
+    // Handle language change with automatic refresh
+    if (key === "language") {
+      updatePreferencesMutation.mutate({ [key]: value }, {
+        onSuccess: () => {
+          // Set language in localStorage for immediate effect
+          localStorage.setItem('soapbox_language', value);
+          // Show success message
+          toast({
+            title: "Language Updated",
+            description: "Page will refresh to apply language changes.",
+          });
+          // Refresh page after short delay to apply language change
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
+      });
+      return;
+    }
+    
     updatePreferencesMutation.mutate({ [key]: value });
   };
 

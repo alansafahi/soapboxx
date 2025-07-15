@@ -8,7 +8,7 @@ import { useImmediateAuth } from "./lib/immediateAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { ForceLanguageButton } from "./components/ForceLanguageButton";
+
 
 import SidebarFixed from "./components/SidebarFixed";
 import TopHeader from "./components/TopHeader";
@@ -181,7 +181,7 @@ function App() {
                         <WouterRouter>
                             <AppRouter />
                             <Toaster />
-                            <ForceLanguageButton />
+
                         </WouterRouter>
                     </TooltipProvider>
                 </LanguageProvider>
