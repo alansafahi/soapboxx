@@ -315,7 +315,7 @@ export function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManage
         <CardContent className="text-center py-6">
           <div className="text-sm text-gray-600 dark:text-gray-300">
             <p className="mb-2">
-              <strong>Core Features:</strong> Home, Messages, Contacts, S.O.A.P. Journal, Leaderboard, Profile, and Settings are always available.
+              <strong>Core Features:</strong> Home, Messages, Contacts, S.O.A.P. Journal, Engagement Board, Profile, and Settings are always available.
             </p>
             <p>
               Feature changes apply to all church members immediately and affect navigation menu visibility.
