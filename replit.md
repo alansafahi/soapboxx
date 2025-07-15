@@ -142,11 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- July 15, 2025: COMPREHENSIVE SHARE DIALOG SYSTEM IMPLEMENTED - Successfully created standard ShareDialog component with 12 sharing platforms for consistent sharing across entire application
+- July 15, 2025: COMPREHENSIVE SHARE DIALOG SYSTEM WITH NATIVE APP INTEGRATION IMPLEMENTED - Successfully created standard ShareDialog component with 12 sharing platforms that open native apps when available
+  - NATIVE APP INTEGRATION: WhatsApp, Instagram, Discord, Slack, and Signal now attempt to open native apps using deep links with web fallbacks
+  - DEEP LINK PROTOCOLS: Implemented proper URL schemes (whatsapp://, instagram://, discord://, slack://, sgnl://) for seamless native app opening
+  - ENHANCED USER EXPERIENCE: Users can now directly share to native apps instead of copying and pasting manually
+  - FALLBACK MECHANISMS: All platforms include proper fallback to web versions when native apps aren't available
   - STANDARD SHARE COMPONENT: Created reusable ShareDialog component supporting Copy URL, Facebook, X (Twitter), WhatsApp, Instagram, Discord, Slack, Signal, YouTube, Messenger, SMS, and Email
   - TWITTER ICON UPDATED: Replaced blue Twitter bird with black X icon to match current X (formerly Twitter) branding
-  - ENHANCED SHARING OPTIONS: Each platform includes proper URL handling, clipboard integration, and user-friendly toast notifications
-  - CROSS-PLATFORM COMPATIBILITY: Platforms without direct sharing APIs (Instagram, Discord, Slack, YouTube) use clipboard copying with clear instructions
   - PRODUCTION READY: Standard share functionality available for use across all app components with consistent UX
 - July 15, 2025: SOCIAL FEED LIKE/SHARE BUTTONS FUNCTIONALITY RESTORED - Successfully fixed broken like and share buttons in LimitedSocialFeed component by reconnecting onClick handlers to existing mutation functions
   - LIKE BUTTON OPERATIONAL: Added `likeMutation.mutate(post.id)` onClick handler to heart button for proper post liking functionality

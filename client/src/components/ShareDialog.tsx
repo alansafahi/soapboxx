@@ -47,44 +47,106 @@ export default function ShareDialog({ isOpen, onClose, title = "Share Post", con
           break;
           
         case 'whatsapp':
-          window.open(`https://wa.me/?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`, '_blank');
+          // Try WhatsApp app first, fallback to web
+          const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
+          const whatsappWebUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
+          
+          try {
+            window.location.href = whatsappUrl;
+            setTimeout(() => {
+              window.open(whatsappWebUrl, '_blank');
+            }, 1000);
+          } catch (error) {
+            window.open(whatsappWebUrl, '_blank');
+          }
+          
           toast({
             title: "Opening WhatsApp",
-            description: "Share window opened in new tab",
+            description: "Opening WhatsApp app or web version",
           });
           break;
           
         case 'instagram':
-          // Instagram doesn't support direct sharing URLs, so we copy the content
+          // Instagram doesn't have direct sharing URLs, so we'll try to open the app
+          const instagramUrl = `instagram://camera`;
           await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
-          toast({
-            title: "Content copied!",
-            description: "Paste into Instagram - link copied to clipboard",
-          });
+          
+          try {
+            window.location.href = instagramUrl;
+            toast({
+              title: "Opening Instagram",
+              description: "Content copied to clipboard - paste in Instagram story",
+            });
+          } catch (error) {
+            // Fallback to web version
+            window.open(`https://www.instagram.com/`, '_blank');
+            toast({
+              title: "Opening Instagram",
+              description: "Content copied to clipboard - paste in Instagram",
+            });
+          }
           break;
           
         case 'discord':
+          // Discord uses custom protocol for direct app opening
+          const discordUrl = `discord://`;
           await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
-          toast({
-            title: "Content copied!",
-            description: "Paste into Discord - link copied to clipboard",
-          });
+          
+          try {
+            window.location.href = discordUrl;
+            toast({
+              title: "Opening Discord",
+              description: "Content copied to clipboard - paste in Discord",
+            });
+          } catch (error) {
+            // Fallback to web version
+            window.open(`https://discord.com/channels/@me`, '_blank');
+            toast({
+              title: "Opening Discord",
+              description: "Content copied to clipboard - paste in Discord",
+            });
+          }
           break;
           
         case 'slack':
+          // Slack deep link to open the app
+          const slackUrl = `slack://open`;
           await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
-          toast({
-            title: "Content copied!",
-            description: "Paste into Slack - link copied to clipboard",
-          });
+          
+          try {
+            window.location.href = slackUrl;
+            toast({
+              title: "Opening Slack",
+              description: "Content copied to clipboard - paste in Slack",
+            });
+          } catch (error) {
+            // Fallback to web version
+            window.open(`https://slack.com/`, '_blank');
+            toast({
+              title: "Opening Slack",
+              description: "Content copied to clipboard - paste in Slack",
+            });
+          }
           break;
           
         case 'signal':
+          // Signal uses custom protocol
+          const signalUrl = `sgnl://`;
           await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
-          toast({
-            title: "Content copied!",
-            description: "Paste into Signal - link copied to clipboard",
-          });
+          
+          try {
+            window.location.href = signalUrl;
+            toast({
+              title: "Opening Signal",
+              description: "Content copied to clipboard - paste in Signal",
+            });
+          } catch (error) {
+            // Fallback message since Signal doesn't have web version
+            toast({
+              title: "Content copied!",
+              description: "Paste into Signal app - link copied to clipboard",
+            });
+          }
           break;
           
         case 'youtube':
