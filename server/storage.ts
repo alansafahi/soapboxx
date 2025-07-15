@@ -468,6 +468,7 @@ export interface IStorage {
 
   // Church feature toggle operations
   getChurchFeatureSettings(churchId: number): Promise<ChurchFeatureSetting[]>;
+  getChurchFeatureSettingById(featureId: number): Promise<ChurchFeatureSetting | null>;
   updateChurchFeatureSetting(setting: InsertChurchFeatureSetting): Promise<ChurchFeatureSetting>;
   enableChurchFeature(churchId: number, category: string, featureName: string, enabledBy: string, configuration?: any): Promise<ChurchFeatureSetting>;
   disableChurchFeature(churchId: number, category: string, featureName: string): Promise<void>;
@@ -9158,6 +9159,11 @@ export class DatabaseStorage implements IStorage {
   // Church feature toggle operations
   async getChurchFeatureSettings(churchId: number): Promise<ChurchFeatureSetting[]> {
     return await db.select().from(churchFeatureSettings).where(eq(churchFeatureSettings.churchId, churchId));
+  }
+
+  async getChurchFeatureSettingById(featureId: number): Promise<ChurchFeatureSetting | null> {
+    const [feature] = await db.select().from(churchFeatureSettings).where(eq(churchFeatureSettings.id, featureId));
+    return feature || null;
   }
 
   async updateChurchFeatureSetting(setting: InsertChurchFeatureSetting): Promise<ChurchFeatureSetting> {

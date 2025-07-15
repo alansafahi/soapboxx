@@ -6094,7 +6094,7 @@ Return JSON with this exact structure:
         return res.status(403).json({ error: 'Access denied to this church' });
       }
 
-      const features = await storage.getChurchFeatures(churchId);
+      const features = await storage.getChurchFeatureSettings(churchId);
       res.json(features);
     } catch (error) {
       // Error getting church features - silent error handling
@@ -6113,8 +6113,9 @@ Return JSON with this exact structure:
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      // Get the feature to check church access
-      const feature = await storage.getChurchFeature(featureId);
+      // Get the feature setting to check church access
+      const feature = await storage.getChurchFeatureSettingById(featureId);
+      
       if (!feature) {
         return res.status(404).json({ error: 'Feature not found' });
       }
@@ -6142,9 +6143,12 @@ Return JSON with this exact structure:
         return res.status(403).json({ error: 'Admin access required' });
       }
 
-      const updatedFeature = await storage.updateChurchFeature(featureId, {
+      const updatedFeature = await storage.updateChurchFeatureSetting({
+        churchId: feature.churchId,
+        featureCategory: feature.featureCategory,
+        featureName: feature.featureName,
         isEnabled,
-        lastModified: new Date()
+        enabledBy: userId
       });
       
       res.json(updatedFeature);
