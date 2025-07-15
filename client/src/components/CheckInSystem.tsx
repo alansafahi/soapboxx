@@ -77,8 +77,8 @@ interface Event {
   isOnline?: boolean;
 }
 
-// 4-Pillar Comprehensive Mood System matching AI Check-In
-const moodCategories = [
+// 4-Pillar Comprehensive Mood System matching AI Check-In - function to get translated moods
+const getMoodCategories = (t: (key: string) => string) => [
   {
     title: "💙 Emotional & Spiritual Support",
     description: "Express your struggles and need for comfort",
@@ -137,8 +137,8 @@ const moodCategories = [
   }
 ];
 
-// Flattened mood options for easier access
-const moodOptions = moodCategories.flatMap(category => 
+// Flattened mood options for easier access - function to get translated moods
+const getMoodOptions = (t: (key: string) => string) => getMoodCategories(t).flatMap(category => 
   category.moods.map(mood => ({
     ...mood,
     category: category.title
@@ -158,6 +158,10 @@ export default function CheckInSystem() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+
+  // Get translated mood categories and options
+  const moodCategories = getMoodCategories(t);
+  const moodOptions = getMoodOptions(t);
 
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
