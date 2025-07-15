@@ -14,7 +14,7 @@ interface MoodCheckInProps {
   onComplete?: () => void;
 }
 
-import { moodCategories, allMoods } from "../lib/moodCategories";
+import { getMoodCategories, getAllMoods } from "../lib/moodCategories";
 
 export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
   const { t } = useLanguage();
@@ -22,6 +22,9 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
   const [notes, setNotes] = useState("");
   const [shareWithStaff, setShareWithStaff] = useState(false);
   const [personalizedContent, setPersonalizedContent] = useState<any>(null);
+  
+  const moodCategories = getMoodCategories(t);
+  const allMoods = getAllMoods(t);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -210,7 +213,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
               {getSelectedMoodsData().map((mood) => (
                 <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
                   <span className="text-sm">{mood.icon}</span>
-                  <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{mood.label}</span>
+                  <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{t(mood.label)}</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -228,7 +231,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
                   onClick={clearMoods}
                   className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
                 >
-                  Clear all
+                  {t('general.clearAll')}
                 </Button>
               )}
             </div>
@@ -244,10 +247,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
                 <div className={`flex items-center gap-2 pb-2 border-b ${hasSelectedMood ? 'border-purple-300 dark:border-purple-600' : 'border-gray-200 dark:border-gray-600'}`}>
                   <span className="text-lg">{category.icon}</span>
                   <h3 className={`font-semibold text-sm ${hasSelectedMood ? 'text-purple-700 dark:text-purple-300' : 'text-gray-800 dark:text-white'}`}>
-                    {category.title}
+                    {t(category.title)}
                     {hasSelectedMood && (
                       <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
-                        Selected
+                        {t('general.selected')}
                       </span>
                     )}
                   </h3>

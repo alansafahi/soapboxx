@@ -8,6 +8,7 @@ import { Textarea } from "./ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../hooks/useAuth";
+import { useLanguage } from "../contexts/LanguageContext";
 import { apiRequest } from "../lib/queryClient";
 import { 
   Heart, 
@@ -100,6 +101,7 @@ interface FeedPost {
 export default function SocialFeed() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   
   const [newPost, setNewPost] = useState("");
@@ -769,7 +771,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                       onClick={clearMoods}
                       className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
                     >
-                      Clear all
+{t('general.clearAll')}
                     </Button>
                   )}
                 </div>
@@ -897,7 +899,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   {showMoodDropdown && (
                     <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-[480px] max-w-[95vw] max-h-[70vh] overflow-y-auto">
                       <div className="p-3 sm:p-4">
-                        <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
+                        <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">{t('moodCheckin.howAreYouFeeling')}</div>
                         
                         {/* Recently Used Section */}
                         {recentMoods.length > 0 && (

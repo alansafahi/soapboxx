@@ -77,65 +77,20 @@ interface Event {
   isOnline?: boolean;
 }
 
-// 4-Pillar Comprehensive Mood System matching AI Check-In - function to get translated moods
-const getMoodCategories = (t: (key: string) => string) => [
-  {
-    title: "💙 Emotional & Spiritual Support",
-    description: "Express your struggles and need for comfort",
-    moods: [
-      { value: "anxious", emoji: "😰", label: t('moods.anxious') },
-      { value: "sad", emoji: "😞", label: t('moods.sad') },
-      { value: "lonely", emoji: "😔", label: t('moods.lonely') },
-      { value: "grieving", emoji: "💔", label: t('moods.grieving') },
-      { value: "fearful", emoji: "😨", label: t('moods.fearful') },
-      { value: "overwhelmed", emoji: "😵", label: t('moods.overwhelmed') },
-      { value: "doubtful", emoji: "🤔", label: t('moods.doubtful') },
-      { value: "angry", emoji: "😠", label: t('moods.angry') },
-    ]
-  },
-  {
-    title: "🌱 Growth & Transformation",
-    description: "Mark your spiritual formation journey",
-    moods: [
-      { value: "seeking", emoji: "🧭", label: t('moods.seeking') },
-      { value: "repentant", emoji: "🙏", label: t('moods.repentant') },
-      { value: "motivated", emoji: "🔥", label: t('moods.motivated') },
-      { value: "curious", emoji: "🤓", label: t('moods.curious') },
-      { value: "determined", emoji: "💪", label: t('moods.determined') },
-      { value: "reflective", emoji: "🤲", label: t('moods.reflective') },
-      { value: "inspired", emoji: "✨", label: t('moods.inspired') },
-      { value: "focused", emoji: "🎯", label: t('moods.focused') },
-    ]
-  },
-  {
-    title: "🏠 Life Situations",
-    description: "Navigate life's challenges with faith",
-    moods: [
-      { value: "celebrating", emoji: "🎉", label: t('moods.celebrating') },
-      { value: "adaptable", emoji: "🚪", label: t('moods.adaptable') },
-      { value: "healing", emoji: "🩹", label: t('moods.healing') },
-      { value: "caring", emoji: "👨‍👩‍👧‍👦", label: t('moods.caring') },
-      { value: "working", emoji: "💼", label: t('moods.working') },
-      { value: "loving", emoji: "💕", label: t('moods.loving') },
-      { value: "concerned", emoji: "💰", label: t('moods.concerned') },
-      { value: "hopeful", emoji: "🏥", label: t('moods.hopeful') },
-    ]
-  },
-  {
-    title: "⛪ Faith & Worship",
-    description: "Express your spiritual state and connection",
-    moods: [
-      { value: "grateful", emoji: "🙌", label: t('moods.grateful') },
-      { value: "peaceful", emoji: "🕊️", label: t('moods.peaceful') },
-      { value: "joyful", emoji: "😊", label: t('moods.joyful') },
-      { value: "blessed", emoji: "😇", label: t('moods.blessed') },
-      { value: "prayerful", emoji: "🙏", label: t('moods.prayerful') },
-      { value: "worshipful", emoji: "🎵", label: t('moods.worshipful') },
-      { value: "hopeful", emoji: "🌅", label: t('moods.hopeful') },
-      { value: "content", emoji: "😌", label: t('moods.content') },
-    ]
-  }
-];
+// Import shared mood system
+import { getMoodCategories as getSharedMoodCategories } from "../lib/moodCategories";
+
+// Adapt shared mood system for CheckInSystem with value field instead of id
+const getMoodCategories = (t: (key: string) => string) => 
+  getSharedMoodCategories(t).map(category => ({
+    title: category.title,
+    description: category.title, // Use title as description for now
+    moods: category.moods.map(mood => ({
+      value: mood.id,
+      emoji: mood.icon,
+      label: mood.label
+    }))
+  }));
 
 // Flattened mood options for easier access - function to get translated moods
 const getMoodOptions = (t: (key: string) => string) => getMoodCategories(t).flatMap(category => 
@@ -527,14 +482,14 @@ export default function CheckInSystem() {
                       {/* Comprehensive Mood Selection */}
                       <div>
                         <label className="text-sm font-medium mb-3 block">
-                          How are you feeling? (Optional)
+                          {t('moodCheckin.howAreYouFeeling')} ({t('general.optional')})
                         </label>
                         
                         {/* Selected moods display */}
                         {selectedMoods.length > 0 && (
                           <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                             <div className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                              Selected feelings ({selectedMoods.join(', ').length}/150 characters):
+                              {t('general.selected')} ({selectedMoods.join(', ').length}/150 {t('general.characters')}):
                             </div>
                             <div className="flex flex-wrap gap-1">
                               {selectedMoods.map((moodValue) => {
@@ -557,7 +512,7 @@ export default function CheckInSystem() {
                                 onClick={() => setSelectedMoods([])}
                                 className="text-xs text-blue-600 hover:text-blue-800 mt-2"
                               >
-                                Clear all
+                                {t('general.clearAll')}
                               </button>
                             )}
                           </div>

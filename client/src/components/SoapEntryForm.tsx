@@ -18,7 +18,7 @@ import { useToast } from "../hooks/use-toast";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { insertSoapEntrySchema, type SoapEntry } from "../../../shared/schema";
 import { z } from "zod";
-import { moodCategories, allMoods, getMoodsByIds } from "../lib/moodCategories";
+import { getMoodCategories, getAllMoods, getMoodsByIds } from "../lib/moodCategories";
 import ExpirationSettings from "./ExpirationSettings";
 import { useLanguage } from "../contexts/LanguageContext";
 
@@ -38,6 +38,8 @@ interface SoapEntryFormProps {
 
 export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps) {
   const { t } = useLanguage();
+  const moodCategories = getMoodCategories(t);
+  const allMoods = getAllMoods(t);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<any>(null);
