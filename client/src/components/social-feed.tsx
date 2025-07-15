@@ -726,7 +726,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 <Textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  placeholder="Share your thoughts, prayers, or reflections..."
+                  placeholder={t('posts.shareThoughts')}
                   className="w-full border-0 p-0 text-base resize-none focus:ring-0 bg-transparent"
                   rows={3}
                 />
@@ -1155,7 +1155,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 onClick={handleCreatePost}
                 disabled={!newPost.trim() || createPostMutation.isPending}
                 className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium p-2 h-8 w-8 border-0 flex-shrink-0 ml-2"
-                title={createPostMutation.isPending ? 'Posting...' : 'Share post'}
+                title={createPostMutation.isPending ? t('posts.posting') : t('buttons.share')}
               >
                 <Send className="w-4 h-4 text-white" />
               </Button>
@@ -1683,9 +1683,9 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
       <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
         <DialogContent className="sm:max-w-md max-h-[85vh] h-[85vh] flex flex-col p-4 m-2" aria-describedby="comment-dialog-description">
           <DialogHeader className="flex-shrink-0 pb-2">
-            <DialogTitle className="text-lg">Comments</DialogTitle>
+            <DialogTitle className="text-lg">{t('comments.title')}</DialogTitle>
             <DialogDescription id="comment-dialog-description" className="text-sm">
-              Share your thoughts and engage with this post.
+              {t('comments.shareThoughts')}
             </DialogDescription>
           </DialogHeader>
           
@@ -1693,7 +1693,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Write a thoughtful comment..."
+              placeholder={t('comments.placeholder')}
               className="min-h-[60px] max-h-[120px] text-sm resize-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -1717,7 +1717,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     disabled={commentMutation.isPending}
                     className="flex-1 h-10"
                   >
-                    {t('common.cancel')}
+                    {t('buttons.cancel')}
                   </Button>
                   <Button 
                     onClick={() => {
