@@ -11,7 +11,12 @@ import { eq, and, inArray } from "drizzle-orm";
 export const CORE_TRANSLATION_KEYS = [
   // Navigation essentials
   'nav.home', 'nav.messages', 'nav.contacts', 'nav.churches', 'nav.events',
-  'nav.profile', 'nav.settings', 'nav.signOut',
+  'nav.profile', 'nav.settings', 'nav.signOut', 'nav.donation', 'nav.discussions',
+  'nav.todaysReading', 'nav.prayerWall', 'nav.engagementBoard', 'nav.soapJournal',
+  'nav.audioBible', 'nav.audioRoutines', 'nav.videoLibrary', 'nav.imageGallery',
+  'nav.memberDirectory', 'nav.qrCodeManagement', 'nav.donationAnalytics',
+  'nav.communicationHub', 'nav.sermonStudio', 'nav.engagementAnalytics',
+  'nav.churchManagement', 'nav.aiTranslationAdmin',
   
   // Buttons and actions
   'buttons.cancel', 'buttons.save', 'buttons.edit', 'buttons.delete', 
@@ -31,6 +36,10 @@ export const CORE_TRANSLATION_KEYS = [
   
   // Settings core
   'settings.title', 'settings.description', 'language.label', 'theme.label',
+  
+  // Section headers
+  'sections.community', 'sections.spiritualTools', 'sections.mediaContents',
+  'sections.adminPortal', 'sections.account', 'sections.soapboxPortal',
   
   // Bible/spiritual core
   'bible.title', 'bible.share', 'bible.reflect', 'bible.loading',

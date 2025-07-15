@@ -163,7 +163,7 @@ export default function SidebarFixed() {
       label: t('sections.adminPortal'),
       items: [
         { label: t('nav.memberDirectory'), href: "/members", icon: Users, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "QR Code Management", href: "/qr-management", icon: QrCode, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: t('nav.qrCodeManagement'), href: "/qr-management", icon: QrCode, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: t('nav.donationAnalytics'), href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: t('nav.communicationHub'), href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: t('nav.sermonStudio'), href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
@@ -171,10 +171,10 @@ export default function SidebarFixed() {
       ]
     },
     {
-      label: "SOAPBOX PORTAL",
+      label: t('sections.soapboxPortal'),
       items: [
-        { label: "Church Management", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
-        { label: "AI Translation Admin", href: "/ai-translation-admin", icon: Languages, roles: ['soapbox_owner', 'system_admin'] },
+        { label: t('nav.churchManagement'), href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
+        { label: t('nav.aiTranslationAdmin'), href: "/ai-translation-admin", icon: Languages, roles: ['soapbox_owner', 'system_admin'] },
       ]
     },
     {
