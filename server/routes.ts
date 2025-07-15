@@ -6528,7 +6528,7 @@ Return JSON with this exact structure:
   });
 
   // Enhanced church search with filtering
-  app.get('/api/churches/search', async (req, res) => {
+  app.get('/api/churches/search', isAuthenticated, async (req: any, res) => {
     try {
       const { denomination, location, churchName, size, proximity, limit } = req.query;
       
@@ -6541,6 +6541,7 @@ Return JSON with this exact structure:
         limit: limit ? parseInt(limit as string) : 1000
       };
       
+      // Log search parameters for debugging
       const churches = await storage.searchChurches(searchParams);
       res.json(churches);
     } catch (error) {

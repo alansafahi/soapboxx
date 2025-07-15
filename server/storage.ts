@@ -1459,7 +1459,8 @@ export class DatabaseStorage implements IStorage {
     try {
       let whereConditions = [
         eq(churches.isActive, true),
-        eq(churches.isDemo, false) // Only show production churches, not demo churches
+        eq(churches.isDemo, false), // Only show production churches, not demo churches
+        eq(churches.verificationStatus, 'approved') // Only show approved churches
       ];
       
       // Filter by denomination (only if not "all")
@@ -1548,6 +1549,7 @@ export class DatabaseStorage implements IStorage {
       
       return filteredResults;
     } catch (error) {
+      console.error('Search churches error:', error);
       
       // Fallback to simple query without member counts
       try {

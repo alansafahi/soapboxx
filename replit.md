@@ -142,10 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- July 15, 2025: UI TEXT CORRECTIONS AND PRIMARY CHURCH MANAGEMENT COMPLETED - Successfully updated core feature labels and resolved multiple primary church conflicts
+- July 15, 2025: CHURCH SEARCH FUNCTIONALITY AND UI IMPROVEMENTS COMPLETED - Successfully fixed church discovery search and updated UI text
+  - CHURCH SEARCH FIXED: Updated search logic to properly handle "all" denomination filter allowing name-based searches to work correctly
+  - AUTHENTICATION ADDED: Added isAuthenticated middleware to church search endpoint for proper security
+  - BUTTON TEXT UPDATED: Changed "Primary" to "Set As Primary" for better user clarity
   - LEADERBOARD TO ENGAGEMENT BOARD: Updated Core Features text in ChurchFeatureManager to show "Engagement Board" instead of "Leaderboard"
   - PRIMARY CHURCH CONFLICT RESOLVED: Set SGA Church as the single primary church by updating last_accessed_at timestamp
-  - USER EXPERIENCE IMPROVED: Eliminated confusion from multiple churches showing as "Primary" simultaneously
+  - DEBUG LOGGING: Added error logging to church search for better troubleshooting
 - July 15, 2025: CHURCH FEATURE TOGGLE API ENDPOINTS COMPLETELY FIXED - Successfully resolved non-responsive admin feature toggles by fixing API endpoint mismatches and database table references
   - API ENDPOINT MISMATCH RESOLVED: Updated frontend to use correct `/api/churches/{churchId}/features` and `/api/churches/features/{featureId}` endpoints
   - BACKEND ROUTES CREATED: Added missing API routes matching frontend expectations for church feature management
