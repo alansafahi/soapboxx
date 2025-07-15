@@ -22,6 +22,7 @@ import { z } from 'zod';
 import { formatDistanceToNow } from 'date-fns';
 import type { PrayerRequest, PrayerCircle, PrayerCircleMember } from '../../../shared/schema';
 import PrayerAnalyticsBadges from './PrayerAnalyticsBadges';
+import ShareDialog from './ShareDialog';
 
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
@@ -216,6 +217,7 @@ export default function EnhancedPrayerWall() {
   const [bookmarkedRequests, setBookmarkedRequests] = useState<Set<number>>(new Set());
   const [showWhosPraying, setShowWhosPraying] = useState<Map<number, boolean>>(new Map());
   const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
+  const [shareDialogOpen, setShareDialogOpen] = useState<{isOpen: boolean, prayer: PrayerRequest | null}>({isOpen: false, prayer: null});
   
   // Expiration settings state
   const [expirationSettings, setExpirationSettings] = useState<{
@@ -874,21 +876,7 @@ export default function EnhancedPrayerWall() {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => {
-                                if (navigator.share) {
-                                  navigator.share({
-                                    title: `Prayer Request: ${prayer.title || 'Community Prayer'}`,
-                                    text: prayer.content,
-                                    url: window.location.href
-                                  });
-                                } else {
-                                  navigator.clipboard.writeText(`Prayer Request: ${prayer.content}\n\nJoin us in prayer at ${window.location.href}`);
-                                  toast({
-                                    title: "Prayer Link Copied",
-                                    description: "Share this prayer with others.",
-                                  });
-                                }
-                              }}
+                              onClick={() => setShareDialogOpen({isOpen: true, prayer})}
                               title="Share this prayer"
                             >
                               <Share className="w-4 h-4" />
@@ -1359,6 +1347,15 @@ export default function EnhancedPrayerWall() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen.isOpen}
+        onClose={() => setShareDialogOpen({isOpen: false, prayer: null})}
+        title="Share Prayer Request"
+        content={shareDialogOpen.prayer ? `Prayer Request: ${shareDialogOpen.prayer.title || 'Community Prayer'}\n\n${shareDialogOpen.prayer.content}` : ''}
+        url={window.location.href}
+      />
     </div>
   );
 }
