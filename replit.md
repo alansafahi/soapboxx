@@ -142,8 +142,9 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
-- July 15, 2025: CHURCH ADMIN PERMISSIONS SECURITY FIX - Fixed overprivileged SoapBox Owner role allowing inappropriate church edit access
-  - ADMIN ACCESS RESTRICTED: Removed global SoapBox Owner privilege to edit all churches in user's "My Churches" list
+- July 15, 2025: USER ROLE SECURITY CORRECTION COMPLETED - Fixed incorrect SoapBox Owner role assignment and secured proper role hierarchy
+  - ROLE REASSIGNMENT: Changed "Hello SoapBox" user (hello@soapboxsuperapp.com) from soapbox_owner to member role
+  - EXCLUSIVE SOAPBOX OWNER: Only Alan Safahi (alan@soapboxsuperapp.com) retains soapbox_owner role with full platform privileges
   - CHURCH-SPECIFIC PERMISSIONS: Edit buttons now only appear based on user's role within that specific church (church_admin, pastor, etc.)
   - SECURITY IMPROVEMENT: SoapBox Owner role now properly limited to platform administration, not individual church management
   - ROLE BASED ACCESS: Church edit access properly restricted to users with church-specific admin roles only
