@@ -5991,12 +5991,27 @@ Return JSON with this exact structure:
         return res.status(400).json({ error: 'Invalid church ID' });
       }
 
+      // First try to get user's role in this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
-      if (!userChurch) {
-        return res.status(404).json({ error: 'User not associated with this church' });
+      if (userChurch) {
+        return res.json({ role: userChurch.role });
       }
 
-      res.json({ role: userChurch.role });
+      // If not found, check if this user is a global admin or created this church
+      const user = await storage.getUser(userId);
+      if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
+        return res.json({ role: user.role });
+      }
+
+      // Check if user created this church by looking for admin churches
+      const adminChurches = await storage.getUserCreatedChurches(userId);
+      const isCreator = adminChurches.some(church => church.id === churchId);
+      
+      if (isCreator) {
+        return res.json({ role: 'church_admin' });
+      }
+
+      return res.status(404).json({ error: 'User not associated with this church' });
     } catch (error) {
       // Error getting user church role - silent error handling
       res.status(500).json({ error: 'Failed to get user role' });

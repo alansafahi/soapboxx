@@ -1799,9 +1799,10 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
 
-    // Get role name
-    let roleName: string | undefined;
-    if (userChurch.roleId) {
+    // Use the role field directly from user_churches table, fall back to roles table if needed
+    let roleName = userChurch.role;
+    
+    if (!roleName && userChurch.roleId) {
       const [role] = await db
         .select()
         .from(roles)

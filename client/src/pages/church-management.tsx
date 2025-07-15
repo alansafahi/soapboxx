@@ -61,14 +61,18 @@ export default function ChurchManagement() {
   });
 
   // Check if user has admin access
-  const { data: userRole } = useQuery({
+  const { data: userRole, error: roleError } = useQuery({
     queryKey: ['user-church-role', churchId],
     queryFn: async () => {
       const response = await fetch(`/api/users/churches/${churchId}/role`, { credentials: 'include' });
-      if (!response.ok) throw new Error('Failed to fetch user role');
+      if (!response.ok) {
+        // If user is not found for this church, they might still be an admin through other means
+        return { role: null, error: response.status };
+      }
       return response.json();
     },
     enabled: !!churchId,
+    retry: false, // Don't retry role checks
   });
 
   // Update church profile mutation
@@ -115,8 +119,22 @@ export default function ChurchManagement() {
 
   // Check if user has admin access
   const hasAdminAccess = () => {
-    const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
-    return adminRoles.includes(userRole?.role || '') || user?.role === 'soapbox_owner';
+    // For SoapBox Owner users, always allow access
+    if (user?.role === 'soapbox_owner') {
+      return true;
+    }
+    
+    // If there was a role error (like user not associated), check if they are a church creator
+    if (roleError || userRole?.error) {
+      // For church_admin role users, try to allow access (they might have created this church)
+      if (user?.role === 'church_admin' || user?.role === 'admin' || user?.role === 'system_admin') {
+        return true;
+      }
+    }
+    
+    // Check if user has admin role for this specific church
+    const adminRoles = ['church_admin', 'owner', 'pastor', 'lead-pastor', 'system-admin', 'admin'];
+    return adminRoles.includes(userRole?.role || '');
   };
 
   const handleFieldChange = (field: keyof ChurchProfile, value: string) => {
