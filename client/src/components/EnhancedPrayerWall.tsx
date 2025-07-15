@@ -14,7 +14,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Heart, MessageCircle, Share, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink } from 'lucide-react';
 import ExpirationSettings from './ExpirationSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -860,7 +860,8 @@ export default function EnhancedPrayerWall() {
                                 };
                                 input.click();
                               }}
-                              title="Upload photo or attachment"
+                              title="Attach photo to prayer request"
+                              className="text-green-600 hover:text-green-700"
                             >
                               <Upload className="w-4 h-4" />
                             </Button>
@@ -878,8 +879,9 @@ export default function EnhancedPrayerWall() {
                               size="sm"
                               onClick={() => setShareDialogOpen({isOpen: true, prayer})}
                               title="Share this prayer"
+                              className="text-blue-600 hover:text-blue-700"
                             >
-                              <Share className="w-4 h-4" />
+                              <Share2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
