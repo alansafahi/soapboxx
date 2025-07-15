@@ -454,7 +454,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                   {/* Unified comment system - same as social-feed.tsx */}
                   <div className="flex items-center justify-between text-gray-600 pt-3 border-t">
                     <div className="flex items-center space-x-6">
-                      <button className="flex items-center space-x-2 hover:text-red-500 transition-colors">
+                      <button 
+                        onClick={() => likeMutation.mutate(post.id)}
+                        className="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                      >
                         <Heart className="w-4 h-4" />
                         <span className="text-sm">{post.likeCount || 0}</span>
                       </button>
@@ -465,7 +468,27 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                         <MessageCircle className="w-4 h-4" />
                         <span className="text-sm">{post.commentCount || 0}</span>
                       </button>
-                      <button className="flex items-center space-x-2 hover:text-green-500 transition-colors">
+                      <button 
+                        onClick={() => {
+                          const shareText = `Check out this post: ${post.content.substring(0, 100)}${post.content.length > 100 ? '...' : ''}`;
+                          const shareUrl = `${window.location.origin}/home`;
+                          if (navigator.share) {
+                            navigator.share({
+                              title: 'SoapBox Community Post',
+                              text: shareText,
+                              url: shareUrl
+                            }).catch(() => {
+                              // Fallback to copy to clipboard
+                              navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+                              toast({ title: "Link copied to clipboard" });
+                            });
+                          } else {
+                            navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+                            toast({ title: "Link copied to clipboard" });
+                          }
+                        }}
+                        className="flex items-center space-x-2 hover:text-green-500 transition-colors"
+                      >
                         <Share2 className="w-4 h-4" />
                         <span className="text-sm">Share</span>
                       </button>
