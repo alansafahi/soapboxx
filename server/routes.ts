@@ -2878,20 +2878,57 @@ app.post('/api/invitations', async (req: any, res) => {
       const today = new Date();
       const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
       
-      // Curated list of inspirational verses for daily rotation
+      // Expanded curated list of inspirational verses for yearly rotation (120 verses)
       const dailyVerses = [
-        "Philippians 4:13", "Jeremiah 29:11", "Romans 8:28", "Psalm 23:4", 
-        "Isaiah 40:31", "Proverbs 3:5-6", "Matthew 19:26", "1 Corinthians 10:13",
-        "Psalm 46:10", "2 Corinthians 12:9", "Joshua 1:9", "Ephesians 2:8-9",
-        "John 3:16", "Romans 6:23", "1 John 1:9", "Psalm 119:105",
-        "Isaiah 55:11", "Hebrews 11:1", "Romans 12:2", "Galatians 5:22-23",
-        "1 Peter 5:7", "Matthew 11:28-30", "Psalm 37:4", "2 Timothy 1:7",
-        "1 Thessalonians 5:16-18", "James 1:2-3", "Colossians 3:23", "Psalm 139:14",
-        "Matthew 6:26", "Isaiah 43:2", "Psalm 34:18", "Romans 15:13"
+        // Core Faith & Salvation (20 verses)
+        "John 3:16", "Romans 6:23", "Ephesians 2:8-9", "1 John 1:9", "Romans 10:9",
+        "Acts 16:31", "2 Corinthians 5:17", "John 14:6", "Romans 5:8", "1 Peter 3:18",
+        "John 1:12", "Titus 3:5", "Romans 3:23", "Isaiah 53:6", "1 Timothy 2:5",
+        "Hebrews 9:27", "John 5:24", "Romans 8:1", "Galatians 2:16", "1 Peter 1:18-19",
+        
+        // Strength & Perseverance (20 verses)
+        "Philippians 4:13", "Isaiah 40:31", "2 Corinthians 12:9", "Joshua 1:9", "Psalm 46:10",
+        "1 Corinthians 10:13", "Romans 8:28", "2 Timothy 1:7", "Nehemiah 8:10", "Isaiah 41:10",
+        "Psalm 27:1", "Deuteronomy 31:6", "Psalm 118:6", "2 Chronicles 20:15", "Exodus 14:14",
+        "1 Peter 5:10", "James 1:2-4", "Romans 5:3-5", "2 Corinthians 4:16-18", "Hebrews 12:1-2",
+        
+        // Peace & Comfort (20 verses)
+        "John 14:27", "Philippians 4:6-7", "Matthew 11:28-30", "Psalm 23:4", "Isaiah 26:3",
+        "1 Peter 5:7", "Psalm 34:18", "2 Corinthians 1:3-4", "Romans 15:13", "John 16:33",
+        "Psalm 46:1", "Psalm 91:1-2", "Isaiah 43:2", "Psalm 121:1-2", "Matthew 6:26",
+        "Psalm 55:22", "Deuteronomy 33:27", "Psalm 62:1-2", "Isaiah 54:10", "Lamentations 3:22-23",
+        
+        // Wisdom & Guidance (20 verses)
+        "Proverbs 3:5-6", "James 1:5", "Psalm 119:105", "Proverbs 16:9", "Isaiah 55:8-9",
+        "Jeremiah 29:11", "Psalm 32:8", "Proverbs 27:17", "Ecclesiastes 3:1", "Proverbs 19:21",
+        "1 Corinthians 2:9", "Romans 11:33", "Proverbs 2:6", "Psalm 25:9", "Proverbs 1:7",
+        "2 Timothy 3:16-17", "Hebrews 4:12", "Psalm 119:11", "Matthew 7:7-8", "John 16:13",
+        
+        // Love & Relationships (20 verses)
+        "1 Corinthians 13:4-8", "1 John 4:19", "John 13:34-35", "Romans 12:10", "Ephesians 4:32",
+        "1 John 4:7-8", "Colossians 3:14", "Matthew 22:37-39", "Galatians 5:22-23", "1 Peter 4:8",
+        "Romans 13:8", "1 Corinthians 16:14", "Ephesians 5:1-2", "1 John 3:16", "Mark 12:31",
+        "Romans 12:9", "Philippians 2:3-4", "1 Thessalonians 4:9", "Hebrews 13:1", "1 John 4:11",
+        
+        // Purpose & Service (20 verses)
+        "Jeremiah 1:5", "Ephesians 2:10", "1 Peter 4:10", "Romans 12:6-8", "Matthew 28:19-20",
+        "Colossians 3:23", "1 Corinthians 10:31", "2 Timothy 2:15", "Acts 20:24", "Philippians 1:6",
+        "Romans 8:29", "Galatians 6:9", "2 Corinthians 9:8", "1 Corinthians 15:58", "Ephesians 4:11-12",
+        "Matthew 5:16", "2 Timothy 4:7", "1 Peter 2:9", "Revelation 3:8", "Matthew 25:21"
       ];
       
-      // Select verse based on day of year
-      const selectedReference = dailyVerses[dayOfYear % dailyVerses.length];
+      // Enhanced selection algorithm for better yearly variety
+      // Combines day of year with month for better distribution across the 120 verses
+      const month = today.getMonth() + 1; // 1-12
+      const dayOfMonth = today.getDate(); // 1-31
+      
+      // Create a seed that changes throughout the year but remains consistent for each date
+      const yearSeed = today.getFullYear() * 137; // Prime number for better distribution
+      const dateSeed = (month * 31) + dayOfMonth + yearSeed;
+      
+      // Select verse ensuring different patterns each year and good distribution
+      const selectedIndex = (dayOfYear + dateSeed) % dailyVerses.length;
+      const selectedReference = dailyVerses[selectedIndex];
       
       // Lookup verse using API-first approach
       const verseData = await lookupBibleVerse(selectedReference, 'NIV');
