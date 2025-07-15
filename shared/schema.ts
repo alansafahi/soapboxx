@@ -53,6 +53,16 @@ export const answeredPrayerReactions = pgTable("answered_prayer_reactions", {
   userTestimonyReactionUnique: unique().on(table.userId, table.testimonyId, table.reactionType),
 }));
 
+export const prayerReactions = pgTable("prayer_reactions", {
+  id: serial("id").primaryKey(),
+  prayerRequestId: integer("prayer_request_id").notNull().references(() => prayerRequests.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  reactionType: varchar("reaction_type", { length: 20 }).notNull(), // heart, pray, amen
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userPrayerReactionUnique: unique().on(table.userId, table.prayerRequestId, table.reactionType),
+}));
+
 export const answeredPrayerComments = pgTable("answered_prayer_comments", {
   id: serial("id").primaryKey(),
   testimonyId: integer("testimony_id").notNull().references(() => answeredPrayerTestimonies.id),

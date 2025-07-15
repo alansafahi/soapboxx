@@ -68,6 +68,7 @@ import {
   answeredPrayerTestimonies,
   answeredPrayerReactions,
   answeredPrayerComments,
+  prayerReactions,
   prayerBadges,
   userBadgeProgress,
   memberCommunications,
