@@ -63,6 +63,13 @@ export default function ExpirationSettings({
           recommended: ["90d", "365d"],
           icon: <Shield className="h-4 w-4" />
         };
+      default:
+        return {
+          title: "Content Privacy",
+          description: "Set automatic expiration for privacy protection",
+          recommended: ["30d", "90d"],
+          icon: <Shield className="h-4 w-4" />
+        };
     }
   };
 
