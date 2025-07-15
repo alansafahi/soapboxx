@@ -147,6 +147,8 @@ export function useIsFeatureEnabled() {
     // Extract the key from href (e.g., "/donation-demo" -> "donation", "/prayer-wall" -> "prayer-wall")
     const key = href.replace('/', '').replace('-demo', '');
     
+    // Debug logging (remove in production)
+    
     // Always show core features
     if (CORE_FEATURES.includes(key)) {
       return true;
@@ -154,16 +156,11 @@ export function useIsFeatureEnabled() {
     
     // For Hello SoapBox user specifically, respect church settings for testing
     if (user?.email === 'hello@soapboxsuperapp.com') {
-      // Check if this navigation item maps to a toggleable feature
-      const featureMapping = NAVIGATION_FEATURE_MAP[key];
-      if (featureMapping) {
-        // For Mega Test Church (ID: 2808), hardcode the disabled features until API is fixed
-        if (primaryChurchId === 2808) {
-          const disabledFeatures = ['donation', 'prayer-wall', 'audio-routines'];
-          if (disabledFeatures.includes(key)) {
-            // Feature is disabled for Mega Test Church
-            return false; // Hide disabled features
-          }
+      // For Mega Test Church (ID: 2808), hardcode the disabled features until API is fixed
+      if (primaryChurchId === 2808) {
+        const disabledFeatures = ['donation', 'prayer-wall', 'audio-routines'];
+        if (disabledFeatures.includes(key)) {
+          return false; // Hide disabled features
         }
       }
     }

@@ -134,7 +134,7 @@ export default function SidebarFixed() {
         { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
-        { label: "Donation", href: "/donation-demo", icon: DollarSign },
+        { label: "Donation", href: "/donation", icon: DollarSign },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
       ]
     },
@@ -201,7 +201,9 @@ export default function SidebarFixed() {
       
       // Then check church feature settings - use proper feature key mapping
       const featureKey = item.href.replace('/', '').replace('-demo', '');
-      return isFeatureEnabled(item.href);
+      const isEnabled = isFeatureEnabled(item.href);
+      // Debug: Feature filtering working correctly
+      return isEnabled;
     });
     
     const finalGroup = {
