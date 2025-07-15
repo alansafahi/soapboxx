@@ -12,6 +12,7 @@ import { Label } from '../components/ui/label';
 import { useToast } from '../hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../lib/queryClient';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface GalleryImage {
   id: number;
@@ -65,6 +66,7 @@ export default function ImageGallery() {
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ['/api/gallery/images', selectedCategory, sortBy, searchQuery],
@@ -199,10 +201,10 @@ export default function ImageGallery() {
             <ImageIcon className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Image Gallery
+            {t('imageGallery.title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            A sacred space for visual inspiration, community moments, and spiritual storytelling
+            {t('imageGallery.subtitle')}
           </p>
         </div>
 
@@ -213,7 +215,7 @@ export default function ImageGallery() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Search images, tags, verses..."
+                placeholder={t('imageGallery.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -223,7 +225,7 @@ export default function ImageGallery() {
               <DialogTrigger asChild>
                 <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
                   <Plus className="w-4 h-4 mr-2" />
-                  Share Image
+                  {t('imageGallery.shareImage')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">

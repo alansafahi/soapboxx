@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import { Play, Pause, Volume2, Settings, RefreshCw, Heart, Star, BookOpen, Headphones, Square } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface BibleVerse {
   id: number;
@@ -40,6 +41,7 @@ export default function FreshAudioBible() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const { t } = useLanguage();
   
   // State management
   const [selectedMood, setSelectedMood] = useState<string>("");
@@ -687,8 +689,8 @@ export default function FreshAudioBible() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-2 sm:py-4 md:py-6 lg:py-8">
       <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6">
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">Audio Bible Experience</h1>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300">AI-powered personalized scripture listening with premium voices</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{t('audioBible.title')}</h1>
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300">{t('audioBible.subtitle')}</p>
         </div>
 
         <Tabs defaultValue="mood-selection" className="space-y-3 sm:space-y-4 md:space-y-6">

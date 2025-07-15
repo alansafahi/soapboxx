@@ -10,6 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../hooks/useAuth";
+import { useLanguage } from "../contexts/LanguageContext";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +56,7 @@ interface VideoContent {
 export default function VideoLibrary() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -346,11 +348,11 @@ export default function VideoLibrary() {
               <div className="flex items-center gap-3 mb-3">
                 <Video className="w-8 h-8 text-purple-400" />
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                  Video Library
+                  {t('videoLibrary.title')}
                 </h1>
               </div>
               <p className="text-lg text-gray-300 max-w-2xl">
-                Spiritual videos, devotionals, and community content to deepen your journey with God.
+                {t('videoLibrary.subtitle')}
               </p>
             </div>
             
