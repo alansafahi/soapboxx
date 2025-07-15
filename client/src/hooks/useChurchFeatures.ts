@@ -148,8 +148,6 @@ export function useIsFeatureEnabled() {
     // Extract the key from href (e.g., "/donation-demo" -> "donation", "/prayer-wall" -> "prayer-wall")
     const key = href.replace('/', '').replace('-demo', '');
     
-    console.log(`🔍 FEATURE CHECK DEBUG: href=${href}, key=${key}, user=${user?.email}, churchId=${primaryChurchId}`);
-    
     // Church feature filtering system operational
     
     // Always show core features
