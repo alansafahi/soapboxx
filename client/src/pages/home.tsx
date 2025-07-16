@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import SocialFeed from "../components/social-feed";
 import EventsList from "../components/events-list";
 
-import ChurchDiscovery from "../components/church-discovery";
+
 import LeaderboardWidget from "../components/leaderboard-widget";
 import LeaderboardPreview from "../components/LeaderboardPreview";
 import UpcomingEventsPreview from "../components/UpcomingEventsPreview";
@@ -164,25 +164,12 @@ export default function Home({ referralCode }: HomeProps = {}) {
         {/* Recent Check-Ins Horizontal Strip */}
         <RecentCheckInsStrip />
 
-        {/* Main Feed Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Primary Feed Column */}
-          <div className="lg:col-span-3 min-w-0 space-y-6">
-            {/* Latest Posts */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
-              <LimitedSocialFeed initialLimit={5} />
-            </div>
-          </div>
-          
-          {/* Right Sidebar - Hidden on smaller screens */}
-          <div className="hidden lg:block space-y-6">
-            <div id="church-discovery">
-              <ChurchDiscovery />
-            </div>
-            <div id="events-list">
-              <EventsList />
-            </div>
+        {/* Main Feed Layout - Full Width */}
+        <div className="w-full">
+          {/* Latest Posts */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
+            <LimitedSocialFeed initialLimit={5} />
           </div>
         </div>
       </main>

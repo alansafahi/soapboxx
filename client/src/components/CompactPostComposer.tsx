@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
+import ExpirationSettings from "./ExpirationSettings";
 import { 
   Heart, 
   MessageCircle, 
@@ -79,6 +80,13 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   const [recentMoods, setRecentMoods] = useState<Array<{id: string; icon: string; label: string}>>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+  const [expirationSettings, setExpirationSettings] = useState<{
+    expiresAt: Date | null;
+    allowsExpiration: boolean;
+  }>({
+    expiresAt: null,
+    allowsExpiration: false,
+  });
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const moodDropdownRef = useRef<HTMLDivElement>(null);
@@ -159,6 +167,10 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       setLinkedVerse(null);
       setAudience('public');
       setIsExpanded(false);
+      setExpirationSettings({
+        expiresAt: null,
+        allowsExpiration: false,
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       toast({
         title: "Post shared!",
@@ -227,7 +239,8 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       mood: selectedMoods.join(","),
       attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
       linkedVerse: linkedVerse || undefined,
-      audience
+      audience,
+      expiresAt: expirationSettings.allowsExpiration ? expirationSettings.expiresAt : null
     });
   };
 
@@ -824,6 +837,12 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                     )}
                   </div>
                 </div>
+
+                {/* Expiration Settings */}
+                <ExpirationSettings
+                  expirationSettings={expirationSettings}
+                  onExpirationChange={setExpirationSettings}
+                />
                 
                 <div className="flex space-x-2">
                   <Button
@@ -833,6 +852,13 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                       setIsExpanded(false);
                       setContent("");
                       setSelectedMoods([]);
+                      setAttachedMedia([]);
+                      setLinkedVerse(null);
+                      setAudience('public');
+                      setExpirationSettings({
+                        expiresAt: null,
+                        allowsExpiration: false,
+                      });
                     }}
                     className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                   >
