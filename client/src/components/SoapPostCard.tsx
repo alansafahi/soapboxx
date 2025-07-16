@@ -241,20 +241,18 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
 
   const handleReflect = async () => {
     try {
-      // Copy SOAP content to user's personal journal
+      // Copy only Scripture and reference to user's personal journal for their own reflection
       const soapData = post.soapData;
       if (soapData) {
         await apiRequest('POST', '/api/soap/reflect', {
           originalSoapId: post.id,
           scripture: soapData.scripture,
-          scriptureReference: soapData.scriptureReference,
-          observation: soapData.observation,
-          application: soapData.application,
-          prayer: soapData.prayer
+          scriptureReference: soapData.scriptureReference
+          // Note: observation, application, and prayer intentionally omitted to encourage personal reflection
         });
         toast({
-          title: "Copied to your S.O.A.P. journal",
-          description: "This reflection is now in your private journal for personal study",
+          title: "Scripture copied to your S.O.A.P. journal",
+          description: "Add your own observations, applications, and prayers for personal reflection",
         });
       }
     } catch (error) {
