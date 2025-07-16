@@ -286,7 +286,7 @@ export function SoapEntryCard({
                         className="gap-2 text-destructive focus:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Delete
+                        Delete Entry
                       </DropdownMenuItem>
                     </>
                   )}

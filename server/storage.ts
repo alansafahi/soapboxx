@@ -2497,6 +2497,34 @@ export class DatabaseStorage implements IStorage {
     return newEntry;
   }
 
+  async getSoapEntry(id: number): Promise<any> {
+    const [entry] = await db
+      .select()
+      .from(soapEntries)
+      .where(eq(soapEntries.id, id));
+    return entry;
+  }
+
+  async deleteSoapEntry(id: number): Promise<void> {
+    // Delete related comments first
+    await db
+      .delete(soapComments)
+      .where(eq(soapComments.soapId, id));
+
+    // Delete related reactions
+    await db
+      .delete(reactions)
+      .where(and(
+        eq(reactions.targetType, 'soap'),
+        eq(reactions.targetId, id)
+      ));
+
+    // Delete the SOAP entry
+    await db
+      .delete(soapEntries)
+      .where(eq(soapEntries.id, id));
+  }
+
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
     
