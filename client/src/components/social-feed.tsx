@@ -18,6 +18,7 @@ import {
   Users,
   Church,
   BookOpen,
+  Book,
   PlusCircle,
   Bookmark,
   BookmarkCheck,
@@ -47,6 +48,7 @@ import {
   Share2,
   Loader2
 } from "lucide-react";
+import { FaFacebook as Facebook, FaTwitter as Twitter } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns";
 import ExpirationSettings from "./ExpirationSettings";
 
@@ -1011,7 +1013,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 p-1.5 h-8 w-8"
                     title="Add Bible verse"
                   >
-                    <Book className="w-4 h-4" />
+                    <BookOpen className="w-4 h-4" />
                   </Button>
 
                   {/* Bible Verse Search Dropdown */}
