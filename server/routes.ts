@@ -8392,8 +8392,8 @@ Return JSON with this exact structure:
       
       res.status(201).json(newEntry);
     } catch (error) {
-      if (error instanceof Error) {
-      }
+      console.error('SOAP POST - Error:', error);
+      console.error('SOAP POST - Error stack:', error instanceof Error ? error.stack : 'No stack');
       
       // Send more detailed error information
       res.status(500).json({ 

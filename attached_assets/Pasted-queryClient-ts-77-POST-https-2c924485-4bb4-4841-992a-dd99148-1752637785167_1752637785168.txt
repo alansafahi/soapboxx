@@ -1,0 +1,102 @@
+queryClient.ts:77 
+            
+            
+           POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/soap 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ SoapEntryForm.tsx:219
+fn @ @tanstack_react-query.js?v=c2bf4eb5:1189
+run @ @tanstack_react-query.js?v=c2bf4eb5:494
+start @ @tanstack_react-query.js?v=c2bf4eb5:536
+execute @ @tanstack_react-query.js?v=c2bf4eb5:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=c2bf4eb5:2630
+(anonymous) @ @tanstack_react-query.js?v=c2bf4eb5:3295
+handleSubmit @ SoapEntryForm.tsx:777
+onSubmit @ SoapEntryForm.tsx:806
+callCallback2 @ chunk-RPCDYKBN.js?v=c2bf4eb5:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c2bf4eb5:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c2bf4eb5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c2bf4eb5:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c2bf4eb5:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c2bf4eb5:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c2bf4eb5:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c2bf4eb5:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c2bf4eb5:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c2bf4eb5:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c2bf4eb5:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c2bf4eb5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c2bf4eb5:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c2bf4eb5:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c2bf4eb5:5449Understand this error
+queryClient.ts:77 
+            
+            
+           POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/soap 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ SoapEntryForm.tsx:219
+fn @ @tanstack_react-query.js?v=c2bf4eb5:1189
+run @ @tanstack_react-query.js?v=c2bf4eb5:494
+start @ @tanstack_react-query.js?v=c2bf4eb5:536
+execute @ @tanstack_react-query.js?v=c2bf4eb5:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=c2bf4eb5:2630
+(anonymous) @ @tanstack_react-query.js?v=c2bf4eb5:3295
+handleSubmit @ SoapEntryForm.tsx:777
+onClick @ SoapEntryForm.tsx:1544
+callCallback2 @ chunk-RPCDYKBN.js?v=c2bf4eb5:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c2bf4eb5:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c2bf4eb5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c2bf4eb5:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c2bf4eb5:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c2bf4eb5:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c2bf4eb5:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c2bf4eb5:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c2bf4eb5:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c2bf4eb5:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c2bf4eb5:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c2bf4eb5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c2bf4eb5:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c2bf4eb5:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c2bf4eb5:5449Understand this error
+queryClient.ts:77 
+            
+            
+           POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/soap 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ SoapEntryForm.tsx:219
+fn @ @tanstack_react-query.js?v=c2bf4eb5:1189
+run @ @tanstack_react-query.js?v=c2bf4eb5:494
+(anonymous) @ @tanstack_react-query.js?v=c2bf4eb5:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=c2bf4eb5:515
+Promise.catch
+run @ @tanstack_react-query.js?v=c2bf4eb5:498
+start @ @tanstack_react-query.js?v=c2bf4eb5:536
+execute @ @tanstack_react-query.js?v=c2bf4eb5:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=c2bf4eb5:2630
+(anonymous) @ @tanstack_react-query.js?v=c2bf4eb5:3295
+handleSubmit @ SoapEntryForm.tsx:777
+onSubmit @ SoapEntryForm.tsx:806
+callCallback2 @ chunk-RPCDYKBN.js?v=c2bf4eb5:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c2bf4eb5:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c2bf4eb5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c2bf4eb5:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c2bf4eb5:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c2bf4eb5:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c2bf4eb5:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c2bf4eb5:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c2bf4eb5:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c2bf4eb5:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c2bf4eb5:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c2bf4eb5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c2bf4eb5:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c2bf4eb5:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c2bf4eb5:5449Understand this error
+queryClient.ts:77 
+            
+            
+           POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/soap 500 (Internal Server Error)
