@@ -47,7 +47,9 @@ import {
   Trash2,
   Share2,
   Loader2,
-  Smartphone
+  Smartphone,
+  Mail,
+  Copy
 } from "lucide-react";
 import { FaFacebook as Facebook, FaTwitter as Twitter } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns";
