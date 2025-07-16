@@ -1154,15 +1154,18 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                 </div>
               </div>
 
-              {/* Share Button */}
-              <Button 
-                onClick={handleCreatePost}
-                disabled={!newPost.trim() || createPostMutation.isPending}
-                className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium p-2 h-8 w-8 border-0 flex-shrink-0 ml-2"
-                title={createPostMutation.isPending ? 'Posting...' : 'Share post'}
-              >
-                <Send className="w-4 h-4 text-white" />
-              </Button>
+              {/* Share Button - Always visible on the right */}
+              <div className="flex-shrink-0">
+                <Button 
+                  onClick={handleCreatePost}
+                  disabled={!newPost.trim() || createPostMutation.isPending}
+                  className="bg-[#5A2671] hover:bg-[#4A1F5C] text-white font-medium px-4 py-2 h-8 border-0 flex items-center gap-2"
+                  title={createPostMutation.isPending ? 'Posting...' : 'Share post'}
+                >
+                  <Send className="w-4 h-4 text-white" />
+                  <span className="text-white text-sm font-medium">Share</span>
+                </Button>
+              </div>
             </div>
 
             {/* Expiration Settings Section - Always visible below toolbar */}
