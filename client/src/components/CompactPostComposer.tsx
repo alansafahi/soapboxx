@@ -541,6 +541,14 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                 </div>
               )}
 
+              {/* Expiration Settings */}
+              <ExpirationSettings
+                contentType="discussion"
+                initialExpiresAt={expirationSettings.expiresAt}
+                allowsExpiration={expirationSettings.allowsExpiration}
+                onSettingsChange={setExpirationSettings}
+              />
+
               <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
                   {/* Media Upload */}
@@ -837,12 +845,6 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                     )}
                   </div>
                 </div>
-
-                {/* Expiration Settings */}
-                <ExpirationSettings
-                  expirationSettings={expirationSettings}
-                  onExpirationChange={setExpirationSettings}
-                />
                 
                 <div className="flex space-x-2">
                   <Button
