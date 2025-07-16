@@ -700,14 +700,8 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
     setSelectedMoods([]);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="w-6 h-6 animate-spin" />
-        <span className="ml-2">Loading feed...</span>
-      </div>
-    );
-  }
+  // Don't hide the entire component while loading - show composer and loading state for posts
+  const isPostsLoading = isLoading;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -1189,7 +1183,12 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
 
       {/* Feed Posts */}
       <div className="space-y-6">
-        {Array.isArray(feedPosts) && feedPosts.length > 0 ? feedPosts.map((post: FeedPost) => (
+        {isPostsLoading ? (
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            <span className="ml-2">Loading posts...</span>
+          </div>
+        ) : Array.isArray(feedPosts) && feedPosts.length > 0 ? feedPosts.map((post: FeedPost) => (
           <Card key={post.id} className="border border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3 mb-4">
