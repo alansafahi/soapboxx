@@ -8425,11 +8425,14 @@ Return JSON with this exact structure:
         offset: parseInt(offset),
       };
 
+      console.log('SOAP API - Calling getSoapEntries with:', { userId, options });
       const entries = await storage.getSoapEntries(userId, options);
+      console.log('SOAP API - Got entries:', entries?.length || 0);
 
       res.json(entries);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries' });
+      console.error('SOAP API - Error:', error);
+      res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries', error: error.message });
     }
   });
 
