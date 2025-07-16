@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 15, 2025: THEME CONSISTENCY FIXES COMPLETED - Successfully resolved dark background issues in light mode for Discussions, Events, and Engagement Board pages by replacing hardcoded dark purple gradients with proper light/dark mode responsive styling
+  - DISCUSSIONS PAGE FIXED: Changed from hardcoded `bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900` to `bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-900 dark:to-violet-900`
+  - EVENTS PAGE CORRECTED: Updated header backgrounds, text colors, and loading states to use proper light mode styling with `bg-white/90` and `text-gray-600` for light mode
+  - ENGAGEMENT BOARD ENHANCED: Fixed all background colors, text elements, and UI components in Leaderboard.tsx to respect theme switching
+  - CONSISTENT THEMING: All pages now use `bg-gray-50` for light mode backgrounds and only show purple gradients in dark mode
+  - USER EXPERIENCE IMPROVED: Eliminated jarring dark backgrounds appearing in light mode ensuring consistent visual experience across all pages
 - July 15, 2025: SOCIAL FEED DELETE BUTTONS AUTHORIZATION BUG COMPLETELY FIXED - Successfully resolved issue preventing delete buttons from appearing on user's own posts by fixing incorrect user/author comparison logic
   - AUTHORIZATION LOGIC CORRECTED: Fixed social-feed.tsx comparison from incorrect `user.email === post.author.id` to proper `user.email === post.author.email`
   - DELETE BUTTONS NOW VISIBLE: Users can now see and use red trash icon delete buttons on their own posts in the social feed

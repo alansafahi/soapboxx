@@ -31,7 +31,7 @@ export default function CommunityPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-900 dark:to-violet-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading community...</p>
@@ -52,21 +52,21 @@ export default function CommunityPage() {
     : 'Connect with fellow believers and share your faith journey';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 dark:from-gray-900 dark:via-purple-900 dark:to-violet-900 pb-20 md:pb-0">
+    <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-900 dark:to-violet-900 pb-20 md:pb-0">
       {/* Enhanced Header */}
-      <div className="bg-gray-900/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg border-b border-purple-800 dark:border-purple-800">
+      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg border-b border-gray-200 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-gray-900 dark:bg-gradient-to-r dark:from-purple-400 dark:to-blue-400 dark:bg-clip-text dark:text-transparent">
                 {pageTitle}
               </h1>
-              <p className="text-gray-300 dark:text-gray-300 mt-2 text-lg">
+              <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
                 {pageDescription}
               </p>
             </div>
             <div className="hidden md:flex items-center space-x-4">
-              <Button variant="outline" size="sm" className="border-purple-600 hover:bg-purple-800 text-purple-300 hover:text-white">
+              <Button variant="outline" size="sm" className="border-gray-300 hover:bg-gray-100 text-gray-700 hover:text-gray-900 dark:border-purple-600 dark:hover:bg-purple-800 dark:text-purple-300 dark:hover:text-white">
                 <Users className="h-4 w-4 mr-2 text-purple-400" />
                 Groups
               </Button>

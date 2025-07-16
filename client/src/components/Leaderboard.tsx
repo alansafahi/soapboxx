@@ -108,11 +108,11 @@ const Leaderboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+      <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-purple-900 dark:via-blue-900 dark:to-indigo-900 text-gray-900 dark:text-white">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-xl">Loading Community Leaderboard...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 dark:border-white mx-auto mb-4"></div>
+            <p className="text-xl text-gray-800 dark:text-white">Loading Community Leaderboard...</p>
           </div>
         </div>
       </div>
@@ -121,9 +121,9 @@ const Leaderboard: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+      <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-purple-900 dark:via-blue-900 dark:to-indigo-900 text-gray-900 dark:text-white">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center p-8 text-red-300">
+          <div className="text-center p-8 text-red-600 dark:text-red-300">
             <Trophy className="w-16 h-16 mx-auto mb-4 opacity-50" />
             <h2 className="text-2xl font-bold mb-2">Oops!</h2>
             <p>Error: {error}</p>
@@ -134,16 +134,16 @@ const Leaderboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+    <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-purple-900 dark:via-blue-900 dark:to-indigo-900 text-gray-900 dark:text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Trophy className="w-12 h-12 text-yellow-500 mr-3" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-gray-900 dark:bg-gradient-to-r dark:from-yellow-400 dark:to-orange-500 dark:bg-clip-text dark:text-transparent">
               Community Engagement Board
             </h1>
           </div>
-          <p className="text-lg text-blue-200 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-blue-200 max-w-2xl mx-auto">
             Celebrating our most active community members! Points are earned through discussions (5pts), 
             SOAP entries (3pts), prayer requests (2pts), and events created (4pts).
           </p>
@@ -153,13 +153,13 @@ const Leaderboard: React.FC = () => {
           <div className="text-center py-12">
             <Trophy className="w-24 h-24 mx-auto mb-6 text-blue-300 opacity-50" />
             <h2 className="text-2xl font-bold mb-4">Join a Church Community</h2>
-            <p className="text-blue-200 mb-6">
+            <p className="text-gray-600 dark:text-blue-200 mb-6">
               To see the engagement leaderboard, you need to be a member of a church community. 
               Join a church to connect with fellow believers and track community engagement!
             </p>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 max-w-md mx-auto">
-              <h3 className="text-lg font-semibold mb-3 text-yellow-400">Getting Started</h3>
-              <ul className="text-left text-blue-200 space-y-2">
+            <div className="bg-white border border-gray-200 dark:bg-white/10 dark:backdrop-blur-md rounded-xl p-6 dark:border-white/20 max-w-md mx-auto">
+              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-yellow-400">Getting Started</h3>
+              <ul className="text-left text-gray-700 dark:text-blue-200 space-y-2">
                 <li>• Browse and join a church in the Churches section</li>
                 <li>• Start participating in discussions</li>
                 <li>• Share SOAP journal entries</li>
@@ -170,7 +170,7 @@ const Leaderboard: React.FC = () => {
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+            <div className="bg-white border border-gray-200 dark:bg-white/10 dark:backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden dark:border-white/20">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
