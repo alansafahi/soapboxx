@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 
 import SocialFeed from "../components/social-feed";
 import EventsList from "../components/events-list";
-import PrayerWall from "../components/prayer-wall";
+
 import ChurchDiscovery from "../components/church-discovery";
 import LeaderboardWidget from "../components/leaderboard-widget";
 import LeaderboardPreview from "../components/LeaderboardPreview";
@@ -177,9 +177,6 @@ export default function Home({ referralCode }: HomeProps = {}) {
           
           {/* Right Sidebar - Hidden on smaller screens */}
           <div className="hidden lg:block space-y-6">
-            <div id="prayer-wall">
-              <PrayerWall />
-            </div>
             <div id="church-discovery">
               <ChurchDiscovery />
             </div>
