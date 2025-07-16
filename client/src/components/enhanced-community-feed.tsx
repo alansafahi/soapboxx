@@ -828,6 +828,14 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
               <SelectItem value="bible_study">Bible Study</SelectItem>
               <SelectItem value="testimony">Testimony</SelectItem>
               <SelectItem value="question">Question</SelectItem>
+              <SelectItem value="sermon_discussion">Sermon Discussion</SelectItem>
+              <SelectItem value="youth_ministry">Youth Ministry</SelectItem>
+              <SelectItem value="family_faith">Family & Faith</SelectItem>
+              <SelectItem value="missions">Missions & Outreach</SelectItem>
+              <SelectItem value="worship">Worship & Music</SelectItem>
+              <SelectItem value="life_challenges">Life Challenges</SelectItem>
+              <SelectItem value="spiritual_growth">Spiritual Growth</SelectItem>
+              <SelectItem value="church_events">Church Events</SelectItem>
             </SelectContent>
           </Select>
         </div>
