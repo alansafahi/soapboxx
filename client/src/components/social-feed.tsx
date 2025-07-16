@@ -1485,26 +1485,26 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   </Button>
                 </div>
                 
-                {/* Delete Button - Only show for post author */}
-                {(() => {
-                  console.log('Debug - User:', user);
-                  console.log('Debug - Post author:', post.author);
-                  console.log('Debug - Post:', post);
-                  const showDelete = user && post.author && (String(user.id) === String(post.author.id) || user.email === post.author.email);
-                  console.log('Debug - Show delete button:', showDelete);
-                  return showDelete;
-                })() && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeletePost(post.id)}
-                      className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      title="Delete post"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )
-                )}
+                {/* Delete Button - Always show for testing */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    console.log('Delete clicked for post:', post.id);
+                    console.log('User:', user);
+                    console.log('Post author:', post.author);
+                    handleDeletePost(post.id);
+                  }}
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  title="Delete post"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+
+                {/* Debug info */}
+                <div className="text-xs text-gray-500 mt-1">
+                  User ID: {user?.id} | Author ID: {post.author?.id}
+                </div>
               </div>
 
               {/* Comments Section */}
