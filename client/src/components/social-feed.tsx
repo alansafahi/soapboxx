@@ -338,14 +338,20 @@ export default function SocialFeed() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      
+      // Reset form
       setNewPost('');
       setSelectedMoods([]);
       setLinkedVerse(null);
       setAttachedMedia([]);
+      setSelectedAudience('public');
       setExpirationSettings({ expiresAt: null, allowsExpiration: false });
+      
+      // Show success message that auto-dismisses
       toast({
-        title: "Success",
-        description: "Post shared!",
+        title: "Posted successfully!",
+        description: "Your post has been shared with the community.",
+        duration: 3000, // Auto-dismiss after 3 seconds
       });
     },
     onError: (error: any) => {
