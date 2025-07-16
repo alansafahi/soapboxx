@@ -378,7 +378,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   if (error) {
     return (
       <div className={`text-center py-8 ${className}`}>
-        <p className="text-gray-500 dark:text-gray-400">Unable to load posts</p>
+        <p className="text-gray-700 dark:text-gray-400">Unable to load posts</p>
       </div>
     );
   }
@@ -458,7 +458,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                   </div>
                   
                   {/* Unified comment system - same as social-feed.tsx */}
-                  <div className="flex items-center justify-between text-gray-600 pt-3 border-t">
+                  <div className="flex items-center justify-between text-gray-700 dark:text-gray-300 pt-3 border-t">
                     <div className="flex items-center space-x-6">
                       <button 
                         onClick={() => likeMutation.mutate(post.id)}
@@ -546,7 +546,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                 Time for Reflection
               </h3>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
               You've spent some time in the community today. Take a moment to reflect or journal.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -612,7 +612,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
             {comments.length === 0 ? (
               <div className="text-center py-8">
                 <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
+                <p className="text-gray-700 dark:text-gray-300">No comments yet. Be the first to share your thoughts!</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -633,7 +633,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                           {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                         </span>
                       </div>
-                      <p className="text-gray-700 text-sm">{comment.content}</p>
+                      <p className="text-gray-800 dark:text-gray-300 text-sm">{comment.content}</p>
                     </div>
                   </div>
                 ))}

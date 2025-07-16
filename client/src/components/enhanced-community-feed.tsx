@@ -522,7 +522,7 @@ export default function EnhancedCommunityFeed() {
                             </span>
                             <span className="text-xl">💬</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-300 dark:font-medium">
+                          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300 dark:font-medium">
                             <Calendar className="h-3 w-3" />
                             <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                             <span>•</span>
@@ -562,7 +562,7 @@ export default function EnhancedCommunityFeed() {
                             
                             return (
                               <div>
-                                <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
+                                <p className="text-gray-800 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
                                 {youtubeUrl && (
                                   <Button 
                                     onClick={() => {
@@ -580,7 +580,7 @@ export default function EnhancedCommunityFeed() {
                             );
                           }
                           
-                          return <p className="text-gray-700 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>;
+                          return <p className="text-gray-800 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>;
                         }
                       })()}
                       
@@ -603,7 +603,7 @@ export default function EnhancedCommunityFeed() {
                     <div className="space-y-3 border-t pt-4">
                       {/* Reaction Summary */}
                       {post.reactions && post.reactions.length > 0 && (
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
                           <div className="flex -space-x-1">
                             {(post.reactions || []).slice(0, 3).map((reaction, index) => (
                               <span 
@@ -706,7 +706,7 @@ export default function EnhancedCommunityFeed() {
                         ? "No discussions match your criteria"
                         : "Start the Conversation"}
                     </h3>
-                    <p className="text-gray-600 text-lg max-w-md mx-auto leading-relaxed">
+                    <p className="text-gray-700 dark:text-gray-300 text-lg max-w-md mx-auto leading-relaxed">
                       {searchQuery || Object.values(filters).some(f => f !== 'all' && f !== false)
                         ? "Try adjusting your filters or search terms to find more discussions"
                         : "Share your thoughts, ask questions, or start a meaningful conversation with fellow believers"}

@@ -1211,11 +1211,11 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                         : post.author?.firstName || post.author?.email || 'User'
                       }
                     </h4>
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">
+                    <span className="text-gray-600 dark:text-gray-400 text-sm">
                       {formatDistanceToNow(new Date(post.createdAt)).replace('about ', '~').replace(' ago', '').replace(' hours', 'hrs').replace(' hour', 'hr').replace(' minutes', 'min').replace(' days', 'd').replace(' day', 'd')}
                     </span>
                   </div>
-                  <div className="text-gray-700 dark:text-gray-300 mt-2">
+                  <div className="text-gray-800 dark:text-gray-300 mt-2">
                     {post.title?.includes('S.O.A.P. Reflection') ? (
                       <div className="space-y-3">
                         {post.content.split('\n\n').map((section, index) => {
