@@ -147,8 +147,8 @@ export default function SidebarFixed() {
         { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Churches", href: "/churches", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
-        { label: "Donation", href: "/donation", icon: DollarSign },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
+        { label: "Donation", href: "/donation", icon: DollarSign },
       ]
     },
     {
@@ -156,11 +156,11 @@ export default function SidebarFixed() {
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
-        { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Bookmark },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
+        { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
       ]
     },
     {
