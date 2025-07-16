@@ -523,9 +523,17 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       </button>
                       
                       {/* Delete Button - Only show for post author */}
-                      {user && post.author && (user.email === post.authorId) && (
+                      {user && (
                         <button 
-                          onClick={() => handleDeletePost(post.id)}
+                          onClick={() => {
+                            console.log("User:", user);
+                            console.log("Post:", post);
+                            console.log("AuthorId:", post.authorId);
+                            console.log("User ID:", user.id);
+                            console.log("User Email:", user.email);
+                            console.log("Match check:", user.email === post.authorId || String(user.id) === String(post.authorId));
+                            handleDeletePost(post.id);
+                          }}
                           className="flex items-center space-x-2 hover:text-red-500 transition-colors"
                           title="Delete post"
                         >
