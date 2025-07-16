@@ -3,11 +3,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { MessageCircle, Heart, Share2, ChevronDown, Loader2 } from "lucide-react";
+import { MessageCircle, Heart, Share2, ChevronDown, Loader2, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
@@ -59,6 +60,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Comment dialog state
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
@@ -67,6 +69,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   
   // Share dialog state
   const [shareDialogOpen, setShareDialogOpen] = useState<number | null>(null);
+  
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
   // Like mutation
   const likeMutation = useMutation({
@@ -112,7 +118,41 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     }
   });
 
+  // Delete post mutation
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return await apiRequest('DELETE', `/api/discussions/${postId}`);
+    },
+    onSuccess: () => {
+      setAllPosts(prev => prev.filter(post => post.id !== postToDelete));
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      toast({
+        title: "Success",
+        description: "Post deleted successfully!",
+      });
+    },
+    onError: (error: any) => {
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      toast({
+        title: "Error",
+        description: `Failed to delete post: ${error.message || 'Please try again.'}`,
+        variant: "destructive",
+      });
+    }
+  });
 
+  const handleDeletePost = (postId: number) => {
+    setPostToDelete(postId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePost = () => {
+    if (postToDelete) {
+      deletePostMutation.mutate(postToDelete);
+    }
+  };
 
   // Comment mutation
   const commentMutation = useMutation({
@@ -481,6 +521,18 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                         <Share2 className="w-4 h-4" />
                         <span className="text-sm">Share</span>
                       </button>
+                      
+                      {/* Delete Button - Only show for post author */}
+                      {user && post.author && (user.email === post.authorId) && (
+                        <button 
+                          onClick={() => handleDeletePost(post.id)}
+                          className="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                          title="Delete post"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span className="text-sm">Delete</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -682,6 +734,34 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         onClose={() => setShareDialogOpen(null)}
         content={shareDialogOpen ? displayedPosts.find(p => p.id === shareDialogOpen)?.content || '' : ''}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Post</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deletePostMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeletePost}
+              disabled={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {/* Show More Button - Shows until infinite scroll is enabled */}
       {allPosts.length === 0 && posts.length > initialLimit && showMoreClicks === 0 && (
