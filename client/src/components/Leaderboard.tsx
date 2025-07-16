@@ -143,7 +143,7 @@ const Leaderboard: React.FC = () => {
               Community Engagement Board
             </h1>
           </div>
-          <p className="text-lg text-gray-600 dark:text-blue-200 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 dark:text-blue-200 max-w-2xl mx-auto">
             Celebrating our most active community members! Points are earned through discussions (5pts), 
             SOAP entries (3pts), prayer requests (2pts), and events created (4pts).
           </p>
@@ -153,7 +153,7 @@ const Leaderboard: React.FC = () => {
           <div className="text-center py-12">
             <Trophy className="w-24 h-24 mx-auto mb-6 text-blue-300 opacity-50" />
             <h2 className="text-2xl font-bold mb-4">Join a Church Community</h2>
-            <p className="text-gray-600 dark:text-blue-200 mb-6">
+            <p className="text-gray-700 dark:text-blue-200 mb-6">
               To see the engagement leaderboard, you need to be a member of a church community. 
               Join a church to connect with fellow believers and track community engagement!
             </p>
@@ -174,23 +174,23 @@ const Leaderboard: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
-                    <tr className="bg-black/20 border-b border-white/20">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-blue-200 uppercase tracking-wider">
+                    <tr className="bg-gray-100 dark:bg-black/20 border-b border-gray-200 dark:border-white/20">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800 dark:text-blue-200 uppercase tracking-wider">
                         Rank
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-blue-200 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-800 dark:text-blue-200 uppercase tracking-wider">
                         Community Member
                       </th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold text-blue-200 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-800 dark:text-blue-200 uppercase tracking-wider">
                         Engagement Score
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10">
+                  <tbody className="divide-y divide-gray-200 dark:divide-white/10">
                     {leaderboard.map((entry) => (
                       <tr 
                         key={entry.id} 
-                        className="hover:bg-white/5 transition-colors duration-200 group"
+                        className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200 group"
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center">
@@ -216,7 +216,7 @@ const Leaderboard: React.FC = () => {
                               onClick={() => handleProfileClick(entry.id)}
                             >
                               <div className="flex items-center gap-2">
-                                <p className="text-lg font-semibold text-white">
+                                <p className="text-lg font-semibold text-gray-900 dark:text-white">
                                   {entry.firstName} {entry.lastName}
                                 </p>
                                 {hasStreak(entry.id, entry.rank) && (
@@ -224,7 +224,7 @@ const Leaderboard: React.FC = () => {
                                 )}
                               </div>
                               {entry.rank <= 3 && (
-                                <p className="text-sm text-blue-200">
+                                <p className="text-sm text-gray-600 dark:text-blue-200">
                                   {entry.rank === 1 && "🏆 Community Champion"}
                                   {entry.rank === 2 && "🥈 Engagement Leader"}
                                   {entry.rank === 3 && "🥉 Active Contributor"}
@@ -238,7 +238,7 @@ const Leaderboard: React.FC = () => {
                             <span className="text-2xl font-bold text-yellow-400 mr-2 group-hover:text-yellow-300 transition-colors">
                               {entry.score}
                             </span>
-                            <span className="text-sm text-blue-200">points</span>
+                            <span className="text-sm text-gray-600 dark:text-blue-200">points</span>
                           </div>
                         </td>
                       </tr>

@@ -146,6 +146,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - ENHANCED COMMUNITY FEED FIXED: Updated post content, timestamps, and metadata text from light gray to darker, more readable colors
   - SOCIAL FEED CONTRAST IMPROVED: Enhanced post content and author information text colors for better day mode visibility
   - LIMITED SOCIAL FEED ENHANCED: Upgraded comment text, error messages, and general content text colors for improved readability
+  - LEADERBOARD TEXT FIXED: Updated table headers, user names, badge text, and "points" labels from white/light text to gray-800/gray-600 for light mode
   - CONSISTENT LIGHT MODE: All text elements now use gray-700/gray-800 for light mode while preserving dark mode styling with gray-300/gray-100
   - USER EXPERIENCE IMPROVED: Eliminated eye strain and reading difficulty in day mode by providing proper text contrast ratios
 - July 15, 2025: ENHANCED COMMUNITY FEED DELETE FUNCTIONALITY COMPLETED - Successfully implemented complete delete system for discussion posts with proper authorization and confirmation dialogs
