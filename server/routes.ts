@@ -573,6 +573,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete SOAP entry endpoint
+  app.delete("/api/soap/:id", isAuthenticated, async (req, res) => {
+    try {
+      const soapId = parseInt(req.params.id);
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      // Verify the user owns this SOAP entry
+      const soapEntry = await storage.getSoapEntry(soapId);
+      if (!soapEntry) {
+        return res.status(404).json({ error: "S.O.A.P. entry not found" });
+      }
+
+      if (soapEntry.userId !== userId) {
+        return res.status(403).json({ error: "You can only delete your own S.O.A.P. entries" });
+      }
+
+      // Delete the SOAP entry
+      await storage.deleteSoapEntry(soapId);
+
+      res.json({ success: true, message: "S.O.A.P. entry deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to delete S.O.A.P. entry" });
+    }
+  });
+
   // SOAP reaction endpoints
   app.post("/api/soap/reaction", isAuthenticated, async (req, res) => {
     try {
