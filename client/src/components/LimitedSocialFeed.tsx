@@ -61,6 +61,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  
+  // Debug logging
+  console.log("LimitedSocialFeed - User:", user);
 
   // Comment dialog state
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
@@ -210,7 +213,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         throw new Error(`Failed to fetch posts: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      console.log("LimitedSocialFeed - Posts loaded:", data);
+      return data;
     },
   });
 
@@ -523,17 +528,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       </button>
                       
                       {/* Delete Button - Only show for post author */}
-                      {user && (
+                      {user && post.author && (user.email === post.authorId || String(user.id) === String(post.authorId)) && (
                         <button 
-                          onClick={() => {
-                            console.log("User:", user);
-                            console.log("Post:", post);
-                            console.log("AuthorId:", post.authorId);
-                            console.log("User ID:", user.id);
-                            console.log("User Email:", user.email);
-                            console.log("Match check:", user.email === post.authorId || String(user.id) === String(post.authorId));
-                            handleDeletePost(post.id);
-                          }}
+                          onClick={() => handleDeletePost(post.id)}
                           className="flex items-center space-x-2 hover:text-red-500 transition-colors"
                           title="Delete post"
                         >
