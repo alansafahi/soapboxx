@@ -622,21 +622,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/soap/reflect", isAuthenticated, async (req, res) => {
     try {
-      const { originalSoapId, scripture, scriptureReference, observation, application, prayer } = req.body;
+      const { originalSoapId, scripture, scriptureReference } = req.body;
       const userId = req.session.userId;
 
       if (!userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      // Create a personal copy of the SOAP reflection
+      // Create a personal reflection template with only scripture and reference
+      // Leave observation, application, and prayer blank to encourage original personal reflection
       await storage.createSoapEntry({
         userId,
         scripture,
         scriptureReference,
-        observation,
-        application,
-        prayer,
+        observation: "", // Blank for personal reflection
+        application: "", // Blank for personal reflection
+        prayer: "", // Blank for personal reflection
         isPublic: false,
         originalSoapId,
         churchId: null,
