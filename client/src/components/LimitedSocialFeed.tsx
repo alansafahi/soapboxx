@@ -62,8 +62,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Debug logging
-  console.log("LimitedSocialFeed - User:", user);
+
 
   // Comment dialog state
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
@@ -213,9 +212,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         throw new Error(`Failed to fetch posts: ${response.status}`);
       }
       
-      const data = await response.json();
-      console.log("LimitedSocialFeed - Posts loaded:", data);
-      return data;
+      return await response.json();
     },
   });
 
@@ -528,7 +525,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       </button>
                       
                       {/* Delete Button - Only show for post author */}
-                      {user && post.author && (user.email === post.authorId || String(user.id) === String(post.authorId)) && (
+                      {user && post.author && (user.email === post.author.email || String(user.id) === String(post.authorId)) && (
                         <button 
                           onClick={() => handleDeletePost(post.id)}
                           className="flex items-center space-x-2 hover:text-red-500 transition-colors"
