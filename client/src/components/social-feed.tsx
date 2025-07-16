@@ -1168,8 +1168,9 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             {/* Expiration Settings Section */}
             <div className="mt-4">
               <ExpirationSettings
-                contentType="social post"
-                settings={expirationSettings}
+                contentType="discussion"
+                allowsExpiration={expirationSettings.allowsExpiration}
+                initialExpiresAt={expirationSettings.expiresAt}
                 onSettingsChange={setExpirationSettings}
               />
             </div>
