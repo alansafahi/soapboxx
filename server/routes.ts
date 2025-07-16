@@ -8330,9 +8330,11 @@ Return JSON with this exact structure:
       const soapData = {
         ...req.body,
         userId,
+        // Convert expiresAt string to Date object if it exists
+        expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
       };
       
-
+      console.log('SOAP POST - Prepared data:', soapData);
       
       // Validate with the schema
       const { insertSoapEntrySchema } = await import("../shared/schema.js");
