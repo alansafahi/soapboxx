@@ -1500,26 +1500,18 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   </Button>
                 </div>
                 
-                {/* Delete Button - Always show for testing */}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => {
-                    console.log('Delete clicked for post:', post.id);
-                    console.log('User:', user);
-                    console.log('Post author:', post.author);
-                    handleDeletePost(post.id);
-                  }}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  title="Delete post"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-
-                {/* Debug info */}
-                <div className="text-xs text-gray-500 mt-1">
-                  User ID: {user?.id} | Author ID: {post.author?.id}
-                </div>
+                {/* Delete Button - Only show for post author */}
+                {user && post.author && (String(user.id) === String(post.author.id) || user.email === post.author.email) && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleDeletePost(post.id)}
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    title="Delete post"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
 
               {/* Comments Section */}

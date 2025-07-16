@@ -34,7 +34,8 @@ import {
   Tag,
   Eye,
   EyeOff,
-  Play
+  Play,
+  Trash2
 } from 'lucide-react';
 
 interface EnhancedPost {
@@ -214,6 +215,8 @@ export default function EnhancedCommunityFeed() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState<{ postId: number; reactionType: string } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
   // Fetch discussions
   const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
@@ -284,6 +287,42 @@ export default function EnhancedCommunityFeed() {
         reactionType, 
         emoji: reaction.emoji 
       });
+    }
+  };
+
+  // Delete post mutation
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return await apiRequest('DELETE', `/api/discussions/${postId}`);
+    },
+    onSuccess: () => {
+      refetch();
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      toast({
+        title: "Success",
+        description: "Discussion deleted successfully!",
+      });
+    },
+    onError: (error: any) => {
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      toast({
+        title: "Error",
+        description: `Failed to delete discussion: ${error.message || 'Please try again.'}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleDeletePost = (postId: number) => {
+    setPostToDelete(postId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePost = () => {
+    if (postToDelete) {
+      deletePostMutation.mutate(postToDelete);
     }
   };
 
@@ -624,6 +663,19 @@ export default function EnhancedCommunityFeed() {
                             <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="hidden sm:inline">Share</span>
                           </Button>
+                          {/* Delete Button - Only show for post author */}
+                          {user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email) && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleDeletePost(post.id)}
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs sm:text-sm px-2 sm:px-3"
+                              title="Delete discussion"
+                            >
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <span className="hidden sm:inline ml-1">Delete</span>
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -706,6 +758,34 @@ export default function EnhancedCommunityFeed() {
           </motion.div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Discussion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this discussion? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deletePostMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeletePost}
+              disabled={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </TooltipProvider>
   );
