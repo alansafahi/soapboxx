@@ -549,8 +549,8 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                 onSettingsChange={setExpirationSettings}
               />
 
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-                <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-gray-100 dark:border-gray-700 gap-3">
+                <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1 justify-center sm:justify-start">
                   {/* Media Upload */}
                   <div className="relative">
                     <input
@@ -846,7 +846,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                   </div>
                 </div>
                 
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -862,7 +862,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                         allowsExpiration: false,
                       });
                     }}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 w-full sm:w-auto"
                   >
                     Cancel
                   </Button>
@@ -870,7 +870,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                     onClick={handleSubmit}
                     disabled={!content.trim() || createPostMutation.isPending}
                     size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
                   >
                     {createPostMutation.isPending ? "Sharing..." : "Share"}
                   </Button>
