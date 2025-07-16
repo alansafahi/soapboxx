@@ -8407,8 +8407,11 @@ Return JSON with this exact structure:
   app.get('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
+      console.log('SOAP API - Session:', req.session);
+      console.log('SOAP API - UserId:', userId);
       
       if (!userId) {
+        console.log('SOAP API - No userId in session');
         return res.status(401).json({ message: 'User authentication required' });
       }
       
