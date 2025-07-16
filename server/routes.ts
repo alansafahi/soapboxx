@@ -8384,10 +8384,12 @@ Return JSON with this exact structure:
             linkedVerse: newEntry.scriptureReference
           };
 
-          
+          console.log('SOAP POST - Creating social feed post with data:', feedPostData);
           const feedPost = await storage.createDiscussion(feedPostData);
+          console.log('SOAP POST - Created social feed post:', feedPost?.id);
 
         } catch (feedError) {
+          console.error('SOAP POST - Failed to create social feed post:', feedError);
           // Don't fail the S.O.A.P. creation if feed post fails
         }
       }
