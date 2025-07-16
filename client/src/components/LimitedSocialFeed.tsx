@@ -126,7 +126,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       return await apiRequest('DELETE', `/api/discussions/${postId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      setAllPosts(prev => prev.filter(post => post.id !== postToDelete));
       setDeleteDialogOpen(false);
       setPostToDelete(null);
       toast({
