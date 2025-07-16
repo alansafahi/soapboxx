@@ -1165,8 +1165,8 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
               </Button>
             </div>
 
-            {/* Expiration Settings Section */}
-            <div className="mt-4">
+            {/* Expiration Settings Section - Always visible below toolbar */}
+            <div className="mt-4 border-t border-gray-100 dark:border-gray-700 pt-4">
               <ExpirationSettings
                 contentType="discussion"
                 allowsExpiration={expirationSettings.allowsExpiration}
