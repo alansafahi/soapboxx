@@ -8334,8 +8334,6 @@ Return JSON with this exact structure:
         expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
       };
       
-      console.log('SOAP POST - Prepared data:', soapData);
-      
       // Validate with the schema
       const { insertSoapEntrySchema } = await import("../shared/schema.js");
       
@@ -8384,26 +8382,18 @@ Return JSON with this exact structure:
             linkedVerse: newEntry.scriptureReference
           };
 
-          console.log('SOAP POST - Creating social feed post with data:', feedPostData);
           const feedPost = await storage.createDiscussion(feedPostData);
-          console.log('SOAP POST - Created social feed post:', feedPost?.id);
 
         } catch (feedError) {
-          console.error('SOAP POST - Failed to create social feed post:', feedError);
           // Don't fail the S.O.A.P. creation if feed post fails
         }
       }
       
       res.status(201).json(newEntry);
     } catch (error) {
-      console.error('SOAP POST - Error:', error);
-      console.error('SOAP POST - Error stack:', error instanceof Error ? error.stack : 'No stack');
-      
-      // Send more detailed error information
       res.status(500).json({ 
         message: 'Failed to create S.O.A.P. entry',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: error
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
@@ -8411,11 +8401,8 @@ Return JSON with this exact structure:
   app.get('/api/soap', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      console.log('SOAP API - Session:', req.session);
-      console.log('SOAP API - UserId:', userId);
       
       if (!userId) {
-        console.log('SOAP API - No userId in session');
         return res.status(401).json({ message: 'User authentication required' });
       }
       
@@ -8423,20 +8410,16 @@ Return JSON with this exact structure:
 
       const options = {
         churchId: churchId ? parseInt(churchId) : undefined,
-        // Only filter by isPublic if explicitly provided in query
         isPublic: isPublic !== undefined ? isPublic === 'true' : undefined,
         limit: parseInt(limit),
         offset: parseInt(offset),
       };
 
-      console.log('SOAP API - Calling getSoapEntries with:', { userId, options });
       const entries = await storage.getSoapEntries(userId, options);
-      console.log('SOAP API - Got entries:', entries?.length || 0);
 
       res.json(entries);
     } catch (error) {
-      console.error('SOAP API - Error:', error);
-      res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries', error: error.message });
+      res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
