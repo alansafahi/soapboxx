@@ -142,6 +142,17 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 16, 2025: S.O.A.P. COLLAPSIBLE DISPLAY ENHANCEMENT COMPLETED - Successfully implemented improved S.O.A.P. display format showing first 1-2 lines of each section with expand/collapse functionality
+  - PREVIEW MODE IMPLEMENTED: Each S.O.A.P. section (Observation, Application, Prayer) now shows first ~120 characters with "Show more" option
+  - SMART TRUNCATION: Text truncation preserves word boundaries for clean reading experience
+  - EXPAND/COLLAPSE BUTTONS: Small "Show more/Show less" buttons with chevron icons for intuitive interaction
+  - CONSISTENT DESIGN: Maintained original purple/blue gradient styling and spiritual icons (🔍💡🙏) from previous design
+  - RESPONSIVE LAYOUT: Optimized for mobile and desktop viewing with proper spacing and hover states
+- July 16, 2025: S.O.A.P. SAVING FUNCTIONALITY COMPLETELY FIXED - Successfully resolved critical date validation error preventing S.O.A.P. entries from being saved to database
+  - ROOT CAUSE RESOLVED: Fixed Zod validation error expecting Date object but receiving string for expiresAt field
+  - DATE CONVERSION IMPLEMENTED: Added proper string-to-Date conversion in POST endpoint before validation
+  - ENHANCED ERROR LOGGING: Added comprehensive debugging to track S.O.A.P. creation and social feed integration
+  - S.O.A.P. CREATION OPERATIONAL: Users can now successfully save S.O.A.P. entries with all fields including expiration settings
 - July 16, 2025: SOCIAL FEED DELETE FUNCTIONALITY COMPLETED - Successfully implemented complete delete system for LimitedSocialFeed component on home page with proper authorization and confirmation dialogs
   - DELETE BUTTON INTEGRATION: Added red delete button with text for post authors in home page social feed component (LimitedSocialFeed.tsx)
   - AUTHORIZATION VERIFIED: Delete buttons only appear for original post creators using proper user.email and post.author.email comparison logic
