@@ -120,18 +120,33 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     }
   });
 
-  // Delete post mutation
+  // Delete post mutation - handles both SOAP and discussion posts
   const deletePostMutation = useMutation({
     mutationFn: async (postId: number) => {
-      return await apiRequest('DELETE', `/api/discussions/${postId}`);
+      // Check if this is a SOAP post by looking at the post in allPosts
+      const post = allPosts.find(p => p.id === postId);
+      const endpoint = post?.type === 'soap' 
+        ? `/api/soap/${postId}` 
+        : `/api/discussions/${postId}`;
+      
+      return await apiRequest('DELETE', endpoint);
     },
     onSuccess: () => {
+      // Remove post from local state
       setAllPosts(prev => prev.filter(post => post.id !== postToDelete));
+      // Invalidate queries to refresh feed
+      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/soap"] });
+      // Close dialog
       setDeleteDialogOpen(false);
       setPostToDelete(null);
+      // Auto-refresh page after deletion
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
       toast({
-        title: "Success",
-        description: "Post deleted successfully!",
+        title: "Success", 
+        description: "Post deleted successfully! Refreshing page...",
       });
     },
     onError: (error: any) => {
