@@ -126,6 +126,7 @@ export default function SocialFeed() {
   const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+  const [postType, setPostType] = useState<string>('discussion');
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
@@ -365,9 +366,14 @@ export default function SocialFeed() {
 
   // Delete post mutation with improved error handling
   const deletePostMutation = useMutation({
-    mutationFn: async (postId: number) => {
+    mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
       try {
-        const response = await apiRequest('DELETE', `/api/discussions/${postId}`);
+        let response;
+        if (postType === 'soap_reflection') {
+          response = await apiRequest('DELETE', `/api/soap/${postId}`);
+        } else {
+          response = await apiRequest('DELETE', `/api/discussions/${postId}`);
+        }
         return response;
       } catch (error) {
         throw error;
@@ -384,6 +390,7 @@ export default function SocialFeed() {
         // Reset dialog state first to prevent UI issues
         setDeleteDialogOpen(false);
         setPostToDelete(null);
+        setPostType('discussion');
         
         // Provide user feedback
         setTimeout(() => {
@@ -401,6 +408,7 @@ export default function SocialFeed() {
     onError: (error: any) => {
       setDeleteDialogOpen(false);
       setPostToDelete(null);
+      setPostType('discussion');
       toast({
         title: "Error",
         description: `Failed to delete post: ${error.message || 'Please try again.'}`,
@@ -409,14 +417,15 @@ export default function SocialFeed() {
     }
   });
 
-  const handleDeletePost = (postId: number) => {
+  const handleDeletePost = (postId: number, postType: string = 'discussion') => {
     setPostToDelete(postId);
+    setPostType(postType);
     setDeleteDialogOpen(true);
   };
 
   const confirmDeletePost = () => {
     if (postToDelete) {
-      deletePostMutation.mutate(postToDelete);
+      deletePostMutation.mutate({ postId: postToDelete, postType: postType || 'discussion' });
     }
   };
 
@@ -1505,9 +1514,9 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => handleDeletePost(post.id)}
+                    onClick={() => handleDeletePost(post.id, post.type || 'discussion')}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    title="Delete post"
+                    title={`Delete ${post.type === 'soap_reflection' ? 'S.O.A.P. entry' : 'post'}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -1768,9 +1777,9 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Post</DialogTitle>
+            <DialogTitle>Delete {postType === 'soap_reflection' ? 'S.O.A.P. Entry' : 'Post'}</DialogTitle>
             <DialogDescription>
-              Delete this post? This can't be undone.
+              Delete this {postType === 'soap_reflection' ? 'S.O.A.P. entry' : 'post'}? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end space-x-2 mt-4">

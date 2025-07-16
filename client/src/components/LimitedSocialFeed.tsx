@@ -61,20 +61,21 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-  
+
 
 
   // Comment dialog state
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
-  
+
   // Share dialog state
   const [shareDialogOpen, setShareDialogOpen] = useState<number | null>(null);
-  
+
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+  const [postType, setPostType] = useState<string>('discussion');
 
   // Like mutation
   const likeMutation = useMutation({
@@ -120,16 +121,20 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     }
   });
 
-  // Delete post mutation - handles both SOAP and discussion posts
+  // Delete post mutation with improved error handling
   const deletePostMutation = useMutation({
-    mutationFn: async (postId: number) => {
-      // Check if this is a SOAP post by looking at the post in allPosts
-      const post = allPosts.find(p => p.id === postId);
-      const endpoint = post?.type === 'soap' 
-        ? `/api/soap/${postId}` 
-        : `/api/discussions/${postId}`;
-      
-      return await apiRequest('DELETE', endpoint);
+    mutationFn: async ({ postId, postType }: { postId: number; postType: string }) => {
+      try {
+        let response;
+        if (postType === 'soap_reflection') {
+          response = await apiRequest('DELETE', `/api/soap/${postId}`);
+        } else {
+          response = await apiRequest('DELETE', `/api/discussions/${postId}`);
+        }
+        return response;
+      } catch (error) {
+        throw error;
+      }
     },
     onSuccess: () => {
       // Remove post from local state
@@ -138,8 +143,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/soap"] });
       // Close dialog
+
+      // Reset dialog state first to prevent UI issues
       setDeleteDialogOpen(false);
       setPostToDelete(null);
+      setPostType('discussion');
       // Auto-refresh page after deletion
       setTimeout(() => {
         window.location.reload();
@@ -160,14 +168,15 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     }
   });
 
-  const handleDeletePost = (postId: number) => {
+  const handleDeletePost = (postId: number, postType: string = 'discussion') => {
     setPostToDelete(postId);
+    setPostType(postType);
     setDeleteDialogOpen(true);
   };
 
   const confirmDeletePost = () => {
     if (postToDelete) {
-      deletePostMutation.mutate(postToDelete);
+      deletePostMutation.mutate({ postId: postToDelete, postType: postType });
     }
   };
 
@@ -184,11 +193,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         credentials: "include",
         body: JSON.stringify({ content })
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to add comment: ${response.status}`);
       }
-      
+
       return await response.json();
     },
     onSuccess: () => {
@@ -222,11 +231,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch posts: ${response.status}`);
       }
-      
+
       return await response.json();
     },
   });
@@ -255,7 +264,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     if (post.type === 'soap_reflection' && post.soapData) {
       return true;
     }
-    
+
     // No legacy SOAP detection - we've cleaned up the old posts
     return false;
   };
@@ -269,13 +278,13 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       application: '',
       prayer: ''
     };
-    
+
     // Look for scripture reference patterns - enhanced to capture more formats
     const referenceMatches = content.match(/([1-3]?\s*[A-Za-z]+\s+\d+:\d+(?:-\d+)?)/g);
     if (referenceMatches && referenceMatches.length > 0) {
       soapData.scriptureReference = referenceMatches[0];
     }
-    
+
     // Parse HTML-formatted SOAP content (legacy format from database)
     const scriptureMatch = content.match(/<strong>Scripture<\/strong>:\s*([^📖🔍💡🙏]*?)(?=🔍|$)/i);
     if (scriptureMatch) {
@@ -297,22 +306,22 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         soapData.scripture = scriptureText;
       }
     }
-    
+
     const observationMatch = content.match(/<strong>Observation<\/strong>:\s*([^📖🔍💡🙏]*?)(?=💡|$)/i);
     if (observationMatch) {
       soapData.observation = observationMatch[1].replace(/<[^>]*>/g, '').trim();
     }
-    
+
     const applicationMatch = content.match(/<strong>Application<\/strong>:\s*([^📖🔍💡🙏]*?)(?=🙏|$)/i);
     if (applicationMatch) {
       soapData.application = applicationMatch[1].replace(/<[^>]*>/g, '').trim();
     }
-    
+
     const prayerMatch = content.match(/<strong>Prayer<\/strong>:\s*([^📖🔍💡🙏]*?)(?=$)/i);
     if (prayerMatch) {
       soapData.prayer = prayerMatch[1].replace(/<[^>]*>/g, '').trim();
     }
-    
+
     // Fallback: if no HTML format detected, try basic colon format
     if (!scriptureMatch) {
       const sections = content.split(/(?=scripture:|observation:|application:|prayer:)/i);
@@ -334,12 +343,12 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         }
       });
     }
-    
+
     // Set default reference if still empty
     if (!soapData.scriptureReference) {
       soapData.scriptureReference = 'Scripture Reflection';
     }
-    
+
     return soapData;
   };
 
@@ -348,7 +357,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   // Load more posts function
   const loadMorePosts = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
-    
+
     setIsLoadingMore(true);
     try {
       const nextPage = page + 1;
@@ -356,10 +365,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to fetch more posts");
-      
+
       const newPosts = await response.json();
 
-      
+
       if (newPosts.length === 0) {
         setHasMore(false);
 
@@ -390,7 +399,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   useEffect(() => {
     // Only set up observer when we have expanded posts
     if (allPosts.length === 0) return;
-    
+
     if (observerRef.current) observerRef.current.disconnect();
 
     observerRef.current = new IntersectionObserver(
@@ -442,11 +451,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   const displayedPosts = allPosts.length > 0 ? allPosts : posts.slice(0, initialLimit);
   const showInitialLoadMore = allPosts.length === 0 && posts.length > initialLimit && showMoreClicks < 2;
-  
+
   // Track posts viewed and show reflection break after 15 posts
   const totalPostsViewed = allPosts.length > 0 ? allPosts.length : Math.min(posts.length, initialLimit);
   const shouldShowReflectionBreak = totalPostsViewed >= 15 && !showReflectionBreak && hasMore;
-  
+
   // Generate milestone messages
   const getMilestoneMessage = (count: number) => {
     if (count === 10) {
@@ -458,10 +467,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     }
     return null;
   };
-  
+
   // Show mini reflection prompt every 10 posts (but not when showing reflection break)
   const shouldShowMiniReflection = totalPostsViewed > 0 && totalPostsViewed % 10 === 0 && totalPostsViewed >= 10 && !shouldShowReflectionBreak;
-  
+
 
 
   return (
@@ -470,7 +479,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       {displayedPosts.map((post: Post, index: number) => {
         // Check if this is a SOAP post (either new format or legacy)
         const isSoapPost = detectSoapContent(post);
-        
+
         return (
           <div key={post.id}>
             {/* Render SOAP posts with specialized component */}
@@ -492,7 +501,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                     {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
@@ -509,11 +518,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       {formatDistanceToNow(new Date(post.createdAt)).replace('about ', '~').replace(' ago', '').replace(' hours', 'hrs').replace(' hour', 'hr').replace(' minutes', 'min').replace(' days', 'd').replace(' day', 'd')}
                     </span>
                   </div>
-                  
+
                   <div className="mb-4">
                     <FormattedContent content={post.content} />
                   </div>
-                  
+
                   {/* Unified comment system - same as social-feed.tsx */}
                   <div className="flex items-center justify-between text-gray-700 dark:text-gray-300 pt-3 border-t">
                     <div className="flex items-center space-x-6">
@@ -538,13 +547,13 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                         <Share2 className="w-4 h-4" />
                         <span className="text-sm">Share</span>
                       </button>
-                      
+
                       {/* Delete Button - Only show for post author */}
                       {user && post.author && (user.email === post.author.email || String(user.id) === String(post.authorId)) && (
                         <button 
-                          onClick={() => handleDeletePost(post.id)}
+                          onClick={() => handleDeletePost(post.id, post.type || 'discussion')}
                           className="flex items-center space-x-2 hover:text-red-500 transition-colors"
-                          title="Delete post"
+                          title={`Delete ${post.type === 'soap_reflection' ? 'S.O.A.P. entry' : 'post'}`}
                         >
                           <Trash2 className="w-4 h-4" />
                           <span className="text-sm">Delete</span>
@@ -594,7 +603,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
             </CardContent>
           </Card>
             )}
-            
+
             {/* Soft divider between posts (except last) */}
             {index < displayedPosts.length - 1 && (
               <div className="flex justify-center my-4">
@@ -709,7 +718,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               </div>
             )}
           </div>
-          
+
           {/* Add Comment Form */}
           <div className="border-t pt-4">
             <div className="space-y-3">
@@ -756,11 +765,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Post</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this post? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
+            <DialogTitle>Delete {postType === 'soap_reflection' ? 'S.O.A.P. Entry' : 'Post'}</DialogTitle>
+          <DialogDescription>
+            Delete this {postType === 'soap_reflection' ? 'S.O.A.P. entry' : 'post'}? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
           <div className="flex justify-end space-x-2 mt-4">
             <Button 
               variant="outline" 
@@ -779,7 +788,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* Show More Button - Shows until infinite scroll is enabled */}
       {allPosts.length === 0 && posts.length > initialLimit && showMoreClicks === 0 && (
         <div className="text-center pt-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
@@ -818,7 +827,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                   credentials: "include",
                 });
                 if (!response.ok) throw new Error("Failed to fetch all posts");
-                
+
                 const allDbPosts = await response.json();
                 setAllPosts(allDbPosts);
                 setPostsViewed(allDbPosts.length); // Track all posts viewed
@@ -859,7 +868,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           </p>
         </div>
       )}
-      
+
       {/* Empty State */}
       {displayedPosts.length === 0 && !isLoading && (
         <div className="text-center py-8">
