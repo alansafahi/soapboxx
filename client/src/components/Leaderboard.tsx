@@ -249,28 +249,28 @@ const Leaderboard: React.FC = () => {
             </div>
 
             <div className="mt-8 text-center">
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <h3 className="text-xl font-bold mb-4 text-yellow-400">How to Earn Points</h3>
+              <div className="bg-white/90 dark:bg-white/10 backdrop-blur-md rounded-xl p-6 border border-gray-200 dark:border-white/20">
+                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-yellow-400">How to Earn Points</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div className="text-center">
                     <div className="text-2xl mb-2">💬</div>
-                    <div className="font-semibold">Discussions</div>
-                    <div className="text-blue-200">5 points</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">Discussions</div>
+                    <div className="text-gray-600 dark:text-blue-200">5 points</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">📖</div>
-                    <div className="font-semibold">SOAP Entries</div>
-                    <div className="text-blue-200">3 points</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">SOAP Entries</div>
+                    <div className="text-gray-600 dark:text-blue-200">3 points</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">🙏</div>
-                    <div className="font-semibold">Prayer Requests</div>
-                    <div className="text-blue-200">2 points</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">Prayer Requests</div>
+                    <div className="text-gray-600 dark:text-blue-200">2 points</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">📅</div>
-                    <div className="font-semibold">Events Created</div>
-                    <div className="text-blue-200">4 points</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">Events Created</div>
+                    <div className="text-gray-600 dark:text-blue-200">4 points</div>
                   </div>
                 </div>
               </div>
