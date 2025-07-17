@@ -1324,6 +1324,16 @@ export const leaderboardEntries = pgTable("leaderboard_entries", {
   leaderboardChurchUnique: unique().on(table.leaderboardId, table.churchId),
 }));
 
+// AI Scripture History for preventing repetition in SOAP generation
+export const aiScriptureHistory = pgTable("ai_scripture_history", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  scriptureReference: varchar("scripture_reference", { length: 100 }).notNull(),
+  generatedAt: timestamp("generated_at").defaultNow(),
+}, (table) => ({
+  userScriptureUnique: unique().on(table.userId, table.scriptureReference),
+}));
+
 export const streaks = pgTable("streaks", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),

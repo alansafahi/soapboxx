@@ -8614,6 +8614,7 @@ Return JSON with this exact structure:
   app.post('/api/soap/ai/suggestions', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, scriptureReference, userMood, currentEvents, personalContext, generateComplete } = req.body;
+      const userId = req.session.userId;
 
       const contextualInfo = {
         userMood,
@@ -8625,7 +8626,14 @@ Return JSON with this exact structure:
       
       // If no scripture provided or generateComplete flag is true, generate complete S.O.A.P.
       if (generateComplete || !scripture || !scriptureReference) {
-        suggestions = await generateCompleteSoapEntry(contextualInfo);
+        // Get recent scriptures for this user to avoid repetition
+        const recentScriptures = await storage.getRecentUserScriptures(userId, 30);
+        suggestions = await generateCompleteSoapEntry(contextualInfo, userId, recentScriptures);
+        
+        // Record the generated scripture for future exclusion
+        if (suggestions.scriptureReference) {
+          await storage.recordUserScripture(userId, suggestions.scriptureReference);
+        }
       } else {
         suggestions = await generateSoapSuggestions(scripture, scriptureReference, contextualInfo);
       }

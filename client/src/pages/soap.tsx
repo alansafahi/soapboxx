@@ -57,6 +57,8 @@ export default function SoapPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
       queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       setDeleteDialogOpen(false);
       setEntryToDelete(null);
       toast({
@@ -99,6 +101,8 @@ export default function SoapPage() {
   const handleFormSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
     queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
     handleFormClose();
     toast({
       title: editingEntry ? "S.O.A.P. entry updated" : "S.O.A.P. entry created",

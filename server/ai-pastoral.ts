@@ -104,7 +104,9 @@ Respond with JSON in this format:
 }
 
 export async function generateCompleteSoapEntry(
-  contextualInfo?: ContextualInfo
+  contextualInfo?: ContextualInfo,
+  userId?: string,
+  excludeRecentScriptures?: string[]
 ): Promise<SoapSuggestion> {
   try {
     // Build contextual awareness
@@ -141,9 +143,6 @@ export async function generateCompleteSoapEntry(
     // Add randomization to ensure variety in scripture selection
     const randomSeed = Math.floor(Math.random() * 1000);
     const currentTimestamp = Date.now();
-    
-    // Debug: Log the context being sent (remove in production)  
-    console.log('AI SOAP Generation Context:', { contextPrompt, randomSeed, timestamp: currentTimestamp });
 
     // Create a list of alternative verses to encourage variety
     const alternativeVerses = [
@@ -153,6 +152,12 @@ export async function generateCompleteSoapEntry(
     ];
     const suggestedVerse = alternativeVerses[Math.floor(Math.random() * alternativeVerses.length)];
 
+    // Build exclusion text for recent scriptures
+    let exclusionText = '';
+    if (excludeRecentScriptures && excludeRecentScriptures.length > 0) {
+      exclusionText = `IMPORTANT: DO NOT use any of these recently used scriptures: ${excludeRecentScriptures.join(', ')}. `;
+    }
+
     const prompt = `As a pastoral AI assistant, generate a complete S.O.A.P. (Scripture, Observation, Application, Prayer) entry that is perfectly suited to the current context and user's spiritual needs.
 
 Current Context:
@@ -160,7 +165,7 @@ ${contextPrompt}
 
 Request ID: ${randomSeed}-${currentTimestamp}
 
-IMPORTANT: For variety, DO NOT use Matthew 11:28-30 as it has been used recently. Instead, consider this suggested verse: ${suggestedVerse}, or choose from these categories:
+${exclusionText}For variety, consider this suggested verse: ${suggestedVerse}, or choose from these categories:
 
 Comfort & Healing Verses (avoid Matthew 11:28-30):
 - Psalm 23:1-4 (The Lord is my shepherd)

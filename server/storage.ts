@@ -275,6 +275,7 @@ import {
   notificationPreferences,
   type NotificationPreferences,
   type InsertNotificationPreferences,
+  aiScriptureHistory,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt, ne } from "drizzle-orm";
@@ -566,6 +567,11 @@ export interface IStorage {
   removeSavedSoapEntry(soapId: number, userId: string): Promise<void>;
   isSoapEntrySaved(soapId: number, userId: string): Promise<boolean>;
   createSoapEntry(entry: any): Promise<any>;
+  
+  // AI Scripture History operations for preventing repetition
+  getRecentUserScriptures(userId: string, days?: number): Promise<string[]>;
+  recordUserScripture(userId: string, scriptureReference: string): Promise<void>;
+  cleanupOldScriptureHistory(days?: number): Promise<void>;
   createLeaderboard(leaderboard: InsertLeaderboard): Promise<Leaderboard>;
   updateLeaderboardEntries(leaderboardId: number): Promise<void>;
   getUserAchievements(userId: string): Promise<UserAchievement[]>;
@@ -2431,6 +2437,62 @@ export class DatabaseStorage implements IStorage {
     );
 
     return postsWithReactions;
+  }
+
+  // AI Scripture History operations for preventing repetition
+  async getRecentUserScriptures(userId: string, days: number = 30): Promise<string[]> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    const recentScriptures = await db
+      .select({ scriptureReference: aiScriptureHistory.scriptureReference })
+      .from(aiScriptureHistory)
+      .where(
+        and(
+          eq(aiScriptureHistory.userId, userId),
+          gte(aiScriptureHistory.generatedAt, cutoffDate)
+        )
+      )
+      .orderBy(desc(aiScriptureHistory.generatedAt));
+    
+    return recentScriptures.map(s => s.scriptureReference);
+  }
+
+  async recordUserScripture(userId: string, scriptureReference: string): Promise<void> {
+    try {
+      await db.insert(aiScriptureHistory).values({
+        userId,
+        scriptureReference,
+        generatedAt: new Date()
+      }).onConflictDoUpdate({
+        target: [aiScriptureHistory.userId, aiScriptureHistory.scriptureReference],
+        set: {
+          generatedAt: new Date()
+        }
+      });
+    } catch (error) {
+      // If there's a conflict (duplicate), that's fine - just update the timestamp
+      await db
+        .update(aiScriptureHistory)
+        .set({ generatedAt: new Date() })
+        .where(
+          and(
+            eq(aiScriptureHistory.userId, userId),
+            eq(aiScriptureHistory.scriptureReference, scriptureReference)
+          )
+        );
+    }
+  }
+
+  async cleanupOldScriptureHistory(days: number = 90): Promise<void> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    await db
+      .delete(aiScriptureHistory)
+      .where(
+        lte(aiScriptureHistory.generatedAt, cutoffDate)
+      );
   }
 
   // SOAP operations

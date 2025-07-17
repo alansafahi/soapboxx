@@ -234,6 +234,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
       queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       
       toast({
         title: "S.O.A.P. Entry Saved",
