@@ -275,7 +275,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
 
   return (
     <div className={`fixed ${positionClasses} z-50`}>
-      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : 'h-96'}`}>
+      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh]`}>
         {/* Chat Header */}
         <div className="bg-gradient-to-r from-teal-600 to-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -312,7 +312,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         {!isMinimized && (
           <>
             {/* Messages Area */}
-            <div className="h-64 overflow-y-auto p-4 space-y-3">
+            <div className={`${hasProvidedInfo ? 'h-64' : 'h-48'} overflow-y-auto p-4 space-y-3`}>
               {messages.map((message) => (
                 <div
                   key={message.id}

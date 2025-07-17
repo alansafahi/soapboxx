@@ -390,7 +390,7 @@ export default function ContactUs() {
                     <div className="font-semibold text-gray-900">Mailing Address</div>
                     <div className="text-gray-600 text-sm">
                       SoapBox Super App<br />
-                      11340 E. Clark Street, #150-204<br />
+                      1130 E. Clark Street, #150-204<br />
                       Orcutt, CA 93455<br />
                       USA
                     </div>
