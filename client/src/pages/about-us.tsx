@@ -298,42 +298,47 @@ export default function AboutUs() {
         </section>
 
         {/* Safe & Secure Features */}
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8 sm:mb-12 px-4">
-            Safe, Secure & Spirit-Led
-          </h2>
+        <section className="mb-12 sm:mb-16" aria-labelledby="faith-tech-security">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 id="faith-tech-security" className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 px-4">
+              Faith-Based Technology That's Safe, Secure & Spirit-Led
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
+              SoapBox Super App is built for churches—prioritizing your privacy, values, and faith journey.
+            </p>
+          </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-6 h-6 text-green-600" />
+                <Lock className="w-6 h-6 text-green-600" aria-label="Faith-first privacy icon" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Privacy-First</h3>
-              <p className="text-gray-600 text-sm">No data reselling or ad tracking—your information stays sacred.</p>
+              <p className="text-gray-600 text-sm">We protect your church's data with faith-first privacy—no ad tracking, no data resale, ever.</p>
             </div>
             
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <CrossIcon className="w-6 h-6 text-blue-600" />
+                <CrossIcon className="w-6 h-6 text-blue-600" aria-label="AI-assisted church tech icon" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">AI-Assisted</h3>
-              <p className="text-gray-600 text-sm">AI-assisted, not AI-driven—always guided by faith values.</p>
+              <p className="text-gray-600 text-sm">Designed with spiritual discernment—AI supports your mission without replacing it.</p>
             </div>
             
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <ChurchIcon className="w-6 h-6 text-purple-600" />
+                <ChurchIcon className="w-6 h-6 text-purple-600" aria-label="Custom church platform icon" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Church-Built</h3>
-              <p className="text-gray-600 text-sm">Custom-built for churches, not generic platforms.</p>
+              <p className="text-gray-600 text-sm">Purpose-built church technology—not a generic business platform in disguise.</p>
             </div>
             
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-orange-600" />
+                <Users className="w-6 h-6 text-orange-600" aria-label="Mobile-ready faith tools icon" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Mobile-Ready</h3>
-              <p className="text-gray-600 text-sm">Designed for how members live, worship, and pray.</p>
+              <p className="text-gray-600 text-sm">Reach members anywhere with mobile-ready worship tools and prayer communities.</p>
             </div>
           </div>
         </section>
@@ -351,7 +356,7 @@ export default function AboutUs() {
           </p>
           
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Grow. Connect. Pray. Reflect. Serve—together.</h3>
+            <h3 className="text-lg font-semibold mb-4">Empower your church to grow, connect, pray, reflect, and serve using AI-assisted digital ministry tools designed for spiritual communities.</h3>
             <p className="text-purple-100 text-sm">SoapBox Super App: Faith Meets Functionality.</p>
           </div>
           
