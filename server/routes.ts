@@ -8579,7 +8579,7 @@ Return JSON with this exact structure:
           const user = await storage.getUser(userId);
           if (user) {
             // Create a social feed post for the updated SOAP entry
-            await storage.createDiscussion({
+            const socialPost = await storage.createDiscussion({
               authorId: userId,
               churchId: user.churchId,
               title: `S.O.A.P. Reflection`,
@@ -8602,6 +8602,7 @@ Return JSON with this exact structure:
                 prayer: updatedEntry.prayer,
               }
             });
+            console.log('Social feed post created for SOAP entry:', socialPost.id);
           }
         } catch (socialFeedError) {
           // Don't fail the SOAP update if social feed creation fails
