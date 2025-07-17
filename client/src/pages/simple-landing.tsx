@@ -80,7 +80,7 @@ export default function SimpleLanding() {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = '/login'}
+              onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
               className="border-2 border-gray-300 hover:border-gray-400 text-gray-900 hover:text-gray-700 px-8 py-4 text-lg rounded-full font-semibold"
             >
               Schedule Demo
@@ -285,7 +285,7 @@ export default function SimpleLanding() {
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = '/demo'}
+              onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
               className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg rounded-full font-semibold transition-all duration-200"
             >
               Schedule Demo
