@@ -2047,7 +2047,7 @@ export const chatMessages = pgTable("chat_messages", {
   conversationId: integer("conversation_id").references(() => chatConversations.id),
   sessionId: varchar("session_id", { length: 255 }).notNull(),
   sender: varchar("sender", { length: 20 }).notNull(), // user, agent, system
-  message: text("message").notNull(),
+  content: text("content").notNull(),
   messageType: varchar("message_type", { length: 20 }).default("text"), // text, system, file, template
   isRead: boolean("is_read").default(false),
   metadata: jsonb("metadata"), // Additional data like user agent, IP, etc.

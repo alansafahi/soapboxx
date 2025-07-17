@@ -2981,6 +2981,8 @@ app.post('/api/invitations', async (req: any, res) => {
           html: emailContent
         });
         
+        console.log('Email result:', emailResult); // Debug email sending
+        
         // Also send confirmation email to user
         const confirmationContent = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -3027,6 +3029,73 @@ app.post('/api/invitations', async (req: any, res) => {
       }
     } catch (error) {
       res.status(500).json({ message: 'Failed to process contact submission' });
+    }
+  });
+
+  // Chat system endpoints
+  app.post('/api/chat/conversation', async (req, res) => {
+    try {
+      const { sessionId, userData } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      // Check if conversation exists
+      let conversation = await storage.getChatConversation(sessionId);
+      
+      if (!conversation) {
+        // Create new conversation
+        conversation = await storage.createChatConversation(sessionId, userData);
+      } else if (userData && (userData.name || userData.email)) {
+        // Update existing conversation with user data
+        conversation = await storage.updateChatConversation(sessionId, userData);
+      }
+
+      res.json(conversation);
+    } catch (error) {
+      console.error('Chat conversation error:', error);
+      res.status(500).json({ error: 'Failed to create/get conversation' });
+    }
+  });
+
+  app.post('/api/chat/message', async (req, res) => {
+    try {
+      const { sessionId, content, sender } = req.body;
+      
+      if (!sessionId || !sender || !content) {
+        return res.status(400).json({ error: 'Session ID, sender, and message are required' });
+      }
+
+      const message = await storage.createChatMessage({
+        sessionId,
+        content,
+        sender
+      });
+
+      res.json(message);
+    } catch (error) {
+      console.error('Chat message error:', error);
+      res.status(500).json({ error: 'Failed to send message' });
+    }
+  });
+
+  app.get('/api/chat/messages/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const messages = await storage.getChatMessages(sessionId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get messages' });
+    }
+  });
+
+  app.get('/api/chat/conversations', async (req, res) => {
+    try {
+      const conversations = await storage.getActiveChatConversations();
+      res.json(conversations);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get conversations' });
     }
   });
   

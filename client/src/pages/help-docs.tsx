@@ -64,7 +64,7 @@ export default function HelpDocs() {
   const helpCategories: HelpCategory[] = [
     {
       id: "getting-started",
-      title: "🔧 Getting Started",
+      title: "Getting Started",
       icon: <BookOpen className="w-6 h-6" />,
       color: "from-blue-500 to-blue-600",
       articles: [
@@ -92,7 +92,7 @@ export default function HelpDocs() {
     },
     {
       id: "account-profile",
-      title: "🛠️ Account & Profile Management",
+      title: "Account & Profile Management",
       icon: <Users className="w-6 h-6" />,
       color: "from-green-500 to-green-600",
       articles: [
@@ -120,7 +120,7 @@ export default function HelpDocs() {
     },
     {
       id: "prayer-wall",
-      title: "🙏 Prayer Wall",
+      title: "Prayer Wall",
       icon: <PrayingHandsIcon className="w-6 h-6" />,
       color: "from-purple-500 to-purple-600",
       articles: [
@@ -148,7 +148,7 @@ export default function HelpDocs() {
     },
     {
       id: "soap-journaling",
-      title: "📖 S.O.A.P. Journaling",
+      title: "S.O.A.P. Journaling",
       icon: <SoapIcon className="w-6 h-6" />,
       color: "from-indigo-500 to-indigo-600",
       articles: [
@@ -172,7 +172,7 @@ export default function HelpDocs() {
     },
     {
       id: "communication",
-      title: "💬 Communication Hub",
+      title: "Communication Hub",
       icon: <MessageCircle className="w-6 h-6" />,
       color: "from-teal-500 to-teal-600",
       articles: [
@@ -196,7 +196,7 @@ export default function HelpDocs() {
     },
     {
       id: "giving",
-      title: "💰 Giving & Donations",
+      title: "Giving & Donations",
       icon: <DollarSign className="w-6 h-6" />,
       color: "from-emerald-500 to-emerald-600",
       articles: [
@@ -220,7 +220,7 @@ export default function HelpDocs() {
     },
     {
       id: "admin",
-      title: "📊 Admin & Church Dashboard",
+      title: "Admin & Church Dashboard",
       icon: <Settings className="w-6 h-6" />,
       color: "from-orange-500 to-orange-600",
       articles: [
@@ -244,7 +244,7 @@ export default function HelpDocs() {
     },
     {
       id: "mobile",
-      title: "📱 Mobile App Troubleshooting",
+      title: "Mobile App Troubleshooting",
       icon: <Smartphone className="w-6 h-6" />,
       color: "from-red-500 to-red-600",
       articles: [
@@ -268,7 +268,7 @@ export default function HelpDocs() {
     },
     {
       id: "legal",
-      title: "🧾 Legal & Privacy",
+      title: "Legal & Privacy",
       icon: <Shield className="w-6 h-6" />,
       color: "from-gray-500 to-gray-600",
       articles: [

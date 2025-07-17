@@ -350,7 +350,10 @@ export default function ContactUs() {
                   <Phone className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
                   <div>
                     <div className="font-semibold text-gray-900">Talk to Sales</div>
-                    <a href="mailto:sales@soapboxsuperapp.com" className="text-green-600 hover:underline">
+                    <a href="tel:8053422940" className="text-green-600 hover:underline block">
+                      (805) 342-2940
+                    </a>
+                    <a href="mailto:sales@soapboxsuperapp.com" className="text-green-600 hover:underline block text-sm">
                       sales@soapboxsuperapp.com
                     </a>
                   </div>
@@ -387,7 +390,7 @@ export default function ContactUs() {
                     <div className="font-semibold text-gray-900">Mailing Address</div>
                     <div className="text-gray-600 text-sm">
                       SoapBox Super App<br />
-                      123 FaithTech Way<br />
+                      11340 E. Clark Street, #150-204<br />
                       Orcutt, CA 93455<br />
                       USA
                     </div>

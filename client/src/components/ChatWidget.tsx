@@ -77,7 +77,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         const chatMessages = await response.json();
         const formattedMessages = chatMessages.map((msg: any) => ({
           id: msg.id.toString(),
-          text: msg.message,
+          text: msg.content,
           sender: msg.sender,
           timestamp: new Date(msg.createdAt),
           type: msg.messageType
@@ -106,7 +106,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         body: JSON.stringify({
           sessionId,
           sender: 'agent',
-          message: text,
+          content: text,
           messageType: 'system'
         })
       });
@@ -147,7 +147,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         body: JSON.stringify({
           sessionId,
           sender,
-          message: text,
+          content: text,
           messageType: type
         })
       });
@@ -261,7 +261,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         <div className="relative">
           <Button
             onClick={() => setIsOpen(true)}
-            className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse"
+            className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <MessageCircle className="w-6 h-6" />
           </Button>

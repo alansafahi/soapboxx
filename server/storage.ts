@@ -10016,13 +10016,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Chat message methods
-  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+  async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
     const [newMessage] = await db
       .insert(chatMessages)
       .values({
-        ...message,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        sessionId: messageData.sessionId,
+        sender: messageData.sender,
+        content: messageData.content,
+        messageType: messageData.messageType || 'text',
+        metadata: messageData.metadata,
+        createdAt: new Date()
       })
       .returning();
 
@@ -10033,7 +10036,7 @@ export class DatabaseStorage implements IStorage {
         lastMessageAt: new Date(),
         updatedAt: new Date()
       })
-      .where(eq(chatConversations.sessionId, message.sessionId));
+      .where(eq(chatConversations.sessionId, messageData.sessionId));
 
     return newMessage;
   }
