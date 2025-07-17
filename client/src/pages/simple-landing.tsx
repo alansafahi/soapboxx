@@ -21,12 +21,19 @@ export default function SimpleLanding() {
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <SoapBoxLogo />
+            <div className="flex items-center space-x-2 min-w-0">
+              <img 
+                src={soapboxLogo} 
+                alt="SoapBox Super App Logo" 
+                className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0"
+              />
+              <span className="text-sm sm:text-xl font-bold text-gray-900 truncate">SoapBox Super App</span>
+            </div>
             
             {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-6">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
               <a href="#about" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
@@ -34,16 +41,16 @@ export default function SimpleLanding() {
             </div>
             
             {/* CTA Buttons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <Button 
                 variant="ghost" 
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 text-sm px-2 sm:px-4"
                 onClick={() => window.location.href = '/login'}
               >
                 Sign In
               </Button>
               <Button 
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-2 sm:px-4"
                 onClick={() => window.location.href = '/login'}
               >
                 Get Started
@@ -54,25 +61,25 @@ export default function SimpleLanding() {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-purple-100">
+      <section className="py-12 sm:py-20 px-4 bg-gradient-to-br from-purple-50 to-purple-100">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          <div className="text-center mb-12 sm:mb-16">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Unite Your Faith
               <br />
               <span className="text-purple-600">Community</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
               SoapBox Super App brings your congregation together with powerful tools for prayer, 
               Bible study, events, and meaningful connections that strengthen faith and community bonds.
             </p>
           </div>
           
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <div className="flex flex-col gap-4 justify-center items-center mb-12 px-4">
             <Button 
               size="lg"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto min-w-[200px]"
               onClick={() => window.location.href = '/login'}
             >
               <Play className="w-5 h-5 mr-2" />
@@ -81,7 +88,7 @@ export default function SimpleLanding() {
             <Button 
               variant="outline"
               onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
-              className="border-2 border-gray-300 hover:border-gray-400 text-gray-900 hover:text-gray-700 px-8 py-4 text-lg rounded-full font-semibold"
+              className="border-2 border-gray-300 hover:border-gray-400 text-gray-900 hover:text-gray-700 px-8 py-4 text-lg rounded-full font-semibold w-full sm:w-auto min-w-[200px]"
             >
               Schedule Demo
             </Button>
@@ -94,94 +101,94 @@ export default function SimpleLanding() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4">
+      <section id="features" className="py-12 sm:py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Everything Your Community Needs
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Comprehensive tools designed specifically for faith communities to grow, connect, and thrive together.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Prayer Wall */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <Heart className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Prayer Wall</h3>
-              <p className="text-gray-600">Share prayer requests and lift each other up in a sacred, supportive space.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Prayer Wall</h3>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Share prayer requests and lift each other up in a sacred, supportive space.</p>
             </div>
             
             {/* Community */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <Users className="w-6 h-6 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Community Hub</h3>
-              <p className="text-gray-600">Connect with fellow believers through groups, discussions, and shared experiences.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Community Hub</h3>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Connect with fellow believers through groups, discussions, and shared experiences.</p>
             </div>
             
             {/* Events */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <Calendar className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Event Management</h3>
-              <p className="text-gray-600">Organize services, study groups, and community events with seamless coordination.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Event Management</h3>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Organize services, study groups, and community events with seamless coordination.</p>
             </div>
             
             {/* Bible Study */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <MessageCircle className="w-6 h-6 text-yellow-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Bible Study Tools</h3>
-              <p className="text-gray-600">Interactive study guides, devotionals, and reading plans for spiritual growth.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Bible Study Tools</h3>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Interactive study guides, devotionals, and reading plans for spiritual growth.</p>
             </div>
             
             {/* Volunteer Management */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <Star className="w-6 h-6 text-red-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Volunteer Hub</h3>
-              <p className="text-gray-600">Coordinate service opportunities and empower members to serve with purpose.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Volunteer Hub</h3>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Coordinate service opportunities and empower members to serve with purpose.</p>
             </div>
             
             {/* Communication */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
+              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <Globe className="w-6 h-6 text-indigo-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Digital Outreach</h3>
-              <p className="text-gray-600">Reach your community with announcements, newsletters, and spiritual content.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Digital Outreach</h3>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Reach your community with announcements, newsletters, and spiritual content.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Why Choose Section */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-12 sm:py-20 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Why Faith Communities Choose SoapBox Super App
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Built specifically for spiritual communities with the features that matter most.
             </p>
           </div>
           
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-3 gap-8 sm:gap-12">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Shield className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">Secure & Private</h3>
-              <p className="text-gray-600 text-lg">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 text-gray-900">Secure & Private</h3>
+              <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
                 Your community's data is protected with enterprise-grade security and privacy controls you can trust.
               </p>
             </div>
@@ -190,8 +197,8 @@ export default function SimpleLanding() {
               <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Zap className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">Easy to Use</h3>
-              <p className="text-gray-600 text-lg">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 text-gray-900">Easy to Use</h3>
+              <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
                 Intuitive design that works for all ages and technical abilities. Get started in minutes, not hours.
               </p>
             </div>
@@ -200,8 +207,8 @@ export default function SimpleLanding() {
               <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Globe className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">Built for Faith</h3>
-              <p className="text-gray-600 text-lg">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 text-gray-900">Built for Faith</h3>
+              <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
                 Every feature is designed with spiritual communities in mind, supporting your unique needs and values.
               </p>
             </div>
@@ -212,11 +219,11 @@ export default function SimpleLanding() {
       {/* Pricing Section */}
       <section id="pricing" className="py-20 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Simple, Transparent Pricing
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 px-4">
               Choose the perfect plan for your faith community
             </p>
             
@@ -237,91 +244,91 @@ export default function SimpleLanding() {
             <h3 className="text-2xl font-semibold text-center mb-2 text-gray-900">Individual Members</h3>
             <p className="text-center text-gray-600 mb-8">Goal: Spiritual growth and belonging</p>
             
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
                 <div className="text-center mb-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Basic</h4>
-                  <div className="text-3xl font-bold text-blue-600 mb-2">Free</div>
-                  <p className="text-gray-600">100 credits/month</p>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Basic</h4>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">Free</div>
+                  <p className="text-gray-600 text-sm sm:text-base">100 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>S.O.A.P. Journal</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">S.O.A.P. Journal</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Prayer Wall Access</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Prayer Wall Access</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Community Discussions</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Community Discussions</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>100 credits per referral</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">100 credits per referral</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">Get Started Free</Button>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base">Get Started Free</Button>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-500 relative">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border-2 border-purple-500 relative">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Most Popular
                 </div>
                 <div className="text-center mb-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Standard</h4>
-                  <div className="text-3xl font-bold text-purple-600 mb-1">$10/mo</div>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Standard</h4>
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">$10/mo</div>
                   <p className="text-gray-600 text-sm">$100/year</p>
-                  <p className="text-gray-600">500 credits/month</p>
+                  <p className="text-gray-600 text-sm sm:text-base">500 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Everything in Basic</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Everything in Basic</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>AI-Powered Insights</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">AI-Powered Insights</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Priority Support</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Priority Support</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>100 credits per referral</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">100 credits per referral</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">Choose Standard</Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 py-3 text-sm sm:text-base">Choose Standard</Button>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
                 <div className="text-center mb-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Premium</h4>
-                  <div className="text-3xl font-bold text-gray-900 mb-1">$20/mo</div>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Premium</h4>
+                  <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">$20/mo</div>
                   <p className="text-gray-600 text-sm">$200/year</p>
-                  <p className="text-gray-600">1,000 credits/month</p>
+                  <p className="text-gray-600 text-sm sm:text-base">1,000 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Everything in Standard</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Everything in Standard</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Advanced Analytics</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Advanced Analytics</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Custom Integrations</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Custom Integrations</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>100 credits per referral</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">100 credits per referral</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-gray-900 hover:bg-gray-800">Choose Premium</Button>
+                <Button className="w-full bg-gray-900 hover:bg-gray-800 py-3 text-sm sm:text-base">Choose Premium</Button>
               </div>
             </div>
           </div>
@@ -331,32 +338,32 @@ export default function SimpleLanding() {
             <h3 className="text-2xl font-semibold text-center mb-2 text-gray-900">Church Plans</h3>
             <p className="text-center text-gray-600 mb-8">Goal: Engagement & Growth</p>
             
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
                 <div className="text-center mb-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Church Basic</h4>
-                  <div className="text-3xl font-bold text-blue-600 mb-2">$50/mo</div>
-                  <p className="text-gray-600">2,500 credits/month</p>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Church Basic</h4>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">$50/mo</div>
+                  <p className="text-gray-600 text-sm sm:text-base">2,500 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Member Management</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Member Management</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Event Planning</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Event Planning</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Communication Tools</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Communication Tools</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>1,000 loyalty credits/6 months</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">1,000 loyalty credits/6 months</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">Start Church Basic</Button>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base">Start Church Basic</Button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-500 relative">
@@ -452,13 +459,13 @@ export default function SimpleLanding() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4">
+      <section className="py-12 sm:py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Trusted by Faith Communities
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg sm:text-xl text-gray-600 px-4">
               See how churches are growing and connecting with SoapBox Super App
             </p>
           </div>
@@ -507,19 +514,19 @@ export default function SimpleLanding() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700">
+      <section className="py-12 sm:py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
             Ready to Transform Your Community?
           </h2>
-          <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-blue-100 mb-12 max-w-2xl mx-auto px-4">
             Join thousands of faith communities using SoapBox Super App to deepen connections and strengthen their spiritual journey together.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col gap-4 justify-center items-center px-4">
             <Button 
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto min-w-[200px]"
               onClick={() => window.location.href = '/login'}
             >
               <Play className="w-5 h-5 mr-2" />
@@ -528,7 +535,7 @@ export default function SimpleLanding() {
             <Button 
               variant="outline"
               onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg rounded-full font-semibold transition-all duration-200"
+              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg rounded-full font-semibold transition-all duration-200 w-full sm:w-auto min-w-[200px]"
             >
               Schedule Demo
             </Button>
