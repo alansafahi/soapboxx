@@ -14,6 +14,7 @@ import TopHeader from "./components/TopHeader";
 // Lazy-loaded pages
 const NotFound = lazy(() => import("./pages/not-found"));
 const Landing = lazy(() => import("./pages/landing"));
+const SimpleLanding = lazy(() => import("./pages/simple-landing"));
 const LoginPage = lazy(() => import("./pages/login"));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
 const Home = lazy(() => import("./pages/home"));
@@ -115,12 +116,14 @@ function AppRouter() {
                                     <Route path="/login" component={LoginPage} />
                                     <Route path="/reset-password" component={ResetPasswordPage} />
                                     <Route path="/email-verification" component={EmailVerificationPage} />
+                                    <Route path="/landing" component={SimpleLanding} />
                                     <ProtectedRoute path="/dashboard" component={Home} />
+                                    <ProtectedRoute path="/home" component={Home} />
                                     <Route path="/">
                                         {isAuthenticated ? (
                                             <Home />
                                         ) : (
-                                            <LoginPage />
+                                            <SimpleLanding />
                                         )}
                                     </Route>
 

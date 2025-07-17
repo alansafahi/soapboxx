@@ -35,10 +35,17 @@ export default function SimpleLanding() {
             
             {/* CTA Buttons */}
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+              <Button 
+                variant="ghost" 
+                className="text-gray-600 hover:text-gray-900"
+                onClick={() => window.location.href = '/login'}
+              >
                 Sign In
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => window.location.href = '/login'}
+              >
                 Get Started
               </Button>
             </div>
@@ -66,13 +73,14 @@ export default function SimpleLanding() {
             <Button 
               size="lg"
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => window.location.href = '/login'}
             >
               <Play className="w-5 h-5 mr-2" />
               Get Started Free
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = '/demo'}
+              onClick={() => window.location.href = '/login'}
               className="border-2 border-gray-300 hover:border-gray-400 text-gray-900 hover:text-gray-700 px-8 py-4 text-lg rounded-full font-semibold"
             >
               Schedule Demo
@@ -270,6 +278,7 @@ export default function SimpleLanding() {
             <Button 
               size="lg"
               className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => window.location.href = '/login'}
             >
               <Play className="w-5 h-5 mr-2" />
               Start Free Today
