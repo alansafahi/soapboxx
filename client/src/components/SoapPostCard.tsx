@@ -177,7 +177,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
   );
 }
 
-export default function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = false }: SoapPostCardProps) {
+function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = false }: SoapPostCardProps) {
   const [expandedSections, setExpandedSections] = useState({
     observation: false,
     application: false,
@@ -720,3 +720,6 @@ export default function SoapPostCard({ post, showRemoveOption = false, onRemove,
     </Card>
   );
 }
+
+export { SoapPostCard };
+export default SoapPostCard;
