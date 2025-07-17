@@ -105,7 +105,7 @@ export default function SimpleLanding() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything Your Community Needs
+              A Digital Ministry Hub
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Comprehensive tools designed specifically for faith communities to grow, connect, and thrive together.
@@ -119,7 +119,7 @@ export default function SimpleLanding() {
                 <Heart className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Prayer Wall</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base">Share prayer requests and lift each other up in a sacred, supportive space.</p>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Create a sacred space where members can share prayer requests and receive community support 24/7.</p>
             </div>
             
             {/* Community */}
@@ -128,7 +128,7 @@ export default function SimpleLanding() {
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Community Hub</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base">Connect with fellow believers through groups, discussions, and shared experiences.</p>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Build deeper relationships with automated small group formation and engagement tracking that grows participation by 40%.</p>
             </div>
             
             {/* Events */}
@@ -137,7 +137,7 @@ export default function SimpleLanding() {
                 <Calendar className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Event Management</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base">Organize services, study groups, and community events with seamless coordination.</p>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Easily schedule services and automate reminders across all ministries, saving 5+ hours weekly on coordination.</p>
             </div>
             
             {/* Bible Study */}
@@ -146,7 +146,7 @@ export default function SimpleLanding() {
                 <Cross className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Bible Study Tools</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base">Interactive study guides, devotionals, and reading plans for spiritual growth.</p>
+              <p className="text-gray-600 text-center text-sm sm:text-base">AI-powered study guides and S.O.A.P. journaling that help members engage with Scripture 3x more consistently.</p>
             </div>
             
             {/* Volunteer Management */}
@@ -155,7 +155,7 @@ export default function SimpleLanding() {
                 <Sparkles className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Volunteer Hub</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base">Coordinate service opportunities and empower members to serve with purpose.</p>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Match members with their calling through smart volunteer matching, increasing ministry participation by 60%.</p>
             </div>
             
             {/* Communication */}
@@ -164,7 +164,7 @@ export default function SimpleLanding() {
                 <Globe className="w-6 h-6 text-purple-600" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Digital Outreach</h3>
-              <p className="text-gray-600 text-center text-sm sm:text-base">Reach your community with announcements, newsletters, and spiritual content.</p>
+              <p className="text-gray-600 text-center text-sm sm:text-base">Amplify your message with one-click publishing to 11+ platforms and personalized outreach that doubles engagement.</p>
             </div>
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function SimpleLanding() {
               </div>
               <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-6 text-gray-900">Secure & Private</h3>
               <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
-                Your community's data is protected with enterprise-grade security and privacy controls you can trust.
+                We treat your church's data with the sacred care it deserves—secure, private, and always under your control.
               </p>
             </div>
             
