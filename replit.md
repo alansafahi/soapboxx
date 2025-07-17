@@ -151,7 +151,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - ACCESSIBILITY ENHANCED: Updated alt text descriptions to be more descriptive and SEO-friendly
   - MOBILE OPTIMIZATION: Improved page load times through deferred image loading and semantic structure
   - PRIVACY POLICY IMPLEMENTED: Added comprehensive privacy policy page with content from official Google Doc source
-  - FOOTER NAVIGATION: Updated footer privacy policy link to functional /privacy-policy route
+  - TERMS OF SERVICE IMPLEMENTED: Added comprehensive terms of service page with content from official Google Doc source
+  - FOOTER NAVIGATION: Updated footer privacy policy and terms of service links to functional routes
 - July 17, 2025: LANDING PAGE REACTIVATION AND DEPLOYMENT SETUP COMPLETED - Successfully reactivated SimpleLanding as main entry point and prepared for soapboxsuperapp.com deployment
   - LANDING PAGE ACTIVATED: SimpleLanding.tsx now displays as main entry point for non-authenticated users with "Unite Your Faith Community" messaging
   - AUTHENTICATION FLOW INTEGRATED: All CTA buttons ("Sign In", "Get Started", "Start Free Today") properly linked to /login route

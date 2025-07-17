@@ -16,6 +16,7 @@ const NotFound = lazy(() => import("./pages/not-found"));
 const Landing = lazy(() => import("./pages/landing"));
 const SimpleLanding = lazy(() => import("./pages/simple-landing"));
 const PrivacyPolicyPage = lazy(() => import("./pages/privacy-policy"));
+const TermsOfServicePage = lazy(() => import("./pages/terms-of-service"));
 const LoginPage = lazy(() => import("./pages/login"));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
 const Home = lazy(() => import("./pages/home"));
@@ -170,6 +171,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/source-attribution" component={SourceAttributionPage} />
                                     
                                     <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+                                    <Route path="/terms-of-service" component={TermsOfServicePage} />
                                     <Route path="*" component={NotFound} />
                                 </Switch>
                             </Suspense>
