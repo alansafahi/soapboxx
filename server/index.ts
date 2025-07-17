@@ -11,6 +11,18 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Trust proxy for Replit deployment
 app.set('trust proxy', 1);
 
+// WWW subdomain redirect middleware
+app.use((req, res, next) => {
+  const host = req.get('host');
+  if (host && host.startsWith('www.')) {
+    const newHost = host.slice(4); // Remove 'www.'
+    const protocol = req.get('x-forwarded-proto') || req.protocol;
+    const redirectUrl = `${protocol}://${newHost}${req.originalUrl}`;
+    return res.redirect(301, redirectUrl);
+  }
+  next();
+});
+
 // Enable response compression for better performance
 app.use(compression({
   level: 6, // Balanced compression
