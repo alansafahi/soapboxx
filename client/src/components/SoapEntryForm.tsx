@@ -76,7 +76,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       application: entry?.application || "",
       prayer: entry?.prayer || "",
       moodTag: entry?.moodTag || "",
-      isPublic: entry?.isPublic || false,
+      isPublic: entry?.isPublic ?? true,
       isSharedWithGroup: entry?.isSharedWithGroup || false,
       isSharedWithPastor: entry?.isSharedWithPastor || false,
       aiAssisted: entry?.aiAssisted || false,

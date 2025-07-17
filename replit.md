@@ -142,6 +142,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 17, 2025: SOAP SOCIAL FEED INTEGRATION COMPLETELY FIXED - Successfully resolved SOAP entries not appearing in social feed by fixing isPublic default and cache invalidation
+  - ISOPUBLIC DEFAULT CORRECTED: Changed SOAP form default from isPublic=false to isPublic=true so entries appear in social feed by default
+  - CACHE INVALIDATION ENHANCED: Added missing /api/discussions cache invalidation to both SOAP page and SOAP form components  
+  - AI SCRIPTURE TRACKING OPERATIONAL: Different scriptures are being selected preventing repetition (Romans 8:28, then Psalm 62:1-2)
+  - SOCIAL FEED VISIBILITY: New SOAP entries will now appear in social feed automatically unless user specifically makes them private
+  - USER EXPERIENCE IMPROVED: SOAP entries default to community sharing with opt-out rather than opt-in for better engagement
 - July 17, 2025: SOAP SYSTEM ARCHITECTURE COMPLETELY FIXED - Successfully resolved duplicate posts and cache invalidation issues by correcting system architecture to use proper UNION query design
   - DUPLICATE POSTS ELIMINATED: Removed erroneous duplicate social feed creation logic from SOAP endpoints that was creating discussion table entries
   - UNION QUERY ARCHITECTURE RESTORED: Fixed system to use proper getDiscussions() method with UNION query combining soap_entries and discussions tables
