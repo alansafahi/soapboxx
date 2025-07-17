@@ -10,7 +10,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 import SidebarFixed from "./components/SidebarFixed";
 import TopHeader from "./components/TopHeader";
-import SoapPage from "./pages/soap";
 
 // Lazy-loaded pages
 const NotFound = lazy(() => import("./pages/not-found"));
@@ -23,6 +22,7 @@ const Community = lazy(() => import("./pages/community"));
 const Churches = lazy(() => import("./pages/churches"));
 const Events = lazy(() => import("./pages/events"));
 const Prayer = lazy(() => import("./pages/prayer"));
+const SoapPage = lazy(() => import("./pages/soap"));
 const Messages = lazy(() => import("./pages/messages"));
 const Chat = lazy(() => import("./pages/chat"));
 const Leaderboard = lazy(() => import("./pages/leaderboard"));
