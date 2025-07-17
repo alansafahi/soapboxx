@@ -218,12 +218,23 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
             
             // Add help documentation link if available
             if (knowledgeData.helpDocLink) {
-              response += `\n\nFor more detailed information, check our [Help Documentation](${knowledgeData.helpDocLink}).`;
+              response += `\n\nFor more details: [View Help Documentation](${knowledgeData.helpDocLink})`;
+            }
+            
+            // Add related topics if available
+            if (knowledgeData.relatedTopics && knowledgeData.relatedTopics.length > 0) {
+              response += `\n\n**Related topics:** ${knowledgeData.relatedTopics.join(', ')}`;
             }
             
             // If escalation is needed, add human handoff message
             if (knowledgeData.escalate) {
-              response += "\n\nWould you like me to connect you with a team member for further assistance?";
+              response += "\n\n🔄 **Connecting you with our support team for personalized assistance...**";
+            }
+            
+            // Add confidence indicator for high-quality responses
+            if (knowledgeData.confidence && knowledgeData.confidence > 0.8) {
+              // High confidence responses get a checkmark
+              response = "✅ " + response;
             }
             
             await addMessage(response, 'agent');
@@ -234,17 +245,11 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         // Continue with fallback logic if knowledge base fails
       }
       
-      // Handle acknowledgments and simple responses
-      if (['ok', 'okay', 'thanks', 'thank you', 'got it', 'understood'].includes(msgLower)) {
-        if (hasShownInitialResponse) {
-          response = "Is there anything else I can help you with today? I can answer questions about:\n• Prayer Wall and prayer requests\n• S.O.A.P. Bible journaling\n• Account setup and login\n• Church events and notifications\n• Giving and donations\n• Technical troubleshooting\n\nOr I can connect you with our support team.";
-        } else {
-          response = "Great! What specific questions do you have about SoapBox Super App? I can help with features, pricing, demos, or technical support.";
-        }
-      } else if (msgLower.includes('demo') || msgLower.includes('trial')) {
+      // Fallback responses if knowledge base didn't find anything
+      if (msgLower.includes('demo') || msgLower.includes('trial')) {
         response = "I'd be happy to schedule a demo for you! You can book a time that works for you using our Calendly link, or I can connect you with our sales team. Which would you prefer?";
-      } else if (msgLower.includes('price') || msgLower.includes('cost')) {
-        response = "Our pricing is designed to be affordable for churches of all sizes. For detailed pricing information, I can connect you with our sales team who can provide a customized quote based on your church's needs. Would you like me to arrange that?";
+      } else if (msgLower.includes('price') || msgLower.includes('cost') || msgLower.includes('how much')) {
+        response = "For individuals, SoapBox Super App offers a free version with basic features. Premium individual plans start at $4.99/month. Church pricing varies by size ($29-99/month). Would you like details on individual or church pricing?";
       } else if (msgLower.includes('human') || msgLower.includes('agent') || msgLower.includes('person')) {
         response = isBusinessHours 
           ? "I'll connect you with one of our team members right away. Someone will be with you shortly!"

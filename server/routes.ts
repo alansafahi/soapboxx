@@ -3099,7 +3099,7 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
-  // Chat knowledge base endpoint
+  // Comprehensive knowledge base endpoint
   app.post('/api/chat/knowledge', async (req, res) => {
     try {
       const { message } = req.body;
@@ -3108,27 +3108,51 @@ app.post('/api/invitations', async (req: any, res) => {
         return res.status(400).json({ error: 'Message is required' });
       }
 
-      // Import knowledge base functions
-      const { searchKnowledge, getGreetingResponse } = await import('./chat-knowledge');
+      // Import comprehensive knowledge base functions
+      const { searchComprehensiveKnowledge, getEnhancedGreetingResponse } = await import('./comprehensive-knowledge');
       
       // Check for greetings first
-      const greetingResponse = getGreetingResponse(message);
+      const greetingResponse = getEnhancedGreetingResponse(message);
       if (greetingResponse) {
         return res.json({
           found: true,
-          answer: greetingResponse
+          answer: greetingResponse,
+          confidence: 1.0
         });
       }
       
-      // Search knowledge base
-      const knowledgeResult = searchKnowledge(message);
+      // Search comprehensive knowledge base
+      const knowledgeResult = searchComprehensiveKnowledge(message);
       res.json(knowledgeResult);
     } catch (error) {
+      console.error('Knowledge base search error:', error);
       res.status(500).json({ 
         found: false,
         answer: '',
-        error: 'Knowledge base search failed'
+        error: 'Knowledge base search failed',
+        confidence: 0.0
       });
+    }
+  });
+
+  // Endpoint to add new knowledge entries (for daily growth)
+  app.post('/api/admin/knowledge', async (req, res) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.session?.userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const { addKnowledgeEntry } = await import('./comprehensive-knowledge');
+      const newEntry = addKnowledgeEntry(req.body);
+      
+      res.status(201).json({
+        success: true,
+        entry: newEntry
+      });
+    } catch (error) {
+      console.error('Failed to add knowledge entry:', error);
+      res.status(500).json({ error: 'Failed to add knowledge entry' });
     }
   });
   
