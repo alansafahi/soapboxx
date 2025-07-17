@@ -1,5 +1,5 @@
 import { Button } from "../components/ui/button";
-import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift, Cross, Sparkles } from "lucide-react";
+import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift, Cross, Sparkles, Facebook, Twitter, Linkedin } from "lucide-react";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 import { useEffect } from "react";
 

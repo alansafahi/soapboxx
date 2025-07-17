@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
-import { ArrowLeft, Mail, MessageCircle, Calendar, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Heart, BookOpen, Check, Send, Loader2, AlertCircle, User } from "lucide-react";
+import { ArrowLeft, Mail, MessageCircle, Calendar, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Heart, BookOpen, Check, Send, Loader2, AlertCircle, User, ChevronRight } from "lucide-react";
 
 // Custom Spiritual Icons
 const CrossIcon = ({ className = "w-6 h-6" }) => (
@@ -164,6 +164,66 @@ export default function ContactUs() {
     }
   };
 
+  // Set SEO meta tags
+  useEffect(() => {
+    document.title = "Contact SoapBox Super App | Faith-Based Church Support & Partnerships";
+    
+    // Update meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Contact SoapBox Super App for church tech support, demo requests, prayer help, and ministry partnership opportunities. We\'re here to empower your mission with AI-assisted tools for worship, connection, and digital growth.');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = 'Contact SoapBox Super App for church tech support, demo requests, prayer help, and ministry partnership opportunities. We\'re here to empower your mission with AI-assisted tools for worship, connection, and digital growth.';
+      document.head.appendChild(meta);
+    }
+
+    // Add JSON-LD schema for Organization
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "SoapBox Super App",
+      "description": "Faith-based church management platform with AI-powered pastoral tools",
+      "url": "https://soapboxsuperapp.com",
+      "email": "hello@soapboxsuperapp.com",
+      "telephone": "+1-555-SOAPBOX",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "US"
+      },
+      "sameAs": [
+        "https://www.facebook.com/profile.php?id=61555178230788",
+        "https://x.com/soapboxsuperapp",
+        "https://www.linkedin.com/company/soapboxsuperapp"
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "support@soapboxsuperapp.com",
+          "availableLanguage": "English"
+        },
+        {
+          "@type": "ContactPoint", 
+          "contactType": "sales",
+          "email": "sales@soapboxsuperapp.com",
+          "availableLanguage": "English"
+        }
+      ]
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -183,10 +243,10 @@ export default function ContactUs() {
               <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 px-2">
-              Contact Us — We're Here to Support Your Ministry
+              Let's Grow Your Ministry — Together
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-teal-100 max-w-3xl mx-auto px-2">
-              Have a question, need support, or want to learn more about SoapBox Super App? We'd love to hear from you.
+              Get answers, request support, or explore how SoapBox can serve your church.
             </p>
           </div>
         </div>
@@ -203,7 +263,7 @@ export default function ContactUs() {
             {/* Support & Technical Help */}
             <div className="bg-white rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 sm:p-8 border border-gray-100">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                <MessageCircle className="w-8 h-8 text-white" aria-label="Technical support icon" />
+                <MessageCircle className="w-9 h-9 text-white" aria-label="Technical support icon" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
                 Support & Technical Help
@@ -247,7 +307,7 @@ export default function ContactUs() {
             {/* Church Partnerships & Demos */}
             <div className="bg-white rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 sm:p-8 border border-gray-100">
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                <Calendar className="w-8 h-8 text-white" aria-label="Church partnerships icon" />
+                <Calendar className="w-9 h-9 text-white" aria-label="Church partnerships icon" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
                 Church Partnerships & Demos
@@ -431,15 +491,21 @@ export default function ContactUs() {
                     )}
                   </div>
                   
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-start space-x-3">
                     <Switch
                       id="church-leader"
                       checked={formData.isChurchLeader}
                       onCheckedChange={(checked) => handleInputChange('isChurchLeader', checked)}
+                      className="mt-1"
                     />
-                    <Label htmlFor="church-leader" className="text-gray-700 font-medium">
-                      I am a church leader
-                    </Label>
+                    <div>
+                      <Label htmlFor="church-leader" className="text-gray-700 font-medium">
+                        I am a church leader
+                      </Label>
+                      <p className="text-gray-500 text-sm mt-1">
+                        This helps us tailor our response to your ministry needs.
+                      </p>
+                    </div>
                   </div>
                   
                   <Button
@@ -455,7 +521,7 @@ export default function ContactUs() {
                     ) : (
                       <>
                         <Send className="w-4 h-4 mr-2" />
-                        Send Message & Stay Blessed
+                        Send My Message
                       </>
                     )}
                   </Button>
@@ -465,8 +531,73 @@ export default function ContactUs() {
           </div>
         </section>
 
-        {/* Follow Us & Prayer Section */}
+        {/* FAQ Section */}
         <section className="mb-12 sm:mb-16">
+          <div className="bg-gray-50 rounded-xl p-6 sm:p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-4 max-w-3xl mx-auto">
+              
+              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
+                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
+                  <span>How quickly do you respond?</span>
+                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+                </summary>
+                <div className="p-4 pt-0 text-gray-600">
+                  We respond to support emails within 24 hours on weekdays, and sales inquiries within 4 hours during business hours (9am-5pm PT).
+                </div>
+              </details>
+
+              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
+                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
+                  <span>Can I use SoapBox if I'm not a church leader?</span>
+                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+                </summary>
+                <div className="p-4 pt-0 text-gray-600">
+                  Absolutely! SoapBox Super App is designed for all members of faith communities. Individual believers can join prayer circles, participate in Bible studies, and connect with their church community.
+                </div>
+              </details>
+
+              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
+                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
+                  <span>Do you offer live demos or onboarding help?</span>
+                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+                </summary>
+                <div className="p-4 pt-0 text-gray-600">
+                  Yes! We offer personalized live demos via Calendly and comprehensive onboarding support to help your church get started with all features.
+                </div>
+              </details>
+
+              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
+                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
+                  <span>Is SoapBox suitable for small churches?</span>
+                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+                </summary>
+                <div className="p-4 pt-0 text-gray-600">
+                  Perfect for churches of all sizes! Our platform scales from small congregations to mega-churches, with pricing plans designed for every ministry budget.
+                </div>
+              </details>
+
+              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
+                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
+                  <span>What makes SoapBox different from other church apps?</span>
+                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+                </summary>
+                <div className="p-4 pt-0 text-gray-600">
+                  SoapBox combines AI-powered pastoral tools, comprehensive community features, and spiritual growth tracking in one integrated platform designed specifically for faith communities.
+                </div>
+              </details>
+
+            </div>
+          </div>
+        </section>
+
+        {/* Section Divider */}
+        <div className="border-t border-gray-200"></div>
+
+        {/* Follow Us & Prayer Section */}
+        <section className="mb-12 sm:mb-16 pt-12 sm:pt-16">
           <div className="grid lg:grid-cols-2 gap-8">
             
             {/* Follow Us */}
@@ -592,6 +723,19 @@ export default function ContactUs() {
           </div>
         </section>
 
+      </div>
+
+      {/* Sticky Contact Widget */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={() => window.open('https://wa.me/message/BNZMR2CPIKVKA1', '_blank')}
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          size="lg"
+          aria-label="Chat with us on WhatsApp"
+        >
+          <MessageCircle className="w-5 h-5 mr-2" />
+          <span className="hidden sm:inline">Chat with Us</span>
+        </Button>
       </div>
     </div>
   );

@@ -1,0 +1,115 @@
+For the "Visit Help Docs" link in the Support & Technical Help section of your contact page, your Help Center (or Docs page) should serve as a self-service knowledge base to reduce support tickets and empower users. Here's what it should include, structured by category, with suggested articles under each:
+
+🧠 Help Docs Structure for SoapBox Super App
+🔧 Getting Started
+What is SoapBox Super App?
+
+How to Create a Church or Join One
+
+Roles: Member, Pastor, Admin, Owner Explained
+
+How to Invite Church Members
+
+Supported Devices & System Requirements
+
+🛠️ Account & Profile Management
+How to Sign Up or Log In
+
+Resetting Your Password
+
+Updating Your Email, Phone, or Profile Info
+
+Managing Notifications (Email, Push, In-App)
+
+Deleting or Deactivating Your Account
+
+🙏 Prayer Wall
+How to Post a Prayer Request
+
+Managing Prayer Comments and Replies
+
+Privacy Settings for Prayer Posts
+
+How the Prayer Wall Works
+
+Can I Post Without Being in a Church?
+
+📖 S.O.A.P. Journaling
+What Is S.O.A.P. and How to Use It
+
+Setting Up Daily Reminders
+
+Sharing or Keeping Journals Private
+
+Mood Tags Explained
+
+🎥 Sermon Studio & Media
+Uploading and Publishing Sermons
+
+Best Practices for Video & Audio Quality
+
+How to Share with Church Members
+
+Using Tags and Categories for Discovery
+
+💬 Communication Hub
+Creating and Sending Announcements
+
+Using Templates for Church Updates
+
+Scheduling Communications
+
+Push vs In-App Messaging
+
+💰 Giving & Donations (if enabled)
+How to Set Up Giving
+
+Tracking Donations and History
+
+Giving Analytics Overview
+
+Integrating with Stripe or Other Providers
+
+📊 Admin & Church Dashboard
+Managing Church Roles and Permissions
+
+How to Moderate Content
+
+Church Analytics Overview
+
+Customizing Your Church Page
+
+📱 Mobile App Troubleshooting
+App Not Loading or Crashing
+
+Fixing Notification Issues
+
+App Permissions (Camera, Location, etc.)
+
+How to Report a Bug
+
+🤝 Church Onboarding & Demos
+What to Expect in a Demo
+
+How to Prepare Your Church for Launch
+
+First 7 Days: Setup Checklist
+
+Accessing Support During Onboarding
+
+🧾 Legal & Privacy
+Data Privacy Practices
+
+How We Protect Your Data
+
+Terms of Use & Community Guidelines
+
+🧩 Bonus Suggestions
+Search Bar: Prioritize fast keyword lookup
+
+Category Icons: Visual navigation improves UX
+
+Live Chat Button: Always accessible from Help Docs
+
+“Still Need Help?” CTA: Link to contact page or live chat if users don’t find answers
+
