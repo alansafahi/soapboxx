@@ -1532,21 +1532,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
               type="submit" 
               disabled={saveMutation.isPending}
               className="flex items-center gap-2"
-              onClick={(e) => {
-                
-                // Manually trigger form submission if validation passes
-                const values = form.getValues();
-                
-                if (values.scripture && values.observation && values.application && values.prayer) {
-                  
-                  // Try direct handleSubmit call to bypass form wrapper
-                  try {
-                    handleSubmit(values);
-                  } catch (error) {
-                  }
-                } else {
-                }
-              }}
             >
               <Save className="h-4 w-4" />
               {saveMutation.isPending ? 'Saving...' : entry ? 'Update Entry' : 'Save Entry'}
