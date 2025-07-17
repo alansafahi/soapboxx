@@ -152,62 +152,65 @@ export default function AboutUs() {
 
         {/* What We Do Section */}
         <section className="mb-12 sm:mb-16">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8 sm:mb-12 px-4">
-            What We Do
-          </h2>
+          <div className="text-center mb-6">
+            <p className="text-sm font-medium text-purple-600 mb-2">Digital Tools for Modern Ministry</p>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-4">
+              What We Do
+            </h2>
+          </div>
           
           <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 sm:p-8 lg:p-12 mb-8">
-            <p className="text-base sm:text-lg text-gray-700 text-center max-w-4xl mx-auto mb-8">
+            <p className="text-base sm:text-lg text-gray-700 text-center max-w-4xl mx-auto mb-12">
               SoapBox Super App is more than a church management system. It's a complete digital ministry platform that helps churches connect hearts, amplify worship, and extend the reach of the Gospel.
             </p>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <BookOpen className="w-5 h-5 text-blue-600" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                  <BookOpen className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Share Devotionals & Sermons</h3>
-                <p className="text-gray-600 text-sm">Distribute spiritual content and teachings to your community.</p>
+                <h3 className="font-semibold text-gray-900 mb-3">Share Devotionals & Sermons</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Distribute spiritual content and teachings to your community.</p>
               </div>
               
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                  <PrayingHandsIcon className="w-5 h-5 text-purple-600" />
+              <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                  <PrayingHandsIcon className="w-8 h-8 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Create Prayer Walls</h3>
-                <p className="text-gray-600 text-sm">Foster community prayer with moderated prayer request walls.</p>
+                <h3 className="font-semibold text-gray-900 mb-3">Create Prayer Walls</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Foster community prayer with moderated prayer request walls.</p>
               </div>
               
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <BookOpen className="w-5 h-5 text-green-600" />
+              <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                  <BookOpen className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Bible Reading & S.O.A.P.</h3>
-                <p className="text-gray-600 text-sm">Host Bible reading plans and Scripture journaling tools.</p>
+                <h3 className="font-semibold text-gray-900 mb-3">Bible Reading & S.O.A.P.</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Host Bible reading plans and Scripture journaling tools.</p>
               </div>
               
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                  <MessageCircle className="w-5 h-5 text-orange-600" />
+              <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
+                  <MessageCircle className="w-8 h-8 text-orange-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Connect Members</h3>
-                <p className="text-gray-600 text-sm">Messaging, discussion boards, and community announcements.</p>
+                <h3 className="font-semibold text-gray-900 mb-3">Connect Members</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Messaging, discussion boards, and community announcements.</p>
               </div>
               
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                  <Calendar className="w-5 h-5 text-red-600" />
+              <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+                  <Calendar className="w-8 h-8 text-red-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Organize Events</h3>
-                <p className="text-gray-600 text-sm">Plan small groups, events, and volunteer activities.</p>
+                <h3 className="font-semibold text-gray-900 mb-3">Organize Events</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Plan small groups, events, and volunteer activities.</p>
               </div>
               
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                  <DollarSign className="w-5 h-5 text-indigo-600" />
+              <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                  <DollarSign className="w-8 h-8 text-indigo-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Accept Donations</h3>
-                <p className="text-gray-600 text-sm">Secure online giving with comprehensive analytics.</p>
+                <h3 className="font-semibold text-gray-900 mb-3">Accept Donations</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Secure online giving with comprehensive analytics.</p>
               </div>
             </div>
           </div>
