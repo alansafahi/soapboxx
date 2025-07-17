@@ -630,14 +630,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create a personal reflection template with only scripture and reference
-      // Leave observation, application, and prayer blank to encourage original personal reflection
+      // Use placeholder text to satisfy schema requirements while encouraging personal reflection
       await storage.createSoapEntry({
         userId,
         scripture,
         scriptureReference,
-        observation: "", // Blank for personal reflection
-        application: "", // Blank for personal reflection
-        prayer: "", // Blank for personal reflection
+        observation: "[Add your observations about this scripture...]", // Placeholder for personal reflection
+        application: "[How does this apply to your life?...]", // Placeholder for personal reflection
+        prayer: "[Write your prayer based on this scripture...]", // Placeholder for personal reflection
         isPublic: false,
         originalSoapId,
         churchId: null,
@@ -8429,8 +8429,14 @@ Return JSON with this exact structure:
         }
       }
       
-      // If S.O.A.P. entry is public AND has complete content (not just reflected scripture), create social feed post
-      if (newEntry.isPublic && newEntry.observation && newEntry.application && newEntry.prayer) {
+      // If S.O.A.P. entry is public AND has complete content (not placeholder text), create social feed post
+      if (newEntry.isPublic && 
+          newEntry.observation && 
+          newEntry.application && 
+          newEntry.prayer &&
+          !newEntry.observation.startsWith('[Add your observations') &&
+          !newEntry.application.startsWith('[How does this apply') &&
+          !newEntry.prayer.startsWith('[Write your prayer')) {
         try {
           // Use consistent format with PUT endpoint
           const socialPost = await storage.createDiscussion({
@@ -8582,8 +8588,15 @@ Return JSON with this exact structure:
 
       const updatedEntry = await storage.updateSoapEntry(entryId, updateData);
       
-      // If SOAP entry is being made public and wasn't public before, AND has complete content, create social feed post
-      if (updateData.isPublic && !existingEntry.isPublic && updatedEntry.observation && updatedEntry.application && updatedEntry.prayer) {
+      // If SOAP entry is being made public and wasn't public before, AND has complete content (not placeholder text), create social feed post
+      if (updateData.isPublic && 
+          !existingEntry.isPublic && 
+          updatedEntry.observation && 
+          updatedEntry.application && 
+          updatedEntry.prayer &&
+          !updatedEntry.observation.startsWith('[Add your observations') &&
+          !updatedEntry.application.startsWith('[How does this apply') &&
+          !updatedEntry.prayer.startsWith('[Write your prayer')) {
         try {
           const user = await storage.getUser(userId);
           if (user) {
