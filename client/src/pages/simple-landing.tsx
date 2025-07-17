@@ -94,8 +94,23 @@ export default function SimpleLanding() {
             </Button>
           </div>
           
-          <div className="text-sm text-gray-500">
-            Join thousands of faith communities worldwide
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border border-purple-200">
+              <div className="flex -space-x-2 mr-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center border-2 border-white">
+                  <Heart className="w-4 h-4 text-purple-600" />
+                </div>
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white">
+                  <Users className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center border-2 border-white">
+                  <Cross className="w-4 h-4 text-green-600" />
+                </div>
+              </div>
+              <span className="text-sm font-semibold text-gray-700">
+                Join thousands of faith communities worldwide
+              </span>
+            </div>
           </div>
         </div>
       </section>
