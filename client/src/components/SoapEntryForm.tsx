@@ -204,12 +204,18 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       const payload = {
         ...data,
         churchId: user?.churchId || 1,
-        devotionalDate: new Date(data.devotionalDate),
+        devotionalDate: new Date(data.devotionalDate).toISOString(),
         tags: data.tags || [],
-        expiresAt: expirationSettings.expiresAt,
+        expiresAt: expirationSettings.expiresAt ? expirationSettings.expiresAt.toISOString() : null,
         allowsExpiration: expirationSettings.allowsExpiration,
       };
 
+      // Remove any undefined fields to prevent backend issues
+      Object.keys(payload).forEach(key => {
+        if (payload[key as keyof typeof payload] === undefined) {
+          delete payload[key as keyof typeof payload];
+        }
+      });
 
       try {
         let result;

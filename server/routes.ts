@@ -8508,10 +8508,39 @@ Return JSON with this exact structure:
         return res.status(403).json({ message: 'Unauthorized to update this entry' });
       }
 
-      const updatedEntry = await storage.updateSoapEntry(entryId, req.body);
+      // Prepare update data with proper type conversion
+      const updateData = {
+        ...req.body,
+        updatedAt: new Date()
+      };
+
+      // Convert devotionalDate string to Date object if provided
+      if (updateData.devotionalDate && typeof updateData.devotionalDate === 'string') {
+        updateData.devotionalDate = new Date(updateData.devotionalDate);
+      }
+
+      // Handle expiresAt field properly
+      if (updateData.expiresAt) {
+        if (typeof updateData.expiresAt === 'string') {
+          updateData.expiresAt = new Date(updateData.expiresAt);
+        }
+      } else if (updateData.allowsExpiration === false) {
+        // If expiration is disabled, clear the expiresAt field
+        updateData.expiresAt = null;
+      }
+
+      // Remove any undefined or null fields that shouldn't be updated
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
+      });
+
+      const updatedEntry = await storage.updateSoapEntry(entryId, updateData);
       res.json(updatedEntry);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to update S.O.A.P. entry' });
+      console.error('SOAP update error:', error);
+      res.status(500).json({ message: 'Failed to update S.O.A.P. entry', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
