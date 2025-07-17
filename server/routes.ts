@@ -8429,28 +8429,37 @@ Return JSON with this exact structure:
         }
       }
       
-      // If S.O.A.P. entry is public, also create a corresponding social feed post
-      if (newEntry.isPublic) {
+      // If S.O.A.P. entry is public AND has complete content (not just reflected scripture), create social feed post
+      if (newEntry.isPublic && newEntry.observation && newEntry.application && newEntry.prayer) {
         try {
-
-          const feedPostData = {
-            title: `S.O.A.P. Reflection: ${newEntry.scriptureReference}`,
-            content: `📖 <strong>Scripture</strong>: ${newEntry.scriptureReference}\n${newEntry.scripture}\n\n🔍 <strong>Observation</strong>: ${newEntry.observation}\n\n💡 <strong>Application</strong>: ${newEntry.application}\n\n🙏 <strong>Prayer</strong>: ${newEntry.prayer}`,
+          // Use consistent format with PUT endpoint
+          const socialPost = await storage.createDiscussion({
             authorId: userId,
-            churchId: newEntry.churchId || null,
-            category: 'devotional',
-            audience: 'public',
+            churchId: newEntry.churchId,
+            title: `S.O.A.P. Reflection`,
+            content: newEntry.scripture || '',
+            category: 'soap_reflection',
             isPublic: true,
-            mood: newEntry.moodTag || null,
+            audience: 'public',
+            mood: newEntry.moodTag,
             suggestedVerses: null,
             attachedMedia: null,
-            linkedVerse: newEntry.scriptureReference
-          };
-
-          const feedPost = await storage.createDiscussion(feedPostData);
+            linkedVerse: newEntry.scriptureReference,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            type: 'soap_reflection',
+            soapData: {
+              scripture: newEntry.scripture,
+              scriptureReference: newEntry.scriptureReference,
+              observation: newEntry.observation,
+              application: newEntry.application,
+              prayer: newEntry.prayer,
+            }
+          });
 
         } catch (feedError) {
           // Don't fail the S.O.A.P. creation if feed post fails
+
         }
       }
       
@@ -8573,8 +8582,8 @@ Return JSON with this exact structure:
 
       const updatedEntry = await storage.updateSoapEntry(entryId, updateData);
       
-      // If SOAP entry is being made public and wasn't public before, create social feed post
-      if (updateData.isPublic && !existingEntry.isPublic) {
+      // If SOAP entry is being made public and wasn't public before, AND has complete content, create social feed post
+      if (updateData.isPublic && !existingEntry.isPublic && updatedEntry.observation && updatedEntry.application && updatedEntry.prayer) {
         try {
           const user = await storage.getUser(userId);
           if (user) {
@@ -8602,11 +8611,11 @@ Return JSON with this exact structure:
                 prayer: updatedEntry.prayer,
               }
             });
-            console.log('Social feed post created for SOAP entry:', socialPost.id);
+
           }
         } catch (socialFeedError) {
           // Don't fail the SOAP update if social feed creation fails
-          console.error('Failed to create social feed post for updated SOAP entry:', socialFeedError);
+
         }
       }
       
