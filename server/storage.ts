@@ -8562,7 +8562,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteSoapEntry(id: number): Promise<void> {
-    await db.delete(soapEntries).where(eq(soapEntries.id, id));
+    // Delete related bookmarks first to avoid foreign key constraint violation
+    await db
+      .delete(soapBookmarks)
+      .where(eq(soapBookmarks.soapId, id));
+
+    // Delete related comments
+    await db
+      .delete(soapComments)
+      .where(eq(soapComments.soapId, id));
+
+    // Delete related reactions
+    await db
+      .delete(reactions)
+      .where(and(
+        eq(reactions.targetType, 'soap'),
+        eq(reactions.targetId, id)
+      ));
+
+    // Delete the SOAP entry
+    await db
+      .delete(soapEntries)
+      .where(eq(soapEntries.id, id));
   }
 
   async getUserSoapStreak(userId: string): Promise<number> {
