@@ -427,12 +427,12 @@ export default function SimpleLanding() {
 
           {/* Pay As You Go */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-semibold text-center mb-8 text-gray-900">Pay As You Go - Credit Boost Packs</h3>
+            <h3 className="text-2xl font-semibold text-center mb-8 text-gray-900">Addon Credit Boost Packs</h3>
             
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center p-6 bg-gray-50 rounded-lg">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Boost Pack S</h4>
-                <div className="text-2xl font-bold text-blue-600 mb-2">$20</div>
+                <div className="text-2xl font-bold text-blue-600 mb-2">$25</div>
                 <p className="text-gray-600">1,000 credits</p>
               </div>
               
