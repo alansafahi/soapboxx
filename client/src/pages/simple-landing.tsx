@@ -1,14 +1,16 @@
 import { Button } from "../components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift, Cross, Sparkles } from "lucide-react";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
+import { useEffect } from "react";
 
 // SoapBox Logo Component
 const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: string; showText?: boolean }) => (
   <div className="flex items-center space-x-3">
     <img 
       src={soapboxLogo} 
-      alt="SoapBox Super App Logo" 
+      alt="SoapBox Super App - Faith Community Platform" 
       className={className}
+      loading="lazy"
     />
     {showText && (
       <span className="text-xl font-bold text-gray-900">SoapBox Super App</span>
@@ -17,6 +19,42 @@ const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: s
 );
 
 export default function SimpleLanding() {
+  useEffect(() => {
+    // Set meta title and description for SEO
+    document.title = "SoapBox Super App – Unite Your Faith Community With Prayer, Engagement & Events";
+    
+    // Update meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Unite your faith community with SoapBox Super App - featuring prayer walls, Bible study tools, event management, and digital ministry solutions for modern churches worldwide.');
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = 'Unite your faith community with SoapBox Super App - featuring prayer walls, Bible study tools, event management, and digital ministry solutions for modern churches worldwide.';
+      document.head.appendChild(meta);
+    }
+
+    // Add Open Graph meta tags
+    const ogTags = [
+      { property: 'og:title', content: 'SoapBox Super App – Unite Your Faith Community With Prayer, Engagement & Events' },
+      { property: 'og:description', content: 'Unite your faith community with SoapBox Super App - featuring prayer walls, Bible study tools, event management, and digital ministry solutions for modern churches worldwide.' },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://soapboxsuperapp.com' }
+    ];
+
+    ogTags.forEach(tag => {
+      const existing = document.querySelector(`meta[property="${tag.property}"]`);
+      if (existing) {
+        existing.setAttribute('content', tag.content);
+      } else {
+        const meta = document.createElement('meta');
+        meta.setAttribute('property', tag.property);
+        meta.setAttribute('content', tag.content);
+        document.head.appendChild(meta);
+      }
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -133,7 +171,7 @@ export default function SimpleLanding() {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
                 <Heart className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Prayer Wall</h3>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Prayer Wall for Church Communities</h2>
               <p className="text-gray-600 text-center text-sm sm:text-base">Create a sacred space where members can share prayer requests and receive community support 24/7.</p>
             </div>
             
@@ -142,7 +180,7 @@ export default function SimpleLanding() {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Community Hub</h3>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Digital Community Hub for Churches</h2>
               <p className="text-gray-600 text-center text-sm sm:text-base">Build deeper relationships with automated small group formation and engagement tracking that grows participation by 40%.</p>
             </div>
             
@@ -151,7 +189,7 @@ export default function SimpleLanding() {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
                 <Calendar className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Event Management</h3>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Church Event Management System</h2>
               <p className="text-gray-600 text-center text-sm sm:text-base">Easily schedule services and automate reminders across all ministries, saving 5+ hours weekly on coordination.</p>
             </div>
             
@@ -160,7 +198,7 @@ export default function SimpleLanding() {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
                 <Cross className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Bible Study Tools</h3>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Bible Study Tools for Modern Ministries</h2>
               <p className="text-gray-600 text-center text-sm sm:text-base">AI-powered study guides and S.O.A.P. journaling that help members engage with Scripture 3x more consistently.</p>
             </div>
             
@@ -169,7 +207,7 @@ export default function SimpleLanding() {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
                 <Sparkles className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Volunteer Hub</h3>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Church Volunteer Management Hub</h2>
               <p className="text-gray-600 text-center text-sm sm:text-base">Match members with their calling through smart volunteer matching, increasing ministry participation by 60%.</p>
             </div>
             
@@ -178,7 +216,7 @@ export default function SimpleLanding() {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
                 <Globe className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Digital Outreach</h3>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Digital Ministry Outreach Platform</h2>
               <p className="text-gray-600 text-center text-sm sm:text-base">Amplify your message with one-click publishing to 11+ platforms and personalized outreach that doubles engagement.</p>
             </div>
           </div>
