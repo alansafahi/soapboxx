@@ -8557,7 +8557,6 @@ Return JSON with this exact structure:
       
       res.json(updatedEntry);
     } catch (error) {
-      console.error('SOAP update error:', error);
       res.status(500).json({ message: 'Failed to update S.O.A.P. entry', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });

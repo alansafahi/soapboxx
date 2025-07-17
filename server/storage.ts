@@ -1129,111 +1129,9 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // User statistics operations
-  async getUserStats(userId: string): Promise<any> {
-    
-    try {
-      // Count prayers offered (prayer requests created by user)
-      const prayerCount = await db
-        .select({ count: count() })
-        .from(prayerRequests)
-        .where(eq(prayerRequests.userId, userId));
 
-      // Count discussions created by user
-      const discussionCount = await db
-        .select({ count: count() })
-        .from(discussions)
-        .where(eq(discussions.userId, userId));
 
-      // Count events attended (RSVPs)
-      const attendanceCount = await db
-        .select({ count: count() })
-        .from(eventRsvps)
-        .where(and(
-          eq(eventRsvps.userId, userId),
-          eq(eventRsvps.status, 'attending')
-        ));
 
-      // Count user connections/contacts
-      const connectionCount = await db
-        .select({ count: count() })
-        .from(contacts)
-        .where(and(
-          eq(contacts.userId, userId),
-          eq(contacts.status, 'connected')
-        ));
-
-      // Count SOAP entries (inspirations read)
-      const soapCount = await db
-        .select({ count: count() })
-        .from(soapEntries)
-        .where(eq(soapEntries.userId, userId));
-
-      // Count prayer reactions (prayers offered to others)
-      const prayerReactionCount = await db
-        .select({ count: count() })
-        .from(prayerReactions)
-        .where(eq(prayerReactions.userId, userId));
-
-      const stats = {
-        prayerCount: prayerCount[0]?.count || 0,
-        discussionCount: discussionCount[0]?.count || 0,
-        attendanceCount: attendanceCount[0]?.count || 0,
-        connectionCount: connectionCount[0]?.count || 0,
-        inspirationsRead: soapCount[0]?.count || 0,
-        prayersOffered: prayerReactionCount[0]?.count || 0,
-      };
-
-      return stats;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getUserAchievements(userId: string): Promise<any> {
-    
-    try {
-      // Get user badge progress/achievements
-      const achievements = await db
-        .select({
-          id: userBadgeProgress.id,
-          badgeId: userBadgeProgress.badgeId,
-          currentProgress: userBadgeProgress.currentProgress,
-          maxProgress: userBadgeProgress.maxProgress,
-          isUnlocked: userBadgeProgress.isUnlocked,
-          unlockedAt: userBadgeProgress.unlockedAt,
-          badgeName: prayerBadges.name,
-          badgeDescription: prayerBadges.description,
-          badgeIcon: prayerBadges.icon,
-          badgeColor: prayerBadges.color,
-          badgeCategory: prayerBadges.category,
-        })
-        .from(userBadgeProgress)
-        .leftJoin(prayerBadges, eq(userBadgeProgress.badgeId, prayerBadges.id))
-        .where(and(
-          eq(userBadgeProgress.userId, userId),
-          eq(userBadgeProgress.isUnlocked, true)
-        ))
-        .orderBy(desc(userBadgeProgress.unlockedAt));
-
-      // Transform achievements for frontend
-      const transformedAchievements = achievements.map(achievement => ({
-        id: achievement.id,
-        achievementType: achievement.badgeName,
-        achievementLevel: Math.ceil((achievement.currentProgress / achievement.maxProgress) * 100),
-        description: achievement.badgeDescription,
-        icon: achievement.badgeIcon,
-        color: achievement.badgeColor,
-        category: achievement.badgeCategory,
-        unlockedAt: achievement.unlockedAt,
-      }));
-
-      return transformedAchievements;
-    } catch (error) {
-      // Return empty array if no achievements table exists yet
-      return [];
-    }
-  }
 
   // Email verification operations
   async setEmailVerificationToken(userId: string, token: string): Promise<void> {
@@ -2643,38 +2541,7 @@ export class DatabaseStorage implements IStorage {
     return bookmark.length > 0;
   }
 
-  async createSoapEntry(entry: any): Promise<any> {
-    const [newEntry] = await db.insert(soapEntries).values(entry).returning();
-    return newEntry;
-  }
 
-  async getSoapEntry(id: number): Promise<any> {
-    const [entry] = await db
-      .select()
-      .from(soapEntries)
-      .where(eq(soapEntries.id, id));
-    return entry;
-  }
-
-  async deleteSoapEntry(id: number): Promise<void> {
-    // Delete related comments first
-    await db
-      .delete(soapComments)
-      .where(eq(soapComments.soapId, id));
-
-    // Delete related reactions
-    await db
-      .delete(reactions)
-      .where(and(
-        eq(reactions.targetType, 'soap'),
-        eq(reactions.targetId, id)
-      ));
-
-    // Delete the SOAP entry
-    await db
-      .delete(soapEntries)
-      .where(eq(soapEntries.id, id));
-  }
 
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();

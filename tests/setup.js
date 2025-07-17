@@ -15,20 +15,15 @@ export const testDb = drizzle({ client: testPool, schema });
 
 // Global test setup
 beforeAll(async () => {
-  console.log('🧪 Setting up test environment...');
-  
   // Ensure test database is available
   try {
     await testPool.query('SELECT 1');
-    console.log('✅ Test database connection established');
   } catch (error) {
-    console.error('❌ Test database connection failed:', error);
     throw error;
   }
 });
 
 afterAll(async () => {
-  console.log('🧹 Cleaning up test environment...');
   await testPool.end();
 });
 
