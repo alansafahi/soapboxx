@@ -17,6 +17,7 @@ const Landing = lazy(() => import("./pages/landing"));
 const SimpleLanding = lazy(() => import("./pages/simple-landing"));
 const PrivacyPolicyPage = lazy(() => import("./pages/privacy-policy"));
 const TermsOfServicePage = lazy(() => import("./pages/terms-of-service"));
+const PrayerWallFeaturePage = lazy(() => import("./pages/prayer-wall-feature"));
 const LoginPage = lazy(() => import("./pages/login"));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
 const Home = lazy(() => import("./pages/home"));
@@ -172,6 +173,7 @@ function AppRouter() {
                                     
                                     <Route path="/privacy-policy" component={PrivacyPolicyPage} />
                                     <Route path="/terms-of-service" component={TermsOfServicePage} />
+                                    <Route path="/features/prayer-wall" component={PrayerWallFeaturePage} />
                                     <Route path="*" component={NotFound} />
                                 </Switch>
                             </Suspense>

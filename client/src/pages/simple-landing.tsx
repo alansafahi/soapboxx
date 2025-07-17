@@ -659,7 +659,7 @@ export default function SimpleLanding() {
             <div>
               <h4 className="font-semibold mb-4">Features</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Prayer Wall</a></li>
+                <li><a href="/features/prayer-wall" className="hover:text-white transition-colors">Prayer Wall</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Bible Reading</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Events</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Community Chat</a></li>
