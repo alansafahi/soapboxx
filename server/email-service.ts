@@ -43,7 +43,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
       return { success: true, messageId: 'dev-mode' };
     }
   } catch (error: any) {
-    console.log('SendGrid error:', error?.response?.body || error.message || error);
+    // Log error for debugging (production: use proper logging service)
     
     // Provide specific error messages for common issues
     let errorMessage = 'Failed to send email';

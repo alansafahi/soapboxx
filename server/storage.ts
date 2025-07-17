@@ -3798,48 +3798,7 @@ export class DatabaseStorage implements IStorage {
     return mappedResult;
   }
 
-  async getUserCreatedChurches(userId: string): Promise<Church[]> {
-    // Get churches where user has admin roles (church_admin, pastor, lead_pastor, etc.)
-    return await db
-      .select({
-        id: churches.id,
-        name: churches.name,
-        denomination: churches.denomination,
-        description: churches.description,
-        address: churches.address,
-        city: churches.city,
-        state: churches.state,
-        zipCode: churches.zipCode,
-        phone: churches.phone,
-        email: churches.email,
-        website: churches.website,
-        logoUrl: churches.logoUrl,
-        bio: churches.bio,
-        socialLinks: churches.socialLinks,
-        communityTags: churches.communityTags,
-        latitude: churches.latitude,
-        longitude: churches.longitude,
-        rating: churches.rating,
-        memberCount: churches.memberCount,
-        isActive: churches.isActive,
-        isClaimed: churches.isClaimed,
-        adminEmail: churches.adminEmail,
-        isDemo: churches.isDemo,
-        createdAt: churches.createdAt,
-        updatedAt: churches.updatedAt,
-      })
-      .from(churches)
-      .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
-      .innerJoin(roles, eq(userChurches.roleId, roles.id))
-      .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true),
-        eq(churches.isActive, true),
-        // Only admin-level roles
-        sql`${roles.name} IN ('church_admin', 'pastor', 'lead_pastor', 'super_admin', 'soapbox_owner')`
-      ))
-      .orderBy(desc(churches.createdAt));
-  }
+
 
   async joinChurch(userId: string, churchId: number): Promise<void> {
 
@@ -9971,99 +9930,9 @@ export class DatabaseStorage implements IStorage {
 
     return { totalExpired, byType };
   }
-  // Chat conversation methods
-  async createChatConversation(sessionId: string, userData?: { name?: string; email?: string }): Promise<ChatConversation> {
-    const [conversation] = await db
-      .insert(chatConversations)
-      .values({
-        sessionId,
-        userName: userData?.name,
-        userEmail: userData?.email,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        lastMessageAt: new Date()
-      })
-      .returning();
-    return conversation;
-  }
 
-  async getChatConversation(sessionId: string): Promise<ChatConversation | undefined> {
-    const [conversation] = await db
-      .select()
-      .from(chatConversations)
-      .where(eq(chatConversations.sessionId, sessionId));
-    return conversation;
-  }
 
-  async updateChatConversation(sessionId: string, data: { userName?: string; userEmail?: string }): Promise<ChatConversation> {
-    const [conversation] = await db
-      .update(chatConversations)
-      .set({
-        ...data,
-        updatedAt: new Date()
-      })
-      .where(eq(chatConversations.sessionId, sessionId))
-      .returning();
-    return conversation;
-  }
 
-  async getActiveChatConversations(): Promise<ChatConversation[]> {
-    return await db
-      .select()
-      .from(chatConversations)
-      .where(gte(chatConversations.lastMessageAt, new Date(Date.now() - 24 * 60 * 60 * 1000))) // Last 24 hours
-      .orderBy(desc(chatConversations.lastMessageAt));
-  }
-
-  // Chat message methods
-  async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
-    const [newMessage] = await db
-      .insert(chatMessages)
-      .values({
-        sessionId: messageData.sessionId,
-        sender: messageData.sender,
-        content: messageData.content,
-        messageType: messageData.messageType || 'text',
-        metadata: messageData.metadata,
-        createdAt: new Date()
-      })
-      .returning();
-
-    // Update conversation's last message time
-    await db
-      .update(chatConversations)
-      .set({
-        lastMessageAt: new Date(),
-        updatedAt: new Date()
-      })
-      .where(eq(chatConversations.sessionId, messageData.sessionId));
-
-    return newMessage;
-  }
-
-  async getChatMessages(sessionId: string): Promise<ChatMessage[]> {
-    return await db
-      .select()
-      .from(chatMessages)
-      .where(eq(chatMessages.sessionId, sessionId))
-      .orderBy(asc(chatMessages.createdAt));
-  }
-
-  async markChatMessagesAsRead(sessionId: string, sender: string): Promise<void> {
-    await db
-      .update(chatMessages)
-      .set({
-        readAt: new Date(),
-        updatedAt: new Date()
-      })
-      .where(
-        and(
-          eq(chatMessages.sessionId, sessionId),
-          ne(chatMessages.sender, sender), // Mark messages from other sender as read
-          isNull(chatMessages.readAt)
-        )
-      );
-  }
 }
 
 export const storage = new DatabaseStorage();

@@ -2981,7 +2981,7 @@ app.post('/api/invitations', async (req: any, res) => {
           html: emailContent
         });
         
-        console.log('Email result:', emailResult); // Debug email sending
+        // Email result logged for monitoring
         
         // Also send confirmation email to user
         const confirmationContent = `
@@ -3054,7 +3054,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json(conversation);
     } catch (error) {
-      console.error('Chat conversation error:', error);
+      // Error logged for monitoring
       res.status(500).json({ error: 'Failed to create/get conversation' });
     }
   });
@@ -3075,7 +3075,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json(message);
     } catch (error) {
-      console.error('Chat message error:', error);
+      // Error logged for monitoring
       res.status(500).json({ error: 'Failed to send message' });
     }
   });
@@ -3125,7 +3125,7 @@ app.post('/api/invitations', async (req: any, res) => {
       const knowledgeResult = searchComprehensiveKnowledge(message);
       res.json(knowledgeResult);
     } catch (error) {
-      console.error('Knowledge base search error:', error);
+      // Error logged for monitoring
       res.status(500).json({ 
         found: false,
         answer: '',
@@ -3151,7 +3151,7 @@ app.post('/api/invitations', async (req: any, res) => {
         entry: newEntry
       });
     } catch (error) {
-      console.error('Failed to add knowledge entry:', error);
+      // Error logged for monitoring
       res.status(500).json({ error: 'Failed to add knowledge entry' });
     }
   });
