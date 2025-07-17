@@ -675,7 +675,7 @@ export default function SimpleLanding() {
                 <li><a href="/contact-us" className="hover:text-white transition-colors">Contact</a></li>
                 <li><a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a></li>
                 <li><a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
+                <li><a href="/support" className="hover:text-white transition-colors">Support</a></li>
               </ul>
             </div>
           </div>

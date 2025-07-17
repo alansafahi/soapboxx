@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
-import { ArrowLeft, Mail, MessageCircle, Calendar, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Heart, Clock, BookOpen, Check, Send } from "lucide-react";
+import { ArrowLeft, Mail, MessageCircle, Calendar, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Heart, BookOpen, Check, Send, Loader2, AlertCircle, User } from "lucide-react";
 
 // Custom Spiritual Icons
 const CrossIcon = ({ className = "w-6 h-6" }) => (
@@ -41,18 +41,110 @@ export default function ContactUs() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
-    document.title = "Contact Us - Support & Partnership | SoapBox Super App";
+    document.title = "Contact Us - Faith Tech Support, Church App Help & Ministry Tools Assistance | SoapBox Super App";
     
+    // Meta description with keywords
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Contact SoapBox Super App for technical support, church partnerships, demos, and general inquiries. We\'re here to support your ministry with faith-based technology solutions.');
+      metaDescription.setAttribute('content', 'Reach out to the SoapBox Super App team for support, church partnerships, and general inquiries. We\'re here to help you grow your ministry with faith tech support and church app help.');
     }
+
+    // Keywords meta tag
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute('content', 'church app contact, prayer wall help, ministry support, SoapBox Super App contact, faith tech support, church app help, ministry tools assistance');
+
+    // Open Graph tags
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) {
+      ogTitle = document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      document.head.appendChild(ogTitle);
+    }
+    ogTitle.setAttribute('content', 'Connect with SoapBox Super App');
+
+    let ogDescription = document.querySelector('meta[property="og:description"]');
+    if (!ogDescription) {
+      ogDescription = document.createElement('meta');
+      ogDescription.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDescription);
+    }
+    ogDescription.setAttribute('content', 'Stay inspired by following us on social media as we grow the faith tech movement.');
+
+    // Twitter Card
+    let twitterCard = document.querySelector('meta[name="twitter:card"]');
+    if (!twitterCard) {
+      twitterCard = document.createElement('meta');
+      twitterCard.setAttribute('name', 'twitter:card');
+      document.head.appendChild(twitterCard);
+    }
+    twitterCard.setAttribute('content', 'summary_large_image');
+
+    // Schema markup for organization contact
+    const schemaScript = document.createElement('script');
+    schemaScript.type = 'application/ld+json';
+    schemaScript.innerHTML = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "SoapBox Super App",
+      "url": "https://soapboxsuperapp.com",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "support@soapboxsuperapp.com",
+          "areaServed": "US",
+          "availableLanguage": "English"
+        },
+        {
+          "@type": "ContactPoint", 
+          "contactType": "sales",
+          "email": "sales@soapboxsuperapp.com",
+          "areaServed": "US",
+          "availableLanguage": "English"
+        }
+      ]
+    });
+    document.head.appendChild(schemaScript);
   }, []);
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = "Message is required";
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsSubmitting(true);
     
     // Simulate form submission
@@ -60,11 +152,16 @@ export default function ContactUs() {
       setIsSubmitting(false);
       setIsSubmitted(true);
       setFormData({ name: "", email: "", message: "", isChurchLeader: false });
+      setErrors({});
     }, 2000);
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
   };
 
   return (
@@ -99,13 +196,14 @@ export default function ContactUs() {
       <div className="max-w-6xl mx-auto px-4 py-12 sm:py-16">
         
         {/* Contact Methods Grid */}
-        <section className="mb-12 sm:mb-16">
+        <section className="mb-12 sm:mb-16" aria-labelledby="contact-methods">
+          <h2 id="contact-methods" className="sr-only">Contact Methods</h2>
           <div className="grid lg:grid-cols-3 gap-8">
             
             {/* Support & Technical Help */}
-            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <MessageCircle className="w-6 h-6 text-blue-600" />
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 sm:p-8 border border-gray-100">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                <MessageCircle className="w-8 h-8 text-white" aria-label="Technical support icon" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
                 Support & Technical Help
@@ -147,9 +245,9 @@ export default function ContactUs() {
             </div>
 
             {/* Church Partnerships & Demos */}
-            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                <Calendar className="w-6 h-6 text-green-600" />
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 sm:p-8 border border-gray-100">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                <Calendar className="w-8 h-8 text-white" aria-label="Church partnerships icon" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
                 Church Partnerships & Demos
@@ -165,7 +263,7 @@ export default function ContactUs() {
                     <div className="font-semibold text-gray-900">Schedule a Demo</div>
                     <Button
                       onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
-                      className="bg-green-600 hover:bg-green-700 text-white mt-2 w-full sm:w-auto min-w-[140px]"
+                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white mt-2 w-full sm:w-auto min-w-[140px] shadow-md hover:shadow-lg transition-all duration-200"
                     >
                       Book a Time
                     </Button>
@@ -185,9 +283,9 @@ export default function ContactUs() {
             </div>
 
             {/* General Inquiries */}
-            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                <DoveIcon className="w-6 h-6 text-purple-600" />
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 sm:p-8 border border-gray-100">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                <DoveIcon className="w-8 h-8 text-white" aria-label="General inquiries icon" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
                 General Inquiries
@@ -245,18 +343,27 @@ export default function ContactUs() {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Check className="w-8 h-8 text-green-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">
                     Message Sent Successfully!
-                  </h3>
+                  </h2>
                   <p className="text-gray-600 mb-6">
                     Thank you for reaching out. We'll get back to you within 24 hours. Stay blessed!
                   </p>
-                  <Button
-                    onClick={() => setIsSubmitted(false)}
-                    className="bg-teal-600 hover:bg-teal-700 text-white min-w-[160px]"
-                  >
-                    Send Another Message
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      onClick={() => setIsSubmitted(false)}
+                      className="bg-teal-600 hover:bg-teal-700 text-white min-w-[160px]"
+                    >
+                      Send Another Message
+                    </Button>
+                    <Button
+                      onClick={() => window.location.href = '/features/prayer-wall'}
+                      variant="outline"
+                      className="min-w-[160px] border-teal-600 text-teal-600 hover:bg-teal-50"
+                    >
+                      Go to Prayer Wall
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -271,9 +378,15 @@ export default function ContactUs() {
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         required
-                        className="mt-2"
+                        className={`mt-2 ${errors.name ? 'border-red-500 focus:border-red-500' : ''}`}
                         placeholder="Your full name"
                       />
+                      {errors.name && (
+                        <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.name}
+                        </div>
+                      )}
                     </div>
                     
                     <div>
@@ -286,9 +399,15 @@ export default function ContactUs() {
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         required
-                        className="mt-2"
+                        className={`mt-2 ${errors.email ? 'border-red-500 focus:border-red-500' : ''}`}
                         placeholder="your@email.com"
                       />
+                      {errors.email && (
+                        <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.email}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -301,9 +420,15 @@ export default function ContactUs() {
                       value={formData.message}
                       onChange={(e) => handleInputChange('message', e.target.value)}
                       required
-                      className="mt-2 min-h-[120px]"
+                      className={`mt-2 min-h-[120px] ${errors.message ? 'border-red-500 focus:border-red-500' : ''}`}
                       placeholder="How can we help you and your ministry?"
                     />
+                    {errors.message && (
+                      <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.message}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex items-center space-x-3">
@@ -320,11 +445,11 @@ export default function ContactUs() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-teal-600 hover:bg-teal-700 text-white w-full py-3 text-lg font-semibold disabled:opacity-50"
+                    className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white w-full py-3 text-lg font-semibold disabled:opacity-50 shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     {isSubmitting ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Sending...
                       </>
                     ) : (
@@ -354,23 +479,51 @@ export default function ContactUs() {
               </p>
               
               <div className="grid grid-cols-2 gap-4">
-                <a href="#" className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <Facebook className="w-5 h-5 text-blue-600" />
+                <a 
+                  href="#" 
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:scale-105 transition-all duration-200"
+                  aria-label="Follow us on Facebook"
+                  rel="noopener noreferrer"
+                >
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <Facebook className="w-5 h-5 text-white" />
+                  </div>
                   <span className="font-medium text-gray-900">Facebook</span>
                 </a>
                 
-                <a href="#" className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <Instagram className="w-5 h-5 text-pink-600" />
+                <a 
+                  href="#" 
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-pink-50 hover:border-pink-300 hover:scale-105 transition-all duration-200"
+                  aria-label="Follow us on Instagram"
+                  rel="noopener noreferrer"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Instagram className="w-5 h-5 text-white" />
+                  </div>
                   <span className="font-medium text-gray-900">Instagram</span>
                 </a>
                 
-                <a href="#" className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <Twitter className="w-5 h-5 text-black" />
+                <a 
+                  href="#" 
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 transition-all duration-200"
+                  aria-label="Follow us on Twitter/X"
+                  rel="noopener noreferrer"
+                >
+                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                    <Twitter className="w-5 h-5 text-white" />
+                  </div>
                   <span className="font-medium text-gray-900">Twitter / X</span>
                 </a>
                 
-                <a href="#" className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <Linkedin className="w-5 h-5 text-blue-700" />
+                <a 
+                  href="#" 
+                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:scale-105 transition-all duration-200"
+                  aria-label="Follow us on LinkedIn"
+                  rel="noopener noreferrer"
+                >
+                  <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
+                    <Linkedin className="w-5 h-5 text-white" />
+                  </div>
                   <span className="font-medium text-gray-900">LinkedIn</span>
                 </a>
               </div>
@@ -406,29 +559,29 @@ export default function ContactUs() {
           </div>
         </section>
 
-        {/* Office Hours Info */}
-        <section className="bg-gradient-to-br from-gray-50 to-teal-50 rounded-2xl p-6 sm:p-8 lg:p-12 text-center">
-          <div className="w-16 h-16 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Clock className="w-8 h-8 text-white" />
+        {/* Mission to Serve You - Final CTA */}
+        <section className="bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-2xl p-6 sm:p-8 lg:p-12 text-center text-white">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CrossIcon className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4">
             Our Mission to Serve You
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Our mission is to serve faith communities like yours with technology that empowers connection, prayer, and growth. We're here to support your ministry every step of the way.
+          <p className="text-base sm:text-lg text-purple-100 mb-8 max-w-2xl mx-auto">
+            Our mission is to serve faith communities like yours with technology that empowers connection, digital discipleship, community prayer, and Gospel-centered growth. We're here to support your ministry every step of the way.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
-              className="bg-teal-600 text-white hover:bg-teal-700 px-12 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px]"
+              className="bg-white text-purple-600 hover:bg-gray-100 px-12 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px] shadow-lg hover:shadow-xl transition-all duration-200"
               onClick={() => window.location.href = '/login'}
             >
               Start Free Today
             </Button>
             <Button 
               size="lg"
-              className="bg-white text-teal-600 border-2 border-teal-600 hover:bg-teal-50 px-12 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px]"
+              className="bg-transparent text-white border-2 border-white hover:bg-white/10 px-12 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px] transition-all duration-200"
               onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
             >
               Schedule Demo

@@ -1,0 +1,96 @@
+Here’s a **professional, warm, and helpful Support page** for **SoapBoxSuperApp.com**, optimized for both **church leaders** and **individual users**, and structured for clear navigation, trust, and accessibility.
+
+---
+
+## 📞 **Support | SoapBox Super App**
+
+### 🙏 We’re Here to Help Your Ministry Thrive
+
+At SoapBox, we’re committed to helping your faith community flourish with technology that’s simple, secure, and sacred. Whether you're a church admin, pastor, or individual member, our support team is ready to guide you every step of the way.
+
+---
+
+### 🔍 **Need Help With...**
+
+#### 🛠 App Features & Usage
+
+**Get quick answers** and how-to guides for:
+
+* Prayer Wall & Prayer Circles
+* S.O.A.P. Journaling
+* Event Scheduling & RSVPs
+* Sermon Studio & Audio Bible
+* Church Admin Dashboard
+* Role-based Access Control
+  ➡️ [Visit the Help Center](#)
+
+---
+
+### 💬 **Contact Support**
+
+Can’t find what you’re looking for? Reach out directly:
+
+| Contact Method      | Response Time                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| **Email**           | [support@soapboxsuperapp.com](mailto:support@soapboxsuperapp.com) — *Replies within 1 business day* |
+| **Live Chat**       | In-app (Mon–Fri, 9am–6pm PT)                                                                        |
+| **Schedule a Call** | [Book a support call](#) with our ministry tech advisors                                            |
+
+---
+
+### 📘 **Popular Guides**
+
+* [Getting Started with Your Church Account](#)
+* [How to Invite and Manage Church Staff](#)
+* [Understanding Privacy & Visibility Settings](#)
+* [Sharing Devotionals on Social Feed](#)
+* [Setting Expiration Dates for Posts](#)
+
+---
+
+### 🧭 **New to SoapBox?**
+
+Welcome! Explore our onboarding resources:
+
+➡️ [Watch the Quick Start Video](#)
+➡️ [Download the Admin Onboarding PDF](#)
+➡️ [Explore Features](#)
+
+---
+
+### 🛡️ **Security & Privacy**
+
+Your trust is sacred to us. Learn more about:
+
+* [How We Keep Your Data Secure](#)
+* [Privacy Controls for Churches & Members](#)
+
+---
+
+### 🤝 **Join the SoapBox Community**
+
+* 🌐 [Visit Our Church Leader Forum](#)
+* 📨 [Sign up for Monthly Tips & Devotional Tools](#)
+* 🧪 [Suggest a New Feature](#)
+
+---
+
+### 🧾 **Account & Billing Support**
+
+* Update your payment method
+* View invoices and receipts
+* Switch between plan tiers
+  ➡️ [Manage My Subscription](#)
+
+---
+
+### ✝️ **Still Stuck? Let’s Pray and Proceed Together.**
+
+Sometimes a little faith (and help) goes a long way. If you’re feeling overwhelmed, we’re here to walk with you.
+
+📧 **Email us:** [support@soapboxsuperapp.com](mailto:support@soapboxsuperapp.com)
+🕊️ **Need prayer?** [Submit a private prayer request](#)
+
+---
+
+Let me know if you'd like this in HTML, Markdown, or as a React page. I can also generate matching icons, chatbot prompts, or expand this for a multi-language layout.
