@@ -22,8 +22,8 @@ export default function CleanLanding() {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
-              <a href="#about" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
-              <a href="#contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
+              <a href="/about-us" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
+              <a href="/contact-us" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
             </div>
             
             {/* CTA Buttons */}
