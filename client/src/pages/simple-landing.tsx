@@ -533,9 +533,8 @@ export default function SimpleLanding() {
               Start Free Today
             </Button>
             <Button 
-              variant="outline"
               onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg rounded-full font-semibold transition-all duration-200 w-full sm:w-auto min-w-[200px]"
+              className="bg-white/10 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 text-lg rounded-full font-semibold transition-all duration-200 w-full sm:w-auto min-w-[200px] shadow-lg hover:shadow-xl"
             >
               Schedule Demo
             </Button>
