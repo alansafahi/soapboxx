@@ -8429,45 +8429,9 @@ Return JSON with this exact structure:
         }
       }
       
-      // If S.O.A.P. entry is public AND has complete content (not placeholder text), create social feed post
-      if (newEntry.isPublic && 
-          newEntry.observation && 
-          newEntry.application && 
-          newEntry.prayer &&
-          !newEntry.observation.startsWith('[Add your observations') &&
-          !newEntry.application.startsWith('[How does this apply') &&
-          !newEntry.prayer.startsWith('[Write your prayer')) {
-        try {
-          // Use consistent format with PUT endpoint
-          const socialPost = await storage.createDiscussion({
-            authorId: userId,
-            churchId: newEntry.churchId,
-            title: `S.O.A.P. Reflection`,
-            content: newEntry.scripture || '',
-            category: 'soap_reflection',
-            isPublic: true,
-            audience: 'public',
-            mood: newEntry.moodTag,
-            suggestedVerses: null,
-            attachedMedia: null,
-            linkedVerse: newEntry.scriptureReference,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            type: 'soap_reflection',
-            soapData: {
-              scripture: newEntry.scripture,
-              scriptureReference: newEntry.scriptureReference,
-              observation: newEntry.observation,
-              application: newEntry.application,
-              prayer: newEntry.prayer,
-            }
-          });
-
-        } catch (feedError) {
-          // Don't fail the S.O.A.P. creation if feed post fails
-
-        }
-      }
+      // Note: SOAP entries automatically appear in social feed via UNION query in getDiscussions()
+      // No need to create duplicate discussion entries - the storage.getDiscussions() method
+      // already includes public SOAP entries from soap_entries table
       
       res.status(201).json(newEntry);
     } catch (error) {
@@ -8588,49 +8552,8 @@ Return JSON with this exact structure:
 
       const updatedEntry = await storage.updateSoapEntry(entryId, updateData);
       
-      // If SOAP entry is being made public and wasn't public before, AND has complete content (not placeholder text), create social feed post
-      if (updateData.isPublic && 
-          !existingEntry.isPublic && 
-          updatedEntry.observation && 
-          updatedEntry.application && 
-          updatedEntry.prayer &&
-          !updatedEntry.observation.startsWith('[Add your observations') &&
-          !updatedEntry.application.startsWith('[How does this apply') &&
-          !updatedEntry.prayer.startsWith('[Write your prayer')) {
-        try {
-          const user = await storage.getUser(userId);
-          if (user) {
-            // Create a social feed post for the updated SOAP entry
-            const socialPost = await storage.createDiscussion({
-              authorId: userId,
-              churchId: user.churchId,
-              title: `S.O.A.P. Reflection`,
-              content: updatedEntry.scripture || '',
-              category: 'soap_reflection',
-              isPublic: true,
-              audience: 'public',
-              mood: updatedEntry.moodTag,
-              suggestedVerses: null,
-              attachedMedia: null,
-              linkedVerse: updatedEntry.scriptureReference,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              type: 'soap_reflection',
-              soapData: {
-                scripture: updatedEntry.scripture,
-                scriptureReference: updatedEntry.scriptureReference,
-                observation: updatedEntry.observation,
-                application: updatedEntry.application,
-                prayer: updatedEntry.prayer,
-              }
-            });
-
-          }
-        } catch (socialFeedError) {
-          // Don't fail the SOAP update if social feed creation fails
-
-        }
-      }
+      // Note: SOAP entries automatically appear in social feed via UNION query in getDiscussions()
+      // No need to create duplicate discussion entries when updating to public
       
       res.json(updatedEntry);
     } catch (error) {
