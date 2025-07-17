@@ -641,6 +641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isPublic: false,
         originalSoapId,
         churchId: null,
+        devotionalDate: new Date(), // Set current date for proper ordering
         createdAt: new Date(),
         updatedAt: new Date()
       });
