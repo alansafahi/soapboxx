@@ -296,7 +296,7 @@ export default function ContactUs() {
                   <BookOpen className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
                   <div>
                     <div className="font-semibold text-gray-900">Help Center</div>
-                    <a href="#" className="text-blue-600 hover:underline text-sm">
+                    <a href="/help-docs" className="text-blue-600 hover:underline text-sm">
                       Visit Help Docs
                     </a>
                   </div>
