@@ -8571,6 +8571,43 @@ Return JSON with this exact structure:
       });
 
       const updatedEntry = await storage.updateSoapEntry(entryId, updateData);
+      
+      // If SOAP entry is being made public and wasn't public before, create social feed post
+      if (updateData.isPublic && !existingEntry.isPublic) {
+        try {
+          const user = await storage.getUser(userId);
+          if (user) {
+            // Create a social feed post for the updated SOAP entry
+            await storage.createDiscussion({
+              authorId: userId,
+              churchId: user.churchId,
+              title: `S.O.A.P. Reflection`,
+              content: updatedEntry.scripture || '',
+              category: 'soap_reflection',
+              isPublic: true,
+              audience: 'public',
+              mood: updatedEntry.moodTag,
+              suggestedVerses: null,
+              attachedMedia: null,
+              linkedVerse: updatedEntry.scriptureReference,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              type: 'soap_reflection',
+              soapData: {
+                scripture: updatedEntry.scripture,
+                scriptureReference: updatedEntry.scriptureReference,
+                observation: updatedEntry.observation,
+                application: updatedEntry.application,
+                prayer: updatedEntry.prayer,
+              }
+            });
+          }
+        } catch (socialFeedError) {
+          // Don't fail the SOAP update if social feed creation fails
+          console.error('Failed to create social feed post for updated SOAP entry:', socialFeedError);
+        }
+      }
+      
       res.json(updatedEntry);
     } catch (error) {
       console.error('SOAP update error:', error);
