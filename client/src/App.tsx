@@ -22,6 +22,7 @@ const BibleReadingFeaturePage = lazy(() => import("./pages/bible-reading-feature
 const EventsFeaturePage = lazy(() => import("./pages/events-feature"));
 const CommunityChatFeaturePage = lazy(() => import("./pages/community-chat-feature"));
 const VolunteerHubFeaturePage = lazy(() => import("./pages/volunteer-hub-feature"));
+const AboutUsPage = lazy(() => import("./pages/about-us"));
 const LoginPage = lazy(() => import("./pages/login"));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
 const Home = lazy(() => import("./pages/home"));
@@ -182,6 +183,7 @@ function AppRouter() {
                                     <Route path="/features/events" component={EventsFeaturePage} />
                                     <Route path="/features/community-chat" component={CommunityChatFeaturePage} />
                                     <Route path="/features/volunteer-hub" component={VolunteerHubFeaturePage} />
+                                    <Route path="/about-us" component={AboutUsPage} />
                                     <Route path="*" component={NotFound} />
                                 </Switch>
                             </Suspense>
