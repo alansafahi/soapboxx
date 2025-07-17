@@ -1,5 +1,5 @@
 import { Button } from "../components/ui/button";
-import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift } from "lucide-react";
+import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift, Cross, Sparkles } from "lucide-react";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 
 // SoapBox Logo Component
@@ -101,7 +101,7 @@ export default function SimpleLanding() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-12 sm:py-20 px-4">
+      <section id="features" className="py-16 sm:py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -115,55 +115,55 @@ export default function SimpleLanding() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Prayer Wall */}
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <Heart className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
+                <Heart className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Prayer Wall</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Prayer Wall</h3>
               <p className="text-gray-600 text-center text-sm sm:text-base">Share prayer requests and lift each other up in a sacred, supportive space.</p>
             </div>
             
             {/* Community */}
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <Users className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
+                <Users className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Community Hub</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Community Hub</h3>
               <p className="text-gray-600 text-center text-sm sm:text-base">Connect with fellow believers through groups, discussions, and shared experiences.</p>
             </div>
             
             {/* Events */}
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
                 <Calendar className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Event Management</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Event Management</h3>
               <p className="text-gray-600 text-center text-sm sm:text-base">Organize services, study groups, and community events with seamless coordination.</p>
             </div>
             
             {/* Bible Study */}
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <MessageCircle className="w-6 h-6 text-yellow-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
+                <Cross className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Bible Study Tools</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Bible Study Tools</h3>
               <p className="text-gray-600 text-center text-sm sm:text-base">Interactive study guides, devotionals, and reading plans for spiritual growth.</p>
             </div>
             
             {/* Volunteer Management */}
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <Star className="w-6 h-6 text-red-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
+                <Sparkles className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Volunteer Hub</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Volunteer Hub</h3>
               <p className="text-gray-600 text-center text-sm sm:text-base">Coordinate service opportunities and empower members to serve with purpose.</p>
             </div>
             
             {/* Communication */}
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <Globe className="w-6 h-6 text-indigo-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-8 mx-auto">
+                <Globe className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 text-center">Digital Outreach</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 text-center">Digital Outreach</h3>
               <p className="text-gray-600 text-center text-sm sm:text-base">Reach your community with announcements, newsletters, and spiritual content.</p>
             </div>
           </div>
@@ -171,7 +171,7 @@ export default function SimpleLanding() {
       </section>
 
       {/* Why Choose Section */}
-      <section className="py-12 sm:py-20 px-4 bg-gray-50">
+      <section className="py-16 sm:py-24 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -184,30 +184,30 @@ export default function SimpleLanding() {
           
           <div className="grid sm:grid-cols-3 gap-8 sm:gap-12">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-8">
                 <Shield className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 text-gray-900">Secure & Private</h3>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-6 text-gray-900">Secure & Private</h3>
               <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
                 Your community's data is protected with enterprise-grade security and privacy controls you can trust.
               </p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Zap className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Heart className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 text-gray-900">Easy to Use</h3>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-6 text-gray-900">Easy to Use</h3>
               <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
                 Intuitive design that works for all ages and technical abilities. Get started in minutes, not hours.
               </p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Globe className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Cross className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-4 text-gray-900">Built for Faith</h3>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-6 text-gray-900">Built for Faith</h3>
               <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
                 Every feature is designed with spiritual communities in mind, supporting your unique needs and values.
               </p>
@@ -459,7 +459,7 @@ export default function SimpleLanding() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-12 sm:py-20 px-4">
+      <section className="py-16 sm:py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -514,12 +514,12 @@ export default function SimpleLanding() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-12 sm:py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700">
+      <section className="py-16 sm:py-24 px-4 bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
             Ready to Transform Your Community?
           </h2>
-          <p className="text-lg sm:text-xl text-blue-100 mb-12 max-w-2xl mx-auto px-4">
+          <p className="text-lg sm:text-xl text-purple-100 mb-12 max-w-2xl mx-auto px-4">
             Join thousands of faith communities using SoapBox Super App to deepen connections and strengthen their spiritual journey together.
           </p>
           
