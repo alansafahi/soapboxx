@@ -138,16 +138,33 @@ export async function generateCompleteSoapEntry(
       contextPrompt += `Personal context: ${contextualInfo.personalContext}\n`;
     }
 
+    // Add randomization to ensure variety in scripture selection
+    const randomSeed = Math.floor(Math.random() * 1000);
+    const currentTimestamp = Date.now();
+    
+    // Debug: Log the context being sent (remove in production)  
+    console.log('AI SOAP Generation Context:', { contextPrompt, randomSeed, timestamp: currentTimestamp });
+
     const prompt = `As a pastoral AI assistant, generate a complete S.O.A.P. (Scripture, Observation, Application, Prayer) entry that is perfectly suited to the current context and user's spiritual needs.
 
 Current Context:
 ${contextPrompt}
 
-Please select an appropriate Scripture passage that speaks directly to this context and provide a complete S.O.A.P. reflection. Choose a verse that:
+Request ID: ${randomSeed}-${currentTimestamp}
+
+Please select an appropriate Scripture passage that speaks directly to this context and provide a complete S.O.A.P. reflection. To ensure variety, please choose from different books of the Bible and avoid repeating recent selections. Consider verses from:
+- Books of wisdom (Proverbs, Ecclesiastes, Psalms)
+- New Testament letters (Romans, Ephesians, Philippians, etc.)
+- Gospel teachings (Matthew, Mark, Luke, John)
+- Old Testament narratives (Genesis, Exodus, etc.)
+- Prophetic books (Isaiah, Jeremiah, etc.)
+
+Choose a verse that:
 - Addresses the user's current emotional state
 - Is relevant to the liturgical season 
 - Speaks to current world events or circumstances
 - Provides spiritual guidance and comfort
+- Offers fresh perspective and variety
 
 Respond with JSON in this format:
 {
@@ -172,7 +189,7 @@ Respond with JSON in this format:
       ],
       response_format: { type: "json_object" },
       max_tokens: 1200,
-      temperature: 0.7
+      temperature: 0.8
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
