@@ -18,6 +18,10 @@ const SimpleLanding = lazy(() => import("./pages/simple-landing"));
 const PrivacyPolicyPage = lazy(() => import("./pages/privacy-policy"));
 const TermsOfServicePage = lazy(() => import("./pages/terms-of-service"));
 const PrayerWallFeaturePage = lazy(() => import("./pages/prayer-wall-feature"));
+const BibleReadingFeaturePage = lazy(() => import("./pages/bible-reading-feature"));
+const EventsFeaturePage = lazy(() => import("./pages/events-feature"));
+const CommunityChatFeaturePage = lazy(() => import("./pages/community-chat-feature"));
+const VolunteerHubFeaturePage = lazy(() => import("./pages/volunteer-hub-feature"));
 const LoginPage = lazy(() => import("./pages/login"));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
 const Home = lazy(() => import("./pages/home"));
@@ -174,6 +178,10 @@ function AppRouter() {
                                     <Route path="/privacy-policy" component={PrivacyPolicyPage} />
                                     <Route path="/terms-of-service" component={TermsOfServicePage} />
                                     <Route path="/features/prayer-wall" component={PrayerWallFeaturePage} />
+                                    <Route path="/features/bible-reading" component={BibleReadingFeaturePage} />
+                                    <Route path="/features/events" component={EventsFeaturePage} />
+                                    <Route path="/features/community-chat" component={CommunityChatFeaturePage} />
+                                    <Route path="/features/volunteer-hub" component={VolunteerHubFeaturePage} />
                                     <Route path="*" component={NotFound} />
                                 </Switch>
                             </Suspense>
