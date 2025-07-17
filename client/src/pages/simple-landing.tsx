@@ -1,5 +1,5 @@
 import { Button } from "../components/ui/button";
-import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe } from "lucide-react";
+import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift } from "lucide-react";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 
 // SoapBox Logo Component
@@ -204,6 +204,248 @@ export default function SimpleLanding() {
               <p className="text-gray-600 text-lg">
                 Every feature is designed with spiritual communities in mind, supporting your unique needs and values.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Choose the perfect plan for your faith community
+            </p>
+            
+            {/* Special Offer Banner */}
+            <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-4 rounded-lg shadow-lg max-w-4xl mx-auto mb-12">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Gift className="w-5 h-5" />
+                <span className="font-semibold text-lg">🎉 SUMMER PILOT SPECIAL</span>
+              </div>
+              <p className="text-lg">
+                <strong>All fees waived for 6 months</strong> for churches signing up during our pilot phase this summer!
+              </p>
+            </div>
+          </div>
+
+          {/* Member Plans */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-semibold text-center mb-2 text-gray-900">Individual Members</h3>
+            <p className="text-center text-gray-600 mb-8">Goal: Spiritual growth and belonging</p>
+            
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                <div className="text-center mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Basic</h4>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">Free</div>
+                  <p className="text-gray-600">100 credits/month</p>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>S.O.A.P. Journal</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Prayer Wall Access</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Community Discussions</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>100 credits per referral</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">Get Started Free</Button>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-500 relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  Most Popular
+                </div>
+                <div className="text-center mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Standard</h4>
+                  <div className="text-3xl font-bold text-purple-600 mb-1">$10/mo</div>
+                  <p className="text-gray-600 text-sm">$100/year</p>
+                  <p className="text-gray-600">500 credits/month</p>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Everything in Basic</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>AI-Powered Insights</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Priority Support</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>100 credits per referral</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700">Choose Standard</Button>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                <div className="text-center mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Premium</h4>
+                  <div className="text-3xl font-bold text-gray-900 mb-1">$20/mo</div>
+                  <p className="text-gray-600 text-sm">$200/year</p>
+                  <p className="text-gray-600">1,000 credits/month</p>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Everything in Standard</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Advanced Analytics</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Custom Integrations</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>100 credits per referral</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-gray-900 hover:bg-gray-800">Choose Premium</Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Church Plans */}
+          <div className="mb-16">
+            <h3 className="text-2xl font-semibold text-center mb-2 text-gray-900">Church Plans</h3>
+            <p className="text-center text-gray-600 mb-8">Goal: Engagement & Growth</p>
+            
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                <div className="text-center mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Church Basic</h4>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">$50/mo</div>
+                  <p className="text-gray-600">2,500 credits/month</p>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Member Management</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Event Planning</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Communication Tools</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>1,000 loyalty credits/6 months</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">Start Church Basic</Button>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-500 relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  Recommended
+                </div>
+                <div className="text-center mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Church Standard</h4>
+                  <div className="text-3xl font-bold text-purple-600 mb-2">$100/mo</div>
+                  <p className="text-gray-600">5,000 credits/month</p>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Everything in Basic</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Advanced Analytics</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Sermon Studio</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>2,000 loyalty credits/6 months</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700">Choose Standard</Button>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                <div className="text-center mb-6">
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Church Premium</h4>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">Custom</div>
+                  <p className="text-gray-600">Custom credits</p>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Everything in Standard</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>White-label Solution</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Dedicated Support</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span>Custom loyalty rewards</span>
+                  </li>
+                </ul>
+                <Button className="w-full bg-gray-900 hover:bg-gray-800">Contact Sales</Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Pay As You Go */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-semibold text-center mb-8 text-gray-900">Pay As You Go - Credit Boost Packs</h3>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-6 bg-gray-50 rounded-lg">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Boost Pack S</h4>
+                <div className="text-2xl font-bold text-blue-600 mb-2">$20</div>
+                <p className="text-gray-600">1,000 credits</p>
+              </div>
+              
+              <div className="text-center p-6 bg-purple-50 rounded-lg border-2 border-purple-200">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Boost Pack M</h4>
+                <div className="text-2xl font-bold text-purple-600 mb-2">$50</div>
+                <p className="text-gray-600">2,500 credits</p>
+              </div>
+              
+              <div className="text-center p-6 bg-gray-50 rounded-lg">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Boost Pack L</h4>
+                <div className="text-2xl font-bold text-gray-900 mb-2">$100</div>
+                <p className="text-gray-600">5,000 credits</p>
+              </div>
+            </div>
+            
+            <div className="text-center mt-8">
+              <Button className="bg-blue-600 hover:bg-blue-700 px-8 py-3">
+                Purchase Credits
+              </Button>
             </div>
           </div>
         </div>
