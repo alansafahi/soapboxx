@@ -36,24 +36,56 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     source: 'website'
   },
   {
-    id: 'pricing-individual',
+    id: 'pricing-individual-free',
     category: 'pricing',
     subcategory: 'individual',
-    keywords: ['individual pricing', 'personal plan', 'free', 'premium', 'cost', 'how much', 'price'],
-    content: 'Individual Plans: FREE (Basic features including prayer wall, community discussions, basic S.O.A.P. journaling, event viewing). PREMIUM ($4.99/month) includes unlimited prayer circles, advanced Bible study tools, priority support, enhanced analytics, custom prayer reminders, and exclusive content.',
+    keywords: ['free', 'free plan', 'no cost', 'basic features', 'individual free', '100 credits'],
+    content: 'FREE Individual Plan (100 credits/month): Includes S.O.A.P. Journal, Prayer Wall Access, Community Discussions, and 100 credits per referral. Perfect for individuals starting their faith journey with SoapBox Super App.',
     helpLink: '/pricing',
     priority: 9,
     lastUpdated: '2025-07-17',
     source: 'website'
   },
   {
-    id: 'pricing-church',
+    id: 'pricing-individual-standard',
     category: 'pricing',
-    subcategory: 'church',
-    keywords: ['church pricing', 'congregation', 'ministry', 'church plan', 'organization'],
-    content: 'Church Plans: STARTER ($29/month for up to 100 members), GROWTH ($69/month for up to 500 members), ENTERPRISE ($149/month for unlimited members). All church plans include admin dashboard, member management, communication tools, event management, giving platform, sermon studio, and dedicated support.',
+    subcategory: 'individual',
+    keywords: ['individual pricing', 'standard plan', '$10', '$10/mo', '500 credits', '$100/year'],
+    content: 'Standard Individual Plan: $10/month ($100/year) with 500 credits/month. Includes everything in Basic plus AI-Powered Insights, Priority Support, and 100 credits per referral.',
     helpLink: '/pricing',
     priority: 9,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'pricing-individual-premium',
+    category: 'pricing',
+    subcategory: 'individual',
+    keywords: ['premium individual', '$20', '$20/mo', 'advanced features', '1000 credits', '$200/year'],
+    content: 'Premium Individual Plan: $20/month ($200/year) with 1,000 credits/month. Includes everything in Standard plus Advanced Analytics.',
+    helpLink: '/pricing',
+    priority: 9,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'pricing-overview',
+    category: 'pricing',
+    keywords: ['pricing', 'plans', 'cost', 'how much', 'price', 'subscription', 'plan options'],
+    content: 'SoapBox Super App Pricing: FREE (100 credits/month), Standard ($10/month, 500 credits), Premium ($20/month, 1,000 credits). All plans include S.O.A.P. Journal, Prayer Wall, Community Discussions, and referral credits. Higher plans add AI insights, priority support, and advanced analytics.',
+    helpLink: '/pricing',
+    priority: 10,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'summer-pilot-special',
+    category: 'pricing',
+    subcategory: 'promotion',
+    keywords: ['summer special', 'pilot program', 'free months', 'promotion', 'discount', 'waived fees'],
+    content: '🎉 SUMMER PILOT SPECIAL: All fees waived for 6 months for churches signing up during our pilot phase this summer! This is a limited-time offer for early adopters.',
+    helpLink: '/pricing',
+    priority: 10,
     lastUpdated: '2025-07-17',
     source: 'website'
   },
@@ -205,6 +237,94 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     category: 'support',
     keywords: ['contact', 'support', 'help', 'phone', 'email', 'address'],
     content: 'Contact Information: Email: support@soapboxsuperapp.com, Phone: (805) 342-2940, Address: 1130 E. Clark Street, #150-204, Orcutt, CA 93455. Business Hours: 9 AM - 5 PM PT, weekdays. For urgent issues, email provides fastest response. Live chat available during business hours.',
+    priority: 9,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+
+  // DETAILED FEATURE DESCRIPTIONS
+  {
+    id: 'credits-system',
+    category: 'features',
+    subcategory: 'credits',
+    keywords: ['credits', 'what are credits', 'credit system', 'how credits work'],
+    content: 'Credits power AI-assisted features like sermon generation, biblical research, content creation, and analytics insights. Each plan includes monthly credits. Additional credits can be purchased through boost packs. Credits reset monthly and unused credits don\'t roll over.',
+    priority: 8,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'loyalty-rewards',
+    category: 'features',
+    subcategory: 'rewards',
+    keywords: ['loyalty', 'rewards', 'loyalty credits', 'referral credits', 'bonus credits'],
+    content: 'Loyalty Rewards System: Individual plans earn 100 credits per successful referral. Church plans receive 1,000-2,000 loyalty credits every 6 months based on plan level. Use loyalty credits for bonus AI features and premium content.',
+    priority: 7,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'demo-scheduling',
+    category: 'sales',
+    keywords: ['demo', 'schedule demo', 'calendly', 'sales meeting', 'product demonstration'],
+    content: 'Schedule a personalized demo at https://www.calendly.com/soapboxsuperapp to see SoapBox Super App in action. Our team will walk you through features, answer questions, and help determine the best plan for your church or personal needs.',
+    priority: 8,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+
+  // WEBSITE FAQs
+  {
+    id: 'faq-response-time',
+    category: 'support',
+    subcategory: 'response-time',
+    keywords: ['how quickly', 'response time', 'how fast', 'when will you respond', 'support response'],
+    content: 'Response Times: We respond to support emails within 24 hours on weekdays, and sales inquiries within 4 hours during business hours (9am-5pm PT). Live chat is available weekdays 9am–5pm PT.',
+    helpLink: '/contact',
+    priority: 8,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'faq-individual-users',
+    category: 'general',
+    subcategory: 'user-access',
+    keywords: ['not church leader', 'individual users', 'personal use', 'regular members', 'non-leader'],
+    content: 'Individual Access: Absolutely! SoapBox Super App is designed for all members of faith communities. Individual believers can join prayer circles, participate in Bible studies, and connect with their church community without being a church leader.',
+    helpLink: '/contact',
+    priority: 8,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'faq-demos-onboarding',
+    category: 'sales',
+    subcategory: 'demos',
+    keywords: ['live demo', 'onboarding', 'help getting started', 'demo', 'personalized demo'],
+    content: 'Live Demos & Onboarding: Yes! We offer personalized live demos via Calendly (https://www.calendly.com/soapboxsuperapp) and comprehensive onboarding support to help your church get started with all features.',
+    helpLink: '/contact',
+    priority: 8,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'faq-small-churches',
+    category: 'general',
+    subcategory: 'church-size',
+    keywords: ['small church', 'small congregation', 'suitable for small', 'church size', 'scales'],
+    content: 'Small Church Suitability: Perfect for churches of all sizes! Our platform scales from small congregations to mega-churches, with pricing plans designed for every ministry budget. Small churches are especially welcome.',
+    helpLink: '/contact',
+    priority: 8,
+    lastUpdated: '2025-07-17',
+    source: 'website'
+  },
+  {
+    id: 'faq-what-makes-different',
+    category: 'general',
+    subcategory: 'differentiation',
+    keywords: ['what makes different', 'compared to other', 'unique features', 'different from other church apps', 'why choose'],
+    content: 'What Makes SoapBox Different: SoapBox combines AI-powered pastoral tools, comprehensive community features, and spiritual growth tracking in one integrated platform designed specifically for faith communities. Unlike generic platforms, we\'re built exclusively for churches.',
+    helpLink: '/contact',
     priority: 9,
     lastUpdated: '2025-07-17',
     source: 'website'

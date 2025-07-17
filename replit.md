@@ -142,6 +142,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 17, 2025: WEBSITE FAQ INTEGRATION COMPLETED - Successfully added all 5 FAQs from contact page to comprehensive knowledge base with semantic search matching for response times, individual access, demos, church size suitability, and platform differentiators
+- July 17, 2025: ACCURATE PRICING INFORMATION UPDATED - Corrected knowledge base pricing data to match exact website pricing (FREE 100 credits, Standard $10/month 500 credits, Premium $20/month 1,000 credits) with proper feature descriptions
 - July 17, 2025: COMPREHENSIVE AI KNOWLEDGE BASE SYSTEM COMPLETED - Successfully implemented advanced chatbot with exhaustive SoapBox Super App expertise covering all website content, app features, and expandable daily knowledge growth
   - COMPREHENSIVE KNOWLEDGE BASE: Created comprehensive-knowledge.ts with 20+ detailed knowledge entries covering every aspect of SoapBox Super App (pricing, features, technical support, AI tools, admin functions)
   - ADVANCED SEMANTIC SEARCH: Implemented intelligent keyword matching with confidence scoring, partial word matching, and category boosting for accurate responses
