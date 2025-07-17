@@ -643,15 +643,15 @@ export default function SimpleLanding() {
                 Empowering faith communities worldwide with innovative technology that brings people together, deepens spiritual connections, and transforms lives.
               </p>
               <div className="flex space-x-4">
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 cursor-pointer">
-                  <span className="text-sm">f</span>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 cursor-pointer">
-                  <span className="text-sm">t</span>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 cursor-pointer">
-                  <span className="text-sm">in</span>
-                </div>
+                <a href="https://www.facebook.com/profile.php?id=61555178230788" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer" aria-label="Follow us on Facebook">
+                  <Facebook className="w-4 h-4 text-white" />
+                </a>
+                <a href="https://x.com/soapboxsuperapp" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-black transition-colors cursor-pointer" aria-label="Follow us on X (Twitter)">
+                  <Twitter className="w-4 h-4 text-white" />
+                </a>
+                <a href="https://www.linkedin.com/company/soapboxsuperapp" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors cursor-pointer" aria-label="Follow us on LinkedIn">
+                  <Linkedin className="w-4 h-4 text-white" />
+                </a>
               </div>
             </div>
 

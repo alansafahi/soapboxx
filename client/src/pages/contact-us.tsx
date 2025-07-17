@@ -480,7 +480,8 @@ export default function ContactUs() {
               
               <div className="grid grid-cols-2 gap-4">
                 <a 
-                  href="#" 
+                  href="https://www.facebook.com/profile.php?id=61555178230788" 
+                  target="_blank"
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:scale-105 transition-all duration-200"
                   aria-label="Follow us on Facebook"
                   rel="noopener noreferrer"
@@ -504,7 +505,8 @@ export default function ContactUs() {
                 </a>
                 
                 <a 
-                  href="#" 
+                  href="https://x.com/soapboxsuperapp" 
+                  target="_blank"
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 transition-all duration-200"
                   aria-label="Follow us on Twitter/X"
                   rel="noopener noreferrer"
@@ -516,7 +518,8 @@ export default function ContactUs() {
                 </a>
                 
                 <a 
-                  href="#" 
+                  href="https://www.linkedin.com/company/soapboxsuperapp" 
+                  target="_blank"
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:scale-105 transition-all duration-200"
                   aria-label="Follow us on LinkedIn"
                   rel="noopener noreferrer"
