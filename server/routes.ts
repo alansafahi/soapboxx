@@ -3098,6 +3098,39 @@ app.post('/api/invitations', async (req: any, res) => {
       res.status(500).json({ error: 'Failed to get conversations' });
     }
   });
+
+  // Chat knowledge base endpoint
+  app.post('/api/chat/knowledge', async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      // Import knowledge base functions
+      const { searchKnowledge, getGreetingResponse } = await import('./chat-knowledge');
+      
+      // Check for greetings first
+      const greetingResponse = getGreetingResponse(message);
+      if (greetingResponse) {
+        return res.json({
+          found: true,
+          answer: greetingResponse
+        });
+      }
+      
+      // Search knowledge base
+      const knowledgeResult = searchKnowledge(message);
+      res.json(knowledgeResult);
+    } catch (error) {
+      res.status(500).json({ 
+        found: false,
+        answer: '',
+        error: 'Knowledge base search failed'
+      });
+    }
+  });
   
   // Bible API endpoints - Fixed to use cache-free API lookup system (Public Access)
   app.get('/api/bible/daily-verse', async (req: any, res) => {

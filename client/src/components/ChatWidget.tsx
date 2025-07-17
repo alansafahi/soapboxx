@@ -195,17 +195,49 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
 
     setIsTyping(true);
     
-    // Simulate agent response based on message content
+    // Check knowledge base first, then provide intelligent response
     setTimeout(async () => {
       setIsTyping(false);
       
       let response = '';
       const msgLower = userMessage.toLowerCase();
       
+      // First check for knowledge base answers
+      try {
+        const knowledgeResponse = await fetch('/api/chat/knowledge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage })
+        });
+        
+        if (knowledgeResponse.ok) {
+          const knowledgeData = await knowledgeResponse.json();
+          
+          if (knowledgeData.found) {
+            response = knowledgeData.answer;
+            
+            // Add help documentation link if available
+            if (knowledgeData.helpDocLink) {
+              response += `\n\nFor more detailed information, check our [Help Documentation](${knowledgeData.helpDocLink}).`;
+            }
+            
+            // If escalation is needed, add human handoff message
+            if (knowledgeData.escalate) {
+              response += "\n\nWould you like me to connect you with a team member for further assistance?";
+            }
+            
+            await addMessage(response, 'agent');
+            return;
+          }
+        }
+      } catch (error) {
+        // Continue with fallback logic if knowledge base fails
+      }
+      
       // Handle acknowledgments and simple responses
       if (['ok', 'okay', 'thanks', 'thank you', 'got it', 'understood'].includes(msgLower)) {
         if (hasShownInitialResponse) {
-          response = "Is there anything else I can help you with today? I'm here to assist with questions about SoapBox Super App features, pricing, or technical support.";
+          response = "Is there anything else I can help you with today? I can answer questions about:\n• Prayer Wall and prayer requests\n• S.O.A.P. Bible journaling\n• Account setup and login\n• Church events and notifications\n• Giving and donations\n• Technical troubleshooting\n\nOr I can connect you with our support team.";
         } else {
           response = "Great! What specific questions do you have about SoapBox Super App? I can help with features, pricing, demos, or technical support.";
         }
@@ -213,22 +245,18 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         response = "I'd be happy to schedule a demo for you! You can book a time that works for you using our Calendly link, or I can connect you with our sales team. Which would you prefer?";
       } else if (msgLower.includes('price') || msgLower.includes('cost')) {
         response = "Our pricing is designed to be affordable for churches of all sizes. For detailed pricing information, I can connect you with our sales team who can provide a customized quote based on your church's needs. Would you like me to arrange that?";
-      } else if (msgLower.includes('support') || msgLower.includes('help')) {
-        response = "For technical support, you can email us at support@soapboxsuperapp.com or check our Help Documentation. Is this a technical issue or are you looking for general information?";
-      } else if (msgLower.includes('feature') || msgLower.includes('what') || msgLower.includes('how')) {
-        response = "SoapBox Super App offers prayer walls, Bible study tools, event management, giving platforms, and community engagement features. What specific feature interests you most?";
+      } else if (msgLower.includes('human') || msgLower.includes('agent') || msgLower.includes('person')) {
+        response = isBusinessHours 
+          ? "I'll connect you with one of our team members right away. Someone will be with you shortly!"
+          : "I'll make sure one of our team members contacts you first thing during business hours (9 AM - 5 PM PT, weekdays). You can also email support@soapboxsuperapp.com for faster response.";
       } else {
         // Only show the business hours message for the first substantial message
         if (!hasShownInitialResponse) {
-          if (isBusinessHours) {
-            response = "Thank you for your message! I'm connecting you with one of our team members who will be with you shortly. In the meantime, feel free to ask any other questions.";
-          } else {
-            response = "Thanks for reaching out! Our team is currently offline (business hours: 9 AM - 5 PM PT, weekdays). I'll make sure someone gets back to you first thing during business hours. You can also email us at support@soapboxsuperapp.com for faster response.";
-          }
+          response = "I can help answer questions about SoapBox Super App features, account setup, prayer walls, Bible study tools, and technical issues. What would you like to know?";
           setHasShownInitialResponse(true);
         } else {
           // Provide helpful follow-up responses
-          response = "I'd be happy to help! Could you tell me more about what you're looking for? I can assist with:\n• Demo scheduling\n• Pricing information\n• Feature questions\n• Technical support\n• General inquiries";
+          response = "I'd be happy to help! I can assist with:\n• Prayer Wall and S.O.A.P. journaling questions\n• Account and login help\n• Church events and notifications\n• Giving and donation setup\n• Technical troubleshooting\n• Demo scheduling and pricing\n\nWhat specific area interests you?";
         }
       }
       
