@@ -28,6 +28,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
   const [isBusinessHours, setIsBusinessHours] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasShownInitialResponse, setHasShownInitialResponse] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -88,6 +89,9 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         // If no messages exist, add welcome message
         if (formattedMessages.length === 0) {
           await sendSystemMessage("Hi! I'm here to help you with SoapBox Super App. How can I assist you today?");
+        } else {
+          // Check if we've already had a conversation
+          setHasShownInitialResponse(formattedMessages.length >= 2);
         }
       }
     } catch (error) {
@@ -196,17 +200,35 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
       setIsTyping(false);
       
       let response = '';
-      if (userMessage.toLowerCase().includes('demo') || userMessage.toLowerCase().includes('trial')) {
-        response = "I'd be happy to schedule a demo for you! You can book a time that works for you using our Calendly link, or I can connect you with our sales team. Which would you prefer?";
-      } else if (userMessage.toLowerCase().includes('price') || userMessage.toLowerCase().includes('cost')) {
-        response = "Our pricing is designed to be affordable for churches of all sizes. For detailed pricing information, I can connect you with our sales team who can provide a customized quote based on your church's needs. Would you like me to arrange that?";
-      } else if (userMessage.toLowerCase().includes('support') || userMessage.toLowerCase().includes('help')) {
-        response = "For technical support, you can email us at support@soapboxsuperapp.com or check our Help Documentation. Is this a technical issue or are you looking for general information?";
-      } else {
-        if (isBusinessHours) {
-          response = "Thank you for your message! I'm connecting you with one of our team members who will be with you shortly. In the meantime, feel free to ask any other questions.";
+      const msgLower = userMessage.toLowerCase();
+      
+      // Handle acknowledgments and simple responses
+      if (['ok', 'okay', 'thanks', 'thank you', 'got it', 'understood'].includes(msgLower)) {
+        if (hasShownInitialResponse) {
+          response = "Is there anything else I can help you with today? I'm here to assist with questions about SoapBox Super App features, pricing, or technical support.";
         } else {
-          response = "Thanks for reaching out! Our team is currently offline (business hours: 9 AM - 5 PM PT, weekdays). I'll make sure someone gets back to you first thing during business hours. You can also email us at support@soapboxsuperapp.com for faster response.";
+          response = "Great! What specific questions do you have about SoapBox Super App? I can help with features, pricing, demos, or technical support.";
+        }
+      } else if (msgLower.includes('demo') || msgLower.includes('trial')) {
+        response = "I'd be happy to schedule a demo for you! You can book a time that works for you using our Calendly link, or I can connect you with our sales team. Which would you prefer?";
+      } else if (msgLower.includes('price') || msgLower.includes('cost')) {
+        response = "Our pricing is designed to be affordable for churches of all sizes. For detailed pricing information, I can connect you with our sales team who can provide a customized quote based on your church's needs. Would you like me to arrange that?";
+      } else if (msgLower.includes('support') || msgLower.includes('help')) {
+        response = "For technical support, you can email us at support@soapboxsuperapp.com or check our Help Documentation. Is this a technical issue or are you looking for general information?";
+      } else if (msgLower.includes('feature') || msgLower.includes('what') || msgLower.includes('how')) {
+        response = "SoapBox Super App offers prayer walls, Bible study tools, event management, giving platforms, and community engagement features. What specific feature interests you most?";
+      } else {
+        // Only show the business hours message for the first substantial message
+        if (!hasShownInitialResponse) {
+          if (isBusinessHours) {
+            response = "Thank you for your message! I'm connecting you with one of our team members who will be with you shortly. In the meantime, feel free to ask any other questions.";
+          } else {
+            response = "Thanks for reaching out! Our team is currently offline (business hours: 9 AM - 5 PM PT, weekdays). I'll make sure someone gets back to you first thing during business hours. You can also email us at support@soapboxsuperapp.com for faster response.";
+          }
+          setHasShownInitialResponse(true);
+        } else {
+          // Provide helpful follow-up responses
+          response = "I'd be happy to help! Could you tell me more about what you're looking for? I can assist with:\n• Demo scheduling\n• Pricing information\n• Feature questions\n• Technical support\n• General inquiries";
         }
       }
       
