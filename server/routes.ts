@@ -2932,6 +2932,104 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // Contact form submission endpoint (public - no authentication required)
+  app.post('/api/contact-submission', async (req, res) => {
+    try {
+      const { name, email, message, isChurchLeader } = req.body;
+      
+      // Basic validation
+      if (!name || !email || !message) {
+        return res.status(400).json({ message: 'Name, email, and message are required' });
+      }
+      
+      // Save to database
+      const submission = await storage.createContactSubmission({
+        name,
+        email,
+        message,
+        isChurchLeader: isChurchLeader || false,
+        source: 'website'
+      });
+      
+      // Send notification email to sales team
+      try {
+        const emailContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #3B82F6;">New Contact Form Submission</h2>
+            <div style="background: #F9FAFB; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 15px 0; color: #374151;">Contact Information</h3>
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+              <p><strong>Church Leader:</strong> ${isChurchLeader ? 'Yes' : 'No'}</p>
+              <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            <div style="background: #FEF3C7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 15px 0; color: #374151;">Message</h3>
+              <p style="white-space: pre-wrap;">${message}</p>
+            </div>
+            <div style="background: #DBEAFE; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; font-size: 14px; color: #1E40AF;">
+                This submission has been saved to the database with ID: ${submission.id}
+              </p>
+            </div>
+          </div>
+        `;
+        
+        const emailResult = await sendEmail({
+          to: 'sales@soapboxsuperapp.com',
+          subject: `New Contact Form Submission from ${name}${isChurchLeader ? ' (Church Leader)' : ''}`,
+          html: emailContent
+        });
+        
+        // Also send confirmation email to user
+        const confirmationContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #3B82F6;">Thank You for Contacting SoapBox Super App!</h2>
+            <p>Hi ${name},</p>
+            <p>We've received your message and appreciate you taking the time to reach out to us. Our team will review your inquiry and get back to you within 24 hours.</p>
+            <div style="background: #F0F9FF; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 15px 0; color: #374151;">Your Message</h3>
+              <p style="white-space: pre-wrap;">${message}</p>
+            </div>
+            <p>In the meantime, feel free to:</p>
+            <ul>
+              <li><a href="https://soapboxsuperapp.com/help-docs" style="color: #3B82F6;">Browse our Help Documentation</a></li>
+              <li><a href="https://wa.me/message/BNZMR2CPIKVKA1" style="color: #3B82F6;">Chat with us on WhatsApp</a></li>
+              <li><a href="https://soapboxsuperapp.com/about-us" style="color: #3B82F6;">Learn more about our mission</a></li>
+            </ul>
+            <p>Blessings,<br/>The SoapBox Super App Team</p>
+            <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
+            <p style="font-size: 12px; color: #6B7280;">
+              SoapBox Super App - Unite Your Faith Community<br/>
+              <a href="https://soapboxsuperapp.com" style="color: #3B82F6;">soapboxsuperapp.com</a>
+            </p>
+          </div>
+        `;
+        
+        await sendEmail({
+          to: email,
+          subject: 'Thank you for contacting SoapBox Super App',
+          html: confirmationContent
+        });
+        
+        res.status(201).json({ 
+          message: 'Contact submission received successfully',
+          id: submission.id,
+          emailSent: emailResult.success
+        });
+      } catch (emailError) {
+        // Still return success even if email fails
+        res.status(201).json({ 
+          message: 'Contact submission received successfully',
+          id: submission.id,
+          emailSent: false
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process contact submission' });
+    }
+  });
+  
   // Bible API endpoints - Fixed to use cache-free API lookup system (Public Access)
   app.get('/api/bible/daily-verse', async (req: any, res) => {
     try {

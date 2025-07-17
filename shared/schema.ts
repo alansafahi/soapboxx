@@ -2013,14 +2013,30 @@ export const bibleVerseShares = pgTable("bible_verse_shares", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Contact submissions from marketing website
+export const contactSubmissions = pgTable("contact_submissions", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  isChurchLeader: boolean("is_church_leader").default(false),
+  status: varchar("status", { length: 50 }).default("new"), // new, contacted, qualified, closed
+  source: varchar("source", { length: 50 }).default("website"), // website, referral, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Type definitions for contacts and invitations
 export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = typeof contacts.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type InsertInvitation = typeof invitations.$inferInsert;
+export type ContactSubmission = typeof contactSubmissions.$inferSelect;
+export type InsertContactSubmission = typeof contactSubmissions.$inferInsert;
 
 export const insertContactSchema = createInsertSchema(contacts);
 export const insertInvitationSchema = createInsertSchema(invitations);
+export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions);
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

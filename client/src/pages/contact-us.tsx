@@ -138,7 +138,7 @@ export default function ContactUs() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -147,13 +147,28 @@ export default function ContactUs() {
     
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/contact-submission', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      if (response.ok) {
+        setIsSubmitted(true);
+        setFormData({ name: "", email: "", message: "", isChurchLeader: false });
+        setErrors({});
+      } else {
+        const errorData = await response.json();
+        setErrors({ submit: errorData.message || 'Failed to send message. Please try again.' });
+      }
+    } catch (error) {
+      setErrors({ submit: 'Failed to send message. Please check your internet connection and try again.' });
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormData({ name: "", email: "", message: "", isChurchLeader: false });
-      setErrors({});
-    }, 2000);
+    }
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -407,7 +422,7 @@ export default function ContactUs() {
                     Message Sent Successfully!
                   </h2>
                   <p className="text-gray-600 mb-6">
-                    Thank you for reaching out. We'll get back to you within 24 hours. Stay blessed!
+                    Thank you for reaching out. We've sent you a confirmation email and will get back to you within 24 hours. Stay blessed!
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Button
@@ -507,6 +522,13 @@ export default function ContactUs() {
                       </p>
                     </div>
                   </div>
+                  
+                  {errors.submit && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                      <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                      <span>{errors.submit}</span>
+                    </div>
+                  )}
                   
                   <Button
                     type="submit"

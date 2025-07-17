@@ -117,6 +117,9 @@ import {
   type InsertContact,
   type Invitation,
   type InsertInvitation,
+  type ContactSubmission,
+  type InsertContactSubmission,
+  contactSubmissions,
   type Church,
   type InsertChurch,
   type UserChurch,
@@ -643,6 +646,11 @@ export interface IStorage {
   createInvitation(invitation: InsertInvitation): Promise<Invitation>;
   getUserInvitations(userId: string): Promise<Invitation[]>;
   updateInvitationStatus(inviteCode: string, status: string): Promise<Invitation>;
+  
+  // Contact submissions from marketing website
+  createContactSubmission(submission: InsertContactSubmission): Promise<ContactSubmission>;
+  getContactSubmissions(): Promise<ContactSubmission[]>;
+  updateContactSubmissionStatus(id: number, status: string): Promise<ContactSubmission>;
   getPendingInvitations(userId: string): Promise<Invitation[]>;
   
   // Social media credentials operations
@@ -6039,6 +6047,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(invitations.inviteCode, inviteCode))
       .returning();
     return updatedInvitation;
+  }
+
+  // Contact submissions from marketing website
+  async createContactSubmission(submission: InsertContactSubmission): Promise<ContactSubmission> {
+    const [newSubmission] = await db
+      .insert(contactSubmissions)
+      .values({
+        ...submission,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newSubmission;
+  }
+
+  async getContactSubmissions(): Promise<ContactSubmission[]> {
+    return await db
+      .select()
+      .from(contactSubmissions)
+      .orderBy(desc(contactSubmissions.createdAt));
+  }
+
+  async updateContactSubmissionStatus(id: number, status: string): Promise<ContactSubmission> {
+    const [updatedSubmission] = await db
+      .update(contactSubmissions)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(contactSubmissions.id, id))
+      .returning();
+    return updatedSubmission;
   }
 
   async getPendingInvitations(userId: string): Promise<Invitation[]> {
