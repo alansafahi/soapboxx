@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SoapPostCard } from '@/components/SoapPostCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookmarkX, Heart, MessageCircle, BookOpen } from 'lucide-react';
+import { Heart, MessageCircle, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -97,28 +97,16 @@ export default function SavedReflections() {
               />
               
               {/* Saved indicator and metadata */}
-              <div className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-6">
-                <div className="flex items-center space-x-4">
-                  <span className="flex items-center">
-                    <BookOpen className="w-3 h-3 mr-1" />
-                    Saved on {new Date(entry.savedAt).toLocaleDateString()}
+              <div className="mt-3 flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400 px-6">
+                <span className="flex items-center">
+                  <BookOpen className="w-3 h-3 mr-1" />
+                  Saved on {new Date(entry.savedAt).toLocaleDateString()}
+                </span>
+                {entry.bookmarkNotes && (
+                  <span className="italic">
+                    Note: {entry.bookmarkNotes}
                   </span>
-                  {entry.bookmarkNotes && (
-                    <span className="italic">
-                      Note: {entry.bookmarkNotes}
-                    </span>
-                  )}
-                </div>
-                <Button
-                  onClick={() => removeSavedMutation.mutate(entry.id)}
-                  disabled={removeSavedMutation.isPending}
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <BookmarkX className="w-3 h-3 mr-1" />
-                  Remove
-                </Button>
+                )}
               </div>
             </div>
           ))}
