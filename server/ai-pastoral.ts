@@ -145,6 +145,14 @@ export async function generateCompleteSoapEntry(
     // Debug: Log the context being sent (remove in production)  
     console.log('AI SOAP Generation Context:', { contextPrompt, randomSeed, timestamp: currentTimestamp });
 
+    // Create a list of alternative verses to encourage variety
+    const alternativeVerses = [
+      "Psalm 23:1-3", "Isaiah 40:31", "Philippians 4:13", "Romans 8:28", "2 Corinthians 12:9",
+      "Psalm 46:10", "Jeremiah 29:11", "1 Peter 5:7", "Psalm 34:18", "Isaiah 41:10",
+      "Proverbs 3:5-6", "John 14:27", "Romans 15:13", "Psalm 62:1-2", "2 Corinthians 4:16-18"
+    ];
+    const suggestedVerse = alternativeVerses[Math.floor(Math.random() * alternativeVerses.length)];
+
     const prompt = `As a pastoral AI assistant, generate a complete S.O.A.P. (Scripture, Observation, Application, Prayer) entry that is perfectly suited to the current context and user's spiritual needs.
 
 Current Context:
@@ -152,19 +160,33 @@ ${contextPrompt}
 
 Request ID: ${randomSeed}-${currentTimestamp}
 
-Please select an appropriate Scripture passage that speaks directly to this context and provide a complete S.O.A.P. reflection. To ensure variety, please choose from different books of the Bible and avoid repeating recent selections. Consider verses from:
-- Books of wisdom (Proverbs, Ecclesiastes, Psalms)
-- New Testament letters (Romans, Ephesians, Philippians, etc.)
-- Gospel teachings (Matthew, Mark, Luke, John)
-- Old Testament narratives (Genesis, Exodus, etc.)
-- Prophetic books (Isaiah, Jeremiah, etc.)
+IMPORTANT: For variety, DO NOT use Matthew 11:28-30 as it has been used recently. Instead, consider this suggested verse: ${suggestedVerse}, or choose from these categories:
+
+Comfort & Healing Verses (avoid Matthew 11:28-30):
+- Psalm 23:1-4 (The Lord is my shepherd)
+- Isaiah 40:31 (Those who hope in the Lord will renew their strength)
+- Psalm 34:18 (The Lord is close to the brokenhearted)
+- 2 Corinthians 1:3-4 (God of all comfort)
+- Psalm 147:3 (He heals the brokenhearted)
+
+Financial Concern Verses:
+- Philippians 4:19 (God will meet all your needs)
+- Matthew 6:26 (Look at the birds of the air)
+- Proverbs 3:9-10 (Honor the Lord with your wealth)
+- 2 Corinthians 9:8 (God is able to bless you abundantly)
+
+Grief & Doubt Verses:
+- Psalm 30:5 (Weeping may stay for the night)
+- John 14:1 (Do not let your hearts be troubled)
+- Romans 8:38-39 (Nothing can separate us from God's love)
+- Habakkuk 3:17-19 (Though the fig tree does not bud)
 
 Choose a verse that:
 - Addresses the user's current emotional state
 - Is relevant to the liturgical season 
-- Speaks to current world events or circumstances
 - Provides spiritual guidance and comfort
 - Offers fresh perspective and variety
+- Is NOT Matthew 11:28-30
 
 Respond with JSON in this format:
 {
@@ -189,7 +211,8 @@ Respond with JSON in this format:
       ],
       response_format: { type: "json_object" },
       max_tokens: 1200,
-      temperature: 0.8
+      temperature: 0.9,
+      top_p: 0.95
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
