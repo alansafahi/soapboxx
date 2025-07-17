@@ -11674,6 +11674,111 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Chat conversation endpoints (public - no authentication required)
+  app.post('/api/chat/conversation', async (req, res) => {
+    try {
+      const { sessionId, userData } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ error: "Session ID is required" });
+      }
+
+      // Check if conversation already exists
+      let conversation = await storage.getChatConversation(sessionId);
+      
+      if (!conversation) {
+        // Create new conversation
+        conversation = await storage.createChatConversation(sessionId, userData);
+      } else if (userData && (!conversation.userName || !conversation.userEmail)) {
+        // Update conversation with user data if not already present
+        conversation = await storage.updateChatConversation(sessionId, {
+          userName: userData.name || conversation.userName,
+          userEmail: userData.email || conversation.userEmail
+        });
+      }
+
+      res.status(201).json(conversation);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create/get conversation" });
+    }
+  });
+
+  app.get('/api/chat/conversation/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const conversation = await storage.getChatConversation(sessionId);
+      
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+
+      res.json(conversation);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get conversation" });
+    }
+  });
+
+  // Chat messages endpoints (public - no authentication required)
+  app.post('/api/chat/message', async (req, res) => {
+    try {
+      const { sessionId, sender, message, messageType = 'text', metadata } = req.body;
+      
+      if (!sessionId || !sender || !message) {
+        return res.status(400).json({ error: "Session ID, sender, and message are required" });
+      }
+
+      const newMessage = await storage.createChatMessage({
+        sessionId,
+        sender,
+        message,
+        messageType,
+        metadata,
+        conversationId: null // Will be populated if needed
+      });
+
+      res.status(201).json(newMessage);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  app.get('/api/chat/messages/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const messages = await storage.getChatMessages(sessionId);
+      
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get messages" });
+    }
+  });
+
+  app.put('/api/chat/messages/:sessionId/read', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { sender } = req.body;
+      
+      if (!sender) {
+        return res.status(400).json({ error: "Sender is required" });
+      }
+
+      await storage.markChatMessagesAsRead(sessionId, sender);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark messages as read" });
+    }
+  });
+
+  // Admin endpoint to get active conversations (requires authentication)
+  app.get('/api/admin/chat/conversations', isAuthenticated, async (req, res) => {
+    try {
+      const conversations = await storage.getActiveChatConversations();
+      res.json(conversations);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get conversations" });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 

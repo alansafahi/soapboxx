@@ -2026,6 +2026,38 @@ export const contactSubmissions = pgTable("contact_submissions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Chat conversations for customer support
+export const chatConversations = pgTable("chat_conversations", {
+  id: serial("id").primaryKey(),
+  sessionId: varchar("session_id", { length: 255 }).notNull().unique(),
+  userName: varchar("user_name", { length: 255 }),
+  userEmail: varchar("user_email", { length: 255 }),
+  status: varchar("status", { length: 50 }).default("active"), // active, closed, escalated
+  source: varchar("source", { length: 50 }).default("website"), // website, whatsapp, email
+  assignedAgent: varchar("assigned_agent", { length: 255 }),
+  priority: varchar("priority", { length: 20 }).default("normal"), // low, normal, high, urgent
+  lastMessageAt: timestamp("last_message_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chat messages within conversations
+export const chatMessages = pgTable("chat_messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").references(() => chatConversations.id),
+  sessionId: varchar("session_id", { length: 255 }).notNull(),
+  sender: varchar("sender", { length: 20 }).notNull(), // user, agent, system
+  message: text("message").notNull(),
+  messageType: varchar("message_type", { length: 20 }).default("text"), // text, system, file, template
+  isRead: boolean("is_read").default(false),
+  metadata: jsonb("metadata"), // Additional data like user agent, IP, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("chat_messages_conversation_idx").on(table.conversationId),
+  index("chat_messages_session_idx").on(table.sessionId),
+  index("chat_messages_created_idx").on(table.createdAt),
+]);
+
 // Type definitions for contacts and invitations
 export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = typeof contacts.$inferInsert;
@@ -2037,6 +2069,16 @@ export type InsertContactSubmission = typeof contactSubmissions.$inferInsert;
 export const insertContactSchema = createInsertSchema(contacts);
 export const insertInvitationSchema = createInsertSchema(invitations);
 export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions);
+
+// Chat conversation types
+export const insertChatConversationSchema = createInsertSchema(chatConversations);
+export type InsertChatConversation = z.infer<typeof insertChatConversationSchema>;
+export type ChatConversation = typeof chatConversations.$inferSelect;
+
+// Chat message types  
+export const insertChatMessageSchema = createInsertSchema(chatMessages);
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

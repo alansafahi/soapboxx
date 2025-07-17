@@ -119,7 +119,13 @@ import {
   type InsertInvitation,
   type ContactSubmission,
   type InsertContactSubmission,
+  type ChatConversation,
+  type InsertChatConversation,
+  type ChatMessage,
+  type InsertChatMessage,
   contactSubmissions,
+  chatConversations,
+  chatMessages,
   type Church,
   type InsertChurch,
   type UserChurch,
@@ -800,6 +806,17 @@ export interface IStorage {
   markContentAsExpired(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void>;
   restoreExpiredContent(contentType: 'discussion' | 'prayer' | 'soap', contentId: number): Promise<void>;
   getExpiredContentSummary(churchId?: number): Promise<{ totalExpired: number; byType: { [key: string]: number } }>;
+
+  // Chat conversation operations
+  createChatConversation(sessionId: string, userData?: { name?: string; email?: string }): Promise<ChatConversation>;
+  getChatConversation(sessionId: string): Promise<ChatConversation | undefined>;
+  updateChatConversation(sessionId: string, data: { userName?: string; userEmail?: string }): Promise<ChatConversation>;
+  getActiveChatConversations(): Promise<ChatConversation[]>;
+
+  // Chat message operations
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  getChatMessages(sessionId: string): Promise<ChatMessage[]>;
+  markChatMessagesAsRead(sessionId: string, sender: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -6078,6 +6095,85 @@ export class DatabaseStorage implements IStorage {
     return updatedSubmission;
   }
 
+  // Chat conversation methods
+  async createChatConversation(sessionId: string, userData?: { name?: string; email?: string }): Promise<ChatConversation> {
+    const [conversation] = await db
+      .insert(chatConversations)
+      .values({
+        sessionId,
+        userName: userData?.name,
+        userEmail: userData?.email,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastMessageAt: new Date()
+      })
+      .returning();
+    return conversation;
+  }
+
+  async getChatConversation(sessionId: string): Promise<ChatConversation | null> {
+    const [conversation] = await db
+      .select()
+      .from(chatConversations)
+      .where(eq(chatConversations.sessionId, sessionId));
+    return conversation || null;
+  }
+
+  async updateChatConversation(sessionId: string, updates: Partial<ChatConversation>): Promise<ChatConversation> {
+    const [conversation] = await db
+      .update(chatConversations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(chatConversations.sessionId, sessionId))
+      .returning();
+    return conversation;
+  }
+
+  async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
+    const [message] = await db
+      .insert(chatMessages)
+      .values({
+        ...messageData,
+        createdAt: new Date()
+      })
+      .returning();
+
+    // Update conversation's last message time
+    await db
+      .update(chatConversations)
+      .set({ lastMessageAt: new Date(), updatedAt: new Date() })
+      .where(eq(chatConversations.sessionId, messageData.sessionId));
+
+    return message;
+  }
+
+  async getChatMessages(sessionId: string): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.sessionId, sessionId))
+      .orderBy(chatMessages.createdAt);
+  }
+
+  async markChatMessagesAsRead(sessionId: string, sender: string): Promise<void> {
+    await db
+      .update(chatMessages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(chatMessages.sessionId, sessionId),
+          eq(chatMessages.sender, sender)
+        )
+      );
+  }
+
+  async getActiveChatConversations(): Promise<ChatConversation[]> {
+    return await db
+      .select()
+      .from(chatConversations)
+      .where(eq(chatConversations.status, 'active'))
+      .orderBy(desc(chatConversations.lastMessageAt));
+  }
+
   async getPendingInvitations(userId: string): Promise<Invitation[]> {
     return await db
       .select()
@@ -9874,6 +9970,96 @@ export class DatabaseStorage implements IStorage {
     const totalExpired = byType.discussions + byType.prayerRequests + byType.soapEntries;
 
     return { totalExpired, byType };
+  }
+  // Chat conversation methods
+  async createChatConversation(sessionId: string, userData?: { name?: string; email?: string }): Promise<ChatConversation> {
+    const [conversation] = await db
+      .insert(chatConversations)
+      .values({
+        sessionId,
+        userName: userData?.name,
+        userEmail: userData?.email,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastMessageAt: new Date()
+      })
+      .returning();
+    return conversation;
+  }
+
+  async getChatConversation(sessionId: string): Promise<ChatConversation | undefined> {
+    const [conversation] = await db
+      .select()
+      .from(chatConversations)
+      .where(eq(chatConversations.sessionId, sessionId));
+    return conversation;
+  }
+
+  async updateChatConversation(sessionId: string, data: { userName?: string; userEmail?: string }): Promise<ChatConversation> {
+    const [conversation] = await db
+      .update(chatConversations)
+      .set({
+        ...data,
+        updatedAt: new Date()
+      })
+      .where(eq(chatConversations.sessionId, sessionId))
+      .returning();
+    return conversation;
+  }
+
+  async getActiveChatConversations(): Promise<ChatConversation[]> {
+    return await db
+      .select()
+      .from(chatConversations)
+      .where(gte(chatConversations.lastMessageAt, new Date(Date.now() - 24 * 60 * 60 * 1000))) // Last 24 hours
+      .orderBy(desc(chatConversations.lastMessageAt));
+  }
+
+  // Chat message methods
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [newMessage] = await db
+      .insert(chatMessages)
+      .values({
+        ...message,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+
+    // Update conversation's last message time
+    await db
+      .update(chatConversations)
+      .set({
+        lastMessageAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(chatConversations.sessionId, message.sessionId));
+
+    return newMessage;
+  }
+
+  async getChatMessages(sessionId: string): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.sessionId, sessionId))
+      .orderBy(asc(chatMessages.createdAt));
+  }
+
+  async markChatMessagesAsRead(sessionId: string, sender: string): Promise<void> {
+    await db
+      .update(chatMessages)
+      .set({
+        readAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(
+        and(
+          eq(chatMessages.sessionId, sessionId),
+          ne(chatMessages.sender, sender), // Mark messages from other sender as read
+          isNull(chatMessages.readAt)
+        )
+      );
   }
 }
 
