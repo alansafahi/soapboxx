@@ -16,6 +16,7 @@ import {
   discussionBookmarks,
   soapEntries,
   soapComments,
+  soapBookmarks,
   reactions,
   prayerRequests,
   prayerResponses,
@@ -561,6 +562,9 @@ export interface IStorage {
   // SOAP operations
   addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<void>;
   saveSoapEntry(soapId: number, userId: string): Promise<void>;
+  getSavedSoapEntries(userId: string): Promise<any[]>;
+  removeSavedSoapEntry(soapId: number, userId: string): Promise<void>;
+  isSoapEntrySaved(soapId: number, userId: string): Promise<boolean>;
   createSoapEntry(entry: any): Promise<any>;
   createLeaderboard(leaderboard: InsertLeaderboard): Promise<Leaderboard>;
   updateLeaderboardEntries(leaderboardId: number): Promise<void>;
@@ -722,6 +726,12 @@ export interface IStorage {
   unfeatureSoapEntry(id: number): Promise<SoapEntry>;
   getChurchPastors(churchId: number): Promise<{ id: string; firstName: string; lastName: string; email: string; role: string }[]>;
   getSoapEntriesSharedWithPastor(pastorId: string, churchId: number): Promise<SoapEntry[]>;
+  
+  // S.O.A.P. Bookmark Management
+  saveSoapEntry(soapId: number, userId: string): Promise<void>;
+  getSavedSoapEntries(userId: string): Promise<any[]>;
+  removeSavedSoapEntry(soapId: number, userId: string): Promise<void>;
+  isSoapEntrySaved(soapId: number, userId: string): Promise<boolean>;
 
   // Admin Analytics Methods
   getUserRole(userId: string): Promise<string>;
@@ -2484,12 +2494,91 @@ export class DatabaseStorage implements IStorage {
   }
 
   async saveSoapEntry(soapId: number, userId: string): Promise<void> {
-    // Create a saved entry record (you can create a saved_soap_entries table or use bookmarks)
-    await db.insert(discussionBookmarks).values({
+    // Create a saved entry record using dedicated soapBookmarks table
+    await db.insert(soapBookmarks).values({
       userId,
-      discussionId: soapId, // Reusing discussion bookmarks for SOAP entries
+      soapId,
+      bookmarkType: 'saved',
       createdAt: new Date()
     }).onConflictDoNothing();
+  }
+
+  async getSavedSoapEntries(userId: string): Promise<any[]> {
+    // Get user's saved SOAP entries with full SOAP data and author information
+    const savedEntries = await db
+      .select({
+        id: soapEntries.id,
+        authorId: soapEntries.userId,
+        churchId: soapEntries.churchId,
+        title: sql<string>`'S.O.A.P. Reflection'`,
+        content: soapEntries.scripture,
+        category: sql<string>`'soap_reflection'`,
+        isPublic: soapEntries.isPublic,
+        audience: sql<string>`'saved'`,
+        mood: soapEntries.moodTag,
+        suggestedVerses: sql<any>`null`,
+        attachedMedia: sql<any>`null`,
+        linkedVerse: soapEntries.scriptureReference,
+        isPinned: sql<boolean>`false`,
+        pinnedBy: sql<string>`null`,
+        pinnedAt: sql<any>`null`,
+        pinnedUntil: sql<any>`null`,
+        pinCategory: sql<string>`null`,
+        likeCount: sql<number>`0`,
+        commentCount: sql<number>`0`,
+        createdAt: soapEntries.createdAt,
+        updatedAt: soapEntries.updatedAt,
+        type: sql<string>`'soap_reflection'`,
+        isSaved: sql<boolean>`true`,
+        bookmarkId: soapBookmarks.id,
+        bookmarkNotes: soapBookmarks.notes,
+        savedAt: soapBookmarks.createdAt,
+        soapData: {
+          scripture: soapEntries.scripture,
+          scriptureReference: soapEntries.scriptureReference,
+          observation: soapEntries.observation,
+          application: soapEntries.application,
+          prayer: soapEntries.prayer,
+        },
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(soapBookmarks)
+      .innerJoin(soapEntries, eq(soapBookmarks.soapId, soapEntries.id))
+      .leftJoin(users, eq(soapEntries.userId, users.id))
+      .where(eq(soapBookmarks.userId, userId))
+      .orderBy(desc(soapBookmarks.createdAt));
+
+    return savedEntries;
+  }
+
+  async removeSavedSoapEntry(soapId: number, userId: string): Promise<void> {
+    // Remove the bookmark entry for the specific user and SOAP entry
+    await db
+      .delete(soapBookmarks)
+      .where(and(
+        eq(soapBookmarks.soapId, soapId),
+        eq(soapBookmarks.userId, userId)
+      ));
+  }
+
+  async isSoapEntrySaved(soapId: number, userId: string): Promise<boolean> {
+    // Check if a SOAP entry is saved by the user
+    const bookmark = await db
+      .select({ id: soapBookmarks.id })
+      .from(soapBookmarks)
+      .where(and(
+        eq(soapBookmarks.soapId, soapId),
+        eq(soapBookmarks.userId, userId)
+      ))
+      .limit(1);
+
+    return bookmark.length > 0;
   }
 
   async createSoapEntry(entry: any): Promise<any> {

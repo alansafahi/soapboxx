@@ -1198,6 +1198,18 @@ export const soapComments = pgTable("soap_comments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// SOAP Bookmarks - Dedicated table for saved SOAP reflections
+export const soapBookmarks = pgTable("soap_bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  soapId: integer("soap_id").notNull().references(() => soapEntries.id),
+  bookmarkType: varchar("bookmark_type", { length: 20 }).default("saved"), // saved, favorite, archived
+  notes: text("notes"), // Optional user notes for their saved reflection
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userSoapBookmarkUnique: unique().on(table.userId, table.soapId),
+}));
+
 // Enhanced friend relationships are defined above
 
 // Chat conversations
@@ -2312,6 +2324,10 @@ export type InsertBibleVerseShare = typeof bibleVerseShares.$inferInsert;
 export type SoapEntry = typeof soapEntries.$inferSelect;
 export type InsertSoapEntry = typeof soapEntries.$inferInsert;
 
+// SOAP Bookmark Types
+export type SoapBookmark = typeof soapBookmarks.$inferSelect;
+export type InsertSoapBookmark = typeof soapBookmarks.$inferInsert;
+
 // S.O.A.P. Zod Schema
 export const insertSoapEntrySchema = createInsertSchema(soapEntries).omit({
   id: true,
@@ -2324,6 +2340,12 @@ export const insertSoapEntrySchema = createInsertSchema(soapEntries).omit({
     }
     return val;
   }),
+});
+
+// SOAP Bookmark Zod Schema
+export const insertSoapBookmarkSchema = createInsertSchema(soapBookmarks).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Daily Bible Zod Schemas

@@ -53,6 +53,7 @@ const PersonalizedGuidancePage = lazy(() => import("./pages/PersonalizedGuidance
 const SourceAttributionPage = lazy(() => import("./pages/SourceAttribution"));
 const SocialFeedPage = lazy(() => import("./pages/social-feed"));
 const BookmarkedPrayersPage = lazy(() => import("./pages/BookmarkedPrayersPage"));
+const SavedReflectionsPage = lazy(() => import("./pages/saved-reflections"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -141,6 +142,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/bookmarked-prayers" component={BookmarkedPrayersPage} />
                                     <ProtectedRoute path="/soap" component={SoapPage} />
                                     <ProtectedRoute path="/soap-journal" component={SoapPage} />
+                                    <ProtectedRoute path="/saved-reflections" component={SavedReflectionsPage} />
                                     <ProtectedRoute path="/messages" component={Messages} />
                                     <ProtectedRoute path="/chat" component={Chat} />
                                     <ProtectedRoute path="/leaderboard" component={Leaderboard} />

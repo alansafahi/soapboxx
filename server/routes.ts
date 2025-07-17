@@ -668,6 +668,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's saved SOAP entries
+  app.get("/api/user/saved-soap", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const savedEntries = await storage.getSavedSoapEntries(userId);
+      res.json(savedEntries);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Remove saved SOAP entry
+  app.delete("/api/soap/saved/:id", isAuthenticated, async (req, res) => {
+    try {
+      const soapId = parseInt(req.params.id);
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      // Remove the saved entry
+      await storage.removeSavedSoapEntry(soapId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Basic test route
   app.get('/api/test', (req, res) => {
     res.json({ message: 'Server is running' });

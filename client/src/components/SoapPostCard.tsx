@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone } from "lucide-react";
+import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone, BookmarkX, Bookmark } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -16,6 +16,7 @@ interface SoapPost {
   authorId: string;
   createdAt: string;
   type: 'soap_reflection';
+  isSaved?: boolean; // Add saved status
   soapData?: {
     scripture: string;
     scriptureReference: string;
@@ -39,6 +40,9 @@ interface SoapPost {
 
 interface SoapPostCardProps {
   post: SoapPost;
+  showRemoveOption?: boolean; // For SavedReflections page
+  onRemove?: () => void;
+  isRemoving?: boolean;
 }
 
 interface CommentDialogProps {
@@ -173,7 +177,7 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
   );
 }
 
-export default function SoapPostCard({ post }: SoapPostCardProps) {
+export default function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = false }: SoapPostCardProps) {
   const [expandedSections, setExpandedSections] = useState({
     observation: false,
     application: false,
@@ -195,6 +199,47 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
   const { data: inlineComments = [] } = useQuery({
     queryKey: [`/api/soap/${post.id}/comments`],
     enabled: !!post.id,
+  });
+
+  // Save/Unsave mutations
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('POST', '/api/soap/save', { soapId: post.id });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/saved-soap'] });
+      toast({
+        title: "Saved to your collection",
+        description: "This reflection has been added to your saved reflections.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to save",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('DELETE', `/api/soap/saved/${post.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/saved-soap'] });
+      toast({
+        title: "Removed from collection",
+        description: "This reflection is no longer saved.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to remove",
+        variant: "destructive",
+      });
+    }
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -508,15 +553,44 @@ export default function SoapPostCard({ post }: SoapPostCardProps) {
               </span>
             </button>
             
-            <button 
-              onClick={() => handleSave()}
-              className="flex items-center space-x-1 group hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors"
-            >
-              <Save className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
-              <span className="text-xs font-medium text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300">
-                Save
-              </span>
-            </button>
+            {showRemoveOption ? (
+              <button 
+                onClick={onRemove}
+                disabled={isRemoving}
+                className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+              >
+                <BookmarkX className="w-4 h-4 text-red-500 group-hover:text-red-700 transition-colors" />
+                <span className="text-xs font-medium text-red-600 group-hover:text-red-700 dark:group-hover:text-red-400">
+                  {isRemoving ? "Removing..." : "Remove"}
+                </span>
+              </button>
+            ) : (
+              <button 
+                onClick={() => post.isSaved ? unsaveMutation.mutate() : saveMutation.mutate()}
+                disabled={saveMutation.isPending || unsaveMutation.isPending}
+                className={`flex items-center space-x-1 group px-2 py-1 rounded-md transition-colors ${
+                  post.isSaved
+                    ? "bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                {post.isSaved ? (
+                  <Bookmark className="w-4 h-4 text-purple-600 transition-colors" />
+                ) : (
+                  <Save className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                )}
+                <span className={`text-xs font-medium transition-colors ${
+                  post.isSaved
+                    ? "text-purple-600 dark:text-purple-400"
+                    : "text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                }`}>
+                  {saveMutation.isPending || unsaveMutation.isPending
+                    ? (post.isSaved ? "Removing..." : "Saving...")
+                    : (post.isSaved ? "Saved" : "Save")
+                  }
+                </span>
+              </button>
+            )}
             
             <button 
               onClick={() => setShareDialogOpen(true)}
