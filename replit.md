@@ -142,6 +142,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Monitoring**: Query performance and error tracking
 
 ## Recent Changes
+- July 17, 2025: LANDING PAGE REACTIVATION AND DEPLOYMENT SETUP COMPLETED - Successfully reactivated SimpleLanding as main entry point and prepared for soapboxsuperapp.com deployment
+  - LANDING PAGE ACTIVATED: SimpleLanding.tsx now displays as main entry point for non-authenticated users with "Unite Your Faith Community" messaging
+  - AUTHENTICATION FLOW INTEGRATED: All CTA buttons ("Sign In", "Get Started", "Start Free Today") properly linked to /login route
+  - ROUTING OPTIMIZED: Root domain (/) shows landing page for visitors, authenticated users go directly to Home dashboard
+  - DEPLOYMENT READY: Application configured for soapboxsuperapp.com root domain deployment with autoscale settings
+  - DNS GUIDANCE PROVIDED: Modern A record + TXT record configuration method for GoDaddy setup (not CNAME)
+  - PRODUCTION OPTIMIZED: Clean 3.8MB build with 892.9kb server bundle ready for deployment
 - July 17, 2025: PRODUCTION DEPLOYMENT CLEANUP COMPLETED - Successfully cleaned up codebase and prepared application for production deployment with massive technical debt elimination
   - DEVELOPMENT ASSETS REMOVED: Eliminated 109MB of attached_assets (screenshots, debug files) reducing deployable size dramatically
   - CONSOLE LOGGING CLEANED: Removed all console.log, console.error statements from production code for clean deployment
