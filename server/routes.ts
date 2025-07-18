@@ -7556,7 +7556,7 @@ Return JSON with this exact structure:
           }
           
           if (moderationResult.flagged) {
-            await createAutoModerationReport(storage, 'discussion', post.id, moderationResult, 'system');
+            await createAutoModerationReport(storage, 'discussion', post.id, moderationResult, 'ai-moderation');
             
             // Send alert notifications for high/critical violations
             if (moderationResult.actionRequired === 'hide' || moderationResult.actionRequired === 'remove') {
