@@ -68,6 +68,13 @@ export function TestModerationPage() {
       type: 'image'
     },
     {
+      name: 'Safe Image - Tech Savvy Priest',
+      content: 'Tech Savvy Priest',
+      mediaUrl: 'https://via.placeholder.com/300x200/3b82f6/ffffff?text=Tech+Savvy+Priest',
+      expectedPriority: 'none',
+      type: 'image'
+    },
+    {
       name: 'Video Analysis - Sample',
       content: 'Sharing a video from our worship service',
       mediaUrl: 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAAAAG1wNDJpc29taXNvMmF2YzEAAAAIZnJlZQAAA',
@@ -83,12 +90,17 @@ export function TestModerationPage() {
     try {
       const startTime = Date.now();
       
-      // Create a test discussion post
+      // Create a test discussion post (add image for image tests)
+      let postContent = content;
+      if (scenario.type === 'image' && scenario.mediaUrl) {
+        postContent = `${content}\n\n![${scenario.name}](${scenario.mediaUrl})`;
+      }
+      
       const response = await apiRequest('/api/discussions', {
         method: 'POST',
         body: JSON.stringify({
           title: `AI Moderation Test - ${Date.now()}`,
-          content: content,
+          content: postContent,
           category: 'Moderation Test',
           isPublic: true
         })

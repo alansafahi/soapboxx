@@ -50,19 +50,79 @@ const FormattedText = ({ content }: { content: string }) => {
   
   const formattedContent = formatContent(content);
   
+  // Parse markdown images and videos
+  const parseMarkdown = (text: string) => {
+    const parts = [];
+    let lastIndex = 0;
+    
+    // Match markdown images: ![alt](url)
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    let match;
+    
+    while ((match = imageRegex.exec(text)) !== null) {
+      // Add text before the image
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+      
+      // Add the image
+      parts.push({
+        type: 'image',
+        alt: match[1],
+        src: match[2],
+        index: parts.length
+      });
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+    
+    return parts.length === 0 ? [text] : parts;
+  };
+  
+  const parts = parseMarkdown(formattedContent);
+  
   return (
-    <span>
-      {formattedContent.split(/(\*\*.*?\*\*|\*.*?\*|_.*?_)/).map((part, index) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={index}>{part.slice(2, -2)}</strong>;
-        } else if (part.startsWith('*') && part.endsWith('*')) {
-          return <em key={index}>{part.slice(1, -1)}</em>;
-        } else if (part.startsWith('_') && part.endsWith('_')) {
-          return <u key={index}>{part.slice(1, -1)}</u>;
+    <div>
+      {parts.map((part, index) => {
+        if (typeof part === 'object' && part.type === 'image') {
+          return (
+            <img 
+              key={part.index} 
+              src={part.src} 
+              alt={part.alt} 
+              className="max-w-full h-auto rounded-lg my-2 border"
+              style={{ maxHeight: '300px' }}
+            />
+          );
         }
-        return part;
+        
+        // Handle text formatting for string parts
+        const textPart = typeof part === 'string' ? part : '';
+        return (
+          <span key={index}>
+            {textPart.split(/(\*\*.*?\*\*|\*.*?\*|_.*?_)/).map((textSegment, segIndex) => {
+              if (textSegment.startsWith('**') && textSegment.endsWith('**')) {
+                return <strong key={segIndex}>{textSegment.slice(2, -2)}</strong>;
+              } else if (textSegment.startsWith('*') && textSegment.endsWith('*')) {
+                return <em key={segIndex}>{textSegment.slice(1, -1)}</em>;
+              } else if (textSegment.startsWith('_') && textSegment.endsWith('_')) {
+                return <u key={segIndex}>{textSegment.slice(1, -1)}</u>;
+              }
+              return textSegment.split('\n').map((line, lineIndex, lines) => (
+                lineIndex < lines.length - 1 ? (
+                  <span key={lineIndex}>{line}<br /></span>
+                ) : line
+              ));
+            })}
+          </span>
+        );
       })}
-    </span>
+    </div>
   );
 };
 
