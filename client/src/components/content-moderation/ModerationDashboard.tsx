@@ -50,6 +50,7 @@ export function ModerationDashboard() {
   const [editRequestDialogOpen, setEditRequestDialogOpen] = useState(false);
   const [editRequestFeedback, setEditRequestFeedback] = useState('');
   const [editRequestSuggestions, setEditRequestSuggestions] = useState('');
+  const [isGeneratingAISuggestions, setIsGeneratingAISuggestions] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -150,6 +151,49 @@ export function ModerationDashboard() {
     setEditRequestFeedback('');
     setEditRequestSuggestions('');
     setEditRequestDialogOpen(true);
+  };
+
+  const generateAISuggestions = async (report: ContentReport | null) => {
+    if (!report) return;
+
+    setIsGeneratingAISuggestions(true);
+    try {
+      const response = await fetch('/api/ai/generate-edit-suggestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contentType: report.contentType,
+          originalContent: report.originalContent,
+          violationReason: report.reason,
+          reportDescription: report.description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate AI suggestions');
+      }
+
+      const data = await response.json();
+      
+      // Fill in the feedback and suggestions with AI-generated content
+      setEditRequestFeedback(data.feedback || '');
+      setEditRequestSuggestions(data.suggestions || '');
+
+      toast({
+        title: "AI Suggestions Generated",
+        description: "Review and customize the AI-generated feedback and suggestions as needed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate AI suggestions. Please create manual suggestions.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingAISuggestions(false);
+    }
   };
 
   const handleSendEditRequest = () => {
@@ -484,7 +528,7 @@ export function ModerationDashboard() {
 
       {/* Request Edit Dialog */}
       <Dialog open={editRequestDialogOpen} onOpenChange={setEditRequestDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Request Content Edit</DialogTitle>
             <DialogDescription>
@@ -531,7 +575,19 @@ export function ModerationDashboard() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="editSuggestions">Specific Suggestions</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="editSuggestions">Specific Suggestions</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => generateAISuggestions(selectedReport)}
+                    disabled={isGeneratingAISuggestions}
+                    className="text-xs"
+                  >
+                    {isGeneratingAISuggestions ? 'Generating...' : '🤖 AI Suggestions'}
+                  </Button>
+                </div>
                 <Textarea
                   id="editSuggestions"
                   value={editRequestSuggestions}

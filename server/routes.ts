@@ -3052,6 +3052,91 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // AI-powered edit suggestions endpoint
+  app.post('/api/ai/generate-edit-suggestions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Check if user is a moderator
+      const user = await storage.getUser(userId);
+      const userChurches = await storage.getUserChurches(userId);
+      const isModerator = user?.role === 'soapbox_owner' || 
+                         userChurches.some(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
+
+      if (!isModerator) {
+        return res.status(403).json({ message: 'Moderator access required' });
+      }
+
+      const { contentType, originalContent, violationReason, reportDescription } = req.body;
+      
+      if (!contentType || !originalContent || !violationReason) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Create a prompt for GPT-4o to generate edit suggestions
+      const prompt = `You are a content moderation assistant for a faith-based community platform. 
+
+Content Type: ${contentType}
+Violation Reason: ${violationReason}
+Report Description: ${reportDescription}
+Original Content: "${originalContent}"
+
+Please provide:
+1. A compassionate feedback message explaining what needs to be changed and why
+2. Specific, actionable suggestions for improvement
+
+Keep the tone respectful and educational. Focus on helping the user understand community guidelines and how to improve their content. Remember this is a faith-based platform, so maintain appropriate spiritual sensitivity.
+
+Respond in JSON format with "feedback" and "suggestions" fields.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful content moderation assistant for a faith-based community platform. Provide compassionate, educational feedback that helps users improve their content while maintaining community guidelines.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          response_format: { type: "json_object" },
+          max_tokens: 500,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = JSON.parse(data.choices[0].message.content);
+      
+      res.json({
+        feedback: aiResponse.feedback || 'Please review this content and consider making appropriate adjustments.',
+        suggestions: aiResponse.suggestions || 'Consider revising the content to better align with our community guidelines.'
+      });
+    } catch (error) {
+      console.error('Error generating AI suggestions:', error);
+      res.status(500).json({ 
+        message: 'Failed to generate AI suggestions',
+        feedback: 'Please review this content and consider making appropriate adjustments.',
+        suggestions: 'Consider revising the content to better align with our community guidelines.'
+      });
+    }
+  });
+
   // Hide/remove content
   app.post('/api/moderation/content/:contentType/:contentId/hide', isAuthenticated, async (req: any, res) => {
     try {
