@@ -450,105 +450,107 @@ export function ModerationDashboard() {
           </DialogHeader>
 
           {selectedReport && (
-            <div className="space-y-4 overflow-y-auto flex-1 pr-2">
-              <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Report Details</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Content Type:</span>
-                    <span className="ml-2 font-medium">{selectedReport.contentType.replace('_', ' ')}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Reason:</span>
-                    <span className="ml-2 font-medium">{selectedReport.reason}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Priority:</span>
-                    <Badge className={getPriorityColor(selectedReport.priority)} size="sm">
-                      {selectedReport.priority}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 dark:text-gray-400">Reported:</span>
-                    <span className="ml-2">{format(new Date(selectedReport.createdAt), 'MMM d, yyyy HH:mm')}</span>
-                  </div>
-                </div>
-                {selectedReport.description && (
-                  <div className="mt-3">
-                    <span className="text-gray-600 dark:text-gray-400">Description:</span>
-                    <p className="mt-1">{selectedReport.description}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Original Content Display */}
-              {selectedReport.originalContent && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2 text-red-800 dark:text-red-200">Original Content (Preserved for Review)</h4>
-                  <div className="text-sm bg-white dark:bg-gray-900 p-3 rounded border max-h-48 overflow-y-auto">
-                    {selectedReport.contentMetadata?.title && (
-                      <div className="mb-2">
-                        <span className="font-medium text-gray-600 dark:text-gray-400">Title:</span> {selectedReport.contentMetadata.title}
-                      </div>
-                    )}
-                    <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
-                      {selectedReport.originalContent}
+            <>
+              <div className="space-y-4 overflow-y-auto flex-1 pr-2">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">Report Details</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Content Type:</span>
+                      <span className="ml-2 font-medium">{selectedReport.contentType.replace('_', ' ')}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Reason:</span>
+                      <span className="ml-2 font-medium">{selectedReport.reason}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Priority:</span>
+                      <Badge className={getPriorityColor(selectedReport.priority)} size="sm">
+                        {selectedReport.priority}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Reported:</span>
+                      <span className="ml-2">{format(new Date(selectedReport.createdAt), 'MMM d, yyyy HH:mm')}</span>
                     </div>
                   </div>
-                  {selectedReport.contentMetadata && (
-                    <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                      <span className="font-medium">Author ID:</span> {selectedReport.contentMetadata.authorId} • 
-                      <span className="font-medium ml-2">Created:</span> {selectedReport.contentMetadata.createdAt ? format(new Date(selectedReport.contentMetadata.createdAt), 'MMM d, yyyy') : 'Unknown'}
+                  {selectedReport.description && (
+                    <div className="mt-3">
+                      <span className="text-gray-600 dark:text-gray-400">Description:</span>
+                      <p className="mt-1">{selectedReport.description}</p>
                     </div>
                   )}
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="action">Action to Take</Label>
-                <Select value={actionTaken} onValueChange={setActionTaken}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an action..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="no_action">No Action Required</SelectItem>
-                    <SelectItem value="warning_sent">Warning Sent to User</SelectItem>
-                    <SelectItem value="hide_content">Hide Content</SelectItem>
-                    <SelectItem value="edit_request_sent">Edit Request Sent to User</SelectItem>
-                    <SelectItem value="escalated">Escalated to Higher Authority</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* Original Content Display */}
+                {selectedReport.originalContent && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2 text-red-800 dark:text-red-200">Original Content (Preserved for Review)</h4>
+                    <div className="text-sm bg-white dark:bg-gray-900 p-3 rounded border max-h-48 overflow-y-auto">
+                      {selectedReport.contentMetadata?.title && (
+                        <div className="mb-2">
+                          <span className="font-medium text-gray-600 dark:text-gray-400">Title:</span> {selectedReport.contentMetadata.title}
+                        </div>
+                      )}
+                      <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                        {selectedReport.originalContent}
+                      </div>
+                    </div>
+                    {selectedReport.contentMetadata && (
+                      <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                        <span className="font-medium">Author ID:</span> {selectedReport.contentMetadata.authorId} • 
+                        <span className="font-medium ml-2">Created:</span> {selectedReport.contentMetadata.createdAt ? format(new Date(selectedReport.contentMetadata.createdAt), 'MMM d, yyyy') : 'Unknown'}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="action">Action to Take</Label>
+                  <Select value={actionTaken} onValueChange={setActionTaken}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an action..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="no_action">No Action Required</SelectItem>
+                      <SelectItem value="warning_sent">Warning Sent to User</SelectItem>
+                      <SelectItem value="hide_content">Hide Content</SelectItem>
+                      <SelectItem value="edit_request_sent">Edit Request Sent to User</SelectItem>
+                      <SelectItem value="escalated">Escalated to Higher Authority</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reviewNotes">Review Notes</Label>
+                  <Textarea
+                    id="reviewNotes"
+                    placeholder="Document your review decision and any actions taken..."
+                    value={reviewNotes}
+                    onChange={(e) => setReviewNotes(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reviewNotes">Review Notes</Label>
-                <Textarea
-                  id="reviewNotes"
-                  placeholder="Document your review decision and any actions taken..."
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  rows={4}
-                />
+              
+              <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setReviewDialogOpen(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmitReview}
+                  disabled={!actionTaken || updateReportMutation.isPending}
+                  className="flex-1"
+                >
+                  {updateReportMutation.isPending ? 'Submitting...' : 'Submit Review'}
+                </Button>
               </div>
-
-            </div>
-            
-            <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex-shrink-0">
-              <Button
-                variant="outline"
-                onClick={() => setReviewDialogOpen(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmitReview}
-                disabled={!actionTaken || updateReportMutation.isPending}
-                className="flex-1"
-              >
-                {updateReportMutation.isPending ? 'Submitting...' : 'Submit Review'}
-              </Button>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
