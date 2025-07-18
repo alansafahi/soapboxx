@@ -51,41 +51,21 @@ export default function FormattedContent({ content }: { content: string }) {
   
   const parts = parseMarkdown(formattedContent);
   
-  // Debug logging (only for posts with images)
-  if (content.includes('![')) {
-    console.log('FormattedContent - Original content:', content);
-    console.log('FormattedContent - Formatted content:', formattedContent);
-    console.log('FormattedContent - Parsed parts:', parts);
-  }
+
   
   return (
     <div>
       {parts.map((part, index) => {
         if (typeof part === 'object' && part.type === 'image') {
-          console.log('Rendering image:', part);
           return (
-            <div key={index} style={{ border: '2px solid red', padding: '10px', margin: '10px 0' }}>
-              <p style={{ color: 'red', fontWeight: 'bold' }}>IMAGE SHOULD BE HERE:</p>
-              <img 
-                src={part.src} 
-                alt={part.alt} 
-                style={{ 
-                  maxWidth: '100%', 
-                  height: 'auto', 
-                  maxHeight: '300px', 
-                  minHeight: '100px', 
-                  display: 'block',
-                  border: '3px solid blue',
-                  backgroundColor: 'yellow'
-                }}
-                onLoad={() => console.log('✅ Image loaded successfully:', part.src)}
-                onError={(e) => {
-                  console.log('❌ Image failed to load:', part.src);
-                  console.log('Error details:', e);
-                }}
-              />
-              <p style={{ color: 'blue', fontSize: '12px' }}>Source: {part.src}</p>
-            </div>
+            <img 
+              key={index}
+              src={part.src} 
+              alt={part.alt} 
+              className="max-w-full h-auto rounded-lg my-3 border shadow-sm"
+              style={{ maxHeight: '400px' }}
+              loading="lazy"
+            />
           );
         }
         

@@ -69,8 +69,8 @@ export function TestModerationPage() {
     },
     {
       name: 'Safe Image - Tech Savvy Priest',
-      content: 'Tech Savvy Priest',
-      mediaUrl: 'https://via.placeholder.com/300x200/3b82f6/ffffff?text=Tech+Savvy+Priest',
+      content: 'Tech Savvy Priest - This is a pastor who loves using technology to connect with the community and share God\'s word through modern platforms.',
+      mediaUrl: 'https://picsum.photos/seed/priest/300/200',
       expectedPriority: 'none',
       type: 'image'
     },
