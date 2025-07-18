@@ -2,7 +2,6 @@ import { Button } from "../components/ui/button";
 import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift, Cross, Sparkles, Facebook, Twitter, Linkedin } from "lucide-react";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 import { useEffect } from "react";
-import ChatWidget from "../components/ChatWidget";
 
 // SoapBox Logo Component
 const SoapBoxLogo = ({ className = "w-8 h-8", showText = true }: { className?: string; showText?: boolean }) => (
@@ -693,9 +692,6 @@ export default function SimpleLanding() {
           </div>
         </div>
       </footer>
-      
-      {/* Chat Widget */}
-      <ChatWidget position="bottom-right" />
     </div>
   );
 }

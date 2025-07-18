@@ -307,8 +307,8 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
   };
 
   const positionClasses = position === 'bottom-right' 
-    ? 'bottom-6 right-6' 
-    : 'bottom-6 left-6';
+    ? 'bottom-4 right-4 sm:bottom-6 sm:right-6' 
+    : 'bottom-4 left-4 sm:bottom-6 sm:left-6';
 
   if (!isOpen) {
     return (

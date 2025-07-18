@@ -18,7 +18,6 @@ import CheckInSystem from "../components/CheckInSystem";
 import FloatingPostButton from "../components/FloatingPostButton";
 import RecentCheckInsStrip from "../components/RecentCheckInsStrip";
 import { ReferralWelcome } from "../components/ReferralWelcome";
-import ChatWidget from "../components/ChatWidget";
 import { useQuery } from "@tanstack/react-query";
 
 interface HomeProps {
@@ -177,9 +176,6 @@ export default function Home({ referralCode }: HomeProps = {}) {
       
       {/* Floating Post Button for Mobile */}
       <FloatingPostButton onClick={scrollToComposer} />
-      
-      {/* Chat Widget */}
-      <ChatWidget position="bottom-right" />
       
       <MobileNav />
     </div>

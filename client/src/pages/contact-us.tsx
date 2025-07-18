@@ -5,7 +5,6 @@ import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { ArrowLeft, Mail, MessageCircle, Calendar, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Heart, BookOpen, Check, Send, Loader2, AlertCircle, User, ChevronRight } from "lucide-react";
-import ChatWidget from "../components/ChatWidget";
 
 // Custom Spiritual Icons
 const CrossIcon = ({ className = "w-6 h-6" }) => (
@@ -750,9 +749,6 @@ export default function ContactUs() {
         </section>
 
       </div>
-
-      {/* Chat Widget */}
-      <ChatWidget position="bottom-right" />
     </div>
   );
 }

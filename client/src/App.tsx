@@ -10,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 import SidebarFixed from "./components/SidebarFixed";
 import TopHeader from "./components/TopHeader";
+import ChatWidget from "./components/ChatWidget";
 
 // Lazy-loaded pages
 const NotFound = lazy(() => import("./pages/not-found"));
@@ -197,6 +198,8 @@ function AppRouter() {
                     </AnimatePresence>
                 </main>
             </div>
+            {/* Global Chat Widget - appears on all pages */}
+            <ChatWidget position="bottom-right" />
         </div>
     );
 }
