@@ -188,12 +188,6 @@ export default function SidebarFixed() {
       ]
     },
     {
-      label: "SOAPBOX PORTAL",
-      items: [
-        { label: "Church Management", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
-      ]
-    },
-    {
       label: "ACCOUNT",
       items: [
         { label: "Profile", href: "/profile", icon: User },

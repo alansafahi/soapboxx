@@ -144,6 +144,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 ## User Preferences
 - **Chat Widget Quality**: Chat widget should provide high-quality responses using the comprehensive knowledge base and GPT-4o integration
 - **Positioning Requirements**: Chat widget must appear in bottom-right corner of all pages for optimal mobile accessibility
+- **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
 - July 18, 2025: CRITICAL AI MODERATION FAILURE FIXED - MULTI-MODAL SEXUAL CONTENT DETECTION ENHANCED - Fixed serious AI moderation failure that missed explicit sexual image with suggestive text. Enhanced system now properly analyzes text+image combinations, identifying that innocent phrases like "Call me!" become inappropriate when paired with sexual/explicit images. Immediately removed discussion #4080 (explicit sexual image) and sexual comment #17779 ("Oh, baby, Such tight ass!"). Enhanced AI detection for sexual poses, suggestive imagery, and multi-modal content analysis to prevent future child protection failures.
