@@ -16,6 +16,11 @@ interface ModerationTestResult {
   userNotified?: boolean;
   adminNotified?: boolean;
   timestamp: string;
+  mediaAnalysis?: {
+    type: 'image' | 'video';
+    description: string;
+    concerns: string[];
+  };
 }
 
 export function TestModerationPage() {
@@ -28,27 +33,46 @@ export function TestModerationPage() {
     {
       name: 'High Priority - Harassment',
       content: 'You are a fake Christian and should leave this app immediately. Your faith is worthless.',
-      expectedPriority: 'high'
+      expectedPriority: 'high',
+      type: 'text'
     },
     {
       name: 'High Priority - Inappropriate Content',
       content: 'This church event is going to be terrible with violent and sexual themes that should not be shared.',
-      expectedPriority: 'high'
+      expectedPriority: 'high',
+      type: 'text'
     },
     {
       name: 'Medium Priority - Misinformation',
       content: 'The Bible verse John 3:16 actually says something completely different than what pastors teach.',
-      expectedPriority: 'medium'
+      expectedPriority: 'medium',
+      type: 'text'
     },
     {
       name: 'Low Priority - Spam',
       content: 'Check out my amazing crypto investment opportunity! Visit my website for huge returns guaranteed!',
-      expectedPriority: 'low'
+      expectedPriority: 'low',
+      type: 'text'
     },
     {
       name: 'Safe Content',
       content: 'I am grateful for our church community and the wonderful sermon last Sunday about love and compassion.',
-      expectedPriority: 'none'
+      expectedPriority: 'none',
+      type: 'text'
+    },
+    {
+      name: 'Image Analysis - Sample',
+      content: 'Check out this image from our church event!',
+      mediaUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABkAGQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//2Q==',
+      expectedPriority: 'none',
+      type: 'image'
+    },
+    {
+      name: 'Video Analysis - Sample',
+      content: 'Sharing a video from our worship service',
+      mediaUrl: 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAAAAG1wNDJpc29taXNvMmF2YzEAAAAIZnJlZQAAA',
+      expectedPriority: 'none',
+      type: 'video'
     }
   ];
 
@@ -192,6 +216,11 @@ export function TestModerationPage() {
                     }>
                       {scenario.expectedPriority}
                     </Badge>
+                    {scenario.type !== 'text' && (
+                      <Badge variant="outline" className="text-xs">
+                        {scenario.type}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                     {scenario.content}
@@ -269,6 +298,32 @@ export function TestModerationPage() {
                       {violation}
                     </Badge>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {testResult.mediaAnalysis && (
+              <div>
+                <h4 className="font-medium mb-2">Media Analysis:</h4>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  <p className="text-sm mb-2">
+                    <strong>Type:</strong> {testResult.mediaAnalysis.type.toUpperCase()}
+                  </p>
+                  <p className="text-sm mb-2">
+                    <strong>Description:</strong> {testResult.mediaAnalysis.description}
+                  </p>
+                  {testResult.mediaAnalysis.concerns.length > 0 && (
+                    <div>
+                      <strong className="text-sm">Visual Concerns:</strong>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {testResult.mediaAnalysis.concerns.map((concern, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {concern}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -7529,12 +7529,31 @@ Return JSON with this exact structure:
       
       const post = await storage.createDiscussion(discussionData);
       
-      // Real-time AI content monitoring (1-3 seconds)
+      // Real-time AI content monitoring with media analysis (1-3 seconds)
       setTimeout(async () => {
         try {
           const { analyzeContentForViolations, createAutoModerationReport } = await import('./ai-moderation');
+          const { analyzeContentMedia, getMediaType } = await import('./media-utils');
+          
           const combinedContent = `${discussionData.title} ${discussionData.content}`;
-          const moderationResult = await analyzeContentForViolations(combinedContent, 'discussion');
+          
+          // Check for media content
+          const mediaItems = await analyzeContentMedia(discussionData.content, []);
+          let moderationResult;
+          
+          if (mediaItems.length > 0) {
+            // Analyze first media item (can be extended for multiple media)
+            const firstMedia = mediaItems[0];
+            moderationResult = await analyzeContentForViolations(
+              combinedContent, 
+              'discussion', 
+              firstMedia.url, 
+              firstMedia.type
+            );
+          } else {
+            // Text-only analysis
+            moderationResult = await analyzeContentForViolations(combinedContent, 'discussion');
+          }
           
           if (moderationResult.flagged) {
             await createAutoModerationReport(storage, 'discussion', post.id, moderationResult, 'system');
@@ -9036,12 +9055,32 @@ Return JSON with this exact structure:
 
       const newEntry = await storage.createSoapEntry(validatedData);
 
-      // Real-time AI content monitoring for SOAP entries (1-3 seconds)
+      // Real-time AI content monitoring for SOAP entries with media analysis (1-3 seconds)
       setTimeout(async () => {
         try {
           const { analyzeContentForViolations, createAutoModerationReport } = await import('./ai-moderation');
+          const { analyzeContentMedia } = await import('./media-utils');
+          
           const combinedContent = `${validatedData.scripture} ${validatedData.observation} ${validatedData.application} ${validatedData.prayer}`;
-          const moderationResult = await analyzeContentForViolations(combinedContent, 'soap_entry');
+          
+          // Check for media content in SOAP entries
+          const allSoapContent = `${validatedData.observation} ${validatedData.application} ${validatedData.prayer}`;
+          const mediaItems = await analyzeContentMedia(allSoapContent, []);
+          let moderationResult;
+          
+          if (mediaItems.length > 0) {
+            // Analyze first media item
+            const firstMedia = mediaItems[0];
+            moderationResult = await analyzeContentForViolations(
+              combinedContent, 
+              'soap_entry', 
+              firstMedia.url, 
+              firstMedia.type
+            );
+          } else {
+            // Text-only analysis
+            moderationResult = await analyzeContentForViolations(combinedContent, 'soap_entry');
+          }
           
           if (moderationResult.flagged) {
             await createAutoModerationReport(storage, 'soap_entry', newEntry.id, moderationResult, 'system');

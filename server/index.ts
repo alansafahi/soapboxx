@@ -42,6 +42,16 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 
 
+// Media moderation routes
+app.use('/api/media', async (req, res, next) => {
+  try {
+    const { default: mediaModerationRoutes } = await import('./routes/media-moderation.js');
+    return mediaModerationRoutes(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

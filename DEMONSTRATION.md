@@ -43,10 +43,16 @@ HIGH Priority → Content Hidden + Instant Notifications
 ## 🔧 TECHNICAL IMPLEMENTATION
 
 ### AI Analysis Integration
-- **Model:** OpenAI GPT-4o for maximum accuracy
+- **Model:** OpenAI GPT-4o with vision capabilities for maximum accuracy
 - **Response Time:** 1-3 seconds average
 - **Processing:** Asynchronous (no UX delay)
-- **Coverage:** Discussions, SOAP entries, comments
+- **Coverage:** Discussions, SOAP entries, comments, images, videos
+
+### Multi-Modal Analysis
+- **Images:** Direct visual analysis via GPT-4o vision
+- **Videos:** Frame analysis and content detection
+- **Text + Media:** Combined analysis for comprehensive understanding
+- **Media Types:** JPEG, PNG, MP4, WebM, and more
 
 ### Automatic Actions
 - **High Priority:** Content immediately hidden via `isPublic=false`
@@ -55,9 +61,11 @@ HIGH Priority → Content Hidden + Instant Notifications
 - **Child Protection:** Flagged content excluded from all feeds
 
 ### Content Analysis
-- **Discussions:** Combined title + content analysis
-- **SOAP Entries:** Scripture + observation + application + prayer analysis
-- **Comments:** Full comment text analysis
+- **Discussions:** Combined title + content + media analysis
+- **SOAP Entries:** Scripture + observation + application + prayer + media analysis
+- **Comments:** Full comment text + media analysis
+- **Images:** Visual content analysis for inappropriate material
+- **Videos:** Frame analysis and audio transcription capability
 
 ## 🎯 DEMONSTRATION READY
 
