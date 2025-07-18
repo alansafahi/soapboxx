@@ -47,6 +47,9 @@ export function ModerationDashboard() {
   const [selectedReport, setSelectedReport] = useState<ContentReport | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
   const [actionTaken, setActionTaken] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editedContent, setEditedContent] = useState('');
+  const [editedTitle, setEditedTitle] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -109,9 +112,55 @@ export function ModerationDashboard() {
     }
   });
 
+  // Edit content mutation
+  const editContentMutation = useMutation({
+    mutationFn: ({ contentType, contentId, content, title }: {
+      contentType: string;
+      contentId: number;
+      content: string;
+      title?: string;
+    }) => 
+      apiRequest('PUT', `/api/moderation/edit-content`, { contentType, contentId, content, title }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/moderation/reports'] });
+      toast({
+        title: 'Content edited successfully',
+        description: 'The content has been updated and the original version is preserved for audit.',
+      });
+      setEditDialogOpen(false);
+      setEditedContent('');
+      setEditedTitle('');
+    },
+    onError: () => {
+      toast({
+        title: 'Failed to edit content',
+        description: 'Please try again or contact support.',
+        variant: 'destructive',
+      });
+    }
+  });
+
   const handleReviewReport = (report: ContentReport) => {
     setSelectedReport(report);
     setReviewDialogOpen(true);
+  };
+
+  const handleEditContent = (report: ContentReport) => {
+    setSelectedReport(report);
+    setEditedContent(report.originalContent || '');
+    setEditedTitle(report.contentMetadata?.title || '');
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedReport) return;
+    
+    editContentMutation.mutate({
+      contentType: selectedReport.contentType,
+      contentId: selectedReport.contentId,
+      content: editedContent,
+      title: editedTitle
+    });
   };
 
   const handleSubmitReview = () => {
@@ -300,6 +349,14 @@ export function ModerationDashboard() {
                               <Eye className="h-4 w-4 mr-1" />
                               Review
                             </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditContent(report)}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              Edit Content
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -418,6 +475,73 @@ export function ModerationDashboard() {
                   className="flex-1"
                 >
                   {updateReportMutation.isPending ? 'Submitting...' : 'Submit Review'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Content Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Content</DialogTitle>
+            <DialogDescription>
+              Edit the reported content. The original version will be preserved for audit purposes.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedReport && (
+            <div className="space-y-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
+                <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">Notice</h4>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  The original content will be preserved in the database for audit purposes. 
+                  Only edit content to remove inappropriate material or fix violations.
+                </p>
+              </div>
+
+              {selectedReport.contentMetadata?.title && (
+                <div className="space-y-2">
+                  <Label htmlFor="editTitle">Title</Label>
+                  <input
+                    id="editTitle"
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    placeholder="Enter title..."
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="editContent">Content</Label>
+                <Textarea
+                  id="editContent"
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  rows={8}
+                  className="w-full"
+                  placeholder="Enter content..."
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditDialogOpen(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveEdit}
+                  disabled={!editedContent.trim() || editContentMutation.isPending}
+                  className="flex-1"
+                >
+                  {editContentMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </div>

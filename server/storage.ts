@@ -530,6 +530,7 @@ export interface IStorage {
   getContentReports(churchId?: number, status?: string): Promise<ContentReport[]>;
   getContentReport(reportId: number): Promise<ContentReport | undefined>;
   updateContentReportStatus(reportId: number, status: string, reviewedBy: string, reviewNotes?: string, actionTaken?: string): Promise<ContentReport>;
+  editContent(contentType: string, contentId: number, content: string, title: string | undefined, moderatorId: string): Promise<any>;
   
   // Moderation actions
   createModerationAction(action: InsertContentModerationAction): Promise<ContentModerationAction>;
@@ -4084,6 +4085,73 @@ export class DatabaseStorage implements IStorage {
       return updatedReport;
     } catch (error) {
       throw new Error(`Failed to update content report status: ${error}`);
+    }
+  }
+
+  async editContent(contentType: string, contentId: number, content: string, title: string | undefined, moderatorId: string): Promise<any> {
+    const editedAt = new Date();
+    
+    try {
+      switch (contentType) {
+        case 'discussion':
+          const updateData: any = { content, editedAt };
+          if (title) updateData.title = title;
+          
+          await db.update(discussions)
+            .set(updateData)
+            .where(eq(discussions.id, contentId));
+          
+          // Log the moderation action
+          await db.insert(moderationActions).values({
+            contentType,
+            contentId,
+            moderatorId,
+            action: 'content_edited',
+            reason: 'Content edited by moderator',
+            createdAt: editedAt
+          });
+          
+          return { contentType, contentId, editedAt };
+          
+        case 'prayer_request':
+          await db.update(prayerRequests)
+            .set({ requestText: content, editedAt })
+            .where(eq(prayerRequests.id, contentId));
+          
+          await db.insert(moderationActions).values({
+            contentType,
+            contentId,
+            moderatorId,
+            action: 'content_edited',
+            reason: 'Content edited by moderator',
+            createdAt: editedAt
+          });
+          
+          return { contentType, contentId, editedAt };
+          
+        case 'soap_entry':
+          // For SOAP entries, we need to update the appropriate field
+          await db.update(soapEntries)
+            .set({ observation: content, editedAt })
+            .where(eq(soapEntries.id, contentId));
+          
+          await db.insert(moderationActions).values({
+            contentType,
+            contentId,
+            moderatorId,
+            action: 'content_edited',
+            reason: 'Content edited by moderator',
+            createdAt: editedAt
+          });
+          
+          return { contentType, contentId, editedAt };
+          
+        default:
+          throw new Error(`Unsupported content type: ${contentType}`);
+      }
+    } catch (error) {
+      console.error('Failed to edit content:', error);
+      throw error;
     }
   }
 

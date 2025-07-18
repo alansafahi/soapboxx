@@ -3023,6 +3023,35 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // Edit content (for moderators)
+  app.put('/api/moderation/edit-content', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Check if user is a moderator (church admin, pastor, or soapbox owner)
+      const user = await storage.getUser(userId);
+      const userChurches = await storage.getUserChurches(userId);
+      const isModerator = user?.role === 'soapbox_owner' || 
+                         userChurches.some(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
+
+      if (!isModerator) {
+        return res.status(403).json({ message: 'Moderator access required' });
+      }
+
+      const { contentType, contentId, content, title } = req.body;
+
+      const result = await storage.editContent(contentType, parseInt(contentId), content, title, userId);
+
+      res.json({ success: true, result });
+    } catch (error) {
+      console.error('Failed to edit content:', error);
+      res.status(500).json({ message: 'Failed to edit content' });
+    }
+  });
+
   // Hide/remove content
   app.post('/api/moderation/content/:contentType/:contentId/hide', isAuthenticated, async (req: any, res) => {
     try {
