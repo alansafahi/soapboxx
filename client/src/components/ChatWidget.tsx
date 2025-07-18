@@ -228,10 +228,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
           if (knowledgeData.found) {
             response = knowledgeData.answer;
             
-            // Add help documentation link if available
-            if (knowledgeData.helpDocLink) {
-              response += `\n\nFor more details: [View Help Documentation](${knowledgeData.helpDocLink})`;
-            }
+            // Remove the help documentation link section as requested
             
             // Add related topics if available
             if (knowledgeData.relatedTopics && knowledgeData.relatedTopics.length > 0) {

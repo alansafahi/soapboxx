@@ -41,7 +41,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     subcategory: 'individual',
     keywords: ['free', 'free plan', 'no cost', 'basic features', 'individual free', '100 credits'],
     content: 'FREE Individual Plan (100 credits/month): Includes S.O.A.P. Journal, Prayer Wall Access, Community Discussions, and 100 credits per referral. Perfect for individuals starting their faith journey with SoapBox Super App.',
-    helpLink: '/pricing',
+    helpLink: '/faq#pricing',
     priority: 9,
     lastUpdated: '2025-07-17',
     source: 'website'
@@ -52,7 +52,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     subcategory: 'individual',
     keywords: ['individual pricing', 'standard plan', '$10', '$10/mo', '500 credits', '$100/year'],
     content: 'Standard Individual Plan: $10/month ($100/year) with 500 credits/month. Includes everything in Basic plus AI-Powered Insights, Priority Support, and 100 credits per referral.',
-    helpLink: '/pricing',
+    helpLink: '/faq#pricing',
     priority: 9,
     lastUpdated: '2025-07-17',
     source: 'website'
@@ -63,7 +63,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     subcategory: 'individual',
     keywords: ['premium individual', '$20', '$20/mo', 'advanced features', '1000 credits', '$200/year'],
     content: 'Premium Individual Plan: $20/month ($200/year) with 1,000 credits/month. Includes everything in Standard plus Advanced Analytics.',
-    helpLink: '/pricing',
+    helpLink: '/faq#pricing',
     priority: 9,
     lastUpdated: '2025-07-17',
     source: 'website'
@@ -73,7 +73,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     category: 'pricing',
     keywords: ['pricing', 'plans', 'cost', 'how much', 'price', 'subscription', 'plan options'],
     content: 'SoapBox Super App Pricing: FREE (100 credits/month), Standard ($10/month, 500 credits), Premium ($20/month, 1,000 credits). All plans include S.O.A.P. Journal, Prayer Wall, Community Discussions, and referral credits. Higher plans add AI insights, priority support, and advanced analytics.',
-    helpLink: '/pricing',
+    helpLink: '/faq#pricing',
     priority: 10,
     lastUpdated: '2025-07-17',
     source: 'website'
@@ -84,7 +84,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     subcategory: 'promotion',
     keywords: ['summer special', 'pilot program', 'free months', 'promotion', 'discount', 'waived fees'],
     content: '🎉 SUMMER PILOT SPECIAL: All fees waived for 6 months for churches signing up during our pilot phase this summer! This is a limited-time offer for early adopters.',
-    helpLink: '/pricing',
+    helpLink: '/faq#pricing',
     priority: 10,
     lastUpdated: '2025-07-17',
     source: 'website'
