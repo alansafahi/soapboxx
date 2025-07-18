@@ -2,7 +2,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { ModerationDashboard } from '@/components/content-moderation/ModerationDashboard';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import MobileNav from '@/components/MobileNav';
+import MobileNav from '@/components/mobile-nav';
 import { useEffect } from 'react';
 
 export default function ModerationDashboardPage() {

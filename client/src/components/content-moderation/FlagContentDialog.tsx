@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Flag, AlertTriangle, MessageSquare, Spam, Shield, ExternalLink } from 'lucide-react';
+import { Flag, AlertTriangle, MessageSquare, Zap, Shield, ExternalLink } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -31,7 +31,7 @@ const reportReasons = [
   {
     value: 'spam',
     label: 'Spam',
-    icon: Spam,
+    icon: Zap,
     description: 'Repetitive, commercial, or off-topic content'
   },
   {
