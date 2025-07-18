@@ -20,37 +20,49 @@ const reportReasons = [
     value: 'inappropriate',
     label: 'Inappropriate Content',
     icon: AlertTriangle,
-    description: 'Sexual content, violence, or otherwise inappropriate material'
+    description: 'Sexual content, violence, adult language, or otherwise inappropriate material',
+    priority: 'high',
+    examples: 'Graphic content, threats, adult language'
   },
   {
     value: 'harassment',
     label: 'Harassment or Bullying',
     icon: MessageSquare,
-    description: 'Targeting, intimidating, or bullying behavior'
-  },
-  {
-    value: 'spam',
-    label: 'Spam',
-    icon: Zap,
-    description: 'Repetitive, commercial, or off-topic content'
+    description: 'Targeting, intimidating, bullying, or hate speech based on faith, race, gender, or other characteristics',
+    priority: 'high',
+    examples: 'Direct harassment, discrimination, blasphemous misuse of Scripture'
   },
   {
     value: 'misinformation',
     label: 'False Information',
     icon: ExternalLink,
-    description: 'Misleading or false religious/spiritual information'
+    description: 'Misleading or false religious/spiritual information, misquoting Scripture',
+    priority: 'medium',
+    examples: 'Theological misinformation, misquoted verses'
   },
   {
     value: 'privacy_violation',
     label: 'Privacy Violation',
     icon: Shield,
-    description: 'Sharing personal information without consent'
+    description: 'Sharing personal information without consent, impersonation of church staff',
+    priority: 'medium',
+    examples: 'Exposing private member info, impersonating pastors'
+  },
+  {
+    value: 'spam',
+    label: 'Spam',
+    icon: Zap,
+    description: 'Repetitive, commercial, or off-topic content across multiple threads',
+    priority: 'low',
+    examples: 'Mass posting, promotional content, AI-generated spam'
   },
   {
     value: 'other',
     label: 'Other',
     icon: Flag,
-    description: 'Other community guideline violations'
+    description: 'Other community guideline violations or disruptive behavior',
+    priority: 'medium',
+    examples: 'Off-topic posts, inappropriate profile pictures, theological disagreements'
   }
 ];
 
@@ -147,9 +159,30 @@ export function FlagContentDialog({ contentType, contentId, trigger, onReported 
               </SelectContent>
             </Select>
             {selectedReasonData && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {selectedReasonData.description}
-              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    selectedReasonData.priority === 'high' ? 'bg-red-100 text-red-800' :
+                    selectedReasonData.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {selectedReasonData.priority === 'high' ? '⚠️ HIGH PRIORITY' :
+                     selectedReasonData.priority === 'medium' ? '🟡 MEDIUM PRIORITY' :
+                     '🟢 LOW PRIORITY'}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedReasonData.description}
+                </p>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Examples:
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    {selectedReasonData.examples}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 

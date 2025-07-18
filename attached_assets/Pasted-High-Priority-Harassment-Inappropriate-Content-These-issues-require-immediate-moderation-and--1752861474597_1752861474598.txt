@@ -1,0 +1,68 @@
+High Priority – Harassment & Inappropriate Content
+⚠️ These issues require immediate moderation and may include offensive, harmful, or emotionally damaging behavior.
+
+🚨 Examples:
+Direct harassment or bullying in prayer comments or discussion threads
+(e.g., “You’re a fake Christian and you should leave this app”)
+
+Sexual or violent language
+(e.g., graphic content, threats, adult language)
+
+Hate speech or discrimination based on faith, race, gender, or sexual orientation
+(e.g., “All [group] should go to hell” or antisemitic remarks)
+
+Blasphemous, mocking, or profane misuse of Scripture or sacred topics
+(e.g., misusing verses to insult others)
+
+Predatory behavior toward minors or inappropriate private messaging
+
+System Action: Automatically escalated for admin review and temporarily hidden until resolved.
+
+🟡 Medium Priority – Other User Reports
+These are non-threatening but still important for maintaining community standards and platform trust.
+
+📝 Examples:
+Theological disagreements escalating in tone
+(e.g., “Your doctrine is wrong and misleading” in a non-hateful way)
+
+Off-topic or disruptive posts in event threads or Bible studies
+
+Misinformation (e.g., misquoting scripture in a misleading way)
+
+Impersonation of pastors or church staff
+
+Overuse of AI-generated content that feels spammy but isn’t malicious
+
+Inappropriate profile pictures (non-sexual but odd or misleading)
+
+System Action: Notified to moderators, but not auto-hidden unless flagged multiple times.
+
+🟢 Low Priority – Automated Spam & System Flags
+These are caught by automated systems using AI/spam detection models.
+
+🤖 Examples:
+Mass posting of the same content across multiple churches or discussion threads
+(e.g., promoting a personal YouTube channel in multiple posts)
+
+Repeated AI-prayers or posts with no context
+
+Suspicious links (e.g., external donation sites, crypto schemes)
+
+Foreign-language posts with non-church content in English-speaking churches
+
+System Action: Temporarily muted or rate-limited; reviewed periodically by moderators.
+
+🔵 Critical Priority – Reserved (For Future Use)
+For extreme cases like safety threats, legal violations, or app-wide disruption.
+
+🔒 Potential Future Examples:
+Credible suicide or self-harm statements (auto-flagged for escalation)
+
+Coordinated misinformation campaigns against churches or denominations
+
+Data breach or exposure of private member information
+
+Direct threats against pastors, churches, or user safety
+
+System Action: Immediate lockdown of content, emergency escalation to platform admins and church admins.
+

@@ -32,7 +32,7 @@ interface ContentReport {
   description?: string;
   originalContent?: string;
   contentMetadata?: any;
-  priority: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
   reporterId: string;
   reviewedBy?: string;
@@ -250,10 +250,31 @@ export function ModerationDashboard() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'low': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'critical': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400 border-purple-300';
+      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 border-red-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-300';
+      case 'low': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 border-blue-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 border-gray-300';
+    }
+  };
+
+  const getPriorityBorderColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'border-l-purple-500';
+      case 'high': return 'border-l-red-500';
+      case 'medium': return 'border-l-yellow-500';
+      case 'low': return 'border-l-blue-500';
+      default: return 'border-l-gray-300';
+    }
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'critical': return '🔒 CRITICAL';
+      case 'high': return '⚠️ HIGH';
+      case 'medium': return '🟡 MEDIUM';
+      case 'low': return '🟢 LOW';
+      default: return priority.toUpperCase();
     }
   };
 

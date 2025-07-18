@@ -2948,6 +2948,23 @@ app.post('/api/invitations', async (req: any, res) => {
         return res.status(400).json({ message: 'Content type, ID, and reason are required' });
       }
 
+      // Determine priority based on comprehensive violation types
+      const getPriorityLevel = (reason: string): 'critical' | 'high' | 'medium' | 'low' => {
+        switch (reason) {
+          case 'harassment':
+          case 'inappropriate':
+            return 'high'; // Immediate moderation required
+          case 'misinformation':
+          case 'privacy_violation':
+          case 'other':
+            return 'medium'; // Important but not threatening
+          case 'spam':
+            return 'low'; // Automated or minor violations
+          default:
+            return 'medium';
+        }
+      };
+
       // Create content report
       const report = await storage.createContentReport({
         reporterId: userId,
@@ -2955,8 +2972,19 @@ app.post('/api/invitations', async (req: any, res) => {
         contentId: parseInt(contentId),
         reason,
         description: description || null,
-        priority: reason === 'harassment' || reason === 'inappropriate' ? 'high' : 'medium',
+        priority: getPriorityLevel(reason),
       });
+
+      // For high priority violations (harassment, inappropriate content), 
+      // automatically hide content to protect children and community
+      if (getPriorityLevel(reason) === 'high') {
+        try {
+          await storage.hideContent(contentType, parseInt(contentId), 
+            `High priority violation: ${reason}`, userId);
+        } catch (error) {
+          console.error('Failed to auto-hide high priority content:', error);
+        }
+      }
 
       res.json({ success: true, report });
     } catch (error) {
