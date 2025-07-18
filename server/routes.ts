@@ -3085,7 +3085,10 @@ app.post('/api/invitations', async (req: any, res) => {
 
       const { contentType, originalContent, violationReason, reportDescription } = req.body;
       
+      console.log('Received AI suggestions request:', { contentType, originalContent: originalContent?.substring(0, 100), violationReason, reportDescription });
+      
       if (!contentType || !originalContent || !violationReason) {
+        console.log('Missing required fields:', { contentType: !!contentType, originalContent: !!originalContent, violationReason: !!violationReason });
         return res.status(400).json({ message: 'Missing required fields' });
       }
 

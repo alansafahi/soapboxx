@@ -158,17 +158,21 @@ export function ModerationDashboard() {
 
     setIsGeneratingAISuggestions(true);
     try {
+      const requestData = {
+        contentType: report.contentType,
+        originalContent: report.originalContent,
+        violationReason: report.reason,
+        reportDescription: report.description,
+      };
+      
+      console.log('Sending AI suggestions request:', requestData);
+      
       const response = await fetch('/api/ai/generate-edit-suggestions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          contentType: report.contentType,
-          originalContent: report.originalContent,
-          violationReason: report.reason,
-          reportDescription: report.description,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       const data = await response.json();
