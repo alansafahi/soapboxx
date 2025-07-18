@@ -307,29 +307,32 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
   };
 
   const positionClasses = position === 'bottom-right' 
-    ? 'bottom-4 right-4' 
-    : 'bottom-4 left-4';
+    ? 'bottom-6 right-6' 
+    : 'bottom-6 left-6';
 
   if (!isOpen) {
     return (
-      <div className={`fixed ${positionClasses} z-[9999]`}>
-        <div className="relative">
+      <div className={`fixed ${positionClasses} z-[99999] chat-widget-isolation`}>
+        <div className="relative chat-widget-isolation">
           <Button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              e.stopImmediatePropagation();
               setIsOpen(true);
             }}
             onTouchStart={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              e.stopImmediatePropagation();
             }}
             onTouchEnd={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              e.stopImmediatePropagation();
               setIsOpen(true);
             }}
-            className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation"
+            className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation chat-widget-isolation"
           >
             <MessageCircle className="w-6 h-6" />
           </Button>
@@ -342,11 +345,11 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
   }
 
   return (
-    <div className={`fixed ${positionClasses} z-[9999]`}>
-      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh] touch-manipulation`}
-           onTouchStart={(e) => e.stopPropagation()}
-           onTouchEnd={(e) => e.stopPropagation()}
-           onClick={(e) => e.stopPropagation()}>
+    <div className={`fixed ${positionClasses} z-[99999] chat-widget-isolation`}>
+      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh] touch-manipulation chat-widget-isolation`}
+           onTouchStart={(e) => { e.stopPropagation(); e.stopImmediatePropagation(); }}
+           onTouchEnd={(e) => { e.stopPropagation(); e.stopImmediatePropagation(); }}
+           onClick={(e) => { e.stopPropagation(); e.stopImmediatePropagation(); }}>
         {/* Chat Header */}
         <div className="bg-gradient-to-r from-teal-600 to-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
           <div className="flex items-center gap-3">

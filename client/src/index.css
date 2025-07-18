@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Chat Widget Mobile Touch Isolation */
+.chat-widget-isolation {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  isolation: isolate !important;
+  z-index: 999999 !important;
+  position: relative !important;
+}
+
+.chat-widget-isolation * {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+
 /* Font size variables */
 .font-small {
   --font-size-base: 0.875rem;
