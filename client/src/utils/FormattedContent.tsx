@@ -11,6 +11,10 @@ interface FormattedContentProps {
 }
 
 export default function FormattedContent({ content, className, attachedMedia }: FormattedContentProps) {
+  console.log('FormattedContent received attachedMedia:', attachedMedia);
+  console.log('FormattedContent attachedMedia type:', typeof attachedMedia);
+  console.log('FormattedContent attachedMedia is array?', Array.isArray(attachedMedia));
+  
   const formatContent = (htmlContent: string) => {
     return htmlContent
       .replace(/<strong>(.*?)<\/strong>/gi, '**$1**') // Bold

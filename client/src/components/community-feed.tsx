@@ -498,6 +498,7 @@ export default function CommunityFeed() {
                     </div>
                     <h3 className="font-medium text-gray-900 dark:text-white dark:font-bold mb-2">{discussion.title}</h3>
                     <div className="text-gray-600 dark:text-gray-100 dark:font-semibold text-sm mb-3">
+                      {console.log('Discussion attachedMedia:', discussion.attachedMedia)}
                       <FormattedContent 
                         content={discussion.content} 
                         attachedMedia={discussion.attachedMedia}
