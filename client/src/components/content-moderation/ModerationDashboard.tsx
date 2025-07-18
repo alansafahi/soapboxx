@@ -47,9 +47,9 @@ export function ModerationDashboard() {
   const [selectedReport, setSelectedReport] = useState<ContentReport | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
   const [actionTaken, setActionTaken] = useState('');
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editedContent, setEditedContent] = useState('');
-  const [editedTitle, setEditedTitle] = useState('');
+  const [editRequestDialogOpen, setEditRequestDialogOpen] = useState(false);
+  const [editRequestFeedback, setEditRequestFeedback] = useState('');
+  const [editRequestSuggestions, setEditRequestSuggestions] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -112,28 +112,28 @@ export function ModerationDashboard() {
     }
   });
 
-  // Edit content mutation
-  const editContentMutation = useMutation({
-    mutationFn: ({ contentType, contentId, content, title }: {
+  // Request edit mutation
+  const requestEditMutation = useMutation({
+    mutationFn: ({ contentType, contentId, feedback, suggestions }: {
       contentType: string;
       contentId: number;
-      content: string;
-      title?: string;
+      feedback: string;
+      suggestions: string;
     }) => 
-      apiRequest('PUT', `/api/moderation/edit-content`, { contentType, contentId, content, title }),
+      apiRequest('POST', `/api/moderation/request-edit`, { contentType, contentId, feedback, suggestions }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/moderation/reports'] });
       toast({
-        title: 'Content edited successfully',
-        description: 'The content has been updated and the original version is preserved for audit.',
+        title: 'Edit request sent successfully',
+        description: 'The user has been notified with your feedback and suggestions.',
       });
-      setEditDialogOpen(false);
-      setEditedContent('');
-      setEditedTitle('');
+      setEditRequestDialogOpen(false);
+      setEditRequestFeedback('');
+      setEditRequestSuggestions('');
     },
     onError: () => {
       toast({
-        title: 'Failed to edit content',
+        title: 'Failed to send edit request',
         description: 'Please try again or contact support.',
         variant: 'destructive',
       });
@@ -145,21 +145,21 @@ export function ModerationDashboard() {
     setReviewDialogOpen(true);
   };
 
-  const handleEditContent = (report: ContentReport) => {
+  const handleRequestEdit = (report: ContentReport) => {
     setSelectedReport(report);
-    setEditedContent(report.originalContent || '');
-    setEditedTitle(report.contentMetadata?.title || '');
-    setEditDialogOpen(true);
+    setEditRequestFeedback('');
+    setEditRequestSuggestions('');
+    setEditRequestDialogOpen(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSendEditRequest = () => {
     if (!selectedReport) return;
     
-    editContentMutation.mutate({
+    requestEditMutation.mutate({
       contentType: selectedReport.contentType,
       contentId: selectedReport.contentId,
-      content: editedContent,
-      title: editedTitle
+      feedback: editRequestFeedback,
+      suggestions: editRequestSuggestions
     });
   };
 
@@ -352,10 +352,10 @@ export function ModerationDashboard() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleEditContent(report)}
+                              onClick={() => handleRequestEdit(report)}
                             >
                               <MessageSquare className="h-4 w-4 mr-1" />
-                              Edit Content
+                              Request Edit
                             </Button>
                           </div>
                         </div>
@@ -444,7 +444,7 @@ export function ModerationDashboard() {
                     <SelectItem value="no_action">No Action Required</SelectItem>
                     <SelectItem value="warning_sent">Warning Sent to User</SelectItem>
                     <SelectItem value="hide_content">Hide Content</SelectItem>
-                    <SelectItem value="content_edited">Content Edited</SelectItem>
+                    <SelectItem value="edit_request_sent">Edit Request Sent to User</SelectItem>
                     <SelectItem value="escalated">Escalated to Higher Authority</SelectItem>
                   </SelectContent>
                 </Select>
@@ -482,66 +482,80 @@ export function ModerationDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Content Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+      {/* Request Edit Dialog */}
+      <Dialog open={editRequestDialogOpen} onOpenChange={setEditRequestDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Content</DialogTitle>
+            <DialogTitle>Request Content Edit</DialogTitle>
             <DialogDescription>
-              Edit the reported content. The original version will be preserved for audit purposes.
+              Send feedback to the user requesting them to edit their content. This empowers users to make their own corrections.
             </DialogDescription>
           </DialogHeader>
 
           {selectedReport && (
             <div className="space-y-4">
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
-                <h4 className="font-medium mb-2 text-yellow-800 dark:text-yellow-200">Notice</h4>
-                <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                  The original content will be preserved in the database for audit purposes. 
-                  Only edit content to remove inappropriate material or fix violations.
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+                <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">Best Practice</h4>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Request edits rather than directly editing content. This helps users learn community guidelines and prevents similar issues in the future.
                 </p>
               </div>
 
-              {selectedReport.contentMetadata?.title && (
-                <div className="space-y-2">
-                  <Label htmlFor="editTitle">Title</Label>
-                  <input
-                    id="editTitle"
-                    type="text"
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                    placeholder="Enter title..."
-                  />
+              {/* Show original content for reference */}
+              {selectedReport.originalContent && (
+                <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-gray-800 dark:text-gray-200">Original Content</h4>
+                  <div className="text-sm bg-white dark:bg-gray-900 p-3 rounded border max-h-32 overflow-y-auto">
+                    {selectedReport.contentMetadata?.title && (
+                      <div className="mb-2">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">Title:</span> {selectedReport.contentMetadata.title}
+                      </div>
+                    )}
+                    <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                      {selectedReport.originalContent}
+                    </div>
+                  </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="editContent">Content</Label>
+                <Label htmlFor="editFeedback">Feedback Message</Label>
                 <Textarea
-                  id="editContent"
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  rows={8}
+                  id="editFeedback"
+                  value={editRequestFeedback}
+                  onChange={(e) => setEditRequestFeedback(e.target.value)}
+                  rows={4}
                   className="w-full"
-                  placeholder="Enter content..."
+                  placeholder="Explain what needs to be changed and why (e.g., 'This content contains inappropriate language that violates our community guidelines...')"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editSuggestions">Specific Suggestions</Label>
+                <Textarea
+                  id="editSuggestions"
+                  value={editRequestSuggestions}
+                  onChange={(e) => setEditRequestSuggestions(e.target.value)}
+                  rows={4}
+                  className="w-full"
+                  placeholder="Provide specific suggestions for improvement (e.g., 'Please rephrase the second paragraph to be more respectful and remove the offensive language...')"
                 />
               </div>
 
               <div className="flex gap-2 pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setEditDialogOpen(false)}
+                  onClick={() => setEditRequestDialogOpen(false)}
                   className="flex-1"
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleSaveEdit}
-                  disabled={!editedContent.trim() || editContentMutation.isPending}
+                  onClick={handleSendEditRequest}
+                  disabled={!editRequestFeedback.trim() || !editRequestSuggestions.trim() || requestEditMutation.isPending}
                   className="flex-1"
                 >
-                  {editContentMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  {requestEditMutation.isPending ? 'Sending...' : 'Send Edit Request'}
                 </Button>
               </div>
             </div>

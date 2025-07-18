@@ -530,7 +530,7 @@ export interface IStorage {
   getContentReports(churchId?: number, status?: string): Promise<ContentReport[]>;
   getContentReport(reportId: number): Promise<ContentReport | undefined>;
   updateContentReportStatus(reportId: number, status: string, reviewedBy: string, reviewNotes?: string, actionTaken?: string): Promise<ContentReport>;
-  editContent(contentType: string, contentId: number, content: string, title: string | undefined, moderatorId: string): Promise<any>;
+  requestContentEdit(contentType: string, contentId: number, feedback: string, suggestions: string, moderatorId: string): Promise<any>;
   
   // Moderation actions
   createModerationAction(action: InsertContentModerationAction): Promise<ContentModerationAction>;
@@ -4088,69 +4088,74 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async editContent(contentType: string, contentId: number, content: string, title: string | undefined, moderatorId: string): Promise<any> {
-    const editedAt = new Date();
+  async requestContentEdit(contentType: string, contentId: number, feedback: string, suggestions: string, moderatorId: string): Promise<any> {
+    const requestedAt = new Date();
     
     try {
+      // Get the content author to send them a notification
+      let authorId: string | null = null;
+      
       switch (contentType) {
         case 'discussion':
-          const updateData: any = { content, editedAt };
-          if (title) updateData.title = title;
-          
-          await db.update(discussions)
-            .set(updateData)
+          const [discussion] = await db.select({ authorId: discussions.authorId })
+            .from(discussions)
             .where(eq(discussions.id, contentId));
-          
-          // Log the moderation action
-          await db.insert(moderationActions).values({
-            contentType,
-            contentId,
-            moderatorId,
-            action: 'content_edited',
-            reason: 'Content edited by moderator',
-            createdAt: editedAt
-          });
-          
-          return { contentType, contentId, editedAt };
+          authorId = discussion?.authorId;
+          break;
           
         case 'prayer_request':
-          await db.update(prayerRequests)
-            .set({ requestText: content, editedAt })
+          const [prayerRequest] = await db.select({ authorId: prayerRequests.authorId })
+            .from(prayerRequests)
             .where(eq(prayerRequests.id, contentId));
-          
-          await db.insert(moderationActions).values({
-            contentType,
-            contentId,
-            moderatorId,
-            action: 'content_edited',
-            reason: 'Content edited by moderator',
-            createdAt: editedAt
-          });
-          
-          return { contentType, contentId, editedAt };
+          authorId = prayerRequest?.authorId;
+          break;
           
         case 'soap_entry':
-          // For SOAP entries, we need to update the appropriate field
-          await db.update(soapEntries)
-            .set({ observation: content, editedAt })
+          const [soapEntry] = await db.select({ authorId: soapEntries.authorId })
+            .from(soapEntries)
             .where(eq(soapEntries.id, contentId));
-          
-          await db.insert(moderationActions).values({
-            contentType,
-            contentId,
-            moderatorId,
-            action: 'content_edited',
-            reason: 'Content edited by moderator',
-            createdAt: editedAt
-          });
-          
-          return { contentType, contentId, editedAt };
+          authorId = soapEntry?.authorId;
+          break;
           
         default:
           throw new Error(`Unsupported content type: ${contentType}`);
       }
+      
+      if (!authorId) {
+        throw new Error('Could not find content author');
+      }
+      
+      // Create an edit request notification
+      await db.insert(notifications).values({
+        recipientId: authorId,
+        senderId: moderatorId,
+        type: 'content_edit_request',
+        title: 'Content Edit Request',
+        message: `A moderator has requested that you edit your ${contentType.replace('_', ' ')}.\n\nFeedback: ${feedback}\n\nSuggestions: ${suggestions}`,
+        data: JSON.stringify({
+          contentType,
+          contentId,
+          feedback,
+          suggestions,
+          moderatorId
+        }),
+        isRead: false,
+        createdAt: requestedAt
+      });
+      
+      // Log the moderation action
+      await db.insert(moderationActions).values({
+        contentType,
+        contentId,
+        moderatorId,
+        action: 'edit_requested',
+        reason: 'Moderator requested content edit',
+        createdAt: requestedAt
+      });
+      
+      return { contentType, contentId, authorId, requestedAt };
     } catch (error) {
-      console.error('Failed to edit content:', error);
+      console.error('Failed to request content edit:', error);
       throw error;
     }
   }

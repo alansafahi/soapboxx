@@ -3023,8 +3023,8 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
-  // Edit content (for moderators)
-  app.put('/api/moderation/edit-content', isAuthenticated, async (req: any, res) => {
+  // Request content edit (for moderators)
+  app.post('/api/moderation/request-edit', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
@@ -3041,14 +3041,14 @@ app.post('/api/invitations', async (req: any, res) => {
         return res.status(403).json({ message: 'Moderator access required' });
       }
 
-      const { contentType, contentId, content, title } = req.body;
+      const { contentType, contentId, feedback, suggestions } = req.body;
 
-      const result = await storage.editContent(contentType, parseInt(contentId), content, title, userId);
+      const result = await storage.requestContentEdit(contentType, parseInt(contentId), feedback, suggestions, userId);
 
       res.json({ success: true, result });
     } catch (error) {
-      console.error('Failed to edit content:', error);
-      res.status(500).json({ message: 'Failed to edit content' });
+      console.error('Failed to send edit request:', error);
+      res.status(500).json({ message: 'Failed to send edit request' });
     }
   });
 
