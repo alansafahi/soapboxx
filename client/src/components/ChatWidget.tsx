@@ -245,23 +245,46 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         // Continue with fallback logic if knowledge base fails
       }
       
-      // Fallback responses if knowledge base didn't find anything
+      // Enhanced fallback with GPT-4o integration for complex queries
+      try {
+        const gptResponse = await fetch('/api/chat/gpt-fallback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: userMessage,
+            context: 'SoapBox Super App support chat' 
+          })
+        });
+        
+        if (gptResponse.ok) {
+          const gptData = await gptResponse.json();
+          if (gptData.response) {
+            response = gptData.response;
+            await addMessage(response, 'agent');
+            return;
+          }
+        }
+      } catch (error) {
+        // Continue with static fallbacks if GPT fails
+      }
+      
+      // Static fallback responses for key topics
       if (msgLower.includes('demo') || msgLower.includes('trial')) {
         response = "I'd be happy to schedule a demo for you! You can book a time that works for you using our Calendly link, or I can connect you with our sales team. Which would you prefer?";
       } else if (msgLower.includes('price') || msgLower.includes('cost') || msgLower.includes('how much')) {
-        response = "For individuals, SoapBox Super App offers a free version with basic features. Premium individual plans start at $4.99/month. Church pricing varies by size ($29-99/month). Would you like details on individual or church pricing?";
+        response = "SoapBox Super App pricing:\n• FREE (100 credits/month) - S.O.A.P. Journal, Prayer Wall, Community\n• Standard ($10/month, 500 credits) - Adds AI insights, priority support\n• Premium ($20/month, 1,000 credits) - Advanced analytics\n\nWould you like details on individual or church pricing?";
       } else if (msgLower.includes('human') || msgLower.includes('agent') || msgLower.includes('person')) {
         response = isBusinessHours 
           ? "I'll connect you with one of our team members right away. Someone will be with you shortly!"
           : "I'll make sure one of our team members contacts you first thing during business hours (9 AM - 5 PM PT, weekdays). You can also email support@soapboxsuperapp.com for faster response.";
       } else {
-        // Only show the business hours message for the first substantial message
+        // Intelligent follow-up based on conversation state
         if (!hasShownInitialResponse) {
-          response = "I can help answer questions about SoapBox Super App features, account setup, prayer walls, Bible study tools, and technical issues. What would you like to know?";
+          response = "I'm your SoapBox Super App assistant with access to comprehensive knowledge about our faith-based platform. I can help with features, pricing, technical support, and ministry tools. What would you like to know?";
           setHasShownInitialResponse(true);
         } else {
-          // Provide helpful follow-up responses
-          response = "I'd be happy to help! I can assist with:\n• Prayer Wall and S.O.A.P. journaling questions\n• Account and login help\n• Church events and notifications\n• Giving and donation setup\n• Technical troubleshooting\n• Demo scheduling and pricing\n\nWhat specific area interests you?";
+          // Smart suggestions based on common queries
+          response = "I have detailed knowledge about:\n• Prayer Wall and S.O.A.P. journaling\n• Account setup and troubleshooting\n• Church events and community features\n• Giving and donation options\n• Pricing plans and features\n• AI-powered ministry tools\n\nWhat interests you most?";
         }
       }
       

@@ -3135,6 +3135,64 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // GPT-4o fallback endpoint for complex queries
+  app.post('/api/chat/gpt-fallback', async (req, res) => {
+    try {
+      const { message, context } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const systemPrompt = `You are a helpful customer support assistant for SoapBox Super App, a comprehensive faith-based platform that helps churches and believers unite their faith community.
+
+Key SoapBox Super App information:
+- Faith-based platform for prayer networks, Bible study, church management
+- Pricing: FREE (100 credits), Standard ($10/month, 500 credits), Premium ($20/month, 1,000 credits)  
+- Features: S.O.A.P. Journal, Prayer Wall, Community Discussions, Event Management, AI-powered ministry tools
+- Target users: Churches of all sizes, pastors, church members, individual believers
+- Core mission: Unite faith communities through modern technology
+
+Guidelines:
+- Be helpful, warm, and professional with a spiritual tone
+- Provide accurate information about SoapBox Super App features and pricing
+- For billing, account deletion, or complex technical issues, direct users to support team
+- Keep responses concise (2-3 sentences) unless detail is needed
+- Focus on how SoapBox Super App can strengthen their faith community
+- Avoid theological debates or deep religious counseling - focus on the app features
+
+Context: ${context || 'General support chat'}`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt
+          },
+          {
+            role: "user", 
+            content: message
+          }
+        ],
+        max_tokens: 200,
+        temperature: 0.7
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      
+      if (response) {
+        res.json({ response });
+      } else {
+        res.status(500).json({ error: 'No response generated' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'GPT fallback failed' });
+    }
+  });
+
   // Endpoint to add new knowledge entries (for daily growth)
   app.post('/api/admin/knowledge', async (req, res) => {
     try {

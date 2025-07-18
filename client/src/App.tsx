@@ -198,8 +198,8 @@ function AppRouter() {
                     </AnimatePresence>
                 </main>
             </div>
-            {/* Global Chat Widget - temporarily hidden due to quality concerns */}
-            {/* <ChatWidget position="bottom-right" /> */}
+            {/* Global Chat Widget - Enhanced with comprehensive knowledge base */}
+            <ChatWidget position="bottom-right" />
         </div>
     );
 }
