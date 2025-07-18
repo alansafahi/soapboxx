@@ -335,9 +335,9 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     id: 'company-ownership',
     category: 'company',
     subcategory: 'ownership',
-    keywords: ['who owns', 'owner', 'founder', 'ceo', 'leadership', 'alan safahi', 'founder'],
+    keywords: ['who owns', 'owner', 'founder', 'ceo', 'leadership', 'alan safahi', 'owns soapbox', 'owns the company', 'company owner', 'soapbox owner'],
     content: 'SoapBox Super App is owned and founded by Alan Safahi, an experienced entrepreneur passionate about strengthening faith communities through technology. Alan leads the vision and development of our comprehensive church management platform.',
-    priority: 9,
+    priority: 15,
     lastUpdated: '2025-07-18',
     source: 'company'
   },
@@ -401,19 +401,28 @@ export function searchComprehensiveKnowledge(userMessage: string): KnowledgeResp
     let score = 0;
     const messageWords = message.split(' ');
     
-    // Exact keyword matches (highest score)
+    // Exact phrase matches (highest priority)
     for (const keyword of entry.keywords) {
       if (message.includes(keyword)) {
-        score += keyword.length > 3 ? 3 : 2; // Longer keywords get higher scores
+        // Give much higher score for longer, more specific phrases
+        if (keyword.length > 8) {
+          score += 15; // High score for specific phrases like "who owns"
+        } else if (keyword.length > 5) {
+          score += 8;
+        } else {
+          score += 5;
+        }
       }
     }
     
-    // Partial word matches
+    // Exact word matches (medium priority)
     for (const word of messageWords) {
-      if (word.length > 3) {
+      if (word.length > 2) {
         for (const keyword of entry.keywords) {
-          if (keyword.includes(word) || word.includes(keyword)) {
-            score += 1;
+          if (keyword === word) {
+            score += 3; // Exact word match
+          } else if (keyword.includes(word) && word.length > 3) {
+            score += 1; // Partial match only for longer words
           }
         }
       }

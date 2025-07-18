@@ -365,18 +365,6 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              e.stopImmediatePropagation();
-              setIsOpen(true);
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (e.stopImmediatePropagation) e.stopImmediatePropagation();
               setIsOpen(true);
             }}
             className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation chat-widget-isolation"
@@ -396,7 +384,6 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
       <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh] touch-manipulation chat-widget-isolation`}
            onTouchStart={(e) => { 
              e.stopPropagation(); 
-             if (e.stopImmediatePropagation) e.stopImmediatePropagation(); 
            }}
            onTouchEnd={(e) => { 
              e.stopPropagation(); 
@@ -428,11 +415,6 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                 e.stopPropagation();
                 setIsMinimized(!isMinimized);
               }}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsMinimized(!isMinimized);
-              }}
               className="text-white hover:bg-white/20 p-1 touch-manipulation"
             >
               <Minimize2 className="w-4 h-4" />
@@ -441,11 +423,6 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
               variant="ghost"
               size="sm"
               onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsOpen(false);
-              }}
-              onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setIsOpen(false);
@@ -516,11 +493,6 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                       e.stopPropagation();
                       handleUserInfoSubmit();
                     }}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleUserInfoSubmit();
-                    }}
                     className="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm touch-manipulation"
                     disabled={!userInfo.name || !userInfo.email}
                   >
@@ -543,11 +515,6 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                   />
                   <Button
                     onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleSendMessage();
-                    }}
-                    onTouchEnd={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       handleSendMessage();
