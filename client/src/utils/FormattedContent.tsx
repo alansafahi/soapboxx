@@ -51,14 +51,6 @@ export default function FormattedContent({ content }: { content: string }) {
   
   const parts = parseMarkdown(formattedContent);
   
-  // Debug logging for image issues
-  console.log('🔍 FormattedContent Debug:', {
-    originalContent: content,
-    formattedContent,
-    parsedParts: parts,
-    hasImage: content.includes('![')
-  });
-  
 
   
   return (
