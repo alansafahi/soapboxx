@@ -105,30 +105,18 @@ export default function FormattedContent({ content, className, attachedMedia }: 
       
       {/* Display attached media */}
       {attachedMedia && attachedMedia.length > 0 && (
-        <div className="mt-3 space-y-2" style={{ backgroundColor: '#f0f0f0', padding: '10px', border: '2px solid red' }}>
-          <p style={{ color: 'red', fontWeight: 'bold' }}>DEBUG: Attached Media Section ({attachedMedia.length} items)</p>
+        <div className="mt-3 space-y-2">
           {attachedMedia.map((media, index) => {
             if (media.type === 'image' || media.url?.startsWith('data:image/')) {
               return (
-                <div key={index} style={{ border: '1px solid blue', padding: '5px' }}>
-                  <p style={{ color: 'blue', fontSize: '12px' }}>Image {index + 1}: {media.name}</p>
-                  <img 
-                    src={media.url} 
-                    alt={media.name || media.filename || 'Attached image'} 
-                    className="max-w-full h-auto rounded-lg border shadow-sm"
-                    style={{ 
-                      maxHeight: '400px',
-                      display: 'block',
-                      border: '3px solid green'
-                    }}
-                    loading="lazy"
-                    onLoad={(e) => console.log('Image loaded successfully:', e.target.naturalWidth, 'x', e.target.naturalHeight)}
-                    onError={(e) => {
-                      console.error('Image failed to load:', media.url?.substring(0, 100));
-                      e.currentTarget.style.border = '3px solid red';
-                    }}
-                  />
-                </div>
+                <img 
+                  key={index}
+                  src={media.url} 
+                  alt={media.name || media.filename || 'Attached image'} 
+                  className="max-w-full h-auto rounded-lg border shadow-sm"
+                  style={{ maxHeight: '400px' }}
+                  loading="lazy"
+                />
               );
             }
             return null;
