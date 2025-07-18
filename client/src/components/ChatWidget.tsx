@@ -306,13 +306,18 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
     }
   };
 
-  const positionClasses = position === 'bottom-right' 
-    ? 'bottom-4 right-4 sm:bottom-6 sm:right-6' 
-    : 'bottom-4 left-4 sm:bottom-6 sm:left-6';
+  // Positioning styles - use inline styles for reliable fixed positioning
+  const widgetStyles: React.CSSProperties = {
+    position: 'fixed',
+    bottom: '20px',
+    right: position === 'bottom-right' ? '20px' : 'auto',
+    left: position === 'bottom-left' ? '20px' : 'auto',
+    zIndex: 99999,
+  };
 
   if (!isOpen) {
     return (
-      <div className={`fixed ${positionClasses} z-[99999] chat-widget-isolation`}>
+      <div className="chat-widget-isolation" style={widgetStyles}>
         <div className="relative chat-widget-isolation">
           <Button
             onClick={(e) => {
@@ -345,7 +350,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
   }
 
   return (
-    <div className={`fixed ${positionClasses} z-[99999] chat-widget-isolation`}>
+    <div className="chat-widget-isolation" style={widgetStyles}>
       <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh] touch-manipulation chat-widget-isolation`}
            onTouchStart={(e) => { e.stopPropagation(); e.stopImmediatePropagation(); }}
            onTouchEnd={(e) => { e.stopPropagation(); e.stopImmediatePropagation(); }}
