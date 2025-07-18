@@ -312,10 +312,12 @@ export default function SidebarFixed() {
                       
                       // Apply direct church feature filtering to bypass React caching
                       const featureEnabled = isFeatureEnabled(item.href);
+                      // Always show moderation dashboard for authorized users
+                      if (!featureEnabled && item.href !== '/moderation-dashboard') {
+                        return false;
+                      }
                       
-
-                      
-                      return featureEnabled;
+                      return true;
                     }).map((item, itemIdx) => {
                       const Icon = item.icon;
                       const isActive = location === item.href;
@@ -362,7 +364,8 @@ export default function SidebarFixed() {
               
               // Apply church feature filtering with debug  
               const featureEnabled = isFeatureEnabled(item.href);
-              if (!featureEnabled) {
+              // Always show moderation dashboard for authorized users
+              if (!featureEnabled && item.href !== '/moderation-dashboard') {
                 return null;
               }
               
