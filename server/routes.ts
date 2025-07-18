@@ -2952,7 +2952,7 @@ app.post('/api/invitations', async (req: any, res) => {
       const report = await storage.createContentReport({
         reporterId: userId,
         contentType,
-        contentId,
+        contentId: parseInt(contentId),
         reason,
         description: description || null,
         priority: reason === 'harassment' || reason === 'inappropriate' ? 'high' : 'medium',
