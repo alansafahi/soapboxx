@@ -61,6 +61,7 @@ Content to analyze: "${content}"`;
       messages = [{ role: "user", content: prompt }];
     }
 
+    const evaluationPrompt = `
 Evaluate for these violation categories with their priority levels:
 
 HIGH PRIORITY (immediate action required):
@@ -101,6 +102,13 @@ For MEDIUM priority: set actionRequired to "review"
 For LOW priority: set actionRequired to "review"
 If no violations: set actionRequired to "none"
 `;
+
+    // Add evaluation prompt to the message content
+    if (mediaUrl && mediaType) {
+      messages[0].content[0].text += evaluationPrompt;
+    } else {
+      messages[0].content += evaluationPrompt;
+    }
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
