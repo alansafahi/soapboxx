@@ -234,10 +234,10 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     id: 'international-access',
     category: 'features',
     subcategory: 'global',
-    keywords: ['international', 'global', 'worldwide', 'countries', 'access'],
+    keywords: ['international', 'global', 'worldwide', 'countries', 'access', 'outside us', 'outside of us', 'outside the us', 'outside america', 'other countries', 'can i use it outside', 'available outside'],
     content: 'International Access: SoapBox is available globally! Anyone with internet access can use SoapBox regardless of their country. Our platform is designed to serve the global Christian community.',
     helpLink: '/faq#international-use',
-    priority: 7,
+    priority: 9,
     lastUpdated: '2025-07-18',
     source: 'faq'
   },
@@ -438,7 +438,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     subcategory: 'ownership',
     keywords: ['who owns', 'owner', 'founder', 'ceo', 'leadership', 'alan safahi', 'owns soapbox', 'owns the company', 'company owner', 'soapbox owner'],
     content: 'SoapBox Super App is owned and founded by Alan Safahi, an experienced entrepreneur passionate about strengthening faith communities through technology. Alan leads the vision and development of our comprehensive church management platform.',
-    priority: 15,
+    priority: 8,
     lastUpdated: '2025-07-18',
     source: 'company'
   },
@@ -493,6 +493,20 @@ export function searchComprehensiveKnowledge(userMessage: string): KnowledgeResp
     };
   }
 
+  // Check for international access queries specifically
+  const internationalKeywords = ['outside us', 'outside of us', 'outside the us', 'outside america', 'international', 'other countries', 'can i use it outside', 'available outside', 'global', 'worldwide'];
+  if (internationalKeywords.some(keyword => message.includes(keyword))) {
+    const internationalEntry = comprehensiveKnowledge.find(entry => entry.id === 'international-access');
+    if (internationalEntry) {
+      return {
+        found: true,
+        answer: internationalEntry.content + "\n\nWhat else would you like to know about SoapBox Super App?",
+        helpDocLink: internationalEntry.helpLink,
+        confidence: 1.0
+      };
+    }
+  }
+
   // Advanced keyword matching with scoring
   const matches: Array<{entry: KnowledgeEntry, score: number}> = [];
   
@@ -506,7 +520,11 @@ export function searchComprehensiveKnowledge(userMessage: string): KnowledgeResp
     for (const keyword of entry.keywords) {
       if (message.includes(keyword)) {
         // Give much higher score for longer, more specific phrases
-        if (keyword.length > 8) {
+        if (keyword.length > 15) {
+          score += 25; // Very specific phrases get highest priority
+        } else if (keyword.length > 10) {
+          score += 20; // Long phrases like "can i use it outside"
+        } else if (keyword.length > 8) {
           score += 15; // High score for specific phrases like "who owns"
         } else if (keyword.length > 5) {
           score += 8;
@@ -516,9 +534,10 @@ export function searchComprehensiveKnowledge(userMessage: string): KnowledgeResp
       }
     }
     
-    // Exact word matches (medium priority)
+    // Exact word matches (medium priority) - skip common words like "us"
+    const skipWords = ['us', 'it', 'is', 'the', 'of', 'to', 'and', 'or', 'in', 'on', 'at', 'by', 'for', 'with', 'can', 'use'];
     for (const word of messageWords) {
-      if (word.length > 2) {
+      if (word.length > 2 && !skipWords.includes(word)) {
         for (const keyword of entry.keywords) {
           if (keyword === word) {
             score += 3; // Exact word match
