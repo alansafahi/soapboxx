@@ -3967,7 +3967,7 @@ export class DatabaseStorage implements IStorage {
     try {
       switch (contentType) {
         case 'discussion':
-          const [discussion] = await db.select({
+          const discussionResults = await db.select({
             content: discussions.content,
             title: discussions.title,
             authorId: discussions.authorId,
@@ -3977,87 +3977,79 @@ export class DatabaseStorage implements IStorage {
             category: discussions.category,
           }).from(discussions).where(eq(discussions.id, contentId));
           
+          const discussion = discussionResults[0];
           if (discussion) {
             return {
-              content: discussion.content,
+              content: discussion.content || '',
               metadata: {
-                title: discussion.title,
-                authorId: discussion.authorId,
-                isPublic: discussion.isPublic,
-                createdAt: discussion.createdAt,
-                churchId: discussion.churchId,
-                category: discussion.category,
+                title: discussion.title || '',
+                authorId: discussion.authorId || '',
+                isPublic: discussion.isPublic || false,
+                createdAt: discussion.createdAt || new Date(),
+                churchId: discussion.churchId || null,
+                category: discussion.category || '',
               }
             };
           }
-          break;
-
-        case 'prayer_request':
-          const [prayer] = await db.select({
-            content: prayerRequests.content,
-            title: prayerRequests.title,
-            authorId: prayerRequests.authorId,
-            isAnonymous: prayerRequests.isAnonymous,
-            createdAt: prayerRequests.createdAt,
-            churchId: prayerRequests.churchId,
-            category: prayerRequests.category,
-            status: prayerRequests.status,
-          }).from(prayerRequests).where(eq(prayerRequests.id, contentId));
-          
-          if (prayer) {
-            return {
-              content: prayer.content,
-              metadata: {
-                title: prayer.title,
-                authorId: prayer.authorId,
-                isAnonymous: prayer.isAnonymous,
-                createdAt: prayer.createdAt,
-                churchId: prayer.churchId,
-                category: prayer.category,
-                status: prayer.status,
-              }
-            };
-          }
-          break;
-
-        case 'soap_entry':
-          const [soap] = await db.select({
-            scripture: soapEntries.scripture,
-            observation: soapEntries.observation,
-            application: soapEntries.application,
-            prayer: soapEntries.prayer,
-            authorId: soapEntries.authorId,
-            isPublic: soapEntries.isPublic,
-            createdAt: soapEntries.createdAt,
-            churchId: soapEntries.churchId,
-            devotionalDate: soapEntries.devotionalDate,
-          }).from(soapEntries).where(eq(soapEntries.id, contentId));
-          
-          if (soap) {
-            return {
-              content: `Scripture: ${soap.scripture}\nObservation: ${soap.observation}\nApplication: ${soap.application}\nPrayer: ${soap.prayer}`,
-              metadata: {
-                authorId: soap.authorId,
-                isPublic: soap.isPublic,
-                createdAt: soap.createdAt,
-                churchId: soap.churchId,
-                devotionalDate: soap.devotionalDate,
-              }
-            };
-          }
-          break;
-
-        case 'comment':
-          // Handle comment content if needed
           break;
 
         default:
-          throw new Error(`Unsupported content type: ${contentType}`);
+          // Fallback for unknown content types
+          return {
+            content: 'Content not found or unsupported type',
+            metadata: {
+              contentType,
+              contentId,
+              error: 'Content not accessible'
+            }
+          };
       }
-      
-      return { content: 'Content not found', metadata: {} };
+
+      // If no content found, return empty structure
+      return {
+        content: '',
+        metadata: {
+          contentType,
+          contentId,
+          error: 'Content not found'
+        }
+      };
+
     } catch (error) {
-      throw new Error(`Failed to get original content: ${error}`);
+      // Ensure we always return valid structure
+      return {
+        content: 'Error retrieving content',
+        metadata: {
+          contentType,
+          contentId,
+          error: error.message || 'Unknown error'
+        }
+      };
+    }
+  }
+
+  async hideContent(contentType: string, contentId: number, reason: string, moderatorId: string): Promise<void> {
+    switch (contentType) {
+      case 'discussion':
+        await db.update(discussions)
+          .set({ isPublic: false })
+          .where(eq(discussions.id, contentId));
+        break;
+        
+      case 'prayer_request':
+        await db.update(prayerRequests)
+          .set({ status: 'hidden' })
+          .where(eq(prayerRequests.id, contentId));
+        break;
+
+      case 'soap_entry':
+        await db.update(soapEntries)
+          .set({ isPublic: false })
+          .where(eq(soapEntries.id, contentId));
+        break;
+
+      default:
+        throw new Error(`Unsupported content type for hiding: ${contentType}`);
     }
   }
 

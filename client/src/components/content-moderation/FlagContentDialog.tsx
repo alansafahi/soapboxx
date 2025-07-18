@@ -17,10 +17,18 @@ interface FlagContentDialogProps {
 
 const reportReasons = [
   {
+    value: 'sexual_content',
+    label: 'Sexual Content',
+    icon: AlertTriangle,
+    description: 'Nudity, explicit poses, sexual activity, pornographic material, or suggestive content',
+    priority: 'high',
+    examples: 'Nudity, explicit images, sexual poses, pornographic content'
+  },
+  {
     value: 'inappropriate',
     label: 'Inappropriate Content',
     icon: AlertTriangle,
-    description: 'Sexual content, violence, adult language, or otherwise inappropriate material',
+    description: 'Violence, adult language, graphic content, or otherwise inappropriate material',
     priority: 'high',
     examples: 'Graphic content, threats, adult language'
   },

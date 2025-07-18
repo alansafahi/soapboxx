@@ -67,12 +67,13 @@ Evaluate for these violation categories with their priority levels:
 HIGH PRIORITY (immediate action required):
 - Violence threats (any mention of bombs, killing, weapons, harm, destruction)
 - Harassment or bullying (targeting, intimidating behavior)
-- Inappropriate content (sexual, violent, adult language)
+- Sexual content (nudity, explicit poses, sexual activity, pornographic material, suggestive positioning)
+- Inappropriate content (violent imagery, adult language, suggestive behavior)
 - Hate speech or discrimination (faith, race, gender based)
 - Blasphemous or profane misuse of Scripture
 - Predatory behavior toward minors
 
-CRITICAL CHILD PROTECTION: Any content mentioning violence, bombs, killing, weapons, threats, or harm to people/property must be flagged as HIGH priority and actionRequired: "hide"
+CRITICAL CHILD PROTECTION: Any content mentioning violence, bombs, killing, weapons, threats, harm to people/property, OR displaying nudity, sexual poses, explicit content must be flagged as HIGH priority and actionRequired: "hide"
 
 MEDIUM PRIORITY (review needed):
 - Misinformation (false religious information, misquoted scripture)
