@@ -60,6 +60,11 @@ import {
   volunteerRoles,
   volunteerOpportunities,
   videoContent,
+  videoComments,
+  videoLikes,
+  videoUploadSessions,
+  videoSeries,
+  videoViews,
   volunteerRegistrations,
   volunteerHours,
   volunteerAwards,
@@ -123,6 +128,16 @@ import {
   type InsertChatConversation,
   type ChatMessage,
   type InsertChatMessage,
+  type VideoComment,
+  type InsertVideoComment,
+  type VideoLike,
+  type InsertVideoLike,
+  type VideoUploadSession,
+  type InsertVideoUploadSession,
+  type VideoSeries,
+  type InsertVideoSeries,
+  type VideoView,
+  type InsertVideoView,
   contactSubmissions,
   chatConversations,
   chatMessages,
@@ -287,7 +302,7 @@ import {
   aiScriptureHistory,
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt, ne } from "drizzle-orm";
+import { eq, desc, and, sql, count, asc, or, ilike, isNotNull, gte, lte, inArray, isNull, gt, ne, avg } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
