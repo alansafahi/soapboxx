@@ -7529,6 +7529,47 @@ Return JSON with this exact structure:
       
       const post = await storage.createDiscussion(discussionData);
       
+      // Real-time AI content monitoring (1-3 seconds)
+      setTimeout(async () => {
+        try {
+          const { analyzeContentForViolations, createAutoModerationReport } = await import('./ai-moderation');
+          const combinedContent = `${discussionData.title} ${discussionData.content}`;
+          const moderationResult = await analyzeContentForViolations(combinedContent, 'discussion');
+          
+          if (moderationResult.flagged) {
+            await createAutoModerationReport(storage, 'discussion', post.id, moderationResult, 'system');
+            
+            // Send alert notifications for high/critical violations
+            if (moderationResult.actionRequired === 'hide' || moderationResult.actionRequired === 'remove') {
+              // Alert the user
+              await storage.createNotification({
+                userId: userId,
+                title: 'Content Review Required',
+                message: `Your recent post "${discussionData.title}" has been flagged for review due to potential community guideline violations. Our moderation team will review it shortly.`,
+                type: 'moderation_alert',
+                isRead: false
+              });
+              
+              // Alert church admins
+              const user = await storage.getUserById(userId);
+              if (user?.primaryChurchId) {
+                const adminUsers = await storage.getChurchAdmins(user.primaryChurchId);
+                for (const admin of adminUsers) {
+                  await storage.createNotification({
+                    userId: admin.id,
+                    title: 'Urgent: Content Flagged',
+                    message: `High priority content violation detected in discussion "${discussionData.title}". Immediate review required.`,
+                    type: 'admin_alert',
+                    isRead: false
+                  });
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('AI moderation failed:', error);
+        }
+      }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
 
       res.status(201).json(post);
     } catch (error) {
@@ -8994,6 +9035,48 @@ Return JSON with this exact structure:
 
 
       const newEntry = await storage.createSoapEntry(validatedData);
+
+      // Real-time AI content monitoring for SOAP entries (1-3 seconds)
+      setTimeout(async () => {
+        try {
+          const { analyzeContentForViolations, createAutoModerationReport } = await import('./ai-moderation');
+          const combinedContent = `${validatedData.scripture} ${validatedData.observation} ${validatedData.application} ${validatedData.prayer}`;
+          const moderationResult = await analyzeContentForViolations(combinedContent, 'soap_entry');
+          
+          if (moderationResult.flagged) {
+            await createAutoModerationReport(storage, 'soap_entry', newEntry.id, moderationResult, 'system');
+            
+            // Send alert notifications for high/critical violations
+            if (moderationResult.actionRequired === 'hide' || moderationResult.actionRequired === 'remove') {
+              // Alert the user
+              await storage.createNotification({
+                userId: userId,
+                title: 'S.O.A.P. Entry Review Required',
+                message: `Your recent S.O.A.P. reflection has been flagged for review due to potential community guideline violations. Our moderation team will review it shortly.`,
+                type: 'moderation_alert',
+                isRead: false
+              });
+              
+              // Alert church admins
+              const user = await storage.getUserById(userId);
+              if (user?.primaryChurchId) {
+                const adminUsers = await storage.getChurchAdmins(user.primaryChurchId);
+                for (const admin of adminUsers) {
+                  await storage.createNotification({
+                    userId: admin.id,
+                    title: 'Urgent: S.O.A.P. Content Flagged',
+                    message: `High priority content violation detected in S.O.A.P. entry on ${validatedData.scriptureReference}. Immediate review required.`,
+                    type: 'admin_alert',
+                    isRead: false
+                  });
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('AI moderation failed for SOAP entry:', error);
+        }
+      }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
 
       // If S.O.A.P. entry is shared with pastor, notify pastors
       if (newEntry.isSharedWithPastor && newEntry.churchId) {

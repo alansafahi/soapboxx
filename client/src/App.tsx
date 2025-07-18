@@ -179,6 +179,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/content-distribution" component={ContentDistributionPage} />
                                     <ProtectedRoute path="/engagement-analytics" component={EngagementAnalyticsPage} />
                                     <ProtectedRoute path="/moderation-dashboard" component={ModerationDashboardPage} />
+                                    <ProtectedRoute path="/test-moderation" component={lazy(() => import("./components/test-moderation/TestModerPage").then(m => ({ default: m.TestModerationPage })))} />
 
                                     <ProtectedRoute path="/ai-guidance" component={PersonalizedGuidancePage} />
                                     <ProtectedRoute path="/source-attribution" component={SourceAttributionPage} />
