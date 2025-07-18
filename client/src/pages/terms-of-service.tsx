@@ -29,7 +29,7 @@ export default function TermsOfService() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               SoapBox Super App Terms of Service
             </h1>
-            <p className="text-gray-600">Last updated April 14, 2025</p>
+            <p className="text-gray-600">Last updated July 18, 2025</p>
           </div>
 
           <div className="prose prose-lg max-w-none">
@@ -54,13 +54,17 @@ export default function TermsOfService() {
             </p>
 
             <ul className="list-disc list-inside mb-6 text-gray-700 space-y-2">
-              <li>Prayer wall and community prayer features</li>
-              <li>Bible study tools and S.O.A.P. journaling</li>
-              <li>Church event management and communication</li>
-              <li>Community discussion forums and social features</li>
-              <li>Volunteer coordination and ministry management</li>
-              <li>Digital outreach and content distribution tools</li>
-              <li>Analytics and engagement tracking for church leadership</li>
+              <li>Prayer wall and community prayer features with real-time notifications</li>
+              <li>AI-powered S.O.A.P. journaling with scripture integration and mood tracking</li>
+              <li>Church event management, communication, and QR code check-in systems</li>
+              <li>Community discussion forums and social features with spiritual content</li>
+              <li>Volunteer coordination and ministry management tools</li>
+              <li>AI-powered sermon studio with biblical research and content generation</li>
+              <li>Digital outreach and multi-platform content distribution</li>
+              <li>Comprehensive analytics dashboard and engagement tracking</li>
+              <li>Daily Bible reading with audio narration and reflection prompts</li>
+              <li>Live chat support and AI-powered customer assistance</li>
+              <li>Mobile app features for iOS and Android platforms</li>
             </ul>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">3. User Accounts and Registration</h2>
@@ -115,21 +119,41 @@ export default function TermsOfService() {
             </p>
 
             <ul className="list-disc list-inside mb-6 text-gray-700 space-y-2">
-              <li>Free accounts have access to basic community features</li>
-              <li>Paid subscriptions provide access to advanced features and analytics</li>
-              <li>Church subscriptions include additional administrative tools</li>
-              <li>Payments are processed securely through third-party payment processors</li>
-              <li>Subscriptions automatically renew unless cancelled</li>
-              <li>Refunds are handled according to our refund policy</li>
+              <li><strong>FREE Plan:</strong> 100 AI credits per month with core community features including prayer wall, S.O.A.P. journaling, community discussions, and basic Bible study tools</li>
+              <li><strong>STANDARD Plan:</strong> $10/month with 500 AI credits, advanced analytics, priority support, and enhanced community features</li>
+              <li><strong>PREMIUM Plan:</strong> $20/month with 1,000 AI credits, custom integrations, advanced engagement tools, and premium ministry resources</li>
+              <li><strong>Church Plans:</strong> Custom pricing with administrative tools, member management, analytics dashboard, and bulk features</li>
+              <li>Additional credit boost packs available for purchase</li>
+              <li>Payments are processed securely through Stripe and other third-party payment processors</li>
+              <li>Subscriptions automatically renew unless cancelled through your account settings</li>
+              <li>Refunds are handled according to our refund policy within 30 days of purchase</li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Privacy and Data Protection</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">7. AI Features and Acceptable Use</h2>
+            
+            <p className="text-gray-700 mb-4">
+              Our Service includes AI-powered features to enhance your spiritual experience. By using these features, you agree to:
+            </p>
+
+            <ul className="list-disc list-inside mb-6 text-gray-700 space-y-2">
+              <li>Use AI features for spiritual growth, ministry purposes, and community building only</li>
+              <li>Not attempt to manipulate AI responses for inappropriate or harmful content</li>
+              <li>Understand that AI-generated content is for guidance and should be reviewed by qualified ministry leaders</li>
+              <li>Not use AI features to generate content that violates our community guidelines</li>
+              <li>Acknowledge that AI processing may involve third-party services as outlined in our Privacy Policy</li>
+            </ul>
+
+            <p className="text-gray-700 mb-6">
+              AI credit usage is tracked and applied according to your subscription plan. Unused credits do not roll over between billing periods. We reserve the right to limit AI usage to prevent abuse and ensure fair access for all users.
+            </p>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Privacy and Data Protection</h2>
             
             <p className="text-gray-700 mb-6">
               Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy, which is incorporated into these Terms by reference. We implement appropriate security measures to protect your personal information.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Termination</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Termination</h2>
             
             <p className="text-gray-700 mb-4">
               We may terminate or suspend your account and access to the Service at our discretion, without notice, for:
@@ -146,7 +170,7 @@ export default function TermsOfService() {
               You may terminate your account at any time by contacting us or using the account deletion feature in your settings.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Disclaimers and Limitations</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Disclaimers and Limitations</h2>
             
             <p className="text-gray-700 mb-4">
               THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING:
@@ -162,36 +186,43 @@ export default function TermsOfService() {
               TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Indemnification</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Indemnification</h2>
             
             <p className="text-gray-700 mb-6">
               You agree to indemnify and hold harmless SoapBox Super App, its officers, directors, employees, and agents from any claims, damages, or expenses arising from your use of the Service or violation of these Terms.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Governing Law and Dispute Resolution</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Governing Law and Dispute Resolution</h2>
             
             <p className="text-gray-700 mb-6">
               These Terms shall be governed by and construed in accordance with the laws of the United States. Any disputes arising under these Terms shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Changes to Terms</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Changes to Terms</h2>
             
             <p className="text-gray-700 mb-6">
               We reserve the right to modify these Terms at any time. We will notify users of significant changes via email or through the Service. Continued use of the Service after changes constitutes acceptance of the new Terms.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Contact Information</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">14. Contact Information</h2>
             
             <p className="text-gray-700 mb-4">
               If you have any questions about these Terms of Service, please contact us at:
             </p>
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-700">
+              <p className="text-gray-700 mb-2">
                 <strong>Email:</strong> <a href="mailto:support@soapboxsuperapp.com" className="text-purple-600 hover:text-purple-800">support@soapboxsuperapp.com</a>
               </p>
-              <p className="text-gray-700 mt-2">
+              <p className="text-gray-700 mb-2">
                 <strong>Website:</strong> <a href="https://www.soapboxsuperapp.com" className="text-purple-600 hover:text-purple-800">www.soapboxsuperapp.com</a>
+              </p>
+              <p className="text-gray-700">
+                <strong>Mailing Address:</strong><br />
+                SoapBox Super App<br />
+                1130 E. Clark Street, #150-204<br />
+                Orcutt, CA 93455<br />
+                USA
               </p>
             </div>
 

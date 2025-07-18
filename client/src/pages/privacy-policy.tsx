@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               SoapBox Super App Privacy Policy
             </h1>
-            <p className="text-gray-600">Last updated April 14, 2025</p>
+            <p className="text-gray-600">Last updated July 18, 2025</p>
           </div>
 
           <div className="prose prose-lg max-w-none">
@@ -175,6 +175,32 @@ export default function PrivacyPolicy() {
               <li>To protect against legal liability</li>
             </ul>
 
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">AI Features and Data Processing</h2>
+            
+            <p className="text-gray-700 mb-4">
+              SoapBox Super App uses artificial intelligence to enhance your spiritual experience, including:
+            </p>
+
+            <ul className="list-disc list-inside mb-6 text-gray-700 space-y-1">
+              <li>AI-powered sermon preparation and biblical research assistance</li>
+              <li>Scripture study enhancement and devotional content generation</li>
+              <li>Prayer assistance and spiritual guidance through chat features</li>
+              <li>Content analysis for community moderation and engagement insights</li>
+              <li>Personalized spiritual growth recommendations and analytics</li>
+            </ul>
+
+            <p className="text-gray-700 mb-4">
+              When you use AI-powered features, your inputs may be processed by third-party AI services (such as OpenAI) to provide these services. We:
+            </p>
+
+            <ul className="list-disc list-inside mb-6 text-gray-700 space-y-1">
+              <li>Do not store personal prayer requests or private journal entries on external AI servers</li>
+              <li>Process only the minimum necessary data to provide AI functionality</li>
+              <li>Use anonymized data when possible for AI training and improvement</li>
+              <li>Require our AI service providers to maintain strict data protection standards</li>
+              <li>Allow you to opt out of AI features while maintaining access to core platform functionality</li>
+            </ul>
+
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Security of Data</h2>
             
             <p className="text-gray-700 mb-6">
@@ -194,8 +220,18 @@ export default function PrivacyPolicy() {
             </p>
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-700">
+              <p className="text-gray-700 mb-2">
                 <strong>Email:</strong> <a href="mailto:support@soapboxsuperapp.com" className="text-purple-600 hover:text-purple-800">support@soapboxsuperapp.com</a>
+              </p>
+              <p className="text-gray-700 mb-2">
+                <strong>Website:</strong> <a href="https://www.soapboxsuperapp.com" className="text-purple-600 hover:text-purple-800">www.soapboxsuperapp.com</a>
+              </p>
+              <p className="text-gray-700">
+                <strong>Mailing Address:</strong><br />
+                SoapBox Super App<br />
+                1130 E. Clark Street, #150-204<br />
+                Orcutt, CA 93455<br />
+                USA
               </p>
             </div>
           </div>
