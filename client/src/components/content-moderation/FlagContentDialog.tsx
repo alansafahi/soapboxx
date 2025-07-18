@@ -74,14 +74,11 @@ export function FlagContentDialog({ contentType, contentId, trigger, onReported 
     setIsSubmitting(true);
 
     try {
-      await apiRequest('/api/moderation/report', {
-        method: 'POST',
-        body: JSON.stringify({
-          contentType,
-          contentId,
-          reason,
-          description: description.trim() || null,
-        }),
+      await apiRequest('POST', '/api/moderation/report', {
+        contentType,
+        contentId,
+        reason,
+        description: description.trim() || null,
       });
 
       toast({

@@ -51,7 +51,7 @@ export function ModerationDashboard() {
   // Fetch content reports
   const { data: reports, isLoading } = useQuery({
     queryKey: ['/api/moderation/reports', selectedStatus],
-    queryFn: () => apiRequest(`/api/moderation/reports?status=${selectedStatus}`)
+    queryFn: () => apiRequest('GET', `/api/moderation/reports?status=${selectedStatus}`)
   });
 
   // Update report status mutation
@@ -62,10 +62,7 @@ export function ModerationDashboard() {
       reviewNotes?: string;
       actionTaken?: string;
     }) => 
-      apiRequest(`/api/moderation/reports/${reportId}`, {
-        method: 'PUT',
-        body: JSON.stringify({ status, reviewNotes, actionTaken })
-      }),
+      apiRequest('PUT', `/api/moderation/reports/${reportId}`, { status, reviewNotes, actionTaken }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/moderation/reports'] });
       toast({
@@ -93,10 +90,7 @@ export function ModerationDashboard() {
       contentId: number;
       reason: string;
     }) => 
-      apiRequest(`/api/moderation/content/${contentType}/${contentId}/hide`, {
-        method: 'POST',
-        body: JSON.stringify({ reason })
-      }),
+      apiRequest('POST', `/api/moderation/content/${contentType}/${contentId}/hide`, { reason }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/moderation/reports'] });
       toast({
