@@ -4208,16 +4208,19 @@ export class DatabaseStorage implements IStorage {
 
       // Update the actual content table to mark as hidden
       if (contentType === 'discussion') {
+        // For discussions, set isPublic to false to hide content
         await db.update(discussions)
-          .set({ moderationStatus: 'hidden' })
+          .set({ isPublic: false })
           .where(eq(discussions.id, contentId));
       } else if (contentType === 'prayer_request') {
+        // For prayer requests, use the existing status field
         await db.update(prayerRequests)
-          .set({ moderationStatus: 'hidden' })
+          .set({ status: 'flagged' })
           .where(eq(prayerRequests.id, contentId));
       } else if (contentType === 'soap_entry') {
+        // For SOAP entries, set isPublic to false to hide content
         await db.update(soapEntries)
-          .set({ moderationStatus: 'hidden' })
+          .set({ isPublic: false })
           .where(eq(soapEntries.id, contentId));
       }
     } catch (error) {
@@ -4240,16 +4243,19 @@ export class DatabaseStorage implements IStorage {
 
       // Update the actual content table to mark as visible
       if (contentType === 'discussion') {
+        // For discussions, set isPublic to true to restore content
         await db.update(discussions)
-          .set({ moderationStatus: 'approved' })
+          .set({ isPublic: true })
           .where(eq(discussions.id, contentId));
       } else if (contentType === 'prayer_request') {
+        // For prayer requests, use the existing status field
         await db.update(prayerRequests)
-          .set({ moderationStatus: 'approved' })
+          .set({ status: 'approved' })
           .where(eq(prayerRequests.id, contentId));
       } else if (contentType === 'soap_entry') {
+        // For SOAP entries, set isPublic to true to restore content
         await db.update(soapEntries)
-          .set({ moderationStatus: 'approved' })
+          .set({ isPublic: true })
           .where(eq(soapEntries.id, contentId));
       }
     } catch (error) {
