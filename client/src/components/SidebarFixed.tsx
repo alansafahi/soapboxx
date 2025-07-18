@@ -315,8 +315,8 @@ export default function SidebarFixed() {
                       
                       // Apply direct church feature filtering to bypass React caching
                       const featureEnabled = isFeatureEnabled(item.href);
-                      // Always show moderation dashboard for authorized users
-                      if (!featureEnabled && item.href !== '/moderation-dashboard') {
+                      // Always show moderation dashboard for soapbox_owner and authorized users
+                      if (!featureEnabled && item.href !== '/moderation-dashboard' && user?.role !== 'soapbox_owner') {
                         return false;
                       }
                       

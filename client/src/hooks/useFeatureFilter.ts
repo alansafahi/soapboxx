@@ -37,7 +37,8 @@ const CORE_FEATURES = [
   'member-directory', // Always needed for admin
   'donation-analytics', // Always needed for admin
   'engagement-analytics', // Always needed for admin
-  'church-management' // SoapBox Portal - always available
+  'church-management', // SoapBox Portal - always available
+  'moderation-dashboard' // Content Moderation - always available for authorized users
 ];
 
 export function useFeatureFilter(churchId: number | null) {
