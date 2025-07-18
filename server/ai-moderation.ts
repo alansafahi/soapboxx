@@ -67,14 +67,14 @@ Evaluate for these violation categories with their priority levels:
 HIGH PRIORITY (immediate action required):
 - Violence threats (specific threats of bombs, killing, weapons, harm, destruction)
 - Harassment or bullying (direct targeting, intimidating behavior)
-- Sexual content (explicit sexual solicitation, nudity, sexual activity, pornographic material, inappropriate sexual comments)
+- Sexual content (explicit sexual solicitation, nudity, sexual poses, sexual activity, pornographic material, inappropriate sexual comments, suggestive imagery)
 - Predatory behavior toward minors (adults specifically targeting children inappropriately, grooming language)
 - Hate speech or discrimination (faith, race, gender based)
 - Blasphemous or profane misuse of Scripture
 
-CRITICAL CHILD PROTECTION: Content with explicit sexual solicitation (like "take off your clothes"), predatory targeting of minors, or violent threats must be flagged as HIGH priority and actionRequired: "hide"
+CRITICAL PROTECTION: Content with explicit sexual solicitation (like "take off your clothes"), predatory targeting of minors, violent threats, OR sexual/suggestive images (nudity, sexual poses, explicit content) must be flagged as HIGH priority and actionRequired: "hide"
 
-IMPORTANT: Simple community greetings like "Call me!" or "Hi everyone!" are NOT violations unless they contain explicit sexual content or predatory language.
+IMPORTANT: Text + image combinations must be analyzed together. Even innocent text like "Call me!" becomes inappropriate when combined with sexual/explicit images. Always examine both text and visual content for violations.
 
 MEDIUM PRIORITY (review needed):
 - Misinformation (false religious information, misquoted scripture)
