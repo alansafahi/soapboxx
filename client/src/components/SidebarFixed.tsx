@@ -68,6 +68,7 @@ interface NavigationGroup {
 export default function SidebarFixed() {
   const { user } = useAuth();
   const [location] = useLocation();
+
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
   const [forceUpdate, setForceUpdate] = useState(0);
   
@@ -324,6 +325,8 @@ export default function SidebarFixed() {
                       
 
                       
+
+
                       return (
                         <Link key={`expanded-${item.href}-${itemIdx}-${forceUpdate}-${Date.now()}`} href={item.href}>
                           <Button
