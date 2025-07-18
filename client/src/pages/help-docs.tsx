@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { ArrowLeft, Search, MessageCircle, BookOpen, Users, Settings, Heart, Calendar, DollarSign, Smartphone, Shield, ChevronRight, HelpCircle } from "lucide-react";
+import { ArrowLeft, Search, MessageCircle, Mail, BookOpen, Users, Settings, Heart, Calendar, DollarSign, Smartphone, Shield, ChevronRight, HelpCircle } from "lucide-react";
 
 // Custom Spiritual Icons
 const CrossIcon = ({ className = "w-6 h-6" }) => (
@@ -423,6 +423,13 @@ export default function HelpDocs() {
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Contact Support
+            </Button>
+            <Button
+              onClick={() => window.location.href = 'mailto:support@soapboxsuperapp.com'}
+              className="bg-white text-purple-600 hover:bg-gray-100 px-6 py-3"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Email Us
             </Button>
             <Button
               onClick={() => window.open('https://wa.me/message/BNZMR2CPIKVKA1', '_blank')}

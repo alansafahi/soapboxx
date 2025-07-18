@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, HelpCircle, Users, Shield, CreditCard, Smartphone, Settings, MessageCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, HelpCircle, Users, Shield, CreditCard, Smartphone, Settings, MessageCircle, Mail } from 'lucide-react';
 
 interface FAQItem {
   id: string;
@@ -361,21 +361,36 @@ export default function FAQPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/contact"
-              className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors"
+              href="/contact-us"
+              className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors inline-flex items-center justify-center"
             >
+              <MessageCircle className="w-4 h-4 mr-2" />
               Contact Support
+            </a>
+            <a
+              href="mailto:support@soapboxsuperapp.com"
+              className="border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-colors inline-flex items-center justify-center"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Email Us
             </a>
             <button 
               onClick={() => {
-                // This will trigger the chat widget
-                const chatWidget = document.querySelector('[data-chat-widget]') as HTMLElement;
-                if (chatWidget) {
-                  chatWidget.click();
+                // This will trigger the chat widget to open
+                const chatButton = document.querySelector('button[data-chat-widget="true"]') as HTMLButtonElement;
+                if (chatButton) {
+                  chatButton.click();
+                } else {
+                  // Fallback - try alternative selectors
+                  const chatWidget = document.querySelector('.chat-widget-isolation button') as HTMLButtonElement;
+                  if (chatWidget) {
+                    chatWidget.click();
+                  }
                 }
               }}
-              className="border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+              className="bg-green-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-600 transition-colors inline-flex items-center justify-center"
             >
+              <MessageCircle className="w-4 h-4 mr-2" />
               Live Chat
             </button>
           </div>

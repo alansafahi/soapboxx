@@ -367,6 +367,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
               e.stopPropagation();
               setIsOpen(true);
             }}
+            data-chat-widget="true"
             className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation chat-widget-isolation"
           >
             <MessageCircle className="w-6 h-6" />

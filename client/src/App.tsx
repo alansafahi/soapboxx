@@ -190,6 +190,7 @@ function AppRouter() {
                                     <Route path="/features/volunteer-hub" component={VolunteerHubFeaturePage} />
                                     <Route path="/about-us" component={AboutUsPage} />
                                     <Route path="/contact-us" component={ContactUsPage} />
+                                    <Route path="/contact" component={ContactUsPage} />
                                     <Route path="/support" component={SupportPage} />
                                     <Route path="/help-docs" component={HelpDocsPage} />
                                     <Route path="/faq" component={FAQPage} />
