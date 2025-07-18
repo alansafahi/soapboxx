@@ -447,18 +447,27 @@ export function searchComprehensiveKnowledge(userMessage: string): KnowledgeResp
     const bestMatch = matches[0];
     const confidence = Math.min(bestMatch.score / 10, 1.0); // Normalize to 0-1
     
-    // Generate related topics from other high-scoring matches
-    const relatedTopics = matches
-      .slice(1, 4)
-      .filter(match => match.score > 1)
-      .map(match => match.entry.category)
-      .filter((category, index, arr) => arr.indexOf(category) === index);
+    // Generate a relevant follow-up question based on the topic
+    let followUpQuestion = "";
+    
+    if (bestMatch.entry.category === 'company') {
+      followUpQuestion = "\n\nWould you like to learn about our pricing plans or schedule a demo?";
+    } else if (bestMatch.entry.category === 'pricing') {
+      followUpQuestion = "\n\nWould you like to know about specific features included in each plan?";
+    } else if (bestMatch.entry.category === 'features') {
+      followUpQuestion = "\n\nWould you like help getting started with this feature or have other questions?";
+    } else if (bestMatch.entry.category === 'support') {
+      followUpQuestion = "\n\nIs there anything else I can help you with today?";
+    } else if (bestMatch.entry.category === 'technical') {
+      followUpQuestion = "\n\nDo you need help with any other technical issues?";
+    } else {
+      followUpQuestion = "\n\nWhat else would you like to know about SoapBox Super App?";
+    }
     
     return {
       found: true,
-      answer: bestMatch.entry.content,
+      answer: bestMatch.entry.content + followUpQuestion,
       helpDocLink: bestMatch.entry.helpLink,
-      relatedTopics,
       confidence
     };
   }

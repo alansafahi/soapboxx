@@ -3162,6 +3162,8 @@ Guidelines:
 - Keep responses concise (2-3 sentences) unless detail is needed
 - Focus on how SoapBox Super App can strengthen their faith community
 - Avoid theological debates or deep religious counseling - focus on the app features
+- Always end with a relevant follow-up question to continue the conversation
+- Do not show related topics lists - ask one specific follow-up question instead
 
 Context: ${context || 'General support chat'}`;
 

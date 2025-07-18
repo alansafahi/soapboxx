@@ -146,6 +146,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **Positioning Requirements**: Chat widget must appear in bottom-right corner of all pages for optimal mobile accessibility
 
 ## Recent Changes
+- July 18, 2025: CHAT WIDGET ENHANCED WITH FOLLOW-UP QUESTIONS - Improved chat widget responses by replacing related topics lists with contextual follow-up questions to encourage natural conversation flow and better user engagement
+- July 18, 2025: CHAT WIDGET FULLY OPERATIONAL - Fixed all critical issues: "who owns soapbox" query returns correct Alan Safahi information, fixed black button styling for WhatsApp/Email links, implemented session management to remember user info across browser sessions, resolved JavaScript errors, enhanced knowledge base search algorithm with better keyword matching and confidence scoring
 - July 18, 2025: CHAT WIDGET RE-ENABLED WITH ENHANCED AI - Connected chat widget to existing comprehensive knowledge base system with GPT-4o integration, semantic search, and 20+ detailed knowledge entries covering all SoapBox Super App features, pricing, and support topics.
 - July 17, 2025: PRODUCTION DEPLOYMENT CLEANUP COMPLETED - Successfully eliminated 33MB development assets, removed all debug code, fixed duplicate methods, and optimized codebase for deployment. Application builds cleanly with 4.1MB production bundle ready for soapboxsuperapp.com deployment.
 - July 17, 2025: HEADER NAVIGATION LINKS FIXED - Updated both landing pages to properly link Features/Pricing (anchor links) and About/Contact (page links) for seamless user navigation
