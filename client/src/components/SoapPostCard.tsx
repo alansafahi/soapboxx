@@ -624,6 +624,21 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 Share
               </span>
             </button>
+            
+            <FlagContentDialog
+              contentType="soap_entry"
+              contentId={post.id}
+              trigger={
+                <button 
+                  className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+                >
+                  <Flag className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
+                  <span className="text-xs font-medium text-gray-500 group-hover:text-red-600 dark:group-hover:text-red-400">
+                    Report
+                  </span>
+                </button>
+              }
+            />
           </div>
         </div>
 
@@ -649,6 +664,20 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                       </span>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
+                  </div>
+                  <div className="flex items-center">
+                    <FlagContentDialog
+                      contentType="comment"
+                      contentId={comment.id}
+                      trigger={
+                        <button 
+                          className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                          aria-label="Report comment"
+                        >
+                          <Flag className="w-3 h-3 text-gray-400 hover:text-red-500 transition-colors" />
+                        </button>
+                      }
+                    />
                   </div>
                 </div>
               ))}

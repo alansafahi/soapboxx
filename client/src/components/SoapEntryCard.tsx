@@ -17,8 +17,10 @@ import {
   Share2,
   Clock,
   Sparkles,
-  MoreHorizontal
+  MoreHorizontal,
+  Flag
 } from "lucide-react";
+import { FlagContentDialog } from "./content-moderation/FlagContentDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -278,6 +280,18 @@ export function SoapEntryCard({
                     <Share2 className="h-4 w-4" />
                     Share
                   </DropdownMenuItem>
+                  
+                  <FlagContentDialog
+                    contentType="soap_entry"
+                    contentId={entry.id}
+                    trigger={
+                      <DropdownMenuItem className="gap-2 text-orange-600 focus:text-orange-600">
+                        <Flag className="h-4 w-4" />
+                        Report Entry
+                      </DropdownMenuItem>
+                    }
+                  />
+                  
                   {onDelete && (
                     <>
                       <DropdownMenuSeparator />

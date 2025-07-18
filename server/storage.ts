@@ -2273,16 +2273,22 @@ export class DatabaseStorage implements IStorage {
       })
       .from(discussions)
       .leftJoin(users, eq(discussions.authorId, users.id))
+      .leftJoin(contentReports, and(
+        eq(contentReports.contentType, 'discussion'),
+        eq(contentReports.contentId, discussions.id),
+        eq(contentReports.status, 'pending')
+      ))
       .where(
         and(
           eq(discussions.isPublic, true),
           isNull(discussions.expiredAt), // Exclude expired content
+          isNull(contentReports.id), // Exclude flagged content for child protection
           churchId ? eq(discussions.churchId, churchId) : undefined
         )
       )
       .orderBy(desc(discussions.createdAt));
 
-    // Get public SOAP entries
+    // Get public SOAP entries (excluding flagged content)
     const soapQuery = db
       .select({
         id: soapEntries.id,
@@ -2324,10 +2330,16 @@ export class DatabaseStorage implements IStorage {
       })
       .from(soapEntries)
       .leftJoin(users, eq(soapEntries.userId, users.id))
+      .leftJoin(contentReports, and(
+        eq(contentReports.contentType, 'soap_entry'),
+        eq(contentReports.contentId, soapEntries.id),
+        eq(contentReports.status, 'pending')
+      ))
       .where(
         and(
           eq(soapEntries.isPublic, true),
           isNull(soapEntries.expiredAt), // Exclude expired content
+          isNull(contentReports.id), // Exclude flagged content for child protection
           churchId ? eq(soapEntries.churchId, churchId) : undefined
         )
       )
@@ -4052,7 +4064,21 @@ export class DatabaseStorage implements IStorage {
         query = query.where(eq(contentReports.status, status));
       }
       
-      return await query.orderBy(desc(contentReports.createdAt));
+      const reports = await query.orderBy(desc(contentReports.createdAt));
+      
+      // Populate originalContent for each report
+      for (const report of reports) {
+        try {
+          const originalContent = await this.getOriginalContent(report.contentType, report.contentId);
+          report.originalContent = originalContent.content;
+          report.contentMetadata = originalContent.metadata;
+        } catch (error) {
+          console.error(`Failed to get original content for report ${report.id}:`, error);
+          report.originalContent = 'Content not available';
+        }
+      }
+      
+      return reports;
     } catch (error) {
       throw new Error(`Failed to get content reports: ${error}`);
     }
