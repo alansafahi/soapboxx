@@ -8,7 +8,6 @@
   touch-action: manipulation !important;
   isolation: isolate !important;
   z-index: 999999 !important;
-  position: relative !important;
 }
 
 .chat-widget-isolation * {
