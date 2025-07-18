@@ -2993,6 +2993,36 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // Update content report status
+  app.put('/api/moderation/reports/:reportId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Check if user is a moderator (church admin, pastor, or soapbox owner)
+      const user = await storage.getUser(userId);
+      const userChurches = await storage.getUserChurches(userId);
+      const isModerator = user?.role === 'soapbox_owner' || 
+                         userChurches.some(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
+
+      if (!isModerator) {
+        return res.status(403).json({ message: 'Moderator access required' });
+      }
+
+      const { reportId } = req.params;
+      const { status, reviewNotes, actionTaken } = req.body;
+
+      await storage.updateContentReportStatus(parseInt(reportId), status, userId, reviewNotes, actionTaken);
+
+      res.json({ success: true, message: 'Report updated successfully' });
+    } catch (error) {
+      console.error('Failed to update content report:', error);
+      res.status(500).json({ message: 'Failed to update content report' });
+    }
+  });
+
   // Hide/remove content
   app.post('/api/moderation/content/:contentType/:contentId/hide', isAuthenticated, async (req: any, res) => {
     try {
