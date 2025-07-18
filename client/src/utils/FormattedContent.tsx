@@ -109,8 +109,11 @@ export default function FormattedContent({ content, className, attachedMedia }: 
       {/* Display attached media */}
       {attachedMedia && attachedMedia.length > 0 && (
         <div className="mt-3 space-y-2">
+          {console.log('Rendering attachedMedia section, count:', attachedMedia.length)}
           {attachedMedia.map((media, index) => {
-            if (media.type === 'image') {
+            console.log('Processing media item:', index, media);
+            if (media.type === 'image' || media.url?.startsWith('data:image/')) {
+              console.log('Rendering image:', media.url?.substring(0, 50) + '...');
               return (
                 <img 
                   key={index}
@@ -119,13 +122,15 @@ export default function FormattedContent({ content, className, attachedMedia }: 
                   className="max-w-full h-auto rounded-lg border shadow-sm"
                   style={{ maxHeight: '400px' }}
                   loading="lazy"
+                  onLoad={() => console.log('Image loaded successfully')}
                   onError={(e) => {
-                    console.error('Image failed to load:', media.url);
+                    console.error('Image failed to load:', media.url?.substring(0, 100));
                     e.currentTarget.style.display = 'none';
                   }}
                 />
               );
             }
+            console.log('Skipping non-image media:', media);
             return null;
           })}
         </div>
