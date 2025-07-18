@@ -128,31 +128,34 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
 
   if (personalizedContent) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader className="text-center">
-          <CardTitle className="flex items-center justify-center gap-2">
+      <div className="w-full max-w-2xl mx-auto space-y-4">
+        {/* Fixed Header */}
+        <div className="text-center pb-4 border-b">
+          <div className="flex items-center justify-center gap-2 mb-2">
             <Heart className="h-5 w-5 text-purple-600" />
-            Personalized Content for You
-          </CardTitle>
-          <CardDescription>
+            <h3 className="text-lg font-semibold">Personalized Content for You</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
             Based on how you're feeling, here's some spiritual guidance just for you
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+
+        {/* Scrollable Content Area */}
+        <div className="max-h-[50vh] overflow-y-auto space-y-3 pr-2">
           {personalizedContent.recommendations?.map((rec: any, index: number) => (
             <Card key={index} className="border-l-4 border-l-purple-600">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   {rec.type === 'verse' && <BookOpen className="h-4 w-4 text-purple-600" />}
-                  {rec.type === 'prayer' && <Pray className="h-4 w-4 text-purple-600" />}
+                  {rec.type === 'prayer' && <Heart className="h-4 w-4 text-purple-600" />}
                   {rec.type === 'devotional' && <Heart className="h-4 w-4 text-purple-600" />}
                   {rec.type === 'meditation' && <Brain className="h-4 w-4 text-purple-600" />}
-                  <CardTitle className="text-lg">{rec.title}</CardTitle>
+                  <CardTitle className="text-base">{rec.title}</CardTitle>
                 </div>
-                <CardDescription>{rec.reason}</CardDescription>
+                <CardDescription className="text-xs">{rec.reason}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-relaxed mb-3">{rec.content}</p>
+              <CardContent className="pt-0">
+                <p className="text-sm leading-relaxed mb-2">{rec.content}</p>
                 <div className="flex flex-wrap gap-1 mb-2">
                   {rec.topics?.map((topic: string) => (
                     <Badge key={topic} variant="secondary" className="text-xs">
@@ -171,6 +174,10 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Fixed Action Button */}
+        <div className="pt-4 border-t bg-background">
           <Button 
             onClick={() => {
               setPersonalizedContent(null);
@@ -183,23 +190,23 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
           >
             New Mood Check-in
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="text-center">
-        <CardTitle className="flex items-center justify-center gap-2">
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="text-center pb-4 border-b">
+        <div className="flex items-center justify-center gap-2 mb-2">
           <Heart className="h-5 w-5 text-purple-600" />
-          How are you feeling today?
-        </CardTitle>
-        <CardDescription>
+          <h3 className="text-lg font-semibold">How are you feeling today?</h3>
+        </div>
+        <p className="text-sm text-muted-foreground">
           Share your mood to receive personalized spiritual content
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+        </p>
+      </div>
+      <div className="space-y-4 pt-4">
         {/* Selected Moods Display */}
         {selectedMoods.length > 0 && (
           <div className="space-y-2">
@@ -234,7 +241,7 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
         )}
 
         {/* 4-Pillar Feelings Selector */}
-        <div className="space-y-4 max-h-64 overflow-y-auto">
+        <div className="space-y-4 max-h-48 overflow-y-auto">
           {moodCategories.map((category) => {
             const hasSelectedMood = category.moods.some(mood => selectedMoods.includes(mood.id));
             return (
@@ -308,11 +315,11 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
         <Button
           onClick={handleSubmit}
           disabled={selectedMoods.length === 0 || submitMoodMutation.isPending}
-          className="w-full bg-purple-600 hover:bg-purple-700"
+          className="w-full bg-purple-600 hover:bg-purple-700 mt-4"
         >
           {submitMoodMutation.isPending ? "Recording..." : "Get Personalized Content"}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

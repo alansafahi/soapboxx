@@ -879,7 +879,7 @@ export default function CheckInSystem() {
       {/* AI Mood Check-In Modal */}
       {showMoodCheckIn && (
         <Dialog open={showMoodCheckIn} onOpenChange={setShowMoodCheckIn}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>AI Mood Check-In</DialogTitle>
               <DialogDescription>
