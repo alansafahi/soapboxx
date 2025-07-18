@@ -49,11 +49,17 @@ import {
   Loader2,
   Smartphone,
   Mail,
-  Copy
+  Copy,
+  Flag
 } from "lucide-react";
 import { FaFacebook as Facebook, FaTwitter as Twitter } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns";
 import ExpirationSettings from "./ExpirationSettings";
+import { ShareDialog } from './ShareDialog';
+import { FormattedText } from './FormattedText';
+import { SoapPostCard } from './social-feed/SoapPostCard';
+import { FlagContentDialog } from './content-moderation/FlagContentDialog';
+import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
 
 interface FeedPost {
   id: number;
@@ -1507,6 +1513,24 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                     <Share2 className="w-4 h-4 mr-1 group-hover:scale-110 transition-all duration-200" />
                     {post.shareCount > 0 && <span className="font-medium">{post.shareCount}</span>}
                   </Button>
+
+                  {/* Flag Button - Only show for other users' posts */}
+                  {user && post.author && (String(user.id) !== String(post.author.id) && user.email !== post.author.email) && (
+                    <FlagContentDialog
+                      contentType={post.type === 'soap_reflection' ? 'soap_entry' : 'discussion'}
+                      contentId={post.id}
+                      trigger={
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 group transition-all duration-200"
+                          title="Report this content"
+                        >
+                          <Flag className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
+                        </Button>
+                      }
+                    />
+                  )}
                 </div>
                 
                 {/* Delete Button - Only show for post author */}

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { MessageCircle, Heart, Share2, ChevronDown, Loader2, Trash2 } from "lucide-react";
+import { MessageCircle, Heart, Share2, ChevronDown, Loader2, Trash2, Flag } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
@@ -13,6 +13,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import ShareDialog from "./ShareDialog";
+import { FlagContentDialog } from './content-moderation/FlagContentDialog';
+import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
 
 
 
@@ -547,6 +549,23 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                         <Share2 className="w-4 h-4" />
                         <span className="text-sm">Share</span>
                       </button>
+
+                      {/* Flag Button - Only show for other users' posts */}
+                      {user && post.author && (user.email !== post.author.email && String(user.id) !== String(post.authorId)) && (
+                        <FlagContentDialog
+                          contentType={post.type === 'soap_reflection' ? 'soap_entry' : 'discussion'}
+                          contentId={post.id}
+                          trigger={
+                            <button 
+                              className="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                              title="Report this content"
+                            >
+                              <Flag className="w-4 h-4" />
+                              <span className="text-sm">Report</span>
+                            </button>
+                          }
+                        />
+                      )}
 
                       {/* Delete Button - Only show for post author */}
                       {user && post.author && (user.email === post.author.email || String(user.id) === String(post.authorId)) && (

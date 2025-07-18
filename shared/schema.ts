@@ -3746,6 +3746,111 @@ export type InsertPlaylistVideo = typeof playlistVideos.$inferInsert;
 export type VideoUploadSession = typeof videoUploadSessions.$inferSelect;
 export type InsertVideoUploadSession = typeof videoUploadSessions.$inferInsert;
 
+// Content Moderation System
+export const contentReports = pgTable("content_reports", {
+  id: serial("id").primaryKey(),
+  reporterId: varchar("reporter_id").notNull().references(() => users.id),
+  contentType: varchar("content_type", { length: 50 }).notNull(), // discussion, prayer_request, soap_entry, comment
+  contentId: integer("content_id").notNull(),
+  reason: varchar("reason", { length: 100 }).notNull(), // inappropriate, harassment, spam, misinformation, privacy_violation, other
+  description: text("description"),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, reviewed, resolved, dismissed
+  priority: varchar("priority", { length: 10 }).default("medium"), // low, medium, high, critical
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewNotes: text("review_notes"),
+  actionTaken: varchar("action_taken", { length: 50 }), // none, warning, content_removed, user_suspended, user_banned
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contentModerationActions = pgTable("content_moderation_actions", {
+  id: serial("id").primaryKey(),
+  contentType: varchar("content_type", { length: 50 }).notNull(),
+  contentId: integer("content_id").notNull(),
+  actionType: varchar("action_type", { length: 50 }).notNull(), // ai_flagged, user_reported, content_removed, content_restored, user_warned, user_suspended, user_banned
+  reason: text("reason").notNull(),
+  moderatorId: varchar("moderator_id").references(() => users.id),
+  automatedAction: boolean("automated_action").default(false),
+  severity: varchar("severity", { length: 20 }).default("medium"), // low, medium, high, critical
+  expiresAt: timestamp("expires_at"), // for temporary suspensions
+  metadata: jsonb("metadata"), // additional context, AI confidence scores, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userModerationHistory = pgTable("user_moderation_history", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  actionType: varchar("action_type", { length: 50 }).notNull(), // warning, suspension, ban, content_removal
+  reason: text("reason").notNull(),
+  moderatorId: varchar("moderator_id").references(() => users.id),
+  severity: varchar("severity", { length: 20 }).notNull(),
+  duration: text("duration"), // for temporary actions (e.g., "3 days", "1 week")
+  isActive: boolean("is_active").default(true),
+  appealStatus: varchar("appeal_status", { length: 20 }).default("none"), // none, pending, approved, denied
+  appealNotes: text("appeal_notes"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+});
+
+export const contentModerationSettings = pgTable("content_moderation_settings", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
+  aiModerationEnabled: boolean("ai_moderation_enabled").default(true),
+  autoRemoveThreshold: real("auto_remove_threshold").default(0.9), // AI confidence threshold
+  requireApprovalForNewUsers: boolean("require_approval_for_new_users").default(false),
+  flaggedContentVisibility: varchar("flagged_content_visibility", { length: 20 }).default("hidden"), // visible, hidden, blur
+  allowAnonymousReporting: boolean("allow_anonymous_reporting").default(true),
+  moderatorNotifications: boolean("moderator_notifications").default(true),
+  escalationThreshold: integer("escalation_threshold").default(3), // number of reports before escalation
+  customFilters: jsonb("custom_filters"), // church-specific keyword filters
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Type definitions for moderation system
+export type ContentReport = typeof contentReports.$inferSelect;
+export type InsertContentReport = typeof contentReports.$inferInsert;
+export type ContentModerationAction = typeof contentModerationActions.$inferSelect;
+export type InsertContentModerationAction = typeof contentModerationActions.$inferInsert;
+export type UserModerationHistory = typeof userModerationHistory.$inferSelect;
+export type InsertUserModerationHistory = typeof userModerationHistory.$inferInsert;
+export type ContentModerationSettings = typeof contentModerationSettings.$inferSelect;
+export type InsertContentModerationSettings = typeof contentModerationSettings.$inferInsert;
+
+// Content moderation validation schemas
+export const insertContentReportSchema = createInsertSchema(contentReports).omit({
+  id: true,
+  status: true,
+  reviewedBy: true,
+  reviewedAt: true,
+  reviewNotes: true,
+  actionTaken: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContentModerationActionSchema = createInsertSchema(contentModerationActions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserModerationHistorySchema = createInsertSchema(userModerationHistory).omit({
+  id: true,
+  isActive: true,
+  appealStatus: true,
+  appealNotes: true,
+  createdAt: true,
+  resolvedAt: true,
+});
+
+export const insertContentModerationSettingsSchema = createInsertSchema(contentModerationSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Role and Permission type definitions
 export type Role = typeof roles.$inferSelect;
 export type InsertRole = typeof roles.$inferInsert;

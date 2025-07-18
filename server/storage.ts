@@ -123,6 +123,19 @@ import {
   type Invitation,
   type InsertInvitation,
   type ContactSubmission,
+  // Content moderation imports
+  contentReports,
+  contentModerationActions,
+  userModerationHistory,
+  contentModerationSettings,
+  type ContentReport,
+  type InsertContentReport,
+  type ContentModerationAction,
+  type InsertContentModerationAction,
+  type UserModerationHistory,
+  type InsertUserModerationHistory,
+  type ContentModerationSettings,
+  type InsertContentModerationSettings,
   type InsertContactSubmission,
   type ChatConversation,
   type InsertChatConversation,
@@ -510,6 +523,41 @@ export interface IStorage {
   isFeatureEnabledForChurch(churchId: number, category: string, featureName: string): Promise<boolean>;
   getDefaultFeatureSettings(churchSize: string): Promise<DefaultFeatureSetting[]>;
   createDefaultFeatureSetting(setting: InsertDefaultFeatureSetting): Promise<DefaultFeatureSetting>;
+
+  // Content moderation operations
+  // Content reports
+  createContentReport(report: InsertContentReport): Promise<ContentReport>;
+  getContentReports(churchId?: number, status?: string): Promise<ContentReport[]>;
+  getContentReport(reportId: number): Promise<ContentReport | undefined>;
+  updateContentReportStatus(reportId: number, status: string, reviewedBy: string, reviewNotes?: string, actionTaken?: string): Promise<ContentReport>;
+  
+  // Moderation actions
+  createModerationAction(action: InsertContentModerationAction): Promise<ContentModerationAction>;
+  getModerationActions(contentType?: string, contentId?: number): Promise<ContentModerationAction[]>;
+  
+  // User moderation history
+  createUserModerationRecord(record: InsertUserModerationHistory): Promise<UserModerationHistory>;
+  getUserModerationHistory(userId: string): Promise<UserModerationHistory[]>;
+  getActiveSuspensions(userId: string): Promise<UserModerationHistory[]>;
+  resolveUserModeration(recordId: number): Promise<UserModerationHistory>;
+  
+  // Content moderation settings
+  getContentModerationSettings(churchId: number): Promise<ContentModerationSettings | undefined>;
+  updateContentModerationSettings(churchId: number, settings: Partial<InsertContentModerationSettings>): Promise<ContentModerationSettings>;
+  
+  // AI content analysis
+  analyzeContentWithAI(content: string, contentType: string): Promise<{ flagged: boolean; confidence: number; reason?: string; severity?: string }>;
+  
+  // Content visibility management
+  hideContent(contentType: string, contentId: number, reason: string, moderatorId: string): Promise<void>;
+  restoreContent(contentType: string, contentId: number, moderatorId: string): Promise<void>;
+  
+  // User suspension management
+  suspendUser(userId: string, reason: string, duration: string, moderatorId: string, severity: string): Promise<UserModerationHistory>;
+  banUser(userId: string, reason: string, moderatorId: string): Promise<UserModerationHistory>;
+  
+  // Bulk moderation operations
+  bulkModerationAction(contentIds: number[], contentType: string, action: string, moderatorId: string, reason: string): Promise<void>;
   initializeChurchFeatures(churchId: number, churchSize: string): Promise<void>;
   
   // User stats and achievements
@@ -3874,6 +3922,401 @@ export class DatabaseStorage implements IStorage {
         eq(userChurches.userId, userId),
         eq(userChurches.churchId, churchId)
       ));
+  }
+
+  // Content moderation implementations
+  async createContentReport(report: InsertContentReport): Promise<ContentReport> {
+    try {
+      const [newReport] = await db.insert(contentReports)
+        .values({
+          ...report,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      return newReport;
+    } catch (error) {
+      throw new Error(`Failed to create content report: ${error}`);
+    }
+  }
+
+  async getContentReports(churchId?: number, status?: string): Promise<ContentReport[]> {
+    try {
+      let query = db.select().from(contentReports);
+      
+      if (status) {
+        query = query.where(eq(contentReports.status, status));
+      }
+      
+      return await query.orderBy(desc(contentReports.createdAt));
+    } catch (error) {
+      throw new Error(`Failed to get content reports: ${error}`);
+    }
+  }
+
+  async getContentReport(reportId: number): Promise<ContentReport | undefined> {
+    try {
+      const [report] = await db.select()
+        .from(contentReports)
+        .where(eq(contentReports.id, reportId));
+      return report;
+    } catch (error) {
+      throw new Error(`Failed to get content report: ${error}`);
+    }
+  }
+
+  async updateContentReportStatus(reportId: number, status: string, reviewedBy: string, reviewNotes?: string, actionTaken?: string): Promise<ContentReport> {
+    try {
+      const [updatedReport] = await db.update(contentReports)
+        .set({
+          status,
+          reviewedBy,
+          reviewedAt: new Date(),
+          reviewNotes,
+          actionTaken,
+          updatedAt: new Date(),
+        })
+        .where(eq(contentReports.id, reportId))
+        .returning();
+      return updatedReport;
+    } catch (error) {
+      throw new Error(`Failed to update content report status: ${error}`);
+    }
+  }
+
+  async createModerationAction(action: InsertContentModerationAction): Promise<ContentModerationAction> {
+    try {
+      const [newAction] = await db.insert(contentModerationActions)
+        .values({
+          ...action,
+          createdAt: new Date(),
+        })
+        .returning();
+      return newAction;
+    } catch (error) {
+      throw new Error(`Failed to create moderation action: ${error}`);
+    }
+  }
+
+  async getModerationActions(contentType?: string, contentId?: number): Promise<ContentModerationAction[]> {
+    try {
+      let query = db.select().from(contentModerationActions);
+      
+      if (contentType && contentId) {
+        query = query.where(
+          and(
+            eq(contentModerationActions.contentType, contentType),
+            eq(contentModerationActions.contentId, contentId)
+          )
+        );
+      }
+      
+      return await query.orderBy(desc(contentModerationActions.createdAt));
+    } catch (error) {
+      throw new Error(`Failed to get moderation actions: ${error}`);
+    }
+  }
+
+  async createUserModerationRecord(record: InsertUserModerationHistory): Promise<UserModerationHistory> {
+    try {
+      const [newRecord] = await db.insert(userModerationHistory)
+        .values({
+          ...record,
+          createdAt: new Date(),
+        })
+        .returning();
+      return newRecord;
+    } catch (error) {
+      throw new Error(`Failed to create user moderation record: ${error}`);
+    }
+  }
+
+  async getUserModerationHistory(userId: string): Promise<UserModerationHistory[]> {
+    try {
+      return await db.select()
+        .from(userModerationHistory)
+        .where(eq(userModerationHistory.userId, userId))
+        .orderBy(desc(userModerationHistory.createdAt));
+    } catch (error) {
+      throw new Error(`Failed to get user moderation history: ${error}`);
+    }
+  }
+
+  async getActiveSuspensions(userId: string): Promise<UserModerationHistory[]> {
+    try {
+      return await db.select()
+        .from(userModerationHistory)
+        .where(
+          and(
+            eq(userModerationHistory.userId, userId),
+            eq(userModerationHistory.isActive, true),
+            or(
+              isNull(userModerationHistory.expiresAt),
+              gt(userModerationHistory.expiresAt, new Date())
+            )
+          )
+        );
+    } catch (error) {
+      throw new Error(`Failed to get active suspensions: ${error}`);
+    }
+  }
+
+  async resolveUserModeration(recordId: number): Promise<UserModerationHistory> {
+    try {
+      const [resolvedRecord] = await db.update(userModerationHistory)
+        .set({
+          isActive: false,
+          resolvedAt: new Date(),
+        })
+        .where(eq(userModerationHistory.id, recordId))
+        .returning();
+      return resolvedRecord;
+    } catch (error) {
+      throw new Error(`Failed to resolve user moderation: ${error}`);
+    }
+  }
+
+  async getContentModerationSettings(churchId: number): Promise<ContentModerationSettings | undefined> {
+    try {
+      const [settings] = await db.select()
+        .from(contentModerationSettings)
+        .where(eq(contentModerationSettings.churchId, churchId));
+      return settings;
+    } catch (error) {
+      throw new Error(`Failed to get content moderation settings: ${error}`);
+    }
+  }
+
+  async updateContentModerationSettings(churchId: number, settings: Partial<InsertContentModerationSettings>): Promise<ContentModerationSettings> {
+    try {
+      const [updatedSettings] = await db.update(contentModerationSettings)
+        .set({
+          ...settings,
+          updatedAt: new Date(),
+        })
+        .where(eq(contentModerationSettings.churchId, churchId))
+        .returning();
+      return updatedSettings;
+    } catch (error) {
+      throw new Error(`Failed to update content moderation settings: ${error}`);
+    }
+  }
+
+  async analyzeContentWithAI(content: string, contentType: string): Promise<{ flagged: boolean; confidence: number; reason?: string; severity?: string }> {
+    try {
+      // Call OpenAI for content analysis
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a content moderation AI for a faith-based community platform. Analyze the following content for:
+              1. Inappropriate content (hate speech, harassment, bullying, sexual content)
+              2. Spam or commercial content
+              3. False religious information
+              4. Privacy violations
+              5. Threatening language
+              
+              Respond with a JSON object containing:
+              - flagged: boolean (true if content violates guidelines)
+              - confidence: number (0-1, how confident you are)
+              - reason: string (explanation if flagged)
+              - severity: string (low, medium, high, critical)
+              
+              Be sensitive to religious content and context. Don't flag legitimate theological discussions.`
+            },
+            {
+              role: 'user',
+              content: `Content Type: ${contentType}\nContent: ${content}`
+            }
+          ],
+          max_tokens: 200,
+          temperature: 0.1,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        try {
+          return JSON.parse(data.choices[0].message.content);
+        } catch {
+          // Fallback to simple keyword detection
+          return this.simpleContentAnalysis(content);
+        }
+      } else {
+        // Fallback to simple analysis if API fails
+        return this.simpleContentAnalysis(content);
+      }
+    } catch (error) {
+      // Fallback to simple analysis
+      return this.simpleContentAnalysis(content);
+    }
+  }
+
+  private simpleContentAnalysis(content: string): { flagged: boolean; confidence: number; reason?: string; severity?: string } {
+    const lowercaseContent = content.toLowerCase();
+    
+    // Define inappropriate keywords for basic detection
+    const inappropriateKeywords = ['hate', 'harassment', 'abuse', 'threat', 'kill', 'die', 'stupid', 'idiot'];
+    const spamKeywords = ['buy now', 'click here', 'limited time', 'make money', 'guarantee'];
+    
+    const hasInappropriate = inappropriateKeywords.some(keyword => lowercaseContent.includes(keyword));
+    const hasSpam = spamKeywords.some(keyword => lowercaseContent.includes(keyword));
+    
+    if (hasInappropriate) {
+      return {
+        flagged: true,
+        confidence: 0.75,
+        reason: 'Contains potentially inappropriate language',
+        severity: 'medium'
+      };
+    }
+    
+    if (hasSpam) {
+      return {
+        flagged: true,
+        confidence: 0.70,
+        reason: 'Contains spam-like content',
+        severity: 'low'
+      };
+    }
+    
+    return {
+      flagged: false,
+      confidence: 0.90
+    };
+  }
+
+  async hideContent(contentType: string, contentId: number, reason: string, moderatorId: string): Promise<void> {
+    try {
+      // Create moderation action record
+      await this.createModerationAction({
+        contentType,
+        contentId,
+        actionType: 'content_removed',
+        reason,
+        moderatorId,
+        automatedAction: false,
+        severity: 'medium',
+      });
+
+      // Update the actual content table to mark as hidden
+      if (contentType === 'discussion') {
+        await db.update(discussions)
+          .set({ moderationStatus: 'hidden' })
+          .where(eq(discussions.id, contentId));
+      } else if (contentType === 'prayer_request') {
+        await db.update(prayerRequests)
+          .set({ moderationStatus: 'hidden' })
+          .where(eq(prayerRequests.id, contentId));
+      } else if (contentType === 'soap_entry') {
+        await db.update(soapEntries)
+          .set({ moderationStatus: 'hidden' })
+          .where(eq(soapEntries.id, contentId));
+      }
+    } catch (error) {
+      throw new Error(`Failed to hide content: ${error}`);
+    }
+  }
+
+  async restoreContent(contentType: string, contentId: number, moderatorId: string): Promise<void> {
+    try {
+      // Create moderation action record
+      await this.createModerationAction({
+        contentType,
+        contentId,
+        actionType: 'content_restored',
+        reason: 'Content reviewed and approved',
+        moderatorId,
+        automatedAction: false,
+        severity: 'low',
+      });
+
+      // Update the actual content table to mark as visible
+      if (contentType === 'discussion') {
+        await db.update(discussions)
+          .set({ moderationStatus: 'approved' })
+          .where(eq(discussions.id, contentId));
+      } else if (contentType === 'prayer_request') {
+        await db.update(prayerRequests)
+          .set({ moderationStatus: 'approved' })
+          .where(eq(prayerRequests.id, contentId));
+      } else if (contentType === 'soap_entry') {
+        await db.update(soapEntries)
+          .set({ moderationStatus: 'approved' })
+          .where(eq(soapEntries.id, contentId));
+      }
+    } catch (error) {
+      throw new Error(`Failed to restore content: ${error}`);
+    }
+  }
+
+  async suspendUser(userId: string, reason: string, duration: string, moderatorId: string, severity: string): Promise<UserModerationHistory> {
+    try {
+      // Calculate expiration date based on duration
+      const now = new Date();
+      let expiresAt: Date | null = null;
+      
+      if (duration.includes('day')) {
+        const days = parseInt(duration);
+        expiresAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      } else if (duration.includes('hour')) {
+        const hours = parseInt(duration);
+        expiresAt = new Date(now.getTime() + hours * 60 * 60 * 1000);
+      }
+
+      return await this.createUserModerationRecord({
+        userId,
+        actionType: 'suspension',
+        reason,
+        moderatorId,
+        severity,
+        duration,
+        expiresAt,
+      });
+    } catch (error) {
+      throw new Error(`Failed to suspend user: ${error}`);
+    }
+  }
+
+  async banUser(userId: string, reason: string, moderatorId: string): Promise<UserModerationHistory> {
+    try {
+      return await this.createUserModerationRecord({
+        userId,
+        actionType: 'ban',
+        reason,
+        moderatorId,
+        severity: 'critical',
+        duration: 'permanent',
+        expiresAt: null,
+      });
+    } catch (error) {
+      throw new Error(`Failed to ban user: ${error}`);
+    }
+  }
+
+  async bulkModerationAction(contentIds: number[], contentType: string, action: string, moderatorId: string, reason: string): Promise<void> {
+    try {
+      for (const contentId of contentIds) {
+        await this.createModerationAction({
+          contentType,
+          contentId,
+          actionType: action,
+          reason,
+          moderatorId,
+          automatedAction: false,
+          severity: 'medium',
+        });
+      }
+    } catch (error) {
+      throw new Error(`Failed to perform bulk moderation action: ${error}`);
+    }
   }
 
   // Friend operations

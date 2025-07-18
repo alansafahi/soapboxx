@@ -2932,6 +2932,97 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // Content Moderation API Routes
+  
+  // Report content
+  app.post('/api/moderation/report', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { contentType, contentId, reason, description } = req.body;
+
+      if (!contentType || !contentId || !reason) {
+        return res.status(400).json({ message: 'Content type, ID, and reason are required' });
+      }
+
+      // Create content report
+      const report = await storage.createContentReport({
+        reporterId: userId,
+        contentType,
+        contentId,
+        reason,
+        description: description || null,
+        priority: reason === 'harassment' || reason === 'inappropriate' ? 'high' : 'medium',
+      });
+
+      res.json({ success: true, report });
+    } catch (error) {
+      console.error('Failed to create content report:', error);
+      res.status(500).json({ message: 'Failed to create content report' });
+    }
+  });
+
+  // Get content reports (for moderators)
+  app.get('/api/moderation/reports', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Check if user is a moderator (church admin, pastor, or soapbox owner)
+      const user = await storage.getUser(userId);
+      const userChurches = await storage.getUserChurches(userId);
+      const isModerator = user?.role === 'soapbox_owner' || 
+                         userChurches.some(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
+
+      if (!isModerator) {
+        return res.status(403).json({ message: 'Moderator access required' });
+      }
+
+      const { status } = req.query;
+      const reports = await storage.getContentReports(undefined, status as string);
+
+      res.json(reports);
+    } catch (error) {
+      console.error('Failed to fetch content reports:', error);
+      res.status(500).json({ message: 'Failed to fetch content reports' });
+    }
+  });
+
+  // Hide/remove content
+  app.post('/api/moderation/content/:contentType/:contentId/hide', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Check moderator access
+      const user = await storage.getUser(userId);
+      const userChurches = await storage.getUserChurches(userId);
+      const isModerator = user?.role === 'soapbox_owner' || 
+                         userChurches.some(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
+
+      if (!isModerator) {
+        return res.status(403).json({ message: 'Moderator access required' });
+      }
+
+      const { contentType, contentId } = req.params;
+      const { reason } = req.body;
+
+      await storage.hideContent(contentType, parseInt(contentId), reason || 'Content hidden by moderator', userId);
+
+      res.json({ success: true, message: 'Content hidden successfully' });
+    } catch (error) {
+      console.error('Failed to hide content:', error);
+      res.status(500).json({ message: 'Failed to hide content' });
+    }
+  });
+
   // Contact form submission endpoint (public - no authentication required)
   app.post('/api/contact-submission', async (req, res) => {
     try {

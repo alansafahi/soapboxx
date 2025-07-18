@@ -35,8 +35,11 @@ import {
   Eye,
   EyeOff,
   Play,
-  Trash2
+  Trash2,
+  Flag
 } from 'lucide-react';
+import { FlagContentDialog } from './content-moderation/FlagContentDialog';
+import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
 
 interface EnhancedPost {
   id: number;
@@ -663,6 +666,26 @@ export default function EnhancedCommunityFeed() {
                             <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="hidden sm:inline">Share</span>
                           </Button>
+
+                          {/* Flag Button - Only show for other users' posts */}
+                          {user && post.author && (String(user.id) !== String(post.authorId) && user.email !== post.author.email) && (
+                            <FlagContentDialog
+                              contentType="discussion"
+                              contentId={post.id}
+                              trigger={
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs sm:text-sm px-2 sm:px-3"
+                                  title="Report this content"
+                                >
+                                  <Flag className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                                  <span className="hidden sm:inline">Report</span>
+                                </Button>
+                              }
+                            />
+                          )}
+
                           {/* Delete Button - Only show for post author */}
                           {user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email) && (
                             <Button 
