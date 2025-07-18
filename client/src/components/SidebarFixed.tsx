@@ -71,6 +71,18 @@ export default function SidebarFixed() {
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
   const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Custom navigation function to handle problematic routes
+  const handleNavigation = (href: string) => {
+    if (href === '/moderation-dashboard') {
+      // Force navigation using history API
+      window.history.pushState({}, '', href);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      return;
+    }
+    // For other routes, use standard navigation
+    window.location.href = href;
+  };
   
   // Force re-render every 2 seconds to overcome React caching issues
   useEffect(() => {
@@ -327,6 +339,25 @@ export default function SidebarFixed() {
                       
 
 
+                      // Special handling for Content Moderation
+                      if (item.href === '/moderation-dashboard') {
+                        return (
+                          <Button
+                            key={`expanded-${item.href}-${itemIdx}-${forceUpdate}-${Date.now()}`}
+                            variant={isActive ? "default" : "ghost"}
+                            className={`w-full justify-start h-auto py-2 px-3 ${
+                              isActive 
+                                ? "bg-purple-600 text-white hover:bg-purple-700" 
+                                : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                            }`}
+                            onClick={() => handleNavigation(item.href)}
+                          >
+                            <Icon className="h-4 w-4 mr-3" />
+                            <span className="text-sm">{item.label}</span>
+                          </Button>
+                        );
+                      }
+
                       return (
                         <Link key={`expanded-${item.href}-${itemIdx}-${forceUpdate}-${Date.now()}`} href={item.href}>
                           <Button
@@ -374,6 +405,32 @@ export default function SidebarFixed() {
               
               const Icon = item.icon;
               const isActive = location === item.href;
+              
+              // Special handling for Content Moderation in collapsed view
+              if (item.href === '/moderation-dashboard') {
+                return (
+                  <Button
+                    key={item.href}
+                    variant={isActive ? "default" : "ghost"}
+                    size="icon"
+                    className={`relative w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
+                      isActive 
+                        ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                        : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+                    }`}
+                    title={item.label}
+                    onClick={() => handleNavigation(item.href)}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label === "Messages" && unreadCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center p-0">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                );
+              }
+
               return (
                 <Link key={item.href} href={item.href}>
                   <Button
