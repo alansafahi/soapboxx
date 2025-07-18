@@ -40,6 +40,9 @@ app.use(compression({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Serve attached assets statically
+app.use('/attached_assets', express.static('attached_assets'));
+
 
 
 // Media moderation routes
