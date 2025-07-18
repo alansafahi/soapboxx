@@ -186,7 +186,7 @@ export default function MessagesPage() {
   };
 
   const filteredConversations = conversations.filter((conv) =>
-    conv.participantName.toLowerCase().includes(searchQuery.toLowerCase())
+    conv.participantName?.toLowerCase().includes(searchQuery.toLowerCase()) || false
   );
 
   const filteredContacts = contacts.filter((contact) =>
