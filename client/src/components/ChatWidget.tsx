@@ -312,11 +312,24 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
 
   if (!isOpen) {
     return (
-      <div className={`fixed ${positionClasses} z-50`}>
+      <div className={`fixed ${positionClasses} z-[9999]`}>
         <div className="relative">
           <Button
-            onClick={() => setIsOpen(true)}
-            className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsOpen(true);
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsOpen(true);
+            }}
+            className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation"
           >
             <MessageCircle className="w-6 h-6" />
           </Button>
@@ -329,8 +342,11 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
   }
 
   return (
-    <div className={`fixed ${positionClasses} z-50`}>
-      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh]`}>
+    <div className={`fixed ${positionClasses} z-[9999]`}>
+      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh] touch-manipulation`}
+           onTouchStart={(e) => e.stopPropagation()}
+           onTouchEnd={(e) => e.stopPropagation()}
+           onClick={(e) => e.stopPropagation()}>
         {/* Chat Header */}
         <div className="bg-gradient-to-r from-teal-600 to-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -348,16 +364,34 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="text-white hover:bg-white/20 p-1"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMinimized(!isMinimized);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMinimized(!isMinimized);
+              }}
+              className="text-white hover:bg-white/20 p-1 touch-manipulation"
             >
               <Minimize2 className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsOpen(false)}
-              className="text-white hover:bg-white/20 p-1"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="text-white hover:bg-white/20 p-1 touch-manipulation"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -418,8 +452,17 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                     className="text-sm"
                   />
                   <Button
-                    onClick={handleUserInfoSubmit}
-                    className="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleUserInfoSubmit();
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleUserInfoSubmit();
+                    }}
+                    className="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm touch-manipulation"
                     disabled={!userInfo.name || !userInfo.email}
                   >
                     Start Chat
@@ -440,9 +483,18 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                     className="flex-1 text-sm"
                   />
                   <Button
-                    onClick={handleSendMessage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSendMessage();
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSendMessage();
+                    }}
                     disabled={!currentMessage.trim()}
-                    className="bg-teal-600 hover:bg-teal-700 text-white p-2"
+                    className="bg-teal-600 hover:bg-teal-700 text-white p-2 touch-manipulation"
                   >
                     <Send className="w-4 h-4" />
                   </Button>
