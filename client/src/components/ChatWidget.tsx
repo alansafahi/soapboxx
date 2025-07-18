@@ -62,9 +62,21 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
     return () => clearInterval(interval);
   }, []);
 
-  // Load existing conversation when chat opens
+  // Load existing conversation when chat opens and check for saved user info
   useEffect(() => {
     if (isOpen && sessionId && messages.length === 0) {
+      // Check for saved user info
+      const savedUserInfo = localStorage.getItem('chat_user_info');
+      if (savedUserInfo) {
+        try {
+          const parsedUserInfo = JSON.parse(savedUserInfo);
+          setUserInfo(parsedUserInfo);
+          setHasProvidedInfo(true);
+        } catch (error) {
+          // Ignore invalid saved data
+        }
+      }
+      
       loadChatHistory();
     }
   }, [isOpen, sessionId]);
@@ -316,6 +328,13 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         });
         
         setHasProvidedInfo(true);
+        
+        // Save user info to localStorage for future sessions
+        localStorage.setItem('chat_user_info', JSON.stringify({
+          name: userInfo.name,
+          email: userInfo.email
+        }));
+        
         await addMessage(`Thanks ${userInfo.name}! How can I help you today?`, 'agent', 'system');
         
         toast({
@@ -540,13 +559,13 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                   </Button>
                 </div>
                 
-                {/* Quick Actions */}
+                {/* Quick Actions - Fixed styling */}
                 <div className="flex gap-2 mt-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => window.open('https://wa.me/message/BNZMR2CPIKVKA1', '_blank')}
-                    className="text-xs flex items-center gap-1"
+                    className="text-xs flex items-center gap-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     <Phone className="w-3 h-3" />
                     WhatsApp
@@ -555,7 +574,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.href = 'mailto:support@soapboxsuperapp.com'}
-                    className="text-xs flex items-center gap-1"
+                    className="text-xs flex items-center gap-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     <Mail className="w-3 h-3" />
                     Email

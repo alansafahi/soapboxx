@@ -330,6 +330,28 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     source: 'website'
   },
 
+  // COMPANY INFORMATION
+  {
+    id: 'company-ownership',
+    category: 'company',
+    subcategory: 'ownership',
+    keywords: ['who owns', 'owner', 'founder', 'ceo', 'leadership', 'alan safahi', 'founder'],
+    content: 'SoapBox Super App is owned and founded by Alan Safahi, an experienced entrepreneur passionate about strengthening faith communities through technology. Alan leads the vision and development of our comprehensive church management platform.',
+    priority: 9,
+    lastUpdated: '2025-07-18',
+    source: 'company'
+  },
+  {
+    id: 'company-mission',
+    category: 'company',
+    subcategory: 'mission',
+    keywords: ['mission', 'vision', 'purpose', 'why', 'goal', 'about company'],
+    content: 'Our mission is to Unite Your Faith Community through innovative technology that strengthens spiritual connections, enhances ministry effectiveness, and builds stronger church communities in the digital age.',
+    priority: 8,
+    lastUpdated: '2025-07-18',
+    source: 'company'
+  },
+
   // ESCALATION TRIGGERS
   {
     id: 'billing-escalation',
