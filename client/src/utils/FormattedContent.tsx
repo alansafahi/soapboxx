@@ -111,10 +111,14 @@ export default function FormattedContent({ content, className, attachedMedia }: 
                 <img 
                   key={index}
                   src={media.url} 
-                  alt={media.filename} 
+                  alt={media.filename || 'Attached image'} 
                   className="max-w-full h-auto rounded-lg border shadow-sm"
                   style={{ maxHeight: '400px' }}
                   loading="lazy"
+                  onError={(e) => {
+                    console.error('Image failed to load:', media.url);
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               );
             }
