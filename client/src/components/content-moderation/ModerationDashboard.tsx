@@ -441,8 +441,8 @@ export function ModerationDashboard() {
 
       {/* Review Dialog */}
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Review Content Report</DialogTitle>
             <DialogDescription>
               Review the reported content and take appropriate moderation action
@@ -450,7 +450,7 @@ export function ModerationDashboard() {
           </DialogHeader>
 
           {selectedReport && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto flex-1 pr-2">
               <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
                 <h4 className="font-medium mb-2">Report Details</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -531,22 +531,23 @@ export function ModerationDashboard() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setReviewDialogOpen(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSubmitReview}
-                  disabled={!actionTaken || updateReportMutation.isPending}
-                  className="flex-1"
-                >
-                  {updateReportMutation.isPending ? 'Submitting...' : 'Submit Review'}
-                </Button>
-              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex-shrink-0">
+              <Button
+                variant="outline"
+                onClick={() => setReviewDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitReview}
+                disabled={!actionTaken || updateReportMutation.isPending}
+                className="flex-1"
+              >
+                {updateReportMutation.isPending ? 'Submitting...' : 'Submit Review'}
+              </Button>
             </div>
           )}
         </DialogContent>
@@ -554,8 +555,8 @@ export function ModerationDashboard() {
 
       {/* Request Edit Dialog */}
       <Dialog open={editRequestDialogOpen} onOpenChange={setEditRequestDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Request Content Edit</DialogTitle>
             <DialogDescription>
               Send feedback to the user requesting them to edit their content. This empowers users to make their own corrections.
@@ -563,7 +564,7 @@ export function ModerationDashboard() {
           </DialogHeader>
 
           {selectedReport && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto flex-1 pr-2">
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
                 <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">Best Practice</h4>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
@@ -624,22 +625,23 @@ export function ModerationDashboard() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setEditRequestDialogOpen(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSendEditRequest}
-                  disabled={!editRequestFeedback.trim() || !editRequestSuggestions.trim() || requestEditMutation.isPending}
-                  className="flex-1"
-                >
-                  {requestEditMutation.isPending ? 'Sending...' : 'Send Edit Request'}
-                </Button>
-              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex-shrink-0">
+              <Button
+                variant="outline"
+                onClick={() => setEditRequestDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSendEditRequest}
+                disabled={!editRequestFeedback.trim() || !editRequestSuggestions.trim() || requestEditMutation.isPending}
+                className="flex-1"
+              >
+                {requestEditMutation.isPending ? 'Sending...' : 'Send Edit Request'}
+              </Button>
             </div>
           )}
         </DialogContent>
