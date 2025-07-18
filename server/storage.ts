@@ -3927,9 +3927,14 @@ export class DatabaseStorage implements IStorage {
   // Content moderation implementations
   async createContentReport(report: InsertContentReport): Promise<ContentReport> {
     try {
+      // Capture original content before creating the report
+      const originalContent = await this.getOriginalContent(report.contentType, report.contentId);
+      
       const [newReport] = await db.insert(contentReports)
         .values({
           ...report,
+          originalContent: originalContent.content,
+          contentMetadata: originalContent.metadata,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -3937,6 +3942,104 @@ export class DatabaseStorage implements IStorage {
       return newReport;
     } catch (error) {
       throw new Error(`Failed to create content report: ${error}`);
+    }
+  }
+
+  async getOriginalContent(contentType: string, contentId: number): Promise<{ content: string; metadata: any }> {
+    try {
+      switch (contentType) {
+        case 'discussion':
+          const [discussion] = await db.select({
+            content: discussions.content,
+            title: discussions.title,
+            authorId: discussions.authorId,
+            isPublic: discussions.isPublic,
+            createdAt: discussions.createdAt,
+            churchId: discussions.churchId,
+            category: discussions.category,
+          }).from(discussions).where(eq(discussions.id, contentId));
+          
+          if (discussion) {
+            return {
+              content: discussion.content,
+              metadata: {
+                title: discussion.title,
+                authorId: discussion.authorId,
+                isPublic: discussion.isPublic,
+                createdAt: discussion.createdAt,
+                churchId: discussion.churchId,
+                category: discussion.category,
+              }
+            };
+          }
+          break;
+
+        case 'prayer_request':
+          const [prayer] = await db.select({
+            content: prayerRequests.content,
+            title: prayerRequests.title,
+            authorId: prayerRequests.authorId,
+            isAnonymous: prayerRequests.isAnonymous,
+            createdAt: prayerRequests.createdAt,
+            churchId: prayerRequests.churchId,
+            category: prayerRequests.category,
+            status: prayerRequests.status,
+          }).from(prayerRequests).where(eq(prayerRequests.id, contentId));
+          
+          if (prayer) {
+            return {
+              content: prayer.content,
+              metadata: {
+                title: prayer.title,
+                authorId: prayer.authorId,
+                isAnonymous: prayer.isAnonymous,
+                createdAt: prayer.createdAt,
+                churchId: prayer.churchId,
+                category: prayer.category,
+                status: prayer.status,
+              }
+            };
+          }
+          break;
+
+        case 'soap_entry':
+          const [soap] = await db.select({
+            scripture: soapEntries.scripture,
+            observation: soapEntries.observation,
+            application: soapEntries.application,
+            prayer: soapEntries.prayer,
+            authorId: soapEntries.authorId,
+            isPublic: soapEntries.isPublic,
+            createdAt: soapEntries.createdAt,
+            churchId: soapEntries.churchId,
+            devotionalDate: soapEntries.devotionalDate,
+          }).from(soapEntries).where(eq(soapEntries.id, contentId));
+          
+          if (soap) {
+            return {
+              content: `Scripture: ${soap.scripture}\nObservation: ${soap.observation}\nApplication: ${soap.application}\nPrayer: ${soap.prayer}`,
+              metadata: {
+                authorId: soap.authorId,
+                isPublic: soap.isPublic,
+                createdAt: soap.createdAt,
+                churchId: soap.churchId,
+                devotionalDate: soap.devotionalDate,
+              }
+            };
+          }
+          break;
+
+        case 'comment':
+          // Handle comment content if needed
+          break;
+
+        default:
+          throw new Error(`Unsupported content type: ${contentType}`);
+      }
+      
+      return { content: 'Content not found', metadata: {} };
+    } catch (error) {
+      throw new Error(`Failed to get original content: ${error}`);
     }
   }
 

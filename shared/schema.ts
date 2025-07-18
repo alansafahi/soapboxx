@@ -3754,6 +3754,8 @@ export const contentReports = pgTable("content_reports", {
   contentId: integer("content_id").notNull(),
   reason: varchar("reason", { length: 100 }).notNull(), // inappropriate, harassment, spam, misinformation, privacy_violation, other
   description: text("description"),
+  originalContent: text("original_content"), // Store original content for moderation review
+  contentMetadata: jsonb("content_metadata"), // Store original content metadata (title, author, etc.)
   status: varchar("status", { length: 20 }).default("pending"), // pending, reviewed, resolved, dismissed
   priority: varchar("priority", { length: 10 }).default("medium"), // low, medium, high, critical
   reviewedBy: varchar("reviewed_by").references(() => users.id),

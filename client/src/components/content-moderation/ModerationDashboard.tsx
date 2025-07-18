@@ -30,6 +30,8 @@ interface ContentReport {
   contentId: number;
   reason: string;
   description?: string;
+  originalContent?: string;
+  contentMetadata?: any;
   priority: 'low' | 'medium' | 'high';
   status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
   reporterId: string;
@@ -351,6 +353,29 @@ export function ModerationDashboard() {
                   </div>
                 )}
               </div>
+
+              {/* Original Content Display */}
+              {selectedReport.originalContent && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-red-800 dark:text-red-200">Original Content (Preserved for Review)</h4>
+                  <div className="text-sm bg-white dark:bg-gray-900 p-3 rounded border max-h-48 overflow-y-auto">
+                    {selectedReport.contentMetadata?.title && (
+                      <div className="mb-2">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">Title:</span> {selectedReport.contentMetadata.title}
+                      </div>
+                    )}
+                    <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                      {selectedReport.originalContent}
+                    </div>
+                  </div>
+                  {selectedReport.contentMetadata && (
+                    <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Author ID:</span> {selectedReport.contentMetadata.authorId} • 
+                      <span className="font-medium ml-2">Created:</span> {selectedReport.contentMetadata.createdAt ? format(new Date(selectedReport.contentMetadata.createdAt), 'MMM d, yyyy') : 'Unknown'}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="action">Action to Take</Label>
