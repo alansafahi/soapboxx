@@ -171,11 +171,11 @@ export function ModerationDashboard() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate AI suggestions');
-      }
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to generate AI suggestions');
+      }
       
       // Fill in the feedback and suggestions with AI-generated content
       setEditRequestFeedback(data.feedback || '');
@@ -186,9 +186,10 @@ export function ModerationDashboard() {
         description: "Review and customize the AI-generated feedback and suggestions as needed.",
       });
     } catch (error) {
+      console.error('AI suggestions error:', error);
       toast({
         title: "Error",
-        description: "Failed to generate AI suggestions. Please create manual suggestions.",
+        description: error.message || "Failed to generate AI suggestions. Please create manual suggestions.",
         variant: "destructive",
       });
     } finally {

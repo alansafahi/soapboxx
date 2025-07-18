@@ -3052,6 +3052,19 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // AI health check endpoint
+  app.get('/api/ai/health', isAuthenticated, async (req: any, res) => {
+    try {
+      res.json({
+        status: 'healthy',
+        openai_configured: !!process.env.OPENAI_API_KEY,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ status: 'error', message: error.message });
+    }
+  });
+
   // AI-powered edit suggestions endpoint
   app.post('/api/ai/generate-edit-suggestions', isAuthenticated, async (req: any, res) => {
     try {
@@ -3076,6 +3089,8 @@ app.post('/api/invitations', async (req: any, res) => {
         return res.status(400).json({ message: 'Missing required fields' });
       }
 
+      console.log('Generating AI suggestions for:', { contentType, violationReason, originalContent: originalContent.substring(0, 100) + '...' });
+
       // Create a prompt for GPT-4o to generate edit suggestions
       const prompt = `You are a content moderation assistant for a faith-based community platform. 
 
@@ -3091,6 +3106,11 @@ Please provide:
 Keep the tone respectful and educational. Focus on helping the user understand community guidelines and how to improve their content. Remember this is a faith-based platform, so maintain appropriate spiritual sensitivity.
 
 Respond in JSON format with "feedback" and "suggestions" fields.`;
+
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OpenAI API key not configured');
+      }
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -3117,10 +3137,17 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error('OpenAI API error:', response.status, errorText);
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+        throw new Error('Invalid OpenAI API response format');
+      }
+
       const aiResponse = JSON.parse(data.choices[0].message.content);
       
       res.json({
@@ -3129,8 +3156,19 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
       });
     } catch (error) {
       console.error('Error generating AI suggestions:', error);
+      
+      // Provide more specific error information
+      let errorMessage = 'Failed to generate AI suggestions';
+      if (error.message.includes('OpenAI API key not configured')) {
+        errorMessage = 'OpenAI API key not configured';
+      } else if (error.message.includes('OpenAI API error')) {
+        errorMessage = 'OpenAI API is temporarily unavailable';
+      } else if (error.message.includes('Invalid OpenAI API response')) {
+        errorMessage = 'Received invalid response from AI service';
+      }
+      
       res.status(500).json({ 
-        message: 'Failed to generate AI suggestions',
+        message: errorMessage,
         feedback: 'Please review this content and consider making appropriate adjustments.',
         suggestions: 'Consider revising the content to better align with our community guidelines.'
       });
