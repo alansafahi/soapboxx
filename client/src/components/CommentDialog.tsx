@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Heart, MoreVertical, Reply } from 'lucide-react';
+import { Heart, MoreVertical, Reply, Flag } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { FlagContentDialog } from './content-moderation/FlagContentDialog';
 
 interface CommentDialogProps {
   isOpen: boolean;
@@ -172,20 +173,40 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                     <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{comment.content}</p>
                     
                     {/* Comment Actions */}
-                    <div className="flex items-center space-x-4 mt-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => likeCommentMutation.mutate(comment.id)}
-                        className={`text-xs ${comment.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
-                      >
-                        <Heart className={`w-3 h-3 mr-1 ${comment.isLiked ? 'fill-current' : ''}`} />
-                        {comment.likeCount > 0 && comment.likeCount}
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-blue-500">
-                        <Reply className="w-3 h-3 mr-1" />
-                        Reply
-                      </Button>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center space-x-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => likeCommentMutation.mutate(comment.id)}
+                          className={`text-xs ${comment.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                        >
+                          <Heart className={`w-3 h-3 mr-1 ${comment.isLiked ? 'fill-current' : ''}`} />
+                          {comment.likeCount > 0 && comment.likeCount}
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-blue-500">
+                          <Reply className="w-3 h-3 mr-1" />
+                          Reply
+                        </Button>
+                      </div>
+                      
+                      {/* Flag Button - Only show for other users' comments */}
+                      {user && comment.author && (String(user.id) !== String(comment.author.id) && user.email !== comment.author.email) && (
+                        <FlagContentDialog
+                          contentType="comment"
+                          contentId={comment.id}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-xs text-gray-400 hover:text-red-500"
+                              title="Report this comment"
+                            >
+                              <Flag className="w-3 h-3" />
+                            </Button>
+                          }
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

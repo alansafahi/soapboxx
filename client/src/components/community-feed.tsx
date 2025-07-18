@@ -11,13 +11,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Heart, MessageCircle, Share, Plus, Upload, Send } from "lucide-react";
+import { Heart, MessageCircle, Share, Plus, Upload, Send, Flag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { Discussion } from "../../../shared/schema";
 import SmartScriptureTextarea from "./SmartScriptureTextarea";
+import { FlagContentDialog } from "./content-moderation/FlagContentDialog";
 
 const discussionSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title too long"),
@@ -525,6 +526,28 @@ export default function CommunityFeed() {
                           </motion.div>
                         </Button>
                       </motion.div>
+                      
+                      {/* Flag Button - Only show for other users' posts */}
+                      {user && (String(user.id) !== String(discussion.authorId) && user.email !== discussion.authorId) && (
+                        <FlagContentDialog
+                          contentType="discussion"
+                          contentId={discussion.id}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-gray-400 hover:text-red-500 hover:bg-red-50"
+                              title="Report this discussion"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                            >
+                              <Flag className="w-4 h-4" />
+                            </Button>
+                          }
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

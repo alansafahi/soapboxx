@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone, BookmarkX, Bookmark } from "lucide-react";
+import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone, BookmarkX, Bookmark, Flag } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { FlagContentDialog } from "./content-moderation/FlagContentDialog";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SoapPost {
   id: number;
@@ -54,6 +56,7 @@ interface CommentDialogProps {
 function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
   const [commentText, setCommentText] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Fetch comments for this SOAP post
   const { data: comments = [] } = useQuery({
@@ -125,13 +128,33 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium text-sm">
-                        {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                      </span>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-sm">
+                          {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                        </span>
+                      </div>
+                      
+                      {/* Flag Button - Only show for other users' comments */}
+                      {user && comment.author && (String(user.id) !== String(comment.author.id) && user.email !== comment.author.email) && (
+                        <FlagContentDialog
+                          contentType="comment"
+                          contentId={comment.id}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-xs text-gray-400 hover:text-red-500 h-6 w-6 p-0"
+                              title="Report this comment"
+                            >
+                              <Flag className="w-3 h-3" />
+                            </Button>
+                          }
+                        />
+                      )}
                     </div>
                     <p className="text-gray-700 text-sm">{comment.content}</p>
                   </div>
