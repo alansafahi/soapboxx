@@ -217,6 +217,36 @@ const faqs: FAQItem[] = [
     question: 'How can I earn free credits?',
     answer: 'Earn credits through community engagement: Daily check-ins (+5 credits), Posting prayers or discussions (+3 credits), Responding to prayers (+2 credits), Attending events (+5 credits), Reading daily Bible verses (+2 credits), Referring new users (bonus credits).',
     category: 'features'
+  },
+  {
+    id: 'response-time',
+    question: 'How quickly do you respond to support requests?',
+    answer: 'We respond to support emails within 24 hours on weekdays, and sales inquiries within 4 hours during business hours (9am-5pm PT). For urgent technical issues, use our live chat feature for faster assistance.',
+    category: 'technical'
+  },
+  {
+    id: 'non-church-leader-use',
+    question: 'Can I use SoapBox if I\'m not a church leader?',
+    answer: 'Absolutely! SoapBox Super App is designed for all members of faith communities. Individual believers can join prayer circles, participate in Bible studies, connect with their church community, and access all personal spiritual growth tools.',
+    category: 'general'
+  },
+  {
+    id: 'live-demos-onboarding',
+    question: 'Do you offer live demos or onboarding help?',
+    answer: 'Yes! We offer personalized live demos via Calendly and comprehensive onboarding support to help your church get started with all features. Contact our sales team to schedule a demo tailored to your ministry needs.',
+    category: 'church'
+  },
+  {
+    id: 'small-church-suitability',
+    question: 'Is SoapBox suitable for small churches?',
+    answer: 'Perfect for churches of all sizes! Our platform scales from small congregations (10-50 members) to mega-churches (1000+ members), with pricing plans designed for every ministry budget. Many small churches find our free tier meets their initial needs.',
+    category: 'church'
+  },
+  {
+    id: 'what-makes-different',
+    question: 'What makes SoapBox different from other church apps?',
+    answer: 'SoapBox combines AI-powered pastoral tools, comprehensive community features, and spiritual growth tracking in one integrated platform designed specifically for faith communities. Unlike generic apps, we focus on deepening spiritual life rather than just communication.',
+    category: 'general'
   }
 ];
 

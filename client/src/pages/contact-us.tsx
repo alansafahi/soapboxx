@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
-import { ArrowLeft, Mail, MessageCircle, Calendar, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Heart, BookOpen, Check, Send, Loader2, AlertCircle, User, ChevronRight } from "lucide-react";
+import { ArrowLeft, Mail, MessageCircle, Calendar, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, Heart, BookOpen, Check, Send, Loader2, AlertCircle, User, ChevronRight, HelpCircle } from "lucide-react";
 
 // Custom Spiritual Icons
 const CrossIcon = ({ className = "w-6 h-6" }) => (
@@ -556,64 +556,27 @@ export default function ContactUs() {
           </div>
         </section>
 
-        {/* FAQ Section */}
+        {/* FAQ Link Section */}
         <section className="mb-12 sm:mb-16">
-          <div className="bg-gray-50 rounded-xl p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 sm:p-8 text-center">
+            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <HelpCircle className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Frequently Asked Questions
             </h2>
-            <div className="space-y-4 max-w-3xl mx-auto">
-              
-              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
-                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
-                  <span>How quickly do you respond?</span>
-                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="p-4 pt-0 text-gray-600">
-                  We respond to support emails within 24 hours on weekdays, and sales inquiries within 4 hours during business hours (9am-5pm PT).
-                </div>
-              </details>
-
-              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
-                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
-                  <span>Can I use SoapBox if I'm not a church leader?</span>
-                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="p-4 pt-0 text-gray-600">
-                  Absolutely! SoapBox Super App is designed for all members of faith communities. Individual believers can join prayer circles, participate in Bible studies, and connect with their church community.
-                </div>
-              </details>
-
-              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
-                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
-                  <span>Do you offer live demos or onboarding help?</span>
-                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="p-4 pt-0 text-gray-600">
-                  Yes! We offer personalized live demos via Calendly and comprehensive onboarding support to help your church get started with all features.
-                </div>
-              </details>
-
-              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
-                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
-                  <span>Is SoapBox suitable for small churches?</span>
-                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="p-4 pt-0 text-gray-600">
-                  Perfect for churches of all sizes! Our platform scales from small congregations to mega-churches, with pricing plans designed for every ministry budget.
-                </div>
-              </details>
-
-              <details className="group bg-white rounded-lg shadow-sm border border-gray-200">
-                <summary className="flex justify-between items-center cursor-pointer p-4 font-semibold text-gray-900 hover:bg-gray-50">
-                  <span>What makes SoapBox different from other church apps?</span>
-                  <ChevronRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="p-4 pt-0 text-gray-600">
-                  SoapBox combines AI-powered pastoral tools, comprehensive community features, and spiritual growth tracking in one integrated platform designed specifically for faith communities.
-                </div>
-              </details>
-
+            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              Find answers to common questions about SoapBox Super App features, pricing, church administration, technical support, and more in our comprehensive FAQ section.
+            </p>
+            <Button
+              onClick={() => window.location.href = '/faq'}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <HelpCircle className="w-5 h-5 mr-2" />
+              View All Frequently Asked Questions
+            </Button>
+            <div className="mt-4 text-sm text-gray-500">
+              40+ questions covering features, pricing, technical support, and church administration
             </div>
           </div>
         </section>
