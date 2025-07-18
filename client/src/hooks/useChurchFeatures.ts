@@ -95,7 +95,8 @@ const CORE_FEATURES = [
   'donation-analytics',
   'engagement-analytics',
   'church-management',
-  'qr-management'
+  'qr-management',
+  'moderation-dashboard' // Content Moderation - always available for authorized users
 ];
 
 // Hook to check if a navigation item should be visible

@@ -305,6 +305,11 @@ export default function SidebarFixed() {
                 {isExpanded && (
                   <div className="space-y-1">
                     {group.items.filter((item) => {
+                      // Special case: Always show Content Moderation for soapbox_owner
+                      if (item.href === '/moderation-dashboard' && user?.role === 'soapbox_owner') {
+                        return true;
+                      }
+                      
                       // Apply role-based filtering first  
                       if (item.roles) {
                         if (!user) return false;
@@ -315,8 +320,8 @@ export default function SidebarFixed() {
                       
                       // Apply direct church feature filtering to bypass React caching
                       const featureEnabled = isFeatureEnabled(item.href);
-                      // Always show moderation dashboard for soapbox_owner and authorized users
-                      if (!featureEnabled && item.href !== '/moderation-dashboard' && user?.role !== 'soapbox_owner') {
+                      // Always show moderation dashboard for authorized users
+                      if (!featureEnabled && item.href !== '/moderation-dashboard') {
                         return false;
                       }
                       
