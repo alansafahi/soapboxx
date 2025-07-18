@@ -207,6 +207,107 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     source: 'app'
   },
 
+  // FREQUENTLY ASKED QUESTIONS
+  {
+    id: 'mobile-app-availability',
+    category: 'technical',
+    subcategory: 'mobile',
+    keywords: ['mobile app', 'app store', 'google play', 'ios', 'android', 'download'],
+    content: 'Mobile App Availability: SoapBox is currently a web application that works perfectly on mobile browsers. Native mobile apps for iOS and Android are planned for future release. The web version is fully optimized for mobile use with all features accessible.',
+    helpLink: '/faq#mobile-apps',
+    priority: 8,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'offline-functionality',
+    category: 'technical',
+    subcategory: 'connectivity',
+    keywords: ['offline', 'internet', 'connection', 'work without wifi'],
+    content: 'Offline Features: Some features like reading past journal entries and saved content work offline. Most interactive features (prayer wall, chat, livestreams, discussions) require an internet connection for real-time updates.',
+    helpLink: '/faq#offline-features',
+    priority: 7,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'international-access',
+    category: 'features',
+    subcategory: 'global',
+    keywords: ['international', 'global', 'worldwide', 'countries', 'access'],
+    content: 'International Access: SoapBox is available globally! Anyone with internet access can use SoapBox regardless of their country. Our platform is designed to serve the global Christian community.',
+    helpLink: '/faq#international-use',
+    priority: 7,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'language-support',
+    category: 'features',
+    subcategory: 'localization',
+    keywords: ['language', 'multilingual', 'spanish', 'other languages', 'translation'],
+    content: 'Language Support: Currently, SoapBox is available in English. Multi-language support is on our roadmap. Let us know what language you need and we\'ll prioritize it in our development schedule.',
+    helpLink: '/faq#language-support',
+    priority: 6,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'church-customization',
+    category: 'church',
+    subcategory: 'administration',
+    keywords: ['customize', 'church settings', 'features toggle', 'permissions', 'roles'],
+    content: 'Church Customization: Church administrators can show/hide specific features for different roles (pastor, staff, volunteers, members), create message templates, configure menus, and customize the experience to match your church\'s workflow and preferences.',
+    helpLink: '/faq#church-customization',
+    priority: 8,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'youth-safety-features',
+    category: 'security',
+    subcategory: 'youth',
+    keywords: ['youth safety', 'children', 'parental controls', 'kids', 'minors'],
+    content: 'Youth Safety: SoapBox is safe for children and youth! Youth accounts can be placed in restricted-access groups, monitored by designated staff, and parental controls can be enabled to ensure a safe environment for young users.',
+    helpLink: '/faq#youth-safety',
+    priority: 9,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'earning-free-credits',
+    category: 'features',
+    subcategory: 'credits',
+    keywords: ['earn credits', 'free credits', 'get more credits', 'bonus credits'],
+    content: 'Earning Free Credits: Earn AI credits through engagement: Daily check-ins (+5 credits), Posting prayers or discussions (+3 credits), Responding to prayers (+2 credits), Attending events (+5 credits), Reading daily Bible verses (+2 credits), Referring new users (bonus credits).',
+    helpLink: '/faq#earning-free-credits',
+    priority: 8,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'vs-social-media',
+    category: 'features',
+    subcategory: 'comparison',
+    keywords: ['different from facebook', 'vs social media', 'why not facebook', 'spiritual focus'],
+    content: 'Spiritual Focus vs Social Media: SoapBox centers specifically on faith, prayer, scripture study, and intentional spiritual community — not entertainment or status updates. It\'s designed to support and strengthen your spiritual life rather than distract from it.',
+    helpLink: '/faq#vs-social-media',
+    priority: 8,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+  {
+    id: 'data-export-options',
+    category: 'church',
+    subcategory: 'data',
+    keywords: ['export data', 'backup', 'download data', 'church records'],
+    content: 'Data Export: Churches can export donation records, attendance data, S.O.A.P. journals, user activity logs, and engagement metrics as CSV or PDF files for records, reporting needs, and backup purposes.',
+    helpLink: '/faq#data-export',
+    priority: 7,
+    lastUpdated: '2025-07-18',
+    source: 'faq'
+  },
+
   // TECHNICAL SUPPORT
   {
     id: 'login-issues',

@@ -673,9 +673,18 @@ export default function SimpleLanding() {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/about-us" className="hover:text-white transition-colors">About Us</a></li>
                 <li><a href="/contact-us" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="/faq" className="hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="/help-docs" className="hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="/support" className="hover:text-white transition-colors">Support</a></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-400">
                 <li><a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a></li>
                 <li><a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="/support" className="hover:text-white transition-colors">Support</a></li>
               </ul>
             </div>
           </div>

@@ -67,6 +67,7 @@ const SourceAttributionPage = lazy(() => import("./pages/SourceAttribution"));
 const SocialFeedPage = lazy(() => import("./pages/social-feed"));
 const BookmarkedPrayersPage = lazy(() => import("./pages/BookmarkedPrayersPage"));
 const SavedReflectionsPage = lazy(() => import("./pages/saved-reflections"));
+const FAQPage = lazy(() => import("./pages/faq"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -191,6 +192,7 @@ function AppRouter() {
                                     <Route path="/contact-us" component={ContactUsPage} />
                                     <Route path="/support" component={SupportPage} />
                                     <Route path="/help-docs" component={HelpDocsPage} />
+                                    <Route path="/faq" component={FAQPage} />
                                     <Route path="*" component={NotFound} />
                                 </Switch>
                             </Suspense>

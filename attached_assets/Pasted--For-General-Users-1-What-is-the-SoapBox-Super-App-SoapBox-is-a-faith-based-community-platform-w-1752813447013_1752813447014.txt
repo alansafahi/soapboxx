@@ -1,0 +1,144 @@
+🙋 For General Users
+1. What is the SoapBox Super App?
+SoapBox is a faith-based community platform where you can pray, journal, connect with others, and attend digital church events — all in one place.
+👉 About Us »
+
+2. Who is the app for?
+It’s designed for Christians of all backgrounds — individuals, families, and ministry leaders — seeking a deeper connection to faith and church life.
+
+3. What can I do with the app?
+You can:
+
+Share or respond to public and private prayer requests
+
+Use AI to generate or reflect on scripture and devotionals
+
+Join church groups and events
+
+Post reflections in your S.O.A.P. journal
+
+Receive relevant notifications
+
+Participate in faith-based discussions and circles
+
+4. Is the app really free?
+Yes!
+
+Users get 100 free AI credits when signing up.
+
+Churches get 6 months free if they join by the end of Summer 2025.
+Premium features are usage-based and scale with AI activity.
+👉 View Pricing »
+
+5. Can I use it even if my church hasn’t joined?
+Yes — you can still access most features on your own and later join or invite your church.
+
+6. How do I join a church on the app?
+Search for your church in the app. If it’s public, you can join instantly. Private churches require admin approval.
+
+7. How is SoapBox different from regular social media?
+SoapBox centers on faith, prayer, scripture, and intentional community — not entertainment or status. It’s built to support your spiritual life, not distract from it.
+
+8. Can I livestream or attend services and events?
+Yes. You can attend any public livestreams or RSVP to virtual and in-person events shared by your church or others.
+
+9. Will I get notified about new prayers or posts?
+Yes — and you can control exactly which notifications you receive.
+
+10. Can I connect with people outside my church?
+Yes. You can join public churches, prayer threads, or discussions.
+Anyone can join any church listed as public — no approval needed.
+
+11. Is my information safe and private?
+Yes. SoapBox uses encryption, secure databases, and private roles.
+You can also choose to have your posts or prayers automatically expire and be removed from public view after a time you set.
+
+12. Can I post anonymously?
+Yes. You can post anonymous prayers or S.O.A.P. reflections depending on your church’s settings.
+
+13. Can I customize my profile?
+Yes — add a profile photo, bio, and favorite verses to personalize your presence in the app.
+
+14. What if I need help using the app?
+You can reach us via live chat, submit a support request, or browse help docs.
+
+15. Is SoapBox available on the App Store or Google Play?
+Not yet. We're launching mobile apps in Fall 2025.
+Until then, you can use SoapBox fully via your web browser on any device.
+
+16. Does the app work offline?
+Some features like reading past journal entries work offline. Most functions (prayer wall, chat, livestreams) require an internet connection.
+
+17. Can I use SoapBox internationally?
+Yes. Anyone with internet access can use SoapBox, no matter their country.
+
+18. Can I use the app in other languages?
+Multi-language support is coming soon. Let us know what language you need!
+
+🧑‍💼 For Church Admins, Pastors & Staff
+19. What does SoapBox offer churches?
+SoapBox is a digital ministry platform offering:
+
+Prayer Wall moderation
+
+Sermon Studio & Livestreaming
+
+Engagement analytics
+
+Bible study tools
+
+Customizable menus and permissions
+
+Direct communication with members
+
+Donation & attendance analytics
+
+20. How much does SoapBox cost for churches?
+Churches who sign up in Summer 2025 get 6 months free.
+After that, pricing is based on AI credit usage, not on storage or member count.
+👉 See Full Pricing »
+
+21. Can churches customize the app UI for members?
+Yes. You can show/hide specific features for each role (pastor, staff, member), create templates, and configure menus to match your church workflow.
+
+22. How are church roles managed?
+Admins can assign roles like Pastor, Youth Leader, Media Director, or Volunteer with specific access rights.
+
+23. Can I invite all my members at once?
+Yes. Use bulk email invites or QR codes from your church admin dashboard.
+
+24. Can we remove or archive content?
+Yes. You can remove inappropriate content, expire events and posts, and review flagged material. Users can also set posts to auto-delete after a time.
+
+25. Is SoapBox kid/youth safe?
+Yes. Youth accounts can be placed in restricted-access groups and monitored by staff. Parental controls can be enabled.
+
+26. What are AI credits and how are they used?
+AI credits power features like prayer generation, devotional writing, and sermon prompts.
+You can also earn more credits by:
+
+Creating community discussions
+
+Posting relevant content
+
+Answering prayers
+
+Checking in daily
+
+Reading Bible verses
+
+Attending events
+
+27. Is there an analytics dashboard?
+Yes. Track engagement, giving trends, prayer activity, and user behavior — all in one admin panel.
+
+28. Can I export our data?
+Yes. Export donation data, attendance, SOAP journals, and user activity logs as CSV or PDF.
+
+29. What denominations does SoapBox support?
+SoapBox is non-denominational and built to serve all Christian traditions — from Evangelical, Catholic, and Charismatic to Reformed, Anglican, Pentecostal, and Independent churches.
+
+30. Can we use SoapBox alongside other tools like Slack, Google Workspace, WhatsApp, Discord, or Tithely?
+Yes! Many churches use SoapBox in conjunction with tools like Slack, Google Workspace, WhatsApp, Discord, Planning Center, Tithely, and more.
+SoapBox isn’t meant to replace everything — it’s built to unify your spiritual engagement, communication, and prayer in one platform. Over time, many churches find they can reduce complexity by consolidating more activities inside SoapBox.
+
