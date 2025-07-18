@@ -1,5 +1,16 @@
 // Utility component for rendering content with markdown image support and HTML formatting
-export default function FormattedContent({ content }: { content: string }) {
+interface FormattedContentProps {
+  content: string;
+  className?: string;
+  attachedMedia?: Array<{
+    type: string;
+    url: string;
+    filename: string;
+    size?: number;
+  }>;
+}
+
+export default function FormattedContent({ content, className, attachedMedia }: FormattedContentProps) {
   const formatContent = (htmlContent: string) => {
     return htmlContent
       .replace(/<strong>(.*?)<\/strong>/gi, '**$1**') // Bold
@@ -54,7 +65,7 @@ export default function FormattedContent({ content }: { content: string }) {
 
   
   return (
-    <div>
+    <div className={className}>
       {parts.map((part, index) => {
         if (typeof part === 'object' && part.type === 'image') {
           return (
@@ -90,6 +101,27 @@ export default function FormattedContent({ content }: { content: string }) {
           </span>
         );
       })}
+      
+      {/* Display attached media */}
+      {attachedMedia && attachedMedia.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {attachedMedia.map((media, index) => {
+            if (media.type === 'image') {
+              return (
+                <img 
+                  key={index}
+                  src={media.url} 
+                  alt={media.filename} 
+                  className="max-w-full h-auto rounded-lg border shadow-sm"
+                  style={{ maxHeight: '400px' }}
+                  loading="lazy"
+                />
+              );
+            }
+            return null;
+          })}
+        </div>
+      )}
     </div>
   );
 }

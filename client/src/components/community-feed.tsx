@@ -19,6 +19,7 @@ import { z } from "zod";
 import type { Discussion } from "../../../shared/schema";
 import SmartScriptureTextarea from "./SmartScriptureTextarea";
 import { FlagContentDialog } from "./content-moderation/FlagContentDialog";
+import FormattedContent from "../utils/FormattedContent";
 
 const discussionSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title too long"),
@@ -26,6 +27,12 @@ const discussionSchema = z.object({
   category: z.string().optional(),
   churchId: z.number().optional(),
   isPublic: z.boolean().default(true),
+  attachedMedia: z.array(z.object({
+    type: z.enum(['image', 'video', 'audio']),
+    url: z.string(),
+    filename: z.string(),
+    size: z.number().optional(),
+  })).optional(),
 });
 
 type DiscussionFormData = z.infer<typeof discussionSchema>;
@@ -39,6 +46,8 @@ export default function CommunityFeed() {
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [viewCommentsDialogOpen, setViewCommentsDialogOpen] = useState<number | null>(null);
 
   const form = useForm<DiscussionFormData>({
@@ -49,6 +58,7 @@ export default function CommunityFeed() {
       category: "general",
       churchId: undefined,
       isPublic: true,
+      attachedMedia: [],
     },
   });
 
@@ -68,12 +78,46 @@ export default function CommunityFeed() {
   // Create discussion mutation
   const createDiscussionMutation = useMutation({
     mutationFn: async (data: DiscussionFormData) => {
-      return await apiRequest('POST', '/api/discussions', data);
+      let attachedMedia: any[] = [];
+      
+      // Upload images if any are selected
+      if (selectedImages.length > 0) {
+        setUploadingImages(true);
+        
+        try {
+          const uploadPromises = selectedImages.map(async (image) => {
+            const formData = new FormData();
+            formData.append('file', image);
+            
+            const response = await fetch('/api/upload/image', {
+              method: 'POST',
+              body: formData,
+              credentials: 'include'
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Failed to upload ${image.name}`);
+            }
+            
+            return response.json();
+          });
+          
+          attachedMedia = await Promise.all(uploadPromises);
+        } finally {
+          setUploadingImages(false);
+        }
+      }
+      
+      return await apiRequest('POST', '/api/discussions', {
+        ...data,
+        attachedMedia
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       setIsCreateDialogOpen(false);
       form.reset();
+      setSelectedImages([]);
       toast({
         title: "Discussion created",
         description: "Your discussion has been posted",
@@ -193,8 +237,48 @@ export default function CommunityFeed() {
     },
   });
 
-  const handleCreateDiscussion = (data: DiscussionFormData) => {
-    createDiscussionMutation.mutate(data);
+  const handleCreateDiscussion = async (data: DiscussionFormData) => {
+    let uploadedMedia: any[] = [];
+    
+    if (selectedImages.length > 0) {
+      setUploadingImages(true);
+      try {
+        for (const file of selectedImages) {
+          const formData = new FormData();
+          formData.append('file', file);
+          
+          const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            uploadedMedia.push({
+              type: 'image',
+              url: result.url,
+              filename: file.name,
+              size: file.size
+            });
+          }
+        }
+      } catch (error) {
+        toast({
+          title: "Upload failed",
+          description: "Failed to upload images. Please try again.",
+          variant: "destructive",
+        });
+        setUploadingImages(false);
+        return;
+      }
+      setUploadingImages(false);
+    }
+    
+    createDiscussionMutation.mutate({
+      ...data,
+      attachedMedia: uploadedMedia
+    });
   };
 
   const handleLikeDiscussion = (discussionId: number) => {
@@ -413,7 +497,12 @@ export default function CommunityFeed() {
                       </span>
                     </div>
                     <h3 className="font-medium text-gray-900 dark:text-white dark:font-bold mb-2">{discussion.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-100 dark:font-semibold text-sm line-clamp-2 mb-3">{discussion.content}</p>
+                    <div className="text-gray-600 dark:text-gray-100 dark:font-semibold text-sm mb-3">
+                      <FormattedContent 
+                        content={discussion.content} 
+                        attachedMedia={discussion.attachedMedia}
+                      />
+                    </div>
                     <div className="flex items-center space-x-4">
                       {/* Reaction Emojis */}
                       <div className="flex items-center space-x-1">
@@ -763,6 +852,58 @@ export default function CommunityFeed() {
                       </FormItem>
                     )}
                   />
+                  
+                  {/* Image Upload Section */}
+                  <div className="space-y-2">
+                    <FormLabel>Attach Images</FormLabel>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          setSelectedImages(files);
+                        }}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600 mb-2">
+                          Click to attach images or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          PNG, JPG, GIF up to 10MB each
+                        </p>
+                      </label>
+                    </div>
+                    
+                    {/* Preview selected images */}
+                    {selectedImages.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        {selectedImages.map((file, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-20 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedImages(files => files.filter((_, i) => i !== index));
+                              }}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="flex justify-end space-x-2">
                     <Button 
                       type="button" 
@@ -773,10 +914,10 @@ export default function CommunityFeed() {
                     </Button>
                     <Button 
                       type="submit" 
-                      disabled={createDiscussionMutation.isPending}
+                      disabled={createDiscussionMutation.isPending || uploadingImages}
                       className="bg-faith-blue hover:bg-blue-600"
                     >
-                      {createDiscussionMutation.isPending ? "Posting..." : "Post Discussion"}
+                      {uploadingImages ? "Uploading Images..." : createDiscussionMutation.isPending ? "Posting..." : "Post Discussion"}
                     </Button>
                   </div>
                 </form>

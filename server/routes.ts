@@ -11123,6 +11123,35 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Specific image upload endpoint for discussions
+  app.post('/api/upload/image', isAuthenticated, upload.single('file'), async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub || req.user?.id;
+      
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      // Validate it's an image
+      if (!req.file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: 'Only image files are allowed' });
+      }
+
+      const uploadedFile = {
+        type: 'image',
+        url: `/uploads/${req.file.filename}`,
+        filename: req.file.originalname,
+        size: req.file.size,
+        uploadedBy: userId,
+        uploadedAt: new Date().toISOString()
+      };
+
+      res.json(uploadedFile);
+    } catch (error) {
+      res.status(500).json({ message: 'Image upload failed', error: error.message });
+    }
+  });
+
   // Video upload endpoint
   app.post('/api/videos/upload', isAuthenticated, upload.single('video'), async (req: any, res) => {
     try {

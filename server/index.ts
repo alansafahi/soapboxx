@@ -43,6 +43,9 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 // Serve attached assets statically
 app.use('/attached_assets', express.static('attached_assets'));
 
+// Serve uploaded files statically
+app.use('/uploads', express.static('uploads'));
+
 
 
 // Media moderation routes

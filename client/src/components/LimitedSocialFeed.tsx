@@ -44,6 +44,12 @@ interface Post {
   likeCount: number;
   commentCount: number;
   isLiked?: boolean;
+  attachedMedia?: Array<{
+    type: string;
+    url: string;
+    filename: string;
+    size?: number;
+  }>;
 }
 
 interface LimitedSocialFeedProps {
@@ -522,7 +528,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                   </div>
 
                   <div className="mb-4">
-                    <FormattedContent content={post.content} />
+                    <FormattedContent 
+                      content={post.content} 
+                      attachedMedia={post.attachedMedia}
+                    />
                   </div>
 
                   {/* Unified comment system - same as social-feed.tsx */}
