@@ -566,85 +566,87 @@ export function ModerationDashboard() {
           </DialogHeader>
 
           {selectedReport && (
-            <div className="space-y-4 overflow-y-auto flex-1 pr-2">
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
-                <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">Best Practice</h4>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Request edits rather than directly editing content. This helps users learn community guidelines and prevents similar issues in the future.
-                </p>
-              </div>
+            <>
+              <div className="space-y-4 overflow-y-auto flex-1 pr-2">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-blue-800 dark:text-blue-200">Best Practice</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    Request edits rather than directly editing content. This helps users learn community guidelines and prevents similar issues in the future.
+                  </p>
+                </div>
 
-              {/* Show original content for reference */}
-              {selectedReport.originalContent && (
-                <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2 text-gray-800 dark:text-gray-200">Original Content</h4>
-                  <div className="text-sm bg-white dark:bg-gray-900 p-3 rounded border max-h-32 overflow-y-auto">
-                    {selectedReport.contentMetadata?.title && (
-                      <div className="mb-2">
-                        <span className="font-medium text-gray-600 dark:text-gray-400">Title:</span> {selectedReport.contentMetadata.title}
+                {/* Show original content for reference */}
+                {selectedReport.originalContent && (
+                  <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2 text-gray-800 dark:text-gray-200">Original Content</h4>
+                    <div className="text-sm bg-white dark:bg-gray-900 p-3 rounded border max-h-32 overflow-y-auto">
+                      {selectedReport.contentMetadata?.title && (
+                        <div className="mb-2">
+                          <span className="font-medium text-gray-600 dark:text-gray-400">Title:</span> {selectedReport.contentMetadata.title}
+                        </div>
+                      )}
+                      <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                        {selectedReport.originalContent}
                       </div>
-                    )}
-                    <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
-                      {selectedReport.originalContent}
                     </div>
                   </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="editFeedback">Feedback Message</Label>
+                  <Textarea
+                    id="editFeedback"
+                    value={editRequestFeedback}
+                    onChange={(e) => setEditRequestFeedback(e.target.value)}
+                    rows={4}
+                    className="w-full"
+                    placeholder="Explain what needs to be changed and why (e.g., 'This content contains inappropriate language that violates our community guidelines...')"
+                  />
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="editFeedback">Feedback Message</Label>
-                <Textarea
-                  id="editFeedback"
-                  value={editRequestFeedback}
-                  onChange={(e) => setEditRequestFeedback(e.target.value)}
-                  rows={4}
-                  className="w-full"
-                  placeholder="Explain what needs to be changed and why (e.g., 'This content contains inappropriate language that violates our community guidelines...')"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="editSuggestions">Specific Suggestions</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => generateAISuggestions(selectedReport)}
-                    disabled={isGeneratingAISuggestions}
-                    className="text-xs"
-                  >
-                    {isGeneratingAISuggestions ? 'Generating...' : '🤖 AI Suggestions'}
-                  </Button>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="editSuggestions">Specific Suggestions</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateAISuggestions(selectedReport)}
+                      disabled={isGeneratingAISuggestions}
+                      className="text-xs"
+                    >
+                      {isGeneratingAISuggestions ? 'Generating...' : '🤖 AI Suggestions'}
+                    </Button>
+                  </div>
+                  <Textarea
+                    id="editSuggestions"
+                    value={editRequestSuggestions}
+                    onChange={(e) => setEditRequestSuggestions(e.target.value)}
+                    rows={4}
+                    className="w-full"
+                    placeholder="Provide specific suggestions for improvement (e.g., 'Please rephrase the second paragraph to be more respectful and remove the offensive language...')"
+                  />
                 </div>
-                <Textarea
-                  id="editSuggestions"
-                  value={editRequestSuggestions}
-                  onChange={(e) => setEditRequestSuggestions(e.target.value)}
-                  rows={4}
-                  className="w-full"
-                  placeholder="Provide specific suggestions for improvement (e.g., 'Please rephrase the second paragraph to be more respectful and remove the offensive language...')"
-                />
-              </div>
 
-            </div>
-            
-            <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex-shrink-0">
-              <Button
-                variant="outline"
-                onClick={() => setEditRequestDialogOpen(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSendEditRequest}
-                disabled={!editRequestFeedback.trim() || !editRequestSuggestions.trim() || requestEditMutation.isPending}
-                className="flex-1"
-              >
-                {requestEditMutation.isPending ? 'Sending...' : 'Send Edit Request'}
-              </Button>
-            </div>
+              </div>
+              
+              <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditRequestDialogOpen(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSendEditRequest}
+                  disabled={!editRequestFeedback.trim() || !editRequestSuggestions.trim() || requestEditMutation.isPending}
+                  className="flex-1"
+                >
+                  {requestEditMutation.isPending ? 'Sending...' : 'Send Edit Request'}
+                </Button>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
