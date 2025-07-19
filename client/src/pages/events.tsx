@@ -7,6 +7,10 @@ import MobileNav from "../components/mobile-nav";
 export default function EventsPage() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  
+  // Extract highlight parameter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const highlightId = urlParams.get('highlight');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -39,6 +43,18 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-900 dark:to-violet-900 pb-20 md:pb-0">
+      {highlightId && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mx-4 mt-4 mb-6">
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold text-red-800 dark:text-red-300">
+              🔴 Viewing Event #{highlightId}
+            </span>
+          </div>
+          <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+            This event has been highlighted for your attention.
+          </p>
+        </div>
+      )}
       {/* Enhanced Header */}
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg border-b border-gray-200 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-8">
@@ -62,7 +78,7 @@ export default function EventsPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <EventsList />
+        <EventsList highlightId={highlightId} />
       </div>
 
       <MobileNav />

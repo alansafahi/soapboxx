@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, isToday, addDays } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -78,7 +78,11 @@ interface Event {
   isOnline: boolean | null;
 }
 
-export default function EventsList() {
+interface EventsListProps {
+  highlightId?: string | null;
+}
+
+export default function EventsList({ highlightId }: EventsListProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -104,6 +108,19 @@ export default function EventsList() {
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["/api/events"],
   });
+
+  // Auto-scroll to highlighted event
+  useEffect(() => {
+    if (highlightId && events.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`event-${highlightId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId, events]);
 
   // RSVP mutation
   const rsvpMutation = useMutation({
@@ -567,11 +584,16 @@ export default function EventsList() {
                   return (
                     <motion.div
                       key={event.id}
+                      id={`event-${event.id}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-gradient-to-r from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/30 border border-purple-100 dark:border-purple-800 rounded-xl p-6 hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-300 group"
+                      className={`bg-gradient-to-r from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/30 border ${
+                        highlightId && event.id.toString() === highlightId 
+                          ? 'border-red-500 bg-red-50 dark:bg-red-900/20' 
+                          : 'border-purple-100 dark:border-purple-800'
+                      } rounded-xl p-6 hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-300 group`}
                     >
                       <div className="flex items-start space-x-6">
                         {/* Enhanced Date Display */}

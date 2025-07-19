@@ -308,8 +308,14 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
     }
   };
 
+  // Email validation function
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleUserInfoSubmit = async () => {
-    if (userInfo.name && userInfo.email) {
+    if (userInfo.name && userInfo.email && isValidEmail(userInfo.email)) {
       try {
         // Save conversation with user data
         await fetch('/api/chat/conversation', {
@@ -379,7 +385,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
 
   return (
     <div className="chat-widget-isolation" style={widgetStyles}>
-      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-96' : 'h-[480px]'} max-h-[90vh] touch-manipulation chat-widget-isolation`}
+      <div className={`bg-white rounded-lg shadow-2xl border border-gray-200 w-80 sm:w-96 transition-all duration-300 ${isMinimized ? 'h-14' : hasProvidedInfo ? 'h-[440px]' : 'h-[520px]'} max-h-[90vh] touch-manipulation chat-widget-isolation`}
            onTouchStart={(e) => { 
              e.stopPropagation(); 
            }}
@@ -435,7 +441,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
         {!isMinimized && (
           <>
             {/* Messages Area */}
-            <div className={`${hasProvidedInfo ? 'h-64' : 'h-48'} overflow-y-auto p-4 space-y-3`}>
+            <div className={`${hasProvidedInfo ? 'h-72' : 'h-56'} overflow-y-auto p-4 space-y-3`}>
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -483,8 +489,11 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                     type="email"
                     value={userInfo.email}
                     onChange={(e) => setUserInfo(prev => ({...prev, email: e.target.value}))}
-                    className="text-sm"
+                    className={`text-sm ${userInfo.email && !isValidEmail(userInfo.email) ? 'border-red-300 focus:border-red-500' : ''}`}
                   />
+                  {userInfo.email && !isValidEmail(userInfo.email) && (
+                    <p className="text-xs text-red-600">Please enter a valid email address</p>
+                  )}
                   <Button
                     onClick={(e) => {
                       e.preventDefault();
@@ -492,10 +501,35 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
                       handleUserInfoSubmit();
                     }}
                     className="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm touch-manipulation"
-                    disabled={!userInfo.name || !userInfo.email}
+                    disabled={!userInfo.name || !userInfo.email || !isValidEmail(userInfo.email)}
                   >
                     Start Chat
                   </Button>
+                  
+                  {/* Contact Options */}
+                  <div className="pt-2 border-t border-gray-300">
+                    <p className="text-xs text-gray-600 mb-2 text-center">Or contact us directly:</p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open('https://wa.me/message/BNZMR2CPIKVKA1', '_blank')}
+                        className="flex-1 text-xs flex items-center justify-center gap-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        <Phone className="w-3 h-3" />
+                        WhatsApp
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.location.href = 'mailto:support@soapboxsuperapp.com'}
+                        className="flex-1 text-xs flex items-center justify-center gap-1 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        <Mail className="w-3 h-3" />
+                        Email
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

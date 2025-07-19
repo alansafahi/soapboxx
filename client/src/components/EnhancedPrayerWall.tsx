@@ -204,7 +204,11 @@ function PrayerCircleCard({ circle, onJoin, onLeave, onDelete, isJoining, isLeav
   );
 }
 
-export default function EnhancedPrayerWall() {
+interface EnhancedPrayerWallProps {
+  highlightId?: string | null;
+}
+
+export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -285,6 +289,19 @@ export default function EnhancedPrayerWall() {
   const { data: prayerRequests = [], isLoading } = useQuery<PrayerRequest[]>({
     queryKey: ["/api/prayers"],
   });
+
+  // Auto-scroll to highlighted prayer request
+  useEffect(() => {
+    if (highlightId && prayerRequests.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`prayer-${highlightId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId, prayerRequests]);
 
   // Load initial reaction counts for all prayers
   useEffect(() => {
@@ -844,6 +861,7 @@ export default function EnhancedPrayerWall() {
                 return (
                   <motion.div
                     key={prayer.id}
+                    id={`prayer-${prayer.id}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -851,7 +869,11 @@ export default function EnhancedPrayerWall() {
                   >
                     <Card 
                       className={`transition-all duration-200 hover:shadow-lg ${
-                        prayer.isUrgent ? 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-white dark:from-red-900/20 dark:to-transparent' : ''
+                        highlightId && prayer.id.toString() === highlightId 
+                          ? 'border-2 border-red-500 bg-red-50 dark:bg-red-900/20 shadow-lg' 
+                          : prayer.isUrgent 
+                            ? 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-white dark:from-red-900/20 dark:to-transparent' 
+                            : ''
                       }`}
                     >
                       <CardHeader className="pb-3">
