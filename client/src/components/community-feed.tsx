@@ -68,7 +68,18 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
 
   // Fetch discussions
   const { data: discussions = [], isLoading } = useQuery<Discussion[]>({
-    queryKey: ["/api/discussions"],
+    queryKey: ["/api/discussions", highlightId],
+    queryFn: async () => {
+      const queryParams = new URLSearchParams();
+      if (highlightId) {
+        queryParams.append('highlight', highlightId);
+      }
+      
+      const url = `/api/discussions${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch discussions');
+      return response.json();
+    },
   });
 
   // Auto-scroll to highlighted discussion when highlightId changes

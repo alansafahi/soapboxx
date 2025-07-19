@@ -2241,114 +2241,215 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Discussion operations
-  async getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string): Promise<any[]> {
-    // Get regular discussions
-    const discussionsQuery = db
-      .select({
-        id: discussions.id,
-        authorId: discussions.authorId,
-        churchId: discussions.churchId,
-        title: discussions.title,
-        content: discussions.content,
-        category: discussions.category,
-        isPublic: discussions.isPublic,
-        audience: discussions.audience,
-        mood: discussions.mood,
-        suggestedVerses: discussions.suggestedVerses,
-        attachedMedia: discussions.attachedMedia,
-        linkedVerse: discussions.linkedVerse,
-        isPinned: discussions.isPinned,
-        pinnedBy: discussions.pinnedBy,
-        pinnedAt: discussions.pinnedAt,
-        pinnedUntil: discussions.pinnedUntil,
-        pinCategory: discussions.pinCategory,
-        likeCount: discussions.likeCount,
-        commentCount: discussions.commentCount,
-        createdAt: discussions.createdAt,
-        updatedAt: discussions.updatedAt,
-        type: sql<string>`'general'`,
-        soapData: sql<any>`null`,
-        author: {
-          id: users.id,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          profileImageUrl: users.profileImageUrl,
-        }
-      })
-      .from(discussions)
-      .leftJoin(users, eq(discussions.authorId, users.id))
-      .leftJoin(contentReports, and(
-        eq(contentReports.contentType, 'discussion'),
-        eq(contentReports.contentId, discussions.id),
-        eq(contentReports.status, 'pending')
-      ))
-      .where(
-        and(
+  async getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string, includeFlagged?: boolean): Promise<any[]> {
+    // When including flagged content, we need to modify our approach
+    // Instead of filtering by contentReports.id being null, we either:
+    // 1. Show only public posts (normal mode)
+    // 2. Show all posts including flagged ones (includeFlagged mode)
+    
+    const baseConditions = [
+      isNull(discussions.expiredAt), // Exclude expired content
+      churchId ? eq(discussions.churchId, churchId) : undefined
+    ].filter(Boolean);
+    
+    let discussionQuery;
+    
+    if (includeFlagged) {
+      // When including flagged content, don't filter by isPublic or contentReports
+      discussionQuery = db
+        .select({
+          id: discussions.id,
+          authorId: discussions.authorId,
+          churchId: discussions.churchId,
+          title: discussions.title,
+          content: discussions.content,
+          category: discussions.category,
+          isPublic: discussions.isPublic,
+          audience: discussions.audience,
+          mood: discussions.mood,
+          suggestedVerses: discussions.suggestedVerses,
+          attachedMedia: discussions.attachedMedia,
+          linkedVerse: discussions.linkedVerse,
+          isPinned: discussions.isPinned,
+          pinnedBy: discussions.pinnedBy,
+          pinnedAt: discussions.pinnedAt,
+          pinnedUntil: discussions.pinnedUntil,
+          pinCategory: discussions.pinCategory,
+          likeCount: discussions.likeCount,
+          commentCount: discussions.commentCount,
+          createdAt: discussions.createdAt,
+          updatedAt: discussions.updatedAt,
+          type: sql<string>`'general'`,
+          soapData: sql<any>`null`,
+          author: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl,
+          }
+        })
+        .from(discussions)
+        .leftJoin(users, eq(discussions.authorId, users.id))
+        .where(baseConditions.length > 0 ? and(...baseConditions) : undefined)
+        .orderBy(desc(discussions.createdAt));
+    } else {
+      // Normal mode: exclude flagged content
+      discussionQuery = db
+        .select({
+          id: discussions.id,
+          authorId: discussions.authorId,
+          churchId: discussions.churchId,
+          title: discussions.title,
+          content: discussions.content,
+          category: discussions.category,
+          isPublic: discussions.isPublic,
+          audience: discussions.audience,
+          mood: discussions.mood,
+          suggestedVerses: discussions.suggestedVerses,
+          attachedMedia: discussions.attachedMedia,
+          linkedVerse: discussions.linkedVerse,
+          isPinned: discussions.isPinned,
+          pinnedBy: discussions.pinnedBy,
+          pinnedAt: discussions.pinnedAt,
+          pinnedUntil: discussions.pinnedUntil,
+          pinCategory: discussions.pinCategory,
+          likeCount: discussions.likeCount,
+          commentCount: discussions.commentCount,
+          createdAt: discussions.createdAt,
+          updatedAt: discussions.updatedAt,
+          type: sql<string>`'general'`,
+          soapData: sql<any>`null`,
+          author: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl,
+          }
+        })
+        .from(discussions)
+        .leftJoin(users, eq(discussions.authorId, users.id))
+        .leftJoin(contentReports, and(
+          eq(contentReports.contentType, 'discussion'),
+          eq(contentReports.contentId, discussions.id),
+          eq(contentReports.status, 'pending')
+        ))
+        .where(and(
+          ...baseConditions,
           eq(discussions.isPublic, true),
-          isNull(discussions.expiredAt), // Exclude expired content
-          isNull(contentReports.id), // Exclude flagged content for child protection
-          churchId ? eq(discussions.churchId, churchId) : undefined
-        )
-      )
-      .orderBy(desc(discussions.createdAt));
-
-    // Get public SOAP entries (excluding flagged content)
-    const soapQuery = db
-      .select({
-        id: soapEntries.id,
-        authorId: soapEntries.userId,
-        churchId: soapEntries.churchId,
-        title: sql<string>`'S.O.A.P. Reflection'`,
-        content: soapEntries.scripture,
-        category: sql<string>`'soap_reflection'`,
-        isPublic: soapEntries.isPublic,
-        audience: sql<string>`'public'`,
-        mood: soapEntries.moodTag,
-        suggestedVerses: sql<any>`null`,
-        attachedMedia: sql<any>`null`,
-        linkedVerse: soapEntries.scriptureReference,
-        isPinned: sql<boolean>`false`,
-        pinnedBy: sql<string>`null`,
-        pinnedAt: sql<any>`null`,
-        pinnedUntil: sql<any>`null`,
-        pinCategory: sql<string>`null`,
-        likeCount: sql<number>`0`,
-        commentCount: sql<number>`0`,
-        createdAt: soapEntries.createdAt,
-        updatedAt: soapEntries.updatedAt,
-        type: sql<string>`'soap_reflection'`,
-        soapData: {
-          scripture: soapEntries.scripture,
-          scriptureReference: soapEntries.scriptureReference,
-          observation: soapEntries.observation,
-          application: soapEntries.application,
-          prayer: soapEntries.prayer,
-        },
-        author: {
-          id: users.id,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          profileImageUrl: users.profileImageUrl,
-        }
-      })
-      .from(soapEntries)
-      .leftJoin(users, eq(soapEntries.userId, users.id))
-      .leftJoin(contentReports, and(
-        eq(contentReports.contentType, 'soap_entry'),
-        eq(contentReports.contentId, soapEntries.id),
-        eq(contentReports.status, 'pending')
-      ))
-      .where(
-        and(
+          isNull(contentReports.id) // Exclude flagged content for child protection
+        ))
+        .orderBy(desc(discussions.createdAt));
+    }
+    
+    // Get SOAP entries with similar logic
+    let soapQuery;
+    
+    if (includeFlagged) {
+      // When including flagged content, don't filter by isPublic or contentReports  
+      soapQuery = db
+        .select({
+          id: soapEntries.id,
+          authorId: soapEntries.userId,
+          churchId: soapEntries.churchId,
+          title: sql<string>`'S.O.A.P. Reflection'`,
+          content: soapEntries.scripture,
+          category: sql<string>`'soap_reflection'`,
+          isPublic: soapEntries.isPublic,
+          audience: sql<string>`'public'`,
+          mood: soapEntries.moodTag,
+          suggestedVerses: sql<any>`null`,
+          attachedMedia: sql<any>`null`,
+          linkedVerse: soapEntries.scriptureReference,
+          isPinned: sql<boolean>`false`,
+          pinnedBy: sql<string>`null`,
+          pinnedAt: sql<any>`null`,
+          pinnedUntil: sql<any>`null`,
+          pinCategory: sql<string>`null`,
+          likeCount: sql<number>`0`,
+          commentCount: sql<number>`0`,
+          createdAt: soapEntries.createdAt,
+          updatedAt: soapEntries.updatedAt,
+          type: sql<string>`'soap_reflection'`,
+          soapData: {
+            scripture: soapEntries.scripture,
+            scriptureReference: soapEntries.scriptureReference,
+            observation: soapEntries.observation,
+            application: soapEntries.application,
+            prayer: soapEntries.prayer,
+          },
+          author: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl,
+          }
+        })
+        .from(soapEntries)
+        .leftJoin(users, eq(soapEntries.userId, users.id))
+        .where(and(...[
+          isNull(soapEntries.expiredAt),
+          churchId ? eq(soapEntries.churchId, churchId) : undefined
+        ].filter(Boolean)))
+        .orderBy(desc(soapEntries.createdAt));
+    } else {
+      // Normal mode: exclude flagged content
+      soapQuery = db
+        .select({
+          id: soapEntries.id,
+          authorId: soapEntries.userId,
+          churchId: soapEntries.churchId,
+          title: sql<string>`'S.O.A.P. Reflection'`,
+          content: soapEntries.scripture,
+          category: sql<string>`'soap_reflection'`,
+          isPublic: soapEntries.isPublic,
+          audience: sql<string>`'public'`,
+          mood: soapEntries.moodTag,
+          suggestedVerses: sql<any>`null`,
+          attachedMedia: sql<any>`null`,
+          linkedVerse: soapEntries.scriptureReference,
+          isPinned: sql<boolean>`false`,
+          pinnedBy: sql<string>`null`,
+          pinnedAt: sql<any>`null`,
+          pinnedUntil: sql<any>`null`,
+          pinCategory: sql<string>`null`,
+          likeCount: sql<number>`0`,
+          commentCount: sql<number>`0`,
+          createdAt: soapEntries.createdAt,
+          updatedAt: soapEntries.updatedAt,
+          type: sql<string>`'soap_reflection'`,
+          soapData: {
+            scripture: soapEntries.scripture,
+            scriptureReference: soapEntries.scriptureReference,
+            observation: soapEntries.observation,
+            application: soapEntries.application,
+            prayer: soapEntries.prayer,
+          },
+          author: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl,
+          }
+        })
+        .from(soapEntries)
+        .leftJoin(users, eq(soapEntries.userId, users.id))
+        .leftJoin(contentReports, and(
+          eq(contentReports.contentType, 'soap_entry'),
+          eq(contentReports.contentId, soapEntries.id),
+          eq(contentReports.status, 'pending')
+        ))
+        .where(and(...[
+          isNull(soapEntries.expiredAt),
           eq(soapEntries.isPublic, true),
-          isNull(soapEntries.expiredAt), // Exclude expired content
           isNull(contentReports.id), // Exclude flagged content for child protection
           churchId ? eq(soapEntries.churchId, churchId) : undefined
-        )
-      )
-      .orderBy(desc(soapEntries.createdAt));
+        ].filter(Boolean)))
+        .orderBy(desc(soapEntries.createdAt));
+    }
 
     // Execute both queries
     const [discussionResults, soapResults] = await Promise.all([

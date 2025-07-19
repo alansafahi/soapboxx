@@ -227,9 +227,15 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
 
   // Fetch discussions
   const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
-    queryKey: ['/api/discussions', filters, searchQuery],
+    queryKey: ['/api/discussions', filters, searchQuery, highlightId],
     queryFn: async () => {
-      const response = await fetch('/api/discussions');
+      const queryParams = new URLSearchParams();
+      if (highlightId) {
+        queryParams.append('highlight', highlightId);
+      }
+      
+      const url = `/api/discussions${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch discussions');
       const data = await response.json();
       // Ensure each post has proper structure with default values

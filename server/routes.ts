@@ -7472,8 +7472,12 @@ Return JSON with this exact structure:
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
+      
+      // Check if we need to include flagged content for editing
+      const highlightId = req.query.highlight;
+      const includeFlagged = highlightId ? true : false;
 
-      const discussions = await storage.getDiscussions(limit, offset, undefined, userId);
+      const discussions = await storage.getDiscussions(limit, offset, undefined, userId, includeFlagged);
 
       res.json(discussions);
     } catch (error) {
