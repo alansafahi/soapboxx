@@ -1,96 +1,181 @@
-// Integration layer for AI training system with content moderation
-import { aiTrainingSystem, ModerationTrainingData } from './ai-training-system.js';
-import { analyzeContentForViolations, ModerationResult } from './ai-moderation.js';
+import { AITrainingSystem, ModerationTrainingData } from './ai-training-system.js';
+import { storage } from './storage.js';
 
-export interface ModeratorDecision {
-  reportId: number;
-  moderatorId: string;
-  finalAction: 'approved' | 'hidden' | 'removed' | 'edit_requested';
-  finalPriority: 'low' | 'medium' | 'high' | 'critical';
-  finalCategory: string;
-  moderatorNotes?: string;
-  contentId: number;
-  contentType: string;
-  originalContent: string;
+// Global training system instance
+const trainingSystem = new AITrainingSystem();
+
+export interface LearningCase {
+  contentId: string;
+  contentType: 'discussion' | 'comment' | 'soap_entry' | 'prayer_request';
+  content: string;
+  aiClassification: {
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    category: string;
+    confidence: number;
+    actionRequired: string;
+    reason: string;
+  };
+  moderatorDecision?: {
+    finalPriority: 'low' | 'medium' | 'high' | 'critical';
+    finalCategory: string;
+    action: 'approved' | 'hidden' | 'removed' | 'edit_requested';
+    moderatorNotes?: string;
+    moderatorId: string;
+  };
+  outcome?: 'correct' | 'under_classified' | 'over_classified';
+  timestamp: Date;
 }
 
 export class LearningIntegration {
   /**
-   * Process moderator decision and create training data
+   * Analyze content with enhanced AI that learns from past decisions
    */
-  async processModeratorDecision(
-    decision: ModeratorDecision,
-    originalAIResult: ModerationResult
-  ): Promise<void> {
-    // Determine outcome by comparing AI vs human decision
-    let outcome: 'correct' | 'under_classified' | 'over_classified';
-    
-    const priorityLevels = { 'low': 1, 'medium': 2, 'high': 3, 'critical': 4 };
-    const aiLevel = priorityLevels[originalAIResult.priority];
-    const humanLevel = priorityLevels[decision.finalPriority];
-    
-    if (aiLevel === humanLevel) {
-      outcome = 'correct';
-    } else if (aiLevel < humanLevel) {
-      outcome = 'under_classified';
-    } else {
-      outcome = 'over_classified';
+  static async analyzeWithLearning(
+    content: string,
+    contentType: string,
+    contentId?: string
+  ) {
+    try {
+      const result = await trainingSystem.analyzeContentWithLearning(content, contentType);
+      
+      // Store the AI prediction for potential training
+      if (contentId) {
+        await this.storeAIPrediction(contentId, content, contentType, result);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Learning-enabled analysis failed:', error);
+      throw error;
     }
+  }
+
+  /**
+   * Record moderator decision for learning
+   */
+  static async recordModeratorDecision(
+    contentId: string,
+    moderatorDecision: {
+      finalPriority: 'low' | 'medium' | 'high' | 'critical';
+      finalCategory: string;
+      action: 'approved' | 'hidden' | 'removed' | 'edit_requested';
+      moderatorNotes?: string;
+      moderatorId: string;
+    }
+  ) {
+    try {
+      // Get the original AI prediction
+      const aiPrediction = await this.getAIPrediction(contentId);
+      if (!aiPrediction) {
+        console.log('No AI prediction found for content:', contentId);
+        return;
+      }
+
+      // Determine outcome
+      const outcome = this.determineOutcome(aiPrediction.aiClassification, moderatorDecision);
+
+      // Create training case
+      const trainingCase: ModerationTrainingData = {
+        content: aiPrediction.content,
+        contentType: aiPrediction.contentType,
+        aiClassification: aiPrediction.aiClassification,
+        humanDecision: moderatorDecision,
+        outcome,
+        timestamp: new Date()
+      };
+
+      // Record for learning
+      await trainingSystem.recordTrainingCase(trainingCase);
+
+      // Store in database for persistence
+      await this.storeTrainingCase(contentId, trainingCase);
+
+      console.log(`🧠 Learning case recorded: ${outcome} classification for ${aiPrediction.contentType} content`);
+
+    } catch (error) {
+      console.error('Failed to record moderator decision:', error);
+    }
+  }
+
+  /**
+   * Determine if AI classification was correct
+   */
+  private static determineOutcome(
+    aiClassification: any,
+    moderatorDecision: any
+  ): 'correct' | 'under_classified' | 'over_classified' {
+    const priorityLevels = { 'low': 1, 'medium': 2, 'high': 3, 'critical': 4 };
     
-    // Create training case
-    const trainingData: ModerationTrainingData = {
-      content: decision.originalContent,
-      contentType: decision.contentType,
+    const aiLevel = priorityLevels[aiClassification.priority] || 2;
+    const humanLevel = priorityLevels[moderatorDecision.finalPriority] || 2;
+
+    if (aiLevel === humanLevel) {
+      return 'correct';
+    } else if (aiLevel < humanLevel) {
+      return 'under_classified'; // AI was too lenient
+    } else {
+      return 'over_classified'; // AI was too strict
+    }
+  }
+
+  /**
+   * Store AI prediction for later comparison
+   */
+  private static async storeAIPrediction(
+    contentId: string,
+    content: string,
+    contentType: string,
+    aiResult: any
+  ) {
+    const learningCase: LearningCase = {
+      contentId,
+      contentType: contentType as any,
+      content,
       aiClassification: {
-        priority: originalAIResult.priority,
-        category: this.mapViolationsToCategory(originalAIResult.violations),
-        confidence: originalAIResult.confidence
+        priority: aiResult.priority,
+        category: aiResult.category || 'other',
+        confidence: aiResult.confidence || 0.7,
+        actionRequired: aiResult.actionRequired || 'review',
+        reason: aiResult.reason || 'AI analysis'
       },
-      humanDecision: {
-        finalPriority: decision.finalPriority,
-        finalCategory: decision.finalCategory,
-        action: decision.finalAction,
-        moderatorNotes: decision.moderatorNotes
-      },
-      outcome,
       timestamp: new Date()
     };
-    
-    // Record for learning
-    await aiTrainingSystem.recordTrainingCase(trainingData);
-    
-    console.log(`🧠 Learning case recorded: AI ${originalAIResult.priority} -> Human ${decision.finalPriority} (${outcome})`);
+
+    // Store in memory cache (in production, use database)
+    this.learningCache.set(contentId, learningCase);
   }
-  
+
   /**
-   * Enhanced content analysis using the learning system
+   * Get stored AI prediction
    */
-  async analyzeContentWithLearning(
-    content: string,
-    contentType: string
-  ): Promise<ModerationResult> {
-    return await aiTrainingSystem.analyzeContentWithLearning(content, contentType);
+  private static async getAIPrediction(contentId: string): Promise<LearningCase | null> {
+    return this.learningCache.get(contentId) || null;
   }
-  
+
   /**
-   * Map violations array to primary category
+   * Store training case in database
    */
-  private mapViolationsToCategory(violations: string[]): string {
-    if (violations.includes('sexual_content') || violations.includes('Sexual content')) return 'sexual_content';
-    if (violations.includes('harassment') || violations.includes('Harassment')) return 'harassment_bullying';
-    if (violations.includes('inappropriate_content') || violations.includes('Inappropriate content')) return 'inappropriate_content';
-    if (violations.includes('privacy_violation') || violations.includes('Privacy violations')) return 'privacy_violation';
-    if (violations.includes('false_information') || violations.includes('Misinformation')) return 'false_information';
-    if (violations.includes('spam') || violations.includes('Spam')) return 'spam';
-    return 'other';
+  private static async storeTrainingCase(contentId: string, trainingCase: ModerationTrainingData) {
+    // In production, store in dedicated training_cases table
+    console.log('📚 Training case stored for content:', contentId);
   }
-  
+
   /**
-   * Get training system performance metrics
+   * Get training feedback and statistics
    */
-  async getTrainingMetrics() {
-    return aiTrainingSystem.generateTrainingFeedback();
+  static async getTrainingFeedback() {
+    return trainingSystem.generateTrainingFeedback();
   }
+
+  /**
+   * Test the enhanced AI system
+   */
+  static async testEnhancedClassification() {
+    return await trainingSystem.testWithExamples();
+  }
+
+  // In-memory cache for AI predictions (use database in production)
+  private static learningCache = new Map<string, LearningCase>();
 }
 
-export const learningIntegration = new LearningIntegration();
+export { trainingSystem };

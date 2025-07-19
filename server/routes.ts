@@ -43,6 +43,7 @@ interface RequestWithSession extends express.Request {
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import { lookupBibleVerse } from "./bible-api.js";
+import { LearningIntegration } from "./learning-integration.js";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import multer from "multer";
@@ -12417,6 +12418,112 @@ Please provide suggestions for the missing or incomplete sections.`
       res.json(conversations);
     } catch (error) {
       res.status(500).json({ error: "Failed to get conversations" });
+    }
+  });
+
+  // Moderation action endpoint with learning integration
+  app.post('/api/moderation/action', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Check if user is a moderator
+      const user = await storage.getUser(userId);
+      const userChurches = await storage.getUserChurches(userId);
+      const isModerator = user?.role === 'soapbox_owner' || 
+                         userChurches.some(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
+
+      if (!isModerator) {
+        return res.status(403).json({ message: 'Moderator access required' });
+      }
+
+      const { 
+        contentType, 
+        contentId, 
+        action, 
+        finalPriority, 
+        finalCategory, 
+        moderatorNotes 
+      } = req.body;
+
+      // Record moderator decision for learning
+      await LearningIntegration.recordModeratorDecision(contentId, {
+        finalPriority,
+        finalCategory,
+        action,
+        moderatorNotes,
+        moderatorId: userId
+      });
+
+      // Execute the moderation action
+      let result;
+      switch (action) {
+        case 'approved':
+          result = { message: 'Content approved' };
+          break;
+        case 'hidden':
+          result = await storage.hideContent(contentType, parseInt(contentId));
+          break;
+        case 'removed':
+          result = await storage.removeContent(contentType, parseInt(contentId));
+          break;
+        case 'edit_requested':
+          result = await storage.requestContentEdit(contentType, parseInt(contentId), moderatorNotes || '', '', userId);
+          break;
+        default:
+          return res.status(400).json({ message: 'Invalid action' });
+      }
+
+      res.json({ success: true, result });
+    } catch (error) {
+      console.error('Moderation action failed:', error);
+      res.status(500).json({ message: 'Failed to execute moderation action' });
+    }
+  });
+
+  // Get AI training feedback and statistics
+  app.get('/api/moderation/training-feedback', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const user = await storage.getUser(userId);
+      const isModerator = user?.role === 'soapbox_owner';
+
+      if (!isModerator) {
+        return res.status(403).json({ message: 'SoapBox Owner access required' });
+      }
+
+      const feedback = await LearningIntegration.getTrainingFeedback();
+      res.json(feedback);
+    } catch (error) {
+      console.error('Failed to get training feedback:', error);
+      res.status(500).json({ message: 'Failed to get training feedback' });
+    }
+  });
+
+  // Test enhanced AI classification
+  app.post('/api/moderation/test-ai', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (user?.role !== 'soapbox_owner') {
+        return res.status(403).json({ message: 'SoapBox Owner access required' });
+      }
+
+      await LearningIntegration.testEnhancedClassification();
+      res.json({ message: 'AI classification test completed - check server logs' });
+    } catch (error) {
+      console.error('AI test failed:', error);
+      res.status(500).json({ message: 'Failed to test AI classification' });
     }
   });
 
