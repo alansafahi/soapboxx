@@ -9467,7 +9467,16 @@ export class DatabaseStorage implements IStorage {
 
   async getUserNotifications(userId: string): Promise<Notification[]> {
     return await db
-      .select()
+      .select({
+        id: notifications.id,
+        userId: notifications.userId,
+        type: notifications.type,
+        title: notifications.title,
+        message: notifications.message,
+        isRead: notifications.isRead,
+        actionUrl: notifications.actionUrl,
+        createdAt: notifications.createdAt
+      })
       .from(notifications)
       .where(eq(notifications.userId, userId))
       .orderBy(desc(notifications.createdAt));

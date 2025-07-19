@@ -387,11 +387,27 @@ export default function TopHeader() {
                     key={notification.id}
                     className={`p-3 cursor-pointer ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
                     onClick={() => {
+                      console.log('Bell notification clicked:', {
+                        id: notification.id,
+                        type: notification.type,
+                        actionUrl: notification.actionUrl,
+                        title: notification.title
+                      });
+                      
                       if (!notification.isRead) {
                         markAsReadMutation.mutate(notification.id);
                       }
+                      
                       if (notification.actionUrl) {
+                        console.log('Navigating to actionUrl:', notification.actionUrl);
                         window.location.href = notification.actionUrl;
+                      } else {
+                        console.log('No actionUrl found for notification');
+                        // Fallback navigation for content edit requests
+                        if (notification.type === 'content_edit_request') {
+                          console.log('Attempting fallback navigation to community page');
+                          window.location.href = '/community';
+                        }
                       }
                     }}
                   >
