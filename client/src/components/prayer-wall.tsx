@@ -59,7 +59,11 @@ const prayerCategories = [
   { id: 'general', label: 'General', icon: '🤲', color: 'gray' },
 ];
 
-export default function PrayerWall() {
+interface PrayerWallProps {
+  highlightId?: string | null;
+}
+
+export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
