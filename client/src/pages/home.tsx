@@ -18,6 +18,8 @@ import CheckInSystem from "../components/CheckInSystem";
 import FloatingPostButton from "../components/FloatingPostButton";
 import RecentCheckInsStrip from "../components/RecentCheckInsStrip";
 import { ReferralWelcome } from "../components/ReferralWelcome";
+import EditRequestBanner from "../components/EditRequestBanner";
+import EditRequestToast from "../components/EditRequestToast";
 import { useQuery } from "@tanstack/react-query";
 
 interface HomeProps {
@@ -117,7 +119,13 @@ export default function Home({ referralCode }: HomeProps = {}) {
 
   return (
     <div className="min-h-screen bg-warm-white dark:bg-gray-900">
+      {/* Edit Request Toast System */}
+      <EditRequestToast />
+      
       <main className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-4 md:py-6 lg:py-8">
+        {/* Edit Request Banner - High Priority */}
+        <EditRequestBanner />
+        
         {/* Referral Welcome Banner */}
         {referralCode && (
           <div className="mb-4 sm:mb-6">

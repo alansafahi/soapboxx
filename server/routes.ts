@@ -11211,7 +11211,7 @@ Please provide suggestions for the missing or incomplete sections.`
   // Notification API endpoints
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId || req.user?.claims?.sub;
       
       // Get actual notifications from database
       const notifications = await storage.getUserNotifications(userId);
@@ -11222,10 +11222,23 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Get edit request notifications specifically
+  app.get('/api/notifications/edit-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      
+      const editRequests = await storage.getUserEditRequestNotifications(userId);
+      
+      res.json(editRequests);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch edit requests' });
+    }
+  });
+
   app.post('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
     try {
       const notificationId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId || req.user?.claims?.sub;
       
       // Actually mark notification as read in database
       await storage.markNotificationAsRead(notificationId, userId);
@@ -11238,7 +11251,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
   app.post('/api/notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId || req.user?.claims?.sub;
       
       // Actually mark all notifications as read in database
       await storage.markAllNotificationsAsRead(userId);

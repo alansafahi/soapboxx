@@ -4148,22 +4148,15 @@ export class DatabaseStorage implements IStorage {
         throw new Error('Could not find content author');
       }
       
-      // Create an edit request notification
+      // Create an urgent edit request notification with enhanced visibility
       await db.insert(notifications).values({
-        recipientId: authorId,
-        senderId: moderatorId,
+        userId: authorId,
         type: 'content_edit_request',
-        title: 'Content Edit Request',
-        message: `A moderator has requested that you edit your ${contentType.replace('_', ' ')}.\n\nFeedback: ${feedback}\n\nSuggestions: ${suggestions}`,
-        data: JSON.stringify({
-          contentType,
-          contentId,
-          feedback,
-          suggestions,
-          moderatorId
-        }),
+        title: '🔴 URGENT: Content Edit Required',
+        message: `A moderator has requested that you edit your ${contentType.replace('_', ' ')} to meet community guidelines.\n\n📝 Feedback: ${feedback}\n\n💡 Suggestions: ${suggestions}\n\n⚡ Action Required: Please review and edit your content immediately.`,
         isRead: false,
-        createdAt: requestedAt
+        createdAt: requestedAt,
+        actionUrl: `/community?highlight=${contentId}`
       });
       
       // Log the moderation action
@@ -9426,6 +9419,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Notification operations
+  async getUserEditRequestNotifications(userId: string): Promise<any[]> {
+    try {
+      const editRequests = await db
+        .select()
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.userId, userId),
+            eq(notifications.type, 'content_edit_request')
+          )
+        )
+        .orderBy(desc(notifications.createdAt));
+
+      return editRequests.map(notification => {
+        // Since the old notifications table doesn't have data field, 
+        // extract info from title and message
+        const feedback = notification.message.includes('Feedback:') 
+          ? notification.message.split('Feedback:')[1].split('Suggestions:')[0].trim()
+          : notification.message;
+        
+        const suggestions = notification.message.includes('Suggestions:')
+          ? notification.message.split('Suggestions:')[1].split('Action Required:')[0].trim()
+          : '';
+        
+        return {
+          id: notification.id,
+          contentType: 'discussion', // Default to discussion for now
+          contentId: 0, // Extract from message if needed
+          feedback: feedback,
+          suggestions: suggestions,
+          createdAt: notification.createdAt,
+          isRead: notification.isRead
+        };
+      });
+    } catch (error) {
+      console.error('Failed to get edit request notifications:', error);
+      return [];
+    }
+  }
+
   async getUserNotifications(userId: string): Promise<Notification[]> {
     return await db
       .select()
@@ -9437,14 +9470,14 @@ export class DatabaseStorage implements IStorage {
   async markNotificationAsRead(notificationId: number, userId: string): Promise<void> {
     await db
       .update(notifications)
-      .set({ isRead: true, updatedAt: new Date() })
+      .set({ isRead: true })
       .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
   }
 
   async markAllNotificationsAsRead(userId: string): Promise<void> {
     await db
       .update(notifications)
-      .set({ isRead: true, updatedAt: new Date() })
+      .set({ isRead: true })
       .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
   }
 
