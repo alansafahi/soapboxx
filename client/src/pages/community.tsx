@@ -57,6 +57,23 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-900 dark:to-violet-900 pb-20 md:pb-0">
+      {/* Red Warning Banner for Flagged Content */}
+      {highlightId && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 p-4 mb-4">
+          <div className="flex items-center max-w-6xl mx-auto px-6">
+            <AlertTriangle className="h-5 w-5 text-red-400 mr-3 flex-shrink-0" />
+            <div>
+              <p className="text-red-700 dark:text-red-300 font-medium">
+                Viewing Flagged Content
+              </p>
+              <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                You are viewing content that has been flagged for review. Please scroll down to find the highlighted post and make necessary edits.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Enhanced Header */}
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg border-b border-gray-200 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-8">

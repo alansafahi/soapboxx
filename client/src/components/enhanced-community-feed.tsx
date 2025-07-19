@@ -202,7 +202,11 @@ interface FilterOptions {
   sortBy: string;
 }
 
-export default function EnhancedCommunityFeed() {
+interface EnhancedCommunityFeedProps {
+  highlightId?: string | null;
+}
+
+export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunityFeedProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -220,6 +224,33 @@ export default function EnhancedCommunityFeed() {
   const [selectedReaction, setSelectedReaction] = useState<{ postId: number; reactionType: string } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+
+  // Auto-scroll to highlighted post when highlightId changes
+  useEffect(() => {
+    if (highlightId) {
+      console.log('Attempting to scroll to highlighted post:', highlightId);
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`post-${highlightId}`);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          console.log('Successfully scrolled to post:', highlightId);
+          // Add a temporary highlight effect
+          element.style.border = '3px solid #ef4444';
+          element.style.borderRadius = '8px';
+          setTimeout(() => {
+            element.style.border = '';
+          }, 5000);
+        } else {
+          console.log('Post element not found:', `post-${highlightId}`);
+        }
+      }, 1000); // Wait for posts to load
+      
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId, posts]);
 
   // Fetch discussions
   const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
@@ -499,7 +530,14 @@ export default function EnhancedCommunityFeed() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
+              <Card 
+                id={`post-${post.id}`}
+                className={`hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 ${
+                  highlightId && post.id.toString() === highlightId 
+                    ? 'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10' 
+                    : ''
+                }`}
+              >
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     {/* Post Header */}

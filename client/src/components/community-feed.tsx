@@ -37,7 +37,11 @@ const discussionSchema = z.object({
 
 type DiscussionFormData = z.infer<typeof discussionSchema>;
 
-export default function CommunityFeed() {
+interface CommunityFeedProps {
+  highlightId?: string | null;
+}
+
+export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -482,7 +486,15 @@ export default function CommunityFeed() {
         ) : (
           <div className="divide-y divide-gray-100">
             {discussions.map((discussion) => (
-              <div key={discussion.id} className="py-6 first:pt-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer rounded-lg px-4 -mx-4">
+              <div 
+                key={discussion.id} 
+                id={`post-${discussion.id}`}
+                className={`py-6 first:pt-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer rounded-lg px-4 -mx-4 ${
+                  highlightId && discussion.id.toString() === highlightId 
+                    ? 'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10' 
+                    : ''
+                }`}
+              >
                 <div className="flex items-start space-x-4">
                   <Avatar className="w-10 h-10">
                     <AvatarFallback>
