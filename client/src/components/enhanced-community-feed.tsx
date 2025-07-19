@@ -225,9 +225,25 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
+  // Fetch discussions
+  const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
+    queryKey: ['/api/discussions', filters, searchQuery],
+    queryFn: async () => {
+      const response = await fetch('/api/discussions');
+      if (!response.ok) throw new Error('Failed to fetch discussions');
+      const data = await response.json();
+      // Ensure each post has proper structure with default values
+      return Array.isArray(data) ? data.map(post => ({
+        ...post,
+        reactions: post.reactions || [],
+        author: post.author || { id: '', firstName: 'Anonymous', lastName: 'User' }
+      })) : [];
+    },
+  });
+
   // Auto-scroll to highlighted post when highlightId changes
   useEffect(() => {
-    if (highlightId) {
+    if (highlightId && posts && posts.length > 0) {
       console.log('Attempting to scroll to highlighted post:', highlightId);
       const timer = setTimeout(() => {
         const element = document.getElementById(`post-${highlightId}`);
@@ -251,22 +267,6 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
       return () => clearTimeout(timer);
     }
   }, [highlightId, posts]);
-
-  // Fetch discussions
-  const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
-    queryKey: ['/api/discussions', filters, searchQuery],
-    queryFn: async () => {
-      const response = await fetch('/api/discussions');
-      if (!response.ok) throw new Error('Failed to fetch discussions');
-      const data = await response.json();
-      // Ensure each post has proper structure with default values
-      return Array.isArray(data) ? data.map(post => ({
-        ...post,
-        reactions: post.reactions || [],
-        author: post.author || { id: '', firstName: 'Anonymous', lastName: 'User' }
-      })) : [];
-    },
-  });
 
   // Add reaction mutation
   const addReactionMutation = useMutation({
