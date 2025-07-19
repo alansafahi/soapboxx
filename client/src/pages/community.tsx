@@ -7,12 +7,16 @@ import EnhancedCommunityFeed from "../components/enhanced-community-feed";
 import MobileNav from "../components/mobile-nav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
-import { Sparkles, Users, MessageCircle } from "lucide-react";
+import { Sparkles, Users, MessageCircle, AlertTriangle } from "lucide-react";
 
 export default function CommunityPage() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
+  
+  // Extract highlight parameter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const highlightId = urlParams.get('highlight');
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -76,6 +80,20 @@ export default function CommunityPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
+        {highlightId && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <span className="font-semibold text-red-800 dark:text-red-300">
+                🔴 Viewing Flagged Content for Edit
+              </span>
+            </div>
+            <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+              This post has been flagged for moderation. Please review and edit as requested.
+            </p>
+          </div>
+        )}
+        
         <Tabs defaultValue="enhanced" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="enhanced" className="flex items-center space-x-2">
@@ -89,11 +107,11 @@ export default function CommunityPage() {
           </TabsList>
           
           <TabsContent value="enhanced">
-            <EnhancedCommunityFeed />
+            <EnhancedCommunityFeed highlightId={highlightId} />
           </TabsContent>
           
           <TabsContent value="classic">
-            <CommunityFeed />
+            <CommunityFeed highlightId={highlightId} />
           </TabsContent>
         </Tabs>
       </div>

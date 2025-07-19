@@ -12,6 +12,7 @@ interface EditRequest {
   suggestions: string;
   createdAt: string;
   isRead: boolean;
+  actionUrl?: string;
 }
 
 export default function EditRequestToast() {
@@ -39,21 +40,26 @@ export default function EditRequestToast() {
           <Button
             size="sm"
             onClick={() => {
-              // Navigate to content
+              // Use actionUrl if available, otherwise construct URL
               let url = '';
-              switch (latestRequest.contentType) {
-                case 'discussion':
-                  url = `/community?highlight=${latestRequest.contentId}`;
-                  break;
-                case 'soap_entry':
-                  url = `/soap?highlight=${latestRequest.contentId}`;
-                  break;
-                case 'prayer_request':
-                  url = `/prayer-wall?highlight=${latestRequest.contentId}`;
-                  break;
-                default:
-                  url = '/home';
+              if (latestRequest.actionUrl) {
+                url = latestRequest.actionUrl;
+              } else {
+                switch (latestRequest.contentType) {
+                  case 'discussion':
+                    url = `/community?highlight=${latestRequest.contentId}`;
+                    break;
+                  case 'soap_entry':
+                    url = `/soap?highlight=${latestRequest.contentId}`;
+                    break;
+                  case 'prayer_request':
+                    url = `/prayer-wall?highlight=${latestRequest.contentId}`;
+                    break;
+                  default:
+                    url = '/community';
+                }
               }
+              console.log('Toast navigating to:', url); // Debug log
               window.location.href = url;
             }}
             className="bg-red-600 hover:bg-red-700 text-white"

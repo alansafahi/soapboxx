@@ -14,6 +14,7 @@ interface EditRequest {
   suggestions: string;
   createdAt: string;
   isRead: boolean;
+  actionUrl?: string;
 }
 
 export default function EditRequestBanner() {
@@ -40,22 +41,28 @@ export default function EditRequestBanner() {
   const handleViewContent = (editRequest: EditRequest) => {
     markAsReadMutation.mutate(editRequest.id);
     
-    // Navigate based on content type
+    // Use actionUrl if available, otherwise construct URL
     let url = '';
-    switch (editRequest.contentType) {
-      case 'discussion':
-        url = `/community?highlight=${editRequest.contentId}`;
-        break;
-      case 'soap_entry':
-        url = `/soap?highlight=${editRequest.contentId}`;
-        break;
-      case 'prayer_request':
-        url = `/prayer-wall?highlight=${editRequest.contentId}`;
-        break;
-      default:
-        url = '/home';
+    if (editRequest.actionUrl) {
+      url = editRequest.actionUrl;
+    } else {
+      // Fallback to constructing URL
+      switch (editRequest.contentType) {
+        case 'discussion':
+          url = `/community?highlight=${editRequest.contentId}`;
+          break;
+        case 'soap_entry':
+          url = `/soap?highlight=${editRequest.contentId}`;
+          break;
+        case 'prayer_request':
+          url = `/prayer-wall?highlight=${editRequest.contentId}`;
+          break;
+        default:
+          url = '/community'; // Default to community page
+      }
     }
     
+    console.log('Navigating to:', url); // Debug log
     window.location.href = url;
   };
 

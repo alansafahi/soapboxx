@@ -9433,8 +9433,7 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(notifications.createdAt));
 
       return editRequests.map(notification => {
-        // Since the old notifications table doesn't have data field, 
-        // extract info from title and message
+        // Extract info from title and message
         const feedback = notification.message.includes('Feedback:') 
           ? notification.message.split('Feedback:')[1].split('Suggestions:')[0].trim()
           : notification.message;
@@ -9443,14 +9442,21 @@ export class DatabaseStorage implements IStorage {
           ? notification.message.split('Suggestions:')[1].split('Action Required:')[0].trim()
           : '';
         
+        // Extract content ID from action_url (e.g., /community?highlight=4079)
+        let contentId = 0;
+        if (notification.actionUrl && notification.actionUrl.includes('highlight=')) {
+          contentId = parseInt(notification.actionUrl.split('highlight=')[1]) || 0;
+        }
+        
         return {
           id: notification.id,
-          contentType: 'discussion', // Default to discussion for now
-          contentId: 0, // Extract from message if needed
+          contentType: 'discussion',
+          contentId: contentId,
           feedback: feedback,
           suggestions: suggestions,
           createdAt: notification.createdAt,
-          isRead: notification.isRead
+          isRead: notification.isRead,
+          actionUrl: notification.actionUrl
         };
       });
     } catch (error) {
