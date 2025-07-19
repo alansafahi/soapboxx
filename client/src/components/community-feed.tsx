@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
@@ -70,6 +70,22 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
   const { data: discussions = [], isLoading } = useQuery<Discussion[]>({
     queryKey: ["/api/discussions"],
   });
+
+  // Auto-scroll to highlighted discussion when highlightId changes
+  useEffect(() => {
+    if (highlightId && discussions && discussions.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`post-${highlightId}`);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId, discussions]);
 
   // Fetch comments for viewing dialog
   const { data: commentsData } = useQuery({
