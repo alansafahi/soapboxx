@@ -1,0 +1,50 @@
+CRITICAL (Immediate Removal & Review)
+Category	Example Post
+Sexual Content	“Looking for a hookup after church 💦 DM me”
+Inappropriate Content	“Jesus was a fraud. Christians are sheep.”
+Harassment/Bullying	“Everyone should avoid John. He’s a pervert and a liar.”
+False Information	“Tithing is optional. Jesus never told anyone to give.”
+Privacy Violation	“Here’s Pastor Mark’s phone number and home address 🏠📞”
+Spam	“💰 Buy Bitcoin now! Click here to invest with me”
+
+🛑 Action: Auto-flag for review + immediate shadowban or quarantine.
+
+🔶 HIGH (Likely Harmful or Spiritually Disruptive)
+Category	Example Post
+Sexual Content	“Is it okay if I post thirst traps as long as I quote scripture?”
+Inappropriate Content	“The Bible supports slavery. Read it again.”
+Harassment/Bullying	“The youth group is full of losers and sinners.”
+False Information	“Prayer is more powerful than medicine. Don’t take pills—just pray.”
+Privacy Violation	“That user’s real name is Sarah Smith, she lives in Fresno.”
+Spam	“Join my crypto church—Jesus loves passive income 💸”
+
+🚨 Action: Warn user or auto-moderate + send to human moderator.
+
+🟡 MEDIUM (Unhelpful or Distracting)
+Category	Example Post
+Sexual Content	“Can Christian couples use sex toys? Just asking here.”
+Inappropriate Content	“Catholics aren’t real Christians.”
+Harassment/Bullying	“You’re obviously not a real believer if you feel depressed.”
+False Information	“The rapture is happening next Friday. Be ready!”
+Privacy Violation	“I saw Pastor at a bar last night—posting this anonymously.”
+Spam	“Check out my YouTube channel where I expose all church pastors.”
+
+⚠️ Action: AI response with correction or compassion, maybe throttle reach.
+
+🟢 LOW (Minor Issues or Off-topic)
+Category	Example Post
+Sexual Content	“Is attraction a sin?”
+Inappropriate Content	“I feel like sermons are boring sometimes.”
+Harassment/Bullying	“Your prayer request seems dramatic. Just my opinion.”
+False Information	“Jesus probably spoke English, right?”
+Spam	“Come to our revival event! Free pizza 🍕🎉”
+
+✅ Action: AI coach can offer guidance or allow with soft moderation.
+
+🧠 Guidelines for AI Classification
+Severity	Triggers	Action
+Critical	Threatens safety, violates law, exposes private info	Block/auto-report + quarantine
+High	Harms reputation, theology, or mental/emotional health	Flag + moderator review + optional AI response
+Medium	Misinformed, harsh tone, divisive theology	Soft AI correction, downrank visibility, log for review
+Low	Mildly off-topic or misinformed, but benign	Allow but offer correction or redirect gently
+

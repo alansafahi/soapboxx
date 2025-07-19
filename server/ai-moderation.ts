@@ -9,6 +9,7 @@ export interface ModerationResult {
   reason: string;
   confidence: number;
   actionRequired: 'none' | 'review' | 'hide' | 'remove';
+  learningNote?: string;
   mediaAnalysis?: {
     type: 'image' | 'video';
     description: string;
@@ -62,57 +63,58 @@ Content to analyze: "${content}"`;
     }
 
     const evaluationPrompt = `
-Evaluate for these violation categories with their priority levels:
+You are an advanced AI content moderator for a faith-based community platform. Use this EXACT classification system:
 
-HIGH PRIORITY (immediate action required):
-- Violence threats (specific threats of bombs, killing, weapons, harm, destruction)
-- Harassment or bullying (direct targeting, intimidating behavior)
-- Sexual content (explicit sexual solicitation, nudity, sexual poses, sexual activity, pornographic material, inappropriate sexual comments, suggestive imagery)
-- Predatory behavior toward minors (adults specifically targeting children inappropriately, grooming language, soliciting "young ones")
-- Anti-religious/blasphemy content (devil worship, satan worship, anti-Christian messaging)
-- Hate speech or discrimination (faith, race, gender based)
+🛑 CRITICAL (Immediate Removal & Review) - actionRequired: "remove":
+- Sexual Content: "Looking for a hookup after church", explicit sexual requests/solicitation
+- Inappropriate Content: Blasphemy, "Jesus was a fraud. Christians are sheep"
+- Harassment/Bullying: Personal attacks, "Everyone should avoid John. He's a pervert"
+- False Information: "Tithing is optional. Jesus never told anyone to give"
+- Privacy Violation: Sharing personal info, addresses, phone numbers
+- Spam: "Buy Bitcoin now! Click here to invest with me"
+- Violence threats (bombs, killing, weapons, harm, destruction)
+- Predatory behavior toward minors ("young ones", grooming language)
 
-CRITICAL PROTECTION: Content with explicit sexual solicitation (like "take off your clothes"), predatory targeting of minors (like "young ones" or "chat with old man"), violent threats, anti-religious content (devil/satan worship), OR sexual/suggestive images (nudity, sexual poses, explicit content) must be flagged as HIGH priority and actionRequired: "hide"
+🔶 HIGH (Likely Harmful or Spiritually Disruptive) - actionRequired: "hide":
+- Sexual Content: "Is it okay if I post thirst traps as long as I quote scripture?"
+- Inappropriate Content: "The Bible supports slavery. Read it again"
+- Harassment/Bullying: "The youth group is full of losers and sinners"
+- False Information: "Prayer is more powerful than medicine. Don't take pills—just pray"
+- Privacy Violation: "That user's real name is Sarah Smith, she lives in Fresno"
+- Spam: "Join my crypto church—Jesus loves passive income"
 
-WATCH FOR SPECIFIC PATTERNS:
-- Devil worship, satan worship, anti-Christian messaging
-- Adults soliciting contact with "young ones", "kids", "children", "minors"  
-- Requests for personal information (SSN, bank info, home address, phone numbers)
-- Sexual content combined with any text (analyze text+image together)
+🟡 MEDIUM (Unhelpful or Distracting) - actionRequired: "review":
+- Sexual Content: "Can Christian couples use sex toys? Just asking here"
+- Inappropriate Content: "Catholics aren't real Christians"
+- Harassment/Bullying: "You're obviously not a real believer if you feel depressed"
+- False Information: "The rapture is happening next Friday. Be ready!"
+- Privacy Violation: "I saw Pastor at a bar last night—posting this anonymously"
+- Spam: "Check out my YouTube channel where I expose all church pastors"
 
-IMPORTANT: Text + image combinations must be analyzed together. Even innocent text becomes inappropriate when combined with sexual/explicit images.
+🟢 LOW (Minor Issues or Off-topic) - actionRequired: "review":
+- Sexual Content: "Is attraction a sin?"
+- Inappropriate Content: "I feel like sermons are boring sometimes"
+- Harassment/Bullying: "Your prayer request seems dramatic. Just my opinion"
+- False Information: "Jesus probably spoke English, right?"
+- Spam: "Come to our revival event! Free pizza"
 
-MEDIUM PRIORITY (review needed):
-- Misinformation (false religious information, misquoted scripture)
-- Privacy violations (sharing personal info without consent, requesting SSN/bank info/personal details)
-- Impersonation of pastors or church staff
-- Theological disagreements that are escalating in tone
+SPECIAL RULES:
+- Any personal info sharing (phone numbers, addresses, SSN, bank info) = CRITICAL
+- Devil worship, satan worship solicitation = CRITICAL
+- Adult targeting minors ("young ones", "kids") = CRITICAL
+- Explicit sexual content + any text = CRITICAL
+- Multiple minor violations can elevate to higher priority
 
-LOW PRIORITY (automated handling):
-- Spam (repetitive content, promotional material)
-- Off-topic posts
-- Suspicious external links
-
-Respond with JSON in this format:
+Respond with JSON:
 {
   "flagged": boolean,
-  "priority": "low" | "medium" | "high",
-  "violations": ["array of specific violations found"],
-  "reason": "primary violation category",
+  "priority": "low" | "medium" | "high" | "critical",
+  "violations": ["specific violations found"],
+  "reason": "primary violation category", 
   "confidence": 0.0-1.0,
   "actionRequired": "none" | "review" | "hide" | "remove",
-  "mediaAnalysis": {
-    "type": "image" | "video",
-    "description": "brief description of visual content",
-    "concerns": ["specific visual concerns if any"]
-  }
-}
-
-For HIGH priority: set actionRequired to "hide"
-For MEDIUM priority: set actionRequired to "review" 
-For LOW priority: set actionRequired to "review"
-If no violations: set actionRequired to "none"
-`;
+  "learningNote": "what this case teaches about classification"
+}`;
 
     // Add evaluation prompt to the message content
     if (mediaUrl && mediaType) {
@@ -131,14 +133,15 @@ If no violations: set actionRequired to "none"
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
-    // Validate and sanitize the response
+    // Validate and sanitize the response  
     const moderationResult: ModerationResult = {
       flagged: Boolean(result.flagged),
       priority: ['low', 'medium', 'high', 'critical'].includes(result.priority) ? result.priority : 'medium',
       violations: Array.isArray(result.violations) ? result.violations : [],
       reason: typeof result.reason === 'string' ? result.reason : 'other',
       confidence: typeof result.confidence === 'number' ? Math.max(0, Math.min(1, result.confidence)) : 0.5,
-      actionRequired: ['none', 'review', 'hide', 'remove'].includes(result.actionRequired) ? result.actionRequired : 'none'
+      actionRequired: ['none', 'review', 'hide', 'remove'].includes(result.actionRequired) ? result.actionRequired : 'none',
+      learningNote: result.learningNote || ''
     };
 
     // Add media analysis if provided
