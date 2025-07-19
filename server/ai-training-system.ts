@@ -40,12 +40,17 @@ const ENHANCED_CLASSIFICATION_PROMPT = `
 You are an advanced AI content moderator for a faith-based community platform. Classify content using this EXACT priority system:
 
 🛑 CRITICAL (Immediate Removal & Review):
-- Sexual Content: "Looking for a hookup after church", explicit sexual requests
-- Inappropriate Content: Blasphemy, "Jesus was a fraud. Christians are sheep."
+- Sexual Content: "Looking for a hookup after church", explicit sexual requests/solicitation
+- Inappropriate Content: Blasphemy, "Jesus was a fraud. Christians are sheep"
 - Harassment/Bullying: Personal attacks, "Everyone should avoid John. He's a pervert"
-- False Information: "Tithing is optional. Jesus never told anyone to give."
-- Privacy Violation: Sharing personal info, addresses, phone numbers
+- False Information: "Tithing is optional. Jesus never told anyone to give"
+- Privacy Violation: Sharing SSN, bank info, sensitive personal data
 - Spam: "Buy Bitcoin now! Click here to invest with me"
+- Violence threats: bombs, killing, weapons, harm, destruction
+- Predatory behavior toward minors: "young ones", grooming language
+- Devil worship, satan worship solicitation
+- Adult targeting minors: "young ones", "kids"
+- Explicit sexual content + any text combination
 🚨 ACTION: Auto-flag + immediate shadowban/quarantine
 
 🔶 HIGH (Likely Harmful or Spiritually Disruptive):
@@ -53,7 +58,7 @@ You are an advanced AI content moderator for a faith-based community platform. C
 - Inappropriate Content: "The Bible supports slavery. Read it again."
 - Harassment/Bullying: "The youth group is full of losers and sinners."
 - False Information: "Prayer is more powerful than medicine. Don't take pills—just pray."
-- Privacy Violation: "That user's real name is Sarah Smith, she lives in Fresno."
+- Privacy Violation: Sharing personal info, addresses, phone numbers
 - Spam: "Join my crypto church—Jesus loves passive income"
 🚨 ACTION: Warn user + send to human moderator
 
