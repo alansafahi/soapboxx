@@ -120,10 +120,8 @@ export class VolunteerStorage {
         opportunityId: volunteerOpportunities.id,
         opportunityTitle: volunteerOpportunities.title,
         opportunityDescription: volunteerOpportunities.description,
-        ministry: volunteerOpportunities.ministry,
-        timeCommitment: volunteerOpportunities.timeCommitment,
         location: volunteerOpportunities.location,
-        backgroundCheckRequired: volunteerOpportunities.backgroundCheckRequired
+        roleId: volunteerOpportunities.roleId
       })
       .from(volunteerMatches)
       .innerJoin(volunteerOpportunities, eq(volunteerMatches.opportunityId, volunteerOpportunities.id))
@@ -146,10 +144,8 @@ export class VolunteerStorage {
         id: match.opportunityId,
         title: match.opportunityTitle,
         description: match.opportunityDescription,
-        ministry: match.ministry,
-        timeCommitment: match.timeCommitment,
         location: match.location,
-        backgroundCheckRequired: match.backgroundCheckRequired
+        roleId: match.roleId
       }
     }));
   }
@@ -335,12 +331,12 @@ export class VolunteerStorage {
   // Background Check Management
   async requestBackgroundCheck(volunteerId: number, checkType: string): Promise<any> {
     const backgroundCheck = await db.insert(backgroundChecks).values({
-      volunteerId,
+      volunteerId: volunteerId.toString(),
       provider: 'MinistrySafe', // Default provider
       checkType,
       status: 'pending',
       requestedAt: new Date(),
-      cost: checkType === 'basic' ? 25.00 : 45.00
+      cost: (checkType === 'basic' ? 25.00 : 45.00).toString()
     }).returning();
 
     return backgroundCheck[0];

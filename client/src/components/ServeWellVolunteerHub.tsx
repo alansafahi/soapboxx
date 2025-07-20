@@ -120,10 +120,7 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
 
   const assessmentMutation = useMutation({
     mutationFn: (data: SpiritualGiftsForm) => 
-      apiRequest('/api/volunteers/spiritual-gifts-assessment', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      }),
+      apiRequest('/api/volunteers/spiritual-gifts-assessment', 'POST', data),
     onSuccess: (profile) => {
       onComplete(profile);
     }
@@ -244,7 +241,7 @@ const DivineAppointmentsPanel = () => {
 
   const acceptMutation = useMutation({
     mutationFn: (matchId: number) => 
-      apiRequest(`/api/volunteers/matches/${matchId}/accept`, { method: 'POST' }),
+      apiRequest(`/api/volunteers/matches/${matchId}/accept`, 'POST'),
     onSuccess: () => {
       // Refresh appointments
     }

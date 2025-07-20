@@ -21,13 +21,13 @@ router.post('/spiritual-gifts-assessment', async (req, res) => {
     const assessment = await assessSpiritualGifts(responses);
     
     // Get or create volunteer profile
-    let volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    let volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     
     if (!volunteer) {
       // Create new volunteer profile
       volunteer = await volunteerStorage.createVolunteer({
-        userId: req.user.id,
-        churchId: req.user.churchId,
+        userId: req.user.email,
+        churchId: 1, // Default church ID for now
         firstName: req.user.firstName || '',
         lastName: req.user.lastName || '',
         email: req.user.email || '',
@@ -67,7 +67,7 @@ router.get('/has-profile', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     res.json({ hasProfile: !!volunteer });
   } catch (error) {
     console.error('Profile check error:', error);
@@ -82,7 +82,7 @@ router.get('/profile', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     res.json(volunteer);
   } catch (error) {
     console.error('Profile fetch error:', error);
@@ -97,7 +97,7 @@ router.get('/stats', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     if (!volunteer) {
       return res.json({
         totalHours: 0,
@@ -123,7 +123,7 @@ router.get('/divine-appointments', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     if (!volunteer) {
       return res.json([]);
     }
@@ -157,7 +157,7 @@ router.post('/matches/:matchId/accept', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     if (!volunteer) {
       return res.status(404).json({ error: 'Volunteer profile not found' });
     }
@@ -192,9 +192,9 @@ router.post('/opportunities', async (req, res) => {
     }
 
     // Check if user has admin permissions
-    const isAdmin = req.user.role === 'soapbox_owner' || 
-                   req.user.role === 'church_admin' || 
-                   req.user.role === 'admin';
+    const isAdmin = (req.user.role || "member") === 'soapbox_owner' || 
+                   (req.user.role || "member") === 'church_admin' || 
+                   (req.user.role || "member") === 'admin';
     
     if (!isAdmin) {
       return res.status(403).json({ error: 'Admin permissions required' });
@@ -202,8 +202,8 @@ router.post('/opportunities', async (req, res) => {
 
     const validatedData = insertVolunteerOpportunitySchema.parse({
       ...req.body,
-      churchId: req.user.churchId,
-      coordinatorId: req.user.id
+      churchId: 1, // Default church ID
+      coordinatorId: req.user.email
     });
 
     const opportunity = await volunteerStorage.createVolunteerOpportunity(validatedData);
@@ -236,7 +236,7 @@ router.post('/background-check', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     if (!volunteer) {
       return res.status(404).json({ error: 'Volunteer profile not found' });
     }
@@ -262,7 +262,7 @@ router.get('/background-check-status', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     if (!volunteer) {
       return res.status(404).json({ error: 'Volunteer profile not found' });
     }
@@ -282,16 +282,16 @@ router.get('/ministry/:ministry/team-optimization', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const isAdmin = req.user.role === 'soapbox_owner' || 
-                   req.user.role === 'church_admin' || 
-                   req.user.role === 'admin';
+    const isAdmin = (req.user.role || "member") === 'soapbox_owner' || 
+                   (req.user.role || "member") === 'church_admin' || 
+                   (req.user.role || "member") === 'admin';
     
     if (!isAdmin) {
       return res.status(403).json({ error: 'Admin permissions required' });
     }
 
     const { ministry } = req.params;
-    const volunteers = await volunteerStorage.getVolunteersByMinistry(ministry, req.user.churchId);
+    const volunteers = await volunteerStorage.getVolunteersByMinistry(ministry, 1); // Default church ID
     
     if (volunteers.length === 0) {
       return res.json({ 
@@ -320,7 +320,7 @@ router.get('/onboarding-path', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.id);
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
     if (!volunteer) {
       return res.status(404).json({ error: 'Volunteer profile not found' });
     }

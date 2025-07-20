@@ -2490,13 +2490,13 @@ export const volunteerRoles = pgTable("volunteer_roles", {
   churchId: integer("church_id").references(() => churches.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  ministry: varchar("ministry", { length: 50 }).notNull(), // worship, children, youth, hospitality, tech, admin
+  category: varchar("category", { length: 50 }).notNull(), // worship, children, youth, hospitality, tech, admin
   department: varchar("department", { length: 50 }),
   requiredSkills: text("required_skills").array(),
   spiritualGifts: text("spiritual_gifts").array(), // Aligned spiritual gifts
   backgroundCheckRequired: boolean("background_check_required").default(false),
   minimumAge: integer("minimum_age").default(16),
-  timeCommitment: varchar("time_commitment", { length: 50 }), // weekly, monthly, event-based
+  commitment: varchar("commitment", { length: 50 }), // weekly, monthly, event-based
   hoursPerWeek: integer("hours_per_week"),
   requiredTraining: text("required_training").array(),
   isLeadershipRole: boolean("is_leadership_role").default(false),
