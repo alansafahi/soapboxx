@@ -76,13 +76,18 @@ export class VolunteerStorage {
   }
 
   async getVolunteerOpportunities(churchId?: number): Promise<VolunteerOpportunity[]> {
-    let query = db.select().from(volunteerOpportunities);
-    
-    if (churchId) {
-      query = query.where(eq(volunteerOpportunities.churchId, churchId));
+    try {
+      let query = db.select().from(volunteerOpportunities);
+      
+      if (churchId) {
+        query = query.where(eq(volunteerOpportunities.churchId, churchId));
+      }
+      
+      return await query.orderBy(desc(volunteerOpportunities.createdAt));
+    } catch (error) {
+      console.error('Error fetching volunteer opportunities:', error);
+      return [];
     }
-    
-    return await query.orderBy(desc(volunteerOpportunities.priority), asc(volunteerOpportunities.startDate));
   }
 
   async getVolunteerOpportunityById(opportunityId: number): Promise<VolunteerOpportunity | undefined> {
