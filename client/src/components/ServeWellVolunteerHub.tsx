@@ -189,7 +189,10 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
     onError: (error) => {
       console.error('Assessment failed:', error);
       // Still complete the assessment even if API fails - show success announcement
-      onComplete({ success: true });
+      // Calculate the profile locally if API fails
+      const responses = form.getValues().responses;
+      const profile = calculateSpiritualProfile(responses, spiritualGiftsQuestions);
+      onComplete({ ...profile, success: true });
     }
   });
 
@@ -555,6 +558,7 @@ const VolunteerOpportunitiesPanel = () => {
   const [selectedOpportunity, setSelectedOpportunity] = useState<VolunteerOpportunity | null>(null);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [signupNotes, setSignupNotes] = useState('');
+  const queryClient = useQueryClient();
   
   const { data: opportunities, isLoading } = useQuery({
     queryKey: ['/api/volunteers/opportunities'],
@@ -771,11 +775,13 @@ const ServeWellVolunteerHub = () => {
   const handleAssessmentComplete = (profile: any) => {
     setShowAssessment(false);
     setLastAssessmentProfile(profile);
-    // Refresh the hasProfile query to update the UI
-    queryClient.invalidateQueries({ queryKey: ['/api/volunteers/has-profile'] });
     
-    // Show success announcement
+    // Show success announcement immediately
     setShowSuccessAnnouncement(true);
+    
+    // Force refresh the hasProfile query and manually update the cached data
+    queryClient.setQueryData(['/api/volunteers/has-profile'], { hasProfile: true });
+    queryClient.invalidateQueries({ queryKey: ['/api/volunteers/has-profile'] });
     
     // Auto-hide after 25 seconds to give users time to read profile and click
     setTimeout(() => {
@@ -951,7 +957,7 @@ const ServeWellVolunteerHub = () => {
                         </p>
                       </div>
                       {hasProfile?.hasProfile ? (
-                        <Button variant="outline" className="border-green-500 text-green-700">
+                        <Button variant="outline" className="border-green-500 text-green-700" disabled>
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Completed
                         </Button>
