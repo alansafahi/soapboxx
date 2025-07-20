@@ -13,7 +13,10 @@ import LeaderboardPreview from "../components/LeaderboardPreview";
 import UpcomingEventsPreview from "../components/UpcomingEventsPreview";
 import CompactPostComposer from "../components/CompactPostComposer";
 import LimitedSocialFeed from "../components/LimitedSocialFeed";
+import MyPostsFeed from "../components/my-posts-feed";
 import MobileNav from "../components/mobile-nav";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Users, User } from "lucide-react";
 import CheckInSystem from "../components/CheckInSystem";
 import FloatingPostButton from "../components/FloatingPostButton";
 import RecentCheckInsStrip from "../components/RecentCheckInsStrip";
@@ -174,10 +177,29 @@ export default function Home({ referralCode }: HomeProps = {}) {
 
         {/* Main Feed Layout - Full Width */}
         <div className="w-full">
-          {/* Latest Posts */}
+          {/* Social Feed with Tabs */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Latest Posts</h2>
-            <LimitedSocialFeed initialLimit={5} />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📬 Social Feed</h2>
+            <Tabs defaultValue="all" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="all" className="flex items-center space-x-2">
+                  <Users className="h-4 w-4" />
+                  <span>Latest Posts</span>
+                </TabsTrigger>
+                <TabsTrigger value="myposts" className="flex items-center space-x-2">
+                  <User className="h-4 w-4" />
+                  <span>My Posts</span>
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="all">
+                <LimitedSocialFeed initialLimit={5} />
+              </TabsContent>
+              
+              <TabsContent value="myposts">
+                <MyPostsFeed />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
