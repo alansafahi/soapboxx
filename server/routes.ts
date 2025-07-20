@@ -7805,9 +7805,8 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
-      // Get the discussion to check ownership
-      const discussions = await storage.getDiscussions();
-      const discussion = discussions.find(d => d.id === discussionId);
+      // Get the discussion directly to check ownership (including flagged posts)
+      const discussion = await storage.getDiscussion(discussionId);
       if (!discussion) {
         return res.status(404).json({ message: "Post not found" });
       }
@@ -7815,7 +7814,7 @@ Return JSON with this exact structure:
       // Check if user is the author or has admin permissions
       const userRole = await storage.getUserRole(userId);
       const isAuthor = discussion.authorId === userId;
-      const isAdmin = ['admin', 'system_admin', 'church_admin', 'pastor', 'lead_pastor'].includes(userRole);
+      const isAdmin = ['admin', 'system_admin', 'church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(userRole);
       
       if (!isAuthor && !isAdmin) {
         return res.status(403).json({ message: "You can only delete your own posts" });
