@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
-// ServeWell™ - World-Class Volunteer Management Hub
+// D.I.V.I.N.E. - Disciple-Inspired Volunteer Integration & Nurture Engine
 
 interface Volunteer {
   id: number;
@@ -389,8 +389,8 @@ const VolunteerDashboard = () => {
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="text-center p-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome to ServeWell™</h1>
-        <p className="text-purple-100">Your AI-powered ministry matching platform</p>
+        <h1 className="text-3xl font-bold mb-2">Welcome to D.I.V.I.N.E.</h1>
+        <p className="text-purple-100">Disciple-Inspired Volunteer Integration & Nurture Engine</p>
       </div>
 
       {/* Stats Cards */}
@@ -472,7 +472,7 @@ const VolunteerDashboard = () => {
   );
 };
 
-// Main ServeWell™ Component
+// Main D.I.V.I.N.E. Component
 const ServeWellVolunteerHub = () => {
   const [showAssessment, setShowAssessment] = useState(false);
   const { data: hasProfile } = useQuery({

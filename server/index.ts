@@ -89,7 +89,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // ServeWell™ Volunteer Management Routes
+  // D.I.V.I.N.E. Volunteer Management Routes
   const { default: volunteerRoutes } = await import('./routes/volunteer-routes');
   app.use('/api/volunteers', volunteerRoutes);
   

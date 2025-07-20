@@ -18,7 +18,7 @@ import {
 } from "@shared/schema";
 import { eq, and, desc, asc } from "drizzle-orm";
 
-// ServeWell™ Enhanced Volunteer Storage Methods
+// D.I.V.I.N.E. Enhanced Volunteer Storage Methods
 
 export class VolunteerStorage {
   

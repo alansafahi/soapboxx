@@ -1,8 +1,8 @@
 import React from 'react';
 import ServeWellVolunteerHub from '@/components/ServeWellVolunteerHub';
 
-const ServeWellPage = () => {
+const DIVINEPage = () => {
   return <ServeWellVolunteerHub />;
 };
 
-export default ServeWellPage;
+export default DIVINEPage;

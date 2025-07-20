@@ -6,7 +6,7 @@ import { insertVolunteerSchema, insertVolunteerOpportunitySchema } from '@shared
 
 const router = Router();
 
-// ServeWell™ API Routes - World-Class Volunteer Management
+// D.I.V.I.N.E. API Routes - Disciple-Inspired Volunteer Integration & Nurture Engine
 
 // Spiritual Gifts Assessment
 router.post('/spiritual-gifts-assessment', async (req, res) => {
