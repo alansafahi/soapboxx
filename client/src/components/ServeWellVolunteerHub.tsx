@@ -127,6 +127,7 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
     },
     onError: (error) => {
       console.error('Assessment failed:', error);
+      alert('Assessment submission failed. Please try again or contact support.');
       // Still complete the assessment even if API fails
       onComplete({ success: true });
     }
@@ -683,6 +684,7 @@ const VolunteerOpportunitiesPanel = () => {
 // Main D.I.V.I.N.E. Component
 const ServeWellVolunteerHub = () => {
   const [showAssessment, setShowAssessment] = useState(false);
+  const [showSuccessAnnouncement, setShowSuccessAnnouncement] = useState(false);
   const { data: hasProfile } = useQuery({
     queryKey: ['/api/volunteers/has-profile'],
     queryFn: () => apiRequest('/api/volunteers/has-profile', 'GET')
@@ -695,14 +697,13 @@ const ServeWellVolunteerHub = () => {
     // Refresh the hasProfile query to update the UI
     queryClient.invalidateQueries({ queryKey: ['/api/volunteers/has-profile'] });
     
-    // Show success message and guide to next steps
+    // Show success announcement
+    setShowSuccessAnnouncement(true);
+    
+    // Auto-hide after 10 seconds
     setTimeout(() => {
-      alert('🎉 Assessment Complete!\n\n' +
-            '✅ Your spiritual gifts have been identified\n' +
-            '🎯 You can now browse volunteer opportunities\n' +
-            '📋 Check out your personalized matches\n' +
-            '👆 Click "Divine Appointments" tab to see your matches!');
-    }, 500);
+      setShowSuccessAnnouncement(false);
+    }, 10000);
   };
 
   if (showAssessment) {
@@ -711,6 +712,68 @@ const ServeWellVolunteerHub = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Success Announcement Box */}
+      {showSuccessAnnouncement && (
+        <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-lg shadow-lg border-l-4 border-l-yellow-400 relative animate-in slide-in-from-top duration-500">
+          <button
+            onClick={() => setShowSuccessAnnouncement(false)}
+            className="absolute top-2 right-2 text-white hover:text-gray-200 text-xl font-bold"
+          >
+            ×
+          </button>
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <CheckCircle className="w-8 h-8 text-yellow-300" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold mb-2">🎉 Assessment Complete!</h3>
+              <div className="space-y-2 text-sm">
+                <p className="flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-2 text-green-300" />
+                  Your spiritual gifts have been identified
+                </p>
+                <p className="flex items-center">
+                  <Target className="w-4 h-4 mr-2 text-blue-300" />
+                  You can now browse volunteer opportunities
+                </p>
+                <p className="flex items-center">
+                  <Sparkles className="w-4 h-4 mr-2 text-purple-300" />
+                  Check out your personalized matches
+                </p>
+                <p className="flex items-center">
+                  <Calendar className="w-4 h-4 mr-2 text-yellow-300" />
+                  Click "Divine Appointments" tab to see your matches!
+                </p>
+              </div>
+              <div className="mt-4 flex space-x-2">
+                <Button 
+                  onClick={() => {
+                    document.querySelector('[data-state="inactive"][value="appointments"]')?.click();
+                    setShowSuccessAnnouncement(false);
+                  }}
+                  className="bg-white text-blue-600 hover:bg-gray-100"
+                  size="sm"
+                >
+                  <Target className="w-4 h-4 mr-1" />
+                  View My Matches
+                </Button>
+                <Button 
+                  onClick={() => {
+                    document.querySelector('[data-state="inactive"][value="opportunities"]')?.click();
+                    setShowSuccessAnnouncement(false);
+                  }}
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-blue-600"
+                  size="sm"
+                >
+                  Browse Opportunities
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Tabs defaultValue="dashboard" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
