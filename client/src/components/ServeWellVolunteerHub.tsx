@@ -839,35 +839,90 @@ const ServeWellVolunteerHub = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {/* Step 1: Assessment */}
-                    <div className="flex items-center space-x-4 p-4 rounded-lg bg-purple-50 border border-purple-200">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white text-sm font-medium">
-                        1
+                    <div className={`flex items-center space-x-4 p-4 rounded-lg border ${
+                      hasProfile?.hasProfile 
+                        ? "bg-green-50 border-green-200" 
+                        : "bg-purple-50 border-purple-200"
+                    }`}>
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-medium ${
+                        hasProfile?.hasProfile 
+                          ? "bg-green-500" 
+                          : "bg-purple-500"
+                      }`}>
+                        {hasProfile?.hasProfile ? <CheckCircle className="w-4 h-4" /> : "1"}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium">Complete Spiritual Gifts Assessment</h4>
-                        <p className="text-sm text-gray-600">Discover your divine gifts and serving style (5-10 minutes)</p>
+                        <h4 className="font-medium">
+                          {hasProfile?.hasProfile 
+                            ? "✅ Spiritual Gifts Assessment Complete" 
+                            : "Complete Spiritual Gifts Assessment"
+                          }
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {hasProfile?.hasProfile 
+                            ? "Your spiritual gifts have been identified and saved" 
+                            : "Discover your divine gifts and serving style (5-10 minutes)"
+                          }
+                        </p>
                       </div>
-                      <Button 
-                        onClick={() => setShowAssessment(true)}
-                        className="bg-gradient-to-r from-purple-500 to-blue-500"
-                      >
-                        <Brain className="w-4 h-4 mr-2" />
-                        Start Now
-                      </Button>
+                      {hasProfile?.hasProfile ? (
+                        <Button variant="outline" className="border-green-500 text-green-700">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Completed
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => setShowAssessment(true)}
+                          className="bg-gradient-to-r from-purple-500 to-blue-500"
+                        >
+                          <Brain className="w-4 h-4 mr-2" />
+                          Start Now
+                        </Button>
+                      )}
                     </div>
 
-                    {/* Step 2: Browse Opportunities (Locked) */}
-                    <div className="flex items-center space-x-4 p-4 rounded-lg bg-gray-50 border border-gray-200 opacity-75">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-400 text-white text-sm font-medium">
+                    {/* Step 2: Browse Opportunities (Unlocked after assessment) */}
+                    <div className={`flex items-center space-x-4 p-4 rounded-lg border ${
+                      hasProfile?.hasProfile 
+                        ? "bg-green-50 border-green-200" 
+                        : "bg-gray-50 border-gray-200 opacity-75"
+                    }`}>
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-medium ${
+                        hasProfile?.hasProfile 
+                          ? "bg-green-500" 
+                          : "bg-gray-400"
+                      }`}>
                         2
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-500">Browse Volunteer Opportunities</h4>
-                        <p className="text-sm text-gray-400">Explore ministry opportunities matched to your gifts</p>
+                        <h4 className={`font-medium ${
+                          hasProfile?.hasProfile 
+                            ? "text-gray-900" 
+                            : "text-gray-500"
+                        }`}>
+                          Browse Volunteer Opportunities
+                        </h4>
+                        <p className={`text-sm ${
+                          hasProfile?.hasProfile 
+                            ? "text-gray-600" 
+                            : "text-gray-400"
+                        }`}>
+                          Explore ministry opportunities matched to your gifts
+                        </p>
                       </div>
-                      <Button disabled variant="outline">
-                        Locked
-                      </Button>
+                      {hasProfile?.hasProfile ? (
+                        <Button 
+                          onClick={() => setActiveTab("opportunities")}
+                          className="bg-gradient-to-r from-green-500 to-blue-500"
+                        >
+                          <Search className="w-4 h-4 mr-2" />
+                          Browse Now
+                        </Button>
+                      ) : (
+                        <Button disabled variant="outline">
+                          Locked
+                        </Button>
+                      )}
                     </div>
 
                     {/* Step 3: Sign Up (Locked) */}
