@@ -69,6 +69,7 @@ const BookmarkedPrayersPage = lazy(() => import("./pages/BookmarkedPrayersPage")
 const SavedReflectionsPage = lazy(() => import("./pages/saved-reflections"));
 const FAQPage = lazy(() => import("./pages/faq"));
 const ModerationDashboardPage = lazy(() => import("./pages/moderation-dashboard"));
+const ServeWellPage = lazy(() => import("./pages/ServeWellPage"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -166,6 +167,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/contacts" component={ContactsPage} />
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
+                                    <ProtectedRoute path="/servewell" component={ServeWellPage} />
                                     
                                     {/* Admin Portal Routes */}
                                     <ProtectedRoute path="/admin" component={AdminPage} />

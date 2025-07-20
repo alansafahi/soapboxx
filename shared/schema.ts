@@ -2471,21 +2471,44 @@ export const referralMilestones = pgTable("referral_milestones", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Volunteer Management System
+// ServeWell™ - World-Class Volunteer Management System
 
-// Volunteer roles
+// Spiritual gifts taxonomy for divine appointment matching
+export const spiritualGifts = pgTable("spiritual_gifts", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 50 }).notNull(), // administration, leadership, teaching, mercy, etc.
+  category: varchar("category", { length: 30 }).notNull(), // ministry, spiritual, natural
+  description: text("description").notNull(),
+  scriptureReference: varchar("scripture_reference", { length: 100 }),
+  assessmentQuestions: text("assessment_questions").array(),
+  isActive: boolean("is_active").default(true),
+});
+
+// Enhanced volunteer roles with ministry focus
 export const volunteerRoles = pgTable("volunteer_roles", {
   id: serial("id").primaryKey(),
+  churchId: integer("church_id").references(() => churches.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  requiredSkills: text("required_skills").array(),
+  ministry: varchar("ministry", { length: 50 }).notNull(), // worship, children, youth, hospitality, tech, admin
   department: varchar("department", { length: 50 }),
+  requiredSkills: text("required_skills").array(),
+  spiritualGifts: text("spiritual_gifts").array(), // Aligned spiritual gifts
+  backgroundCheckRequired: boolean("background_check_required").default(false),
+  minimumAge: integer("minimum_age").default(16),
+  timeCommitment: varchar("time_commitment", { length: 50 }), // weekly, monthly, event-based
+  hoursPerWeek: integer("hours_per_week"),
+  requiredTraining: text("required_training").array(),
+  isLeadershipRole: boolean("is_leadership_role").default(false),
+  maxVolunteers: integer("max_volunteers"),
+  currentVolunteers: integer("current_volunteers").default(0),
   isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Volunteer profiles
+// Enhanced volunteer profiles with spiritual focus
 export const volunteers = pgTable("volunteers", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -2498,14 +2521,43 @@ export const volunteers = pgTable("volunteers", {
   dateOfBirth: timestamp("date_of_birth"),
   emergencyContactName: varchar("emergency_contact_name", { length: 100 }),
   emergencyContactPhone: varchar("emergency_contact_phone", { length: 20 }),
-  skills: text("skills").array(),
-  interests: text("interests").array(),
+  
+  // Enhanced spiritual and skill matching
+  skills: text("skills").array(), // Technical and natural skills
+  interests: text("interests").array(), // Ministry interests
+  spiritualGifts: text("spiritual_gifts").array(), // Assessed spiritual gifts
+  spiritualGiftsScore: jsonb("spiritual_gifts_score"), // Gift assessment scores
+  ministryPassion: text("ministry_passion").array(), // Areas of calling
+  personalityType: varchar("personality_type", { length: 20 }), // For team compatibility
+  servingStyle: varchar("serving_style", { length: 30 }), // hands_on, behind_scenes, leadership, support
+  
+  // Availability and constraints
   availability: jsonb("availability"), // {monday: [{start: "09:00", end: "17:00"}], ...}
+  timeCommitmentLevel: varchar("time_commitment_level", { length: 20 }).default("moderate"), // low, moderate, high
+  maxHoursPerWeek: integer("max_hours_per_week"),
+  preferredMinistries: text("preferred_ministries").array(),
+  
+  // Compliance and safety
   backgroundCheck: boolean("background_check").default(false),
   backgroundCheckDate: timestamp("background_check_date"),
+  backgroundCheckStatus: varchar("background_check_status", { length: 20 }), // pending, approved, rejected, expired
+  backgroundCheckProvider: varchar("background_check_provider", { length: 50 }),
   orientation: boolean("orientation").default(false),
   orientationDate: timestamp("orientation_date"),
-  status: varchar("status", { length: 20 }).default("active"), // active, inactive, pending
+  
+  // Kingdom impact tracking
+  totalHoursServed: decimal("total_hours_served", { precision: 8, scale: 2 }).default("0"),
+  livesTouched: integer("lives_touched").default(0), // Impact metric
+  kingdomImpactScore: integer("kingdom_impact_score").default(0),
+  lastServedDate: timestamp("last_served_date"),
+  servingStreakDays: integer("serving_streak_days").default(0),
+  
+  // AI matching optimization
+  aiMatchingData: jsonb("ai_matching_data"), // ML features for smart matching
+  successfulPlacements: integer("successful_placements").default(0),
+  volunteerSatisfactionScore: real("volunteer_satisfaction_score"), // 1-5 from feedback
+  
+  status: varchar("status", { length: 20 }).default("active"), // active, inactive, pending, on_break
   joinedAt: timestamp("joined_at").defaultNow(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -2580,50 +2632,7 @@ export const volunteerHours = pgTable("volunteer_hours", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Volunteer certifications/training
-export const volunteerCertifications = pgTable("volunteer_certifications", {
-  id: serial("id").primaryKey(),
-  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
-  name: varchar("name", { length: 100 }).notNull(),
-  issuingOrganization: varchar("issuing_organization", { length: 100 }),
-  issuedDate: timestamp("issued_date"),
-  expirationDate: timestamp("expiration_date"),
-  certificateNumber: varchar("certificate_number", { length: 100 }),
-  documentUrl: varchar("document_url", { length: 500 }),
-  isVerified: boolean("is_verified").default(false),
-  verifiedBy: varchar("verified_by").references(() => users.id),
-  verifiedAt: timestamp("verified_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-// Volunteer communication/notifications
-export const volunteerCommunications = pgTable("volunteer_communications", {
-  id: serial("id").primaryKey(),
-  fromUserId: varchar("from_user_id").notNull().references(() => users.id),
-  toVolunteerId: integer("to_volunteer_id").references(() => volunteers.id),
-  opportunityId: integer("opportunity_id").references(() => volunteerOpportunities.id),
-  type: varchar("type", { length: 20 }).notNull(), // email, sms, notification, announcement
-  subject: varchar("subject", { length: 200 }),
-  message: text("message").notNull(),
-  sentAt: timestamp("sent_at").defaultNow(),
-  readAt: timestamp("read_at"),
-  status: varchar("status", { length: 20 }).default("sent"), // sent, delivered, read, failed
-});
-
-// Volunteer awards/recognition
-export const volunteerAwards = pgTable("volunteer_awards", {
-  id: serial("id").primaryKey(),
-  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
-  awardType: varchar("award_type", { length: 50 }).notNull(), // service_hours, years_of_service, special_recognition
-  title: varchar("title", { length: 100 }).notNull(),
-  description: text("description"),
-  hoursThreshold: integer("hours_threshold"),
-  yearsThreshold: integer("years_threshold"),
-  awardedBy: varchar("awarded_by").notNull().references(() => users.id),
-  awardedAt: timestamp("awarded_at").defaultNow(),
-  certificateUrl: varchar("certificate_url", { length: 500 }),
-  isPublic: boolean("is_public").default(true),
-});
 
 // Volunteer feedback and surveys
 export const volunteerFeedback = pgTable("volunteer_feedback", {
@@ -2642,7 +2651,102 @@ export const volunteerFeedback = pgTable("volunteer_feedback", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Volunteer Management Types
+// AI-Powered Divine Appointment Matching System
+export const volunteerMatches = pgTable("volunteer_matches", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  opportunityId: integer("opportunity_id").notNull().references(() => volunteerOpportunities.id),
+  matchScore: real("match_score").notNull(), // 0-1 confidence score
+  matchReasons: text("match_reasons").array(), // spiritual_gifts, skills, availability, passion
+  spiritualFitScore: real("spiritual_fit_score"), // Spiritual gifts alignment
+  skillFitScore: real("skill_fit_score"), // Technical skills match
+  availabilityScore: real("availability_score"), // Schedule compatibility
+  passionScore: real("passion_score"), // Ministry interest alignment
+  divineAppointmentScore: real("divine_appointment_score"), // AI-calculated "meant to be" score
+  aiRecommendation: varchar("ai_recommendation", { length: 20 }), // highly_recommended, recommended, consider, not_recommended
+  aiExplanation: text("ai_explanation"), // Human-readable explanation
+  volunteerResponse: varchar("volunteer_response", { length: 20 }), // accepted, declined, interested, not_interested
+  respondedAt: timestamp("responded_at"),
+  placementSuccess: boolean("placement_success"), // Track accuracy for learning
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Background Check Integration & Compliance
+export const backgroundChecks = pgTable("background_checks", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  provider: varchar("provider", { length: 50 }).notNull(), // MinistrySafe, Checkr, ProtectMyMinistry
+  externalId: varchar("external_id", { length: 100 }), // Provider's tracking ID
+  checkType: varchar("check_type", { length: 30 }).notNull(), // basic, comprehensive, child_protection
+  status: varchar("status", { length: 20 }).default("pending"), // pending, in_progress, approved, rejected, expired
+  requestedAt: timestamp("requested_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  expiresAt: timestamp("expires_at"),
+  results: jsonb("results"), // Provider-specific results data
+  cost: decimal("cost", { precision: 6, scale: 2 }),
+  notes: text("notes"),
+  renewalReminder: boolean("renewal_reminder").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Volunteer Certifications & Training
+export const volunteerCertifications = pgTable("volunteer_certifications", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  certificationType: varchar("certification_type", { length: 50 }).notNull(), // CPR, First_Aid, Child_Protection, Ministry_Training
+  certificationName: varchar("certification_name", { length: 100 }).notNull(),
+  issuingOrganization: varchar("issuing_organization", { length: 100 }),
+  certificationNumber: varchar("certification_number", { length: 50 }),
+  issuedDate: timestamp("issued_date"),
+  expiresDate: timestamp("expires_date"),
+  status: varchar("status", { length: 20 }).default("active"), // active, expired, suspended, revoked
+  documentUrl: varchar("document_url", { length: 255 }), // Stored certificate
+  renewalReminderSent: boolean("renewal_reminder_sent").default(false),
+  isRequired: boolean("is_required").default(false), // For specific roles
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Volunteer Appreciation & Recognition
+export const volunteerAwards = pgTable("volunteer_awards", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  awardType: varchar("award_type", { length: 50 }).notNull(), // service_hours, leadership, impact, appreciation
+  awardName: varchar("award_name", { length: 100 }).notNull(),
+  description: text("description"),
+  hoursThreshold: integer("hours_threshold"), // Hours required for award
+  impactMetric: varchar("impact_metric", { length: 30 }), // lives_touched, events_served, teams_led
+  badgeIcon: varchar("badge_icon", { length: 50 }),
+  awardedBy: varchar("awarded_by").references(() => users.id),
+  awardedAt: timestamp("awarded_at").defaultNow(),
+  isPublic: boolean("is_public").default(true),
+  notificationSent: boolean("notification_sent").default(false),
+});
+
+// Ministry Team Communication Channels
+export const volunteerCommunications = pgTable("volunteer_communications", {
+  id: serial("id").primaryKey(),
+  ministryId: varchar("ministry", { length: 50 }).notNull(), // worship, children, youth, etc.
+  churchId: integer("church_id").references(() => churches.id),
+  messageType: varchar("message_type", { length: 30 }).notNull(), // announcement, reminder, appreciation, urgent
+  subject: varchar("subject", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  recipientType: varchar("recipient_type", { length: 20 }), // all_volunteers, role_specific, individual
+  targetRoles: text("target_roles").array(), // Specific volunteer roles
+  targetVolunteers: text("target_volunteers").array(), // Individual volunteer IDs
+  channels: text("channels").array(), // in_app, email, sms, push
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  deliveredCount: integer("delivered_count").default(0),
+  readCount: integer("read_count").default(0),
+  responseCount: integer("response_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ServeWell™ Enhanced Volunteer Management Types
+export type SpiritualGift = typeof spiritualGifts.$inferSelect;
+export type InsertSpiritualGift = typeof spiritualGifts.$inferInsert;
 export type VolunteerRole = typeof volunteerRoles.$inferSelect;
 export type InsertVolunteerRole = typeof volunteerRoles.$inferInsert;
 export type Volunteer = typeof volunteers.$inferSelect;
@@ -2655,6 +2759,10 @@ export type VolunteerRegistration = typeof volunteerRegistrations.$inferSelect;
 export type InsertVolunteerRegistration = typeof volunteerRegistrations.$inferInsert;
 export type VolunteerHours = typeof volunteerHours.$inferSelect;
 export type InsertVolunteerHours = typeof volunteerHours.$inferInsert;
+export type VolunteerMatch = typeof volunteerMatches.$inferSelect;
+export type InsertVolunteerMatch = typeof volunteerMatches.$inferInsert;
+export type BackgroundCheck = typeof backgroundChecks.$inferSelect;
+export type InsertBackgroundCheck = typeof backgroundChecks.$inferInsert;
 export type VolunteerCertification = typeof volunteerCertifications.$inferSelect;
 export type InsertVolunteerCertification = typeof volunteerCertifications.$inferInsert;
 export type VolunteerCommunication = typeof volunteerCommunications.$inferSelect;
@@ -2664,15 +2772,18 @@ export type InsertVolunteerAward = typeof volunteerAwards.$inferInsert;
 export type VolunteerFeedback = typeof volunteerFeedback.$inferSelect;
 export type InsertVolunteerFeedback = typeof volunteerFeedback.$inferInsert;
 
-// Volunteer Management Zod Schemas
+// ServeWell™ Enhanced Volunteer Management Zod Schemas
+export const insertSpiritualGiftSchema = createInsertSchema(spiritualGifts).omit({ id: true });
 export const insertVolunteerRoleSchema = createInsertSchema(volunteerRoles).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertVolunteerSchema = createInsertSchema(volunteers).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertVolunteerRoleAssignmentSchema = createInsertSchema(volunteerRoleAssignments).omit({ id: true, assignedAt: true });
 export const insertVolunteerOpportunitySchema = createInsertSchema(volunteerOpportunities).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertVolunteerRegistrationSchema = createInsertSchema(volunteerRegistrations).omit({ id: true, registeredAt: true });
 export const insertVolunteerHoursSchema = createInsertSchema(volunteerHours).omit({ id: true, createdAt: true });
-export const insertVolunteerCertificationSchema = createInsertSchema(volunteerCertifications).omit({ id: true, createdAt: true });
-export const insertVolunteerCommunicationSchema = createInsertSchema(volunteerCommunications).omit({ id: true, sentAt: true });
+export const insertVolunteerMatchSchema = createInsertSchema(volunteerMatches).omit({ id: true, createdAt: true });
+export const insertBackgroundCheckSchema = createInsertSchema(backgroundChecks).omit({ id: true, createdAt: true });
+export const insertVolunteerCertificationSchema = createInsertSchema(volunteerCertifications).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVolunteerCommunicationSchema = createInsertSchema(volunteerCommunications).omit({ id: true, createdAt: true });
 export const insertVolunteerAwardSchema = createInsertSchema(volunteerAwards).omit({ id: true, awardedAt: true });
 export const insertVolunteerFeedbackSchema = createInsertSchema(volunteerFeedback).omit({ id: true, createdAt: true });
 export const insertBibleInADayBadgeSchema = createInsertSchema(bibleInADayBadges).omit({ id: true, earnedAt: true });
