@@ -2984,13 +2984,13 @@ app.post('/api/invitations', async (req: any, res) => {
           await storage.hideContent(contentType, parseInt(contentId), 
             `High priority violation: ${reason}`, userId);
         } catch (error) {
-          console.error('Failed to auto-hide high priority content:', error);
+          // // console.error('Failed to auto-hide high priority content:', error);
         }
       }
 
       res.json({ success: true, report });
     } catch (error) {
-      console.error('Failed to create content report:', error);
+      // // console.error('Failed to create content report:', error);
       res.status(500).json({ message: 'Failed to create content report' });
     }
   });
@@ -3030,7 +3030,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json(reports);
     } catch (error) {
-      console.error('Failed to fetch content reports:', error);
+      // // console.error('Failed to fetch content reports:', error);
       res.status(500).json({ message: 'Failed to fetch content reports' });
     }
   });
@@ -3060,7 +3060,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json({ success: true, message: 'Report updated successfully' });
     } catch (error) {
-      console.error('Failed to update content report:', error);
+      // // console.error('Failed to update content report:', error);
       res.status(500).json({ message: 'Failed to update content report' });
     }
   });
@@ -3089,7 +3089,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json({ success: true, result });
     } catch (error) {
-      console.error('Failed to send edit request:', error);
+      // // console.error('Failed to send edit request:', error);
       res.status(500).json({ message: 'Failed to send edit request' });
     }
   });
@@ -3127,14 +3127,14 @@ app.post('/api/invitations', async (req: any, res) => {
 
       const { contentType, originalContent, violationReason, reportDescription } = req.body;
       
-      console.log('Received AI suggestions request:', { contentType, originalContent: originalContent?.substring(0, 100), violationReason, reportDescription });
+      // // console.log('Received AI suggestions request:', { contentType, originalContent: originalContent?.substring(0, 100), violationReason, reportDescription });
       
       if (!contentType || !originalContent || !violationReason) {
-        console.log('Missing required fields:', { contentType: !!contentType, originalContent: !!originalContent, violationReason: !!violationReason });
+        // // console.log('Missing required fields:', { contentType: !!contentType, originalContent: !!originalContent, violationReason: !!violationReason });
         return res.status(400).json({ message: 'Missing required fields' });
       }
 
-      console.log('Generating AI suggestions for:', { contentType, violationReason, originalContent: originalContent.substring(0, 100) + '...' });
+      // // console.log('Generating AI suggestions for:', { contentType, violationReason, originalContent: originalContent.substring(0, 100) + '...' });
 
       // Create a prompt for GPT-4o to generate edit suggestions
       const prompt = `You are a content moderation assistant for a faith-based community platform. 
@@ -3183,7 +3183,7 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('OpenAI API error:', response.status, errorText);
+        // // console.error('OpenAI API error:', response.status, errorText);
         throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
       }
 
@@ -3200,7 +3200,7 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
         suggestions: aiResponse.suggestions || 'Consider revising the content to better align with our community guidelines.'
       });
     } catch (error) {
-      console.error('Error generating AI suggestions:', error);
+      // // console.error('Error generating AI suggestions:', error);
       
       // Provide more specific error information
       let errorMessage = 'Failed to generate AI suggestions';
@@ -3245,7 +3245,7 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
 
       res.json({ success: true, message: 'Content hidden successfully' });
     } catch (error) {
-      console.error('Failed to hide content:', error);
+      // // console.error('Failed to hide content:', error);
       res.status(500).json({ message: 'Failed to hide content' });
     }
   });
@@ -7246,7 +7246,7 @@ Return JSON with this exact structure:
       const posts = await storage.getUserPosts(userId, sort as string, type as string);
       res.json(posts);
     } catch (error) {
-      console.error('Error fetching user posts:', error);
+      // // console.error('Error fetching user posts:', error);
       res.status(500).json({ 
         message: 'Failed to fetch user posts',
         error: error instanceof Error ? error.message : String(error)
@@ -7266,7 +7266,7 @@ Return JSON with this exact structure:
       const stats = await storage.getUserPostStats(userId);
       res.json(stats);
     } catch (error) {
-      console.error('Error fetching user post stats:', error);
+      // // console.error('Error fetching user post stats:', error);
       res.status(500).json({ 
         message: 'Failed to fetch user post statistics',
         error: error instanceof Error ? error.message : String(error)
@@ -7688,7 +7688,7 @@ Return JSON with this exact structure:
             }
           }
         } catch (error) {
-          console.error('AI moderation failed:', error);
+          // // console.error('AI moderation failed:', error);
         }
       }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
 
@@ -7913,7 +7913,7 @@ Return JSON with this exact structure:
         deletedBy: isAuthor ? "author" : "admin"
       });
     } catch (error) {
-      console.error('Delete discussion error:', error);
+      // // console.error('Delete discussion error:', error);
       res.status(500).json({ message: "Failed to delete post", error: error.message });
     }
   });
@@ -9215,7 +9215,7 @@ Return JSON with this exact structure:
             }
           }
         } catch (error) {
-          console.error('AI moderation failed for SOAP entry:', error);
+          // // console.error('AI moderation failed for SOAP entry:', error);
         }
       }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
 
@@ -12592,7 +12592,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json({ success: true, result });
     } catch (error) {
-      console.error('Moderation action failed:', error);
+      // // console.error('Moderation action failed:', error);
       res.status(500).json({ message: 'Failed to execute moderation action' });
     }
   });
@@ -12615,7 +12615,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const feedback = await LearningIntegration.getTrainingFeedback();
       res.json(feedback);
     } catch (error) {
-      console.error('Failed to get training feedback:', error);
+      // // console.error('Failed to get training feedback:', error);
       res.status(500).json({ message: 'Failed to get training feedback' });
     }
   });
@@ -12636,7 +12636,7 @@ Please provide suggestions for the missing or incomplete sections.`
       await LearningIntegration.testEnhancedClassification();
       res.json({ message: 'AI classification test completed - check server logs' });
     } catch (error) {
-      console.error('AI test failed:', error);
+      // // console.error('AI test failed:', error);
       res.status(500).json({ message: 'Failed to test AI classification' });
     }
   });

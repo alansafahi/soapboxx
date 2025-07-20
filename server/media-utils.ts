@@ -50,7 +50,7 @@ export function extractMediaForAnalysis(mediaPath: string): MediaInfo | null {
 
     return null;
   } catch (error) {
-    console.error('Error processing media for analysis:', error);
+    // console.error('Error processing media for analysis:', error);
     return null;
   }
 }

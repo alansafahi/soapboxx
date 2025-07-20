@@ -107,12 +107,7 @@ export class AITrainingSystem {
     
     // Store in database for persistent learning
     // This would integrate with your storage system
-    console.log('🧠 Training case recorded:', {
-      content: trainingCase.content.substring(0, 50),
-      aiPrediction: trainingCase.aiClassification.priority,
-      humanDecision: trainingCase.humanDecision.finalPriority,
-      outcome: trainingCase.outcome
-    });
+    // Training case recorded - silent for production
   }
 
   /**
@@ -197,7 +192,7 @@ Notes: ${correction.humanDecision.moderatorNotes || 'None'}`;
       };
 
     } catch (error) {
-      console.error('AI analysis with learning failed:', error);
+      // console.error('AI analysis with learning failed:', error);
       return {
         flagged: false,
         priority: 'medium',
@@ -266,7 +261,7 @@ Notes: ${correction.humanDecision.moderatorNotes || 'None'}`;
    * Test the AI with your specific examples
    */
   async testWithExamples(): Promise<void> {
-    console.log('🧪 Testing AI with Classification Examples...\n');
+    // console.log('🧪 Testing AI with Classification Examples...\n');
 
     const testCases = [
       // CRITICAL Examples
@@ -298,14 +293,14 @@ Notes: ${correction.humanDecision.moderatorNotes || 'None'}`;
       const isCorrect = result.priority === testCase.expected;
       if (isCorrect) correct++;
       
-      console.log(`${isCorrect ? '✅' : '❌'} "${testCase.content.substring(0, 40)}..."`);
-      console.log(`   Expected: ${testCase.expected} | Got: ${result.priority} | Confidence: ${(result.confidence * 100).toFixed(1)}%`);
+      // console.log(`${isCorrect ? '✅' : '❌'} "${testCase.content.substring(0, 40)}..."`);
+      // console.log(`   Expected: ${testCase.expected} | Got: ${result.priority} | Confidence: ${(result.confidence * 100).toFixed(1)}%`);
       if (!isCorrect) {
-        console.log(`   Reason: ${result.reason}`);
+        // console.log(`   Reason: ${result.reason}`);
       }
     }
     
-    console.log(`\n🎯 Accuracy: ${correct}/${testCases.length} (${((correct/testCases.length)*100).toFixed(1)}%)`);
+    // console.log(`\n🎯 Accuracy: ${correct}/${testCases.length} (${((correct/testCases.length)*100).toFixed(1)}%)`);
   }
 }
 

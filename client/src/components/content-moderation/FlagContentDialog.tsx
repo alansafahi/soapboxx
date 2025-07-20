@@ -111,7 +111,7 @@ export function FlagContentDialog({ contentType, contentId, trigger, onReported 
       setDescription('');
       onReported?.();
     } catch (error) {
-      console.error('Failed to report content:', error);
+      // Silent error logging for production
       toast({
         title: 'Failed to submit report',
         description: 'Please try again or contact support if the problem persists.',

@@ -45,7 +45,7 @@ export class LearningIntegration {
       
       return result;
     } catch (error) {
-      console.error('Learning-enabled analysis failed:', error);
+      // console.error('Learning-enabled analysis failed:', error);
       throw error;
     }
   }
@@ -67,7 +67,7 @@ export class LearningIntegration {
       // Get the original AI prediction
       const aiPrediction = await this.getAIPrediction(contentId);
       if (!aiPrediction) {
-        console.log('No AI prediction found for content:', contentId);
+        // console.log('No AI prediction found for content:', contentId);
         return;
       }
 
@@ -90,10 +90,10 @@ export class LearningIntegration {
       // Store in database for persistence
       await this.storeTrainingCase(contentId, trainingCase);
 
-      console.log(`🧠 Learning case recorded: ${outcome} classification for ${aiPrediction.contentType} content`);
+      // console.log(`🧠 Learning case recorded: ${outcome} classification for ${aiPrediction.contentType} content`);
 
     } catch (error) {
-      console.error('Failed to record moderator decision:', error);
+      // console.error('Failed to record moderator decision:', error);
     }
   }
 
@@ -157,7 +157,7 @@ export class LearningIntegration {
    */
   private static async storeTrainingCase(contentId: string, trainingCase: ModerationTrainingData) {
     // In production, store in dedicated training_cases table
-    console.log('📚 Training case stored for content:', contentId);
+    // console.log('📚 Training case stored for content:', contentId);
   }
 
   /**

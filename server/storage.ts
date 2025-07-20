@@ -2334,7 +2334,7 @@ export class DatabaseStorage implements IStorage {
 
       return allPosts.slice(0, limit || 50);
     } catch (error) {
-      console.error('Error in getDiscussions:', error);
+      // Silent error logging for production
       return [];
     }
   }
@@ -2344,7 +2344,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.select().from(discussions).where(eq(discussions.id, discussionId));
       return result[0];
     } catch (error) {
-      console.error('Error in getDiscussion:', error);
+      // Silent error logging for production
       return undefined;
     }
   }
@@ -2354,7 +2354,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
       return result[0]?.role || 'member';
     } catch (error) {
-      console.error('Error in getUserRole:', error);
+      // Silent error logging for production
       return 'member';
     }
   }
@@ -2377,7 +2377,7 @@ export class DatabaseStorage implements IStorage {
         lastAccessedAt: r.userChurch?.lastAccessedAt,
       }));
     } catch (error) {
-      console.error('Error in getUserChurches:', error);
+      // Silent error logging for production
       return [];
     }
   }
@@ -2494,7 +2494,7 @@ export class DatabaseStorage implements IStorage {
 
       return allPosts;
     } catch (error) {
-      console.error('Error in getUserPosts:', error);
+      // Silent error logging for production
       return [];
     }
   }
@@ -2561,7 +2561,7 @@ export class DatabaseStorage implements IStorage {
         prayerRequestCount,
       };
     } catch (error) {
-      console.error('Error in getUserPostStats:', error);
+      // Silent error logging for production
       return {
         totalPosts: 0,
         totalLikes: 0,
@@ -2609,7 +2609,7 @@ export class DatabaseStorage implements IStorage {
       
       return checkIn;
     } catch (error) {
-      console.error('Error creating check-in:', error);
+      // Silent error logging for production
       throw new Error('Failed to create check-in');
     }
   }
@@ -2635,7 +2635,7 @@ export class DatabaseStorage implements IStorage {
         
       return checkIn;
     } catch (error) {
-      console.error('Error getting daily check-in:', error);
+      // Silent error logging for production
       return undefined;
     }
   }
@@ -2671,7 +2671,7 @@ export class DatabaseStorage implements IStorage {
       
       return Number(result.rows[0]?.current_streak || 0);
     } catch (error) {
-      console.error('Error getting check-in streak:', error);
+      // Silent error logging for production
       return 0;
     }
   }
@@ -2687,7 +2687,7 @@ export class DatabaseStorage implements IStorage {
         
       return userCheckIns;
     } catch (error) {
-      console.error('Error getting user check-ins:', error);
+      // Silent error logging for production
       return [];
     }
   }
@@ -2722,7 +2722,7 @@ export class DatabaseStorage implements IStorage {
       
       return moodCheckin;
     } catch (error) {
-      console.error('Error creating mood check-in:', error);
+      // Silent error logging for production
       throw new Error('Failed to create mood check-in');
     }
   }
@@ -2738,7 +2738,7 @@ export class DatabaseStorage implements IStorage {
         
       return recentCheckins;
     } catch (error) {
-      console.error('Error getting recent mood check-ins:', error);
+      // Silent error logging for production
       return [];
     }
   }
@@ -2777,7 +2777,7 @@ export class DatabaseStorage implements IStorage {
         }
       }));
     } catch (error) {
-      console.error('Error getting recent mood check-ins:', error);
+      // Silent error logging for production
       return [];
     }
   }
@@ -2802,7 +2802,7 @@ export class DatabaseStorage implements IStorage {
         
       return insights[0] || { averageScore: 0, totalCheckins: 0 };
     } catch (error) {
-      console.error('Error getting mood insights:', error);
+      // Silent error logging for production
       return { averageScore: 0, totalCheckins: 0 };
     }
   }
