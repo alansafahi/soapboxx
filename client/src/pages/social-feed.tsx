@@ -3,7 +3,10 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
 import SocialFeed from "../components/social-feed";
+import MyPostsFeed from "../components/my-posts-feed";
 import MobileNav from "../components/mobile-nav";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Users, User } from "lucide-react";
 
 export default function SocialFeedPage() {
   const { toast } = useToast();
@@ -48,7 +51,26 @@ export default function SocialFeedPage() {
           <p className="text-gray-300">Connect with fellow believers and share your faith journey</p>
         </div>
         
-        <SocialFeed />
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/10 backdrop-blur-sm">
+            <TabsTrigger value="all" className="flex items-center space-x-2 text-white data-[state=active]:bg-white data-[state=active]:text-gray-900">
+              <Users className="h-4 w-4" />
+              <span>All Posts</span>
+            </TabsTrigger>
+            <TabsTrigger value="myposts" className="flex items-center space-x-2 text-white data-[state=active]:bg-white data-[state=active]:text-gray-900">
+              <User className="h-4 w-4" />
+              <span>My Posts</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="all">
+            <SocialFeed />
+          </TabsContent>
+          
+          <TabsContent value="myposts">
+            <MyPostsFeed />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <MobileNav />

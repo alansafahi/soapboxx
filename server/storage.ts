@@ -3905,8 +3905,8 @@ export class DatabaseStorage implements IStorage {
     const [discussionStats] = await db
       .select({
         count: count(),
-        totalLikes: sum(discussions.likeCount),
-        totalComments: sum(discussions.commentCount),
+        totalLikes: sql<number>`COALESCE(SUM(${discussions.likeCount}), 0)`,
+        totalComments: sql<number>`COALESCE(SUM(${discussions.commentCount}), 0)`,
       })
       .from(discussions)
       .where(eq(discussions.authorId, userId));

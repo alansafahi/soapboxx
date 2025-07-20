@@ -147,6 +147,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 20, 2025: MY POSTS FEATURE RELOCATED TO SOCIAL FEED - Successfully moved "My Posts" functionality from Community page to Social Feed with intuitive tab system ("All Posts" | "My Posts") for better user experience and logical information architecture
+  - SOCIAL FEED ENHANCEMENT: Added tab system to Social Feed page enabling users to toggle between all community posts and their personal content
+  - COMMUNITY PAGE STREAMLINED: Simplified Community page to focus on Latest Posts (Enhanced Feed) and Classic View, removing redundant My Posts tab
+  - IMPROVED USER EXPERIENCE: My Posts now logically positioned within social context rather than community discussions, making personal content management more intuitive
+  - CONSISTENT IMAGE SUPPORT: FormattedContent component integration ensures images display properly across all feed types (Enhanced Feed, Classic View, My Posts)
+  - ARCHITECTURAL IMPROVEMENT: Better separation of community discussion features vs personal social content management
 - July 20, 2025: COMPREHENSIVE CONTENT MODERATION SYSTEM PRODUCTION READY - Successfully completed church-scoped admin permissions system with full edit request workflow operational
   - CHURCH-SPECIFIC MODERATION: alan@safahi.com as church_admin for SGA Church can access moderation dashboard and view only SGA Church flagged content
   - EDIT REQUEST WORKFLOW: Complete end-to-end functionality from flagged content detection → AI-generated edit suggestions → notification to content author
