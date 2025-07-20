@@ -709,6 +709,12 @@ export interface IStorage {
   deleteQrCode(id: string): Promise<void>;
   validateQrCode(id: string): Promise<{ valid: boolean; qrCode?: QrCode }>;
   
+  // Check-in operations
+  createCheckIn(checkIn: InsertCheckIn): Promise<CheckIn>;
+  getUserDailyCheckIn(userId: string): Promise<CheckIn | undefined>;
+  getUserCheckInStreak(userId: string): Promise<number>;
+  getUserCheckIns(userId: string, limit?: number): Promise<CheckIn[]>;
+  
   // Contacts and invitations operations
   getUserContacts(userId: string): Promise<Contact[]>;
   addContact(contact: InsertContact): Promise<Contact>;
@@ -2564,6 +2570,124 @@ export class DatabaseStorage implements IStorage {
         soapCount: 0,
         prayerRequestCount: 0,
       };
+    }
+  }
+  
+  // Check-in operations
+  async createCheckIn(checkInData: InsertCheckIn): Promise<CheckIn> {
+    try {
+      // Get user's church for additional context
+      const user = await this.getUser(checkInData.userId);
+      const churchId = user?.churchId;
+      
+      // Calculate streak
+      const currentStreak = await this.getUserCheckInStreak(checkInData.userId);
+      const newStreak = currentStreak + 1;
+      
+      // Create check-in record
+      const [checkIn] = await db
+        .insert(checkIns)
+        .values({
+          ...checkInData,
+          churchId,
+          streakCount: newStreak,
+          pointsEarned: 10, // Base points for check-in
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      
+      // Record user activity for streak tracking
+      await db.insert(userActivities).values({
+        userId: checkInData.userId,
+        activityType: 'check_in',
+        entityId: checkIn.id,
+        points: checkIn.pointsEarned,
+        createdAt: new Date(),
+      });
+      
+      return checkIn;
+    } catch (error) {
+      console.error('Error creating check-in:', error);
+      throw new Error('Failed to create check-in');
+    }
+  }
+  
+  async getUserDailyCheckIn(userId: string): Promise<CheckIn | undefined> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const [checkIn] = await db
+        .select()
+        .from(checkIns)
+        .where(
+          and(
+            eq(checkIns.userId, userId),
+            gte(checkIns.createdAt, today),
+            lte(checkIns.createdAt, tomorrow)
+          )
+        )
+        .orderBy(desc(checkIns.createdAt));
+        
+      return checkIn;
+    } catch (error) {
+      console.error('Error getting daily check-in:', error);
+      return undefined;
+    }
+  }
+  
+  async getUserCheckInStreak(userId: string): Promise<number> {
+    try {
+      // Use the same logic as getUserStats for consistency
+      const result = await db.execute(sql`
+        WITH consecutive_days AS (
+          SELECT 
+            DATE(created_at) as activity_date,
+            ROW_NUMBER() OVER (ORDER BY DATE(created_at) DESC) as row_num,
+            DATE(created_at) - INTERVAL '1 day' * ROW_NUMBER() OVER (ORDER BY DATE(created_at) DESC) as streak_group
+          FROM user_activities 
+          WHERE user_id = ${userId}
+          AND DATE(created_at) >= CURRENT_DATE - INTERVAL '365 days'
+          GROUP BY DATE(created_at)
+          ORDER BY DATE(created_at) DESC
+        ),
+        streak_groups AS (
+          SELECT 
+            COUNT(*) as streak_length,
+            MIN(activity_date) as streak_start,
+            MAX(activity_date) as streak_end
+          FROM consecutive_days 
+          GROUP BY streak_group
+          ORDER BY streak_end DESC
+        )
+        SELECT COALESCE(MAX(streak_length), 0) as current_streak
+        FROM streak_groups 
+        WHERE streak_end >= CURRENT_DATE - INTERVAL '1 day'
+      `);
+      
+      return Number(result.rows[0]?.current_streak || 0);
+    } catch (error) {
+      console.error('Error getting check-in streak:', error);
+      return 0;
+    }
+  }
+  
+  async getUserCheckIns(userId: string, limit: number = 10): Promise<CheckIn[]> {
+    try {
+      const userCheckIns = await db
+        .select()
+        .from(checkIns)
+        .where(eq(checkIns.userId, userId))
+        .orderBy(desc(checkIns.createdAt))
+        .limit(limit);
+        
+      return userCheckIns;
+    } catch (error) {
+      console.error('Error getting user check-ins:', error);
+      return [];
     }
   }
 }
