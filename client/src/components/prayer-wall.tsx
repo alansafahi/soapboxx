@@ -6,7 +6,7 @@ import { isUnauthorizedError } from "../lib/authUtils";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -542,6 +542,9 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Share Your Prayer Request</DialogTitle>
+            <DialogDescription>
+              Share what's on your heart so our community can pray with and for you
+            </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleCreatePrayer)} className="space-y-4">
@@ -631,9 +634,9 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
               <Sparkles className="w-5 h-5 mr-2 text-blue-600" />
               AI Prayer Writing Assistant
             </DialogTitle>
-            <p className="text-sm text-gray-600">
+            <DialogDescription>
               Share what's on your heart and get personalized prayer suggestions
-            </p>
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 overflow-y-auto flex-1 pr-2">

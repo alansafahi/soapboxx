@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -681,6 +681,9 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                   <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Share a Prayer Request</DialogTitle>
+                      <DialogDescription>
+                        Share what's on your heart for our community to pray for
+                      </DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
                       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -1186,6 +1189,9 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                 <DialogContent className="sm:max-w-[600px]">
                   <DialogHeader>
                     <DialogTitle>Create New Prayer Circle</DialogTitle>
+                    <DialogDescription>
+                      Create a small group prayer circle to pray together with specific people
+                    </DialogDescription>
                   </DialogHeader>
 
                   {/* Church Status Information */}
@@ -1372,6 +1378,9 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
               <Shield className="w-5 h-5 text-orange-500" />
               Profile Verification Required
             </DialogTitle>
+            <DialogDescription>
+              Complete your profile to create prayer circles and connect with others
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -1406,6 +1415,9 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
               <Church className="w-5 h-5 text-blue-500" />
               Prayer Circle Options
             </DialogTitle>
+            <DialogDescription>
+              Choose how you'd like to create your prayer circle
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">

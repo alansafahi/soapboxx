@@ -6,7 +6,7 @@ import { isUnauthorizedError } from "../lib/authUtils";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -689,6 +689,9 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Add Comment</DialogTitle>
+              <DialogDescription>
+                Share your thoughts on this discussion
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <SmartScriptureTextarea
@@ -734,6 +737,9 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
           <DialogContent className="sm:max-w-2xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>Discussion Comments</DialogTitle>
+              <DialogDescription>
+                Read what others have shared about this topic
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 max-h-[50vh] overflow-y-auto">
               {comments.length === 0 ? (
@@ -810,6 +816,9 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Share Content</DialogTitle>
+              <DialogDescription>
+                Upload an image or start a discussion with the community
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -855,6 +864,9 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Create New Discussion</DialogTitle>
+                <DialogDescription>
+                  Start a conversation with your community
+                </DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleCreateDiscussion)} className="space-y-4">

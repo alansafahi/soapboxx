@@ -477,6 +477,9 @@ export default function CheckInSystem() {
                   <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Daily Spiritual Check-In</DialogTitle>
+                      <DialogDescription>
+                        Share how you're feeling today and what you're checking in for to track your spiritual journey
+                      </DialogDescription>
                     </DialogHeader>
                     
                     <div className="space-y-4">
