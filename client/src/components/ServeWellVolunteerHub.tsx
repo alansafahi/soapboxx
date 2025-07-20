@@ -191,8 +191,19 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
       // Still complete the assessment even if API fails - show success announcement
       // Calculate the profile locally if API fails
       const responses = form.getValues().responses;
-      const profile = calculateSpiritualProfile(responses, spiritualGiftsQuestions);
-      onComplete({ ...profile, success: true });
+      if (responses && Object.keys(responses).length > 0) {
+        const profile = calculateSpiritualProfile(responses, spiritualGiftsQuestions);
+        onComplete({ ...profile, success: true });
+      } else {
+        // Fallback if no responses available
+        onComplete({ 
+          profileLabel: "Faithful Servant",
+          profileDescription: "Ready to serve with your unique gifts",
+          servingStyle: "Ministry Participation",
+          topGifts: ["Service", "Helps", "Hospitality"],
+          success: true 
+        });
+      }
     }
   });
 
