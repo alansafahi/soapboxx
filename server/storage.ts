@@ -2342,6 +2342,16 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getUserRole(userId: string): Promise<string> {
+    try {
+      const result = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
+      return result[0]?.role || 'member';
+    } catch (error) {
+      console.error('Error in getUserRole:', error);
+      return 'member';
+    }
+  }
+
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
     
