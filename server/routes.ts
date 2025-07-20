@@ -2022,6 +2022,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { mood, moodScore, moodEmoji, notes, shareWithStaff, generatePersonalizedContent } = req.body;
 
+      // Debug: Log mood check-in data
+      console.log('=== MOOD CHECK-IN DEBUG ===');
+      console.log('Raw request body:', req.body);
+      console.log('Extracted mood:', mood);
+      console.log('Mood score:', moodScore);
+      console.log('Mood emoji:', moodEmoji);
+      console.log('Notes:', notes);
+      console.log('=== END DEBUG ===');
 
       // Create mood check-in record
       const moodCheckin = await storage.createMoodCheckin({
