@@ -7497,6 +7497,49 @@ Return JSON with this exact structure:
     }
   });
 
+  // Update discussion endpoint - for editing flagged content
+  app.put("/api/discussions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const discussionId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      // Get the discussion to check ownership
+      const discussion = await storage.getDiscussion(discussionId);
+      if (!discussion) {
+        return res.status(404).json({ message: "Discussion not found" });
+      }
+      
+      // Check if user is the author or has admin permissions
+      const userRole = await storage.getUserRole(userId);
+      const isAuthor = discussion.authorId === userId;
+      const isAdmin = ['admin', 'system_admin', 'church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(userRole);
+      
+      if (!isAuthor && !isAdmin) {
+        return res.status(403).json({ message: "You can only edit your own posts" });
+      }
+      
+      // Update the discussion
+      const { title, content, category, isPublic } = req.body;
+      const updatedDiscussion = await storage.updateDiscussion(discussionId, {
+        title,
+        content,
+        category,
+        isPublic: isPublic !== undefined ? isPublic : true
+      });
+      
+      res.json({ 
+        message: "Discussion updated successfully",
+        discussion: updatedDiscussion
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update discussion" });
+    }
+  });
+
   // Create discussion endpoint
   app.post("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {

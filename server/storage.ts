@@ -436,6 +436,7 @@ export interface IStorage {
   getDiscussions(churchId?: number): Promise<Discussion[]>;
   getDiscussion(id: number): Promise<Discussion | undefined>;
   createDiscussion(discussion: InsertDiscussion): Promise<Discussion>;
+  updateDiscussion(id: number, updates: Partial<Discussion>): Promise<Discussion>;
   likeDiscussion(discussionId: number, userId: string): Promise<void>;
   unlikeDiscussion(discussionId: number, userId: string): Promise<void>;
   getUserDiscussionLike(discussionId: number, userId: string): Promise<boolean>;
@@ -2653,6 +2654,23 @@ export class DatabaseStorage implements IStorage {
     });
     
     return newDiscussion;
+  }
+
+  async updateDiscussion(id: number, updates: Partial<Discussion>): Promise<Discussion> {
+    const [updatedDiscussion] = await db
+      .update(discussions)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(discussions.id, id))
+      .returning();
+    
+    if (!updatedDiscussion) {
+      throw new Error('Discussion not found');
+    }
+    
+    return updatedDiscussion;
   }
 
   async likeDiscussion(discussionId: number, userId: string): Promise<void> {

@@ -36,7 +36,8 @@ import {
   EyeOff,
   Play,
   Trash2,
-  Flag
+  Flag,
+  Edit
 } from 'lucide-react';
 import { FlagContentDialog } from './content-moderation/FlagContentDialog';
 import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
@@ -726,8 +727,39 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             />
                           )}
 
-                          {/* Delete Button - Only show for post author */}
-                          {user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email) && (
+                          {/* Edit Button - Only show for flagged content when user is author */}
+                          {user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email) && 
+                           highlightId && post.id.toString() === highlightId && (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-orange-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-xs sm:text-sm px-2 sm:px-3"
+                                  title="Edit flagged content"
+                                >
+                                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                                  <span className="hidden sm:inline ml-1">Edit Now</span>
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Flagged Discussion</DialogTitle>
+                                  <DialogDescription>
+                                    This content has been flagged for moderation. Please edit it to comply with community guidelines.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <EditDiscussionForm post={post} onSuccess={() => {
+                                  refetch();
+                                  window.location.href = '/community';
+                                }} />
+                              </DialogContent>
+                            </Dialog>
+                          )}
+
+                          {/* Delete Button - Only show for post author (when not flagged content) */}
+                          {user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email) && 
+                           !(highlightId && post.id.toString() === highlightId) && (
                             <Button 
                               variant="ghost" 
                               size="sm" 
@@ -1030,6 +1062,134 @@ function CreateDiscussionForm({ onSuccess }: { onSuccess: () => void }) {
               Share Discussion
             </>
           )}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+// Edit Discussion Form Component for Flagged Content
+function EditDiscussionForm({ post, onSuccess }: { post: EnhancedPost; onSuccess: () => void }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    title: post.title || '',
+    content: post.content || '',
+    category: post.category || 'general',
+    isPublic: post.isPublic,
+  });
+
+  const updateDiscussionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('PUT', `/api/discussions/${post.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      toast({
+        title: "Discussion updated",
+        description: "Your discussion has been updated and will be reviewed",
+      });
+      onSuccess();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update discussion. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.title.trim() || !formData.content.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both a title and content for your discussion",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      await updateDiscussionMutation.mutateAsync({
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        category: formData.category,
+        isPublic: true, // Make public again after editing
+      });
+    } catch (error) {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Discussion Title</label>
+        <Input
+          placeholder="Enter discussion title..."
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          required
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Category</label>
+        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">General Discussion</SelectItem>
+            <SelectItem value="prayer">Prayer Request</SelectItem>
+            <SelectItem value="bible_study">Bible Study</SelectItem>
+            <SelectItem value="testimony">Testimony</SelectItem>
+            <SelectItem value="question">Question</SelectItem>
+            <SelectItem value="announcement">Announcement</SelectItem>
+            <SelectItem value="sermon_discussion">Sermon Discussion</SelectItem>
+            <SelectItem value="youth_ministry">Youth Ministry</SelectItem>
+            <SelectItem value="family_faith">Family & Faith</SelectItem>
+            <SelectItem value="missions_outreach">Missions & Outreach</SelectItem>
+            <SelectItem value="worship_music">Worship & Music</SelectItem>
+            <SelectItem value="life_challenges">Life Challenges</SelectItem>
+            <SelectItem value="spiritual_growth">Spiritual Growth</SelectItem>
+            <SelectItem value="church_events">Church Events</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Content</label>
+        <SmartScriptureTextarea
+          placeholder="Share your thoughts, ask questions, or start a meaningful conversation..."
+          value={formData.content}
+          onChange={(value) => setFormData({ ...formData, content: value })}
+          className="min-h-[100px]"
+        />
+      </div>
+      
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => window.location.href = '/community'}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        >
+          {isSubmitting ? "Updating..." : "Update Discussion"}
         </Button>
       </div>
     </form>
