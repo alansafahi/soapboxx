@@ -147,6 +147,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 20, 2025: CRITICAL SQL SYNTAX ERRORS COMPLETELY FIXED - Successfully resolved all SQL syntax errors in getUserPosts and getUserPostStats methods that were preventing both "All Posts" and "My Posts" from loading properly
+  - INAPPROPRIATE CONTENT REMOVAL: Immediately deleted explicit sexual image post from discussions table for user safety
+  - GETDISCUSSIONS METHOD REBUILT: Completely rewrote corrupted getDiscussions method with simplified queries to eliminate "syntax error at or near =" errors
+  - GETUSERPOSTSTATS SIMPLIFIED: Fixed complex SQL aggregation queries causing database errors by using basic count() queries
+  - GETUSERPOSTSMTHOD OPERATIONAL: All user posts (discussions, SOAP entries, prayer requests) now load correctly with proper content display
+  - STORAGE.TS EXPORT FIXED: Restored missing storage export that was causing module import errors
+  - MY POSTS TAB WORKING: Users can now successfully view their personal content in the "My Posts" tab without SQL errors
+  - ALL POSTS DISPLAYING: Social feed "All Posts" now shows community content correctly after fixing getDiscussions method
 - July 20, 2025: MY POSTS FEATURE RELOCATED TO SOCIAL FEED - Successfully moved "My Posts" functionality from Community page to Social Feed with intuitive tab system ("All Posts" | "My Posts") for better user experience and logical information architecture
   - SOCIAL FEED ENHANCEMENT: Added tab system to Social Feed page enabling users to toggle between all community posts and their personal content
   - COMMUNITY PAGE STREAMLINED: Simplified Community page to focus on Latest Posts (Enhanced Feed) and Classic View, removing redundant My Posts tab
