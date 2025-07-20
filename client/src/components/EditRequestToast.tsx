@@ -59,7 +59,7 @@ export default function EditRequestToast() {
                     url = '/community';
                 }
               }
-              console.log('Toast navigating to:', url); // Debug log
+
               window.location.href = url;
             }}
             className="bg-red-600 hover:bg-red-700 text-white"

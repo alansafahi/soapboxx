@@ -62,7 +62,7 @@ export default function EditRequestBanner() {
       }
     }
     
-    console.log('Navigating to:', url); // Debug log
+
     window.location.href = url;
   };
 
