@@ -2456,29 +2456,24 @@ export class DatabaseStorage implements IStorage {
     prayerRequestCount: number;
   }> {
     try {
-      // Get discussion count
-      const discussionStats = await db
-        .select({ count: count() })
-        .from(discussions)
-        .where(eq(discussions.authorId, userId));
+      console.log('getUserPostStats called for userId:', userId);
+      
+      // Get discussion count using raw SQL to avoid Drizzle issues
+      const discussionResult = await db.execute(sql`SELECT COUNT(*) as count FROM discussions WHERE author_id = ${userId}`);
+      const discussionCount = Number(discussionResult.rows[0]?.count || 0);
+      console.log('Discussion count:', discussionCount);
 
       // Get SOAP entry count
-      const soapStats = await db
-        .select({ count: count() })
-        .from(soapEntries)
-        .where(eq(soapEntries.userId, userId));
+      const soapResult = await db.execute(sql`SELECT COUNT(*) as count FROM soap_entries WHERE user_id = ${userId}`);
+      const soapCount = Number(soapResult.rows[0]?.count || 0);
+      console.log('SOAP count:', soapCount);
 
-      // Get prayer request count
-      const prayerRequestStats = await db
-        .select({ count: count() })
-        .from(prayerRequests)
-        .where(eq(prayerRequests.userId, userId));
+      // Get prayer request count  
+      const prayerResult = await db.execute(sql`SELECT COUNT(*) as count FROM prayer_requests WHERE author_id = ${userId}`);
+      const prayerRequestCount = Number(prayerResult.rows[0]?.count || 0);
+      console.log('Prayer request count:', prayerRequestCount);
 
-      const discussionCount = Number(discussionStats[0]?.count || 0);
-      const soapCount = Number(soapStats[0]?.count || 0);
-      const prayerRequestCount = Number(prayerRequestStats[0]?.count || 0);
-
-      return {
+      const stats = {
         totalPosts: discussionCount + soapCount + prayerRequestCount,
         totalLikes: 0, // Simplified for now
         totalComments: 0, // Simplified for now
@@ -2487,6 +2482,9 @@ export class DatabaseStorage implements IStorage {
         soapCount,
         prayerRequestCount,
       };
+      
+      console.log('Final stats:', stats);
+      return stats;
     } catch (error) {
       console.error('Error in getUserPostStats:', error);
       return {
