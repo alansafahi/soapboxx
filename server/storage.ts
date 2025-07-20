@@ -2479,8 +2479,8 @@ export class DatabaseStorage implements IStorage {
            JOIN discussions d ON dl.discussion_id = d.id 
            WHERE d.author_id = ${userId}) +
           (SELECT COUNT(*) FROM reactions r 
-           JOIN soap_entries s ON r.soap_entry_id = s.id 
-           WHERE s.user_id = ${userId}) as count
+           JOIN soap_entries s ON r.target_id = s.id 
+           WHERE s.user_id = ${userId} AND r.target_type = 'soap_entry') as count
       `);
       const totalLikes = Number(likesResult.rows[0]?.count || 0);
 
