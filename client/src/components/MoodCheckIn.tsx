@@ -110,7 +110,11 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
         title: "Mood check-in recorded",
         description: "We've prepared some personalized content for you based on how you're feeling."
       });
+      // Invalidate all check-in and mood-related queries  
       queryClient.invalidateQueries({ queryKey: ["/api/checkins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/checkins/today"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/checkins/recent"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mood-checkins"] });
       if (onComplete) onComplete();
     },
     onError: (error) => {

@@ -227,7 +227,11 @@ export default function CheckInSystem() {
       setPrayerIntent("");
       setSelectedMoods([]);
       setCustomType("");
+      // Invalidate all check-in related queries
       queryClient.invalidateQueries({ queryKey: ["/api/checkins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/checkins/today"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/checkins/recent"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/checkins/streak"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/score"] });
     },
     onError: (error: any) => {

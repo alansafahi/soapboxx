@@ -161,6 +161,10 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
 
       const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
       
+      // Debug: Log AI response to check for incorrect content
+      console.log('AI Personalization Response for mood:', mood);
+      console.log('AI Generated Content:', JSON.stringify(aiResponse, null, 2));
+      
       return {
         mood,
         moodScore,
