@@ -2747,7 +2747,7 @@ app.post('/api/invitations', async (req: any, res) => {
                 <p>${message || 'They\'d love to share their faith journey with you.'}</p>
                 <p>You can find them in your SoapBox community and start connecting right away.</p>
                 <p style="margin-top: 30px;">
-                  <a href="https://www.soapboxapp.org" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+                  <a href="https://www.soapboxsuperapp.com" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
                     Open SoapBox App
                   </a>
                 </p>
@@ -2779,7 +2779,7 @@ app.post('/api/invitations', async (req: any, res) => {
           const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'A friend';
           
           // Create new invitation link
-          const inviteLink = `https://www.soapboxapp.org/join?code=${existingInvitation.inviteCode}`;
+          const inviteLink = `https://www.soapboxsuperapp.com/join?code=${existingInvitation.inviteCode}`;
           
           // Resend invitation email
           const { sendInvitationEmail } = await import('./email-service.js');
@@ -2829,7 +2829,7 @@ app.post('/api/invitations', async (req: any, res) => {
         const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'A friend';
         
         // Create invitation link
-        const inviteLink = `https://www.soapboxapp.org/join?code=${inviteCode}`;
+        const inviteLink = `https://www.soapboxsuperapp.com/join?code=${inviteCode}`;
         
         // Send invitation email using email service
         const { sendInvitationEmail } = await import('./email-service.js');

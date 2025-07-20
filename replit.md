@@ -147,6 +147,18 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 20, 2025: DOMAIN UPDATE TO SOAPBOXSUPERAPP.COM COMPLETED - Successfully updated all domain references throughout the application from soapboxapp.org to soapboxsuperapp.com for proper production deployment
+  - EMAIL TEMPLATES UPDATED: Updated verification and invitation email templates to use new domain
+  - REFERRAL LINKS FIXED: Updated all referral link generation to use soapboxsuperapp.com domain
+  - SHARING FUNCTIONALITY: Updated S.O.A.P. entry sharing and social media sharing to use new domain
+  - INVITATION SYSTEM: Updated invitation email links to use new production domain
+  - COMPREHENSIVE COVERAGE: All frontend and backend domain references now point to soapboxsuperapp.com
+- July 20, 2025: COMMUNITY-FOCUSED REWARDS SYSTEM IMPLEMENTED - Successfully updated rewards system to remove premium features and focus on community engagement activities
+  - PREMIUM FEATURES REMOVED: Eliminated rewards for premium voice, ad-free experience, and custom prayer themes
+  - COMMUNITY ENGAGEMENT REWARDS: Added points for Prayer Requests (25), Discussions (20), Check-ins (10), Prayer Circle (15), Volunteer Activities (30), Events Attended (25), S.O.A.P. Entries (15)
+  - REFERRAL BONUS MAINTAINED: Kept 100 credits per referral while reducing welcome bonus from 250 to 50 points
+  - DATABASE UPDATES: Updated referral reward tiers to focus on community building instead of premium features
+  - USER MESSAGING: Updated all reward descriptions to emphasize spiritual activities and community participation
 - July 20, 2025: MY POSTS DELETE FUNCTIONALITY AND USER CONTENT MANAGEMENT COMPLETELY IMPLEMENTED - Successfully added comprehensive delete functionality to My Posts feed with proper authentication, confirmation dialogs, and real-time UI updates
   - DELETE BUTTONS ADDED: Implemented red trash icon delete buttons for all posts in My Posts feed with hover effects and loading states
   - DELETE FUNCTIONALITY RESTORED: Fixed missing getDiscussion method in storage layer enabling proper post deletion with ownership verification

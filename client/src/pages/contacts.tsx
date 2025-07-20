@@ -285,7 +285,7 @@ function ContactsPage() {
   };
 
   const copyReferralLink = async () => {
-    const referralLink = `https://www.soapboxapp.org/?ref=${user?.id}`;
+    const referralLink = `https://www.soapboxsuperapp.com/?ref=${user?.id}`;
     try {
       await navigator.clipboard.writeText(referralLink);
       setCopiedReferral(true);
@@ -304,7 +304,7 @@ function ContactsPage() {
   };
 
   const shareToSocialMedia = (platform: string) => {
-    const referralLink = `https://www.soapboxapp.org/?ref=${user?.id}`;
+    const referralLink = `https://www.soapboxsuperapp.com/?ref=${user?.id}`;
     const message = "Join me on SoapBox Super App - the best platform for spiritual growth and community! 🙏";
     
     let shareUrl = "";
@@ -427,7 +427,7 @@ function ContactsPage() {
                   <Label>Your Referral Link</Label>
                   <div className="flex space-x-2">
                     <Input
-                      value={`https://www.soapboxapp.org/?ref=${user?.id}`}
+                      value={`https://www.soapboxsuperapp.com/?ref=${user?.id}`}
                       readOnly
                       className="flex-1"
                     />

@@ -17,7 +17,7 @@ export function createVerificationEmailTemplate(options: { firstName: string; to
           Welcome to SoapBox Super App! Please verify your email address to complete your registration and start your spiritual journey with our faith community.
         </p>
         
-        <a href="https://www.soapboxapp.org/api/auth/verify-email?token=${options.token}" style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; margin-bottom: 20px;">
+        <a href="https://www.soapboxsuperapp.com/api/auth/verify-email?token=${options.token}" style="display: inline-block; background-color: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; margin-bottom: 20px;">
           Verify Email Address
         </a>
         
@@ -27,7 +27,7 @@ export function createVerificationEmailTemplate(options: { firstName: string; to
         
         <p style="color: #6b7280; font-size: 12px; line-height: 1.6; margin-top: 20px;">
           If the button above doesn't work, you can copy and paste this link into your browser:<br>
-          <span style="word-break: break-all;">https://www.soapboxapp.org/api/auth/verify-email?token=${options.token}</span>
+          <span style="word-break: break-all;">https://www.soapboxsuperapp.com/api/auth/verify-email?token=${options.token}</span>
         </p>
         
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">

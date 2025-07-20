@@ -213,7 +213,7 @@ export function SoapEntryCard({
   };
 
   const handleShare = async () => {
-    const productionUrl = `https://www.soapboxapp.org/soap-journal`;
+    const productionUrl = `https://www.soapboxsuperapp.com/soap-journal`;
     const shareText = `Check out this S.O.A.P. entry: "${entry.scriptureReference || 'Scripture Reflection'}"\n\nScripture: ${entry.scripture.substring(0, 100)}${entry.scripture.length > 100 ? '...' : ''}\n\nShared from SoapBox Super App`;
     
     try {
