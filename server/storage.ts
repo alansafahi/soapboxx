@@ -2365,7 +2365,8 @@ export class DatabaseStorage implements IStorage {
           churchId: d.church_id,
           isPublic: d.is_public,
           createdAt: d.created_at,
-          updatedAt: d.updated_at
+          updatedAt: d.updated_at,
+          attachedMedia: d.attached_media // Add attached media field
         }));
         allPosts.push(...discussionsWithType);
       }
@@ -2391,7 +2392,8 @@ export class DatabaseStorage implements IStorage {
           churchId: s.church_id,
           isPublic: s.is_public,
           createdAt: s.created_at,
-          updatedAt: s.updated_at
+          updatedAt: s.updated_at,
+          attachedMedia: s.attached_media // Add attached media field
         }));
         allPosts.push(...soapWithType);
       }
@@ -2418,7 +2420,8 @@ export class DatabaseStorage implements IStorage {
           isAnswered: prayer.is_answered,
           answeredAt: prayer.answered_at,
           createdAt: prayer.created_at,
-          updatedAt: prayer.updated_at
+          updatedAt: prayer.updated_at,
+          attachedMedia: prayer.attached_media // Add attached media field
         }));
 
         allPosts.push(...prayerRequestsWithCount);
