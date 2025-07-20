@@ -2350,29 +2350,35 @@ export class DatabaseStorage implements IStorage {
     try {
       const allPosts: any[] = [];
 
-      // Get discussions
+      // Get discussions using raw SQL
       if (type === 'all' || type === 'discussion') {
-        const userDiscussions = await db
-          .select()
-          .from(discussions)
-          .where(eq(discussions.authorId, userId))
-          .orderBy(desc(discussions.createdAt));
-
-        // Add type field to each discussion
-        const discussionsWithType = userDiscussions.map(d => ({ ...d, type: 'discussion' }));
+        const discussionResult = await db.execute(sql`
+          SELECT * FROM discussions 
+          WHERE author_id = ${userId} 
+          ORDER BY created_at DESC
+        `);
+        
+        const discussionsWithType = discussionResult.rows.map(d => ({ 
+          ...d, 
+          type: 'discussion',
+          authorId: d.author_id,
+          churchId: d.church_id,
+          isPublic: d.is_public,
+          createdAt: d.created_at,
+          updatedAt: d.updated_at
+        }));
         allPosts.push(...discussionsWithType);
       }
 
-      // Get SOAP entries
+      // Get SOAP entries using raw SQL
       if (type === 'all' || type === 'soap_reflection') {
-        const userSoapEntries = await db
-          .select()
-          .from(soapEntries)
-          .where(eq(soapEntries.userId, userId))
-          .orderBy(desc(soapEntries.createdAt));
+        const soapResult = await db.execute(sql`
+          SELECT * FROM soap_entries 
+          WHERE user_id = ${userId} 
+          ORDER BY created_at DESC
+        `);
 
-        // Add consistent fields to SOAP entries
-        const soapWithType = userSoapEntries.map(s => ({
+        const soapWithType = soapResult.rows.map(s => ({
           ...s,
           type: 'soap_reflection',
           title: 'S.O.A.P. Reflection',
@@ -2381,48 +2387,39 @@ export class DatabaseStorage implements IStorage {
           commentCount: 0,
           mood: s.mood || null,
           content: s.scripture || s.observation || s.application || s.prayer || 'S.O.A.P. Entry',
+          userId: s.user_id,
+          churchId: s.church_id,
+          isPublic: s.is_public,
+          createdAt: s.created_at,
+          updatedAt: s.updated_at
         }));
         allPosts.push(...soapWithType);
       }
 
-      // Get prayer requests
+      // Get prayer requests using raw SQL
       if (type === 'all' || type === 'prayer_request') {
-        const userPrayerRequests = await db
-          .select()
-          .from(prayerRequests)
-          .where(eq(prayerRequests.userId, userId))
-          .orderBy(desc(prayerRequests.createdAt));
+        const prayerResult = await db.execute(sql`
+          SELECT * FROM prayer_requests 
+          WHERE author_id = ${userId} 
+          ORDER BY created_at DESC
+        `);
 
-        // Add prayer count for prayer requests
-        const prayerRequestsWithCount = await Promise.all(
-          userPrayerRequests.map(async (prayer) => {
-            try {
-              const [prayerCount] = await db
-                .select({ count: count() })
-                .from(prayerResponses)
-                .where(eq(prayerResponses.prayerRequestId, prayer.id));
-
-              return {
-                ...prayer,
-                type: 'prayer_request',
-                likeCount: 0,
-                commentCount: 0,
-                mood: prayer.mood || null,
-                prayerCount: Number(prayerCount.count || 0),
-              };
-            } catch (error) {
-              // Return prayer without count if error occurs
-              return {
-                ...prayer,
-                type: 'prayer_request',
-                likeCount: 0,
-                commentCount: 0,
-                mood: prayer.mood || null,
-                prayerCount: 0,
-              };
-            }
-          })
-        );
+        const prayerRequestsWithCount = prayerResult.rows.map(prayer => ({
+          ...prayer,
+          type: 'prayer_request',
+          likeCount: 0,
+          commentCount: 0,
+          mood: prayer.mood || null,
+          prayerCount: prayer.prayer_count || 0,
+          authorId: prayer.author_id,
+          churchId: prayer.church_id,
+          isPublic: prayer.is_public,
+          isAnonymous: prayer.is_anonymous,
+          isAnswered: prayer.is_answered,
+          answeredAt: prayer.answered_at,
+          createdAt: prayer.created_at,
+          updatedAt: prayer.updated_at
+        }));
 
         allPosts.push(...prayerRequestsWithCount);
       }
