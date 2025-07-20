@@ -805,6 +805,7 @@ export interface IStorage {
   getSoapEntry(id: number): Promise<SoapEntry | undefined>;
   updateSoapEntry(id: number, updates: Partial<SoapEntry>): Promise<SoapEntry>;
   deleteSoapEntry(id: number): Promise<void>;
+  deleteDiscussion(id: number): Promise<void>;
   getUserSoapStreak(userId: string): Promise<number>;
   getPublicSoapEntries(churchId?: number, limit?: number, offset?: number, excludeUserId?: string): Promise<any[]>;
   featureSoapEntry(id: number, featuredBy: string): Promise<SoapEntry>;
@@ -1981,6 +1982,28 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEvent(id: number): Promise<void> {
     await db.delete(events).where(eq(events.id, id));
+  }
+
+  async deleteSoapEntry(id: number): Promise<void> {
+    // Delete related data first
+    await db.delete(reactions).where(eq(reactions.targetId, id));
+    await db.delete(soapBookmarks).where(eq(soapBookmarks.soapId, id));
+    await db.delete(contentReports).where(eq(contentReports.contentId, id));
+    
+    // Delete the SOAP entry
+    await db.delete(soapEntries).where(eq(soapEntries.id, id));
+  }
+
+  async deleteDiscussion(id: number): Promise<void> {
+    // Delete related data first
+    await db.delete(discussionComments).where(eq(discussionComments.discussionId, id));
+    await db.delete(discussionLikes).where(eq(discussionLikes.discussionId, id));
+    await db.delete(discussionBookmarks).where(eq(discussionBookmarks.discussionId, id));
+    await db.delete(contentReports).where(eq(contentReports.contentId, id));
+    await db.delete(reactions).where(eq(reactions.targetId, id));
+    
+    // Delete the discussion
+    await db.delete(discussions).where(eq(discussions.id, id));
   }
 
   async getUpcomingEvents(churchId?: number, limit = 10): Promise<Event[]> {
