@@ -2472,29 +2472,31 @@ export class DatabaseStorage implements IStorage {
       const prayersOfferedResult = await db.execute(sql`SELECT COUNT(*) as count FROM prayer_responses WHERE user_id = ${userId}`);
       const totalPrayers = Number(prayersOfferedResult.rows[0]?.count || 0);
 
-      // Get total likes received on user's content
-      const likesResult = await db.execute(sql`
-        SELECT 
-          (SELECT COUNT(*) FROM discussion_likes dl 
-           JOIN discussions d ON dl.discussion_id = d.id 
-           WHERE d.author_id = ${userId}) +
-          (SELECT COUNT(*) FROM reactions r 
-           JOIN soap_entries s ON r.target_id = s.id 
-           WHERE s.user_id = ${userId} AND r.target_type = 'soap_entry') as count
+      // Get total likes received on user's content (simplified approach)
+      const discussionLikesResult = await db.execute(sql`
+        SELECT COUNT(*) as count FROM discussion_likes dl 
+        JOIN discussions d ON dl.discussion_id = d.id 
+        WHERE d.author_id = ${userId}
       `);
-      const totalLikes = Number(likesResult.rows[0]?.count || 0);
+      const soapLikesResult = await db.execute(sql`
+        SELECT COUNT(*) as count FROM reactions r 
+        JOIN soap_entries s ON r.target_id = s.id 
+        WHERE s.user_id = ${userId} AND r.target_type = 'soap_entry'
+      `);
+      const totalLikes = Number(discussionLikesResult.rows[0]?.count || 0) + Number(soapLikesResult.rows[0]?.count || 0);
 
-      // Get total comments on user's content
-      const commentsResult = await db.execute(sql`
-        SELECT 
-          (SELECT COUNT(*) FROM discussion_comments dc 
-           JOIN discussions d ON dc.discussion_id = d.id 
-           WHERE d.author_id = ${userId}) +
-          (SELECT COUNT(*) FROM soap_comments sc 
-           JOIN soap_entries s ON sc.soap_entry_id = s.id 
-           WHERE s.user_id = ${userId}) as count
+      // Get total comments on user's content (simplified approach)
+      const discussionCommentsResult = await db.execute(sql`
+        SELECT COUNT(*) as count FROM discussion_comments dc 
+        JOIN discussions d ON dc.discussion_id = d.id 
+        WHERE d.author_id = ${userId}
       `);
-      const totalComments = Number(commentsResult.rows[0]?.count || 0);
+      const soapCommentsResult = await db.execute(sql`
+        SELECT COUNT(*) as count FROM soap_comments sc 
+        JOIN soap_entries s ON sc.soap_id = s.id 
+        WHERE s.user_id = ${userId}
+      `);
+      const totalComments = Number(discussionCommentsResult.rows[0]?.count || 0) + Number(soapCommentsResult.rows[0]?.count || 0);
 
       return {
         totalPosts: discussionCount + soapCount + prayerRequestCount,
