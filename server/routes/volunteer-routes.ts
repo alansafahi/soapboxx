@@ -320,7 +320,7 @@ router.post('/signup', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
+    const volunteer = await volunteerStorage.getVolunteerByUserId((req.user as any).email);
     if (!volunteer) {
       return res.status(404).json({ error: 'Volunteer profile not found. Please complete assessment first.' });
     }
@@ -335,7 +335,7 @@ router.post('/signup', async (req, res) => {
       status: 'registered'
     });
 
-    res.json(registration);
+    res.json({ success: true, registration });
   } catch (error) {
     console.error('Volunteer signup error:', error);
     res.status(500).json({ error: 'Failed to sign up for opportunity' });

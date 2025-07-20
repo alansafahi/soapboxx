@@ -478,6 +478,7 @@ const VolunteerDashboard = () => {
 const VolunteerOpportunitiesPanel = () => {
   const [selectedOpportunity, setSelectedOpportunity] = useState<VolunteerOpportunity | null>(null);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [signupNotes, setSignupNotes] = useState('');
   
   const { data: opportunities, isLoading } = useQuery({
     queryKey: ['/api/volunteers/opportunities'],
@@ -490,6 +491,15 @@ const VolunteerOpportunitiesPanel = () => {
     onSuccess: () => {
       setShowSignupDialog(false);
       setSelectedOpportunity(null);
+      setSignupNotes('');
+      // Show success feedback
+      console.log('Successfully signed up for volunteer opportunity!');
+    },
+    onError: (error) => {
+      console.error('Signup failed:', error);
+      // Still close dialog to prevent getting stuck
+      setShowSignupDialog(false);
+      setSignupNotes('');
     }
   });
 
@@ -628,7 +638,11 @@ const VolunteerOpportunitiesPanel = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Additional Notes (Optional)</label>
-              <Textarea placeholder="Any questions or special considerations..." />
+              <Textarea 
+                placeholder="What type of sound equipment do we have?"
+                value={signupNotes}
+                onChange={(e) => setSignupNotes(e.target.value)}
+              />
             </div>
 
             <div className="flex gap-2">
@@ -641,7 +655,8 @@ const VolunteerOpportunitiesPanel = () => {
               </Button>
               <Button
                 onClick={() => signupMutation.mutate({ 
-                  opportunityId: selectedOpportunity?.id || 0 
+                  opportunityId: selectedOpportunity?.id || 0,
+                  notes: signupNotes
                 })}
                 disabled={signupMutation.isPending}
                 className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500"
