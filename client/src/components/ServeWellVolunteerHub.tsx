@@ -694,6 +694,15 @@ const ServeWellVolunteerHub = () => {
     setShowAssessment(false);
     // Refresh the hasProfile query to update the UI
     queryClient.invalidateQueries({ queryKey: ['/api/volunteers/has-profile'] });
+    
+    // Show success message and guide to next steps
+    setTimeout(() => {
+      alert('🎉 Assessment Complete!\n\n' +
+            '✅ Your spiritual gifts have been identified\n' +
+            '🎯 You can now browse volunteer opportunities\n' +
+            '📋 Check out your personalized matches\n' +
+            '👆 Click "Divine Appointments" tab to see your matches!');
+    }, 500);
   };
 
   if (showAssessment) {
@@ -712,26 +721,145 @@ const ServeWellVolunteerHub = () => {
         </TabsList>
 
         <TabsContent value="dashboard">
-          {!hasProfile ? (
-            <Card className="text-center p-8">
-              <CardHeader>
-                <CardTitle>Complete Your Spiritual Gifts Assessment</CardTitle>
-                <CardDescription>
-                  Discover your divine calling and get matched with perfect ministry opportunities
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={() => setShowAssessment(true)}
-                  className="bg-gradient-to-r from-purple-500 to-blue-500"
-                >
-                  <Brain className="w-4 h-4 mr-2" />
-                  Start Assessment
-                </Button>
-              </CardContent>
-            </Card>
+          {!hasProfile?.hasProfile ? (
+            <div className="space-y-6">
+              {/* Progress Steps */}
+              <Card className="border-l-4 border-l-purple-500">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Brain className="w-5 h-5 mr-2 text-purple-500" />
+                    D.I.V.I.N.E. Onboarding Progress
+                  </CardTitle>
+                  <CardDescription>
+                    Complete these steps to unlock your full volunteer potential
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Step 1: Assessment */}
+                    <div className="flex items-center space-x-4 p-4 rounded-lg bg-purple-50 border border-purple-200">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white text-sm font-medium">
+                        1
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">Complete Spiritual Gifts Assessment</h4>
+                        <p className="text-sm text-gray-600">Discover your divine gifts and serving style (5-10 minutes)</p>
+                      </div>
+                      <Button 
+                        onClick={() => setShowAssessment(true)}
+                        className="bg-gradient-to-r from-purple-500 to-blue-500"
+                      >
+                        <Brain className="w-4 h-4 mr-2" />
+                        Start Now
+                      </Button>
+                    </div>
+
+                    {/* Step 2: Browse Opportunities (Locked) */}
+                    <div className="flex items-center space-x-4 p-4 rounded-lg bg-gray-50 border border-gray-200 opacity-75">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-400 text-white text-sm font-medium">
+                        2
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-500">Browse Volunteer Opportunities</h4>
+                        <p className="text-sm text-gray-400">Explore ministry opportunities matched to your gifts</p>
+                      </div>
+                      <Button disabled variant="outline">
+                        Locked
+                      </Button>
+                    </div>
+
+                    {/* Step 3: Sign Up (Locked) */}
+                    <div className="flex items-center space-x-4 p-4 rounded-lg bg-gray-50 border border-gray-200 opacity-75">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-400 text-white text-sm font-medium">
+                        3
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-500">Sign Up to Serve</h4>
+                        <p className="text-sm text-gray-400">Register for opportunities and start making a difference</p>
+                      </div>
+                      <Button disabled variant="outline">
+                        Locked
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Welcome Message */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Welcome to D.I.V.I.N.E.</CardTitle>
+                  <CardDescription>
+                    The Disciple-Inspired Volunteer Integration & Nurture Engine
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Get started by completing your spiritual gifts assessment. This will help us match you 
+                    with volunteer opportunities that align with your divine calling and natural abilities.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <Brain className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                      <h4 className="font-medium">Discover Gifts</h4>
+                      <p className="text-sm text-gray-600">Identify your spiritual gifts</p>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <Target className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                      <h4 className="font-medium">Find Matches</h4>
+                      <p className="text-sm text-gray-600">Get AI-powered opportunity matching</p>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <Heart className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+                      <h4 className="font-medium">Serve Kingdom</h4>
+                      <p className="text-sm text-gray-600">Make a meaningful impact</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
-            <VolunteerDashboard />
+            <div className="space-y-6">
+              {/* Completed Progress Steps */}
+              <Card className="border-l-4 border-l-green-500">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                    D.I.V.I.N.E. Setup Complete!
+                  </CardTitle>
+                  <CardDescription>
+                    You're ready to explore volunteer opportunities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Button 
+                      onClick={() => document.querySelector('[data-state="inactive"][value="appointments"]')?.click()}
+                      className="bg-gradient-to-r from-purple-500 to-blue-500"
+                    >
+                      <Target className="w-4 h-4 mr-2" />
+                      View My Matches
+                    </Button>
+                    <Button 
+                      onClick={() => document.querySelector('[data-state="inactive"][value="opportunities"]')?.click()}
+                      variant="outline"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Browse All Opportunities
+                    </Button>
+                    <Button 
+                      onClick={() => document.querySelector('[data-state="inactive"][value="calendar"]')?.click()}
+                      variant="outline"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      My Calendar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <VolunteerDashboard />
+            </div>
           )}
         </TabsContent>
 
