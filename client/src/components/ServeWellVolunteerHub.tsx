@@ -171,7 +171,7 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
                   name={`responses.${q.id}`}
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium">
+                      <FormLabel className="text-base font-medium text-gray-900 dark:text-gray-100">
                         {q.question}
                         <Badge variant="outline" className="ml-2 text-xs">
                           {q.gift}
