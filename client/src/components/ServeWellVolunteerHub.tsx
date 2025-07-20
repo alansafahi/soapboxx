@@ -707,10 +707,10 @@ const ServeWellVolunteerHub = () => {
     // Show success announcement
     setShowSuccessAnnouncement(true);
     
-    // Auto-hide after 10 seconds
+    // Auto-hide after 20 seconds to give users time to read and click
     setTimeout(() => {
       setShowSuccessAnnouncement(false);
-    }, 10000);
+    }, 20000);
   };
 
   if (showAssessment) {
@@ -769,8 +769,7 @@ const ServeWellVolunteerHub = () => {
                     setActiveTab("opportunities");
                     setShowSuccessAnnouncement(false);
                   }}
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-blue-600"
+                  className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                   size="sm"
                 >
                   Browse Opportunities
