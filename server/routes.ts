@@ -7871,7 +7871,8 @@ Return JSON with this exact structure:
         deletedBy: isAuthor ? "author" : "admin"
       });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete post" });
+      console.error('Delete discussion error:', error);
+      res.status(500).json({ message: "Failed to delete post", error: error.message });
     }
   });
 
