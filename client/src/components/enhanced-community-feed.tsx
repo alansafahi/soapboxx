@@ -250,7 +250,6 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
   // Auto-scroll to highlighted post when highlightId changes
   useEffect(() => {
     if (highlightId && posts && posts.length > 0) {
-      console.log('Attempting to scroll to highlighted post:', highlightId);
       const timer = setTimeout(() => {
         const element = document.getElementById(`post-${highlightId}`);
         if (element) {
@@ -258,15 +257,12 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
             behavior: 'smooth', 
             block: 'center' 
           });
-          console.log('Successfully scrolled to post:', highlightId);
           // Add a temporary highlight effect
           element.style.border = '3px solid #ef4444';
           element.style.borderRadius = '8px';
           setTimeout(() => {
             element.style.border = '';
           }, 5000);
-        } else {
-          console.log('Post element not found:', `post-${highlightId}`);
         }
       }, 1000); // Wait for posts to load
       

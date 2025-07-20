@@ -4049,8 +4049,82 @@ export class DatabaseStorage implements IStorage {
     try {
       let query = db.select().from(contentReports);
       
+      const conditions = [];
       if (status) {
-        query = query.where(eq(contentReports.status, status));
+        conditions.push(eq(contentReports.status, status));
+      }
+      
+      // If churchId is specified, filter by church-specific content
+      if (churchId) {
+        // We need to join with the actual content tables to filter by church
+        // This requires separate queries for each content type and then combining
+        const reportPromises = [];
+        
+        // Get discussion reports for this church
+        const discussionReports = db
+          .select()
+          .from(contentReports)
+          .innerJoin(discussions, eq(contentReports.contentId, discussions.id))
+          .where(and(
+            eq(contentReports.contentType, 'discussion'),
+            eq(discussions.churchId, churchId),
+            ...conditions
+          ));
+        reportPromises.push(discussionReports);
+        
+        // Get SOAP entry reports for this church
+        const soapReports = db
+          .select()
+          .from(contentReports)
+          .innerJoin(soapEntries, eq(contentReports.contentId, soapEntries.id))
+          .where(and(
+            eq(contentReports.contentType, 'soap_entry'),
+            eq(soapEntries.churchId, churchId),
+            ...conditions
+          ));
+        reportPromises.push(soapReports);
+        
+        // Get prayer request reports for this church
+        const prayerReports = db
+          .select()
+          .from(contentReports)
+          .innerJoin(prayerRequests, eq(contentReports.contentId, prayerRequests.id))
+          .where(and(
+            eq(contentReports.contentType, 'prayer_request'),
+            eq(prayerRequests.churchId, churchId),
+            ...conditions
+          ));
+        reportPromises.push(prayerReports);
+        
+        const [discussionResults, soapResults, prayerResults] = await Promise.all(reportPromises);
+        
+        // Extract just the contentReports data and combine
+        const allReports = [
+          ...discussionResults.map(r => r.content_reports),
+          ...soapResults.map(r => r.content_reports),
+          ...prayerResults.map(r => r.content_reports)
+        ];
+        
+        // Sort by creation date
+        const reports = allReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+        // Populate original content
+        for (const report of reports) {
+          try {
+            const originalContent = await this.getOriginalContent(report.contentType, report.contentId);
+            report.originalContent = originalContent.content;
+            report.contentMetadata = originalContent.metadata;
+          } catch (error) {
+            report.originalContent = 'Content not available';
+          }
+        }
+        
+        return reports;
+      }
+      
+      // No church filter - get all reports (for SoapBox owners)
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
       }
       
       const reports = await query.orderBy(desc(contentReports.createdAt));

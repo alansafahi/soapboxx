@@ -147,6 +147,18 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 20, 2025: CHURCH-SPECIFIC CONTENT MODERATION PERMISSIONS IMPLEMENTED - Successfully implemented church-scoped admin permissions system ensuring church administrators only access moderation tools for their respective churches
+  - CHURCH-SCOPED MODERATION: Updated /api/moderation/reports endpoint to filter content by church association for non-SoapBox owner moderators
+  - ROLE-BASED FILTERING: SoapBox owners see all reports platform-wide, church admins only see reports from their assigned churches
+  - DATABASE JOINS ENHANCED: Implemented complex join queries across discussions, soapEntries, and prayerRequests tables to enforce church boundaries
+  - ALAN@SAFAHI.COM PERMISSIONS: Church admin for SGA church now properly restricted to only SGA church content moderation
+  - SECURITY BOUNDARY ENFORCEMENT: Prevents church admins from accessing content from other churches while maintaining platform owner privileges
+  - PRODUCTION READY: Complete church-specific permission system operational with proper authentication and authorization controls
+- July 20, 2025: FLAGGED CONTENT NAVIGATION SYSTEM PRODUCTION READY - Successfully completed and documented the comprehensive notification-to-edit workflow with clean production code
+  - DEBUG CODE REMOVED: Cleaned up console logging from TopHeader and enhanced-community-feed components for production deployment
+  - NAVIGATION SYSTEM VERIFIED: Complete workflow from bell notification → community page → flagged content editing confirmed operational
+  - USER EXPERIENCE OPTIMIZED: Red warning banner, auto-scroll to highlighted content, and visual highlighting working seamlessly
+  - SYSTEM DOCUMENTATION: Comprehensive implementation documented for future maintenance and feature expansion
 - July 19, 2025: EDIT REQUEST NAVIGATION SYSTEM COMPLETELY FIXED - Successfully resolved critical navigation issue where users couldn't reach flagged content for editing by implementing proper actionUrl-based navigation, enhanced community page highlighting, and comprehensive debug logging for the complete notification-to-edit workflow
   - NAVIGATION FIX IMPLEMENTED: Fixed broken "Edit Now" button navigation by extracting contentId from actionUrl and using direct navigation paths
   - DATABASE SCHEMA CORRECTED: Fixed column mapping issues (user_id vs recipientId) and created real test notification with actual discussion ID (4079)

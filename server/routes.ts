@@ -3013,7 +3013,19 @@ app.post('/api/invitations', async (req: any, res) => {
       }
 
       const { status } = req.query;
-      const reports = await storage.getContentReports(undefined, status as string);
+      
+      // Church-specific filtering: Only SoapBox owners see all reports
+      // Church admins only see reports for their churches
+      let churchId: number | undefined;
+      if (user?.role !== 'soapbox_owner') {
+        // Find the church where user is admin (take first one if multiple)
+        const adminChurch = userChurches.find(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
+        if (adminChurch) {
+          churchId = adminChurch.churchId;
+        }
+      }
+
+      const reports = await storage.getContentReports(churchId, status as string);
 
       res.json(reports);
     } catch (error) {
