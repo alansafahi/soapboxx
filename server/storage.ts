@@ -2261,7 +2261,7 @@ export class DatabaseStorage implements IStorage {
         .offset(offset || 0);
 
       // Get public SOAP entries  
-      const soapEntries = await db
+      const soapEntriesData = await db
         .select()
         .from(soapEntries)
         .leftJoin(users, eq(soapEntries.userId, users.id))
@@ -2277,7 +2277,7 @@ export class DatabaseStorage implements IStorage {
         soapData: null
       }));
 
-      const transformedSoap = soapEntries.map(row => ({
+      const transformedSoap = soapEntriesData.map(row => ({
         ...row.soap_entries,
         id: row.soap_entries?.id,
         authorId: row.soap_entries?.userId,
