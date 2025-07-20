@@ -116,7 +116,9 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
     resolver: zodResolver(spiritualGiftsSchema),
     defaultValues: {
       responses: {}
-    }
+    },
+    mode: 'onSubmit', // Only validate when form is submitted
+    reValidateMode: 'onSubmit'
   });
 
   const assessmentMutation = useMutation({
@@ -167,7 +169,7 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
                   key={q.id}
                   control={form.control}
                   name={`responses.${q.id}`}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel className="text-base font-medium">
                         {q.question}
@@ -183,10 +185,10 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
                               <button
                                 key={value}
                                 type="button"
-                                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors font-medium ${
                                   field.value === value
-                                    ? 'bg-purple-500 border-purple-500 text-white'
-                                    : 'border-gray-300 hover:border-purple-300'
+                                    ? 'bg-purple-500 border-purple-500 text-white shadow-lg'
+                                    : 'border-gray-300 hover:border-purple-300 hover:bg-purple-50 text-gray-700'
                                 }`}
                                 onClick={() => field.onChange(value)}
                               >
@@ -197,7 +199,10 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
                           <span className="text-sm text-gray-500">Strongly Agree</span>
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      {/* Only show error message if form has been submitted and field has error */}
+                      {form.formState.isSubmitted && fieldState.error && (
+                        <p className="text-sm text-red-500 mt-1">Please select a rating for this question</p>
+                      )}
                     </FormItem>
                   )}
                 />
