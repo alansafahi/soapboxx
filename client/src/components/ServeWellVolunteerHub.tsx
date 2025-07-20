@@ -793,6 +793,39 @@ const ServeWellVolunteerHub = () => {
         <TabsContent value="dashboard">
           {!hasProfile?.hasProfile ? (
             <div className="space-y-6">
+              {/* Welcome Message */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Welcome to D.I.V.I.N.E.</CardTitle>
+                  <CardDescription>
+                    The Disciple-Inspired Volunteer Integration & Nurture Engine
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Get started by completing your spiritual gifts assessment. This will help us match you 
+                    with volunteer opportunities that align with your divine calling and natural abilities.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <Brain className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                      <h4 className="font-medium">Discover Gifts</h4>
+                      <p className="text-sm text-gray-600">Identify your spiritual gifts</p>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <Target className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                      <h4 className="font-medium">Find Matches</h4>
+                      <p className="text-sm text-gray-600">Get AI-powered opportunity matching</p>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <Heart className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+                      <h4 className="font-medium">Serve Kingdom</h4>
+                      <p className="text-sm text-gray-600">Make a meaningful impact</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Progress Steps */}
               <Card className="border-l-4 border-l-purple-500">
                 <CardHeader>
@@ -850,39 +883,6 @@ const ServeWellVolunteerHub = () => {
                       <Button disabled variant="outline">
                         Locked
                       </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Welcome Message */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Welcome to D.I.V.I.N.E.</CardTitle>
-                  <CardDescription>
-                    The Disciple-Inspired Volunteer Integration & Nurture Engine
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">
-                    Get started by completing your spiritual gifts assessment. This will help us match you 
-                    with volunteer opportunities that align with your divine calling and natural abilities.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <Brain className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                      <h4 className="font-medium">Discover Gifts</h4>
-                      <p className="text-sm text-gray-600">Identify your spiritual gifts</p>
-                    </div>
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <Target className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                      <h4 className="font-medium">Find Matches</h4>
-                      <p className="text-sm text-gray-600">Get AI-powered opportunity matching</p>
-                    </div>
-                    <div className="p-4 bg-purple-50 rounded-lg">
-                      <Heart className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                      <h4 className="font-medium">Serve Kingdom</h4>
-                      <p className="text-sm text-gray-600">Make a meaningful impact</p>
                     </div>
                   </div>
                 </CardContent>
