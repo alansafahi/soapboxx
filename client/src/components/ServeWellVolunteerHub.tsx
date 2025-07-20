@@ -90,6 +90,65 @@ const spiritualGiftsSchema = z.object({
 
 type SpiritualGiftsForm = z.infer<typeof spiritualGiftsSchema>;
 
+// Spiritual Gifts Profile Calculator
+const calculateSpiritualProfile = (responses: Record<string, number>, questions: any[]) => {
+  const scores: Record<string, number> = {};
+  
+  // Calculate scores for each spiritual gift category
+  questions.forEach(q => {
+    const score = responses[q.id] || 1;
+    if (!scores[q.gift]) scores[q.gift] = 0;
+    scores[q.gift] += score;
+  });
+  
+  // Get top 3 gifts
+  const topGifts = Object.entries(scores)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 3)
+    .map(([gift]) => gift);
+  
+  // Calculate overall engagement level
+  const totalScore = Object.values(responses).reduce((sum, score) => sum + score, 0);
+  const averageScore = totalScore / Object.keys(responses).length;
+  
+  // Determine spiritual profile label (encouraging and inclusive)
+  let profileLabel = "";
+  let profileDescription = "";
+  let servingStyle = "";
+  
+  if (averageScore >= 4.5) {
+    profileLabel = "Kingdom Champion";
+    profileDescription = "Highly gifted leader with strong calling to serve";
+    servingStyle = "Leadership & High-Impact Ministry";
+  } else if (averageScore >= 4.0) {
+    profileLabel = "Faithful Servant";
+    profileDescription = "Dedicated volunteer with clear spiritual gifts";
+    servingStyle = "Active Ministry Participation";
+  } else if (averageScore >= 3.5) {
+    profileLabel = "Growing Disciple";
+    profileDescription = "Developing gifts with heart to serve";
+    servingStyle = "Ministry Support & Growth";
+  } else if (averageScore >= 2.5) {
+    profileLabel = "Willing Helper";
+    profileDescription = "Ready to serve in practical, supportive ways";
+    servingStyle = "Behind-the-Scenes Support";
+  } else {
+    // Even those who rate themselves low have value - NEVER disqualified!
+    profileLabel = "Humble Servant";
+    profileDescription = "Heart to help with essential support ministry";
+    servingStyle = "Practical Service & Foundation Support";
+  }
+  
+  return {
+    topGifts,
+    profileLabel,
+    profileDescription,
+    servingStyle,
+    averageScore: Math.round(averageScore * 10) / 10,
+    engagementLevel: averageScore >= 3.5 ? "High" : averageScore >= 2.5 ? "Moderate" : "Supportive"
+  };
+};
+
 const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) => void }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const questionsPerPage = 5;
@@ -141,7 +200,16 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
   );
 
   const onSubmit = (data: SpiritualGiftsForm) => {
-    assessmentMutation.mutate(data);
+    // Calculate spiritual profile before sending to backend
+    const profile = calculateSpiritualProfile(data.responses, spiritualGiftsQuestions);
+    
+    // Add profile data to submission
+    const enrichedData = {
+      ...data,
+      profile
+    };
+    
+    assessmentMutation.mutate(enrichedData);
   };
 
   return (
@@ -691,6 +759,7 @@ const VolunteerOpportunitiesPanel = () => {
 const ServeWellVolunteerHub = () => {
   const [showAssessment, setShowAssessment] = useState(false);
   const [showSuccessAnnouncement, setShowSuccessAnnouncement] = useState(false);
+  const [lastAssessmentProfile, setLastAssessmentProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const { data: hasProfile } = useQuery({
     queryKey: ['/api/volunteers/has-profile'],
@@ -701,16 +770,17 @@ const ServeWellVolunteerHub = () => {
   
   const handleAssessmentComplete = (profile: any) => {
     setShowAssessment(false);
+    setLastAssessmentProfile(profile);
     // Refresh the hasProfile query to update the UI
     queryClient.invalidateQueries({ queryKey: ['/api/volunteers/has-profile'] });
     
     // Show success announcement
     setShowSuccessAnnouncement(true);
     
-    // Auto-hide after 20 seconds to give users time to read and click
+    // Auto-hide after 25 seconds to give users time to read profile and click
     setTimeout(() => {
       setShowSuccessAnnouncement(false);
-    }, 20000);
+    }, 25000);
   };
 
   if (showAssessment) {
@@ -720,7 +790,7 @@ const ServeWellVolunteerHub = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Success Announcement Box */}
-      {showSuccessAnnouncement && (
+      {showSuccessAnnouncement && lastAssessmentProfile && (
         <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-lg shadow-lg border-l-4 border-l-yellow-400 relative animate-in slide-in-from-top duration-500">
           <button
             onClick={() => setShowSuccessAnnouncement(false)}
@@ -734,22 +804,37 @@ const ServeWellVolunteerHub = () => {
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold mb-2">🎉 Assessment Complete!</h3>
+              
+              {/* Display Spiritual Profile */}
+              <div className="bg-white/20 rounded-lg p-3 mb-4">
+                <div className="text-lg font-bold text-white mb-1">
+                  {lastAssessmentProfile.profileLabel || "Faithful Servant"}
+                </div>
+                <div className="text-sm text-white/90 mb-2">
+                  {lastAssessmentProfile.profileDescription || "Ready to serve with your unique gifts"}
+                </div>
+                <div className="text-xs text-white/80">
+                  Serving Style: {lastAssessmentProfile.servingStyle || "Ministry Participation"}
+                </div>
+                {lastAssessmentProfile.topGifts && lastAssessmentProfile.topGifts.length > 0 && (
+                  <div className="text-xs text-white/80 mt-1">
+                    Top Gifts: {lastAssessmentProfile.topGifts.join(", ")}
+                  </div>
+                )}
+              </div>
+              
               <div className="space-y-2 text-sm">
                 <p className="flex items-center">
                   <CheckCircle className="w-4 h-4 mr-2 text-green-300" />
-                  Your spiritual gifts have been identified
+                  Your spiritual profile has been created
                 </p>
                 <p className="flex items-center">
                   <Target className="w-4 h-4 mr-2 text-blue-300" />
-                  You can now browse volunteer opportunities
+                  Browse opportunities matched to your gifts
                 </p>
                 <p className="flex items-center">
                   <Sparkles className="w-4 h-4 mr-2 text-purple-300" />
-                  Check out your personalized matches
-                </p>
-                <p className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-2 text-yellow-300" />
-                  Click "Divine Appointments" tab to see your matches!
+                  Check out your personalized divine appointments
                 </p>
               </div>
               <div className="mt-4 flex space-x-2">
