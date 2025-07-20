@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
@@ -19,7 +19,8 @@ import {
   Users,
   ChevronDown,
   BarChart3,
-  Eye
+  Eye,
+  Trash2
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -50,6 +51,7 @@ interface PostStats {
 export default function MyPostsFeed() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'engagement'>('recent');
   const [filterType, setFilterType] = useState<'all' | 'discussion' | 'soap_reflection' | 'prayer_request'>('all');
 
@@ -101,6 +103,41 @@ export default function MyPostsFeed() {
 
   const getEngagementScore = (post: UserPost) => {
     return (post.likeCount || 0) + (post.commentCount || 0) + (post.prayerCount || 0);
+  };
+
+  // Delete mutation for posts
+  const deleteMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      const response = await fetch(`/api/discussions/${postId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete post');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users/my-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/post-stats'] });
+      toast({
+        title: "Success",
+        description: "Post deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeletePost = (postId: number, postTitle: string) => {
+    if (window.confirm(`Are you sure you want to delete "${postTitle}"? This action cannot be undone.`)) {
+      deleteMutation.mutate(postId);
+    }
   };
 
   if (isLoading) {
@@ -241,13 +278,25 @@ export default function MyPostsFeed() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {format(new Date(post.createdAt), 'MMM d, yyyy')}
+                  <div className="flex items-center space-x-3">
+                    <div className="text-right">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {format(new Date(post.createdAt), 'MMM d, yyyy')}
+                      </div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500">
+                        {format(new Date(post.createdAt), 'h:mm a')}
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500">
-                      {format(new Date(post.createdAt), 'h:mm a')}
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeletePost(post.id, post.title)}
+                      disabled={deleteMutation.isPending}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="Delete post"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardHeader>
