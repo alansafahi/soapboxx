@@ -3791,17 +3791,7 @@ export class DatabaseStorage implements IStorage {
     // Get discussions
     if (type === 'all' || type === 'discussion') {
       const userDiscussions = await db
-        .select({
-          id: discussions.id,
-          title: discussions.title,
-          content: discussions.content,
-          category: discussions.category,
-          createdAt: discussions.createdAt,
-          likeCount: discussions.likeCount,
-          commentCount: discussions.commentCount,
-          isPublic: discussions.isPublic,
-          mood: discussions.mood,
-        })
+        .select()
         .from(discussions)
         .where(eq(discussions.authorId, userId))
         .orderBy(desc(discussions.createdAt));
@@ -3814,12 +3804,7 @@ export class DatabaseStorage implements IStorage {
     // Get SOAP entries
     if (type === 'all' || type === 'soap_reflection') {
       const userSoapEntries = await db
-        .select({
-          id: soapEntries.id,
-          content: soapEntries.scripture,
-          createdAt: soapEntries.createdAt,
-          isPublic: soapEntries.isPublic,
-        })
+        .select()
         .from(soapEntries)
         .where(eq(soapEntries.userId, userId))
         .orderBy(desc(soapEntries.createdAt));
@@ -3832,7 +3817,8 @@ export class DatabaseStorage implements IStorage {
         category: 'soap_reflection',
         likeCount: 0,
         commentCount: 0,
-        mood: null,
+        mood: s.mood || null,
+        content: s.scripture || s.observation || s.application || s.prayer || 'S.O.A.P. Entry',
       }));
       allPosts.push(...soapWithType);
     }
@@ -3840,14 +3826,7 @@ export class DatabaseStorage implements IStorage {
     // Get prayer requests
     if (type === 'all' || type === 'prayer_request') {
       const userPrayerRequests = await db
-        .select({
-          id: prayerRequests.id,
-          title: prayerRequests.title,
-          content: prayerRequests.content,
-          category: prayerRequests.category,
-          createdAt: prayerRequests.createdAt,
-          isPublic: prayerRequests.isPublic,
-        })
+        .select()
         .from(prayerRequests)
         .where(eq(prayerRequests.userId, userId))
         .orderBy(desc(prayerRequests.createdAt));
@@ -3865,7 +3844,7 @@ export class DatabaseStorage implements IStorage {
             type: 'prayer_request',
             likeCount: 0,
             commentCount: 0,
-            mood: null,
+            mood: prayer.mood || null,
             prayerCount: Number(prayerCount.count || 0),
           };
         })
