@@ -640,7 +640,7 @@ export function ModerationDashboard() {
                 </Button>
                 <Button
                   onClick={handleSendEditRequest}
-                  disabled={!editRequestFeedback.trim() || !(typeof editRequestSuggestions === 'string' && editRequestSuggestions.trim()) || requestEditMutation.isPending}
+                  disabled={!editRequestFeedback.trim() || !editRequestSuggestions || (typeof editRequestSuggestions === 'string' && !editRequestSuggestions.trim()) || requestEditMutation.isPending}
                   className="flex-1"
                 >
                   {requestEditMutation.isPending ? 'Sending...' : 'Send Edit Request'}

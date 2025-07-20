@@ -225,7 +225,6 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
   const [selectedReaction, setSelectedReaction] = useState<{ postId: number; reactionType: string } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
-  const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
   // Fetch discussions
   const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
