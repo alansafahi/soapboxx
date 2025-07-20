@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import FormattedContent from "../utils/FormattedContent";
 import { 
   MessageSquare, 
   Heart, 
@@ -252,9 +253,13 @@ export default function MyPostsFeed() {
               </CardHeader>
               
               <CardContent className="pt-0">
-                <p className="text-gray-700 dark:text-gray-300 line-clamp-2 mb-4">
-                  {post.content}
-                </p>
+                <div className="mb-4">
+                  <FormattedContent 
+                    content={post.content} 
+                    attachedMedia={post.attachedMedia} 
+                    className="text-gray-700 dark:text-gray-300 line-clamp-2"
+                  />
+                </div>
                 
                 {/* Engagement Stats */}
                 <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">

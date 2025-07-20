@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { FlagContentDialog } from './content-moderation/FlagContentDialog';
 import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
+import FormattedContent from '../utils/FormattedContent';
 
 interface EnhancedPost {
   id: number;
@@ -606,7 +607,11 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             
                             return (
                               <div>
-                                <p className="text-gray-800 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>
+                                <FormattedContent 
+                                  content={post.content} 
+                                  attachedMedia={post.attachedMedia} 
+                                  className="text-gray-800 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed"
+                                />
                                 {youtubeUrl && (
                                   <Button 
                                     onClick={() => {
@@ -624,7 +629,13 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             );
                           }
                           
-                          return <p className="text-gray-800 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed">{post.content}</p>;
+                          return (
+                            <FormattedContent 
+                              content={post.content} 
+                              attachedMedia={post.attachedMedia} 
+                              className="text-gray-800 dark:text-gray-100 dark:font-semibold whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere hyphens-auto leading-relaxed"
+                            />
+                          );
                         }
                       })()}
                       

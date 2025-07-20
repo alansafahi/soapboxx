@@ -3793,7 +3793,6 @@ export class DatabaseStorage implements IStorage {
       const userDiscussions = await db
         .select({
           id: discussions.id,
-          type: sql<string>`'discussion'`,
           title: discussions.title,
           content: discussions.content,
           category: discussions.category,
@@ -3807,7 +3806,9 @@ export class DatabaseStorage implements IStorage {
         .where(eq(discussions.authorId, userId))
         .orderBy(desc(discussions.createdAt));
 
-      allPosts.push(...userDiscussions);
+      // Add type field to each discussion
+      const discussionsWithType = userDiscussions.map(d => ({ ...d, type: 'discussion' }));
+      allPosts.push(...discussionsWithType);
     }
 
     // Get SOAP entries
@@ -3815,21 +3816,25 @@ export class DatabaseStorage implements IStorage {
       const userSoapEntries = await db
         .select({
           id: soapEntries.id,
-          type: sql<string>`'soap_reflection'`,
-          title: sql<string>`'S.O.A.P. Reflection'`,
           content: soapEntries.scripture,
-          category: sql<string>`'soap_reflection'`,
           createdAt: soapEntries.createdAt,
-          likeCount: sql<number>`0`,
-          commentCount: sql<number>`0`,
           isPublic: soapEntries.isPublic,
-          mood: sql<string>`null`,
         })
         .from(soapEntries)
         .where(eq(soapEntries.userId, userId))
         .orderBy(desc(soapEntries.createdAt));
 
-      allPosts.push(...userSoapEntries);
+      // Add consistent fields to SOAP entries
+      const soapWithType = userSoapEntries.map(s => ({
+        ...s,
+        type: 'soap_reflection',
+        title: 'S.O.A.P. Reflection',
+        category: 'soap_reflection',
+        likeCount: 0,
+        commentCount: 0,
+        mood: null,
+      }));
+      allPosts.push(...soapWithType);
     }
 
     // Get prayer requests
@@ -3837,36 +3842,36 @@ export class DatabaseStorage implements IStorage {
       const userPrayerRequests = await db
         .select({
           id: prayerRequests.id,
-          type: sql<string>`'prayer_request'`,
           title: prayerRequests.title,
           content: prayerRequests.content,
           category: prayerRequests.category,
           createdAt: prayerRequests.createdAt,
-          likeCount: sql<number>`0`,
-          commentCount: sql<number>`0`,
           isPublic: prayerRequests.isPublic,
-          mood: sql<string>`null`,
         })
         .from(prayerRequests)
         .where(eq(prayerRequests.userId, userId))
         .orderBy(desc(prayerRequests.createdAt));
 
       // Add prayer count for prayer requests
-      const prayerRequestsWithPrayerCount = await Promise.all(
+      const prayerRequestsWithCount = await Promise.all(
         userPrayerRequests.map(async (prayer) => {
           const [prayerCount] = await db
-            .select({ count: sql<number>`count(*)` })
+            .select({ count: count() })
             .from(prayerResponses)
             .where(eq(prayerResponses.prayerRequestId, prayer.id));
 
           return {
             ...prayer,
+            type: 'prayer_request',
+            likeCount: 0,
+            commentCount: 0,
+            mood: null,
             prayerCount: Number(prayerCount.count || 0),
           };
         })
       );
 
-      allPosts.push(...prayerRequestsWithPrayerCount);
+      allPosts.push(...prayerRequestsWithCount);
     }
 
     // Sort posts
@@ -3899,27 +3904,28 @@ export class DatabaseStorage implements IStorage {
     // Get discussion stats
     const [discussionStats] = await db
       .select({
-        count: sql<number>`count(*)`,
-        totalLikes: sql<number>`COALESCE(sum(${discussions.likeCount}), 0)`,
-        totalComments: sql<number>`COALESCE(sum(${discussions.commentCount}), 0)`,
+        count: count(),
+        totalLikes: sum(discussions.likeCount),
+        totalComments: sum(discussions.commentCount),
       })
       .from(discussions)
       .where(eq(discussions.authorId, userId));
 
     // Get SOAP entry count
     const [soapStats] = await db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: count() })
       .from(soapEntries)
       .where(eq(soapEntries.userId, userId));
 
-    // Get prayer request count and prayer responses
+    // Get prayer request count
     const [prayerRequestStats] = await db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: count() })
       .from(prayerRequests)
       .where(eq(prayerRequests.userId, userId));
 
+    // Get prayer responses for user's prayer requests
     const [prayerResponseStats] = await db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: count() })
       .from(prayerResponses)
       .innerJoin(prayerRequests, eq(prayerResponses.prayerRequestId, prayerRequests.id))
       .where(eq(prayerRequests.userId, userId));
