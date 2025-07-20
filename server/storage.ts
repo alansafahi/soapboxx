@@ -2347,89 +2347,106 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserPosts(userId: string, sort: string = 'recent', type: string = 'all'): Promise<any[]> {
-    const allPosts: any[] = [];
+    try {
+      const allPosts: any[] = [];
 
-    // Get discussions
-    if (type === 'all' || type === 'discussion') {
-      const userDiscussions = await db
-        .select()
-        .from(discussions)
-        .where(eq(discussions.authorId, userId))
-        .orderBy(desc(discussions.createdAt));
+      // Get discussions
+      if (type === 'all' || type === 'discussion') {
+        const userDiscussions = await db
+          .select()
+          .from(discussions)
+          .where(eq(discussions.authorId, userId))
+          .orderBy(desc(discussions.createdAt));
 
-      // Add type field to each discussion
-      const discussionsWithType = userDiscussions.map(d => ({ ...d, type: 'discussion' }));
-      allPosts.push(...discussionsWithType);
-    }
-
-    // Get SOAP entries
-    if (type === 'all' || type === 'soap_reflection') {
-      const userSoapEntries = await db
-        .select()
-        .from(soapEntries)
-        .where(eq(soapEntries.userId, userId))
-        .orderBy(desc(soapEntries.createdAt));
-
-      // Add consistent fields to SOAP entries
-      const soapWithType = userSoapEntries.map(s => ({
-        ...s,
-        type: 'soap_reflection',
-        title: 'S.O.A.P. Reflection',
-        category: 'soap_reflection',
-        likeCount: 0,
-        commentCount: 0,
-        mood: s.mood || null,
-        content: s.scripture || s.observation || s.application || s.prayer || 'S.O.A.P. Entry',
-      }));
-      allPosts.push(...soapWithType);
-    }
-
-    // Get prayer requests
-    if (type === 'all' || type === 'prayer_request') {
-      const userPrayerRequests = await db
-        .select()
-        .from(prayerRequests)
-        .where(eq(prayerRequests.userId, userId))
-        .orderBy(desc(prayerRequests.createdAt));
-
-      // Add prayer count for prayer requests
-      const prayerRequestsWithCount = await Promise.all(
-        userPrayerRequests.map(async (prayer) => {
-          const [prayerCount] = await db
-            .select({ count: count() })
-            .from(prayerResponses)
-            .where(eq(prayerResponses.prayerRequestId, prayer.id));
-
-          return {
-            ...prayer,
-            type: 'prayer_request',
-            likeCount: 0,
-            commentCount: 0,
-            mood: prayer.mood || null,
-            prayerCount: Number(prayerCount.count || 0),
-          };
-        })
-      );
-
-      allPosts.push(...prayerRequestsWithCount);
-    }
-
-    // Sort posts
-    allPosts.sort((a, b) => {
-      switch (sort) {
-        case 'popular':
-          return (b.likeCount || 0) - (a.likeCount || 0);
-        case 'engagement':
-          const aEngagement = (a.likeCount || 0) + (a.commentCount || 0) + (a.prayerCount || 0);
-          const bEngagement = (b.likeCount || 0) + (b.commentCount || 0) + (b.prayerCount || 0);
-          return bEngagement - aEngagement;
-        case 'recent':
-        default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        // Add type field to each discussion
+        const discussionsWithType = userDiscussions.map(d => ({ ...d, type: 'discussion' }));
+        allPosts.push(...discussionsWithType);
       }
-    });
 
-    return allPosts;
+      // Get SOAP entries
+      if (type === 'all' || type === 'soap_reflection') {
+        const userSoapEntries = await db
+          .select()
+          .from(soapEntries)
+          .where(eq(soapEntries.userId, userId))
+          .orderBy(desc(soapEntries.createdAt));
+
+        // Add consistent fields to SOAP entries
+        const soapWithType = userSoapEntries.map(s => ({
+          ...s,
+          type: 'soap_reflection',
+          title: 'S.O.A.P. Reflection',
+          category: 'soap_reflection',
+          likeCount: 0,
+          commentCount: 0,
+          mood: s.mood || null,
+          content: s.scripture || s.observation || s.application || s.prayer || 'S.O.A.P. Entry',
+        }));
+        allPosts.push(...soapWithType);
+      }
+
+      // Get prayer requests
+      if (type === 'all' || type === 'prayer_request') {
+        const userPrayerRequests = await db
+          .select()
+          .from(prayerRequests)
+          .where(eq(prayerRequests.userId, userId))
+          .orderBy(desc(prayerRequests.createdAt));
+
+        // Add prayer count for prayer requests
+        const prayerRequestsWithCount = await Promise.all(
+          userPrayerRequests.map(async (prayer) => {
+            try {
+              const [prayerCount] = await db
+                .select({ count: count() })
+                .from(prayerResponses)
+                .where(eq(prayerResponses.prayerRequestId, prayer.id));
+
+              return {
+                ...prayer,
+                type: 'prayer_request',
+                likeCount: 0,
+                commentCount: 0,
+                mood: prayer.mood || null,
+                prayerCount: Number(prayerCount.count || 0),
+              };
+            } catch (error) {
+              // Return prayer without count if error occurs
+              return {
+                ...prayer,
+                type: 'prayer_request',
+                likeCount: 0,
+                commentCount: 0,
+                mood: prayer.mood || null,
+                prayerCount: 0,
+              };
+            }
+          })
+        );
+
+        allPosts.push(...prayerRequestsWithCount);
+      }
+
+      // Sort posts
+      allPosts.sort((a, b) => {
+        switch (sort) {
+          case 'popular':
+            return (b.likeCount || 0) - (a.likeCount || 0);
+          case 'engagement':
+            const aEngagement = (a.likeCount || 0) + (a.commentCount || 0) + (a.prayerCount || 0);
+            const bEngagement = (b.likeCount || 0) + (b.commentCount || 0) + (b.prayerCount || 0);
+            return bEngagement - aEngagement;
+          case 'recent':
+          default:
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+      });
+
+      return allPosts;
+    } catch (error) {
+      console.error('Error in getUserPosts:', error);
+      return [];
+    }
   }
 
   async getUserPostStats(userId: string): Promise<{
