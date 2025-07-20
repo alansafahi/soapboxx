@@ -357,6 +357,43 @@ export class VolunteerStorage {
     return check;
   }
 
+  // Volunteer Registration Management
+  async createVolunteerRegistration(data: any): Promise<any> {
+    const [registration] = await db.insert(volunteerRegistrations).values({
+      volunteerId: data.volunteerId,
+      opportunityId: data.opportunityId,
+      notes: data.notes,
+      shiftPreference: data.shiftPreference,
+      status: data.status || 'registered',
+      registeredAt: new Date()
+    }).returning();
+
+    return registration;
+  }
+
+  async getVolunteerRegistrations(volunteerId: number): Promise<any[]> {
+    const registrations = await db
+      .select({
+        id: volunteerRegistrations.id,
+        opportunityId: volunteerRegistrations.opportunityId,
+        status: volunteerRegistrations.status,
+        registeredAt: volunteerRegistrations.registeredAt,
+        notes: volunteerRegistrations.notes,
+        shiftPreference: volunteerRegistrations.shiftPreference,
+        opportunityTitle: volunteerOpportunities.title,
+        opportunityDescription: volunteerOpportunities.description,
+        location: volunteerOpportunities.location,
+        startDate: volunteerOpportunities.startDate,
+        endDate: volunteerOpportunities.endDate
+      })
+      .from(volunteerRegistrations)
+      .innerJoin(volunteerOpportunities, eq(volunteerRegistrations.opportunityId, volunteerOpportunities.id))
+      .where(eq(volunteerRegistrations.volunteerId, volunteerId))
+      .orderBy(desc(volunteerRegistrations.registeredAt));
+
+    return registrations;
+  }
+
   // Ministry Team Management
   async getVolunteersByMinistry(ministry: string, churchId?: number): Promise<Volunteer[]> {
     let query = db

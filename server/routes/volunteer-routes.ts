@@ -313,6 +313,55 @@ router.get('/ministry/:ministry/team-optimization', async (req, res) => {
   }
 });
 
+// Volunteer signup for opportunities
+router.post('/signup', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
+    if (!volunteer) {
+      return res.status(404).json({ error: 'Volunteer profile not found. Please complete assessment first.' });
+    }
+
+    const { opportunityId, notes, shiftPreference } = req.body;
+    
+    const registration = await volunteerStorage.createVolunteerRegistration({
+      volunteerId: volunteer.id,
+      opportunityId,
+      notes,
+      shiftPreference,
+      status: 'registered'
+    });
+
+    res.json(registration);
+  } catch (error) {
+    console.error('Volunteer signup error:', error);
+    res.status(500).json({ error: 'Failed to sign up for opportunity' });
+  }
+});
+
+// Get volunteer registrations
+router.get('/my-registrations', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const volunteer = await volunteerStorage.getVolunteerByUserId(req.user.email);
+    if (!volunteer) {
+      return res.status(404).json({ error: 'Volunteer profile not found' });
+    }
+
+    const registrations = await volunteerStorage.getVolunteerRegistrations(volunteer.id);
+    res.json(registrations);
+  } catch (error) {
+    console.error('Registrations fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch registrations' });
+  }
+});
+
 // Get personalized onboarding path
 router.get('/onboarding-path', async (req, res) => {
   try {

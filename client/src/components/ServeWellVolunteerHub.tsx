@@ -236,7 +236,7 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
 const DivineAppointmentsPanel = () => {
   const { data: divineAppointments, isLoading } = useQuery({
     queryKey: ['/api/volunteers/divine-appointments'],
-    queryFn: () => apiRequest('/api/volunteers/divine-appointments')
+    queryFn: () => apiRequest('/api/volunteers/divine-appointments', 'GET')
   });
 
   const acceptMutation = useMutation({
@@ -374,12 +374,12 @@ const DivineAppointmentsPanel = () => {
 const VolunteerDashboard = () => {
   const { data: profile } = useQuery({
     queryKey: ['/api/volunteers/profile'],
-    queryFn: () => apiRequest('/api/volunteers/profile')
+    queryFn: () => apiRequest('/api/volunteers/profile', 'GET')
   });
 
   const { data: stats } = useQuery({
     queryKey: ['/api/volunteers/stats'],
-    queryFn: () => apiRequest('/api/volunteers/stats')
+    queryFn: () => apiRequest('/api/volunteers/stats', 'GET')
   });
 
   return (
@@ -469,12 +469,194 @@ const VolunteerDashboard = () => {
   );
 };
 
+// Volunteer Opportunities Panel with Signup
+const VolunteerOpportunitiesPanel = () => {
+  const [selectedOpportunity, setSelectedOpportunity] = useState<VolunteerOpportunity | null>(null);
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
+  
+  const { data: opportunities, isLoading } = useQuery({
+    queryKey: ['/api/volunteers/opportunities'],
+    queryFn: () => apiRequest('/api/volunteers/opportunities', 'GET')
+  });
+
+  const signupMutation = useMutation({
+    mutationFn: (data: { opportunityId: number; notes?: string; shiftPreference?: string }) =>
+      apiRequest('/api/volunteers/signup', 'POST', data),
+    onSuccess: () => {
+      setShowSignupDialog(false);
+      setSelectedOpportunity(null);
+    }
+  });
+
+  const handleSignup = (opportunity: VolunteerOpportunity) => {
+    setSelectedOpportunity(opportunity);
+    setShowSignupDialog(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-200 rounded"></div>
+                <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Volunteer Opportunities</h2>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Filter className="w-4 h-4 mr-2" />
+            Filter
+          </Button>
+          <Button variant="outline" size="sm">
+            <Search className="w-4 h-4 mr-2" />
+            Search
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {opportunities?.map((opportunity: VolunteerOpportunity) => (
+          <Card key={opportunity.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-lg">{opportunity.title}</CardTitle>
+                  <CardDescription className="flex items-center mt-1">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {opportunity.location}
+                  </CardDescription>
+                </div>
+                <Badge
+                  variant={opportunity.priority === 'high' ? 'destructive' : 
+                          opportunity.priority === 'medium' ? 'default' : 'secondary'}
+                >
+                  {opportunity.priority}
+                </Badge>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600">{opportunity.description}</p>
+              
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center">
+                  <Users className="w-4 h-4 mr-1" />
+                  {opportunity.volunteersRegistered || 0}/{opportunity.volunteersNeeded || 1}
+                </span>
+                <span className="flex items-center">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {opportunity.timeCommitment || 'Flexible'}
+                </span>
+              </div>
+
+              {opportunity.spiritualGifts && opportunity.spiritualGifts.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-gray-500">Spiritual Gifts Needed:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {opportunity.spiritualGifts.map((gift, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {gift}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {opportunity.backgroundCheckRequired && (
+                <div className="flex items-center text-xs text-amber-600">
+                  <Shield className="w-3 h-3 mr-1" />
+                  Background check required
+                </div>
+              )}
+
+              <Button 
+                onClick={() => handleSignup(opportunity)}
+                className="w-full"
+                disabled={opportunity.volunteersRegistered >= opportunity.volunteersNeeded}
+              >
+                {opportunity.volunteersRegistered >= opportunity.volunteersNeeded ? 
+                  'Position Filled' : 'Sign Up to Serve'}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Signup Dialog */}
+      <Dialog open={showSignupDialog} onOpenChange={setShowSignupDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign Up: {selectedOpportunity?.title}</DialogTitle>
+            <DialogDescription>
+              Complete your volunteer registration for this opportunity
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Opportunity Details</h4>
+              <p className="text-sm text-gray-600 mb-2">{selectedOpportunity?.description}</p>
+              <div className="text-xs text-gray-500 space-y-1">
+                <p>📍 Location: {selectedOpportunity?.location}</p>
+                <p>⏰ Commitment: {selectedOpportunity?.timeCommitment}</p>
+                {selectedOpportunity?.backgroundCheckRequired && (
+                  <p>🛡️ Background check required</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Additional Notes (Optional)</label>
+              <Textarea placeholder="Any questions or special considerations..." />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowSignupDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => signupMutation.mutate({ 
+                  opportunityId: selectedOpportunity?.id || 0 
+                })}
+                disabled={signupMutation.isPending}
+                className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500"
+              >
+                {signupMutation.isPending ? 'Signing Up...' : 'Confirm Signup'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 // Main D.I.V.I.N.E. Component
 const ServeWellVolunteerHub = () => {
   const [showAssessment, setShowAssessment] = useState(false);
   const { data: hasProfile } = useQuery({
     queryKey: ['/api/volunteers/has-profile'],
-    queryFn: () => apiRequest('/api/volunteers/has-profile')
+    queryFn: () => apiRequest('/api/volunteers/has-profile', 'GET')
   });
 
   const handleAssessmentComplete = (profile: any) => {
@@ -526,10 +708,7 @@ const ServeWellVolunteerHub = () => {
         </TabsContent>
 
         <TabsContent value="opportunities">
-          <div className="text-center p-8">
-            <h2 className="text-2xl font-bold mb-4">All Opportunities</h2>
-            <p className="text-gray-600">Browse all available volunteer opportunities</p>
-          </div>
+          <VolunteerOpportunitiesPanel />
         </TabsContent>
 
         <TabsContent value="teams">
