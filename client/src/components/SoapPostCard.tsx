@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone, BookmarkX, Bookmark, Flag } from "lucide-react";
+import { ChevronDown, ChevronUp, Heart, MessageCircle, BookOpen, Save, RotateCcw, Share2, Copy, Facebook, Twitter, Mail, Smartphone, BookmarkX, Bookmark, Flag, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -216,7 +216,9 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
   };
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Fetch comments for this SOAP post to show inline
   const { data: inlineComments = [] } = useQuery({
@@ -265,11 +267,43 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
     }
   });
 
+  // Delete SOAP entry mutation
+  const deleteSoapMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('DELETE', `/api/soap/${post.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
+      setDeleteDialogOpen(false);
+      toast({
+        title: "S.O.A.P. entry deleted",
+        description: "Your reflection has been removed.",
+      });
+    },
+    onError: () => {
+      setDeleteDialogOpen(false);
+      toast({
+        title: "Failed to delete",
+        variant: "destructive",
+      });
+    }
+  });
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const handleDeletePost = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePost = () => {
+    deleteSoapMutation.mutate();
   };
 
   const handleReaction = async (reactionType: string) => {
@@ -625,20 +659,36 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
               </span>
             </button>
             
-            <FlagContentDialog
-              contentType="soap_entry"
-              contentId={post.id}
-              trigger={
-                <button 
-                  className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
-                >
-                  <Flag className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
-                  <span className="text-xs font-medium text-gray-500 group-hover:text-red-600 dark:group-hover:text-red-400">
-                    Report
-                  </span>
-                </button>
-              }
-            />
+            {/* Flag Button - Only show for other users' posts */}
+            {user && post.author && (String(user.id) !== String(post.author.id) && user.email !== post.author.email) && (
+              <FlagContentDialog
+                contentType="soap_entry"
+                contentId={post.id}
+                trigger={
+                  <button 
+                    className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+                  >
+                    <Flag className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
+                    <span className="text-xs font-medium text-gray-500 group-hover:text-red-600 dark:group-hover:text-red-400">
+                      Report
+                    </span>
+                  </button>
+                }
+              />
+            )}
+
+            {/* Delete Button - Only show for post author */}
+            {user && post.author && (String(user.id) === String(post.author.id) || user.email === post.author.email) && (
+              <button 
+                onClick={handleDeletePost}
+                className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+              >
+                <Trash2 className="w-4 h-4 text-red-500 group-hover:text-red-700 transition-colors" />
+                <span className="text-xs font-medium text-red-600 group-hover:text-red-700 dark:group-hover:text-red-400">
+                  Delete
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -766,6 +816,34 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 <span className="text-sm">Copy Link</span>
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete S.O.A.P. Entry</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this S.O.A.P. reflection? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleteSoapMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeletePost}
+              disabled={deleteSoapMutation.isPending}
+            >
+              {deleteSoapMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
