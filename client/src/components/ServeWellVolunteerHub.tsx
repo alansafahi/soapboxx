@@ -35,6 +35,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import VolunteerCalendar from './VolunteerCalendar';
 
 // D.I.V.I.N.E. - Disciple-Inspired Volunteer Integration & Nurture Engine
 
@@ -488,16 +489,24 @@ const VolunteerOpportunitiesPanel = () => {
   const signupMutation = useMutation({
     mutationFn: (data: { opportunityId: number; notes?: string; shiftPreference?: string }) =>
       apiRequest('/api/volunteers/signup', 'POST', data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       setShowSignupDialog(false);
       setSelectedOpportunity(null);
       setSignupNotes('');
-      // Show success feedback
-      console.log('Successfully signed up for volunteer opportunity!');
+      
+      // Show success message with next steps
+      alert('🎉 Thank you for signing up!\n\n' +
+            '✅ Your application has been submitted\n' +
+            '⏳ Pending church admin approval\n' +
+            '📧 You\'ll receive a notification when approved\n' +
+            '📅 Check "My Calendar" to track your commitments');
+      
+      // Refresh registrations data
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers/my-registrations'] });
     },
     onError: (error) => {
       console.error('Signup failed:', error);
-      // Still close dialog to prevent getting stuck
+      alert('❌ Signup failed. Please try again or contact support.');
       setShowSignupDialog(false);
       setSignupNotes('');
     }
@@ -698,7 +707,7 @@ const ServeWellVolunteerHub = () => {
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="appointments">Divine Appointments</TabsTrigger>
           <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-          <TabsTrigger value="teams">My Teams</TabsTrigger>
+          <TabsTrigger value="calendar">My Calendar</TabsTrigger>
           <TabsTrigger value="impact">Impact</TabsTrigger>
         </TabsList>
 
@@ -734,11 +743,8 @@ const ServeWellVolunteerHub = () => {
           <VolunteerOpportunitiesPanel />
         </TabsContent>
 
-        <TabsContent value="teams">
-          <div className="text-center p-8">
-            <h2 className="text-2xl font-bold mb-4">My Ministry Teams</h2>
-            <p className="text-gray-600">Manage your team assignments and relationships</p>
-          </div>
+        <TabsContent value="calendar">
+          <VolunteerCalendar />
         </TabsContent>
 
         <TabsContent value="impact">

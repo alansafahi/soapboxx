@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { volunteerStorage } from '../volunteer-storage';
 import { assessSpiritualGifts, findDivineAppointments, optimizeTeamComposition, recommendOnboardingPath } from '../ai-volunteer-matching';
+import { volunteerNotificationService } from '../volunteer-notifications';
 import { insertVolunteerSchema, insertVolunteerOpportunitySchema } from '@shared/schema';
 
 const router = Router();
@@ -331,11 +332,20 @@ router.post('/signup', async (req, res) => {
       volunteerId: volunteer.id,
       opportunityId,
       notes,
-      shiftPreference,
-      status: 'registered'
+      status: 'pending_approval'
     });
 
-    res.json({ success: true, registration });
+    // Send confirmation notification to volunteer
+    await volunteerNotificationService.sendVolunteerSignupConfirmation(volunteer.id, opportunityId);
+    
+    // Notify church admins of new signup
+    await volunteerNotificationService.notifyAdminsOfVolunteerSignup(registration.id, volunteer.id, opportunityId);
+
+    res.json({ 
+      success: true, 
+      registration,
+      message: "Thank you for signing up! Your application is pending approval and you'll receive a confirmation notification shortly."
+    });
   } catch (error) {
     console.error('Volunteer signup error:', error);
     res.status(500).json({ error: 'Failed to sign up for opportunity' });

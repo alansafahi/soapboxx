@@ -363,8 +363,7 @@ export class VolunteerStorage {
       volunteerId: data.volunteerId,
       opportunityId: data.opportunityId,
       notes: data.notes,
-      shiftPreference: data.shiftPreference,
-      status: data.status || 'registered',
+      status: data.status || 'pending_approval',
       registeredAt: new Date()
     }).returning();
 
@@ -379,7 +378,6 @@ export class VolunteerStorage {
         status: volunteerRegistrations.status,
         registeredAt: volunteerRegistrations.registeredAt,
         notes: volunteerRegistrations.notes,
-        shiftPreference: volunteerRegistrations.shiftPreference,
         opportunityTitle: volunteerOpportunities.title,
         opportunityDescription: volunteerOpportunities.description,
         location: volunteerOpportunities.location,
@@ -392,6 +390,62 @@ export class VolunteerStorage {
       .orderBy(desc(volunteerRegistrations.registeredAt));
 
     return registrations;
+  }
+
+  // Get pending registrations for admin approval
+  async getPendingRegistrations(churchId?: number): Promise<any[]> {
+    const pendingRegistrations = await db
+      .select({
+        id: volunteerRegistrations.id,
+        volunteerId: volunteerRegistrations.volunteerId,
+        opportunityId: volunteerRegistrations.opportunityId,
+        status: volunteerRegistrations.status,
+        registeredAt: volunteerRegistrations.registeredAt,
+        notes: volunteerRegistrations.notes,
+        opportunityTitle: volunteerOpportunities.title,
+        opportunityDescription: volunteerOpportunities.description,
+        location: volunteerOpportunities.location,
+        startDate: volunteerOpportunities.startDate,
+        endDate: volunteerOpportunities.endDate,
+        volunteerName: volunteers.firstName,
+        volunteerLastName: volunteers.lastName,
+        volunteerEmail: volunteers.email
+      })
+      .from(volunteerRegistrations)
+      .innerJoin(volunteerOpportunities, eq(volunteerRegistrations.opportunityId, volunteerOpportunities.id))
+      .innerJoin(volunteers, eq(volunteerRegistrations.volunteerId, volunteers.id))
+      .where(eq(volunteerRegistrations.status, 'pending_approval'))
+      .orderBy(desc(volunteerRegistrations.registeredAt));
+
+    return pendingRegistrations;
+  }
+
+  // Update registration status
+  async updateRegistrationStatus(registrationId: number, status: string): Promise<any> {
+    const [updatedRegistration] = await db
+      .update(volunteerRegistrations)
+      .set({ status })
+      .where(eq(volunteerRegistrations.id, registrationId))
+      .returning();
+
+    return updatedRegistration;
+  }
+
+  // Helper methods for notifications
+  async getVolunteerById(volunteerId: number): Promise<any> {
+    const [volunteer] = await db
+      .select()
+      .from(volunteers)
+      .where(eq(volunteers.id, volunteerId));
+    return volunteer;
+  }
+
+  async getVolunteerOpportunity(opportunityId: number): Promise<any> {
+    const [opportunity] = await db
+      .select()
+      .from(volunteerOpportunities)
+      .where(eq(volunteerOpportunities.id, opportunityId));
+    return opportunity;
   }
 
   // Ministry Team Management
