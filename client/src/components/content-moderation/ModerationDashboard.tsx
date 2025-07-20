@@ -182,8 +182,8 @@ export function ModerationDashboard() {
       }
       
       // Fill in the feedback and suggestions with AI-generated content
-      setEditRequestFeedback(data.feedback || '');
-      setEditRequestSuggestions(data.suggestions || '');
+      setEditRequestFeedback(typeof data.feedback === 'string' ? data.feedback : '');
+      setEditRequestSuggestions(typeof data.suggestions === 'string' ? data.suggestions : '');
 
       toast({
         title: "AI Suggestions Generated",
@@ -620,7 +620,7 @@ export function ModerationDashboard() {
                   </div>
                   <Textarea
                     id="editSuggestions"
-                    value={editRequestSuggestions}
+                    value={typeof editRequestSuggestions === 'string' ? editRequestSuggestions : ''}
                     onChange={(e) => setEditRequestSuggestions(e.target.value)}
                     rows={4}
                     className="w-full"
@@ -640,7 +640,7 @@ export function ModerationDashboard() {
                 </Button>
                 <Button
                   onClick={handleSendEditRequest}
-                  disabled={!editRequestFeedback.trim() || !editRequestSuggestions.trim() || requestEditMutation.isPending}
+                  disabled={!editRequestFeedback.trim() || !(typeof editRequestSuggestions === 'string' && editRequestSuggestions.trim()) || requestEditMutation.isPending}
                   className="flex-1"
                 >
                   {requestEditMutation.isPending ? 'Sending...' : 'Send Edit Request'}
