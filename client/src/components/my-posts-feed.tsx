@@ -14,7 +14,7 @@ import {
   Filter, 
   TrendingUp,
   BookOpen,
-  Hands,
+  Hand,
   Users,
   ChevronDown,
   BarChart3,
@@ -81,7 +81,7 @@ export default function MyPostsFeed() {
       case 'soap_reflection':
         return <BookOpen className="h-4 w-4 text-blue-500" />;
       case 'prayer_request':
-        return <Hands className="h-4 w-4 text-purple-500" />;
+        return <Hand className="h-4 w-4 text-purple-500" />;
       default:
         return <MessageSquare className="h-4 w-4 text-green-500" />;
     }
@@ -268,7 +268,7 @@ export default function MyPostsFeed() {
                   </div>
                   {post.prayerCount !== undefined && (
                     <div className="flex items-center space-x-1">
-                      <Hands className="h-4 w-4" />
+                      <Hand className="h-4 w-4" />
                       <span>{post.prayerCount}</span>
                     </div>
                   )}
