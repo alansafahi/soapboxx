@@ -7232,6 +7232,47 @@ Return JSON with this exact structure:
     }
   });
 
+  // Get user's posts (My Posts functionality)
+  app.get('/api/users/my-posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const { sort = 'recent', type = 'all' } = req.query;
+      const posts = await storage.getUserPosts(userId, sort as string, type as string);
+      res.json(posts);
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch user posts',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Get user's post statistics
+  app.get('/api/users/post-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const stats = await storage.getUserPostStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching user post stats:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch user post statistics',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Church routes
   app.get('/api/churches', async (req, res) => {
     try {

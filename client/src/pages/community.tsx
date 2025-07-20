@@ -4,10 +4,11 @@ import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
 import CommunityFeed from "../components/community-feed";
 import EnhancedCommunityFeed from "../components/enhanced-community-feed";
+import MyPostsFeed from "../components/my-posts-feed";
 import MobileNav from "../components/mobile-nav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
-import { Sparkles, Users, MessageCircle, AlertTriangle } from "lucide-react";
+import { Sparkles, Users, MessageCircle, AlertTriangle, User } from "lucide-react";
 
 export default function CommunityPage() {
   const { toast } = useToast();
@@ -112,10 +113,14 @@ export default function CommunityPage() {
         )}
         
         <Tabs defaultValue="enhanced" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="enhanced" className="flex items-center space-x-2">
               <Sparkles className="h-4 w-4" />
-              <span>Enhanced Feed</span>
+              <span>Latest Posts</span>
+            </TabsTrigger>
+            <TabsTrigger value="myposts" className="flex items-center space-x-2">
+              <User className="h-4 w-4" />
+              <span>My Posts</span>
             </TabsTrigger>
             <TabsTrigger value="classic" className="flex items-center space-x-2">
               <MessageCircle className="h-4 w-4" />
@@ -125,6 +130,10 @@ export default function CommunityPage() {
           
           <TabsContent value="enhanced">
             <EnhancedCommunityFeed highlightId={highlightId} />
+          </TabsContent>
+          
+          <TabsContent value="myposts">
+            <MyPostsFeed />
           </TabsContent>
           
           <TabsContent value="classic">

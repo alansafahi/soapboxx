@@ -3785,6 +3785,156 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getUserPosts(userId: string, sort: string = 'recent', type: string = 'all'): Promise<any[]> {
+    const allPosts: any[] = [];
+
+    // Get discussions
+    if (type === 'all' || type === 'discussion') {
+      const userDiscussions = await db
+        .select({
+          id: discussions.id,
+          type: sql<string>`'discussion'`,
+          title: discussions.title,
+          content: discussions.content,
+          category: discussions.category,
+          createdAt: discussions.createdAt,
+          likeCount: discussions.likeCount,
+          commentCount: discussions.commentCount,
+          isPublic: discussions.isPublic,
+          mood: discussions.mood,
+        })
+        .from(discussions)
+        .where(eq(discussions.authorId, userId))
+        .orderBy(desc(discussions.createdAt));
+
+      allPosts.push(...userDiscussions);
+    }
+
+    // Get SOAP entries
+    if (type === 'all' || type === 'soap_reflection') {
+      const userSoapEntries = await db
+        .select({
+          id: soapEntries.id,
+          type: sql<string>`'soap_reflection'`,
+          title: sql<string>`'S.O.A.P. Reflection'`,
+          content: soapEntries.scripture,
+          category: sql<string>`'soap_reflection'`,
+          createdAt: soapEntries.createdAt,
+          likeCount: sql<number>`0`,
+          commentCount: sql<number>`0`,
+          isPublic: soapEntries.isPublic,
+          mood: sql<string>`null`,
+        })
+        .from(soapEntries)
+        .where(eq(soapEntries.userId, userId))
+        .orderBy(desc(soapEntries.createdAt));
+
+      allPosts.push(...userSoapEntries);
+    }
+
+    // Get prayer requests
+    if (type === 'all' || type === 'prayer_request') {
+      const userPrayerRequests = await db
+        .select({
+          id: prayerRequests.id,
+          type: sql<string>`'prayer_request'`,
+          title: prayerRequests.title,
+          content: prayerRequests.content,
+          category: prayerRequests.category,
+          createdAt: prayerRequests.createdAt,
+          likeCount: sql<number>`0`,
+          commentCount: sql<number>`0`,
+          isPublic: prayerRequests.isPublic,
+          mood: sql<string>`null`,
+        })
+        .from(prayerRequests)
+        .where(eq(prayerRequests.userId, userId))
+        .orderBy(desc(prayerRequests.createdAt));
+
+      // Add prayer count for prayer requests
+      const prayerRequestsWithPrayerCount = await Promise.all(
+        userPrayerRequests.map(async (prayer) => {
+          const [prayerCount] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(prayerResponses)
+            .where(eq(prayerResponses.prayerRequestId, prayer.id));
+
+          return {
+            ...prayer,
+            prayerCount: Number(prayerCount.count || 0),
+          };
+        })
+      );
+
+      allPosts.push(...prayerRequestsWithPrayerCount);
+    }
+
+    // Sort posts
+    allPosts.sort((a, b) => {
+      switch (sort) {
+        case 'popular':
+          return (b.likeCount || 0) - (a.likeCount || 0);
+        case 'engagement':
+          const aEngagement = (a.likeCount || 0) + (a.commentCount || 0) + (a.prayerCount || 0);
+          const bEngagement = (b.likeCount || 0) + (b.commentCount || 0) + (b.prayerCount || 0);
+          return bEngagement - aEngagement;
+        case 'recent':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+
+    return allPosts;
+  }
+
+  async getUserPostStats(userId: string): Promise<{
+    totalPosts: number;
+    totalLikes: number;
+    totalComments: number;
+    totalPrayers: number;
+    discussionCount: number;
+    soapCount: number;
+    prayerRequestCount: number;
+  }> {
+    // Get discussion stats
+    const [discussionStats] = await db
+      .select({
+        count: sql<number>`count(*)`,
+        totalLikes: sql<number>`COALESCE(sum(${discussions.likeCount}), 0)`,
+        totalComments: sql<number>`COALESCE(sum(${discussions.commentCount}), 0)`,
+      })
+      .from(discussions)
+      .where(eq(discussions.authorId, userId));
+
+    // Get SOAP entry count
+    const [soapStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(soapEntries)
+      .where(eq(soapEntries.userId, userId));
+
+    // Get prayer request count and prayer responses
+    const [prayerRequestStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(prayerRequests)
+      .where(eq(prayerRequests.userId, userId));
+
+    const [prayerResponseStats] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(prayerResponses)
+      .innerJoin(prayerRequests, eq(prayerResponses.prayerRequestId, prayerRequests.id))
+      .where(eq(prayerRequests.userId, userId));
+
+    return {
+      totalPosts: Number(discussionStats.count) + Number(soapStats.count) + Number(prayerRequestStats.count),
+      totalLikes: Number(discussionStats.totalLikes || 0),
+      totalComments: Number(discussionStats.totalComments || 0),
+      totalPrayers: Number(prayerResponseStats.count || 0),
+      discussionCount: Number(discussionStats.count || 0),
+      soapCount: Number(soapStats.count || 0),
+      prayerRequestCount: Number(prayerRequestStats.count || 0),
+    };
+  }
+
   // Duplicate function removed - implementation exists above
 
   async trackUserActivity(activity: InsertUserActivity): Promise<void> {
