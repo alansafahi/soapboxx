@@ -4226,11 +4226,11 @@ export class DatabaseStorage implements IStorage {
       });
       
       // Log the moderation action
-      await db.insert(moderationActions).values({
+      await db.insert(contentModerationActions).values({
         contentType,
         contentId,
         moderatorId,
-        action: 'edit_requested',
+        actionType: 'edit_requested',
         reason: 'Moderator requested content edit',
         createdAt: requestedAt
       });

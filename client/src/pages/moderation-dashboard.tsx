@@ -63,17 +63,9 @@ export default function ModerationDashboardPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Access Restricted
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dark:text-gray-400">
             You need moderator privileges to access this dashboard.
           </p>
-          <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 space-y-2">
-            <p>Current user: {user?.email}</p>
-            <p>User role: {user?.role}</p>
-            <p>Church associations: {userChurches ? userChurches.length : 'Loading...'}</p>
-            {userChurches && userChurches.map((uc: any, i: number) => (
-              <p key={i}>Church {i+1}: {uc.name} ({uc.role})</p>
-            ))}
-          </div>
         </div>
       </div>
     );
