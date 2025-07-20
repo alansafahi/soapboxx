@@ -167,7 +167,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/contacts" component={ContactsPage} />
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
-                                    <ProtectedRoute path="/servewell" component={DIVINEPage} />
+                                    <ProtectedRoute path="/divine" component={DIVINEPage} />
                                     
                                     {/* Admin Portal Routes */}
                                     <ProtectedRoute path="/admin" component={AdminPage} />

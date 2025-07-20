@@ -99,7 +99,7 @@ export default function SidebarFixed() {
 
   // Check if user has admin role in any church
   const hasChurchAdminRole = useMemo(() => {
-    if (!userChurches || !userChurches.length) {
+    if (!userChurches || !Array.isArray(userChurches) || userChurches.length === 0) {
       return false;
     }
     
@@ -163,7 +163,7 @@ export default function SidebarFixed() {
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Saved Reflections", href: "/saved-reflections", icon: Bookmark },
         { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Heart },
-        { label: "D.I.V.I.N.E.", href: "/servewell", icon: Heart },
+        { label: "D.I.V.I.N.E.", href: "/divine", icon: Heart },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
         { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
