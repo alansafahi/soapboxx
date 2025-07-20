@@ -171,12 +171,14 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
                   name={`responses.${q.id}`}
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium text-gray-900 dark:text-gray-100">
-                        {q.question}
-                        <Badge variant="outline" className="ml-2 text-xs">
+                      <div className="flex justify-between items-start mb-2">
+                        <FormLabel className="text-base font-medium text-gray-900 dark:text-gray-100 flex-1 pr-4">
+                          {q.question}
+                        </FormLabel>
+                        <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap">
                           {q.gift}
                         </Badge>
-                      </FormLabel>
+                      </div>
                       <FormControl>
                         <div className="flex justify-between items-center mt-2">
                           <span className="text-sm text-gray-500">Strongly Disagree</span>
