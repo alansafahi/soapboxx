@@ -42,6 +42,7 @@ import {
   weeklySeries,
   sermonMedia,
   checkIns,
+  moodCheckins,
   qrCodes,
   mediaFiles,
   mediaCollections,
@@ -2688,6 +2689,121 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error getting user check-ins:', error);
       return [];
+    }
+  }
+  
+  // Mood check-in operations
+  async createMoodCheckin(moodCheckinData: InsertMoodCheckin): Promise<MoodCheckin> {
+    try {
+      // Get user's church for additional context
+      const user = await this.getUser(moodCheckinData.userId);
+      const churchId = user?.churchId;
+      
+      // Create mood check-in record
+      const [moodCheckin] = await db
+        .insert(moodCheckins)
+        .values({
+          ...moodCheckinData,
+          churchId,
+          shareable: moodCheckinData.shareable || false,
+          aiContentGenerated: false,
+          createdAt: new Date(),
+        })
+        .returning();
+      
+      // Record user activity for engagement tracking
+      await db.insert(userActivities).values({
+        userId: moodCheckinData.userId,
+        activityType: 'mood_checkin',
+        entityId: moodCheckin.id,
+        points: 5, // Points for mood check-in
+        createdAt: new Date(),
+      });
+      
+      return moodCheckin;
+    } catch (error) {
+      console.error('Error creating mood check-in:', error);
+      throw new Error('Failed to create mood check-in');
+    }
+  }
+  
+  async getRecentMoodCheckins(userId: string, limit: number = 10): Promise<MoodCheckin[]> {
+    try {
+      const recentCheckins = await db
+        .select()
+        .from(moodCheckins)
+        .where(eq(moodCheckins.userId, userId))
+        .orderBy(desc(moodCheckins.createdAt))
+        .limit(limit);
+        
+      return recentCheckins;
+    } catch (error) {
+      console.error('Error getting recent mood check-ins:', error);
+      return [];
+    }
+  }
+  
+  async getRecentMoodCheckIns(limit: number = 10): Promise<any[]> {
+    try {
+      // Get recent mood check-ins with user info for horizontal strip display
+      const result = await db.execute(sql`
+        SELECT 
+          mc.*,
+          u.id as user_id,
+          u.first_name,
+          u.last_name,
+          u.email,
+          u.profile_image_url
+        FROM mood_checkins mc
+        LEFT JOIN users u ON mc.user_id = u.id
+        ORDER BY mc.created_at DESC
+        LIMIT ${limit}
+      `);
+      
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        userId: row.user_id,
+        mood: row.mood,
+        moodEmoji: row.mood_emoji,
+        moodScore: row.mood_score,
+        notes: row.notes,
+        createdAt: row.created_at,
+        user: {
+          id: row.user_id,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          email: row.email,
+          profileImageUrl: row.profile_image_url,
+        }
+      }));
+    } catch (error) {
+      console.error('Error getting recent mood check-ins:', error);
+      return [];
+    }
+  }
+  
+  async getMoodInsights(userId: string, days: number = 30): Promise<any> {
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      const insights = await db
+        .select({
+          averageScore: avg(moodCheckins.moodScore),
+          totalCheckins: count(moodCheckins.id),
+        })
+        .from(moodCheckins)
+        .where(
+          and(
+            eq(moodCheckins.userId, userId),
+            gte(moodCheckins.createdAt, startDate)
+          )
+        );
+        
+      return insights[0] || { averageScore: 0, totalCheckins: 0 };
+    } catch (error) {
+      console.error('Error getting mood insights:', error);
+      return { averageScore: 0, totalCheckins: 0 };
     }
   }
 }
