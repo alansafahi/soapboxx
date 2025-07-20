@@ -147,6 +147,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 20, 2025: MY POSTS ENGAGEMENT CALCULATIONS AND IMAGE DISPLAY COMPLETELY FIXED - Successfully resolved NaN engagement values and missing images in user posts display by fixing null value handling and ensuring attachedMedia field inclusion across all post types
+  - ENGAGEMENT CALCULATIONS FIXED: Updated getEngagementScore function to use null-safe operators (|| 0) preventing NaN values when likeCount/commentCount are undefined
+  - IMAGE DISPLAY RESTORED: Added attachedMedia field mapping to all post types (discussions, SOAP entries, prayer requests) in getUserPosts method
+  - NULL VALUE PROTECTION: Enhanced all engagement display counters to show 0 instead of undefined/null values for better user experience
+  - STATISTICS ACCURACY: Fixed field reference errors in getUserPostStats ensuring proper counting of likes, comments, and prayers across all content types
 - July 20, 2025: SQL SYNTAX ERRORS IN USER POSTS METHODS COMPLETELY FIXED - Successfully resolved all "syntax error at or near =" SQL errors by implementing raw SQL queries instead of problematic Drizzle ORM queries in getUserPosts and getUserPostStats methods
   - RAW SQL IMPLEMENTATION: Replaced complex Drizzle WHERE queries with direct SQL to avoid field mapping issues between camelCase (authorId/userId) and snake_case (author_id/user_id) database columns
   - FIELD MAPPING CORRECTED: Fixed schema field references - discussions/prayerRequests use author_id while soapEntries uses user_id in database

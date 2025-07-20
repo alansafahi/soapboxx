@@ -100,7 +100,7 @@ export default function MyPostsFeed() {
   };
 
   const getEngagementScore = (post: UserPost) => {
-    return post.likeCount + post.commentCount + (post.prayerCount || 0);
+    return (post.likeCount || 0) + (post.commentCount || 0) + (post.prayerCount || 0);
   };
 
   if (isLoading) {
@@ -265,16 +265,16 @@ export default function MyPostsFeed() {
                 <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center space-x-1">
                     <Heart className="h-4 w-4" />
-                    <span>{post.likeCount}</span>
+                    <span>{post.likeCount || 0}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <MessageSquare className="h-4 w-4" />
-                    <span>{post.commentCount}</span>
+                    <span>{post.commentCount || 0}</span>
                   </div>
                   {post.prayerCount !== undefined && (
                     <div className="flex items-center space-x-1">
                       <Hand className="h-4 w-4" />
-                      <span>{post.prayerCount}</span>
+                      <span>{post.prayerCount || 0}</span>
                     </div>
                   )}
                   <div className="flex items-center space-x-1 ml-auto">
