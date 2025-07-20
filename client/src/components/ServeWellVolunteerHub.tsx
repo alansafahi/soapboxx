@@ -691,6 +691,7 @@ const VolunteerOpportunitiesPanel = () => {
 const ServeWellVolunteerHub = () => {
   const [showAssessment, setShowAssessment] = useState(false);
   const [showSuccessAnnouncement, setShowSuccessAnnouncement] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const { data: hasProfile } = useQuery({
     queryKey: ['/api/volunteers/has-profile'],
     queryFn: () => apiRequest('/api/volunteers/has-profile', 'GET')
@@ -754,7 +755,7 @@ const ServeWellVolunteerHub = () => {
               <div className="mt-4 flex space-x-2">
                 <Button 
                   onClick={() => {
-                    document.querySelector('[data-state="inactive"][value="appointments"]')?.click();
+                    setActiveTab("appointments");
                     setShowSuccessAnnouncement(false);
                   }}
                   className="bg-white text-blue-600 hover:bg-gray-100"
@@ -765,7 +766,7 @@ const ServeWellVolunteerHub = () => {
                 </Button>
                 <Button 
                   onClick={() => {
-                    document.querySelector('[data-state="inactive"][value="opportunities"]')?.click();
+                    setActiveTab("opportunities");
                     setShowSuccessAnnouncement(false);
                   }}
                   variant="outline"
@@ -780,7 +781,7 @@ const ServeWellVolunteerHub = () => {
         </div>
       )}
       
-      <Tabs defaultValue="dashboard" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="appointments">Divine Appointments</TabsTrigger>
@@ -903,21 +904,21 @@ const ServeWellVolunteerHub = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Button 
-                      onClick={() => document.querySelector('[data-state="inactive"][value="appointments"]')?.click()}
+                      onClick={() => setActiveTab("appointments")}
                       className="bg-gradient-to-r from-purple-500 to-blue-500"
                     >
                       <Target className="w-4 h-4 mr-2" />
                       View My Matches
                     </Button>
                     <Button 
-                      onClick={() => document.querySelector('[data-state="inactive"][value="opportunities"]')?.click()}
+                      onClick={() => setActiveTab("opportunities")}
                       variant="outline"
                     >
                       <Search className="w-4 h-4 mr-2" />
                       Browse All Opportunities
                     </Button>
                     <Button 
-                      onClick={() => document.querySelector('[data-state="inactive"][value="calendar"]')?.click()}
+                      onClick={() => setActiveTab("calendar")}
                       variant="outline"
                     >
                       <Calendar className="w-4 h-4 mr-2" />
