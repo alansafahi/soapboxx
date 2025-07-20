@@ -2426,6 +2426,45 @@ export class DatabaseStorage implements IStorage {
     return postsWithReactions;
   }
 
+  async getDiscussion(id: number): Promise<any | undefined> {
+    const [discussion] = await db
+      .select({
+        id: discussions.id,
+        authorId: discussions.authorId,
+        churchId: discussions.churchId,
+        title: discussions.title,
+        content: discussions.content,
+        category: discussions.category,
+        isPublic: discussions.isPublic,
+        audience: discussions.audience,
+        mood: discussions.mood,
+        suggestedVerses: discussions.suggestedVerses,
+        attachedMedia: discussions.attachedMedia,
+        linkedVerse: discussions.linkedVerse,
+        isPinned: discussions.isPinned,
+        pinnedBy: discussions.pinnedBy,
+        pinnedAt: discussions.pinnedAt,
+        pinnedUntil: discussions.pinnedUntil,
+        pinCategory: discussions.pinCategory,
+        likeCount: discussions.likeCount,
+        commentCount: discussions.commentCount,
+        createdAt: discussions.createdAt,
+        updatedAt: discussions.updatedAt,
+        author: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl,
+        }
+      })
+      .from(discussions)
+      .leftJoin(users, eq(discussions.authorId, users.id))
+      .where(eq(discussions.id, id));
+    
+    return discussion;
+  }
+
   // Simple test method to verify API works
   async getSimpleDiscussions(): Promise<any[]> {
     const result = await db
