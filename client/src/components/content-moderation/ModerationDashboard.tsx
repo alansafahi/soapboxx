@@ -165,7 +165,7 @@ export function ModerationDashboard() {
         reportDescription: report.description,
       };
       
-      console.log('Sending AI suggestions request:', requestData);
+
       
       const response = await fetch('/api/ai/generate-edit-suggestions', {
         method: 'POST',
