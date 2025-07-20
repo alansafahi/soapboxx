@@ -2332,6 +2332,16 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getDiscussion(discussionId: number): Promise<Discussion | undefined> {
+    try {
+      const result = await db.select().from(discussions).where(eq(discussions.id, discussionId));
+      return result[0];
+    } catch (error) {
+      console.error('Error in getDiscussion:', error);
+      return undefined;
+    }
+  }
+
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
     
