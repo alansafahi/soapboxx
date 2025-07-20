@@ -2352,6 +2352,29 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getUserChurches(userId: string): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          church: churches,
+          userChurch: userChurches,
+        })
+        .from(userChurches)
+        .leftJoin(churches, eq(userChurches.churchId, churches.id))
+        .where(eq(userChurches.userId, userId))
+        .orderBy(desc(userChurches.lastAccessedAt));
+      
+      return result.map(r => ({
+        ...r.church,
+        userRole: r.userChurch?.role || 'member',
+        lastAccessedAt: r.userChurch?.lastAccessedAt,
+      }));
+    } catch (error) {
+      console.error('Error in getUserChurches:', error);
+      return [];
+    }
+  }
+
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
     

@@ -723,25 +723,45 @@ function ContactsPage() {
                   <h4 className="font-semibold">How it Works</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Share your referral link with friends</li>
-                    <li>• Earn 50 points for each successful signup</li>
-                    <li>• Get bonus rewards for active users</li>
-                    <li>• Redeem points for premium features</li>
+                    <li>• Earn points for community engagement</li>
+                    <li>• Build your spiritual network</li>
+                    <li>• Unlock achievement badges</li>
                   </ul>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Current Rewards</h4>
+                  <h4 className="font-semibold">Community Rewards</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Premium Voice (1 month)</span>
+                      <span>Referral Bonus</span>
                       <Badge variant="outline">100 points</Badge>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Ad-free Experience</span>
-                      <Badge variant="outline">200 points</Badge>
+                      <span>Prayer Requests Created</span>
+                      <Badge variant="outline">25 points</Badge>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Custom Prayer Themes</span>
-                      <Badge variant="outline">150 points</Badge>
+                      <span>Discussions Created</span>
+                      <Badge variant="outline">20 points</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Daily Check-ins</span>
+                      <Badge variant="outline">10 points</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Prayer Circle Participation</span>
+                      <Badge variant="outline">15 points</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Volunteer Activities</span>
+                      <Badge variant="outline">30 points</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Events Attended</span>
+                      <Badge variant="outline">25 points</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>S.O.A.P. Entries</span>
+                      <Badge variant="outline">15 points</Badge>
                     </div>
                   </div>
                 </div>

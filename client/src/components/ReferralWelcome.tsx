@@ -101,7 +101,7 @@ export function ReferralWelcome({ referralCode }: ReferralWelcomeProps) {
               <div className="flex justify-center space-x-4">
                 <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                   <Gift className="w-4 h-4 mr-1" />
-                  250 Welcome Points
+                  50 Welcome Points
                 </Badge>
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
                   <Heart className="w-4 h-4 mr-1" />
@@ -116,7 +116,7 @@ export function ReferralWelcome({ referralCode }: ReferralWelcomeProps) {
                 </div>
                 <p className="text-sm text-gray-600">
                   Someone special invited you to grow in faith together. 
-                  Start your daily Bible reading journey and earn rewards!
+                  Start your community engagement journey and earn points through spiritual activities!
                 </p>
               </div>
               
