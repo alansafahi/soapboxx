@@ -23,7 +23,8 @@ import {
   prayerCircles,
   prayerCircleMembers,
   prayerCircleReports,
-  prayerCircleUpdates
+  prayerCircleUpdates,
+  volunteerOpportunities
 } from "../shared/schema";
 import * as schema from "../shared/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull } from "drizzle-orm";
@@ -12650,6 +12651,85 @@ Please provide suggestions for the missing or incomplete sections.`
     } catch (error) {
       // // console.error('AI test failed:', error);
       res.status(500).json({ message: 'Failed to test AI classification' });
+    }
+  });
+
+  // Create Volunteer Opportunity - D.I.V.I.N.E. Phase 2 Position Creator
+  app.post('/api/volunteer/opportunities', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      // Get user's primary church for creating opportunities
+      const userChurches = await db
+        .select()
+        .from(schema.userChurches)
+        .where(eq(schema.userChurches.userId, user.id));
+
+      const primaryChurch = userChurches.find(uc => uc.isPrimary) || userChurches[0];
+      if (!primaryChurch) {
+        return res.status(400).json({ message: 'No church association found' });
+      }
+
+      // Extract form data from the comprehensive Phase 2 position creator
+      const {
+        title,
+        description,
+        location,
+        startDate,
+        endDate,
+        volunteersNeeded,
+        requiredSkills,
+        isRecurring,
+        recurringPattern,
+        priority,
+        backgroundCheckRequired
+      } = req.body;
+
+      // Create volunteer opportunity with all Phase 2 features
+      const [opportunity] = await db
+        .insert(volunteerOpportunities)
+        .values({
+          churchId: primaryChurch.churchId,
+          title: title || 'New Volunteer Position',
+          description: description || 'Help serve our church community',
+          location: location || 'Church Facility',
+          startDate: startDate ? new Date(startDate) : new Date(),
+          endDate: endDate ? new Date(endDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          volunteersNeeded: volunteersNeeded || 1,
+          volunteersRegistered: 0,
+          requiredSkills: requiredSkills || [],
+          isRecurring: isRecurring || false,
+          recurringPattern: isRecurring ? { pattern: recurringPattern } : null,
+          status: 'open',
+          priority: priority || 'medium',
+          backgroundCheckRequired: backgroundCheckRequired || false,
+          isPublic: true,
+          coordinatorId: user.id,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        message: 'Volunteer position created successfully',
+        opportunity
+      });
+
+    } catch (error) {
+      console.error('Failed to create volunteer opportunity:', error);
+      res.status(500).json({ 
+        message: 'Failed to create volunteer position',
+        error: error.message 
+      });
     }
   });
 
