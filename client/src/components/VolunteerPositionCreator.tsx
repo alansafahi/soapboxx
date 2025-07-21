@@ -378,7 +378,7 @@ export default function VolunteerPositionCreator({ children }: { children: React
     if (Object.keys(errors).length > 0) {
       console.log('VALIDATION ERRORS BLOCKING SUBMISSION:', errors);
       Object.keys(errors).forEach(key => {
-        console.log(`Field ${key}:`, errors[key]);
+        console.log(`Field ${key}:`, (errors as any)[key]);
       });
       return;
     }
@@ -521,7 +521,7 @@ export default function VolunteerPositionCreator({ children }: { children: React
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select priority" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -1136,7 +1136,7 @@ export default function VolunteerPositionCreator({ children }: { children: React
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select hours" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
