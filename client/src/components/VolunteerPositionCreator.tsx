@@ -39,7 +39,9 @@ const createPositionSchema = z.object({
   department: z.string().min(1, 'Department is required'),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  responsibilities: z.string().min(10, 'Responsibilities list is required'),
+  responsibilities: z.union([z.string(), z.array(z.string())]).transform((val) => 
+    Array.isArray(val) ? val : [val]
+  ),
   
   // Scheduling & Time Commitment
   timeCommitment: z.string().min(1, 'Time commitment is required'),
@@ -51,7 +53,7 @@ const createPositionSchema = z.object({
   
   // Recurring Assignments (Phase 2)
   isRecurring: z.boolean(),
-  recurringPattern: z.string().optional(),
+  recurringPattern: z.union([z.string(), z.object({ pattern: z.string() })]).optional(),
   recurringDays: z.array(z.string()),
   recurringEndDate: z.date().optional(),
   
@@ -91,6 +93,147 @@ const createPositionSchema = z.object({
 });
 
 type CreatePositionForm = z.infer<typeof createPositionSchema>;
+
+// Skills Matrix Component
+function SkillsMatrix({ 
+  skills, 
+  requiredSkills, 
+  preferredSkills, 
+  spiritualGifts,
+  onRequiredChange,
+  onPreferredChange, 
+  onSpiritualChange 
+}: {
+  skills: string[];
+  requiredSkills: string[];
+  preferredSkills: string[];
+  spiritualGifts: string[];
+  onRequiredChange: (skills: string[]) => void;
+  onPreferredChange: (skills: string[]) => void;
+  onSpiritualChange: (skills: string[]) => void;
+}) {
+  const handleCellClick = (skill: string, column: 'required' | 'preferred' | 'spiritual' | 'none') => {
+    // Remove skill from all categories first
+    const newRequired = requiredSkills.filter(s => s !== skill);
+    const newPreferred = preferredSkills.filter(s => s !== skill);
+    const newSpiritual = spiritualGifts.filter(s => s !== skill);
+    
+    // Add to selected category
+    if (column === 'required') {
+      newRequired.push(skill);
+    } else if (column === 'preferred') {
+      newPreferred.push(skill);
+    } else if (column === 'spiritual') {
+      newSpiritual.push(skill);
+    }
+    
+    onRequiredChange(newRequired);
+    onPreferredChange(newPreferred);
+    onSpiritualChange(newSpiritual);
+  };
+  
+  const getSkillStatus = (skill: string): 'required' | 'preferred' | 'spiritual' | 'none' => {
+    if (requiredSkills.includes(skill)) return 'required';
+    if (preferredSkills.includes(skill)) return 'preferred';
+    if (spiritualGifts.includes(skill)) return 'spiritual';
+    return 'none';
+  };
+  
+  return (
+    <div className="space-y-4">
+      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        Skills Matrix - Click to categorize each skill
+      </div>
+      
+      {/* Matrix Header */}
+      <div className="grid grid-cols-5 gap-2 mb-2">
+        <div className="font-medium text-sm text-gray-600 dark:text-gray-400">Skill</div>
+        <div className="text-center font-medium text-sm text-red-600">Required</div>
+        <div className="text-center font-medium text-sm text-blue-600">Preferred</div>
+        <div className="text-center font-medium text-sm text-purple-600">Spiritual Gift</div>
+        <div className="text-center font-medium text-sm text-gray-500">N/A</div>
+      </div>
+      
+      {/* Matrix Rows */}
+      <div className="max-h-96 overflow-y-auto space-y-1">
+        {skills.map((skill) => {
+          const status = getSkillStatus(skill);
+          return (
+            <div key={skill} className="grid grid-cols-5 gap-2 items-center py-1 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+              <div className="text-sm text-gray-700 dark:text-gray-300 truncate" title={skill}>
+                {skill}
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => handleCellClick(skill, 'required')}
+                  className={cn(
+                    "w-6 h-6 rounded border-2 transition-colors",
+                    status === 'required' 
+                      ? "bg-red-500 border-red-500" 
+                      : "border-gray-300 hover:border-red-400"
+                  )}
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => handleCellClick(skill, 'preferred')}
+                  className={cn(
+                    "w-6 h-6 rounded border-2 transition-colors",
+                    status === 'preferred' 
+                      ? "bg-blue-500 border-blue-500" 
+                      : "border-gray-300 hover:border-blue-400"
+                  )}
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => handleCellClick(skill, 'spiritual')}
+                  className={cn(
+                    "w-6 h-6 rounded border-2 transition-colors",
+                    status === 'spiritual' 
+                      ? "bg-purple-500 border-purple-500" 
+                      : "border-gray-300 hover:border-purple-400"
+                  )}
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => handleCellClick(skill, 'none')}
+                  className={cn(
+                    "w-6 h-6 rounded border-2 transition-colors",
+                    status === 'none' 
+                      ? "bg-gray-400 border-gray-400" 
+                      : "border-gray-300 hover:border-gray-400"
+                  )}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-4 mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+        <div>
+          <div className="text-sm font-medium text-red-600">Required ({requiredSkills.length})</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">Must have these skills</div>
+        </div>
+        <div>
+          <div className="text-sm font-medium text-blue-600">Preferred ({preferredSkills.length})</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">Nice to have skills</div>
+        </div>
+        <div>
+          <div className="text-sm font-medium text-purple-600">Spiritual Gifts ({spiritualGifts.length})</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">God-given abilities</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Phase 2: Expanded ministry and department options
 const ministryOptions = [
@@ -180,21 +323,88 @@ const weekDays = [
   'Sunday'
 ];
 
+// Comprehensive skills matrix covering all ministries
 const skillOptions = [
+  // Teaching & Education
   'Teaching',
+  'Sunday School',
+  'Curriculum Development',
+  'Bible Study Leadership',
+  'Training & Development',
+  
+  // Children & Youth
   'Child Care',
-  'Patience',
+  'Youth Mentoring',
+  'Age-Appropriate Communication',
+  'Patience with Children',
+  'Safety & First Aid',
+  
+  // Music & Creative Arts
+  'Music Performance',
+  'Instrument Playing',
+  'Vocal Leadership',
+  'Sound Engineering',
+  'Worship Leading',
+  'Art & Design',
+  'Photography',
+  'Video Production',
+  
+  // Technical & Media
+  'Audio/Visual Equipment',
+  'Live Streaming',
+  'Computer Skills',
+  'Social Media',
+  'Website Management',
+  'Graphic Design',
+  
+  // Communication & Leadership
+  'Public Speaking',
   'Communication',
   'Leadership',
+  'Team Management',
+  'Conflict Resolution',
+  'Interpersonal Skills',
+  
+  // Administration & Organization
   'Organization',
-  'Technical Skills',
-  'Music',
-  'Audio/Visual',
   'Event Planning',
-  'Cooking',
+  'Project Management',
+  'Data Entry',
+  'Financial Management',
+  'Record Keeping',
+  
+  // Facilities & Maintenance
+  'Maintenance & Repair',
+  'Electrical Work',
+  'Plumbing',
+  'Landscaping',
   'Cleaning',
+  'Security',
+  'Carpentry',
+  
+  // Food & Hospitality
+  'Cooking',
+  'Food Service',
+  'Event Catering',
+  'Kitchen Management',
+  'Hospitality',
+  'Guest Relations',
+  
+  // Care & Counseling
   'Counseling',
-  'Public Speaking'
+  'Pastoral Care',
+  'Crisis Support',
+  'Mental Health Awareness',
+  'Prayer Ministry',
+  'Grief Support',
+  
+  // Outreach & Missions
+  'Community Outreach',
+  'Evangelism',
+  'Cultural Sensitivity',
+  'Language Skills',
+  'Transportation',
+  'Driving'
 ];
 
 
@@ -1255,6 +1465,75 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
             {/* Requirements Tab */}
             {currentTab === 'requirements' && (
               <div className="space-y-6">
+                {/* Skills Matrix - Enhanced UI/UX */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                    Skills & Requirements Matrix
+                  </h3>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Matrix skills selection coming soon - using enhanced dropdown for now
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <FormLabel>Required Skills</FormLabel>
+                      <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto">
+                        {skillOptions.map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
+                              selectedSkills.includes(skill)
+                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <FormLabel>Preferred Skills (Optional)</FormLabel>
+                      <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto">
+                        {skillOptions.map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handlePreferredSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
+                              preferredSkills.includes(skill)
+                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <FormLabel>Spiritual Gifts Needed</FormLabel>
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        {spiritualGiftsOptions.map(gift => (
+                          <div
+                            key={gift}
+                            onClick={() => handleSpiritualGiftToggle(gift)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
+                              selectedSpiritualGifts.includes(gift)
+                                ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {gift}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -1303,107 +1582,51 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   )}
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <FormLabel>Required Skills</FormLabel>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {skillOptions.map(skill => (
-                        <div
-                          key={skill}
-                          onClick={() => handleSkillToggle(skill)}
-                          className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
-                            selectedSkills.includes(skill)
-                              ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
-                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
-                        >
-                          {skill}
+
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="trainingRequired"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Training Required</FormLabel>
+                          <p className="text-sm text-muted-foreground">
+                            Volunteers must complete training
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </FormItem>
+                    )}
+                  />
 
-                  <div>
-                    <FormLabel>Preferred Skills (Optional)</FormLabel>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {skillOptions.map(skill => (
-                        <div
-                          key={skill}
-                          onClick={() => handlePreferredSkillToggle(skill)}
-                          className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
-                            preferredSkills.includes(skill)
-                              ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
-                        >
-                          {skill}
+                  <FormField
+                    control={form.control}
+                    name="requireReferences"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>References Required</FormLabel>
+                          <p className="text-sm text-muted-foreground">
+                            Require character references
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <FormLabel>Spiritual Gifts Needed</FormLabel>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {spiritualGiftsOptions.map(gift => (
-                        <div
-                          key={gift}
-                          onClick={() => handleSpiritualGiftToggle(gift)}
-                          className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
-                            selectedSpiritualGifts.includes(gift)
-                              ? 'bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300'
-                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
-                        >
-                          {gift}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="trainingRequired"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Training Required</FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Volunteers must complete training
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="requireReferences"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>References Required</FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Require character references
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 </div>
               </div>
             )}

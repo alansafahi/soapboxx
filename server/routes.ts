@@ -12733,8 +12733,8 @@ Please provide suggestions for the missing or incomplete sections.`
           ? responsibilities 
           : (responsibilities ? responsibilities.split('\n').filter(r => r.trim()) : []),
         location: location || 'Church Facility',
-        startDate: startDate ? new Date(startDate) : new Date(),
-        endDate: endDate ? new Date(endDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
         volunteersNeeded: volunteersNeeded || 1,
         volunteersRegistered: 0,
         requiredSkills: Array.isArray(requiredSkills) ? requiredSkills : [],
