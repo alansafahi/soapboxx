@@ -1022,7 +1022,9 @@ const ServeWellVolunteerHub = () => {
               
               {/* Admin Tools */}
               <div className="mt-6">
-                <VolunteerPositionCreator />
+                <Button className="bg-white/20 text-white hover:bg-white/30">
+                  Create Volunteer Position
+                </Button>
               </div>
             </div>
           </div>
