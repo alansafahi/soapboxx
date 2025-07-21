@@ -463,20 +463,168 @@ const DivineAppointmentsPanel = () => {
                   <Heart className="w-4 h-4 mr-1" />
                   {acceptMutation.isPending ? 'Accepting...' : 'Accept Call'}
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => {
-                    // Show detailed opportunity information in a dialog
-                    toast({
-                      title: appointment.opportunity?.title || 'Ministry Opportunity',
-                      description: `Ministry: ${appointment.opportunity?.ministry || 'General'}\nTime Commitment: ${appointment.opportunity?.timeCommitment || 'Flexible'}\nLocation: ${appointment.opportunity?.location || 'Church Location'}`,
-                    });
-                  }}
-                >
-                  Learn More
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="flex-1">
+                      Learn More
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Target className="w-5 h-5 text-purple-600" />
+                        {appointment.opportunity?.title || 'Ministry Opportunity'}
+                      </DialogTitle>
+                      <DialogDescription>
+                        Complete details about this volunteer opportunity
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-6">
+                      {/* Basic Information */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Ministry</h4>
+                          <p className="text-sm">{appointment.opportunity?.ministry || 'General Ministry'}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Priority</h4>
+                          <Badge variant={appointment.opportunity?.priority === 'high' ? 'destructive' : 'secondary'}>
+                            {appointment.opportunity?.priority || 'Medium'}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      {appointment.opportunity?.description && (
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-2">Description</h4>
+                          <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                            {appointment.opportunity.description}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Schedule & Commitment */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Time Commitment</h4>
+                          <div className="flex items-center text-sm">
+                            <Clock className="w-4 h-4 mr-1 text-gray-500" />
+                            {appointment.opportunity?.timeCommitment || 'Flexible schedule'}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Location</h4>
+                          <div className="flex items-center text-sm">
+                            <MapPin className="w-4 h-4 mr-1 text-gray-500" />
+                            {appointment.opportunity?.location || 'Church location'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dates */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Start Date</h4>
+                          <div className="flex items-center text-sm">
+                            <Calendar className="w-4 h-4 mr-1 text-gray-500" />
+                            {appointment.opportunity?.startDate ? new Date(appointment.opportunity.startDate).toLocaleDateString() : 'Immediate start'}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">End Date</h4>
+                          <div className="flex items-center text-sm">
+                            <Calendar className="w-4 h-4 mr-1 text-gray-500" />
+                            {appointment.opportunity?.endDate ? new Date(appointment.opportunity.endDate).toLocaleDateString() : 'Ongoing'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Requirements */}
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">Requirements</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Background Check Required</span>
+                            <Badge variant={appointment.opportunity?.backgroundCheckRequired ? 'destructive' : 'secondary'}>
+                              {appointment.opportunity?.backgroundCheckRequired ? 'Required' : 'Not Required'}
+                            </Badge>
+                          </div>
+                          {appointment.opportunity?.requiredSkills && appointment.opportunity.requiredSkills.length > 0 && (
+                            <div>
+                              <span className="text-sm font-medium">Required Skills:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {appointment.opportunity.requiredSkills.map((skill: string, index: number) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Volunteer Capacity */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Volunteers Needed</h4>
+                          <div className="flex items-center text-sm">
+                            <Users className="w-4 h-4 mr-1 text-gray-500" />
+                            {appointment.opportunity?.volunteersNeeded || 1}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Currently Registered</h4>
+                          <div className="flex items-center text-sm">
+                            <UserPlus className="w-4 h-4 mr-1 text-gray-500" />
+                            {appointment.opportunity?.volunteersRegistered || 0}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Created By & When */}
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Created By</h4>
+                          <p className="text-sm">{appointment.opportunity?.coordinatorName || 'Ministry Leader'}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-1">Posted</h4>
+                          <p className="text-sm">
+                            {appointment.opportunity?.created ? new Date(appointment.opportunity.created).toLocaleDateString() : 'Recently'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* AI Matching Details */}
+                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2 flex items-center">
+                          <Brain className="w-4 h-4 mr-1" />
+                          Why This is Your Divine Appointment
+                        </h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {appointment.aiExplanation || 'This opportunity aligns perfectly with your spiritual gifts and ministry passion.'}
+                        </p>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <div className="text-lg font-bold text-purple-600">{Math.round(appointment.spiritualFitScore * 100)}%</div>
+                            <div className="text-xs text-gray-600">Spiritual Fit</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-blue-600">{Math.round(appointment.matchScore * 100)}%</div>
+                            <div className="text-xs text-gray-600">Overall Match</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-green-600">{Math.round(appointment.divineAppointmentScore * 100)}%</div>
+                            <div className="text-xs text-gray-600">Divine Score</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>

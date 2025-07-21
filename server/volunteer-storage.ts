@@ -14,9 +14,10 @@ import {
   type InsertVolunteer,
   type InsertVolunteerRole,
   type InsertVolunteerOpportunity,
-  type InsertVolunteerMatch
+  type InsertVolunteerMatch,
+  users
 } from "@shared/schema";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { eq, and, desc, asc, sql } from "drizzle-orm";
 
 // D.I.V.I.N.E. Enhanced Volunteer Storage Methods
 
@@ -127,14 +128,30 @@ export class VolunteerStorage {
         aiRecommendation: volunteerMatches.aiRecommendation,
         aiExplanation: volunteerMatches.aiExplanation,
         reasons: volunteerMatches.matchReasons,
+        // Opportunity details
         opportunityId: volunteerOpportunities.id,
         opportunityTitle: volunteerOpportunities.title,
         opportunityDescription: volunteerOpportunities.description,
+        ministry: sql<string>`'General Ministry'`,
         location: volunteerOpportunities.location,
+        timeCommitment: sql<string>`'Flexible schedule'`,
+        startDate: volunteerOpportunities.startDate,
+        endDate: volunteerOpportunities.endDate,
+        volunteersNeeded: volunteerOpportunities.volunteersNeeded,
+        volunteersRegistered: volunteerOpportunities.volunteersRegistered,
+        backgroundCheckRequired: sql<boolean>`false`,
+        priority: volunteerOpportunities.priority,
+        requiredSkills: volunteerOpportunities.requiredSkills,
+        created: volunteerOpportunities.createdAt,
+        // Coordinator details
+        coordinatorId: users.id,
+        coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        coordinatorEmail: users.email,
         roleId: volunteerOpportunities.roleId
       })
       .from(volunteerMatches)
       .innerJoin(volunteerOpportunities, eq(volunteerMatches.opportunityId, volunteerOpportunities.id))
+      .leftJoin(users, eq(volunteerOpportunities.coordinatorId, users.id))
       .where(eq(volunteerMatches.volunteerId, volunteerId))
       .orderBy(desc(volunteerMatches.divineAppointmentScore));
 
@@ -154,7 +171,19 @@ export class VolunteerStorage {
         id: match.opportunityId,
         title: match.opportunityTitle,
         description: match.opportunityDescription,
+        ministry: match.ministry,
         location: match.location,
+        timeCommitment: match.timeCommitment,
+        startDate: match.startDate,
+        endDate: match.endDate,
+        volunteersNeeded: match.volunteersNeeded,
+        volunteersRegistered: match.volunteersRegistered,
+        backgroundCheckRequired: match.backgroundCheckRequired,
+        priority: match.priority,
+        requiredSkills: match.requiredSkills,
+        created: match.created,
+        coordinatorName: match.coordinatorName,
+        coordinatorEmail: match.coordinatorEmail,
         roleId: match.roleId
       }
     }));
