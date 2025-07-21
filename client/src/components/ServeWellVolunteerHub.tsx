@@ -381,8 +381,8 @@ const DivineAppointmentsPanel = () => {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-lg">{appointment.opportunity.title}</CardTitle>
-                  <CardDescription>{appointment.opportunity.ministry} Ministry</CardDescription>
+                  <CardTitle className="text-lg">{appointment.opportunity?.title || 'Ministry Opportunity'}</CardTitle>
+                  <CardDescription>{appointment.opportunity?.ministry || 'General'} Ministry</CardDescription>
                 </div>
                 <Badge 
                   variant={
@@ -396,7 +396,7 @@ const DivineAppointmentsPanel = () => {
                   }
                 >
                   {appointment.aiRecommendation === 'highly_recommended' && <Star className="w-3 h-3 mr-1" />}
-                  {appointment.aiRecommendation.replace('_', ' ')}
+                  {appointment.aiRecommendation ? appointment.aiRecommendation.replace('_', ' ') : 'Recommended'}
                 </Badge>
               </div>
             </CardHeader>
@@ -421,25 +421,27 @@ const DivineAppointmentsPanel = () => {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-gray-600">{appointment.aiExplanation}</p>
+                <p className="text-sm text-gray-600">{appointment.aiExplanation || 'Perfect ministry match for your spiritual gifts'}</p>
                 
                 <div className="flex flex-wrap gap-1">
-                  {appointment.reasons.map((reason, index) => (
+                  {appointment.reasons?.map((reason, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       {reason}
                     </Badge>
-                  ))}
+                  )) || (
+                    <Badge variant="outline" className="text-xs">Spiritual Gifts Match</Badge>
+                  )}
                 </div>
               </div>
 
               <div className="flex items-center text-sm text-gray-500 space-x-4">
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  {appointment.opportunity.timeCommitment}
+                  {appointment.opportunity.timeCommitment || 'Flexible'}
                 </div>
                 <div className="flex items-center">
                   <MapPin className="w-4 h-4 mr-1" />
-                  {appointment.opportunity.location}
+                  {appointment.opportunity.location || 'Church Location'}
                 </div>
               </div>
 
