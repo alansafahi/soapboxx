@@ -331,11 +331,21 @@ router.post('/opportunities', async (req, res) => {
       return res.status(403).json({ error: 'Admin permissions required' });
     }
 
-    const validatedData = insertVolunteerOpportunitySchema.parse({
+    // Map frontend field names to database field names
+    const mappedData = {
       ...req.body,
       churchId: 1, // Default church ID
-      coordinatorId: (req.user as any).email
-    });
+      coordinatorId: (req.user as any).email,
+      spiritualGifts: req.body.spiritualGiftsNeeded, // Map spiritualGiftsNeeded → spiritualGifts
+      category: req.body.department, // Map department → category
+      responsibilities: req.body.responsibilities, // Ensure responsibilities is included
+    };
+
+    console.log('Backend received data:', req.body);
+    console.log('Mapped data for validation:', mappedData);
+
+    const validatedData = insertVolunteerOpportunitySchema.parse(mappedData);
+    console.log('Validated data:', validatedData);
 
     const opportunity = await volunteerStorage.createVolunteerOpportunity(validatedData);
     res.json(opportunity);
