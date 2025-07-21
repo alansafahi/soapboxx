@@ -51,7 +51,7 @@ const createPositionSchema = z.object({
   
   // Recurring Assignments (Phase 2)
   isRecurring: z.boolean(),
-  recurringPattern: z.string().min(1, 'Pattern required if recurring'),
+  recurringPattern: z.string().optional(),
   recurringDays: z.array(z.string()),
   recurringEndDate: z.date().optional(),
   
@@ -243,7 +243,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
       
       // Recurring
       isRecurring: editOpportunity?.isRecurring || false,
-      recurringPattern: editOpportunity?.recurringPattern || 'Weekly',
+      recurringPattern: editOpportunity?.recurringPattern || '',
       recurringDays: editOpportunity?.recurringDays || [],
       
       // Requirements
@@ -584,22 +584,21 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     const isValid = await form.trigger();
     console.log('Form validation result:', isValid);
     console.log('Form errors after trigger:', form.formState.errors);
-    console.log('Current form values:', form.getValues());
     
-    // Log each field and its validation status
-    const values = form.getValues();
-    Object.keys(values).forEach(key => {
-      const value = (values as any)[key];
-      console.log(`${key}: ${typeof value} = ${JSON.stringify(value)}`);
-    });
-    
-    // Check for specific validation errors
+    // Check for specific validation errors and show toast
     const errors = form.formState.errors;
     if (Object.keys(errors).length > 0) {
       console.log('VALIDATION ERRORS BLOCKING SUBMISSION:', errors);
       Object.keys(errors).forEach(key => {
         const error = (errors as any)[key];
         console.log(`Field ${key} error:`, error?.message || error);
+      });
+      
+      // Show user-friendly validation error
+      toast({
+        title: "Form Validation Error",
+        description: "Please check all required fields are filled correctly before submitting.",
+        variant: "destructive"
       });
       return;
     }
@@ -608,7 +607,16 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
       console.log('Validation passed, triggering mutation...');
       createPositionMutation.mutate(data);
     } else {
-      console.log('Form validation failed - form is not valid');
+      console.log('Form validation failed - checking detailed errors');
+      // Get fresh error state
+      const freshErrors = form.formState.errors;
+      console.log('Fresh errors:', freshErrors);
+      
+      toast({
+        title: "Validation Failed", 
+        description: "Please complete all required fields to create the position.",
+        variant: "destructive"
+      });
     }
   };
 
