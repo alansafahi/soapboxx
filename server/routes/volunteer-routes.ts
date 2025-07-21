@@ -229,20 +229,47 @@ router.post('/opportunities', async (req, res) => {
     }
 
     const createOpportunitySchema = z.object({
+      // Basic Info
       title: z.string().min(1, 'Title is required'),
       ministry: z.string().min(1, 'Ministry is required'),
       department: z.string().min(1, 'Department is required'),
       priority: z.enum(['low', 'medium', 'high', 'urgent']),
       description: z.string().min(10, 'Description must be at least 10 characters'),
+      responsibilities: z.string().optional(),
+      
+      // Requirements
       timeCommitment: z.string().min(1, 'Time commitment is required'),
+      timeCommitmentLevel: z.string().optional(),
+      maxHoursPerWeek: z.number().optional(),
       location: z.string().min(1, 'Location is required'),
+      requiredSkills: z.array(z.string()).default([]),
+      preferredSkills: z.array(z.string()).default([]),
+      spiritualGiftsNeeded: z.array(z.string()).default([]),
+      backgroundCheckRequired: z.boolean().default(false),
+      backgroundCheckLevel: z.string().optional(),
+      
+      // Schedule
       startDate: z.string().optional(),
       endDate: z.string().optional(),
-      backgroundCheckRequired: z.boolean(),
-      requiredSkills: z.array(z.string()),
+      isRecurring: z.boolean().default(false),
+      recurringPattern: z.string().optional(),
+      recurringDays: z.array(z.string()).default([]),
+      
+      // Team
       volunteersNeeded: z.number().min(1).max(50),
-      isRecurring: z.boolean(),
-      recurringPattern: z.string().optional()
+      teamSize: z.number().optional(),
+      teamRoles: z.array(z.string()).default([]),
+      leadershipRequired: z.boolean().default(false),
+      
+      // Performance 
+      performanceMetrics: z.array(z.string()).default([]),
+      trainingRequired: z.boolean().default(false),
+      orientationRequired: z.boolean().default(false),
+      mentorshipProvided: z.boolean().default(false),
+      
+      // Admin
+      coordinatorName: z.string().optional(),
+      coordinatorEmail: z.string().optional()
     });
 
     const validatedData = createOpportunitySchema.parse(req.body);
