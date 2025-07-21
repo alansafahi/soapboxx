@@ -230,7 +230,8 @@ router.post('/opportunities', async (req, res) => {
 
     const createOpportunitySchema = z.object({
       title: z.string().min(1, 'Title is required'),
-      ministry: z.string().min(1, 'Ministry is required'), 
+      ministry: z.string().min(1, 'Ministry is required'),
+      department: z.string().min(1, 'Department is required'),
       priority: z.enum(['low', 'medium', 'high', 'urgent']),
       description: z.string().min(10, 'Description must be at least 10 characters'),
       timeCommitment: z.string().min(1, 'Time commitment is required'),

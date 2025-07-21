@@ -434,6 +434,8 @@ export class VolunteerStorage {
         .values({
           churchId: data.churchId,
           title: data.title,
+          ministry: data.ministry, // Add ministry field
+          category: data.department, // Map department to category field
           description: data.description,
           coordinatorId: data.coordinatorId,
           location: data.location,
