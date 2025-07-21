@@ -1358,7 +1358,17 @@ export default function VolunteerPositionCreator({ children }: { children: React
                 </Button>
                 
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={() => {
+                    console.log('Button clicked!');
+                    console.log('Form errors:', form.formState.errors);
+                    console.log('Form is valid:', form.formState.isValid);
+                    const isValid = form.trigger();
+                    console.log('Manual validation result:', isValid);
+                    if (Object.keys(form.formState.errors).length === 0) {
+                      form.handleSubmit(onSubmit)();
+                    }
+                  }}
                   disabled={createPositionMutation.isPending}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                 >
