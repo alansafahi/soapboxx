@@ -89,11 +89,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // D.I.V.I.N.E. Volunteer Management Routes
+  const server = await registerRoutes(app);
+  
+  // D.I.V.I.N.E. Volunteer Management Routes (register after auth is configured)
   const { default: volunteerRoutes } = await import('./routes/volunteer-routes');
   app.use('/api/volunteers', volunteerRoutes);
-  
-  const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

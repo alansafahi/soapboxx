@@ -153,11 +153,20 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
     // Check for session-based authentication
     if (req.session && req.session.userId) {
-      return next();
+      // Load user data into req.user for consistency
+      try {
+        const user = await storage.getUser(req.session.userId);
+        if (user) {
+          (req as any).user = user;
+          return next();
+        }
+      } catch (error) {
+        console.error('Error loading user from session:', error);
+      }
     }
     
     // If no session, return unauthorized
-    return res.status(401).json({ success: false, message: "Unauthorized" });
+    return res.status(401).json({ success: false, message: "Authentication required" });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Authentication error" });
   }

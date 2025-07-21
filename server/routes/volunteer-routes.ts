@@ -4,8 +4,12 @@ import { volunteerStorage } from '../volunteer-storage';
 import { assessSpiritualGifts, findDivineAppointments, optimizeTeamComposition, recommendOnboardingPath } from '../ai-volunteer-matching';
 import { volunteerNotificationService } from '../volunteer-notifications';
 import { insertVolunteerSchema, insertVolunteerOpportunitySchema } from '@shared/schema';
+import { isAuthenticated } from '../auth';
 
 const router = Router();
+
+// Apply authentication middleware to all volunteer routes
+router.use(isAuthenticated);
 
 // D.I.V.I.N.E. API Routes - Disciple-Inspired Volunteer Integration & Nurture Engine
 

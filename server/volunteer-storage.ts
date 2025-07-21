@@ -29,11 +29,16 @@ export class VolunteerStorage {
   }
 
   async getVolunteerByUserId(userId: string): Promise<Volunteer | undefined> {
-    const [volunteer] = await db
-      .select()
-      .from(volunteers)
-      .where(eq(volunteers.userId, userId));
-    return volunteer;
+    try {
+      const [volunteer] = await db
+        .select()
+        .from(volunteers)
+        .where(eq(volunteers.userId, userId));
+      return volunteer || undefined;
+    } catch (error) {
+      console.error('Error fetching volunteer by userId:', error);
+      return undefined;
+    }
   }
 
   async updateVolunteerProfile(volunteerId: number, updates: Partial<Volunteer>): Promise<Volunteer> {
