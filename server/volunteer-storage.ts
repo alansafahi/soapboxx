@@ -72,14 +72,7 @@ export class VolunteerStorage {
     return volunteer;
   }
 
-  // Volunteer Opportunities Management
-  async createVolunteerOpportunity(data: InsertVolunteerOpportunity): Promise<VolunteerOpportunity> {
-    const [opportunity] = await db
-      .insert(volunteerOpportunities)
-      .values(data)
-      .returning();
-    return opportunity;
-  }
+  // Volunteer Opportunities Management (removed - duplicate method)
 
   async getVolunteerOpportunities(churchId?: number): Promise<VolunteerOpportunity[]> {
     try {
@@ -145,7 +138,7 @@ export class VolunteerStorage {
         created: volunteerOpportunities.createdAt,
         // Coordinator details
         coordinatorId: users.id,
-        coordinatorName: sql<string>`CONCAT(${users.first_name}, ' ', ${users.last_name})`,
+        coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         coordinatorEmail: users.email,
         roleId: volunteerOpportunities.roleId
       })
@@ -210,8 +203,8 @@ export class VolunteerStorage {
         opportunityTitle: volunteerOpportunities.title,
         coordinatorId: volunteerOpportunities.coordinatorId,
         coordinatorEmail: users.email,
-        coordinatorName: sql<string>`CONCAT(${users.first_name}, ' ', ${users.last_name})`,
-        volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
+        coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        volunteerName: sql<string>`CONCAT(volunteers.firstName, ' ', volunteers.lastName)`,
         volunteerEmail: volunteers.email,
         backgroundCheckRequired: volunteerOpportunities.backgroundCheckRequired
       })
@@ -282,7 +275,7 @@ export class VolunteerStorage {
           volunteerId: volunteerMatches.volunteerId,
           opportunityId: volunteerMatches.opportunityId,
           opportunityTitle: volunteerOpportunities.title,
-          volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
+          volunteerName: sql<string>`CONCAT(volunteers.firstName, ' ', volunteers.lastName)`,
           volunteerEmail: volunteers.email
         })
         .from(volunteerMatches)
@@ -403,7 +396,7 @@ export class VolunteerStorage {
       const applications = await db
         .select({
           matchId: volunteerMatches.id,
-          volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
+          volunteerName: sql<string>`CONCAT(volunteers.firstName, ' ', volunteers.lastName)`,
           volunteerEmail: volunteers.email,
           opportunityTitle: volunteerOpportunities.title,
           appliedDate: volunteerMatches.respondedAt,
@@ -426,7 +419,7 @@ export class VolunteerStorage {
     }
   }
 
-  // Create volunteer opportunity
+  // Create volunteer opportunity - comprehensive implementation
   async createVolunteerOpportunity(data: any): Promise<any> {
     try {
       const [opportunity] = await db
@@ -690,8 +683,8 @@ export class VolunteerStorage {
         location: volunteerOpportunities.location,
         startDate: volunteerOpportunities.startDate,
         endDate: volunteerOpportunities.endDate,
-        volunteerName: volunteers.first_name,
-        volunteerLastName: volunteers.last_name,
+        volunteerName: volunteers.firstName,
+        volunteerLastName: volunteers.lastName,
         volunteerEmail: volunteers.email
       })
       .from(volunteerRegistrations)
