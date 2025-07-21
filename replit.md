@@ -147,6 +147,8 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 21, 2025: SPREADSHEET-STYLE SKILLS MATRIX FULLY IMPLEMENTED - Successfully replaced grid layout with professional spreadsheet-style table interface featuring rows/columns design for 60+ ministry-specific skills with proper color-coded selection system (Red: Required, Blue: Preferred, Purple: Spiritual Gifts)
+- July 21, 2025: UPDATE POSITION DATE VALIDATION FIXED - Resolved "Invalid time value" error in volunteer position editing by implementing proper null handling for startDate/endDate fields in PUT endpoint
 - July 21, 2025: VOLUNTEER POSITION CREATION SYSTEM FULLY OPERATIONAL - Successfully resolved all technical issues and completed comprehensive volunteer opportunity creation with automatic page refresh
   - POSITION CREATION CONFIRMED: "Choir Leader" position successfully created and displayed in opportunities list with all 38 form fields preserved
   - BACKEND ENDPOINT CONNECTIVITY: Fixed missing volunteer routes registration in main application enabling frontend-backend communication

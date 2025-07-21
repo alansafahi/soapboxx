@@ -1496,165 +1496,214 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     Select required and preferred skills for this volunteer position. Use the color-coded system below.
                   </div>
                   
-                  {/* Skills Selection Matrix */}
-                  <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                  {/* Skills Requirements Matrix - Spreadsheet Style */}
+                  <div className="border rounded-lg bg-white dark:bg-gray-900 overflow-hidden">
                     {/* Legend */}
-                    <div className="flex items-center gap-6 mb-4 text-sm">
+                    <div className="flex items-center gap-6 p-4 bg-gray-50 dark:bg-gray-800 border-b text-sm">
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-red-500 rounded"></div>
-                        <span>Required Skills</span>
+                        <span>Required</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                        <span>Preferred Skills</span>
+                        <span>Preferred</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-purple-500 rounded"></div>
-                        <span>Spiritual Gifts</span>
+                        <span>Spiritual Gift</span>
                       </div>
+                      <span className="text-gray-600 dark:text-gray-400">Click to cycle: None → Preferred → Required → None</span>
                     </div>
 
-                    {/* Ministry Skills Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {/* Administrative & Organization */}
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Administrative</h4>
-                        {['Organization', 'Data Entry', 'Record Keeping', 'Event Planning', 'Project Management', 'Financial Management'].map(skill => (
-                          <div
-                            key={skill}
-                            onClick={() => handleSkillToggle(skill)}
-                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
-                              selectedSkills.includes(skill)
-                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
-                                : preferredSkills.includes(skill)
-                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {skill}
-                          </div>
-                        ))}
-                      </div>
+                    {/* Spreadsheet Table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100 dark:bg-gray-800">
+                          <tr>
+                            <th className="text-left p-3 border-r dark:border-gray-700 font-medium min-w-[200px]">Skill/Requirement</th>
+                            <th className="text-center p-3 border-r dark:border-gray-700 font-medium w-20">Required</th>
+                            <th className="text-center p-3 border-r dark:border-gray-700 font-medium w-20">Preferred</th>
+                            <th className="text-center p-3 font-medium w-24">Spiritual Gift</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* Administrative Skills */}
+                          <tr className="border-t dark:border-gray-700">
+                            <td colSpan={4} className="p-2 bg-gray-50 dark:bg-gray-800 font-medium text-gray-800 dark:text-gray-200">
+                              Administrative & Organization
+                            </td>
+                          </tr>
+                          {['Organization', 'Data Entry', 'Record Keeping', 'Event Planning', 'Project Management', 'Financial Management'].map(skill => (
+                            <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <td className="p-3 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    selectedSkills.includes(skill)
+                                      ? 'bg-red-500 border-red-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    preferredSkills.includes(skill)
+                                      ? 'bg-blue-500 border-blue-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 text-center">
+                                {['Administration', 'Giving'].includes(skill) && (
+                                  <div
+                                    onClick={() => handleSpiritualGiftToggle(skill === 'Organization' ? 'Administration' : 'Giving')}
+                                    className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                      selectedSpiritualGifts.includes(skill === 'Organization' ? 'Administration' : 'Giving')
+                                        ? 'bg-purple-500 border-purple-500'
+                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                                    }`}
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
 
-                      {/* Technical & Maintenance */}
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Technical</h4>
-                        {['Audio/Video Tech', 'Sound Engineering', 'Lighting', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work', 'Plumbing', 'Carpentry', 'Landscaping'].map(skill => (
-                          <div
-                            key={skill}
-                            onClick={() => handleSkillToggle(skill)}
-                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
-                              selectedSkills.includes(skill)
-                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
-                                : preferredSkills.includes(skill)
-                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {skill}
-                          </div>
-                        ))}
-                      </div>
+                          {/* Technical Skills */}
+                          <tr className="border-t dark:border-gray-700">
+                            <td colSpan={4} className="p-2 bg-gray-50 dark:bg-gray-800 font-medium text-gray-800 dark:text-gray-200">
+                              Technical & Maintenance
+                            </td>
+                          </tr>
+                          {['Audio/Video Tech', 'Sound Engineering', 'Lighting', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work', 'Plumbing', 'Carpentry', 'Landscaping'].map(skill => (
+                            <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <td className="p-3 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    selectedSkills.includes(skill)
+                                      ? 'bg-red-500 border-red-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    preferredSkills.includes(skill)
+                                      ? 'bg-blue-500 border-blue-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 text-center">
+                                {skill === 'Audio/Video Tech' && (
+                                  <div
+                                    onClick={() => handleSpiritualGiftToggle('Serving')}
+                                    className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                      selectedSpiritualGifts.includes('Serving')
+                                        ? 'bg-purple-500 border-purple-500'
+                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                                    }`}
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
 
-                      {/* Ministry & Teaching */}
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Ministry</h4>
-                        {['Teaching', 'Bible Study Leadership', 'Counseling', 'Pastoral Care', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading', 'Prayer Ministry', 'Evangelism'].map(skill => (
-                          <div
-                            key={skill}
-                            onClick={() => handleSkillToggle(skill)}
-                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
-                              selectedSkills.includes(skill)
-                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
-                                : preferredSkills.includes(skill)
-                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {skill}
-                          </div>
-                        ))}
-                      </div>
+                          {/* Ministry Skills */}
+                          <tr className="border-t dark:border-gray-700">
+                            <td colSpan={4} className="p-2 bg-gray-50 dark:bg-gray-800 font-medium text-gray-800 dark:text-gray-200">
+                              Ministry & Teaching
+                            </td>
+                          </tr>
+                          {['Teaching', 'Bible Study Leadership', 'Counseling', 'Pastoral Care', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading', 'Prayer Ministry', 'Evangelism'].map(skill => (
+                            <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <td className="p-3 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    selectedSkills.includes(skill)
+                                      ? 'bg-red-500 border-red-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    preferredSkills.includes(skill)
+                                      ? 'bg-blue-500 border-blue-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 text-center">
+                                {['Teaching', 'Evangelism', 'Shepherding', 'Mercy'].includes(skill.split(' ')[0]) && (
+                                  <div
+                                    onClick={() => handleSpiritualGiftToggle(skill === 'Bible Study Leadership' ? 'Teaching' : skill === 'Pastoral Care' ? 'Shepherding' : skill.split(' ')[0])}
+                                    className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                      selectedSpiritualGifts.includes(skill === 'Bible Study Leadership' ? 'Teaching' : skill === 'Pastoral Care' ? 'Shepherding' : skill.split(' ')[0])
+                                        ? 'bg-purple-500 border-purple-500'
+                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                                    }`}
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
 
-                      {/* Hospitality & Service */}
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Hospitality</h4>
-                        {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care', 'Transportation'].map(skill => (
-                          <div
-                            key={skill}
-                            onClick={() => handleSkillToggle(skill)}
-                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
-                              selectedSkills.includes(skill)
-                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
-                                : preferredSkills.includes(skill)
-                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {skill}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Creative & Arts */}
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Creative</h4>
-                        {['Graphic Design', 'Photography', 'Videography', 'Art & Crafts', 'Drama/Theater', 'Dance', 'Writing', 'Social Media', 'Marketing'].map(skill => (
-                          <div
-                            key={skill}
-                            onClick={() => handleSkillToggle(skill)}
-                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
-                              selectedSkills.includes(skill)
-                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
-                                : preferredSkills.includes(skill)
-                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {skill}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Security & Safety */}
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Security & Safety</h4>
-                        {['Security', 'First Aid/CPR', 'Medical Training', 'Emergency Response', 'Crowd Management', 'Safety Coordination'].map(skill => (
-                          <div
-                            key={skill}
-                            onClick={() => handleSkillToggle(skill)}
-                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
-                              selectedSkills.includes(skill)
-                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
-                                : preferredSkills.includes(skill)
-                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {skill}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Spiritual Gifts Section */}
-                    <div className="mt-6 pt-4 border-t">
-                      <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Spiritual Gifts Required</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                        {['Leadership', 'Teaching', 'Evangelism', 'Prophecy', 'Shepherding', 'Mercy', 'Serving', 'Giving', 'Administration', 'Faith', 'Wisdom', 'Knowledge', 'Hospitality', 'Encouragement', 'Discernment', 'Intercession'].map(gift => (
-                          <div
-                            key={gift}
-                            onClick={() => handleSpiritualGiftToggle(gift)}
-                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
-                              selectedSpiritualGifts.includes(gift)
-                                ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
-                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {gift}
-                          </div>
-                        ))}
-                      </div>
+                          {/* Hospitality Skills */}
+                          <tr className="border-t dark:border-gray-700">
+                            <td colSpan={4} className="p-2 bg-gray-50 dark:bg-gray-800 font-medium text-gray-800 dark:text-gray-200">
+                              Hospitality & Service
+                            </td>
+                          </tr>
+                          {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care', 'Transportation'].map(skill => (
+                            <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <td className="p-3 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    selectedSkills.includes(skill)
+                                      ? 'bg-red-500 border-red-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 border-r dark:border-gray-700 text-center">
+                                <div
+                                  onClick={() => handleSkillToggle(skill)}
+                                  className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                    preferredSkills.includes(skill)
+                                      ? 'bg-blue-500 border-blue-500'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                                  }`}
+                                />
+                              </td>
+                              <td className="p-3 text-center">
+                                {['Hospitality', 'Serving'].includes(skill) && (
+                                  <div
+                                    onClick={() => handleSpiritualGiftToggle(skill === 'Food Service' || skill === 'Cooking' ? 'Serving' : 'Hospitality')}
+                                    className={`w-6 h-6 mx-auto rounded cursor-pointer border-2 transition-colors ${
+                                      selectedSpiritualGifts.includes(skill === 'Food Service' || skill === 'Cooking' ? 'Serving' : 'Hospitality')
+                                        ? 'bg-purple-500 border-purple-500'
+                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                                    }`}
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                   
