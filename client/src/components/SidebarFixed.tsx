@@ -163,7 +163,7 @@ export default function SidebarFixed() {
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Saved Reflections", href: "/saved-reflections", icon: Bookmark },
         { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Heart },
-        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
+        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles, roles: [] }, // Force always visible
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
         { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
@@ -305,8 +305,9 @@ export default function SidebarFixed() {
                         return true;
                       }
                       
-                      // ALWAYS show D.I.V.I.N.E. - it's a core feature
+                      // FORCE SHOW D.I.V.I.N.E. - DEBUG
                       if (item.href === '/divine') {
+                        console.log('D.I.V.I.N.E. item found in filter - should be visible');
                         return true;
                       }
                       
@@ -373,8 +374,9 @@ export default function SidebarFixed() {
                 if (!hasGlobalRole && !hasChurchRole) return null;
               }
               
-              // ALWAYS show D.I.V.I.N.E. - it's a core feature
+              // FORCE SHOW D.I.V.I.N.E. - DEBUG  
               if (item.href === '/divine') {
+                console.log('D.I.V.I.N.E. item found in collapsed filter - should be visible');
                 // D.I.V.I.N.E. is always visible - core volunteer management feature
               } else {
                 // Apply church feature filtering for non-core features

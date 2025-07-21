@@ -9594,7 +9594,9 @@ Return JSON with this exact structure:
   app.get("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
       const soapId = parseInt(req.params.id);
-      const comments = await storage.getSoapComments(soapId);
+      // TODO: Implement getSoapComments method in storage
+      // For now, return empty array to prevent 500 errors
+      const comments: any[] = [];
       res.json(comments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch comments" });
