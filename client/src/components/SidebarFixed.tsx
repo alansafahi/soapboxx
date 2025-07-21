@@ -158,10 +158,10 @@ export default function SidebarFixed() {
     {
       label: "SPIRITUAL TOOLS",  
       items: [
-        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // HARDCODED AT TOP
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // Positioned after core spiritual tools
         { label: "Saved Reflections", href: "/saved-reflections", icon: Bookmark },
         { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Heart },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
@@ -318,10 +318,6 @@ export default function SidebarFixed() {
                         </Link>
                     )}
                     {group.items.filter((item) => {
-                      // SKIP D.I.V.I.N.E. since it's hardcoded above
-                      if (item.href === '/divine') {
-                        return false;
-                      }
                       
                       // Special case: Always show Content Moderation for soapbox_owner
                       if (item.href === '/moderation-dashboard' && user?.role === 'soapbox_owner') {
@@ -382,26 +378,8 @@ export default function SidebarFixed() {
         ) : (
           // Collapsed Navigation - Icons Only with Feature Filtering
           <div className="space-y-2">
-            {/* HARDCODED D.I.V.I.N.E. ICON AT TOP - FORCE VISIBLE */}
-            <Link key="/divine-collapsed-top" href="/divine">
-              <Button
-                variant={location === '/divine' ? "default" : "ghost"}
-                size="icon"
-                className={`relative w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
-                  location === '/divine'
-                    ? 'bg-purple-600 text-white hover:bg-purple-700' 
-                    : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
-                }`}
-                title="D.I.V.I.N.E. - Volunteer Management"
-              >
-                <Sparkles className="w-5 h-5" />
-              </Button>
-            </Link>
+
             {visibleGroups.flatMap(group => group.items).map((item) => {
-              // SKIP D.I.V.I.N.E. since it's hardcoded above
-              if (item.href === '/divine') {
-                return null;
-              }
               
               // Apply same filtering logic as expanded view
               if (item.roles) {
