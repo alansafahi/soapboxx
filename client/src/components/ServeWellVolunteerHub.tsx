@@ -765,6 +765,8 @@ const VolunteerDashboard = () => {
 const VolunteerOpportunitiesPanel = () => {
   const [selectedOpportunity, setSelectedOpportunity] = useState<VolunteerOpportunity | null>(null);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [signupNotes, setSignupNotes] = useState('');
   const queryClient = useQueryClient();
   
@@ -802,6 +804,42 @@ const VolunteerOpportunitiesPanel = () => {
   const handleSignup = (opportunity: VolunteerOpportunity) => {
     setSelectedOpportunity(opportunity);
     setShowSignupDialog(true);
+  };
+
+  const handleViewDetails = (opportunity: VolunteerOpportunity) => {
+    setSelectedOpportunity(opportunity);
+    setShowDetailsDialog(true);
+  };
+
+  const handleEditPosition = (opportunity: VolunteerOpportunity) => {
+    setSelectedOpportunity(opportunity);
+    setShowEditDialog(true);
+  };
+
+  const handleCompletePosition = async (opportunity: VolunteerOpportunity) => {
+    if (confirm(`Mark "${opportunity.title}" as complete? This will close the position to new volunteers.`)) {
+      try {
+        await apiRequest(`/api/volunteers/opportunities/${opportunity.id}/complete`, 'PUT');
+        queryClient.invalidateQueries({ queryKey: ['/api/volunteers/opportunities'] });
+        alert('✅ Position marked as complete!');
+      } catch (error) {
+        console.error('Failed to complete position:', error);
+        alert('❌ Failed to complete position. Please try again.');
+      }
+    }
+  };
+
+  const handleDeletePosition = async (opportunity: VolunteerOpportunity) => {
+    if (confirm(`Are you sure you want to delete "${opportunity.title}"? This action cannot be undone.`)) {
+      try {
+        await apiRequest(`/api/volunteers/opportunities/${opportunity.id}`, 'DELETE');
+        queryClient.invalidateQueries({ queryKey: ['/api/volunteers/opportunities'] });
+        alert('🗑️ Position deleted successfully!');
+      } catch (error) {
+        console.error('Failed to delete position:', error);
+        alert('❌ Failed to delete position. Please try again.');
+      }
+    }
   };
 
   if (isLoading) {
@@ -902,14 +940,53 @@ const VolunteerOpportunitiesPanel = () => {
                 </div>
               )}
 
-              <Button 
-                onClick={() => handleSignup(opportunity)}
-                className="w-full"
-                disabled={opportunity.volunteersRegistered >= opportunity.volunteersNeeded}
-              >
-                {opportunity.volunteersRegistered >= opportunity.volunteersNeeded ? 
-                  'Position Filled' : 'Sign Up to Serve'}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => handleSignup(opportunity)}
+                  className="flex-1"
+                  disabled={opportunity.volunteersRegistered >= opportunity.volunteersNeeded}
+                >
+                  {opportunity.volunteersRegistered >= opportunity.volunteersNeeded ? 
+                    'Position Filled' : 'Sign Up to Serve'}
+                </Button>
+                
+                {/* Management Actions for Coordinators/Admins */}
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDetails(opportunity)}
+                    title="View Details"
+                  >
+                    👁️
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditPosition(opportunity)}
+                    title="Edit Position"
+                  >
+                    ✏️
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCompletePosition(opportunity)}
+                    title="Mark Complete"
+                  >
+                    ✅
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeletePosition(opportunity)}
+                    title="Delete Position"
+                    className="hover:bg-red-50"
+                  >
+                    🗑️
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -966,6 +1043,145 @@ const VolunteerOpportunitiesPanel = () => {
                 {signupMutation.isPending ? 'Signing Up...' : 'Confirm Signup'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Position Details Dialog */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              📋 {selectedOpportunity?.title}
+              <Badge variant={selectedOpportunity?.priority === 'high' ? 'destructive' : 
+                            selectedOpportunity?.priority === 'medium' ? 'default' : 'secondary'}>
+                {selectedOpportunity?.priority} priority
+              </Badge>
+            </DialogTitle>
+            <DialogDescription>
+              Complete position details and requirements
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOpportunity && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Ministry</h4>
+                  <p className="text-sm">{selectedOpportunity.ministry || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Department</h4>
+                  <p className="text-sm">{selectedOpportunity.department || 'Not specified'}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Location</h4>
+                  <p className="text-sm">{selectedOpportunity.location}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Time Commitment</h4>
+                  <p className="text-sm">{selectedOpportunity.timeCommitment}</p>
+                </div>
+              </div>
+
+              {/* Description & Responsibilities */}
+              <div>
+                <h4 className="font-semibold text-sm text-gray-700 mb-2">Description</h4>
+                <p className="text-sm bg-gray-50 p-3 rounded-md">{selectedOpportunity.description}</p>
+              </div>
+
+              {selectedOpportunity.responsibilities && (
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Responsibilities</h4>
+                  <p className="text-sm bg-gray-50 p-3 rounded-md whitespace-pre-line">{selectedOpportunity.responsibilities}</p>
+                </div>
+              )}
+
+              {/* Skills & Requirements */}
+              {selectedOpportunity.requiredSkills && selectedOpportunity.requiredSkills.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Required Skills</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedOpportunity.requiredSkills.map((skill, index) => (
+                      <Badge key={index} variant="destructive" className="text-xs">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Team Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Volunteers Needed</h4>
+                  <p className="text-sm">{selectedOpportunity.volunteersNeeded || 1}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Team Size</h4>
+                  <p className="text-sm">{selectedOpportunity.teamSize || 'Not specified'}</p>
+                </div>
+              </div>
+
+              {/* Coordinator Information */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-sm text-gray-700 mb-2">Coordinator Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm"><strong>Name:</strong> {selectedOpportunity.coordinatorName || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm"><strong>Email:</strong> {selectedOpportunity.coordinatorEmail || 'Not specified'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
+              Close
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowDetailsDialog(false);
+                if (selectedOpportunity) handleEditPosition(selectedOpportunity);
+              }}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              Edit Position
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Position Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Position</DialogTitle>
+            <DialogDescription>
+              Use the advanced Position Creator to edit this opportunity
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="text-center py-6">
+            <p className="text-sm text-gray-600 mb-4">
+              Click below to open the full Position Creator with this opportunity's current data pre-filled for editing.
+            </p>
+            
+            <VolunteerPositionCreator editOpportunity={selectedOpportunity}>
+              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                ✏️ Open Position Editor
+              </Button>
+            </VolunteerPositionCreator>
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

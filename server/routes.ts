@@ -12733,6 +12733,109 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Mark volunteer opportunity as complete
+  app.put('/api/volunteers/opportunities/:id/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const opportunityId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      if (isNaN(opportunityId)) {
+        return res.status(400).json({ message: 'Invalid opportunity ID' });
+      }
+
+      // Get opportunity to verify ownership/permissions
+      const opportunity = await db
+        .select()
+        .from(schema.volunteerOpportunities)
+        .where(eq(schema.volunteerOpportunities.id, opportunityId))
+        .limit(1);
+
+      if (opportunity.length === 0) {
+        return res.status(404).json({ message: 'Volunteer opportunity not found' });
+      }
+
+      // Update opportunity status to completed
+      const updatedOpportunity = await db
+        .update(schema.volunteerOpportunities)
+        .set({ 
+          status: 'completed',
+          updatedAt: new Date()
+        })
+        .where(eq(schema.volunteerOpportunities.id, opportunityId))
+        .returning();
+
+      res.json({
+        success: true,
+        message: 'Position marked as complete successfully',
+        opportunity: updatedOpportunity[0]
+      });
+
+    } catch (error) {
+      console.error('Failed to complete volunteer opportunity:', error);
+      res.status(500).json({ 
+        message: 'Failed to mark position as complete',
+        error: error.message 
+      });
+    }
+  });
+
+  // Delete volunteer opportunity
+  app.delete('/api/volunteers/opportunities/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const opportunityId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      if (isNaN(opportunityId)) {
+        return res.status(400).json({ message: 'Invalid opportunity ID' });
+      }
+
+      // Get opportunity to verify ownership/permissions
+      const opportunity = await db
+        .select()
+        .from(schema.volunteerOpportunities)
+        .where(eq(schema.volunteerOpportunities.id, opportunityId))
+        .limit(1);
+
+      if (opportunity.length === 0) {
+        return res.status(404).json({ message: 'Volunteer opportunity not found' });
+      }
+
+      // Delete related records first (volunteer registrations, matches)
+      await db
+        .delete(schema.volunteerRegistrations)
+        .where(eq(schema.volunteerRegistrations.opportunityId, opportunityId));
+
+      await db
+        .delete(schema.volunteerMatches)
+        .where(eq(schema.volunteerMatches.opportunityId, opportunityId));
+
+      // Delete the opportunity
+      await db
+        .delete(schema.volunteerOpportunities)
+        .where(eq(schema.volunteerOpportunities.id, opportunityId));
+
+      res.json({
+        success: true,
+        message: 'Volunteer position deleted successfully'
+      });
+
+    } catch (error) {
+      console.error('Failed to delete volunteer opportunity:', error);
+      res.status(500).json({ 
+        message: 'Failed to delete volunteer position',
+        error: error.message 
+      });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 

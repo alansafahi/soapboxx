@@ -199,7 +199,7 @@ const skillOptions = [
 
 
 
-export default function VolunteerPositionCreator({ children }: { children: React.ReactNode }) {
+export default function VolunteerPositionCreator({ children, editOpportunity }: { children: React.ReactNode; editOpportunity?: any }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [preferredSkills, setPreferredSkills] = useState<string[]>([]);
@@ -908,7 +908,14 @@ export default function VolunteerPositionCreator({ children }: { children: React
                       <FormItem>
                         <FormLabel>Coordinator Name *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Pastor John Smith" {...field} />
+                          <Input 
+                            placeholder="e.g., Pastor John Smith" 
+                            {...field}
+                            onFocus={(e) => e.target.placeholder = ''}
+                            onBlur={(e) => {
+                              if (!e.target.value) e.target.placeholder = 'e.g., Pastor John Smith';
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -922,7 +929,15 @@ export default function VolunteerPositionCreator({ children }: { children: React
                       <FormItem>
                         <FormLabel>Coordinator Email *</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="coordinator@church.org" {...field} />
+                          <Input 
+                            type="email" 
+                            placeholder="coordinator@church.org" 
+                            {...field}
+                            onFocus={(e) => e.target.placeholder = ''}
+                            onBlur={(e) => {
+                              if (!e.target.value) e.target.placeholder = 'coordinator@church.org';
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1275,7 +1290,14 @@ export default function VolunteerPositionCreator({ children }: { children: React
                       <FormItem>
                         <FormLabel>Location *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Main Sanctuary, Room 204" {...field} />
+                          <Input 
+                            placeholder="e.g., Main Sanctuary, Room 204" 
+                            {...field}
+                            onFocus={(e) => e.target.placeholder = ''}
+                            onBlur={(e) => {
+                              if (!e.target.value) e.target.placeholder = 'e.g., Main Sanctuary, Room 204';
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
