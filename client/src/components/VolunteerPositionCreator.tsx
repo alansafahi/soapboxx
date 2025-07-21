@@ -719,7 +719,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Ministry *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select ministry" />
@@ -759,7 +759,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Department *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select department" />
@@ -789,7 +789,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Priority</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select priority" />
@@ -1050,7 +1050,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Age Restriction (Optional)</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select age requirement" />
@@ -1277,7 +1277,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Background Check Level</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select level" />
@@ -1411,7 +1411,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Time Commitment *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select schedule" />
@@ -1437,7 +1437,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Hours Per Week *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select hours" />
@@ -1529,7 +1529,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Recurring Pattern</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select pattern" />
