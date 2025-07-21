@@ -272,6 +272,8 @@ export default function VolunteerPositionCreator({ children }: { children: React
 
   const createPositionMutation = useMutation({
     mutationFn: async (data: CreatePositionForm) => {
+      console.log('MUTATION TRIGGERED', data);
+      console.log('Selected skills:', selectedSkills);
       return apiRequest('/api/volunteer/opportunities', 'POST', {
         ...data,
         requiredSkills: selectedSkills,
@@ -366,6 +368,8 @@ export default function VolunteerPositionCreator({ children }: { children: React
   };
 
   const onSubmit = (data: CreatePositionForm) => {
+    console.log('FORM SUBMITTED!', data);
+    console.log('Form errors:', form.formState.errors);
     createPositionMutation.mutate(data);
   };
 
