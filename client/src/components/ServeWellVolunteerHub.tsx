@@ -830,7 +830,12 @@ const VolunteerOpportunitiesPanel = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Volunteer Opportunities</h2>
         <div className="flex gap-2">
-          <VolunteerPositionCreator />
+          <VolunteerPositionCreator>
+            <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Position
+            </Button>
+          </VolunteerPositionCreator>
           <Button variant="outline" size="sm">
             <Filter className="w-4 h-4 mr-2" />
             Filter
