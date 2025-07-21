@@ -2597,6 +2597,7 @@ export const volunteerOpportunities = pgTable("volunteer_opportunities", {
   maxHoursPerWeek: integer("max_hours_per_week"),
   ministry: varchar("ministry", { length: 100 }),
   category: varchar("category", { length: 100 }),
+  responsibilities: text("responsibilities").array(),
   isRecurring: boolean("is_recurring").default(false),
   recurringPattern: jsonb("recurring_pattern"), // {frequency: "weekly", interval: 1, daysOfWeek: [1,3,5]}
   recurringDays: text("recurring_days").array(),
