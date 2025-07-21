@@ -435,12 +435,12 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         department: editOpportunity.category || 'Pastoral Care', // Map category to department
         priority: editOpportunity.priority || 'medium',
         description: editOpportunity.description || '',
-        responsibilities: editOpportunity.description || '', // Use description for responsibilities
+        responsibilities: editOpportunity.responsibilities || editOpportunity.description || '',
         
         // Scheduling & Time
         timeCommitment: editOpportunity.time_commitment || editOpportunity.timeCommitment || 'Flexible schedule',
-        timeCommitmentLevel: '1-2 hours' as const, // Default since not in DB
-        maxHoursPerWeek: 2, // Default since not in DB
+        timeCommitmentLevel: (editOpportunity.time_commitment_level || editOpportunity.timeCommitmentLevel) as any || '1-2 hours',
+        maxHoursPerWeek: editOpportunity.max_hours_per_week || editOpportunity.maxHoursPerWeek || 2,
         location: editOpportunity.location || 'Main Church Building',
         startDate: editOpportunity.start_date ? new Date(editOpportunity.start_date) : 
                   editOpportunity.startDate ? new Date(editOpportunity.startDate) : undefined,
@@ -454,22 +454,22 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         
         // Requirements
         backgroundCheckRequired: editOpportunity.background_check_required || editOpportunity.backgroundCheckRequired || false,
-        backgroundCheckLevel: 'basic' as const, // Default since not in DB
+        backgroundCheckLevel: (editOpportunity.background_check_level || editOpportunity.backgroundCheckLevel) as any || 'basic',
         requiredSkills: editOpportunity.required_skills || editOpportunity.requiredSkills || [],
         preferredSkills: editOpportunity.preferredSkills || [],
         spiritualGiftsNeeded: editOpportunity.spiritual_gifts || editOpportunity.spiritualGiftsNeeded || [],
         
         // Team
         volunteersNeeded: editOpportunity.volunteers_needed || editOpportunity.volunteersNeeded || 1,
-        teamSize: editOpportunity.volunteers_needed || editOpportunity.volunteersNeeded || 1, // Use same as volunteersNeeded
-        teamRoles: editOpportunity.teamRoles || [],
-        leadershipRequired: editOpportunity.leadershipRequired || false,
+        teamSize: editOpportunity.team_size || editOpportunity.teamSize || editOpportunity.volunteers_needed || editOpportunity.volunteersNeeded || 1,
+        teamRoles: editOpportunity.team_roles || editOpportunity.teamRoles || [],
+        leadershipRequired: editOpportunity.leadership_required || editOpportunity.leadershipRequired || false,
         
         // Performance
-        performanceMetrics: editOpportunity.performanceMetrics || [],
-        trainingRequired: editOpportunity.trainingRequired || false,
-        orientationRequired: editOpportunity.orientationRequired || false,
-        mentorshipProvided: editOpportunity.mentorshipProvided || false,
+        performanceMetrics: editOpportunity.performance_metrics || editOpportunity.performanceMetrics || [],
+        trainingRequired: editOpportunity.training_required || editOpportunity.trainingRequired || false,
+        orientationRequired: editOpportunity.orientation_required || editOpportunity.orientationRequired || false,
+        mentorshipProvided: editOpportunity.mentorship_provided || editOpportunity.mentorshipProvided || false,
         
         // Administrative  
         coordinatorName: 'Ministry Coordinator', // Default since coordinator details not readily available

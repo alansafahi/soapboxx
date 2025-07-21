@@ -430,6 +430,7 @@ export class VolunteerStorage {
           ministry: data.ministry,
           category: data.department, // Map department to category field
           description: data.description,
+          responsibilities: data.responsibilities || [],
           coordinatorId: data.coordinatorId,
           location: data.location,
           startDate: data.startDate,
