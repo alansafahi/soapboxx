@@ -1,0 +1,43 @@
+2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/volunteers/matches/4/accept:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+queryClient.ts:114  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/messages/unread-count 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:114
+fetchFn @ @tanstack_react-query.js?v=942da740:840
+run @ @tanstack_react-query.js?v=942da740:494
+start @ @tanstack_react-query.js?v=942da740:536
+fetch @ @tanstack_react-query.js?v=942da740:926
+executeFetch_fn @ @tanstack_react-query.js?v=942da740:2211
+(anonymous) @ @tanstack_react-query.js?v=942da740:2245Understand this error
+queryClient.ts:114  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/messages/unread-count 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:114
+fetchFn @ @tanstack_react-query.js?v=942da740:840
+run @ @tanstack_react-query.js?v=942da740:494
+(anonymous) @ @tanstack_react-query.js?v=942da740:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=942da740:515
+Promise.catch
+run @ @tanstack_react-query.js?v=942da740:498
+start @ @tanstack_react-query.js?v=942da740:536
+fetch @ @tanstack_react-query.js?v=942da740:926
+executeFetch_fn @ @tanstack_react-query.js?v=942da740:2211
+(anonymous) @ @tanstack_react-query.js?v=942da740:2245Understand this error
+queryClient.ts:114  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/messages/unread-count 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:114
+fetchFn @ @tanstack_react-query.js?v=942da740:840
+run @ @tanstack_react-query.js?v=942da740:494
+(anonymous) @ @tanstack_react-query.js?v=942da740:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=942da740:515
+Promise.catch
+run @ @tanstack_react-query.js?v=942da740:498
+(anonymous) @ @tanstack_react-query.js?v=942da740:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=942da740:515
+Promise.catch
+run @ @tanstack_react-query.js?v=942da740:498
+start @ @tanstack_react-query.js?v=942da740:536
+fetch @ @tanstack_react-query.js?v=942da740:926
+executeFetch_fn @ @tanstack_react-query.js?v=942da740:2211
+(anonymous) @ @tanstack_react-query.js?v=942da740:2245Understand this error

@@ -145,7 +145,7 @@ export class VolunteerStorage {
         created: volunteerOpportunities.createdAt,
         // Coordinator details
         coordinatorId: users.id,
-        coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        coordinatorName: sql<string>`CONCAT(${users.first_name}, ' ', ${users.last_name})`,
         coordinatorEmail: users.email,
         roleId: volunteerOpportunities.roleId
       })
@@ -210,7 +210,7 @@ export class VolunteerStorage {
         opportunityTitle: volunteerOpportunities.title,
         coordinatorId: volunteerOpportunities.coordinatorId,
         coordinatorEmail: users.email,
-        coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        coordinatorName: sql<string>`CONCAT(${users.first_name}, ' ', ${users.last_name})`,
         volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
         volunteerEmail: volunteers.email,
         backgroundCheckRequired: volunteerOpportunities.backgroundCheckRequired
@@ -674,8 +674,8 @@ export class VolunteerStorage {
         location: volunteerOpportunities.location,
         startDate: volunteerOpportunities.startDate,
         endDate: volunteerOpportunities.endDate,
-        volunteerName: volunteers.firstName,
-        volunteerLastName: volunteers.lastName,
+        volunteerName: volunteers.first_name,
+        volunteerLastName: volunteers.last_name,
         volunteerEmail: volunteers.email
       })
       .from(volunteerRegistrations)
