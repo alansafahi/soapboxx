@@ -35,6 +35,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import VolunteerCalendar from './VolunteerCalendar';
 
 // D.I.V.I.N.E. - Disciple-Inspired Volunteer Integration & Nurture Engine
@@ -329,16 +330,23 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
 
 // Divine Appointments - AI-Powered Volunteer Matching
 const DivineAppointmentsPanel = () => {
+  const { toast } = useToast();
   const { data: divineAppointments, isLoading } = useQuery({
     queryKey: ['/api/volunteers/divine-appointments'],
     queryFn: () => apiRequest('/api/volunteers/divine-appointments', 'GET')
   });
 
+  const queryClient = useQueryClient();
+  
   const acceptMutation = useMutation({
     mutationFn: (matchId: number) => 
       apiRequest(`/api/volunteers/matches/${matchId}/accept`, 'POST'),
     onSuccess: () => {
-      // Refresh appointments
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers/divine-appointments'] });
+      toast({
+        title: "Divine Appointment Accepted!",
+        description: "You've accepted this volunteer opportunity. Expect to hear from the ministry leader soon.",
+      });
     }
   });
 
@@ -453,9 +461,20 @@ const DivineAppointmentsPanel = () => {
                   disabled={acceptMutation.isPending}
                 >
                   <Heart className="w-4 h-4 mr-1" />
-                  Accept Call
+                  {acceptMutation.isPending ? 'Accepting...' : 'Accept Call'}
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => {
+                    // Show detailed opportunity information in a dialog
+                    toast({
+                      title: appointment.opportunity?.title || 'Ministry Opportunity',
+                      description: `Ministry: ${appointment.opportunity?.ministry || 'General'}\nTime Commitment: ${appointment.opportunity?.timeCommitment || 'Flexible'}\nLocation: ${appointment.opportunity?.location || 'Church Location'}`,
+                    });
+                  }}
+                >
                   Learn More
                 </Button>
               </div>
