@@ -410,17 +410,132 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     setCurrentTab('basic');
   };
 
-  // Initialize state arrays when editOpportunity changes
+  // Initialize state arrays and form values when editOpportunity changes
   useEffect(() => {
-    if (editOpportunity) {
+    if (editOpportunity && isOpen) {
+      // Reset form with editOpportunity data
+      form.reset({
+        // Basic Information
+        title: editOpportunity.title || '',
+        ministry: editOpportunity.ministry || 'General Ministry',
+        department: editOpportunity.department || 'Pastoral Care',
+        priority: editOpportunity.priority || 'medium',
+        description: editOpportunity.description || '',
+        responsibilities: editOpportunity.responsibilities || '',
+        
+        // Scheduling & Time
+        timeCommitment: editOpportunity.timeCommitment || 'Flexible schedule',
+        timeCommitmentLevel: editOpportunity.timeCommitmentLevel || '1-2 hours',
+        maxHoursPerWeek: editOpportunity.maxHoursPerWeek || 2,
+        location: editOpportunity.location || 'Main Church Building',
+        startDate: editOpportunity.startDate ? new Date(editOpportunity.startDate) : undefined,
+        endDate: editOpportunity.endDate ? new Date(editOpportunity.endDate) : undefined,
+        
+        // Recurring
+        isRecurring: editOpportunity.isRecurring || false,
+        recurringPattern: editOpportunity.recurringPattern || 'Weekly',
+        recurringDays: editOpportunity.recurringDays || [],
+        
+        // Requirements
+        backgroundCheckRequired: editOpportunity.backgroundCheckRequired || false,
+        backgroundCheckLevel: editOpportunity.backgroundCheckLevel || 'basic',
+        requiredSkills: editOpportunity.requiredSkills || [],
+        preferredSkills: editOpportunity.preferredSkills || [],
+        spiritualGiftsNeeded: editOpportunity.spiritualGiftsNeeded || [],
+        
+        // Team
+        volunteersNeeded: editOpportunity.volunteersNeeded || 1,
+        teamSize: editOpportunity.teamSize || 1,
+        teamRoles: editOpportunity.teamRoles || [],
+        leadershipRequired: editOpportunity.leadershipRequired || false,
+        
+        // Performance
+        performanceMetrics: editOpportunity.performanceMetrics || [],
+        trainingRequired: editOpportunity.trainingRequired || false,
+        orientationRequired: editOpportunity.orientationRequired || false,
+        mentorshipProvided: editOpportunity.mentorshipProvided || false,
+        
+        // Administrative  
+        coordinatorName: editOpportunity.coordinatorName || 'Ministry Coordinator',
+        coordinatorEmail: editOpportunity.coordinatorEmail || 'coordinator@example.com',
+        budgetRequired: editOpportunity.budgetRequired || false,
+        
+        // Advanced
+        autoApprove: editOpportunity.autoApprove || false,
+        sendNotifications: editOpportunity.sendNotifications !== false, // Default true unless explicitly false
+        trackHours: editOpportunity.trackHours !== false, // Default true unless explicitly false
+        requireReferences: editOpportunity.requireReferences || false
+      });
+
+      // Set state arrays for multi-select components
       setSelectedSkills(editOpportunity.requiredSkills || []);
       setPreferredSkills(editOpportunity.preferredSkills || []);
       setSelectedSpiritualGifts(editOpportunity.spiritualGiftsNeeded || []);
       setSelectedPerformanceMetrics(editOpportunity.performanceMetrics || []);
       setSelectedRecurringDays(editOpportunity.recurringDays || []);
       setSelectedTeamRoles(editOpportunity.teamRoles || []);
+      
+      // Reset to basic tab when editing
+      setCurrentTab('basic');
+    } else if (isOpen && !editOpportunity) {
+      // Reset form for new position creation
+      form.reset({
+        // Basic Information
+        title: '',
+        ministry: 'General Ministry',
+        department: 'Pastoral Care',
+        priority: 'medium',
+        description: '',
+        responsibilities: '',
+        
+        // Scheduling & Time
+        timeCommitment: 'Flexible schedule',
+        timeCommitmentLevel: '1-2 hours',
+        maxHoursPerWeek: 2,
+        location: 'Main Church Building',
+        startDate: undefined,
+        endDate: undefined,
+        
+        // Recurring
+        isRecurring: false,
+        recurringPattern: 'Weekly',
+        recurringDays: [],
+        
+        // Requirements
+        backgroundCheckRequired: false,
+        backgroundCheckLevel: 'basic',
+        requiredSkills: [],
+        preferredSkills: [],
+        spiritualGiftsNeeded: [],
+        
+        // Team
+        volunteersNeeded: 1,
+        teamSize: 1,
+        teamRoles: [],
+        leadershipRequired: false,
+        
+        // Performance
+        performanceMetrics: [],
+        trainingRequired: false,
+        orientationRequired: false,
+        mentorshipProvided: false,
+        
+        // Administrative  
+        coordinatorName: 'Ministry Coordinator',
+        coordinatorEmail: 'coordinator@example.com',
+        budgetRequired: false,
+        
+        // Advanced
+        autoApprove: false,
+        sendNotifications: true,
+        trackHours: true,
+        requireReferences: false
+      });
+      
+      // Clear all state arrays
+      resetAllSelections();
     }
-  }, [editOpportunity]);
+  }, [editOpportunity, isOpen, form]);
 
   const onSubmit = async (data: CreatePositionForm) => {
     console.log('FORM SUBMITTED!', data);
