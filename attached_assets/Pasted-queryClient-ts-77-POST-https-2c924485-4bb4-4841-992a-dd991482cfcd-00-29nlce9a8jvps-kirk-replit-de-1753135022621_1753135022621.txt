@@ -1,0 +1,65 @@
+queryClient.ts:77  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/volunteer/opportunities 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ VolunteerPositionCreator.tsx:301
+fn @ @tanstack_react-query.js?v=942da740:1189
+run @ @tanstack_react-query.js?v=942da740:494
+start @ @tanstack_react-query.js?v=942da740:536
+execute @ @tanstack_react-query.js?v=942da740:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=942da740:2630
+onSubmit @ VolunteerPositionCreator.tsx:598
+(anonymous) @ chunk-4BFJKWC4.js?v=942da740:1465
+await in (anonymous)
+onSubmit @ VolunteerPositionCreator.tsx:644
+callCallback2 @ chunk-RPCDYKBN.js?v=942da740:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=942da740:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=942da740:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=942da740:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=942da740:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=942da740:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=942da740:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=942da740:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=942da740:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=942da740:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=942da740:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=942da740:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=942da740:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=942da740:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=942da740:5449Understand this error
+queryClient.ts:77  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/volunteer/opportunities 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ VolunteerPositionCreator.tsx:301
+fn @ @tanstack_react-query.js?v=942da740:1189
+run @ @tanstack_react-query.js?v=942da740:494
+(anonymous) @ @tanstack_react-query.js?v=942da740:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=942da740:515
+Promise.catch
+run @ @tanstack_react-query.js?v=942da740:498
+start @ @tanstack_react-query.js?v=942da740:536
+execute @ @tanstack_react-query.js?v=942da740:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=942da740:2630
+onSubmit @ VolunteerPositionCreator.tsx:598
+(anonymous) @ chunk-4BFJKWC4.js?v=942da740:1465
+await in (anonymous)
+onSubmit @ VolunteerPositionCreator.tsx:644
+callCallback2 @ chunk-RPCDYKBN.js?v=942da740:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=942da740:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=942da740:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=942da740:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=942da740:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=942da740:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=942da740:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=942da740:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=942da740:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=942da740:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=942da740:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=942da740:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=942da740:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=942da740:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=942da740:5449Understand this error
+Console.js:61 ❌ Mutation failed: Error: 500: {"message":"Failed to create volunteer position","error":"value.map is not a function"}
+    at apiRequest (queryClient.ts:81:13)
