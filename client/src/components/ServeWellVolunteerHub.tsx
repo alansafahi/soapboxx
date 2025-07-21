@@ -830,6 +830,7 @@ const VolunteerOpportunitiesPanel = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Volunteer Opportunities</h2>
         <div className="flex gap-2">
+          <VolunteerPositionCreator />
           <Button variant="outline" size="sm">
             <Filter className="w-4 h-4 mr-2" />
             Filter
@@ -1004,9 +1005,11 @@ const ServeWellVolunteerHub = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
           <TabsTrigger value="appointments">Divine Appointments</TabsTrigger>
+          <TabsTrigger value="calendar">My Calendar</TabsTrigger>
           <TabsTrigger value="impact">Impact</TabsTrigger>
         </TabsList>
 

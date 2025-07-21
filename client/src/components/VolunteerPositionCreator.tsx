@@ -1378,5 +1378,3 @@ export default function VolunteerPositionCreator() {
     </Dialog>
   );
 };
-
-export default VolunteerPositionCreator;
