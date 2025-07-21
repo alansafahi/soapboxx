@@ -432,34 +432,36 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         // Basic Information
         title: editOpportunity.title || '',
         ministry: editOpportunity.ministry || 'General Ministry',
-        department: editOpportunity.department || 'Pastoral Care',
+        department: editOpportunity.category || 'Pastoral Care', // Map category to department
         priority: editOpportunity.priority || 'medium',
         description: editOpportunity.description || '',
-        responsibilities: editOpportunity.responsibilities || '',
+        responsibilities: editOpportunity.description || '', // Use description for responsibilities
         
         // Scheduling & Time
-        timeCommitment: editOpportunity.timeCommitment || 'Flexible schedule',
-        timeCommitmentLevel: editOpportunity.timeCommitmentLevel || '1-2 hours',
-        maxHoursPerWeek: editOpportunity.maxHoursPerWeek || 2,
+        timeCommitment: editOpportunity.time_commitment || editOpportunity.timeCommitment || 'Flexible schedule',
+        timeCommitmentLevel: '1-2 hours', // Default since not in DB
+        maxHoursPerWeek: 2, // Default since not in DB
         location: editOpportunity.location || 'Main Church Building',
-        startDate: editOpportunity.startDate ? new Date(editOpportunity.startDate) : undefined,
-        endDate: editOpportunity.endDate ? new Date(editOpportunity.endDate) : undefined,
+        startDate: editOpportunity.start_date ? new Date(editOpportunity.start_date) : 
+                  editOpportunity.startDate ? new Date(editOpportunity.startDate) : undefined,
+        endDate: editOpportunity.end_date ? new Date(editOpportunity.end_date) : 
+                editOpportunity.endDate ? new Date(editOpportunity.endDate) : undefined,
         
         // Recurring
-        isRecurring: editOpportunity.isRecurring || false,
-        recurringPattern: editOpportunity.recurringPattern || 'Weekly',
+        isRecurring: editOpportunity.is_recurring || editOpportunity.isRecurring || false,
+        recurringPattern: editOpportunity.recurring_pattern || editOpportunity.recurringPattern || 'Weekly',
         recurringDays: editOpportunity.recurringDays || [],
         
         // Requirements
-        backgroundCheckRequired: editOpportunity.backgroundCheckRequired || false,
-        backgroundCheckLevel: editOpportunity.backgroundCheckLevel || 'basic',
-        requiredSkills: editOpportunity.requiredSkills || [],
+        backgroundCheckRequired: editOpportunity.background_check_required || editOpportunity.backgroundCheckRequired || false,
+        backgroundCheckLevel: 'basic', // Default since not in DB
+        requiredSkills: editOpportunity.required_skills || editOpportunity.requiredSkills || [],
         preferredSkills: editOpportunity.preferredSkills || [],
-        spiritualGiftsNeeded: editOpportunity.spiritualGiftsNeeded || [],
+        spiritualGiftsNeeded: editOpportunity.spiritual_gifts || editOpportunity.spiritualGiftsNeeded || [],
         
         // Team
-        volunteersNeeded: editOpportunity.volunteersNeeded || 1,
-        teamSize: editOpportunity.teamSize || 1,
+        volunteersNeeded: editOpportunity.volunteers_needed || editOpportunity.volunteersNeeded || 1,
+        teamSize: editOpportunity.volunteers_needed || editOpportunity.volunteersNeeded || 1, // Use same as volunteersNeeded
         teamRoles: editOpportunity.teamRoles || [],
         leadershipRequired: editOpportunity.leadershipRequired || false,
         
@@ -470,8 +472,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         mentorshipProvided: editOpportunity.mentorshipProvided || false,
         
         // Administrative  
-        coordinatorName: editOpportunity.coordinatorName || 'Ministry Coordinator',
-        coordinatorEmail: editOpportunity.coordinatorEmail || 'coordinator@example.com',
+        coordinatorName: 'Ministry Coordinator', // Default since coordinator details not readily available
+        coordinatorEmail: 'coordinator@example.com', // Default since coordinator details not readily available  
         budgetRequired: editOpportunity.budgetRequired || false,
         
         // Advanced
@@ -482,9 +484,9 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
       });
 
       // Set state arrays for multi-select components
-      setSelectedSkills(editOpportunity.requiredSkills || []);
+      setSelectedSkills(editOpportunity.required_skills || editOpportunity.requiredSkills || []);
       setPreferredSkills(editOpportunity.preferredSkills || []);
-      setSelectedSpiritualGifts(editOpportunity.spiritualGiftsNeeded || []);
+      setSelectedSpiritualGifts(editOpportunity.spiritual_gifts || editOpportunity.spiritualGiftsNeeded || []);
       setSelectedPerformanceMetrics(editOpportunity.performanceMetrics || []);
       setSelectedRecurringDays(editOpportunity.recurringDays || []);
       setSelectedTeamRoles(editOpportunity.teamRoles || []);
