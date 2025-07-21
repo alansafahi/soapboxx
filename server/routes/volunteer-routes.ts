@@ -336,19 +336,25 @@ router.post('/opportunities', async (req, res) => {
       ...req.body,
       churchId: 1, // Default church ID
       coordinatorId: (req.user as any).email,
-      spiritualGifts: req.body.spiritualGiftsNeeded || [], // Map spiritualGiftsNeeded → spiritualGifts
+      spiritualGifts: Array.isArray(req.body.spiritualGiftsNeeded) ? req.body.spiritualGiftsNeeded : [], // Map spiritualGiftsNeeded → spiritualGifts
       category: req.body.department, // Map department → category
-      // Make sure all array fields are handled properly
-      requiredSkills: req.body.requiredSkills || [],
-      preferredSkills: req.body.preferredSkills || [],
-      teamRoles: req.body.teamRoles || [],
-      performanceMetrics: req.body.performanceMetrics || [],
-      recurringDays: req.body.recurringDays || [],
+      // Make sure all array fields are handled properly and converted to arrays
+      requiredSkills: Array.isArray(req.body.requiredSkills) ? req.body.requiredSkills : [],
+      preferredSkills: Array.isArray(req.body.preferredSkills) ? req.body.preferredSkills : [],
+      teamRoles: Array.isArray(req.body.teamRoles) ? req.body.teamRoles : [],
+      performanceMetrics: Array.isArray(req.body.performanceMetrics) ? req.body.performanceMetrics : [],
+      recurringDays: Array.isArray(req.body.recurringDays) ? req.body.recurringDays : [],
+      responsibilities: Array.isArray(req.body.responsibilities) ? req.body.responsibilities : (req.body.responsibilities ? [req.body.responsibilities] : []),
       // Handle date fields  
       startDate: req.body.startDate ? new Date(req.body.startDate) : undefined,
       endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
     };
 
+    console.log('🔍 DEBUG: Array field types before mapping:');
+    console.log('requiredSkills:', typeof req.body.requiredSkills, Array.isArray(req.body.requiredSkills), req.body.requiredSkills);
+    console.log('responsibilities:', typeof req.body.responsibilities, Array.isArray(req.body.responsibilities), req.body.responsibilities);
+    console.log('performanceMetrics:', typeof req.body.performanceMetrics, Array.isArray(req.body.performanceMetrics), req.body.performanceMetrics);
+    
     console.log('Backend received data:', JSON.stringify(req.body, null, 2));
     console.log('Mapped data for validation:', JSON.stringify(mappedData, null, 2));
 
