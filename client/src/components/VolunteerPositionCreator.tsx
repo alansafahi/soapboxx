@@ -456,11 +456,9 @@ export default function VolunteerPositionCreator({ children }: { children: React
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ministryOptions.map(ministry => (
-                              <SelectItem key={ministry} value={ministry}>
-                                {ministry}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="General Ministry">General Ministry</SelectItem>
+                            <SelectItem value="Children Ministry">Children Ministry</SelectItem>
+                            <SelectItem value="Youth Ministry">Youth Ministry</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -483,11 +481,9 @@ export default function VolunteerPositionCreator({ children }: { children: React
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {departmentOptions.map(dept => (
-                              <SelectItem key={dept} value={dept}>
-                                {dept}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="Pastoral Care">Pastoral Care</SelectItem>
+                            <SelectItem value="Community Outreach">Community Outreach</SelectItem>
+                            <SelectItem value="Operations">Operations</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -963,11 +959,9 @@ export default function VolunteerPositionCreator({ children }: { children: React
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {backgroundCheckLevels.map(level => (
-                                <SelectItem key={level.value} value={level.value}>
-                                  {level.label}
-                                </SelectItem>
-                              ))}
+                                <SelectItem value="basic">Basic Check (ID Verification)</SelectItem>
+                                <SelectItem value="standard">Standard Check (Criminal Background)</SelectItem>
+                                <SelectItem value="enhanced">Enhanced Check (Child Protection)</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1210,11 +1204,9 @@ export default function VolunteerPositionCreator({ children }: { children: React
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {recurringPatterns.map(pattern => (
-                                  <SelectItem key={pattern} value={pattern}>
-                                    {pattern}
-                                  </SelectItem>
-                                ))}
+                                  <SelectItem value="Weekly">Weekly</SelectItem>
+                                  <SelectItem value="Monthly">Monthly</SelectItem>
+                                  <SelectItem value="Quarterly">Quarterly</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
