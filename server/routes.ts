@@ -12973,6 +12973,10 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Import and register volunteer routes
+  const volunteerRoutes = await import('./routes/volunteer-routes.js');
+  app.use('/api/volunteer', volunteerRoutes.default);
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 
