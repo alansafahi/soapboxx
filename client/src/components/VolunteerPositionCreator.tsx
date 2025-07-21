@@ -308,12 +308,22 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
           ? "Your volunteer opportunity has been updated with the new information." 
           : "Your volunteer opportunity has been posted and is now available for applications.",
       });
+      // Invalidate all volunteer-related queries to refresh the opportunities list
       queryClient.invalidateQueries({ queryKey: ['/api/volunteer/opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/volunteers/opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['volunteer-opportunities'] });
+      
+      // Close dialog and reset form
       setIsOpen(false);
       setCurrentTab('basic');
       setCompletedTabs([]);
       form.reset();
       resetAllSelections();
+      
+      // Force page refresh after a short delay to ensure data is visible
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     },
     onError: (error: any) => {
       toast({
