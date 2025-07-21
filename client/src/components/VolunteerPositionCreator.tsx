@@ -439,7 +439,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         
         // Scheduling & Time
         timeCommitment: editOpportunity.time_commitment || editOpportunity.timeCommitment || 'Flexible schedule',
-        timeCommitmentLevel: '1-2 hours', // Default since not in DB
+        timeCommitmentLevel: '1-2 hours' as const, // Default since not in DB
         maxHoursPerWeek: 2, // Default since not in DB
         location: editOpportunity.location || 'Main Church Building',
         startDate: editOpportunity.start_date ? new Date(editOpportunity.start_date) : 
@@ -454,7 +454,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         
         // Requirements
         backgroundCheckRequired: editOpportunity.background_check_required || editOpportunity.backgroundCheckRequired || false,
-        backgroundCheckLevel: 'basic', // Default since not in DB
+        backgroundCheckLevel: 'basic' as const, // Default since not in DB
         requiredSkills: editOpportunity.required_skills || editOpportunity.requiredSkills || [],
         preferredSkills: editOpportunity.preferredSkills || [],
         spiritualGiftsNeeded: editOpportunity.spiritual_gifts || editOpportunity.spiritualGiftsNeeded || [],
@@ -490,6 +490,9 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
       Object.entries(formData).forEach(([key, value]) => {
         form.setValue(key as any, value, { shouldValidate: false, shouldDirty: false, shouldTouch: false });
       });
+      
+      // Force a complete form re-render by triggering validation
+      form.trigger();
 
       // Set state arrays for multi-select components
       setSelectedSkills(editOpportunity.required_skills || editOpportunity.requiredSkills || []);
@@ -527,7 +530,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         
         // Scheduling & Time
         timeCommitment: 'Flexible schedule',
-        timeCommitmentLevel: '1-2 hours',
+        timeCommitmentLevel: '1-2 hours' as const,
         maxHoursPerWeek: 2,
         location: 'Main Church Building',
         startDate: undefined,
@@ -540,7 +543,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         
         // Requirements
         backgroundCheckRequired: false,
-        backgroundCheckLevel: 'basic',
+        backgroundCheckLevel: 'basic' as const,
         requiredSkills: [],
         preferredSkills: [],
         spiritualGiftsNeeded: [],
