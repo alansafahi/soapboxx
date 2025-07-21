@@ -156,14 +156,14 @@ export default function SidebarFixed() {
       ]
     },
     {
-      label: "SPIRITUAL TOOLS",
+      label: "SPIRITUAL TOOLS",  
       items: [
+        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // HARDCODED AT TOP
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "Saved Reflections", href: "/saved-reflections", icon: Bookmark },
         { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Heart },
-        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles, roles: [] }, // Force always visible
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
         { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
@@ -305,9 +305,8 @@ export default function SidebarFixed() {
                         return true;
                       }
                       
-                      // FORCE SHOW D.I.V.I.N.E. - DEBUG
+                      // D.I.V.I.N.E. is ALWAYS visible - core volunteer management system
                       if (item.href === '/divine') {
-                        console.log('D.I.V.I.N.E. item found in filter - should be visible');
                         return true;
                       }
                       
@@ -374,10 +373,9 @@ export default function SidebarFixed() {
                 if (!hasGlobalRole && !hasChurchRole) return null;
               }
               
-              // FORCE SHOW D.I.V.I.N.E. - DEBUG  
+              // D.I.V.I.N.E. is ALWAYS visible - core volunteer management system
               if (item.href === '/divine') {
-                console.log('D.I.V.I.N.E. item found in collapsed filter - should be visible');
-                // D.I.V.I.N.E. is always visible - core volunteer management feature
+                // Skip all filtering - D.I.V.I.N.E. is always visible
               } else {
                 // Apply church feature filtering for non-core features
                 const featureEnabled = isFeatureEnabled(item.href);
