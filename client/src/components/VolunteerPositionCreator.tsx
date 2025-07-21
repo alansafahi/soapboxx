@@ -746,7 +746,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         department: 'Pastoral Care',
         priority: 'medium',
         description: '',
-        responsibilities: '',
+        responsibilities: [],
         
         // Scheduling & Time
         timeCommitment: 'Flexible schedule',
@@ -1627,7 +1627,6 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     )}
                   />
                 </div>
-                </div>
               </div>
             )}
 
@@ -1759,7 +1758,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Recurring Pattern</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={typeof field.value === 'string' ? field.value : field.value?.pattern || 'Weekly'}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select pattern" />
