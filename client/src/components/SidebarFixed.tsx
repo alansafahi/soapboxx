@@ -281,7 +281,6 @@ export default function SidebarFixed() {
         {!isCollapsed ? (
           // Expanded Navigation - Filtered Groups  
           visibleGroups.map((group, idx) => {
-            console.log('Rendering group:', group.label, 'items:', group.items.length);
 
             // Ensure admin groups are always expanded for soapbox_owner users OR users with church admin roles
             // FORCE SPIRITUAL TOOLS TO BE EXPANDED TO SHOW D.I.V.I.N.E.
@@ -304,9 +303,7 @@ export default function SidebarFixed() {
                   <div className="space-y-1">
                     {/* HARDCODED D.I.V.I.N.E. BUTTON - FORCE VISIBLE */}
                     {group.label === "SPIRITUAL TOOLS" && (
-                      <>
-                        {console.log('SPIRITUAL TOOLS group found, rendering D.I.V.I.N.E. button')}
-                        <Link key="/divine-hardcoded" href="/divine">
+                      <Link key="/divine-hardcoded" href="/divine">
                           <Button
                             variant={location === '/divine' ? "default" : "ghost"}
                             className={`w-full justify-start h-auto py-2 px-3 ${
@@ -319,7 +316,6 @@ export default function SidebarFixed() {
                             <span className="text-sm">D.I.V.I.N.E.</span>
                           </Button>
                         </Link>
-                      </>
                     )}
                     {group.items.filter((item) => {
                       // SKIP D.I.V.I.N.E. since it's hardcoded above
