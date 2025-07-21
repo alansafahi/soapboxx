@@ -412,7 +412,21 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
   // Initialize state arrays and form values when editOpportunity changes
   useEffect(() => {
+    console.log('useEffect triggered:', { 
+      hasEditOpportunity: !!editOpportunity, 
+      isOpen, 
+      opportunityTitle: editOpportunity?.title,
+      opportunityMinistry: editOpportunity?.ministry,
+      opportunityDepartment: editOpportunity?.department
+    });
     if (editOpportunity && isOpen) {
+      console.log('Resetting form with edit data:', {
+        id: editOpportunity.id,
+        title: editOpportunity.title,
+        ministry: editOpportunity.ministry,
+        department: editOpportunity.department,
+        allData: editOpportunity
+      });
       // Reset form with editOpportunity data
       form.reset({
         // Basic Information

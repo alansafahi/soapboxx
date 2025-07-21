@@ -812,6 +812,13 @@ const VolunteerOpportunitiesPanel = () => {
   };
 
   const handleEditPosition = (opportunity: VolunteerOpportunity) => {
+    console.log('handleEditPosition called with:', {
+      id: opportunity.id,
+      title: opportunity.title,
+      ministry: opportunity.ministry,
+      department: opportunity.department,
+      fullData: opportunity
+    });
     setSelectedOpportunity(opportunity);
     setShowEditDialog(true);
   };
