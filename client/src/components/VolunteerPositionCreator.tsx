@@ -427,8 +427,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         department: editOpportunity.department,
         allData: editOpportunity
       });
-      // Reset form with editOpportunity data
-      form.reset({
+      // Use individual setValue calls instead of reset to force UI updates
+      const formData = {
         // Basic Information
         title: editOpportunity.title || '',
         ministry: editOpportunity.ministry || 'General Ministry',
@@ -481,6 +481,14 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         sendNotifications: editOpportunity.sendNotifications !== false, // Default true unless explicitly false
         trackHours: editOpportunity.trackHours !== false, // Default true unless explicitly false
         requireReferences: editOpportunity.requireReferences || false
+      };
+
+      // Reset form first
+      form.reset(formData);
+      
+      // Then force individual field updates with setValue to trigger UI updates
+      Object.entries(formData).forEach(([key, value]) => {
+        form.setValue(key as any, value, { shouldValidate: false, shouldDirty: false, shouldTouch: false });
       });
 
       // Set state arrays for multi-select components
@@ -493,6 +501,19 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
       
       // Reset to basic tab when editing
       setCurrentTab('basic');
+      
+      // Debug form values after reset
+      setTimeout(() => {
+        const currentFormValues = form.getValues();
+        console.log('Form values after reset:', {
+          title: currentFormValues.title,
+          ministry: currentFormValues.ministry,
+          department: currentFormValues.department,
+          description: currentFormValues.description,
+          volunteersNeeded: currentFormValues.volunteersNeeded,
+          allFormValues: currentFormValues
+        });
+      }, 100);
     } else if (isOpen && !editOpportunity) {
       // Reset form for new position creation
       form.reset({
