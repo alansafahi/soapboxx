@@ -2806,6 +2806,38 @@ export class DatabaseStorage implements IStorage {
       return { averageScore: 0, totalCheckins: 0 };
     }
   }
+
+  // Messaging system methods to fix 500 errors
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    try {
+      // Return 0 for now - messaging system needs full implementation
+      return 0;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  async getUserConversations(userId: string): Promise<any[]> {
+    try {
+      // Return empty array for now
+      return [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async markConversationAsRead(conversationId: string, userId: string): Promise<void> {
+    // Stub implementation
+    return;
+  }
+
+  async getUserContacts(userId: string): Promise<any[]> {
+    try {
+      return [];
+    } catch (error) {
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
