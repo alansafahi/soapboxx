@@ -372,7 +372,13 @@ export default function VolunteerPositionCreator() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+        <Button 
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          onClick={() => {
+            console.log("Create Volunteer Position clicked");
+            setIsOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Create Volunteer Position
         </Button>
