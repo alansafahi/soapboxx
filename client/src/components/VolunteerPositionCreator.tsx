@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -409,6 +409,18 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     setSelectedTeamRoles([]);
     setCurrentTab('basic');
   };
+
+  // Initialize state arrays when editOpportunity changes
+  useEffect(() => {
+    if (editOpportunity) {
+      setSelectedSkills(editOpportunity.requiredSkills || []);
+      setPreferredSkills(editOpportunity.preferredSkills || []);
+      setSelectedSpiritualGifts(editOpportunity.spiritualGiftsNeeded || []);
+      setSelectedPerformanceMetrics(editOpportunity.performanceMetrics || []);
+      setSelectedRecurringDays(editOpportunity.recurringDays || []);
+      setSelectedTeamRoles(editOpportunity.teamRoles || []);
+    }
+  }, [editOpportunity]);
 
   const onSubmit = async (data: CreatePositionForm) => {
     console.log('FORM SUBMITTED!', data);
@@ -826,8 +838,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                         onClick={() => handlePerformanceMetricToggle(metric)}
                         className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
                           selectedPerformanceMetrics.includes(metric)
-                            ? 'bg-blue-100 border-blue-300 text-blue-700'
-                            : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                            ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                            : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                       >
                         {metric}
@@ -1142,8 +1154,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                           onClick={() => handleSkillToggle(skill)}
                           className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
                             selectedSkills.includes(skill)
-                              ? 'bg-purple-100 border-purple-300 text-purple-700'
-                              : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                              ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
+                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                         >
                           {skill}
@@ -1161,8 +1173,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                           onClick={() => handlePreferredSkillToggle(skill)}
                           className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
                             preferredSkills.includes(skill)
-                              ? 'bg-blue-100 border-blue-300 text-blue-700'
-                              : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                              ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                         >
                           {skill}
@@ -1180,8 +1192,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                           onClick={() => handleSpiritualGiftToggle(gift)}
                           className={`cursor-pointer text-sm px-3 py-2 rounded-md border ${
                             selectedSpiritualGifts.includes(gift)
-                              ? 'bg-green-100 border-green-300 text-green-700'
-                              : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                              ? 'bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300'
+                              : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                           }`}
                         >
                           {gift}
@@ -1391,8 +1403,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               onClick={() => handleRecurringDayToggle(day)}
                               className={`cursor-pointer text-sm px-2 py-2 rounded-md border text-center ${
                                 selectedRecurringDays.includes(day)
-                                  ? 'bg-purple-100 border-purple-300 text-purple-700'
-                                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                  ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
+                                  : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                               }`}
                             >
                               {day.substring(0, 3)}
