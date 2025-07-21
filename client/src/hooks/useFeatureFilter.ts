@@ -69,7 +69,7 @@ export function useFeatureFilter(churchId: number | null) {
     const filterNavigationItems = (items: any[]) => {
       return items.filter(item => {
         // Handle nested items (submenus)
-        if (item.items) {
+        if (item.items && Array.isArray(item.items)) {
           const filteredSubItems = item.items.filter((subItem: any) => 
             isFeatureEnabled(subItem.key || subItem.href?.slice(1) || '')
           );

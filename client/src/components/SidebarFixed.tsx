@@ -305,6 +305,11 @@ export default function SidebarFixed() {
                         return true;
                       }
                       
+                      // ALWAYS show D.I.V.I.N.E. - it's a core feature
+                      if (item.href === '/divine') {
+                        return true;
+                      }
+                      
                       // Apply role-based filtering first  
                       if (item.roles) {
                         if (!user) return false;
@@ -315,8 +320,7 @@ export default function SidebarFixed() {
                       
                       // Apply direct church feature filtering to bypass React caching
                       const featureEnabled = isFeatureEnabled(item.href);
-                      // Always show moderation dashboard and D.I.V.I.N.E. for authorized users
-                      if (!featureEnabled && item.href !== '/moderation-dashboard' && item.href !== '/divine') {
+                      if (!featureEnabled) {
                         return false;
                       }
                       
@@ -369,11 +373,16 @@ export default function SidebarFixed() {
                 if (!hasGlobalRole && !hasChurchRole) return null;
               }
               
-              // Apply church feature filtering with debug  
-              const featureEnabled = isFeatureEnabled(item.href);
-              // Always show moderation dashboard and D.I.V.I.N.E. for authorized users
-              if (!featureEnabled && item.href !== '/moderation-dashboard' && item.href !== '/divine') {
-                return null;
+              // ALWAYS show D.I.V.I.N.E. - it's a core feature
+              if (item.href === '/divine') {
+                // D.I.V.I.N.E. is always visible - core volunteer management feature
+              } else {
+                // Apply church feature filtering for non-core features
+                const featureEnabled = isFeatureEnabled(item.href);
+                // Always show moderation dashboard for authorized users
+                if (!featureEnabled && item.href !== '/moderation-dashboard') {
+                  return null;
+                }
               }
               
               const Icon = item.icon;

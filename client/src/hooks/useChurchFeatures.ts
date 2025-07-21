@@ -131,7 +131,7 @@ export function useIsFeatureEnabled() {
   });
   
   // Use the most recently accessed church (first in the ordered list)
-  const primaryChurchId = userChurches?.[0]?.id;
+  const primaryChurchId = Array.isArray(userChurches) && userChurches.length > 0 ? userChurches[0]?.id : null;
   
   // Get church features if user has a church - using correct endpoint
   const { data: churchFeatures } = useQuery({
@@ -175,7 +175,7 @@ export function useIsFeatureEnabled() {
     }
     
     // If no church joined, show all menu items (all features enabled)
-    if (!userChurches || userChurches.length === 0) {
+    if (!Array.isArray(userChurches) || userChurches.length === 0) {
       return true;
     }
     
@@ -191,10 +191,10 @@ export function useIsFeatureEnabled() {
     }
     
     // Find the feature in church settings for the most recently accessed church
-    const feature = churchFeatures.find(f => 
+    const feature = Array.isArray(churchFeatures) ? churchFeatures.find((f: any) => 
       f.featureCategory === featureMapping.category && 
       f.featureName === featureMapping.name
-    );
+    ) : null;
     
     // Return enabled status for the most recent church (default to true if not found)
     return feature?.isEnabled ?? true;
