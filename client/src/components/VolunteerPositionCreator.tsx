@@ -51,7 +51,7 @@ const createPositionSchema = z.object({
   
   // Recurring Assignments (Phase 2)
   isRecurring: z.boolean(),
-  recurringPattern: z.string().optional(),
+  recurringPattern: z.string().min(1, 'Pattern required if recurring'),
   recurringDays: z.array(z.string()),
   recurringEndDate: z.date().optional(),
   
@@ -221,21 +221,21 @@ export default function VolunteerPositionCreator({ children }: { children: React
     defaultValues: {
       // Basic Information
       title: '',
-      ministry: '',
-      department: '',
+      ministry: 'General Ministry',
+      department: 'Pastoral Care',
       priority: 'medium',
       description: '',
       responsibilities: '',
       
       // Scheduling & Time
-      timeCommitment: '',
+      timeCommitment: 'Flexible schedule',
       timeCommitmentLevel: '1-2 hours',
       maxHoursPerWeek: 2,
       location: '',
       
       // Recurring
       isRecurring: false,
-      recurringPattern: '',
+      recurringPattern: 'Weekly',
       recurringDays: [],
       
       // Requirements
@@ -1358,17 +1358,7 @@ export default function VolunteerPositionCreator({ children }: { children: React
                 </Button>
                 
                 <Button
-                  type="button"
-                  onClick={() => {
-                    console.log('Button clicked!');
-                    console.log('Form errors:', form.formState.errors);
-                    console.log('Form is valid:', form.formState.isValid);
-                    const isValid = form.trigger();
-                    console.log('Manual validation result:', isValid);
-                    if (Object.keys(form.formState.errors).length === 0) {
-                      form.handleSubmit(onSubmit)();
-                    }
-                  }}
+                  type="submit"
                   disabled={createPositionMutation.isPending}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                 >
