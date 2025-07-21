@@ -64,7 +64,7 @@ const createPositionSchema = z.object({
   
   // Team Composition (Phase 2)
   volunteersNeeded: z.number().min(1).max(50),
-  teamSize: z.number().min(1).max(20),
+  teamSize: z.number().min(1).max(100),
   teamRoles: z.array(z.string()),
   leadershipRequired: z.boolean(),
   
