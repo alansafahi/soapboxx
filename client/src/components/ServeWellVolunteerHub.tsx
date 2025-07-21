@@ -806,7 +806,7 @@ const ServeWellVolunteerHub = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Success Announcement Box */}
+      {/* Success Announcement Box - Consolidated */}
       {showSuccessAnnouncement && lastAssessmentProfile && (
         <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-lg shadow-lg border-l-4 border-l-yellow-400 relative animate-in slide-in-from-top duration-500">
           <button
@@ -820,7 +820,8 @@ const ServeWellVolunteerHub = () => {
               <CheckCircle className="w-8 h-8 text-yellow-300" />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold mb-2">🎉 Assessment Complete!</h3>
+              <h3 className="text-xl font-bold mb-2">D.I.V.I.N.E. Setup Complete!</h3>
+              <p className="text-sm text-white/90 mb-4">You're ready to explore volunteer opportunities</p>
               
               {/* Display Spiritual Profile */}
               <div className="bg-white/20 rounded-lg p-3 mb-4">
@@ -840,27 +841,13 @@ const ServeWellVolunteerHub = () => {
                 )}
               </div>
               
-              <div className="space-y-2 text-sm">
-                <p className="flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-2 text-green-300" />
-                  Your spiritual profile has been created
-                </p>
-                <p className="flex items-center">
-                  <Target className="w-4 h-4 mr-2 text-blue-300" />
-                  Browse opportunities matched to your gifts
-                </p>
-                <p className="flex items-center">
-                  <Sparkles className="w-4 h-4 mr-2 text-purple-300" />
-                  Check out your personalized divine appointments
-                </p>
-              </div>
-              <div className="mt-4 flex space-x-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Button 
                   onClick={() => {
                     setActiveTab("appointments");
                     setShowSuccessAnnouncement(false);
                   }}
-                  className="bg-white text-blue-600 hover:bg-gray-100"
+                  className="bg-white text-purple-600 hover:bg-gray-100"
                   size="sm"
                 >
                   <Target className="w-4 h-4 mr-1" />
@@ -871,10 +858,22 @@ const ServeWellVolunteerHub = () => {
                     setActiveTab("opportunities");
                     setShowSuccessAnnouncement(false);
                   }}
-                  className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
+                  className="bg-purple-600 text-white hover:bg-purple-700"
                   size="sm"
                 >
-                  Browse Opportunities
+                  <Search className="w-4 h-4 mr-1" />
+                  Browse All Opportunities
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setActiveTab("calendar");
+                    setShowSuccessAnnouncement(false);
+                  }}
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  size="sm"
+                >
+                  <Calendar className="w-4 h-4 mr-1" />
+                  My Calendar
                 </Button>
               </div>
             </div>
@@ -1045,47 +1044,7 @@ const ServeWellVolunteerHub = () => {
               </Card>
             </div>
           ) : (
-            <div className="space-y-6">
-              {/* Completed Progress Steps */}
-              <Card className="border-l-4 border-l-green-500">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
-                    D.I.V.I.N.E. Setup Complete!
-                  </CardTitle>
-                  <CardDescription>
-                    You're ready to explore volunteer opportunities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Button 
-                      onClick={() => setActiveTab("appointments")}
-                      className="bg-gradient-to-r from-purple-500 to-blue-500"
-                    >
-                      <Target className="w-4 h-4 mr-2" />
-                      View My Matches
-                    </Button>
-                    <Button 
-                      onClick={() => setActiveTab("opportunities")}
-                      variant="outline"
-                    >
-                      <Search className="w-4 h-4 mr-2" />
-                      Browse All Opportunities
-                    </Button>
-                    <Button 
-                      onClick={() => setActiveTab("calendar")}
-                      variant="outline"
-                    >
-                      <Calendar className="w-4 h-4 mr-2" />
-                      My Calendar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <VolunteerDashboard />
-            </div>
+            <VolunteerDashboard />
           )}
         </TabsContent>
 
