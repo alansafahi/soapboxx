@@ -544,15 +544,37 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     }
   });
 
-  // Helper functions for multi-select fields
+  // Helper functions for multi-select fields - Enhanced for Matrix
   const handleSkillToggle = (skill: string) => {
-    setSelectedSkills(prev => {
-      const updated = prev.includes(skill) 
-        ? prev.filter(s => s !== skill)
-        : [...prev, skill];
-      form.setValue('requiredSkills', updated);
-      return updated;
-    });
+    // If currently required (red), remove it completely
+    if (selectedSkills.includes(skill)) {
+      setSelectedSkills(prev => {
+        const updated = prev.filter(s => s !== skill);
+        form.setValue('requiredSkills', updated);
+        return updated;
+      });
+    }
+    // If currently preferred (blue), remove from preferred and make required (red)
+    else if (preferredSkills.includes(skill)) {
+      setPreferredSkills(prev => {
+        const updated = prev.filter(s => s !== skill);
+        form.setValue('preferredSkills', updated);
+        return updated;
+      });
+      setSelectedSkills(prev => {
+        const updated = [...prev, skill];
+        form.setValue('requiredSkills', updated);
+        return updated;
+      });
+    }
+    // Not selected anywhere, make preferred (blue)
+    else {
+      setPreferredSkills(prev => {
+        const updated = [...prev, skill];
+        form.setValue('preferredSkills', updated);
+        return updated;
+      });
+    }
   };
 
   const handlePreferredSkillToggle = (skill: string) => {
@@ -1471,7 +1493,169 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     Skills & Requirements Matrix
                   </h3>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Matrix skills selection coming soon - using enhanced dropdown for now
+                    Select required and preferred skills for this volunteer position. Use the color-coded system below.
+                  </div>
+                  
+                  {/* Skills Selection Matrix */}
+                  <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                    {/* Legend */}
+                    <div className="flex items-center gap-6 mb-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-red-500 rounded"></div>
+                        <span>Required Skills</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                        <span>Preferred Skills</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-purple-500 rounded"></div>
+                        <span>Spiritual Gifts</span>
+                      </div>
+                    </div>
+
+                    {/* Ministry Skills Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Administrative & Organization */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Administrative</h4>
+                        {['Organization', 'Data Entry', 'Record Keeping', 'Event Planning', 'Project Management', 'Financial Management'].map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
+                              selectedSkills.includes(skill)
+                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
+                                : preferredSkills.includes(skill)
+                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Technical & Maintenance */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Technical</h4>
+                        {['Audio/Video Tech', 'Sound Engineering', 'Lighting', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work', 'Plumbing', 'Carpentry', 'Landscaping'].map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
+                              selectedSkills.includes(skill)
+                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
+                                : preferredSkills.includes(skill)
+                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Ministry & Teaching */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Ministry</h4>
+                        {['Teaching', 'Bible Study Leadership', 'Counseling', 'Pastoral Care', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading', 'Prayer Ministry', 'Evangelism'].map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
+                              selectedSkills.includes(skill)
+                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
+                                : preferredSkills.includes(skill)
+                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Hospitality & Service */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Hospitality</h4>
+                        {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care', 'Transportation'].map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
+                              selectedSkills.includes(skill)
+                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
+                                : preferredSkills.includes(skill)
+                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Creative & Arts */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Creative</h4>
+                        {['Graphic Design', 'Photography', 'Videography', 'Art & Crafts', 'Drama/Theater', 'Dance', 'Writing', 'Social Media', 'Marketing'].map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
+                              selectedSkills.includes(skill)
+                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
+                                : preferredSkills.includes(skill)
+                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Security & Safety */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Security & Safety</h4>
+                        {['Security', 'First Aid/CPR', 'Medical Training', 'Emergency Response', 'Crowd Management', 'Safety Coordination'].map(skill => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSkillToggle(skill)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
+                              selectedSkills.includes(skill)
+                                ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'
+                                : preferredSkills.includes(skill)
+                                ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Spiritual Gifts Section */}
+                    <div className="mt-6 pt-4 border-t">
+                      <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Spiritual Gifts Required</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {['Leadership', 'Teaching', 'Evangelism', 'Prophecy', 'Shepherding', 'Mercy', 'Serving', 'Giving', 'Administration', 'Faith', 'Wisdom', 'Knowledge', 'Hospitality', 'Encouragement', 'Discernment', 'Intercession'].map(gift => (
+                          <div
+                            key={gift}
+                            onClick={() => handleSpiritualGiftToggle(gift)}
+                            className={`cursor-pointer text-sm px-3 py-2 rounded-md border text-center transition-colors ${
+                              selectedSpiritualGifts.includes(gift)
+                                ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            {gift}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="space-y-4">
