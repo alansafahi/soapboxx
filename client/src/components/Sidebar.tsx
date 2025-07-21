@@ -111,12 +111,11 @@ export default function Sidebar() {
 
 
   // Get unread message count for notification badge - temporarily disabled to fix dialog issues
-  const unreadCount = 0; // Temporary fix - disable unread count queries until messaging system is fully implemented
-  // const { data: unreadCount = 0 } = useQuery<number>({
-  //   queryKey: ["/api/messages/unread-count"],
-  //   enabled: !!user,
-  //   refetchInterval: 30000, // Refresh every 30 seconds
-  // });
+  const { data: unreadCount = 0 } = useQuery<number>({
+    queryKey: ["/api/messages/unread-count"],
+    enabled: false, // Disabled to prevent 500 errors
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
 
   const navigationGroups: NavigationGroup[] = [
     {

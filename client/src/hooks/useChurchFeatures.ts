@@ -139,18 +139,17 @@ export function useIsFeatureEnabled() {
   const primaryChurchId = Array.isArray(userChurches) && userChurches.length > 0 ? userChurches[0]?.id : null;
   
   // Get church features if user has a church - temporarily disabled to fix 500 errors
-  const churchFeatures = null;
-  // const { data: churchFeatures } = useQuery({
-  //   queryKey: ['church-features', primaryChurchId],
-  //   queryFn: async () => {
-  //     if (!primaryChurchId) return [];
-  //     const response = await fetch(`/api/churches/${primaryChurchId}/features`, { credentials: 'include' });
-  //     if (!response.ok) return [];
-  //     return response.json();
-  //   },
-  //   enabled: !!primaryChurchId,
-  //   staleTime: 30000,
-  // });
+  const { data: churchFeatures = [] } = useQuery({
+    queryKey: ['church-features', primaryChurchId],
+    queryFn: async () => {
+      if (!primaryChurchId) return [];
+      const response = await fetch(`/api/churches/${primaryChurchId}/features`, { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: false, // Disabled to prevent 500 errors
+    staleTime: 30000,
+  });
   
   return (href: string): boolean => {
     // Extract the key from href (e.g., "/donation-demo" -> "donation", "/prayer-wall" -> "prayer-wall")
