@@ -30,6 +30,7 @@ const CORE_FEATURES = [
   'messages', 
   'contacts',
   'leaderboard', // Engagement Board
+  'divine', // D.I.V.I.N.E. - core volunteer management feature
   'profile',
   'settings',
   'today-reading', // S.O.A.P. Journal - always available for spiritual growth

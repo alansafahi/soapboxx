@@ -89,6 +89,7 @@ const CORE_FEATURES = [
   'soap',
   'bookmarked-prayers', // Bookmarked Prayers - always available spiritual feature
   'leaderboard', // Engagement Board - moved to core feature
+  'divine', // D.I.V.I.N.E. - core volunteer management feature
   'profile',
   'settings',
   'members', // Member Directory
