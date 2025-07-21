@@ -215,18 +215,18 @@ export default function VolunteerPositionCreator({ children }: { children: React
     resolver: zodResolver(createPositionSchema),
     defaultValues: {
       // Basic Information
-      title: '',
+      title: 'New Volunteer Position',
       ministry: 'General Ministry',
       department: 'Pastoral Care',
       priority: 'medium',
-      description: '',
-      responsibilities: '',
+      description: 'A meaningful volunteer opportunity to serve our church community.',
+      responsibilities: 'Help support ministry activities and serve church members.',
       
       // Scheduling & Time
       timeCommitment: 'Flexible schedule',
       timeCommitmentLevel: '1-2 hours',
       maxHoursPerWeek: 2,
-      location: '',
+      location: 'Main Church Building',
       
       // Recurring
       isRecurring: false,
@@ -252,9 +252,9 @@ export default function VolunteerPositionCreator({ children }: { children: React
       orientationRequired: false,
       mentorshipProvided: false,
       
-      // Administrative
-      coordinatorName: '',
-      coordinatorEmail: '',
+      // Administrative  
+      coordinatorName: 'Ministry Coordinator',
+      coordinatorEmail: 'coordinator@example.com',
       budgetRequired: false,
       
       // Advanced
@@ -362,24 +362,39 @@ export default function VolunteerPositionCreator({ children }: { children: React
     setCurrentTab('basic');
   };
 
-  const onSubmit = (data: CreatePositionForm) => {
+  const onSubmit = async (data: CreatePositionForm) => {
     console.log('FORM SUBMITTED!', data);
-    console.log('Form errors:', form.formState.errors);
-    console.log('Form validation status:', form.formState.isValid);
-    console.log('Form dirty fields:', form.formState.dirtyFields);
+    
+    // Force a complete validation check
+    const isValid = await form.trigger();
+    console.log('Form validation result:', isValid);
+    console.log('Form errors after trigger:', form.formState.errors);
+    console.log('Current form values:', form.getValues());
+    
+    // Log each field and its validation status
+    const values = form.getValues();
+    Object.keys(values).forEach(key => {
+      const value = (values as any)[key];
+      console.log(`${key}: ${typeof value} = ${JSON.stringify(value)}`);
+    });
     
     // Check for specific validation errors
     const errors = form.formState.errors;
     if (Object.keys(errors).length > 0) {
       console.log('VALIDATION ERRORS BLOCKING SUBMISSION:', errors);
       Object.keys(errors).forEach(key => {
-        console.log(`Field ${key}:`, (errors as any)[key]);
+        const error = (errors as any)[key];
+        console.log(`Field ${key} error:`, error?.message || error);
       });
       return;
     }
     
-    console.log('Validation passed, triggering mutation...');
-    createPositionMutation.mutate(data);
+    if (isValid) {
+      console.log('Validation passed, triggering mutation...');
+      createPositionMutation.mutate(data);
+    } else {
+      console.log('Form validation failed - form is not valid');
+    }
   };
 
   return (
