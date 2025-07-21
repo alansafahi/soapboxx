@@ -1019,6 +1019,11 @@ const ServeWellVolunteerHub = () => {
               </div>
               <h2 className="text-2xl font-bold mb-2">Welcome to D.I.V.I.N.E.</h2>
               <p className="text-white/90">Disciple-Inspired Volunteer Integration & Nurture Engine</p>
+              
+              {/* Admin Tools */}
+              <div className="mt-6">
+                <VolunteerPositionCreator />
+              </div>
             </div>
           </div>
 

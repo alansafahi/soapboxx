@@ -211,7 +211,7 @@ export class VolunteerStorage {
         coordinatorId: volunteerOpportunities.coordinatorId,
         coordinatorEmail: users.email,
         coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        volunteerName: sql<string>`CONCAT(volunteers.firstName, ' ', volunteers.lastName)`,
+        volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
         volunteerEmail: volunteers.email,
         backgroundCheckRequired: volunteerOpportunities.backgroundCheckRequired
       })
@@ -403,7 +403,7 @@ export class VolunteerStorage {
       const applications = await db
         .select({
           matchId: volunteerMatches.id,
-          volunteerName: sql<string>`CONCAT(volunteers.firstName, ' ', volunteers.lastName)`,
+          volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
           volunteerEmail: volunteers.email,
           opportunityTitle: volunteerOpportunities.title,
           appliedDate: volunteerMatches.respondedAt,
