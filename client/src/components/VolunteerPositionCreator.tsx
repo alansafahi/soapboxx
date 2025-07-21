@@ -208,6 +208,19 @@ export default function VolunteerPositionCreator({ children }: { children: React
   const [selectedRecurringDays, setSelectedRecurringDays] = useState<string[]>([]);
   const [selectedTeamRoles, setSelectedTeamRoles] = useState<string[]>([]);
   const [currentTab, setCurrentTab] = useState<string>('basic');
+  const [completedTabs, setCompletedTabs] = useState<string[]>([]);
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: Target },
+    { id: 'requirements', label: 'Requirements', icon: Shield },  
+    { id: 'schedule', label: 'Schedule', icon: Clock },
+    { id: 'team', label: 'Team', icon: Users },
+    { id: 'performance', label: 'Performance', icon: Star },
+    { id: 'admin', label: 'Admin', icon: CheckCircle }
+  ];
+
+  const currentTabIndex = tabs.findIndex(tab => tab.id === currentTab);
+  const progressPercentage = ((currentTabIndex + 1) / tabs.length) * 100;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -288,9 +301,9 @@ export default function VolunteerPositionCreator({ children }: { children: React
         description: "Your volunteer opportunity has been posted and is now available for applications.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/volunteer/opportunities'] });
-      
-      // Advance to Requirements tab instead of closing
-      setCurrentTab('requirements');
+      setIsOpen(false);
+      setCurrentTab('basic');
+      setCompletedTabs([]);
       form.reset();
       resetAllSelections();
     },
@@ -352,6 +365,31 @@ export default function VolunteerPositionCreator({ children }: { children: React
       form.setValue('recurringDays', updated);
       return updated;
     });
+  };
+
+  const markTabComplete = (tabId: string) => {
+    if (!completedTabs.includes(tabId)) {
+      setCompletedTabs([...completedTabs, tabId]);
+    }
+  };
+
+  const goToNextTab = () => {
+    markTabComplete(currentTab);
+    const nextIndex = currentTabIndex + 1;
+    if (nextIndex < tabs.length) {
+      setCurrentTab(tabs[nextIndex].id);
+    }
+  };
+
+  const goToPreviousTab = () => {
+    const prevIndex = currentTabIndex - 1;
+    if (prevIndex >= 0) {
+      setCurrentTab(tabs[prevIndex].id);
+    }
+  };
+
+  const isTabComplete = (tabId: string) => {
+    return completedTabs.includes(tabId);
   };
 
   const resetAllSelections = () => {
@@ -418,36 +456,61 @@ export default function VolunteerPositionCreator({ children }: { children: React
 
         <Form {...form}>
           <form onSubmit={(e) => {
-            console.log('Form submit event triggered');
             e.preventDefault();
-            form.handleSubmit(onSubmit)(e);
+            // Only allow submission on the final 'admin' tab
+            if (currentTab === 'admin') {
+              console.log('Form submit event triggered - Admin tab');
+              form.handleSubmit(onSubmit)(e);
+            } else {
+              console.log('Form submission blocked - not on admin tab');
+              goToNextTab();
+            }
           }} className="space-y-6">
             
             {/* Phase 2 Advanced Tabbed Interface */}
             <div className="border-b">
-              <nav className="flex space-x-4 mb-4">
-                {[
-                  { id: 'basic', label: 'Basic Info', icon: Target },
-                  { id: 'requirements', label: 'Requirements', icon: Shield },  
-                  { id: 'schedule', label: 'Schedule', icon: Clock },
-                  { id: 'team', label: 'Team', icon: Users },
-                  { id: 'performance', label: 'Performance', icon: Star },
-                  { id: 'admin', label: 'Admin', icon: CheckCircle }
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setCurrentTab(tab.id)}
-                    className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md ${
-                      currentTab === tab.id 
-                        ? 'bg-purple-100 text-purple-700 border-purple-200' 
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                ))}
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">Progress</span>
+                  <span className="text-sm text-gray-500">{currentTabIndex + 1} of {tabs.length}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progressPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Tab Navigation */}
+              <nav className="flex space-x-2 mb-4 overflow-x-auto">
+                {tabs.map((tab, index) => {
+                  const isActive = currentTab === tab.id;
+                  const isCompleted = isTabComplete(tab.id);
+                  const isNext = index === currentTabIndex + 1;
+                  
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setCurrentTab(tab.id)}
+                      className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap ${
+                        isActive 
+                          ? 'bg-purple-100 text-purple-700 border-purple-200 border' 
+                          : isCompleted
+                          ? 'bg-green-100 text-green-700 border-green-200 border'
+                          : isNext
+                          ? 'bg-blue-50 text-blue-600 border-blue-200 border animate-pulse'
+                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                      {isCompleted && <CheckCircle className="w-4 h-4" />}
+                    </button>
+                  );
+                })}
               </nav>
             </div>
 
@@ -615,10 +678,18 @@ export default function VolunteerPositionCreator({ children }: { children: React
                   )}
                 />
                 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-between pt-6">
                   <Button 
                     type="button"
-                    onClick={() => setCurrentTab('requirements')}
+                    variant="outline"
+                    onClick={goToPreviousTab}
+                    disabled={currentTabIndex === 0}
+                  >
+                    ← Previous
+                  </Button>
+                  <Button 
+                    type="button"
+                    onClick={goToNextTab}
                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
                   >
                     Next: Requirements →
@@ -1389,7 +1460,7 @@ export default function VolunteerPositionCreator({ children }: { children: React
               </div>
             )}
 
-            {/* Form Actions */}
+            {/* Form Actions - Only show Create Position on last tab */}
             <div className="flex items-center justify-between pt-6 border-t">
               <div className="flex items-center gap-2">
                 <Button
@@ -1398,14 +1469,16 @@ export default function VolunteerPositionCreator({ children }: { children: React
                   onClick={() => {
                     form.reset();
                     resetAllSelections();
+                    setCurrentTab('basic');
+                    setCompletedTabs([]);
                   }}
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Reset Form
+                  Reset All
                 </Button>
                 
                 <div className="text-sm text-gray-500">
-                  Tab: {currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
+                  Step {currentTabIndex + 1} of {tabs.length}: {tabs[currentTabIndex].label}
                 </div>
               </div>
 
@@ -1417,21 +1490,49 @@ export default function VolunteerPositionCreator({ children }: { children: React
                 >
                   Cancel
                 </Button>
-                
-                <Button
-                  type="submit"
-                  disabled={createPositionMutation.isPending}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                >
-                  {createPositionMutation.isPending ? (
-                    <>Creating Position...</>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Create Position
-                    </>
-                  )}
-                </Button>
+
+                {currentTab === 'basic' ? (
+                  <Button 
+                    type="button"
+                    onClick={goToNextTab}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  >
+                    Start Creating →
+                  </Button>
+                ) : currentTab === 'admin' ? (
+                  <Button
+                    type="submit"
+                    disabled={createPositionMutation.isPending}
+                    className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                  >
+                    {createPositionMutation.isPending ? (
+                      <>Creating Position...</>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Create Position
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={goToPreviousTab}
+                      disabled={currentTabIndex === 0}
+                    >
+                      ← Previous
+                    </Button>
+                    <Button 
+                      type="button"
+                      onClick={goToNextTab}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                    >
+                      Next: {tabs[currentTabIndex + 1]?.label} →
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </form>
