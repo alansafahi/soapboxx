@@ -336,16 +336,24 @@ router.post('/opportunities', async (req, res) => {
       ...req.body,
       churchId: 1, // Default church ID
       coordinatorId: (req.user as any).email,
-      spiritualGifts: req.body.spiritualGiftsNeeded, // Map spiritualGiftsNeeded → spiritualGifts
+      spiritualGifts: req.body.spiritualGiftsNeeded || [], // Map spiritualGiftsNeeded → spiritualGifts
       category: req.body.department, // Map department → category
-      responsibilities: req.body.responsibilities, // Ensure responsibilities is included
+      // Make sure all array fields are handled properly
+      requiredSkills: req.body.requiredSkills || [],
+      preferredSkills: req.body.preferredSkills || [],
+      teamRoles: req.body.teamRoles || [],
+      performanceMetrics: req.body.performanceMetrics || [],
+      recurringDays: req.body.recurringDays || [],
+      // Handle date fields  
+      startDate: req.body.startDate ? new Date(req.body.startDate) : undefined,
+      endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
     };
 
-    console.log('Backend received data:', req.body);
-    console.log('Mapped data for validation:', mappedData);
+    console.log('Backend received data:', JSON.stringify(req.body, null, 2));
+    console.log('Mapped data for validation:', JSON.stringify(mappedData, null, 2));
 
     const validatedData = insertVolunteerOpportunitySchema.parse(mappedData);
-    console.log('Validated data:', validatedData);
+    console.log('Validated data passed to storage:', JSON.stringify(validatedData, null, 2));
 
     const opportunity = await volunteerStorage.createVolunteerOpportunity(validatedData);
     res.json(opportunity);

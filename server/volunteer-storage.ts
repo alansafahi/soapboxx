@@ -422,13 +422,16 @@ export class VolunteerStorage {
   // Create volunteer opportunity - comprehensive implementation
   async createVolunteerOpportunity(data: any): Promise<any> {
     try {
+      console.log('STORAGE METHOD - Received data keys:', Object.keys(data));
+      console.log('STORAGE METHOD - Data values:', JSON.stringify(data, null, 2));
+      
       const [opportunity] = await db
         .insert(volunteerOpportunities)
         .values({
           churchId: data.churchId,
           title: data.title,
           ministry: data.ministry,
-          category: data.department, // Map department to category field
+          category: data.category, // Field already mapped in route
           description: data.description,
           responsibilities: data.responsibilities || null,
           coordinatorId: data.coordinatorId,
@@ -439,7 +442,7 @@ export class VolunteerStorage {
           volunteersRegistered: 0,
           requiredSkills: data.requiredSkills || [],
           preferredSkills: data.preferredSkills || [],
-          spiritualGifts: data.spiritualGiftsNeeded || [],
+          spiritualGifts: data.spiritualGifts || [],
           timeCommitment: data.timeCommitment,
           timeCommitmentLevel: data.timeCommitmentLevel,
           maxHoursPerWeek: data.maxHoursPerWeek,
