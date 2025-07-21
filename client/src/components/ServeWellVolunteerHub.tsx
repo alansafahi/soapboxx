@@ -339,16 +339,45 @@ const DivineAppointmentsPanel = () => {
   const queryClient = useQueryClient();
   
   const acceptMutation = useMutation({
-    mutationFn: (matchId: number) => 
-      apiRequest(`/api/volunteers/matches/${matchId}/accept`, 'POST'),
-    onSuccess: () => {
+    mutationFn: async (matchId: number) => {
+      const response = await fetch(`/api/volunteers/matches/${matchId}/accept`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to submit application');
+      return response.json();
+    },
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/volunteers/divine-appointments'] });
       toast({
-        title: "Divine Appointment Accepted!",
-        description: "You've accepted this volunteer opportunity. Expect to hear from the ministry leader soon.",
+        title: data.requiresApproval ? "Application Submitted! 📋" : "Divine Appointment Accepted! 🙏",
+        description: data.message,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit application",
+        variant: "destructive",
       });
     }
   });
+
+  // Function to get button text and style based on application status
+  const getButtonStatus = (appointment: any) => {
+    switch (appointment.volunteerResponse) {
+      case 'applied':
+      case 'pending_approval':
+        return { text: 'Applied ⏳', variant: 'secondary' as const, disabled: true };
+      case 'approved':
+        return { text: 'Approved ✅', variant: 'default' as const, disabled: true };
+      case 'rejected':
+        return { text: 'Not Selected', variant: 'destructive' as const, disabled: true };
+      default:
+        return { text: 'Accept Call', variant: 'default' as const, disabled: false };
+    }
+  };
 
   if (isLoading) {
     return (
@@ -454,15 +483,21 @@ const DivineAppointmentsPanel = () => {
               </div>
 
               <div className="flex space-x-2 pt-2">
-                <Button 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => acceptMutation.mutate(appointment.id)}
-                  disabled={acceptMutation.isPending}
-                >
-                  <Heart className="w-4 h-4 mr-1" />
-                  {acceptMutation.isPending ? 'Accepting...' : 'Accept Call'}
-                </Button>
+                {(() => {
+                  const buttonStatus = getButtonStatus(appointment);
+                  return (
+                    <Button 
+                      size="sm" 
+                      variant={buttonStatus.variant}
+                      className={`flex-1 ${buttonStatus.variant === 'default' && !buttonStatus.disabled ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' : ''}`}
+                      disabled={buttonStatus.disabled || acceptMutation.isPending}
+                      onClick={() => acceptMutation.mutate(appointment.id)}
+                    >
+                      <Heart className="w-4 h-4 mr-1" />
+                      {acceptMutation.isPending ? 'Submitting...' : buttonStatus.text}
+                    </Button>
+                  );
+                })()}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline" className="flex-1">

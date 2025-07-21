@@ -139,7 +139,7 @@ export class VolunteerStorage {
         endDate: volunteerOpportunities.endDate,
         volunteersNeeded: volunteerOpportunities.volunteersNeeded,
         volunteersRegistered: volunteerOpportunities.volunteersRegistered,
-        backgroundCheckRequired: sql<boolean>`false`,
+        backgroundCheckRequired: volunteerOpportunities.backgroundCheckRequired,
         priority: volunteerOpportunities.priority,
         requiredSkills: volunteerOpportunities.requiredSkills,
         created: volunteerOpportunities.createdAt,
@@ -189,12 +189,12 @@ export class VolunteerStorage {
     }));
   }
 
-  async acceptVolunteerMatch(matchId: number, volunteerId: number): Promise<void> {
-    // Update match response
+  async acceptVolunteerMatch(matchId: number, volunteerId: number): Promise<{ success: boolean; message: string; requiresApproval: boolean }> {
+    // Update match response to 'applied' 
     await db
       .update(volunteerMatches)
       .set({
-        volunteerResponse: 'accepted',
+        volunteerResponse: 'applied',
         respondedAt: new Date()
       })
       .where(and(
@@ -202,28 +202,227 @@ export class VolunteerStorage {
         eq(volunteerMatches.volunteerId, volunteerId)
       ));
 
-    // Get the opportunity details
+    // Get the opportunity and volunteer details
     const [match] = await db
-      .select()
+      .select({
+        matchId: volunteerMatches.id,
+        opportunityId: volunteerMatches.opportunityId,
+        opportunityTitle: volunteerOpportunities.title,
+        coordinatorId: volunteerOpportunities.coordinatorId,
+        coordinatorEmail: users.email,
+        coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        volunteerName: sql<string>`CONCAT(volunteer.first_name, ' ', volunteer.last_name)`,
+        volunteerEmail: volunteers.email,
+        backgroundCheckRequired: volunteerOpportunities.backgroundCheckRequired
+      })
       .from(volunteerMatches)
+      .innerJoin(volunteerOpportunities, eq(volunteerMatches.opportunityId, volunteerOpportunities.id))
+      .leftJoin(users, eq(volunteerOpportunities.coordinatorId, users.id))
+      .innerJoin(volunteers, eq(volunteerMatches.volunteerId, volunteers.id))
+
       .where(eq(volunteerMatches.id, matchId));
 
     if (match) {
-      // Register for the opportunity
+      // Register for the opportunity with 'pending_approval' status
       await db.insert(volunteerRegistrations).values({
         opportunityId: match.opportunityId,
         volunteerId: volunteerId,
-        status: 'registered',
-        notes: 'Registered via Divine Appointment AI matching'
+        status: 'pending_approval',
+        notes: 'Applied via Divine Appointment AI matching - awaiting coordinator approval'
       });
 
-      // Update opportunity registration count
-      await db
-        .update(volunteerOpportunities)
-        .set({
-          volunteersRegistered: db.$count(volunteerRegistrations, eq(volunteerRegistrations.opportunityId, match.opportunityId))
+      // Send notification to coordinator
+      await this.sendCoordinatorNotification({
+        coordinatorEmail: match.coordinatorEmail || '',
+        coordinatorName: match.coordinatorName || 'Ministry Leader',
+        volunteerName: match.volunteerName || 'Volunteer',
+        volunteerEmail: match.volunteerEmail || '',
+        opportunityTitle: match.opportunityTitle || '',
+        matchId: match.matchId
+      });
+
+      return {
+        success: true,
+        message: 'Application submitted successfully! The ministry coordinator will review your application.',
+        requiresApproval: true
+      };
+    }
+
+    return {
+      success: false,
+      message: 'Failed to submit application. Please try again.',
+      requiresApproval: false
+    };
+  }
+
+  // Send notification to opportunity coordinator
+  private async sendCoordinatorNotification(data: {
+    coordinatorEmail: string;
+    coordinatorName: string;
+    volunteerName: string;
+    volunteerEmail: string;
+    opportunityTitle: string;
+    matchId: number;
+  }): Promise<void> {
+    const { sendCoordinatorApplicationNotification } = await import('./volunteer-notifications');
+    await sendCoordinatorApplicationNotification(data);
+  }
+
+  // Approve or reject volunteer application
+  async updateVolunteerApplicationStatus(
+    matchId: number,
+    coordinatorId: string,
+    status: 'approved' | 'rejected',
+    message?: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      // Get the match and registration details
+      const [matchData] = await db
+        .select({
+          volunteerId: volunteerMatches.volunteerId,
+          opportunityId: volunteerMatches.opportunityId,
+          opportunityTitle: volunteerOpportunities.title,
+          volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
+          volunteerEmail: volunteers.email
         })
-        .where(eq(volunteerOpportunities.id, match.opportunityId));
+        .from(volunteerMatches)
+        .innerJoin(volunteerOpportunities, eq(volunteerMatches.opportunityId, volunteerOpportunities.id))
+        .innerJoin(volunteers, eq(volunteerMatches.volunteerId, volunteers.id))
+        .where(eq(volunteerMatches.id, matchId));
+
+      if (!matchData) {
+        return { success: false, message: 'Application not found' };
+      }
+
+      if (status === 'approved') {
+        // Update match status to approved
+        await db
+          .update(volunteerMatches)
+          .set({ volunteerResponse: 'approved' })
+          .where(eq(volunteerMatches.id, matchId));
+
+        // Update registration status
+        await db
+          .update(volunteerRegistrations)
+          .set({ 
+            status: 'confirmed',
+            notes: `Approved by coordinator: ${message || 'Welcome to the ministry team!'}`
+          })
+          .where(and(
+            eq(volunteerRegistrations.opportunityId, matchData.opportunityId),
+            eq(volunteerRegistrations.volunteerId, matchData.volunteerId)
+          ));
+
+        // Send approval notification to volunteer
+        const { sendVolunteerStatusNotification } = await import('./volunteer-notifications');
+        await sendVolunteerStatusNotification({
+          volunteerEmail: matchData.volunteerEmail,
+          volunteerName: matchData.volunteerName,
+          opportunityTitle: matchData.opportunityTitle,
+          status: 'approved',
+          message
+        });
+
+        return {
+          success: true,
+          message: `${matchData.volunteerName} has been approved and notified.`
+        };
+
+      } else {
+        // Update match status to rejected
+        await db
+          .update(volunteerMatches)
+          .set({ volunteerResponse: 'rejected' })
+          .where(eq(volunteerMatches.id, matchId));
+
+        // Update registration status
+        await db
+          .update(volunteerRegistrations)
+          .set({ 
+            status: 'cancelled',
+            notes: `Not selected: ${message || 'Thank you for your interest. Please consider other opportunities.'}`
+          })
+          .where(and(
+            eq(volunteerRegistrations.opportunityId, matchData.opportunityId),
+            eq(volunteerRegistrations.volunteerId, matchData.volunteerId)
+          ));
+
+        // Send rejection notification with alternatives
+        const { sendVolunteerStatusNotification } = await import('./volunteer-notifications');
+        await sendVolunteerStatusNotification({
+          volunteerEmail: matchData.volunteerEmail,
+          volunteerName: matchData.volunteerName,
+          opportunityTitle: matchData.opportunityTitle,
+          status: 'rejected',
+          message
+        });
+
+        // Generate alternative suggestions
+        await this.suggestAlternativeOpportunities(matchData.volunteerId, matchData.volunteerEmail);
+
+        return {
+          success: true,
+          message: `Application declined and ${matchData.volunteerName} has been notified with alternative suggestions.`
+        };
+      }
+    } catch (error) {
+      console.error('Failed to update application status:', error);
+      return { success: false, message: 'Failed to update application status' };
+    }
+  }
+
+  // Suggest alternative opportunities for rejected volunteers
+  private async suggestAlternativeOpportunities(volunteerId: number, volunteerEmail: string): Promise<void> {
+    try {
+      // Get volunteer's spiritual gifts and preferences
+      const [volunteer] = await db
+        .select()
+        .from(volunteers)
+        .where(eq(volunteers.id, volunteerId));
+
+      if (volunteer) {
+        // Find 3 alternative opportunities that match their profile
+        const alternatives = await db
+          .select()
+          .from(volunteerOpportunities)
+          .where(eq(volunteerOpportunities.status, 'open'))
+          .limit(3);
+
+        console.log(`💡 Suggested ${alternatives.length} alternative opportunities for volunteer ${volunteerEmail}`);
+        // TODO: Create new volunteer matches for these alternatives
+        // This could trigger new AI matching and divine appointments
+      }
+    } catch (error) {
+      console.error('Failed to suggest alternatives:', error);
+    }
+  }
+
+  // Get pending applications for coordinator
+  async getPendingApplications(coordinatorEmail: string): Promise<any[]> {
+    try {
+      const applications = await db
+        .select({
+          matchId: volunteerMatches.id,
+          volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
+          volunteerEmail: volunteers.email,
+          opportunityTitle: volunteerOpportunities.title,
+          appliedDate: volunteerMatches.respondedAt,
+          divineScore: volunteerMatches.divineAppointmentScore
+        })
+        .from(volunteerMatches)
+        .innerJoin(volunteerOpportunities, eq(volunteerMatches.opportunityId, volunteerOpportunities.id))
+        .innerJoin(volunteers, eq(volunteerMatches.volunteerId, volunteers.id))
+        .leftJoin(users, eq(volunteerOpportunities.coordinatorId, users.id))
+        .where(and(
+          eq(volunteerMatches.volunteerResponse, 'applied'),
+          eq(users.email, coordinatorEmail)
+        ))
+        .orderBy(desc(volunteerMatches.respondedAt));
+
+      return applications;
+    } catch (error) {
+      console.error('Failed to get pending applications:', error);
+      return [];
     }
   }
 

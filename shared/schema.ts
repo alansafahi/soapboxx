@@ -2594,6 +2594,7 @@ export const volunteerOpportunities = pgTable("volunteer_opportunities", {
   recurringPattern: jsonb("recurring_pattern"), // {frequency: "weekly", interval: 1, daysOfWeek: [1,3,5]}
   status: varchar("status", { length: 20 }).default("open"), // open, closed, cancelled, completed
   priority: varchar("priority", { length: 20 }).default("medium"), // low, medium, high, urgent
+  backgroundCheckRequired: boolean("background_check_required").default(false),
   isPublic: boolean("is_public").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

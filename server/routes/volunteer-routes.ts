@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { volunteerStorage } from '../volunteer-storage';
 import { assessSpiritualGifts, findDivineAppointments, optimizeTeamComposition, recommendOnboardingPath } from '../ai-volunteer-matching';
-import { volunteerNotificationService } from '../volunteer-notifications';
+// Notification service imported dynamically in functions
 import { insertVolunteerSchema, insertVolunteerOpportunitySchema } from '@shared/schema';
 import { isAuthenticated } from '../auth';
 
@@ -155,7 +155,7 @@ router.get('/divine-appointments', async (req, res) => {
   }
 });
 
-// Accept a volunteer match
+// Accept a volunteer match (submit application)
 router.post('/matches/:matchId/accept', async (req, res) => {
   try {
     if (!req.user) {
@@ -168,12 +168,56 @@ router.post('/matches/:matchId/accept', async (req, res) => {
     }
 
     const matchId = parseInt(req.params.matchId);
-    await volunteerStorage.acceptVolunteerMatch(matchId, volunteer.id);
+    const result = await volunteerStorage.acceptVolunteerMatch(matchId, volunteer.id);
 
-    res.json({ success: true, message: 'Divine appointment accepted!' });
+    res.json(result);
   } catch (error) {
     console.error('Match acceptance error:', error);
     res.status(500).json({ error: 'Failed to accept match' });
+  }
+});
+
+// Approve or reject volunteer application (coordinator endpoint)
+router.post('/matches/:matchId/review', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { status, message } = req.body;
+    const matchId = parseInt(req.params.matchId);
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be approved or rejected.' });
+    }
+
+    const result = await volunteerStorage.updateVolunteerApplicationStatus(
+      matchId,
+      (req.user as any).email,
+      status,
+      message
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.error('Application review error:', error);
+    res.status(500).json({ error: 'Failed to review application' });
+  }
+});
+
+// Get volunteer applications for coordinators
+router.get('/applications', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Get pending applications for opportunities this user coordinates
+    const applications = await volunteerStorage.getPendingApplications((req.user as any).email);
+    res.json(applications);
+  } catch (error) {
+    console.error('Get applications error:', error);
+    res.status(500).json({ error: 'Failed to get applications' });
   }
 });
 

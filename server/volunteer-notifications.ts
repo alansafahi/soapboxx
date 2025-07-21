@@ -1,165 +1,175 @@
-import { storage } from './storage';
-import { volunteerStorage } from './volunteer-storage';
+import { MailService } from '@sendgrid/mail';
 
-// D.I.V.I.N.E. Notification System for Volunteer Management
-
-export interface VolunteerNotification {
-  recipientId: string;
-  type: 'volunteer_signup' | 'approval_needed' | 'volunteer_approved' | 'volunteer_rejected' | 'reminder';
-  title: string;
-  message: string;
-  actionUrl?: string;
-  metadata?: any;
+if (!process.env.SENDGRID_API_KEY) {
+  console.warn("SENDGRID_API_KEY not found - email notifications will be logged only");
 }
 
-export class VolunteerNotificationService {
-  
-  // Send notification to church admins when someone signs up
-  async notifyAdminsOfVolunteerSignup(registrationId: number, volunteerId: number, opportunityId: number) {
-    try {
-      // Get registration details
-      const registration = await volunteerStorage.getVolunteerRegistrations(volunteerId);
-      const opportunity = await volunteerStorage.getVolunteerOpportunity(opportunityId);
-      const volunteer = await volunteerStorage.getVolunteerById(volunteerId);
-      
-      if (!opportunity || !volunteer) return;
+const mailService = new MailService();
+if (process.env.SENDGRID_API_KEY) {
+  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
-      // Get church admins and ministry leaders
-      const churchId = opportunity.churchId || 1;
-      const admins = await this.getChurchAdmins(churchId);
-      
-      // Send notifications to each admin
-      for (const admin of admins) {
-        const notification: VolunteerNotification = {
-          recipientId: admin.id,
-          type: 'approval_needed',
-          title: 'New Volunteer Signup Needs Approval',
-          message: `${volunteer.firstName} ${volunteer.lastName} has signed up for "${opportunity.title}". Please review and approve their application.`,
-          actionUrl: `/divine/admin/approvals?registration=${registrationId}`,
-          metadata: {
-            registrationId,
-            volunteerId,
-            opportunityId,
-            volunteerName: `${volunteer.firstName} ${volunteer.lastName}`,
-            opportunityTitle: opportunity.title
-          }
-        };
-        
-        await this.sendNotification(notification);
-      }
-      
+export interface VolunteerApplicationNotification {
+  coordinatorEmail: string;
+  coordinatorName: string;
+  volunteerName: string;
+  volunteerEmail: string;
+  opportunityTitle: string;
+  matchId: number;
+}
+
+export interface VolunteerStatusNotification {
+  volunteerEmail: string;
+  volunteerName: string;
+  opportunityTitle: string;
+  status: 'approved' | 'rejected';
+  message?: string;
+}
+
+export async function sendCoordinatorApplicationNotification(data: VolunteerApplicationNotification): Promise<boolean> {
+  try {
+    if (!process.env.SENDGRID_API_KEY) {
+      console.log(`📧 [DEMO] Notification to ${data.coordinatorName} (${data.coordinatorEmail})`);
+      console.log(`New volunteer application: ${data.volunteerName} applied for ${data.opportunityTitle}`);
       return true;
-    } catch (error) {
-      console.error('Failed to notify admins of volunteer signup:', error);
-      return false;
     }
-  }
 
-  // Send confirmation to volunteer after signup
-  async sendVolunteerSignupConfirmation(volunteerId: number, opportunityId: number) {
-    try {
-      const volunteer = await volunteerStorage.getVolunteerById(volunteerId);
-      const opportunity = await volunteerStorage.getVolunteerOpportunity(opportunityId);
-      
-      if (!volunteer || !opportunity) return false;
+    const emailData = {
+      to: data.coordinatorEmail,
+      from: 'noreply@soapboxsuperapp.com',
+      subject: `New Volunteer Application: ${data.opportunityTitle}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0;">New Volunteer Application</h1>
+          </div>
+          
+          <div style="padding: 30px; background: #f9f9f9;">
+            <h2 style="color: #333;">Hello ${data.coordinatorName},</h2>
+            
+            <p style="font-size: 16px; line-height: 1.6; color: #555;">
+              Great news! A volunteer has applied for the <strong>${data.opportunityTitle}</strong> position.
+            </p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+              <h3 style="margin: 0 0 10px 0; color: #333;">Volunteer Details:</h3>
+              <p style="margin: 5px 0;"><strong>Name:</strong> ${data.volunteerName}</p>
+              <p style="margin: 5px 0;"><strong>Email:</strong> ${data.volunteerEmail}</p>
+              <p style="margin: 5px 0;"><strong>Position:</strong> ${data.opportunityTitle}</p>
+            </div>
+            
+            <p style="font-size: 16px; line-height: 1.6; color: #555;">
+              Please log into your SoapBox Super App admin dashboard to review this application and either approve or decline the volunteer.
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://soapboxsuperapp.com/divine" 
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                Review Application
+              </a>
+            </div>
+            
+            <p style="font-size: 14px; color: #777; margin-top: 30px;">
+              This notification was sent from your SoapBox Super App D.I.V.I.N.E. volunteer management system.
+            </p>
+          </div>
+        </div>
+      `
+    };
 
-      const notification: VolunteerNotification = {
-        recipientId: volunteer.userId,
-        type: 'volunteer_signup',
-        title: 'Thank You for Volunteering! 🙏',
-        message: `Your signup for "${opportunity.title}" has been received and is pending approval. We'll notify you once it's confirmed!`,
-        actionUrl: `/divine/my-registrations`,
-        metadata: {
-          opportunityTitle: opportunity.title,
-          status: 'pending_approval',
-          nextSteps: 'Wait for church admin approval'
-        }
-      };
-      
-      await this.sendNotification(notification);
-      return true;
-    } catch (error) {
-      console.error('Failed to send volunteer confirmation:', error);
-      return false;
-    }
-  }
+    await mailService.send(emailData);
+    console.log(`✅ Application notification sent to ${data.coordinatorEmail}`);
+    return true;
 
-  // Send approval/rejection notifications
-  async sendApprovalNotification(registrationId: number, status: 'approved' | 'rejected', message?: string) {
-    try {
-      // Implementation for approval notifications
-      const registration = await db.query.volunteerRegistrations.findFirst({
-        where: eq(volunteerRegistrations.id, registrationId),
-        with: {
-          volunteer: true,
-          opportunity: true
-        }
-      });
-
-      if (!registration) return false;
-
-      const notification: VolunteerNotification = {
-        recipientId: registration.volunteer.userId,
-        type: status === 'approved' ? 'volunteer_approved' : 'volunteer_rejected',
-        title: status === 'approved' ? 'Volunteer Application Approved! ✅' : 'Volunteer Application Update',
-        message: status === 'approved' 
-          ? `Great news! Your application for "${registration.opportunity.title}" has been approved. Welcome to the team!`
-          : `Your application for "${registration.opportunity.title}" needs attention. ${message || 'Please contact the ministry leader for more information.'}`,
-        actionUrl: status === 'approved' ? `/divine/my-registrations` : `/divine/opportunities`,
-        metadata: {
-          registrationId,
-          opportunityTitle: registration.opportunity.title,
-          status,
-          adminMessage: message
-        }
-      };
-      
-      await this.sendNotification(notification);
-      return true;
-    } catch (error) {
-      console.error('Failed to send approval notification:', error);
-      return false;
-    }
-  }
-
-  // Get church administrators and ministry leaders
-  private async getChurchAdmins(churchId: number) {
-    try {
-      // Get users with admin roles for this church
-      const churchMembers = await storage.getChurchMembers(churchId);
-      return churchMembers.filter(member => 
-        ['church_admin', 'admin', 'pastor', 'lead_pastor', 'elder'].includes(member.role)
-      );
-    } catch (error) {
-      console.error('Failed to get church admins:', error);
-      return [];
-    }
-  }
-
-  // Core notification sending method
-  private async sendNotification(notification: VolunteerNotification) {
-    try {
-      // Create notification record in database
-      await storage.createNotification({
-        recipientId: notification.recipientId,
-        type: notification.type,
-        title: notification.title,
-        message: notification.message,
-        actionUrl: notification.actionUrl,
-        metadata: notification.metadata,
-        isRead: false,
-        createdAt: new Date()
-      });
-      
-      // Here you could also integrate with email service, push notifications, etc.
-      console.log(`Notification sent to ${notification.recipientId}: ${notification.title}`);
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to send notification:', error);
-      return false;
-    }
+  } catch (error) {
+    console.error('Failed to send coordinator notification:', error);
+    return false;
   }
 }
 
-export const volunteerNotificationService = new VolunteerNotificationService();
+export async function sendVolunteerStatusNotification(data: VolunteerStatusNotification): Promise<boolean> {
+  try {
+    if (!process.env.SENDGRID_API_KEY) {
+      console.log(`📧 [DEMO] Status notification to ${data.volunteerName} (${data.volunteerEmail})`);
+      console.log(`Application ${data.status} for ${data.opportunityTitle}`);
+      return true;
+    }
+
+    const isApproved = data.status === 'approved';
+    
+    const emailData = {
+      to: data.volunteerEmail,
+      from: 'noreply@soapboxsuperapp.com',
+      subject: isApproved 
+        ? `Welcome to the Team! Your ${data.opportunityTitle} Application Approved`
+        : `Thank you for your interest in ${data.opportunityTitle}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: ${isApproved ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'}; padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0;">
+              ${isApproved ? 'Welcome to the Ministry Team!' : 'Thank You for Your Interest'}
+            </h1>
+          </div>
+          
+          <div style="padding: 30px; background: #f9f9f9;">
+            <h2 style="color: #333;">Dear ${data.volunteerName},</h2>
+            
+            ${isApproved 
+              ? `<p style="font-size: 16px; line-height: 1.6; color: #555;">
+                   Congratulations! Your application for <strong>${data.opportunityTitle}</strong> has been approved. We're excited to have you join our ministry team!
+                 </p>
+                 
+                 <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+                   <h3 style="margin: 0 0 10px 0; color: #065f46;">Next Steps:</h3>
+                   <ul style="margin: 0; padding-left: 20px; color: #065f46;">
+                     <li>Check your calendar for upcoming opportunities</li>
+                     <li>Contact your ministry coordinator if you have questions</li>
+                     <li>Complete any required training or background checks</li>
+                   </ul>
+                 </div>
+
+                 ${data.message ? `<p style="font-style: italic; color: #666; background: white; padding: 15px; border-radius: 6px;">"${data.message}"</p>` : ''}
+
+                 <div style="text-align: center; margin: 30px 0;">
+                   <a href="https://soapboxsuperapp.com/calendar" 
+                      style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                     View My Calendar
+                   </a>
+                 </div>`
+              : `<p style="font-size: 16px; line-height: 1.6; color: #555;">
+                   Thank you for your interest in the <strong>${data.opportunityTitle}</strong> volunteer position. While we've selected another volunteer for this specific opportunity, we truly appreciate your heart for service.
+                 </p>
+                 
+                 <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d97706;">
+                   <h3 style="margin: 0 0 10px 0; color: #92400e;">Don't Give Up!</h3>
+                   <p style="margin: 0; color: #92400e;">We have many other volunteer opportunities that might be perfect for your unique gifts and calling. Please check your Divine Appointments for alternative suggestions.</p>
+                 </div>
+
+                 ${data.message ? `<p style="font-style: italic; color: #666; background: white; padding: 15px; border-radius: 6px;">"${data.message}"</p>` : ''}
+
+                 <div style="text-align: center; margin: 30px 0;">
+                   <a href="https://soapboxsuperapp.com/divine" 
+                      style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                     Explore Other Opportunities
+                   </a>
+                 </div>`
+            }
+            
+            <p style="font-size: 14px; color: #777; margin-top: 30px;">
+              Blessings,<br>
+              Your SoapBox Super App Ministry Team
+            </p>
+          </div>
+        </div>
+      `
+    };
+
+    await mailService.send(emailData);
+    console.log(`✅ Status notification (${data.status}) sent to ${data.volunteerEmail}`);
+    return true;
+
+  } catch (error) {
+    console.error('Failed to send volunteer status notification:', error);
+    return false;
+  }
+}
