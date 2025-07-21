@@ -301,24 +301,8 @@ export default function SidebarFixed() {
                 
                 {isExpanded && (
                   <div className="space-y-1">
-                    {/* HARDCODED D.I.V.I.N.E. BUTTON - FORCE VISIBLE */}
-                    {group.label === "SPIRITUAL TOOLS" && (
-                      <Link key="/divine-hardcoded" href="/divine">
-                          <Button
-                            variant={location === '/divine' ? "default" : "ghost"}
-                            className={`w-full justify-start h-auto py-2 px-3 ${
-                              location === '/divine'
-                                ? "bg-purple-600 text-white hover:bg-purple-700" 
-                                : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                            }`}
-                          >
-                            <Sparkles className="h-4 w-4 mr-3" />
-                            <span className="text-sm">D.I.V.I.N.E.</span>
-                          </Button>
-                        </Link>
-                    )}
+
                     {group.items.filter((item) => {
-                      
                       // Special case: Always show Content Moderation for soapbox_owner
                       if (item.href === '/moderation-dashboard' && user?.role === 'soapbox_owner') {
                         return true;
