@@ -204,7 +204,7 @@ const priorityColors = {
   urgent: 'bg-red-100 text-red-800'
 };
 
-export default function VolunteerPositionCreator() {
+export default function VolunteerPositionCreator({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [preferredSkills, setPreferredSkills] = useState<string[]>([]);
@@ -372,12 +372,7 @@ export default function VolunteerPositionCreator() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button 
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Volunteer Position
-        </Button>
+        {children}
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
