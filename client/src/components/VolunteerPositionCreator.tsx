@@ -743,7 +743,7 @@ export default function VolunteerPositionCreator({ children }: { children: React
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No restriction</SelectItem>
+                          <SelectItem value="none">No restriction</SelectItem>
                           <SelectItem value="16+">16 years and older</SelectItem>
                           <SelectItem value="18+">18 years and older</SelectItem>
                           <SelectItem value="21+">21 years and older</SelectItem>
