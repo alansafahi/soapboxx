@@ -197,12 +197,7 @@ const skillOptions = [
   'Public Speaking'
 ];
 
-const priorityColors = {
-  low: 'bg-green-100 text-green-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800'
-};
+
 
 export default function VolunteerPositionCreator({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -473,6 +468,21 @@ export default function VolunteerPositionCreator({ children }: { children: React
                             <SelectItem value="General Ministry">General Ministry</SelectItem>
                             <SelectItem value="Children Ministry">Children Ministry</SelectItem>
                             <SelectItem value="Youth Ministry">Youth Ministry</SelectItem>
+                            <SelectItem value="Worship & Music">Worship & Music</SelectItem>
+                            <SelectItem value="Outreach & Missions">Outreach & Missions</SelectItem>
+                            <SelectItem value="Administration">Administration</SelectItem>
+                            <SelectItem value="Facilities & Maintenance">Facilities & Maintenance</SelectItem>
+                            <SelectItem value="Food & Hospitality">Food & Hospitality</SelectItem>
+                            <SelectItem value="Technology & Media">Technology & Media</SelectItem>
+                            <SelectItem value="Small Groups">Small Groups</SelectItem>
+                            <SelectItem value="Prayer Ministry">Prayer Ministry</SelectItem>
+                            <SelectItem value="Senior Ministry">Senior Ministry</SelectItem>
+                            <SelectItem value="Women Ministry">Women Ministry</SelectItem>
+                            <SelectItem value="Men Ministry">Men Ministry</SelectItem>
+                            <SelectItem value="Marriage & Family">Marriage & Family</SelectItem>
+                            <SelectItem value="Counseling & Care">Counseling & Care</SelectItem>
+                            <SelectItem value="Communications">Communications</SelectItem>
+                            <SelectItem value="Finance & Stewardship">Finance & Stewardship</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -525,18 +535,10 @@ export default function VolunteerPositionCreator({ children }: { children: React
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="low">
-                              <Badge className={priorityColors.low}>Low</Badge>
-                            </SelectItem>
-                            <SelectItem value="medium">
-                              <Badge className={priorityColors.medium}>Medium</Badge>
-                            </SelectItem>
-                            <SelectItem value="high">
-                              <Badge className={priorityColors.high}>High</Badge>
-                            </SelectItem>
-                            <SelectItem value="urgent">
-                              <Badge className={priorityColors.urgent}>Urgent</Badge>
-                            </SelectItem>
+                            <SelectItem value="low">Low Priority</SelectItem>
+                            <SelectItem value="medium">Medium Priority</SelectItem>
+                            <SelectItem value="high">High Priority</SelectItem>
+                            <SelectItem value="urgent">Urgent Priority</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
