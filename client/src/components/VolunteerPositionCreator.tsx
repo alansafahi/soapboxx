@@ -577,12 +577,31 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     }
   };
 
+  const handleRequiredSkillToggle = (skill: string) => {
+    setSelectedSkills(prev => {
+      const updated = prev.includes(skill) 
+        ? prev.filter(s => s !== skill)
+        : [...prev, skill];
+      form.setValue('requiredSkills', updated);
+      return updated;
+    });
+  };
+
   const handlePreferredSkillToggle = (skill: string) => {
     setPreferredSkills(prev => {
       const updated = prev.includes(skill) 
         ? prev.filter(s => s !== skill)
         : [...prev, skill];
       form.setValue('preferredSkills', updated);
+      return updated;
+    });
+  };
+
+  const handleNASkillToggle = (skill: string) => {
+    setNaSkills(prev => {
+      const updated = prev.includes(skill) 
+        ? prev.filter(s => s !== skill)
+        : [...prev, skill];
       return updated;
     });
   };
@@ -1552,7 +1571,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               <td className="p-2 border-r dark:border-gray-700">{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequiredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
@@ -1562,7 +1584,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePreferredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     preferredSkills.includes(skill)
                                       ? 'bg-blue-500 border-blue-500'
@@ -1571,11 +1596,23 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 />
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {(skill === 'Organization' || skill === 'Project Management' || skill === 'Financial Management') && (
+                                {(skill === 'Organization' || skill === 'Event Planning' || skill === 'Project Management' || skill === 'Financial Management' || skill === 'Record Keeping') && (
                                   <div
-                                    onClick={() => handleSpiritualGiftToggle(skill === 'Organization' || skill === 'Project Management' ? 'Administration' : 'Giving')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const giftMap = {
+                                        'Organization': 'Administration',
+                                        'Event Planning': 'Administration', 
+                                        'Project Management': 'Administration',
+                                        'Financial Management': 'Giving',
+                                        'Record Keeping': 'Administration'
+                                      };
+                                      handleSpiritualGiftToggle(giftMap[skill as keyof typeof giftMap]);
+                                    }}
                                     className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
-                                      selectedSpiritualGifts.includes(skill === 'Organization' || skill === 'Project Management' ? 'Administration' : 'Giving')
+                                      selectedSpiritualGifts.includes(
+                                        skill === 'Financial Management' ? 'Giving' : 'Administration'
+                                      )
                                         ? 'bg-purple-500 border-purple-500'
                                         : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
                                     }`}
@@ -1583,7 +1620,17 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 )}
                               </td>
                               <td className="p-2 text-center">
-                                <div className="w-4 h-4 mx-auto border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 cursor-not-allowed"></div>
+                                <div 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleNASkillToggle(skill);
+                                  }}
+                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                    naSkills.includes(skill)
+                                      ? 'bg-gray-400 border-gray-400'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                                  }`}
+                                />
                               </td>
                             </tr>
                           ))}
@@ -1599,7 +1646,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               <td className="p-2 border-r dark:border-gray-700">{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequiredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
@@ -1609,7 +1659,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePreferredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     preferredSkills.includes(skill)
                                       ? 'bg-blue-500 border-blue-500'
@@ -1618,9 +1671,12 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 />
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair'].includes(skill) && (
+                                {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work'].includes(skill) && (
                                   <div
-                                    onClick={() => handleSpiritualGiftToggle('Serving')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSpiritualGiftToggle('Serving');
+                                    }}
                                     className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                       selectedSpiritualGifts.includes('Serving')
                                         ? 'bg-purple-500 border-purple-500'
@@ -1630,7 +1686,17 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 )}
                               </td>
                               <td className="p-2 text-center">
-                                <div className="w-4 h-4 mx-auto border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 cursor-not-allowed"></div>
+                                <div 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleNASkillToggle(skill);
+                                  }}
+                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                    naSkills.includes(skill)
+                                      ? 'bg-gray-400 border-gray-400'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                                  }`}
+                                />
                               </td>
                             </tr>
                           ))}
@@ -1646,7 +1712,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               <td className="p-2 border-r dark:border-gray-700">{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequiredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
@@ -1656,7 +1725,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePreferredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     preferredSkills.includes(skill)
                                       ? 'bg-blue-500 border-blue-500'
@@ -1665,13 +1737,14 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 />
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {['Teaching', 'Bible Study Leadership', 'Evangelism', 'Pastoral Care', 'Prayer Ministry', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading'].includes(skill) && (
+                                {['Teaching', 'Bible Study Leadership', 'Counseling', 'Evangelism', 'Pastoral Care', 'Prayer Ministry', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading'].includes(skill) && (
                                   <div
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       const giftMap = {
                                         'Teaching': 'Teaching',
                                         'Bible Study Leadership': 'Teaching',
+                                        'Counseling': 'Shepherding',
                                         'Evangelism': 'Evangelism',
                                         'Pastoral Care': 'Shepherding',
                                         'Prayer Ministry': 'Intercession',
@@ -1685,10 +1758,11 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                     className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                       selectedSpiritualGifts.includes(
                                         skill === 'Bible Study Leadership' || skill === 'Children\'s Ministry' ? 'Teaching' : 
-                                        skill === 'Pastoral Care' || skill === 'Youth Ministry' ? 'Shepherding' : 
+                                        skill === 'Counseling' || skill === 'Pastoral Care' || skill === 'Youth Ministry' ? 'Shepherding' : 
                                         skill === 'Prayer Ministry' ? 'Intercession' :
                                         skill === 'Music Ministry' || skill === 'Worship Leading' ? 'Worship' :
-                                        skill.split(' ')[0]
+                                        skill === 'Evangelism' ? 'Evangelism' :
+                                        skill === 'Teaching' ? 'Teaching' : 'Serving'
                                       )
                                         ? 'bg-purple-500 border-purple-500'
                                         : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
@@ -1697,7 +1771,17 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 )}
                               </td>
                               <td className="p-2 text-center">
-                                <div className="w-4 h-4 mx-auto border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 cursor-not-allowed"></div>
+                                <div 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleNASkillToggle(skill);
+                                  }}
+                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                    naSkills.includes(skill)
+                                      ? 'bg-gray-400 border-gray-400'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                                  }`}
+                                />
                               </td>
                             </tr>
                           ))}
@@ -1713,7 +1797,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               <td className="p-2 border-r dark:border-gray-700">{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequiredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
@@ -1723,7 +1810,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
-                                  onClick={() => handleSkillToggle(skill)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePreferredSkillToggle(skill);
+                                  }}
                                   className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                     preferredSkills.includes(skill)
                                       ? 'bg-blue-500 border-blue-500'
@@ -1760,7 +1850,17 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 )}
                               </td>
                               <td className="p-2 text-center">
-                                <div className="w-4 h-4 mx-auto border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 cursor-not-allowed"></div>
+                                <div 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleNASkillToggle(skill);
+                                  }}
+                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                    naSkills.includes(skill)
+                                      ? 'bg-gray-400 border-gray-400'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                                  }`}
+                                />
                               </td>
                             </tr>
                           ))}
