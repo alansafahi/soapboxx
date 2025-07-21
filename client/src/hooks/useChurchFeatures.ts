@@ -90,6 +90,11 @@ const CORE_FEATURES = [
   'bookmarked-prayers', // Bookmarked Prayers - always available spiritual feature
   'leaderboard', // Engagement Board - moved to core feature
   'divine', // D.I.V.I.N.E. - core volunteer management feature
+  'donation', // Donation - always available
+  'audio-routines', // Audio Routines - always available
+  'prayer-wall', // Prayer Wall - always available
+  'audio-bible', // Audio Bible - always available
+  'saved-reflections', // Saved Reflections - always available
   'profile',
   'settings',
   'members', // Member Directory
@@ -159,14 +164,7 @@ export function useIsFeatureEnabled() {
     
     // For Hello SoapBox user specifically, respect church settings for testing
     if (user?.email === 'hello@soapboxsuperapp.com') {
-      // For Mega Test Church (ID: 2808), hardcode the disabled features until API is fixed
-      if (primaryChurchId === 2808) {
-        const disabledFeatures = ['donation', 'prayer-wall', 'audio-routines'];
-        if (disabledFeatures.includes(key)) {
-          // Feature is disabled for this church
-          return false; // Hide disabled features
-        }
-      }
+      // Features enabled by default for testing
     }
     
     // Check if SoapBox Owner wants to test church feature filtering
