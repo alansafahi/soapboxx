@@ -449,7 +449,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
       timeCommitment: editOpportunity?.timeCommitment || 'Flexible schedule',
       timeCommitmentLevel: editOpportunity?.timeCommitmentLevel || '1-2 hours',
       maxHoursPerWeek: editOpportunity?.maxHoursPerWeek || 2,
-      location: editOpportunity?.location || 'Main Church Building',
+      location: editOpportunity?.location || '',
       
       // Recurring
       isRecurring: editOpportunity?.isRecurring || false,
@@ -683,7 +683,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         timeCommitment: editOpportunity.time_commitment || editOpportunity.timeCommitment || 'Flexible schedule',
         timeCommitmentLevel: (editOpportunity.time_commitment_level || editOpportunity.timeCommitmentLevel) as any || '1-2 hours',
         maxHoursPerWeek: editOpportunity.max_hours_per_week || editOpportunity.maxHoursPerWeek || 2,
-        location: editOpportunity.location || 'Main Church Building',
+        location: editOpportunity.location || '',
         startDate: editOpportunity.start_date ? new Date(editOpportunity.start_date) : 
                   editOpportunity.startDate ? new Date(editOpportunity.startDate) : undefined,
         endDate: editOpportunity.end_date ? new Date(editOpportunity.end_date) : 
@@ -774,7 +774,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         timeCommitment: 'Flexible schedule',
         timeCommitmentLevel: '1-2 hours' as const,
         maxHoursPerWeek: 2,
-        location: 'Main Church Building',
+        location: '',
         startDate: undefined,
         endDate: undefined,
         
@@ -1492,8 +1492,21 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     Skills & Requirements Matrix
                   </h3>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Select required and preferred skills for this volunteer position. Use the color-coded system below.
+                  <div className="space-y-2 mb-4">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Select required and preferred skills for this volunteer position. Use the color-coded system below.
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
+                      <div className="flex items-start space-x-2">
+                        <div className="w-4 h-4 bg-purple-500 rounded mt-0.5"></div>
+                        <div>
+                          <span className="font-medium text-purple-700 dark:text-purple-300">Spiritual Gifts Integration:</span>
+                          <span className="text-gray-700 dark:text-gray-300 ml-1">
+                            These connect to volunteers' spiritual assessment results from the D.I.V.I.N.E. system, enabling AI-powered matching based on both practical skills and spiritual giftedness for optimal ministry placement.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Skills Requirements Matrix - Compact Spreadsheet */}
@@ -1605,7 +1618,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 />
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {(skill === 'Audio/Video Tech' || skill === 'Sound Engineering' || skill === 'Website Management') && (
+                                {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair'].includes(skill) && (
                                   <div
                                     onClick={() => handleSpiritualGiftToggle('Serving')}
                                     className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
@@ -1652,19 +1665,29 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 />
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {['Teaching', 'Bible Study Leadership', 'Evangelism', 'Pastoral Care', 'Prayer Ministry'].includes(skill) && (
+                                {['Teaching', 'Bible Study Leadership', 'Evangelism', 'Pastoral Care', 'Prayer Ministry', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading'].includes(skill) && (
                                   <div
-                                    onClick={() => handleSpiritualGiftToggle(
-                                      skill === 'Bible Study Leadership' ? 'Teaching' : 
-                                      skill === 'Pastoral Care' ? 'Shepherding' : 
-                                      skill === 'Prayer Ministry' ? 'Intercession' :
-                                      skill.split(' ')[0]
-                                    )}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const giftMap = {
+                                        'Teaching': 'Teaching',
+                                        'Bible Study Leadership': 'Teaching',
+                                        'Evangelism': 'Evangelism',
+                                        'Pastoral Care': 'Shepherding',
+                                        'Prayer Ministry': 'Intercession',
+                                        'Youth Ministry': 'Shepherding',
+                                        'Children\'s Ministry': 'Teaching',
+                                        'Music Ministry': 'Worship',
+                                        'Worship Leading': 'Worship'
+                                      };
+                                      handleSpiritualGiftToggle(giftMap[skill as keyof typeof giftMap] || skill.split(' ')[0]);
+                                    }}
                                     className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
                                       selectedSpiritualGifts.includes(
-                                        skill === 'Bible Study Leadership' ? 'Teaching' : 
-                                        skill === 'Pastoral Care' ? 'Shepherding' : 
+                                        skill === 'Bible Study Leadership' || skill === 'Children\'s Ministry' ? 'Teaching' : 
+                                        skill === 'Pastoral Care' || skill === 'Youth Ministry' ? 'Shepherding' : 
                                         skill === 'Prayer Ministry' ? 'Intercession' :
+                                        skill === 'Music Ministry' || skill === 'Worship Leading' ? 'Worship' :
                                         skill.split(' ')[0]
                                       )
                                         ? 'bg-purple-500 border-purple-500'
@@ -1709,11 +1732,27 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                 />
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {['Food Service', 'Cooking', 'Hospitality', 'Child Care', 'Elder Care'].includes(skill) && (
+                                {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care'].includes(skill) && (
                                   <div
-                                    onClick={() => handleSpiritualGiftToggle(skill === 'Hospitality' ? 'Hospitality' : skill === 'Child Care' || skill === 'Elder Care' ? 'Mercy' : 'Serving')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const giftMap = {
+                                        'Hospitality': 'Hospitality',
+                                        'Guest Relations': 'Hospitality',
+                                        'Greeting': 'Hospitality',
+                                        'Child Care': 'Mercy',
+                                        'Elder Care': 'Mercy',
+                                        'Food Service': 'Serving',
+                                        'Cooking': 'Serving',
+                                        'Ushering': 'Serving'
+                                      };
+                                      handleSpiritualGiftToggle(giftMap[skill as keyof typeof giftMap] || 'Serving');
+                                    }}
                                     className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
-                                      selectedSpiritualGifts.includes(skill === 'Hospitality' ? 'Hospitality' : skill === 'Child Care' || skill === 'Elder Care' ? 'Mercy' : 'Serving')
+                                      selectedSpiritualGifts.includes(
+                                        skill === 'Hospitality' || skill === 'Guest Relations' || skill === 'Greeting' ? 'Hospitality' : 
+                                        skill === 'Child Care' || skill === 'Elder Care' ? 'Mercy' : 'Serving'
+                                      )
                                         ? 'bg-purple-500 border-purple-500'
                                         : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
                                     }`}
@@ -1837,20 +1876,20 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     name="timeCommitment"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Time Commitment *</FormLabel>
+                        <FormLabel>Schedule Type *</FormLabel>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">When does this volunteer opportunity happen?</p>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select schedule" />
+                              <SelectValue placeholder="Select schedule type" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Flexible schedule">Flexible schedule</SelectItem>
-                            <SelectItem value="1-2 hours/week">1-2 hours/week</SelectItem>
-                            <SelectItem value="3-5 hours/week">3-5 hours/week</SelectItem>
-                            <SelectItem value="5-10 hours/week">5-10 hours/week</SelectItem>
                             <SelectItem value="One-time event">One-time event</SelectItem>
-                            <SelectItem value="Monthly commitment">Monthly commitment</SelectItem>
+                            <SelectItem value="Weekly">Weekly recurring</SelectItem>
+                            <SelectItem value="Monthly">Monthly recurring</SelectItem>
+                            <SelectItem value="Seasonal">Seasonal (quarterly)</SelectItem>
+                            <SelectItem value="Flexible schedule">Flexible/as-needed</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -1863,18 +1902,20 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     name="timeCommitmentLevel"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Hours Per Week *</FormLabel>
+                        <FormLabel>Time Per Session *</FormLabel>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">How long is each volunteer session?</p>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select hours" />
+                              <SelectValue placeholder="Select session length" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="1-2 hours">1-2 hours</SelectItem>
                             <SelectItem value="3-5 hours">3-5 hours</SelectItem>
-                            <SelectItem value="6-10 hours">6-10 hours</SelectItem>
-                            <SelectItem value="10+ hours">10+ hours</SelectItem>
+                            <SelectItem value="6-8 hours">6-8 hours</SelectItem>
+                            <SelectItem value="Full day">Full day (8+ hours)</SelectItem>
+                            <SelectItem value="Varies by task">Varies by task</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -1910,12 +1951,14 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     name="maxHoursPerWeek"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Max Hours Per Week</FormLabel>
+                        <FormLabel>Weekly Time Limit (Optional)</FormLabel>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Maximum hours per week for regular positions</p>
                         <FormControl>
                           <Input 
                             type="number" 
                             min="1" 
                             max="40"
+                            placeholder="e.g., 5"
                             {...field} 
                             onChange={e => field.onChange(parseInt(e.target.value))}
                           />
