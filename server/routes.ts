@@ -12678,44 +12678,94 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(400).json({ message: 'No church association found' });
       }
 
-      // Extract form data from the comprehensive Phase 2 position creator
+      // Extract ALL form data from the comprehensive Phase 2 position creator
+      console.log('✅ OLD ENDPOINT - Backend received ALL data:', JSON.stringify(req.body, null, 2));
+      
       const {
         title,
+        ministry,
+        department, // Maps to category
         description,
+        responsibilities,
         location,
         startDate,
         endDate,
         volunteersNeeded,
         requiredSkills,
+        preferredSkills,
+        spiritualGiftsNeeded, // Maps to spiritualGifts
         isRecurring,
         recurringPattern,
+        recurringDays,
         priority,
-        backgroundCheckRequired
+        backgroundCheckRequired,
+        backgroundCheckLevel,
+        timeCommitment,
+        timeCommitmentLevel,
+        maxHoursPerWeek,
+        teamSize,
+        teamRoles,
+        leadershipRequired,
+        performanceMetrics,
+        trainingRequired,
+        orientationRequired,
+        mentorshipProvided,
+        coordinatorName,
+        coordinatorEmail,
+        coordinatorPhone,
+        budgetRequired,
+        equipmentNeeded,
+        autoApprove,
+        sendNotifications,
+        trackHours,
+        requireReferences,
+        ageRestriction
       } = req.body;
 
-      // Create volunteer opportunity with all Phase 2 features
+      // Create volunteer opportunity with ALL Phase 2 features - COMPREHENSIVE DATA STORAGE
+      const opportunityData = {
+        churchId: primaryChurch.churchId,
+        title: title || 'New Volunteer Position',
+        ministry: ministry,
+        category: department, // Map department → category
+        description: description || 'Help serve our church community',
+        responsibilities: responsibilities,
+        location: location || 'Church Facility',
+        startDate: startDate ? new Date(startDate) : new Date(),
+        endDate: endDate ? new Date(endDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        volunteersNeeded: volunteersNeeded || 1,
+        volunteersRegistered: 0,
+        requiredSkills: requiredSkills || [],
+        preferredSkills: preferredSkills || [],
+        spiritualGifts: spiritualGiftsNeeded || [], // Map spiritualGiftsNeeded → spiritualGifts
+        timeCommitment: timeCommitment,
+        timeCommitmentLevel: timeCommitmentLevel,
+        maxHoursPerWeek: maxHoursPerWeek,
+        isRecurring: isRecurring || false,
+        recurringPattern: isRecurring ? { pattern: recurringPattern } : null,
+        recurringDays: recurringDays || [],
+        teamSize: teamSize,
+        teamRoles: teamRoles || [],
+        leadershipRequired: leadershipRequired || false,
+        performanceMetrics: performanceMetrics || [],
+        trainingRequired: trainingRequired || false,
+        orientationRequired: orientationRequired || false,
+        mentorshipProvided: mentorshipProvided || false,
+        backgroundCheckRequired: backgroundCheckRequired || false,
+        backgroundCheckLevel: backgroundCheckLevel,
+        status: 'open',
+        priority: priority || 'medium',
+        isPublic: true,
+        coordinatorId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      console.log('✅ OLD ENDPOINT - Creating opportunity with data:', JSON.stringify(opportunityData, null, 2));
+      
       const [opportunity] = await db
         .insert(volunteerOpportunities)
-        .values({
-          churchId: primaryChurch.churchId,
-          title: title || 'New Volunteer Position',
-          description: description || 'Help serve our church community',
-          location: location || 'Church Facility',
-          startDate: startDate ? new Date(startDate) : new Date(),
-          endDate: endDate ? new Date(endDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          volunteersNeeded: volunteersNeeded || 1,
-          volunteersRegistered: 0,
-          requiredSkills: requiredSkills || [],
-          isRecurring: isRecurring || false,
-          recurringPattern: isRecurring ? { pattern: recurringPattern } : null,
-          status: 'open',
-          priority: priority || 'medium',
-          backgroundCheckRequired: backgroundCheckRequired || false,
-          isPublic: true,
-          coordinatorId: user.id,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
+        .values(opportunityData)
         .returning();
 
       res.status(201).json({
