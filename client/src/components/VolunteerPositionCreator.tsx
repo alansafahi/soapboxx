@@ -201,12 +201,12 @@ const skillOptions = [
 
 export default function VolunteerPositionCreator({ children, editOpportunity }: { children: React.ReactNode; editOpportunity?: any }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [preferredSkills, setPreferredSkills] = useState<string[]>([]);
-  const [selectedSpiritualGifts, setSelectedSpiritualGifts] = useState<string[]>([]);
-  const [selectedPerformanceMetrics, setSelectedPerformanceMetrics] = useState<string[]>([]);
-  const [selectedRecurringDays, setSelectedRecurringDays] = useState<string[]>([]);
-  const [selectedTeamRoles, setSelectedTeamRoles] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(editOpportunity?.requiredSkills || []);
+  const [preferredSkills, setPreferredSkills] = useState<string[]>(editOpportunity?.preferredSkills || []);
+  const [selectedSpiritualGifts, setSelectedSpiritualGifts] = useState<string[]>(editOpportunity?.spiritualGiftsNeeded || []);
+  const [selectedPerformanceMetrics, setSelectedPerformanceMetrics] = useState<string[]>(editOpportunity?.performanceMetrics || []);
+  const [selectedRecurringDays, setSelectedRecurringDays] = useState<string[]>(editOpportunity?.recurringDays || []);
+  const [selectedTeamRoles, setSelectedTeamRoles] = useState<string[]>(editOpportunity?.teamRoles || []);
   const [currentTab, setCurrentTab] = useState<string>('basic');
   const [completedTabs, setCompletedTabs] = useState<string[]>([]);
 
@@ -228,61 +228,59 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     resolver: zodResolver(createPositionSchema),
     defaultValues: {
       // Basic Information
-      title: '',
-      ministry: 'General Ministry',
-      department: 'Pastoral Care',
-      priority: 'medium',
-      description: '',
-      responsibilities: '',
+      title: editOpportunity?.title || '',
+      ministry: editOpportunity?.ministry || 'General Ministry',
+      department: editOpportunity?.department || 'Pastoral Care',
+      priority: editOpportunity?.priority || 'medium',
+      description: editOpportunity?.description || '',
+      responsibilities: editOpportunity?.responsibilities || '',
       
       // Scheduling & Time
-      timeCommitment: 'Flexible schedule',
-      timeCommitmentLevel: '1-2 hours',
-      maxHoursPerWeek: 2,
-      location: 'Main Church Building',
+      timeCommitment: editOpportunity?.timeCommitment || 'Flexible schedule',
+      timeCommitmentLevel: editOpportunity?.timeCommitmentLevel || '1-2 hours',
+      maxHoursPerWeek: editOpportunity?.maxHoursPerWeek || 2,
+      location: editOpportunity?.location || 'Main Church Building',
       
       // Recurring
-      isRecurring: false,
-      recurringPattern: 'Weekly',
-      recurringDays: [],
+      isRecurring: editOpportunity?.isRecurring || false,
+      recurringPattern: editOpportunity?.recurringPattern || 'Weekly',
+      recurringDays: editOpportunity?.recurringDays || [],
       
       // Requirements
-      backgroundCheckRequired: false,
-      backgroundCheckLevel: 'basic',
-      requiredSkills: [],
-      preferredSkills: [],
-      spiritualGiftsNeeded: [],
+      backgroundCheckRequired: editOpportunity?.backgroundCheckRequired || false,
+      backgroundCheckLevel: editOpportunity?.backgroundCheckLevel || 'basic',
+      requiredSkills: editOpportunity?.requiredSkills || [],
+      preferredSkills: editOpportunity?.preferredSkills || [],
+      spiritualGiftsNeeded: editOpportunity?.spiritualGiftsNeeded || [],
       
       // Team
-      volunteersNeeded: 1,
-      teamSize: 1,
-      teamRoles: [],
-      leadershipRequired: false,
+      volunteersNeeded: editOpportunity?.volunteersNeeded || 1,
+      teamSize: editOpportunity?.teamSize || 1,
+      teamRoles: editOpportunity?.teamRoles || [],
+      leadershipRequired: editOpportunity?.leadershipRequired || false,
       
       // Performance
-      performanceMetrics: [],
-      trainingRequired: false,
-      orientationRequired: false,
-      mentorshipProvided: false,
+      performanceMetrics: editOpportunity?.performanceMetrics || [],
+      trainingRequired: editOpportunity?.trainingRequired || false,
+      orientationRequired: editOpportunity?.orientationRequired || false,
+      mentorshipProvided: editOpportunity?.mentorshipProvided || false,
       
       // Administrative  
-      coordinatorName: 'Ministry Coordinator',
-      coordinatorEmail: 'coordinator@example.com',
-      budgetRequired: false,
+      coordinatorName: editOpportunity?.coordinatorName || 'Ministry Coordinator',
+      coordinatorEmail: editOpportunity?.coordinatorEmail || 'coordinator@example.com',
+      budgetRequired: editOpportunity?.budgetRequired || false,
       
       // Advanced
-      autoApprove: false,
-      sendNotifications: true,
-      trackHours: true,
-      requireReferences: false
+      autoApprove: editOpportunity?.autoApprove || false,
+      sendNotifications: editOpportunity?.sendNotifications !== false, // Default true unless explicitly false
+      trackHours: editOpportunity?.trackHours !== false, // Default true unless explicitly false
+      requireReferences: editOpportunity?.requireReferences || false
     }
   });
 
   const createPositionMutation = useMutation({
     mutationFn: async (data: CreatePositionForm) => {
-      console.log('MUTATION TRIGGERED', data);
-      console.log('Selected skills:', selectedSkills);
-      return apiRequest('/api/volunteer/opportunities', 'POST', {
+      const requestData = {
         ...data,
         requiredSkills: selectedSkills,
         preferredSkills: preferredSkills,
@@ -293,12 +291,22 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         startDate: data.startDate?.toISOString(),
         endDate: data.endDate?.toISOString(),
         recurringEndDate: data.recurringEndDate?.toISOString()
-      });
+      };
+
+      if (editOpportunity) {
+        // Update existing opportunity
+        return apiRequest(`/api/volunteer/opportunities/${editOpportunity.id}`, 'PUT', requestData);
+      } else {
+        // Create new opportunity
+        return apiRequest('/api/volunteer/opportunities', 'POST', requestData);
+      }
     },
     onSuccess: () => {
       toast({
-        title: "Position Created Successfully",
-        description: "Your volunteer opportunity has been posted and is now available for applications.",
+        title: editOpportunity ? "Position Updated Successfully" : "Position Created Successfully",
+        description: editOpportunity 
+          ? "Your volunteer opportunity has been updated with the new information." 
+          : "Your volunteer opportunity has been posted and is now available for applications.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/volunteer/opportunities'] });
       setIsOpen(false);
@@ -309,8 +317,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to Create Position",
-        description: error.message || "An error occurred while creating the volunteer position.",
+        title: editOpportunity ? "Failed to Update Position" : "Failed to Create Position",
+        description: error.message || `An error occurred while ${editOpportunity ? 'updating' : 'creating'} the volunteer position.`,
         variant: "destructive"
       });
     }
@@ -447,10 +455,12 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Target className="w-5 h-5 text-purple-600" />
-            Create New Volunteer Position
+            {editOpportunity ? 'Edit Volunteer Position' : 'Create New Volunteer Position'}
           </DialogTitle>
           <DialogDescription>
-            Create a detailed volunteer opportunity for your ministry team
+            {editOpportunity 
+              ? 'Update the details for this volunteer opportunity' 
+              : 'Create a detailed volunteer opportunity for your ministry team'}
           </DialogDescription>
         </DialogHeader>
 
@@ -1528,11 +1538,11 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                   >
                     {createPositionMutation.isPending ? (
-                      <>Creating Position...</>
+                      <>{editOpportunity ? 'Updating Position...' : 'Creating Position...'}</>
                     ) : (
                       <>
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Create Position
+                        {editOpportunity ? 'Update Position' : 'Create Position'}
                       </>
                     )}
                   </Button>

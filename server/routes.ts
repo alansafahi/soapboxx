@@ -12783,6 +12783,93 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Update volunteer opportunity
+  app.put('/api/volunteer/opportunities/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const opportunityId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      if (isNaN(opportunityId)) {
+        return res.status(400).json({ message: 'Invalid opportunity ID' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      // Get opportunity to verify ownership/permissions
+      const opportunity = await db
+        .select()
+        .from(schema.volunteerOpportunities)
+        .where(eq(schema.volunteerOpportunities.id, opportunityId))
+        .limit(1);
+
+      if (opportunity.length === 0) {
+        return res.status(404).json({ message: 'Volunteer opportunity not found' });
+      }
+
+      // Extract form data from the comprehensive Phase 2 position creator
+      const {
+        title,
+        description,
+        location,
+        startDate,
+        endDate,
+        volunteersNeeded,
+        requiredSkills,
+        isRecurring,
+        recurringPattern,
+        priority,
+        backgroundCheckRequired,
+        ministry,
+        department,
+        timeCommitment,
+        timeCommitmentLevel,
+        maxHoursPerWeek,
+        coordinatorName,
+        coordinatorEmail
+      } = req.body;
+
+      // Update volunteer opportunity with all Phase 2 features
+      const [updatedOpportunity] = await db
+        .update(schema.volunteerOpportunities)
+        .set({
+          title: title || opportunity[0].title,
+          description: description || opportunity[0].description,
+          location: location || opportunity[0].location,
+          startDate: startDate ? new Date(startDate) : opportunity[0].startDate,
+          endDate: endDate ? new Date(endDate) : opportunity[0].endDate,
+          volunteersNeeded: volunteersNeeded || opportunity[0].volunteersNeeded,
+          requiredSkills: requiredSkills || opportunity[0].requiredSkills,
+          isRecurring: isRecurring !== undefined ? isRecurring : opportunity[0].isRecurring,
+          recurringPattern: isRecurring ? { pattern: recurringPattern } : opportunity[0].recurringPattern,
+          priority: priority || opportunity[0].priority,
+          backgroundCheckRequired: backgroundCheckRequired !== undefined ? backgroundCheckRequired : opportunity[0].backgroundCheckRequired,
+          updatedAt: new Date()
+        })
+        .where(eq(schema.volunteerOpportunities.id, opportunityId))
+        .returning();
+
+      res.json({
+        success: true,
+        message: 'Volunteer position updated successfully',
+        opportunity: updatedOpportunity
+      });
+
+    } catch (error) {
+      console.error('Failed to update volunteer opportunity:', error);
+      res.status(500).json({ 
+        message: 'Failed to update volunteer position',
+        error: error.message 
+      });
+    }
+  });
+
   // Delete volunteer opportunity
   app.delete('/api/volunteers/opportunities/:id', isAuthenticated, async (req: any, res) => {
     try {
