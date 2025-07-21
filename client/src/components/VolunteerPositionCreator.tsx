@@ -370,6 +370,20 @@ export default function VolunteerPositionCreator({ children }: { children: React
   const onSubmit = (data: CreatePositionForm) => {
     console.log('FORM SUBMITTED!', data);
     console.log('Form errors:', form.formState.errors);
+    console.log('Form validation status:', form.formState.isValid);
+    console.log('Form dirty fields:', form.formState.dirtyFields);
+    
+    // Check for specific validation errors
+    const errors = form.formState.errors;
+    if (Object.keys(errors).length > 0) {
+      console.log('VALIDATION ERRORS BLOCKING SUBMISSION:', errors);
+      Object.keys(errors).forEach(key => {
+        console.log(`Field ${key}:`, errors[key]);
+      });
+      return;
+    }
+    
+    console.log('Validation passed, triggering mutation...');
     createPositionMutation.mutate(data);
   };
 
@@ -483,7 +497,14 @@ export default function VolunteerPositionCreator({ children }: { children: React
                           <SelectContent>
                             <SelectItem value="Pastoral Care">Pastoral Care</SelectItem>
                             <SelectItem value="Community Outreach">Community Outreach</SelectItem>
+                            <SelectItem value="Discipleship">Discipleship</SelectItem>
+                            <SelectItem value="Evangelism">Evangelism</SelectItem>
+                            <SelectItem value="Education & Teaching">Education & Teaching</SelectItem>
+                            <SelectItem value="Creative Arts">Creative Arts</SelectItem>
                             <SelectItem value="Operations">Operations</SelectItem>
+                            <SelectItem value="Guest Services">Guest Services</SelectItem>
+                            <SelectItem value="Security & Safety">Security & Safety</SelectItem>
+                            <SelectItem value="Transportation">Transportation</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
