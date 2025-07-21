@@ -382,8 +382,8 @@ export default function SidebarFixed() {
         ) : (
           // Collapsed Navigation - Icons Only with Feature Filtering
           <div className="space-y-2">
-            {/* HARDCODED D.I.V.I.N.E. ICON - FORCE VISIBLE */}
-            <Link key="/divine-collapsed" href="/divine">
+            {/* HARDCODED D.I.V.I.N.E. ICON AT TOP - FORCE VISIBLE */}
+            <Link key="/divine-collapsed-top" href="/divine">
               <Button
                 variant={location === '/divine' ? "default" : "ghost"}
                 size="icon"
@@ -392,7 +392,7 @@ export default function SidebarFixed() {
                     ? 'bg-purple-600 text-white hover:bg-purple-700' 
                     : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
                 }`}
-                title="D.I.V.I.N.E."
+                title="D.I.V.I.N.E. - Volunteer Management"
               >
                 <Sparkles className="w-5 h-5" />
               </Button>
