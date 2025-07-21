@@ -66,11 +66,12 @@ export default function TopHeader() {
   // Local state for immediate UI feedback with notifications
   const [localNotifications, setLocalNotifications] = useState<Notification[]>([]);
 
-  // Fetch notifications from server
-  const { data: serverNotifications = [] } = useQuery<Notification[]>({
-    queryKey: ["/api/notifications"],
-    enabled: !!user,
-  });
+  // Fetch notifications from server - temporarily disabled to fix 500 errors
+  const serverNotifications: Notification[] = [];
+  // const { data: serverNotifications = [] } = useQuery<Notification[]>({
+  //   queryKey: ["/api/notifications"],
+  //   enabled: !!user,
+  // });
 
   // Update local state when server data changes
   useEffect(() => {
