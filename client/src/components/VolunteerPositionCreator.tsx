@@ -391,7 +391,11 @@ export default function VolunteerPositionCreator({ children }: { children: React
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={(e) => {
+            console.log('Form submit event triggered');
+            e.preventDefault();
+            form.handleSubmit(onSubmit)(e);
+          }} className="space-y-6">
             
             {/* Phase 2 Advanced Tabbed Interface */}
             <div className="border-b">
