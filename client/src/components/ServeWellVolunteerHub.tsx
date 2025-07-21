@@ -479,12 +479,6 @@ const VolunteerDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="text-center p-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome to D.I.V.I.N.E.</h1>
-        <p className="text-purple-100">Disciple-Inspired Volunteer Integration & Nurture Engine</p>
-      </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
@@ -1073,10 +1067,7 @@ const ServeWellVolunteerHub = () => {
         </TabsContent>
 
         <TabsContent value="impact">
-          <div className="text-center p-8">
-            <h2 className="text-2xl font-bold mb-4">Kingdom Impact Report</h2>
-            <p className="text-gray-600">See how your service is making a difference</p>
-          </div>
+          <VolunteerDashboard />
         </TabsContent>
       </Tabs>
     </div>
