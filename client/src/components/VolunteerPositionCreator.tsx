@@ -215,12 +215,12 @@ export default function VolunteerPositionCreator({ children }: { children: React
     resolver: zodResolver(createPositionSchema),
     defaultValues: {
       // Basic Information
-      title: 'New Volunteer Position',
+      title: '',
       ministry: 'General Ministry',
       department: 'Pastoral Care',
       priority: 'medium',
-      description: 'A meaningful volunteer opportunity to serve our church community.',
-      responsibilities: 'Help support ministry activities and serve church members.',
+      description: '',
+      responsibilities: '',
       
       // Scheduling & Time
       timeCommitment: 'Flexible schedule',
@@ -288,7 +288,9 @@ export default function VolunteerPositionCreator({ children }: { children: React
         description: "Your volunteer opportunity has been posted and is now available for applications.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/volunteer/opportunities'] });
-      setIsOpen(false);
+      
+      // Advance to Requirements tab instead of closing
+      setCurrentTab('requirements');
       form.reset();
       resetAllSelections();
     },
@@ -460,7 +462,14 @@ export default function VolunteerPositionCreator({ children }: { children: React
                       <FormItem>
                         <FormLabel>Position Title *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Children Ministry Leader" {...field} />
+                          <Input 
+                            placeholder="e.g., Children Ministry Leader" 
+                            {...field}
+                            onFocus={(e) => e.target.placeholder = ''}
+                            onBlur={(e) => {
+                              if (!e.target.value) e.target.placeholder = 'e.g., Children Ministry Leader';
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -572,7 +581,11 @@ export default function VolunteerPositionCreator({ children }: { children: React
                         <Textarea 
                           placeholder="Provide a clear, engaging description of this volunteer role..."
                           rows={4}
-                          {...field} 
+                          {...field}
+                          onFocus={(e) => e.target.placeholder = ''}
+                          onBlur={(e) => {
+                            if (!e.target.value) e.target.placeholder = 'Provide a clear, engaging description of this volunteer role...';
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -590,13 +603,27 @@ export default function VolunteerPositionCreator({ children }: { children: React
                         <Textarea 
                           placeholder="• Lead worship sessions&#10;• Prepare materials and setup&#10;• Mentor new volunteers&#10;• Maintain equipment"
                           rows={4}
-                          {...field} 
+                          {...field}
+                          onFocus={(e) => e.target.placeholder = ''}
+                          onBlur={(e) => {
+                            if (!e.target.value) e.target.placeholder = '• Lead worship sessions\n• Prepare materials and setup\n• Mentor new volunteers\n• Maintain equipment';
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    type="button"
+                    onClick={() => setCurrentTab('requirements')}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  >
+                    Next: Requirements →
+                  </Button>
+                </div>
               </div>
             )}
 
