@@ -37,6 +37,7 @@ import {
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import VolunteerCalendar from './VolunteerCalendar';
+import VolunteerPositionCreator from './VolunteerPositionCreator';
 
 // D.I.V.I.N.E. - Disciple-Inspired Volunteer Integration & Nurture Engine
 
@@ -623,13 +624,11 @@ const DivineAppointmentsPanel = () => {
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                         <div>
                           <h4 className="font-semibold text-sm text-gray-700 mb-1">Created By</h4>
-                          <p className="text-sm">{appointment.opportunity?.coordinatorName || 'Ministry Leader'}</p>
+                          <p className="text-sm">Ministry Leader</p>
                         </div>
                         <div>
                           <h4 className="font-semibold text-sm text-gray-700 mb-1">Posted</h4>
-                          <p className="text-sm">
-                            {appointment.opportunity?.created ? new Date(appointment.opportunity.created).toLocaleDateString() : 'Recently'}
-                          </p>
+                          <p className="text-sm">Recently</p>
                         </div>
                       </div>
 

@@ -211,7 +211,7 @@ export class VolunteerStorage {
         coordinatorId: volunteerOpportunities.coordinatorId,
         coordinatorEmail: users.email,
         coordinatorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        volunteerName: sql<string>`CONCAT(volunteer.first_name, ' ', volunteer.last_name)`,
+        volunteerName: sql<string>`CONCAT(volunteers.firstName, ' ', volunteers.lastName)`,
         volunteerEmail: volunteers.email,
         backgroundCheckRequired: volunteerOpportunities.backgroundCheckRequired
       })
@@ -403,7 +403,7 @@ export class VolunteerStorage {
       const applications = await db
         .select({
           matchId: volunteerMatches.id,
-          volunteerName: sql<string>`CONCAT(volunteers.first_name, ' ', volunteers.last_name)`,
+          volunteerName: sql<string>`CONCAT(volunteers.firstName, ' ', volunteers.lastName)`,
           volunteerEmail: volunteers.email,
           opportunityTitle: volunteerOpportunities.title,
           appliedDate: volunteerMatches.respondedAt,
@@ -423,6 +423,40 @@ export class VolunteerStorage {
     } catch (error) {
       console.error('Failed to get pending applications:', error);
       return [];
+    }
+  }
+
+  // Create volunteer opportunity
+  async createVolunteerOpportunity(data: any): Promise<any> {
+    try {
+      const [opportunity] = await db
+        .insert(volunteerOpportunities)
+        .values({
+          churchId: data.churchId,
+          title: data.title,
+          description: data.description,
+          coordinatorId: data.coordinatorId,
+          location: data.location,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          volunteersNeeded: data.volunteersNeeded,
+          volunteersRegistered: 0,
+          requiredSkills: data.requiredSkills,
+          isRecurring: data.isRecurring,
+          recurringPattern: data.recurringPattern ? { pattern: data.recurringPattern } : null,
+          status: data.status,
+          priority: data.priority,
+          backgroundCheckRequired: data.backgroundCheckRequired,
+          isPublic: true
+        })
+        .returning();
+
+      console.log(`✅ Created volunteer opportunity: ${data.title}`);
+      return opportunity;
+      
+    } catch (error) {
+      console.error('Failed to create volunteer opportunity:', error);
+      throw error;
     }
   }
 
