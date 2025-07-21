@@ -806,91 +806,67 @@ const ServeWellVolunteerHub = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Success Announcement Box - Consolidated */}
-      {showSuccessAnnouncement && lastAssessmentProfile && (
-        <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-lg shadow-lg border-l-4 border-l-yellow-400 relative animate-in slide-in-from-top duration-500">
-          <button
-            onClick={() => setShowSuccessAnnouncement(false)}
-            className="absolute top-2 right-2 text-white hover:text-gray-200 text-xl font-bold"
-          >
-            ×
-          </button>
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0">
-              <CheckCircle className="w-8 h-8 text-yellow-300" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold mb-2">D.I.V.I.N.E. Setup Complete!</h3>
-              <p className="text-sm text-white/90 mb-4">You're ready to explore volunteer opportunities</p>
-              
-              {/* Display Spiritual Profile */}
-              <div className="bg-white/20 rounded-lg p-3 mb-4">
-                <div className="text-lg font-bold text-white mb-1">
-                  {lastAssessmentProfile.profileLabel || "Faithful Servant"}
-                </div>
-                <div className="text-sm text-white/90 mb-2">
-                  {lastAssessmentProfile.profileDescription || "Ready to serve with your unique gifts"}
-                </div>
-                <div className="text-xs text-white/80">
-                  Serving Style: {lastAssessmentProfile.servingStyle || "Ministry Participation"}
-                </div>
-                {lastAssessmentProfile.topGifts && lastAssessmentProfile.topGifts.length > 0 && (
-                  <div className="text-xs text-white/80 mt-1">
-                    Top Gifts: {lastAssessmentProfile.topGifts.join(", ")}
-                  </div>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Button 
-                  onClick={() => {
-                    setActiveTab("appointments");
-                    setShowSuccessAnnouncement(false);
-                  }}
-                  className="bg-white text-purple-600 hover:bg-gray-100"
-                  size="sm"
-                >
-                  <Target className="w-4 h-4 mr-1" />
-                  View My Matches
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setActiveTab("opportunities");
-                    setShowSuccessAnnouncement(false);
-                  }}
-                  className="bg-purple-600 text-white hover:bg-purple-700"
-                  size="sm"
-                >
-                  <Search className="w-4 h-4 mr-1" />
-                  Browse All Opportunities
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setActiveTab("calendar");
-                    setShowSuccessAnnouncement(false);
-                  }}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                  size="sm"
-                >
-                  <Calendar className="w-4 h-4 mr-1" />
-                  My Calendar
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="appointments">Divine Appointments</TabsTrigger>
-          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-          <TabsTrigger value="calendar">My Calendar</TabsTrigger>
           <TabsTrigger value="impact">Impact</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
+          {/* Welcome to D.I.V.I.N.E. */}
+          <div className="bg-gradient-to-br from-purple-500 via-blue-500 to-green-500 text-white rounded-xl p-6 mb-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Welcome to D.I.V.I.N.E.</h2>
+              <p className="text-white/90">Disciple-Inspired Volunteer Integration & Nurture Engine</p>
+            </div>
+          </div>
+
+          {/* Progress Bar and Profile Section */}
+          {hasProfile?.hasProfile && lastAssessmentProfile && (
+            <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-lg shadow-lg border-l-4 border-l-yellow-400 mb-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="w-8 h-8 text-yellow-300" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold mb-2">D.I.V.I.N.E. Setup Complete!</h3>
+                  <p className="text-sm text-white/90 mb-4">You're ready to explore volunteer opportunities</p>
+                  
+                  {/* Progress Bar */}
+                  <div className="bg-white/20 rounded-full p-1 mb-4">
+                    <div className="bg-white rounded-full h-2 w-full"></div>
+                  </div>
+                  <div className="flex justify-between text-xs text-white/80 mb-4">
+                    <span>✓ Assessment Complete</span>
+                    <span>✓ Profile Created</span>
+                    <span>✓ Ready to Serve</span>
+                  </div>
+                  
+                  {/* Display Spiritual Profile */}
+                  <div className="bg-white/20 rounded-lg p-3 mb-4">
+                    <div className="text-lg font-bold text-white mb-1">
+                      {lastAssessmentProfile.profileLabel || "Faithful Servant"}
+                    </div>
+                    <div className="text-sm text-white/90 mb-2">
+                      {lastAssessmentProfile.profileDescription || "Ready to serve with your unique gifts"}
+                    </div>
+                    <div className="text-xs text-white/80">
+                      Serving Style: {lastAssessmentProfile.servingStyle || "Ministry Participation"}
+                    </div>
+                    {lastAssessmentProfile.topGifts && lastAssessmentProfile.topGifts.length > 0 && (
+                      <div className="text-xs text-white/80 mt-1">
+                        Top Gifts: {lastAssessmentProfile.topGifts.join(", ")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {!hasProfile?.hasProfile ? (
             <div className="space-y-6">
               {/* Welcome Message */}
@@ -1044,7 +1020,43 @@ const ServeWellVolunteerHub = () => {
               </Card>
             </div>
           ) : (
-            <VolunteerDashboard />
+            <div className="space-y-6">
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button 
+                  onClick={() => setActiveTab("appointments")}
+                  className="h-20 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                >
+                  <div className="text-center">
+                    <Target className="w-6 h-6 mx-auto mb-2" />
+                    <div className="font-medium">Divine Appointments</div>
+                    <div className="text-xs opacity-90">AI-powered matches</div>
+                  </div>
+                </Button>
+                <Button 
+                  onClick={() => setActiveTab("opportunities")}
+                  className="h-20 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+                >
+                  <div className="text-center">
+                    <Search className="w-6 h-6 mx-auto mb-2" />
+                    <div className="font-medium">Browse Opportunities</div>
+                    <div className="text-xs opacity-90">All volunteer roles</div>
+                  </div>
+                </Button>
+                <Button 
+                  onClick={() => setActiveTab("calendar")}
+                  className="h-20 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  <div className="text-center">
+                    <Calendar className="w-6 h-6 mx-auto mb-2" />
+                    <div className="font-medium">My Calendar</div>
+                    <div className="text-xs opacity-90">Track commitments</div>
+                  </div>
+                </Button>
+              </div>
+
+              <VolunteerDashboard />
+            </div>
           )}
         </TabsContent>
 
