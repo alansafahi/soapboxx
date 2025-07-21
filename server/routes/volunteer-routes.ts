@@ -350,16 +350,15 @@ router.post('/opportunities', async (req, res) => {
       endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
     };
 
-    console.log('🔍 DEBUG: Array field types before mapping:');
-    console.log('requiredSkills:', typeof req.body.requiredSkills, Array.isArray(req.body.requiredSkills), req.body.requiredSkills);
-    console.log('responsibilities:', typeof req.body.responsibilities, Array.isArray(req.body.responsibilities), req.body.responsibilities);
-    console.log('performanceMetrics:', typeof req.body.performanceMetrics, Array.isArray(req.body.performanceMetrics), req.body.performanceMetrics);
+    console.log('✅ ENHANCED ENDPOINT - Creating opportunity with comprehensive data');
     
-    console.log('Backend received data:', JSON.stringify(req.body, null, 2));
-    console.log('Mapped data for validation:', JSON.stringify(mappedData, null, 2));
-
+    // Debug specific array fields that might be causing issues
+    if (typeof req.body.responsibilities === 'string') {
+      console.log('Converting responsibilities from string to array');
+    }
+    
     const validatedData = insertVolunteerOpportunitySchema.parse(mappedData);
-    console.log('Validated data passed to storage:', JSON.stringify(validatedData, null, 2));
+    console.log('✅ Validation passed, creating opportunity in database');
 
     const opportunity = await volunteerStorage.createVolunteerOpportunity(validatedData);
     res.json(opportunity);

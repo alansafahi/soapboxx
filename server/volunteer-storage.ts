@@ -433,7 +433,7 @@ export class VolunteerStorage {
           ministry: data.ministry,
           category: data.category, // Field already mapped in route
           description: data.description,
-          responsibilities: data.responsibilities || null,
+          responsibilities: Array.isArray(data.responsibilities) ? data.responsibilities : [],
           coordinatorId: data.coordinatorId,
           location: data.location,
           startDate: data.startDate,
