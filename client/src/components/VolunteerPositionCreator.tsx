@@ -578,43 +578,20 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
   }, [editOpportunity, isOpen, form]);
 
   const onSubmit = async (data: CreatePositionForm) => {
-    console.log('FORM SUBMITTED!', data);
+    console.log('🎯 FORM SUBMISSION STARTED!');
+    console.log('📋 Form data received:', data);
+    console.log('📊 Form state valid:', form.formState.isValid);
+    console.log('🚨 Form errors:', form.formState.errors);
     
-    // Force a complete validation check
-    const isValid = await form.trigger();
-    console.log('Form validation result:', isValid);
-    console.log('Form errors after trigger:', form.formState.errors);
-    
-    // Check for specific validation errors and show toast
-    const errors = form.formState.errors;
-    if (Object.keys(errors).length > 0) {
-      console.log('VALIDATION ERRORS BLOCKING SUBMISSION:', errors);
-      Object.keys(errors).forEach(key => {
-        const error = (errors as any)[key];
-        console.log(`Field ${key} error:`, error?.message || error);
-      });
-      
-      // Show user-friendly validation error
+    try {
+      console.log('✅ Validation passed, calling mutation...');
+      await createPositionMutation.mutateAsync(data);
+      console.log('🎉 Position created successfully!');
+    } catch (error: any) {
+      console.error('❌ Mutation failed:', error);
       toast({
-        title: "Form Validation Error",
-        description: "Please check all required fields are filled correctly before submitting.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (isValid) {
-      console.log('Validation passed, triggering mutation...');
-      createPositionMutation.mutate(data);
-    } else {
-      console.log('Form validation failed - checking detailed errors');
-      // Get fresh error state
-      const freshErrors = form.formState.errors;
-      console.log('Fresh errors:', freshErrors);
-      
-      toast({
-        title: "Validation Failed", 
-        description: "Please complete all required fields to create the position.",
+        title: "Failed to Create Position",
+        description: error.message || "An error occurred while creating the position.",
         variant: "destructive"
       });
     }
@@ -645,7 +622,16 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
             // Only allow submission on the final 'admin' tab
             if (currentTab === 'admin') {
               console.log('Form submit event triggered - Admin tab');
-              form.handleSubmit(onSubmit)(e);
+              console.log('Current form values before submission:', form.getValues());
+              console.log('Form errors before submission:', form.formState.errors);
+              form.handleSubmit(onSubmit, (errors) => {
+                console.log('Form submission failed with errors:', errors);
+                toast({
+                  title: "Form Validation Failed",
+                  description: `Please fix: ${Object.keys(errors).join(', ')}`,
+                  variant: "destructive"
+                });
+              })(e);
             } else {
               console.log('Form submission blocked - not on admin tab');
               goToNextTab();
