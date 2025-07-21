@@ -281,9 +281,12 @@ export default function SidebarFixed() {
         {!isCollapsed ? (
           // Expanded Navigation - Filtered Groups  
           visibleGroups.map((group, idx) => {
+            console.log('Rendering group:', group.label, 'items:', group.items.length);
 
             // Ensure admin groups are always expanded for soapbox_owner users OR users with church admin roles
+            // FORCE SPIRITUAL TOOLS TO BE EXPANDED TO SHOW D.I.V.I.N.E.
             const isExpanded = expandedGroups.has(group.label) || 
+              group.label === 'SPIRITUAL TOOLS' ||
               (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
               (hasChurchAdminRole && group.label === 'ADMIN PORTAL');
             
@@ -301,19 +304,22 @@ export default function SidebarFixed() {
                   <div className="space-y-1">
                     {/* HARDCODED D.I.V.I.N.E. BUTTON - FORCE VISIBLE */}
                     {group.label === "SPIRITUAL TOOLS" && (
-                      <Link key="/divine-hardcoded" href="/divine">
-                        <Button
-                          variant={location === '/divine' ? "default" : "ghost"}
-                          className={`w-full justify-start h-auto py-2 px-3 ${
-                            location === '/divine'
-                              ? "bg-purple-600 text-white hover:bg-purple-700" 
-                              : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                          }`}
-                        >
-                          <Sparkles className="h-4 w-4 mr-3" />
-                          <span className="text-sm">D.I.V.I.N.E.</span>
-                        </Button>
-                      </Link>
+                      <>
+                        {console.log('SPIRITUAL TOOLS group found, rendering D.I.V.I.N.E. button')}
+                        <Link key="/divine-hardcoded" href="/divine">
+                          <Button
+                            variant={location === '/divine' ? "default" : "ghost"}
+                            className={`w-full justify-start h-auto py-2 px-3 ${
+                              location === '/divine'
+                                ? "bg-purple-600 text-white hover:bg-purple-700" 
+                                : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                            }`}
+                          >
+                            <Sparkles className="h-4 w-4 mr-3" />
+                            <span className="text-sm">D.I.V.I.N.E.</span>
+                          </Button>
+                        </Link>
+                      </>
                     )}
                     {group.items.filter((item) => {
                       // SKIP D.I.V.I.N.E. since it's hardcoded above
