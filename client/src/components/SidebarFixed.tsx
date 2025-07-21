@@ -299,14 +299,30 @@ export default function SidebarFixed() {
                 
                 {isExpanded && (
                   <div className="space-y-1">
+                    {/* HARDCODED D.I.V.I.N.E. BUTTON - FORCE VISIBLE */}
+                    {group.label === "SPIRITUAL TOOLS" && (
+                      <Link key="/divine-hardcoded" href="/divine">
+                        <Button
+                          variant={location === '/divine' ? "default" : "ghost"}
+                          className={`w-full justify-start h-auto py-2 px-3 ${
+                            location === '/divine'
+                              ? "bg-purple-600 text-white hover:bg-purple-700" 
+                              : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                          }`}
+                        >
+                          <Sparkles className="h-4 w-4 mr-3" />
+                          <span className="text-sm">D.I.V.I.N.E.</span>
+                        </Button>
+                      </Link>
+                    )}
                     {group.items.filter((item) => {
-                      // Special case: Always show Content Moderation for soapbox_owner
-                      if (item.href === '/moderation-dashboard' && user?.role === 'soapbox_owner') {
-                        return true;
+                      // SKIP D.I.V.I.N.E. since it's hardcoded above
+                      if (item.href === '/divine') {
+                        return false;
                       }
                       
-                      // D.I.V.I.N.E. is ALWAYS visible - core volunteer management system
-                      if (item.href === '/divine') {
+                      // Special case: Always show Content Moderation for soapbox_owner
+                      if (item.href === '/moderation-dashboard' && user?.role === 'soapbox_owner') {
                         return true;
                       }
                       
@@ -364,7 +380,27 @@ export default function SidebarFixed() {
         ) : (
           // Collapsed Navigation - Icons Only with Feature Filtering
           <div className="space-y-2">
+            {/* HARDCODED D.I.V.I.N.E. ICON - FORCE VISIBLE */}
+            <Link key="/divine-collapsed" href="/divine">
+              <Button
+                variant={location === '/divine' ? "default" : "ghost"}
+                size="icon"
+                className={`relative w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm ${
+                  location === '/divine'
+                    ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                    : 'text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400'
+                }`}
+                title="D.I.V.I.N.E."
+              >
+                <Sparkles className="w-5 h-5" />
+              </Button>
+            </Link>
             {visibleGroups.flatMap(group => group.items).map((item) => {
+              // SKIP D.I.V.I.N.E. since it's hardcoded above
+              if (item.href === '/divine') {
+                return null;
+              }
+              
               // Apply same filtering logic as expanded view
               if (item.roles) {
                 if (!user) return null;
@@ -373,10 +409,8 @@ export default function SidebarFixed() {
                 if (!hasGlobalRole && !hasChurchRole) return null;
               }
               
-              // D.I.V.I.N.E. is ALWAYS visible - core volunteer management system
-              if (item.href === '/divine') {
-                // Skip all filtering - D.I.V.I.N.E. is always visible
-              } else {
+              // Apply church feature filtering for other items
+              {
                 // Apply church feature filtering for non-core features
                 const featureEnabled = isFeatureEnabled(item.href);
                 // Always show moderation dashboard for authorized users
