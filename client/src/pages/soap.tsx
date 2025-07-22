@@ -5,7 +5,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { ScrollArea } from "../components/ui/scroll-area";
-import { Plus, BookOpen, Heart, Share2, Star, Calendar, Zap } from "lucide-react";
+import { Plus, BookOpen, Heart, Share2, Star, Calendar, Zap, Globe } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +21,7 @@ import { SoapEntryCard } from "../components/SoapEntryCard";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import type { SoapEntry } from "../../../shared/schema";
+import { useUser } from "../hooks/useUser";
 
 export default function SoapPage() {
   const [showForm, setShowForm] = useState(false);
@@ -29,6 +30,7 @@ export default function SoapPage() {
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: user } = useUser();
 
   // Fetch user's S.O.A.P. entries
   const { data: userEntries = [], isLoading: userLoading } = useQuery({
@@ -36,7 +38,13 @@ export default function SoapPage() {
     queryFn: () => apiRequest('GET', '/api/soap'),
   });
 
-  // Fetch public S.O.A.P. entries for community feed
+  // Fetch ALL public S.O.A.P. entries platform-wide
+  const { data: allEntries = [], isLoading: allLoading } = useQuery({
+    queryKey: ['/api/soap/all'],
+    queryFn: () => apiRequest('GET', '/api/soap/all'),
+  });
+
+  // Fetch public S.O.A.P. entries for community feed (same church)
   const { data: publicEntries = [], isLoading: publicLoading } = useQuery({
     queryKey: ['/api/soap/public'],
     queryFn: () => apiRequest('GET', '/api/soap/public'),
@@ -56,6 +64,7 @@ export default function SoapPage() {
     mutationFn: (id: number) => apiRequest('DELETE', `/api/soap/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap/all'] });
       queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
@@ -100,6 +109,7 @@ export default function SoapPage() {
 
   const handleFormSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/soap/all'] });
     queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
     queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
     queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
@@ -180,8 +190,12 @@ export default function SoapPage() {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="my-entries" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="all-entries" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="all-entries" className="gap-2">
+            <Globe className="h-4 w-4" />
+            All Entries
+          </TabsTrigger>
           <TabsTrigger value="my-entries" className="gap-2">
             <BookOpen className="h-4 w-4" />
             My Entries
@@ -191,6 +205,61 @@ export default function SoapPage() {
             Community
           </TabsTrigger>
         </TabsList>
+
+        {/* All Entries Tab */}
+        <TabsContent value="all-entries" className="space-y-6">
+          <div className="text-center py-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              All Public S.O.A.P. Entries
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Discover spiritual insights from believers across the entire SoapBox platform
+            </p>
+          </div>
+
+          {allLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm animate-pulse">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4 mb-2"></div>
+                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : allEntries.length === 0 ? (
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+              <Globe className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No Public Entries Yet
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Be the first to share a S.O.A.P. entry publicly with the community
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-6">
+              {allEntries.map((entry: any) => (
+                <SoapEntryCard 
+                  key={entry.id} 
+                  entry={entry} 
+                  onDelete={deleteMutation.mutate}
+                  isDeleting={deleteMutation.isPending}
+                  onEdit={handleEdit}
+                  showActions={entry.userId === user?.id}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
         {/* My Entries Tab */}
         <TabsContent value="my-entries" className="space-y-6">

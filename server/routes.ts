@@ -9303,6 +9303,25 @@ Return JSON with this exact structure:
     }
   });
 
+  // Get ALL public S.O.A.P. entries platform-wide 
+  app.get('/api/soap/all', isAuthenticated, async (req: any, res) => {
+    try {
+      const { limit = 20, offset = 0 } = req.query;
+
+      const entries = await storage.getPublicSoapEntries(
+        undefined, // No church filter - platform-wide
+        parseInt(limit as string),
+        parseInt(offset as string),
+        undefined // Include all users including current user
+      );
+
+      res.json(entries);
+    } catch (error) {
+      console.error('SOAP all entries error:', error);
+      res.status(500).json({ message: 'Failed to fetch all S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   app.get('/api/soap/public', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;

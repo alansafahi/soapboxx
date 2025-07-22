@@ -3108,7 +3108,7 @@ export class DatabaseStorage implements IStorage {
         })
         .from(soapEntries)
         .leftJoin(users, eq(soapEntries.userId, users.id))
-        .where(and(...conditions))
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
         .orderBy(desc(soapEntries.createdAt))
         .limit(limit)
         .offset(offset);
