@@ -1554,10 +1554,6 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                         <div className="w-3 h-3 bg-blue-500 rounded"></div>
                         <span>Preferred</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                        <span>Spiritual Gift</span>
-                      </div>
                       <span className="text-gray-600 dark:text-gray-400">Click boxes to select</span>
                     </div>
 
@@ -1569,14 +1565,13 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                             <th className="text-left p-2 border-r dark:border-gray-700 font-medium w-48">Skill/Requirement</th>
                             <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-16">Required</th>
                             <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-16">Preferred</th>
-                            <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-20">Spiritual Gift</th>
                             <th className="text-center p-2 font-medium w-16">N/A</th>
                           </tr>
                         </thead>
                         <tbody>
                           {/* Administrative Skills */}
                           <tr className="border-t dark:border-gray-700">
-                            <td colSpan={5} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
+                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
                               📋 Administrative & Organization
                             </td>
                           </tr>
@@ -1609,13 +1604,6 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {(skill === 'Organization' || skill === 'Event Planning' || skill === 'Project Management' || skill === 'Financial Management' || skill === 'Record Keeping') && (
-                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-                                    {skill === 'Financial Management' ? 'Giving' : 'Administration'}
-                                  </div>
-                                )}
-                              </td>
                               <td className="p-2 text-center">
                                 <div 
                                   onClick={(e) => {
@@ -1634,7 +1622,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Technical Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={5} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
+                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
                               🔧 Technical & Maintenance
                             </td>
                           </tr>
@@ -1667,13 +1655,6 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work'].includes(skill) && (
-                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-                                    Serving
-                                  </div>
-                                )}
-                              </td>
                               <td className="p-2 text-center">
                                 <div 
                                   onClick={(e) => {
@@ -1692,7 +1673,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Ministry Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={5} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
+                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
                               ⛪ Ministry & Teaching
                             </td>
                           </tr>
@@ -1725,18 +1706,6 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {['Teaching', 'Bible Study Leadership', 'Counseling', 'Evangelism', 'Pastoral Care', 'Prayer Ministry', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading'].includes(skill) && (
-                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-                                    {skill === 'Bible Study Leadership' || skill === 'Children\'s Ministry' ? 'Teaching' : 
-                                     skill === 'Counseling' || skill === 'Pastoral Care' || skill === 'Youth Ministry' ? 'Shepherding' : 
-                                     skill === 'Prayer Ministry' ? 'Intercession' :
-                                     skill === 'Music Ministry' || skill === 'Worship Leading' ? 'Worship' :
-                                     skill === 'Evangelism' ? 'Evangelism' :
-                                     skill === 'Teaching' ? 'Teaching' : 'Serving'}
-                                  </div>
-                                )}
-                              </td>
                               <td className="p-2 text-center">
                                 <div 
                                   onClick={(e) => {
@@ -1755,7 +1724,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Hospitality Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={5} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
+                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
                               🤝 Hospitality & Service
                             </td>
                           </tr>
@@ -1787,14 +1756,6 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                                       : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                                   }`}
                                 />
-                              </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
-                                {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care'].includes(skill) && (
-                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-                                    {skill === 'Hospitality' || skill === 'Guest Relations' || skill === 'Greeting' ? 'Hospitality' : 
-                                     skill === 'Child Care' || skill === 'Elder Care' ? 'Mercy' : 'Serving'}
-                                  </div>
-                                )}
                               </td>
                               <td className="p-2 text-center">
                                 <div 
