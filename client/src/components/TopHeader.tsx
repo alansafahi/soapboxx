@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useTheme } from "../hooks/useTheme";
@@ -234,6 +234,12 @@ export default function TopHeader() {
               <DropdownMenuItem className="cursor-pointer">
                 <PenTool className="w-4 h-4 mr-2" />
                 S.O.A.P. Journal
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/divine">
+              <DropdownMenuItem className="cursor-pointer">
+                <Sparkles className="w-4 h-4 mr-2" />
+                D.I.V.I.N.E.
               </DropdownMenuItem>
             </Link>
             <Link href="/audio-bible">

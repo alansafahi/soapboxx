@@ -1,0 +1,95 @@
+This behavior is almost certainly due to responsive design implementations using CSS utility classes (like Tailwind CSS) and/or conditional rendering logic in your navigation components. Modern web applications typically hide full sidebars on smaller screens to optimize for limited display space, replacing them with a mobile-friendly alternative (like a hamburger menu).
+
+Here's a breakdown of why this happens and where to look in your code to understand or modify it:
+
+Understanding the Problem:
+
+The screenshots you provided confirm this common pattern:
+
+Desktop View (Screenshot 2025-07-21 at 7.32.23 PM.jpg): Shows a persistent left sidebar with the "DIVINE" item clearly visible.
+
+Mobile View (Screenshot 2025-07-21 at 7.31.18 PM.jpg): The sidebar is gone, and likely a compact header with a toggle (e.g., hamburger icon) would be present to access mobile navigation.
+
+Common Implementation Patterns (Where to Look in Your Code):
+
+To verify or change this behavior, you'll need to examine your frontend navigation components. Based on typical React/Tailwind setups, the relevant files are most likely:
+
+client/src/components/Sidebar.tsx:
+
+This component likely contains the actual list of navigation items, including "DIVINE."
+
+Look for CSS classes on the main container of this component (e.g., a <div> or <nav> element). You'll probably find classes like hidden by default, and then md:block, lg:flex, or xl:block to make it visible on larger screens.
+
+Example: <aside className="hidden lg:block w-64 bg-gray-50"> ... </aside>
+
+Also, check individual list items if they have specific visibility rules.
+
+client/src/components/mobile-nav.tsx (or similar, sometimes part of AppHeader.tsx):
+
+This component usually defines the navigation that appears only on mobile.
+
+It often contains a "hamburger" icon that, when clicked, opens a Sheet (from @/components/ui/sheet) or Drawer component to display the navigation links.
+
+Verify that "DIVINE" (or its corresponding link/route) is included in the list of items rendered within this mobile navigation component. If it's not here, it simply won't be accessible on mobile.
+
+client/src/components/AppHeader.tsx (or your main layout component, e.g., App.tsx):
+
+The main application layout often dictates which navigation components are rendered at which breakpoints.
+
+You might find logic here that conditionally renders <Sidebar /> for desktop and <MobileNav /> (or a mobile toggle) for smaller screens.
+
+Example:
+
+TypeScript
+
+{isMobile ? <MobileHeader /> : <Sidebar />}
+(where isMobile is a state derived from screen width or a use-mobile.tsx hook).
+
+Recommendations to Ensure "DIVINE" is Accessible on Mobile:
+
+The standard and recommended approach is not to force the full sidebar to display on mobile, but rather to ensure the "DIVINE" menu item is correctly integrated into your mobile navigation.
+
+Locate "DIVINE" in Sidebar.tsx:
+
+Find the JSX element (e.g., <Link> or <Button>) that represents "DIVINE" in your Sidebar.tsx file. Note its to or href prop (e.g., /volunteer-management).
+
+Verify Inclusion in Mobile Navigation:
+
+Open client/src/components/mobile-nav.tsx (or whatever component handles your mobile menu).
+
+Ensure there is a <Link> or navigation item with the same to or href as the "DIVINE" item from the desktop sidebar.
+
+If it's missing, add it to the mobile navigation list.
+
+Example of how to add it to a hypothetical MobileNav.tsx:
+
+TypeScript
+
+// client/src/components/mobile-nav.tsx (or similar)
+import { Link } from 'react-router-dom'; // Assuming react-router-dom
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react"; // Hamburger icon
+
+export function MobileNav() {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="lg:hidden"> {/* Hidden on larger screens */}
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Toggle navigation menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-full sm:max-w-xs">
+        <nav className="flex flex-col gap-4 py-6">
+          {/* ... existing mobile nav items (e.g., Home, Profile) */}
+          <Link to="/volunteer-management" className="text-lg font-semibold text-gray-900 hover:text-purple-600">
+            DIVINE
+          </Link>
+          {/* ... other mobile nav items */}
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+}
+By ensuring the "DIVINE" link is part of your mobile navigation structure, users on smaller devices will be able to access it through the hamburger menu, which is the expected and user-friendly pattern.
