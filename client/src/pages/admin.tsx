@@ -442,7 +442,7 @@ function MembersPage() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="soapbox-admin" className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">SoapBox Admin</TabsTrigger>
+            <TabsTrigger value="soapbox-admin">SoapBox Admin</TabsTrigger>
             <TabsTrigger value="church-admin">Church Admin</TabsTrigger>
             <TabsTrigger value="features">Features</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
