@@ -84,12 +84,21 @@ export default function Sidebar() {
         setIsCollapsed(false);
       }
       
-      // For admin users on mobile, keep admin sections expanded even when sidebar is collapsed
-      if (isMobileScreen && user?.role === 'soapbox_owner') {
+      // For admin users, keep admin sections expanded
+      if (user?.role === 'soapbox_owner') {
         setExpandedGroups(prev => {
           const newSet = new Set(prev);
           newSet.add('ADMIN PORTAL');
           newSet.add('SOAPBOX PORTAL');
+          return newSet;
+        });
+      }
+      
+      // For church admins, expand Admin Portal
+      if (userRole === 'church_admin') {
+        setExpandedGroups(prev => {
+          const newSet = new Set(prev);
+          newSet.add('ADMIN PORTAL');
           return newSet;
         });
       }
@@ -103,7 +112,7 @@ export default function Sidebar() {
     
     // Cleanup
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [user, userRole]);
 
   // Get user's church-specific role data
   const { data: userRole, isLoading: roleLoading, error: roleError } = useQuery<string>({
@@ -187,11 +196,6 @@ export default function Sidebar() {
       // If user data is still loading, show all items to prevent flickering
       if (!user) return true;
       
-      // DEBUG: Log role checking for alan@safahi.com
-      if (user?.email === 'alan@safahi.com') {
-        console.log('DEBUG Sidebar - User:', user?.email, 'Global role:', user?.role, 'Church role:', userRole, 'Item roles:', item.roles, 'Item label:', item.label);
-      }
-      
       const hasAccess = item.roles.some(role => 
         // Check if user has the role directly (global role)
         user?.role === role || 
@@ -202,11 +206,6 @@ export default function Sidebar() {
         // Also check if user has church_admin role for admin portal access
         (userRole === 'church_admin' && ['admin', 'church-admin', 'church_admin'].includes(role))
       );
-      
-      // DEBUG: Log access decision
-      if (user?.email === 'alan@safahi.com') {
-        console.log('DEBUG Sidebar - Item:', item.label, 'Access granted:', hasAccess);
-      }
       
       return hasAccess;
     });
@@ -365,9 +364,10 @@ export default function Sidebar() {
         ) : (
           // Expanded Navigation - Full Groups
           visibleGroups.map((group) => {
-            // Ensure admin groups are always expanded for soapbox_owner users
+            // Ensure admin groups are always expanded for admin users
             const isExpanded = expandedGroups.has(group.label) || 
-              (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL'));
+              (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
+              (userRole === 'church_admin' && group.label === 'ADMIN PORTAL');
             
             return (
               <div key={group.label}>
