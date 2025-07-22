@@ -3079,6 +3079,12 @@ export class DatabaseStorage implements IStorage {
         conditions.push(ne(soapEntries.userId, excludeUserId));
       }
 
+      console.log('getPublicSoapEntries conditions:', {
+        churchId,
+        excludeUserId,
+        conditions: conditions.length
+      });
+
       const entries = await db
         .select({
           id: soapEntries.id,
@@ -3107,6 +3113,16 @@ export class DatabaseStorage implements IStorage {
         .limit(limit)
         .offset(offset);
 
+      console.log(`Found ${entries.length} public SOAP entries`);
+      if (entries.length > 0) {
+        console.log('Sample entry:', {
+          id: entries[0].id,
+          authorEmail: entries[0].email,
+          churchId: entries[0].churchId,
+          scriptureRef: entries[0].scriptureReference
+        });
+      }
+
       return entries.map(entry => ({
         ...entry,
         author: {
@@ -3117,6 +3133,7 @@ export class DatabaseStorage implements IStorage {
         }
       }));
     } catch (error) {
+      console.error('getPublicSoapEntries error:', error);
       return [];
     }
   }

@@ -9321,12 +9321,21 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      // For Community tab, we want to show entries from other users in the community
-      // Church scope vs platform scope: Let's make it platform-wide for now
+      // For Community tab, we want to show entries from other users in the SAME CHURCH
       let userChurchId = churchId ? parseInt(churchId as string) : undefined;
       
-      // Don't restrict by church for Community view - show all public entries platform-wide
-      // unless specifically filtering by church
+      // Get user's church if not specified
+      if (!userChurchId) {
+        const user = await storage.getUser(userId);
+        if (user) {
+          const userChurch = await storage.getUserChurch(userId);
+          if (userChurch) {
+            userChurchId = userChurch.churchId;
+            console.log('Found user church:', userChurchId);
+          }
+        }
+      }
+      
       const excludeUserId = includeOwnEntries === 'true' ? undefined : userId;
 
       console.log('Calling getPublicSoapEntries with:', {
