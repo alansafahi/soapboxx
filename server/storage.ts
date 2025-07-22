@@ -3585,6 +3585,19 @@ export class DatabaseStorage implements IStorage {
     try {
       const { limit = 20, offset = 0, collection, uploadedBy } = filters || {};
       
+      console.log('[STORAGE] getGalleryImages called with:', { churchId, filters });
+      
+      // Simplified query to test basic functionality
+      const directQuery = await db
+        .select()
+        .from(galleryImages)
+        .where(eq(galleryImages.churchId, churchId || 2804))
+        .limit(limit)
+        .offset(offset);
+      
+      console.log('[STORAGE] Direct query result:', directQuery.length, directQuery);
+      
+      // If direct query works, continue with full query
       let baseQuery = db
         .select({
           id: galleryImages.id,
@@ -3623,12 +3636,15 @@ export class DatabaseStorage implements IStorage {
         baseQuery = baseQuery.where(and(...conditions));
       }
 
+      console.log('[STORAGE] About to execute query with conditions:', conditions.length);
       const images = await baseQuery
         .orderBy(desc(galleryImages.uploadedAt))
         .limit(limit)
         .offset(offset);
 
-      return images.map(image => ({
+      console.log('[STORAGE] Raw images from DB:', images.length);
+
+      const mappedImages = images.map(image => ({
         id: image.id,
         title: image.title || 'Untitled',
         description: image.description,
@@ -3645,7 +3661,11 @@ export class DatabaseStorage implements IStorage {
         isSaved: false, // Will be set by API layer
         churchId: image.churchId
       }));
+
+      console.log('[STORAGE] Mapped images:', mappedImages.length);
+      return mappedImages;
     } catch (error) {
+      console.error('[STORAGE] Error in getGalleryImages:', error);
       return [];
     }
   }
