@@ -8033,30 +8033,8 @@ Return JSON with this exact structure:
 
       const prayer = await storage.createPrayerRequest(prayerData);
 
-      
-      // Also create a corresponding social feed post so prayers appear in the main feed
-      try {
-
-        const feedPostData = {
-          title: `Prayer Request: ${prayer.title}`,
-          content: prayer.content,
-          authorId: userId,
-          churchId: prayer.churchId || null,
-          category: 'prayer',
-          audience: prayer.isPublic ? 'public' : 'church',
-          isPublic: prayer.isPublic,
-          mood: null,
-          suggestedVerses: null,
-          attachedMedia: null,
-          linkedVerse: null
-        };
-
-        
-        const feedPost = await storage.createDiscussion(feedPostData);
-
-      } catch (feedError) {
-        // Don't fail the prayer creation if feed post fails
-      }
+      // Prayer requests automatically appear in social feed via getDiscussions UNION query
+      // No need to create duplicate discussion entries
       
       res.status(201).json(prayer);
     } catch (error) {

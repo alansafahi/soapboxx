@@ -150,6 +150,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 22, 2025: PRAYER REQUEST DUPLICATE POSTS FIXED - Successfully resolved issue where prayer requests appeared twice in "My Posts" but not in "Latest Posts" by removing duplicate discussion creation logic in prayer endpoint. Prayer requests now appear correctly once in both feeds through proper UNION query system.
 - July 22, 2025: PRODUCTION DEPLOYMENT CLEANUP COMPLETED - Successfully eliminated 18MB of development screenshots, removed all debug console statements throughout codebase, fixed critical syntax errors from aggressive cleanup, and verified clean production build (914KB server bundle). Application builds cleanly without errors and is ready for deployment.
 - July 22, 2025: SAVED REFLECTIONS SYSTEM COMPLETELY FIXED - Successfully resolved database errors and authentication issues preventing SOAP bookmarks from displaying properly
   - DATABASE QUERY FIXED: Updated getSavedSoapEntries method to use correct column names (mood_tag instead of mood) matching actual database schema
