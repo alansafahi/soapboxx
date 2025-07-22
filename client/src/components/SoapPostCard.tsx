@@ -388,28 +388,57 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
     
     try {
       switch (platform) {
+        case 'copy':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({ title: "Link copied!", description: "The post link has been copied to your clipboard" });
+          break;
         case 'facebook':
           window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
-          navigator.clipboard.writeText(shareText);
-          toast({ title: "Text copied to clipboard", description: "Paste into your Facebook post" });
+          await navigator.clipboard.writeText(shareText);
+          toast({ title: "Opening Facebook", description: "Text copied to clipboard - paste into your Facebook post" });
           break;
         case 'twitter':
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`, '_blank');
+          toast({ title: "Opening X (Twitter)", description: "Share window opened in new tab" });
           break;
         case 'whatsapp':
-          window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+          window.open(`https://wa.me/?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`, '_blank');
+          toast({ title: "Opening WhatsApp", description: "Opening WhatsApp app or web version" });
+          break;
+        case 'instagram':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({ title: "Text copied!", description: "Open Instagram and paste into your story or post" });
+          break;
+        case 'messenger':
+          window.open(`https://www.messenger.com/`, '_blank');
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({ title: "Opening Messenger", description: "Text copied to clipboard - paste into your message" });
+          break;
+        case 'discord':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({ title: "Text copied!", description: "Open Discord and paste into your channel or DM" });
+          break;
+        case 'slack':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({ title: "Text copied!", description: "Open Slack and paste into your workspace" });
+          break;
+        case 'signal':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({ title: "Text copied!", description: "Open Signal and paste into your message" });
+          break;
+        case 'youtube':
+          await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+          toast({ title: "Text copied!", description: "Open YouTube and paste into your comment or community post" });
+          break;
+        case 'sms':
+          window.open(`sms:?body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`);
+          toast({ title: "Opening SMS", description: "SMS app opened with pre-filled message" });
           break;
         case 'email':
           const subject = encodeURIComponent('S.O.A.P. Reflection - ' + (post.soapData?.scriptureReference || 'Scripture'));
           const body = encodeURIComponent(`${shareText}\n\nRead more at: ${shareUrl}`);
           window.open(`mailto:?subject=${subject}&body=${body}`);
-          break;
-        case 'sms':
-          window.open(`sms:?body=${encodeURIComponent(shareText + ' ' + shareUrl)}`);
-          break;
-        case 'copy':
-          await navigator.clipboard.writeText(shareText + ' ' + shareUrl);
-          toast({ title: "Link copied to clipboard", description: "You can now paste it anywhere" });
+          toast({ title: "Opening Email", description: "Email client opened with pre-filled message" });
           break;
       }
       setShareDialogOpen(false);
@@ -761,7 +790,16 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
+              <Button
+                onClick={() => handleShare('copy')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <Copy className="w-6 h-6 text-gray-600" />
+                <span className="text-sm">Copy URL</span>
+              </Button>
+              
               <Button
                 onClick={() => handleShare('facebook')}
                 variant="outline"
@@ -777,7 +815,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 className="flex flex-col items-center space-y-2 h-auto p-4"
               >
                 <Twitter className="w-6 h-6 text-sky-500" />
-                <span className="text-sm">Twitter</span>
+                <span className="text-sm">X (Twitter)</span>
               </Button>
               
               <Button
@@ -785,17 +823,62 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 variant="outline"
                 className="flex flex-col items-center space-y-2 h-auto p-4"
               >
-                <Smartphone className="w-6 h-6 text-green-600" />
+                <MessageCircle className="w-6 h-6 text-green-600" />
                 <span className="text-sm">WhatsApp</span>
               </Button>
               
               <Button
-                onClick={() => handleShare('email')}
+                onClick={() => handleShare('instagram')}
                 variant="outline"
                 className="flex flex-col items-center space-y-2 h-auto p-4"
               >
-                <Mail className="w-6 h-6 text-gray-600" />
-                <span className="text-sm">Email</span>
+                <MessageCircle className="w-6 h-6 text-pink-600" />
+                <span className="text-sm">Instagram</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('messenger')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <MessageCircle className="w-6 h-6 text-blue-500" />
+                <span className="text-sm">Messenger</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('discord')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <MessageCircle className="w-6 h-6 text-purple-600" />
+                <span className="text-sm">Discord</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('slack')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <MessageCircle className="w-6 h-6 text-purple-500" />
+                <span className="text-sm">Slack</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('signal')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <MessageCircle className="w-6 h-6 text-blue-600" />
+                <span className="text-sm">Signal</span>
+              </Button>
+              
+              <Button
+                onClick={() => handleShare('youtube')}
+                variant="outline"
+                className="flex flex-col items-center space-y-2 h-auto p-4"
+              >
+                <MessageCircle className="w-6 h-6 text-red-600" />
+                <span className="text-sm">YouTube</span>
               </Button>
               
               <Button
@@ -808,12 +891,12 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
               </Button>
               
               <Button
-                onClick={() => handleShare('copy')}
+                onClick={() => handleShare('email')}
                 variant="outline"
                 className="flex flex-col items-center space-y-2 h-auto p-4"
               >
-                <Copy className="w-6 h-6 text-gray-600" />
-                <span className="text-sm">Copy Link</span>
+                <Mail className="w-6 h-6 text-gray-600" />
+                <span className="text-sm">Email</span>
               </Button>
             </div>
           </div>
