@@ -1,0 +1,31 @@
+Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/content/distribute:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/content/distribute:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+queryClient.ts:77  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/content/distribute 403 (Forbidden)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ ContentDistributionHub.tsx:100
+fn @ @tanstack_react-query.js?v=942da740:1189
+run @ @tanstack_react-query.js?v=942da740:494
+start @ @tanstack_react-query.js?v=942da740:536
+execute @ @tanstack_react-query.js?v=942da740:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=942da740:2630
+(anonymous) @ @tanstack_react-query.js?v=942da740:3295
+handleGenerate @ ContentDistributionHub.tsx:222
+callCallback2 @ chunk-RPCDYKBN.js?v=942da740:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=942da740:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=942da740:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=942da740:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=942da740:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=942da740:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=942da740:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=942da740:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=942da740:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=942da740:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=942da740:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=942da740:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=942da740:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=942da740:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=942da740:5449Understand this error
+queryClient.ts:77  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/content/distribute 403 (Forbidden)

@@ -5680,7 +5680,7 @@ Format your response as JSON with the following structure:
       // Check if user has pastor or admin role
       const userRole = await storage.getUserRole(userId);
 
-      console.log('User role for content distribution:', userRole);
+
       
       if (!userRole) {
         return res.status(403).json({ 
@@ -5690,18 +5690,16 @@ Format your response as JSON with the following structure:
       }
       
       // Allow content distribution for demo purposes - expand role access
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin', 'member'].includes(userRole)) {
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin', 'member', 'soapbox_owner'].includes(userRole)) {
         return res.status(403).json({ 
           message: `Content distribution requires church membership. Your current role is "${userRole}". Please contact your church administrator.`,
           currentRole: userRole,
-          requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin', 'member'],
+          requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin', 'member', 'soapbox_owner'],
           action: "upgrade_role"
         });
       }
 
       const { title, summary, keyPoints, audiences } = req.body;
-      
-      console.log('Content distribution request:', { title, summary, keyPoints, audiences });
       
       if (!title || !summary) {
         return res.status(400).json({ message: "Title and summary are required" });
@@ -5920,11 +5918,11 @@ Return JSON with this exact structure:
         });
       }
       
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole)) {
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin', 'soapbox_owner'].includes(userRole)) {
         return res.status(403).json({ 
           message: `Content publishing requires Pastor or Admin access. Your current role is "${userRole}". Please contact your church administrator to request elevated permissions.`,
           currentRole: userRole,
-          requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin'],
+          requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin', 'soapbox_owner'],
           action: "upgrade_role"
         });
       }
