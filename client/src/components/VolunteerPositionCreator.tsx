@@ -734,8 +734,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         mentorshipProvided: editOpportunity.mentorship_provided || editOpportunity.mentorshipProvided || false,
         
         // Administrative  
-        coordinatorName: 'Ministry Coordinator', // Default since coordinator details not readily available
-        coordinatorEmail: 'coordinator@example.com', // Default since coordinator details not readily available  
+        coordinatorName: editOpportunity.coordinatorName || 'Ministry Coordinator',
+        coordinatorEmail: editOpportunity.coordinatorEmail || 'coordinator@example.com',
         budgetRequired: editOpportunity.budgetRequired || false,
         
         // Advanced

@@ -74,15 +74,23 @@ export class VolunteerStorage {
 
   // Volunteer Opportunities Management (removed - duplicate method)
 
-  async getVolunteerOpportunities(churchId?: number): Promise<VolunteerOpportunity[]> {
+  async getVolunteerOpportunities(churchId?: number): Promise<any[]> {
     try {
-      let query = db.select().from(volunteerOpportunities);
+      const result = await db.execute(sql`
+        SELECT vo.*, 
+               COALESCE(u.first_name || ' ' || u.last_name, u.email) as coordinator_name,
+               u.email as coordinator_email
+        FROM volunteer_opportunities vo
+        LEFT JOIN users u ON vo.coordinator_id = u.id
+        ${churchId ? sql`WHERE vo.church_id = ${churchId}` : sql``}
+        ORDER BY vo.created_at DESC
+      `);
       
-      if (churchId) {
-        query = query.where(eq(volunteerOpportunities.churchId, churchId));
-      }
-      
-      return await query.orderBy(desc(volunteerOpportunities.createdAt));
+      return result.rows.map((row: any) => ({
+        ...row,
+        coordinatorName: row.coordinator_name,
+        coordinatorEmail: row.coordinator_email
+      }));
     } catch (error) {
       console.error('Error fetching volunteer opportunities:', error);
       return [];
