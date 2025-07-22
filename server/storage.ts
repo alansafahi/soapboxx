@@ -2876,6 +2876,33 @@ export class DatabaseStorage implements IStorage {
   async getChurchFeatureSettingById(featureId: string): Promise<any> {
     return {};
   }
+
+  // Prayer request operations implementation
+  async createPrayerRequest(prayer: InsertPrayerRequest): Promise<PrayerRequest> {
+    try {
+      const [prayerRequest] = await db
+        .insert(prayerRequests)
+        .values({
+          ...prayer,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      // Record user activity for engagement tracking
+      await db.insert(userActivities).values({
+        userId: prayer.authorId,
+        activityType: 'prayer_request',
+        entityId: prayerRequest.id,
+        points: 15, // Points for creating prayer request
+        createdAt: new Date(),
+      });
+
+      return prayerRequest;
+    } catch (error) {
+      throw new Error('Failed to create prayer request');
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
