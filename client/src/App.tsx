@@ -45,7 +45,7 @@ const ChurchClaiming = lazy(() => import("./pages/church-claiming"));
 const FreshAudioBible = lazy(() => import("./pages/FreshAudioBible"));
 const AudioRoutines = lazy(() => import("./pages/AudioRoutines"));
 const VideoLibrary = lazy(() => import("./pages/video-library"));
-const ImageGallery = lazy(() => import("./pages/ImageGallery"));
+const ImageGalleryPage = lazy(() => import("./pages/ImageGalleryPage"));
 const ContactsPage = lazy(() => import("./pages/contacts"));
 const EmailVerificationPage = lazy(() => import("./pages/EmailVerification"));
 
@@ -147,7 +147,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/fresh-audio-bible" component={FreshAudioBible} />
                                     <ProtectedRoute path="/audio-routines" component={AudioRoutines} />
                                     <ProtectedRoute path="/video-library" component={VideoLibrary} />
-                                    <ProtectedRoute path="/image-gallery" component={ImageGallery} />
+                                    <ProtectedRoute path="/admin/image-gallery" component={ImageGalleryPage} />
                                     <ProtectedRoute path="/community" component={Community} />
                                     <ProtectedRoute path="/discussions" component={Community} />
                                     <ProtectedRoute path="/social-feed" component={SocialFeedPage} />
@@ -181,7 +181,6 @@ function AppRouter() {
                                     <ProtectedRoute path="/content-distribution" component={ContentDistributionPage} />
                                     <ProtectedRoute path="/engagement-analytics" component={EngagementAnalyticsPage} />
                                     <ProtectedRoute path="/moderation-dashboard" component={ModerationDashboardPage} />
-
 
                                     <ProtectedRoute path="/ai-guidance" component={PersonalizedGuidancePage} />
                                     <ProtectedRoute path="/source-attribution" component={SourceAttributionPage} />

@@ -6064,12 +6064,18 @@ Return JSON with this exact structure:
     }
   });
 
-  // Image Gallery API endpoint - fetch all images from database
+  // Image Gallery API endpoint - SoapBox owner only
   app.get('/api/images/gallery', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Restrict to SoapBox owners only
+      const userRole = await storage.getUserRole(userId);
+      if (userRole !== 'soapbox_owner') {
+        return res.status(403).json({ message: 'Access denied - SoapBox owner required' });
       }
 
       const images = [];
