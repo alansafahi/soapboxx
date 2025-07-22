@@ -3573,6 +3573,432 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  // Gallery Methods Implementation
+  async getGalleryImages(churchId?: number, filters?: { 
+    collection?: string; 
+    tags?: string[]; 
+    uploadedBy?: string; 
+    limit?: number; 
+    offset?: number; 
+  }): Promise<GalleryImage[]> {
+    try {
+      const { limit = 20, offset = 0, collection, uploadedBy } = filters || {};
+      
+      let baseQuery = db
+        .select({
+          id: galleryImages.id,
+          title: galleryImages.title,
+          description: galleryImages.description,
+          url: galleryImages.url,
+          collection: galleryImages.collection,
+          tags: galleryImages.tags,
+          uploadedBy: galleryImages.uploadedBy,
+          uploadedAt: galleryImages.uploadedAt,
+          likes: galleryImages.likes,
+          comments: galleryImages.comments,
+          churchId: galleryImages.churchId,
+          isPublic: galleryImages.isPublic,
+          uploaderName: users.firstName,
+          uploaderAvatar: users.profileImageUrl
+        })
+        .from(galleryImages)
+        .leftJoin(users, eq(galleryImages.uploadedBy, users.id));
+
+      let conditions = [];
+      
+      if (churchId) {
+        conditions.push(eq(galleryImages.churchId, churchId));
+      }
+      
+      if (collection && collection !== 'all') {
+        conditions.push(eq(galleryImages.collection, collection));
+      }
+      
+      if (uploadedBy) {
+        conditions.push(eq(galleryImages.uploadedBy, uploadedBy));
+      }
+
+      if (conditions.length > 0) {
+        baseQuery = baseQuery.where(and(...conditions));
+      }
+
+      const images = await baseQuery
+        .orderBy(desc(galleryImages.uploadedAt))
+        .limit(limit)
+        .offset(offset);
+
+      return images.map(image => ({
+        id: image.id,
+        title: image.title || 'Untitled',
+        description: image.description,
+        url: image.url,
+        collection: image.collection,
+        tags: image.tags || [],
+        uploadedBy: image.uploadedBy,
+        uploaderName: image.uploaderName || 'Unknown',
+        uploaderAvatar: image.uploaderAvatar,
+        createdAt: image.uploadedAt?.toISOString() || new Date().toISOString(),
+        likesCount: image.likes || 0,
+        commentsCount: image.comments || 0,
+        isLiked: false, // Will be set by API layer
+        isSaved: false, // Will be set by API layer
+        churchId: image.churchId
+      }));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getGalleryImage(imageId: number): Promise<GalleryImage | undefined> {
+    try {
+      const [result] = await db
+        .select({
+          id: galleryImages.id,
+          title: galleryImages.title,
+          description: galleryImages.description,
+          url: galleryImages.url,
+          collection: galleryImages.collection,
+          tags: galleryImages.tags,
+          uploadedBy: galleryImages.uploadedBy,
+          uploadedAt: galleryImages.uploadedAt,
+          likes: galleryImages.likes,
+          comments: galleryImages.comments,
+          churchId: galleryImages.churchId,
+          uploaderName: users.firstName,
+          uploaderAvatar: users.profileImageUrl
+        })
+        .from(galleryImages)
+        .leftJoin(users, eq(galleryImages.uploadedBy, users.id))
+        .where(eq(galleryImages.id, imageId));
+
+      if (!result) return undefined;
+
+      return {
+        id: result.id,
+        title: result.title || 'Untitled',
+        description: result.description,
+        url: result.url,
+        collection: result.collection,
+        tags: result.tags || [],
+        uploadedBy: result.uploadedBy,
+        uploaderName: result.uploaderName || 'Unknown',
+        uploaderAvatar: result.uploaderAvatar,
+        createdAt: result.uploadedAt?.toISOString() || new Date().toISOString(),
+        likesCount: result.likes || 0,
+        commentsCount: result.comments || 0,
+        isLiked: false,
+        isSaved: false,
+        churchId: result.churchId
+      };
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  async uploadGalleryImage(image: InsertGalleryImage): Promise<GalleryImage> {
+    try {
+      const [uploaded] = await db
+        .insert(galleryImages)
+        .values({
+          ...image,
+          uploadedAt: new Date(),
+          likes: 0,
+          comments: 0
+        })
+        .returning();
+
+      return this.getGalleryImage(uploaded.id) as Promise<GalleryImage>;
+    } catch (error) {
+      throw new Error('Failed to upload gallery image');
+    }
+  }
+
+  async updateGalleryImage(imageId: number, updates: Partial<GalleryImage>): Promise<GalleryImage> {
+    try {
+      await db
+        .update(galleryImages)
+        .set(updates)
+        .where(eq(galleryImages.id, imageId));
+
+      return this.getGalleryImage(imageId) as Promise<GalleryImage>;
+    } catch (error) {
+      throw new Error('Failed to update gallery image');
+    }
+  }
+
+  async deleteGalleryImage(imageId: number, userId: string): Promise<void> {
+    try {
+      await db
+        .delete(galleryImages)
+        .where(and(
+          eq(galleryImages.id, imageId),
+          eq(galleryImages.uploadedBy, userId)
+        ));
+    } catch (error) {
+      throw new Error('Failed to delete gallery image');
+    }
+  }
+
+  // Gallery interaction methods
+  async likeGalleryImage(userId: string, imageId: number): Promise<GalleryImageLike> {
+    try {
+      const [like] = await db
+        .insert(galleryImageLikes)
+        .values({ userId, imageId })
+        .returning();
+
+      // Update like count
+      await db
+        .update(galleryImages)
+        .set({ likes: sql`${galleryImages.likes} + 1` })
+        .where(eq(galleryImages.id, imageId));
+
+      return like;
+    } catch (error) {
+      throw new Error('Failed to like gallery image');
+    }
+  }
+
+  async unlikeGalleryImage(userId: string, imageId: number): Promise<void> {
+    try {
+      await db
+        .delete(galleryImageLikes)
+        .where(and(
+          eq(galleryImageLikes.userId, userId),
+          eq(galleryImageLikes.imageId, imageId)
+        ));
+
+      // Update like count
+      await db
+        .update(galleryImages)
+        .set({ likes: sql`${galleryImages.likes} - 1` })
+        .where(eq(galleryImages.id, imageId));
+    } catch (error) {
+      throw new Error('Failed to unlike gallery image');
+    }
+  }
+
+  async isGalleryImageLiked(userId: string, imageId: number): Promise<boolean> {
+    try {
+      const [like] = await db
+        .select()
+        .from(galleryImageLikes)
+        .where(and(
+          eq(galleryImageLikes.userId, userId),
+          eq(galleryImageLikes.imageId, imageId)
+        ));
+
+      return !!like;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async getGalleryImageLikes(imageId: number): Promise<GalleryImageLike[]> {
+    try {
+      return await db
+        .select()
+        .from(galleryImageLikes)
+        .where(eq(galleryImageLikes.imageId, imageId));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async saveGalleryImage(userId: string, imageId: number): Promise<GalleryImageSave> {
+    try {
+      const [save] = await db
+        .insert(galleryImageSaves)
+        .values({ userId, imageId })
+        .returning();
+
+      return save;
+    } catch (error) {
+      throw new Error('Failed to save gallery image');
+    }
+  }
+
+  async unsaveGalleryImage(userId: string, imageId: number): Promise<void> {
+    try {
+      await db
+        .delete(galleryImageSaves)
+        .where(and(
+          eq(galleryImageSaves.userId, userId),
+          eq(galleryImageSaves.imageId, imageId)
+        ));
+    } catch (error) {
+      throw new Error('Failed to unsave gallery image');
+    }
+  }
+
+  async isGalleryImageSaved(userId: string, imageId: number): Promise<boolean> {
+    try {
+      const [save] = await db
+        .select()
+        .from(galleryImageSaves)
+        .where(and(
+          eq(galleryImageSaves.userId, userId),
+          eq(galleryImageSaves.imageId, imageId)
+        ));
+
+      return !!save;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async getUserSavedGalleryImages(userId: string): Promise<GalleryImage[]> {
+    try {
+      const savedImages = await db
+        .select({
+          image: galleryImages,
+          uploaderName: users.firstName,
+          uploaderAvatar: users.profileImageUrl
+        })
+        .from(galleryImageSaves)
+        .innerJoin(galleryImages, eq(galleryImageSaves.imageId, galleryImages.id))
+        .leftJoin(users, eq(galleryImages.uploadedBy, users.id))
+        .where(eq(galleryImageSaves.userId, userId));
+
+      return savedImages.map(({ image, uploaderName, uploaderAvatar }) => ({
+        ...image,
+        uploaderName: uploaderName || 'Unknown',
+        uploaderAvatar,
+        createdAt: image.uploadedAt?.toISOString() || new Date().toISOString(),
+        likesCount: image.likes || 0,
+        commentsCount: image.comments || 0,
+        isLiked: false,
+        isSaved: true,
+        tags: image.tags || []
+      }));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async addGalleryImageComment(comment: InsertGalleryImageComment): Promise<GalleryImageComment> {
+    try {
+      const [newComment] = await db
+        .insert(galleryImageComments)
+        .values({
+          ...comment,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      // Update comment count
+      await db
+        .update(galleryImages)
+        .set({ comments: sql`${galleryImages.comments} + 1` })
+        .where(eq(galleryImages.id, comment.imageId));
+
+      return newComment;
+    } catch (error) {
+      throw new Error('Failed to add gallery image comment');
+    }
+  }
+
+  async getGalleryImageComments(imageId: number): Promise<GalleryImageComment[]> {
+    try {
+      const comments = await db
+        .select({
+          id: galleryImageComments.id,
+          imageId: galleryImageComments.imageId,
+          userId: galleryImageComments.userId,
+          comment: galleryImageComments.comment,
+          createdAt: galleryImageComments.createdAt,
+          updatedAt: galleryImageComments.updatedAt,
+          authorName: users.firstName,
+          authorAvatar: users.profileImageUrl
+        })
+        .from(galleryImageComments)
+        .leftJoin(users, eq(galleryImageComments.userId, users.id))
+        .where(eq(galleryImageComments.imageId, imageId))
+        .orderBy(asc(galleryImageComments.createdAt));
+
+      return comments.map(comment => ({
+        id: comment.id,
+        imageId: comment.imageId,
+        userId: comment.userId,
+        comment: comment.comment,
+        isApproved: true,
+        approvedBy: null,
+        approvedAt: null,
+        createdAt: comment.createdAt || new Date(),
+        updatedAt: comment.updatedAt || new Date(),
+        authorName: comment.authorName || 'Unknown',
+        authorAvatar: comment.authorAvatar
+      }));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async updateGalleryImageComment(commentId: number, content: string): Promise<GalleryImageComment> {
+    try {
+      const [updated] = await db
+        .update(galleryImageComments)
+        .set({ comment: content, updatedAt: new Date() })
+        .where(eq(galleryImageComments.id, commentId))
+        .returning();
+
+      return updated;
+    } catch (error) {
+      throw new Error('Failed to update gallery image comment');
+    }
+  }
+
+  async deleteGalleryImageComment(commentId: number, userId: string): Promise<void> {
+    try {
+      const [comment] = await db
+        .select()
+        .from(galleryImageComments)
+        .where(eq(galleryImageComments.id, commentId));
+
+      if (comment) {
+        await db
+          .delete(galleryImageComments)
+          .where(and(
+            eq(galleryImageComments.id, commentId),
+            eq(galleryImageComments.userId, userId)
+          ));
+
+        // Update comment count
+        await db
+          .update(galleryImages)
+          .set({ comments: sql`${galleryImages.comments} - 1` })
+          .where(eq(galleryImages.id, comment.imageId));
+      }
+    } catch (error) {
+      throw new Error('Failed to delete gallery image comment');
+    }
+  }
+
+  async getGalleryCollections(churchId?: number): Promise<{ collection: string; count: number; thumbnail?: string }[]> {
+    try {
+      let query = db
+        .selectDistinct({ collection: galleryImages.collection })
+        .from(galleryImages);
+
+      if (churchId) {
+        query = query.where(eq(galleryImages.churchId, churchId));
+      }
+
+      const collections = await query;
+      return collections
+        .map(c => c.collection)
+        .filter(Boolean)
+        .map(collection => ({
+          collection,
+          count: 0, // TODO: Calculate actual count
+          thumbnail: undefined // TODO: Get thumbnail
+        }));
+    } catch (error) {
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -11886,11 +11886,14 @@ Please provide suggestions for the missing or incomplete sections.`
   // Gallery API endpoints
   // Get gallery images with optional filters
   app.get('/api/gallery/images', isAuthenticated, async (req: any, res) => {
+    console.log('[GALLERY] API called with session:', req.session?.userId);
     try {
       const userId = req.session.userId;
       if (!userId) {
+        console.log('[GALLERY] No userId in session');
         return res.status(401).json({ message: 'Authentication required' });
       }
+      console.log('[GALLERY] UserId found:', userId);
 
       const user = await storage.getUser(userId);
       
@@ -11903,15 +11906,18 @@ Please provide suggestions for the missing or incomplete sections.`
           eq(userChurches.isActive, true)
         ));
       
+      console.log('[GALLERY] User church associations:', userChurchAssociations);
       
       // If user has no church associations, show no images for security
       if (!userChurchAssociations || userChurchAssociations.length === 0) {
+        console.log('[GALLERY] No active church associations found');
         return res.json([]);
       }
       
       // Use the first active church association
       const primaryChurch = userChurchAssociations[0];
       const churchId = primaryChurch?.churchId;
+      console.log('[GALLERY] Using church ID:', churchId);
       
       const { collection, tags, uploadedBy, limit = 20, offset = 0 } = req.query;
       
@@ -11924,7 +11930,9 @@ Please provide suggestions for the missing or incomplete sections.`
       };
 
       
+      console.log('[GALLERY] Calling getGalleryImages with churchId:', churchId, 'filters:', filters);
       const images = await storage.getGalleryImages(churchId, filters);
+      console.log('[GALLERY] Found images:', images.length);
       
       // Add user-specific interaction data
       const imagesWithInteractions = await Promise.all(
@@ -11935,6 +11943,7 @@ Please provide suggestions for the missing or incomplete sections.`
         }))
       );
 
+      console.log('[GALLERY] Returning images with interactions:', imagesWithInteractions.length);
       res.json(imagesWithInteractions);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch gallery images', error: error.message });
