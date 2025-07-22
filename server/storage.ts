@@ -3250,54 +3250,53 @@ export class DatabaseStorage implements IStorage {
 
   async getSavedSoapEntries(userId: string): Promise<any[]> {
     try {
-      const savedEntries = await db
-        .select({
-          bookmarkId: soapBookmarks.id,
-          soapId: soapBookmarks.soapId,
-          bookmarkCreatedAt: soapBookmarks.createdAt,
-          // S.O.A.P. entry details
-          scripture: soapEntries.scripture,
-          scriptureReference: soapEntries.scriptureReference,
-          observation: soapEntries.observation,
-          application: soapEntries.application,
-          prayer: soapEntries.prayer,
-          mood: soapEntries.mood,
-          tags: soapEntries.tags,
-          soapCreatedAt: soapEntries.createdAt,
-          // Author details
-          authorId: soapEntries.userId,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          profileImageUrl: users.profileImageUrl
-        })
-        .from(soapBookmarks)
-        .leftJoin(soapEntries, eq(soapBookmarks.soapId, soapEntries.id))
-        .leftJoin(users, eq(soapEntries.userId, users.id))
-        .where(eq(soapBookmarks.userId, userId))
-        .orderBy(desc(soapBookmarks.createdAt));
+      // Use raw SQL to avoid Drizzle ORM field selection issues
+      const savedEntries = await db.execute(sql`
+        SELECT 
+          sb.id as bookmark_id,
+          sb.soap_id,
+          sb.created_at as bookmark_created_at,
+          se.scripture,
+          se.scripture_reference,
+          se.observation,
+          se.application,
+          se.prayer,
+          se.mood,
+          se.tags,
+          se.created_at as soap_created_at,
+          se.user_id as author_id,
+          u.first_name,
+          u.last_name,
+          u.email,
+          u.profile_image_url
+        FROM soap_bookmarks sb
+        LEFT JOIN soap_entries se ON sb.soap_id = se.id
+        LEFT JOIN users u ON se.user_id = u.id
+        WHERE sb.user_id = ${userId}
+        ORDER BY sb.created_at DESC
+      `);
 
-      // Transform the data to match the SoapPostCard expected format
-      return savedEntries.map(entry => ({
-        id: entry.soapId, // Use the SOAP entry ID as the main ID
-        content: `${entry.scripture}\n\nObservation: ${entry.observation}\n\nApplication: ${entry.application}\n\nPrayer: ${entry.prayer}`,
-        authorId: entry.authorId,
-        createdAt: entry.soapCreatedAt?.toISOString() || new Date().toISOString(),
+      // Transform the raw results to match the SoapPostCard expected format
+      return savedEntries.rows.map((row: any) => ({
+        id: row.soap_id, // Use the SOAP entry ID as the main ID
+        content: `${row.scripture || ''}\n\nObservation: ${row.observation || ''}\n\nApplication: ${row.application || ''}\n\nPrayer: ${row.prayer || ''}`,
+        authorId: row.author_id,
+        createdAt: row.soap_created_at || new Date().toISOString(),
         type: 'soap_reflection',
         isSaved: true, // This is from saved reflections, so it's always saved
         soapData: {
-          scripture: entry.scripture || '',
-          scriptureReference: entry.scriptureReference || '',
-          observation: entry.observation || '',
-          application: entry.application || '',
-          prayer: entry.prayer || ''
+          scripture: row.scripture || '',
+          scriptureReference: row.scripture_reference || '',
+          observation: row.observation || '',
+          application: row.application || '',
+          prayer: row.prayer || ''
         },
         author: {
-          id: entry.authorId || '',
-          firstName: entry.firstName || 'Unknown',
-          lastName: entry.lastName || '',
-          profileImageUrl: entry.profileImageUrl || null,
-          email: entry.email || ''
+          id: row.author_id || '',
+          firstName: row.first_name || 'Unknown',
+          lastName: row.last_name || '',
+          profileImageUrl: row.profile_image_url || null,
+          email: row.email || ''
         },
         likeCount: 0,
         commentCount: 0,
