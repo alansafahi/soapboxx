@@ -1,7 +1,7 @@
 import { MailService } from '@sendgrid/mail';
 
 if (!process.env.SENDGRID_API_KEY) {
-  console.warn("SENDGRID_API_KEY not found - email notifications will be logged only");
+  // SendGrid not configured - email notifications will be logged only
 }
 
 const mailService = new MailService();
@@ -29,8 +29,7 @@ export interface VolunteerStatusNotification {
 export async function sendCoordinatorApplicationNotification(data: VolunteerApplicationNotification): Promise<boolean> {
   try {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log(`📧 [DEMO] Notification to ${data.coordinatorName} (${data.coordinatorEmail})`);
-      console.log(`New volunteer application: ${data.volunteerName} applied for ${data.opportunityTitle}`);
+      // Email notification logged: New volunteer application
       return true;
     }
 

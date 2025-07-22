@@ -112,7 +112,7 @@ export default function Sidebar() {
     
     // Cleanup
     return () => window.removeEventListener('resize', handleResize);
-  }, [user, userRole]);
+  }, [user]);
 
   // Get user's church-specific role data
   const { data: userRole, isLoading: roleLoading, error: roleError } = useQuery<string>({
@@ -223,18 +223,13 @@ export default function Sidebar() {
   });
 
   const toggleGroup = (groupLabel: string) => {
-    console.log('DEBUG toggleGroup called for:', groupLabel);
     setExpandedGroups(prev => {
       const newSet = new Set(prev);
-      console.log('DEBUG current expanded groups:', Array.from(prev));
       if (newSet.has(groupLabel)) {
         newSet.delete(groupLabel);
-        console.log('DEBUG removing group:', groupLabel);
       } else {
         newSet.add(groupLabel);
-        console.log('DEBUG adding group:', groupLabel);
       }
-      console.log('DEBUG new expanded groups:', Array.from(newSet));
       return newSet;
     });
   };

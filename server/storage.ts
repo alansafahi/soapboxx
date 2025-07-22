@@ -42,7 +42,6 @@ import {
   weeklySeries,
   sermonMedia,
   checkIns,
-  moodCheckins,
   qrCodes,
   mediaFiles,
   mediaCollections,
@@ -79,7 +78,6 @@ import {
   prayerBadges,
   userBadgeProgress,
   memberCommunications,
-  communicationTemplates,
   churchFeatureSettings,
   defaultFeatureSettings,
   type User,
@@ -3043,13 +3041,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async deleteSoapEntry(id: number): Promise<void> {
-    try {
-      await db.delete(soapEntries).where(eq(soapEntries.id, id));
-    } catch (error) {
-      throw new Error('Failed to delete S.O.A.P. entry');
-    }
-  }
+  // deleteSoapEntry method already defined above at line 1995
 
   async getUserSoapStreak(userId: string): Promise<number> {
     try {
