@@ -105,6 +105,8 @@ import {
   type InsertUserBibleBadge,
   type BibleVerseShare,
   type InsertBibleVerseShare,
+  type SoapEntry,
+  type InsertSoapEntry,
   type Volunteer,
   type InsertVolunteer,
   type VolunteerRole,
@@ -2935,6 +2937,318 @@ export class DatabaseStorage implements IStorage {
       return prayerRequest;
     } catch (error) {
       throw new Error('Failed to create prayer request');
+    }
+  }
+
+  // S.O.A.P. Entry operations implementation
+  async createSoapEntry(entry: InsertSoapEntry): Promise<SoapEntry> {
+    try {
+      const [soapEntry] = await db
+        .insert(soapEntries)
+        .values({
+          ...entry,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      // Record user activity for engagement tracking
+      if (this.trackUserActivity) {
+        await this.trackUserActivity(entry.userId, 'soap_entry', soapEntry.id, 20);
+      }
+
+      return soapEntry;
+    } catch (error) {
+      throw new Error('Failed to create S.O.A.P. entry');
+    }
+  }
+
+  async getSoapEntries(userId: string, options?: { churchId?: number; isPublic?: boolean; limit?: number; offset?: number }): Promise<SoapEntry[]> {
+    try {
+      const { limit = 20, offset = 0, isPublic, churchId } = options || {};
+      
+      let baseQuery = db.select().from(soapEntries);
+      let conditions = [eq(soapEntries.userId, userId)];
+
+      if (isPublic !== undefined) {
+        conditions.push(eq(soapEntries.isPublic, isPublic));
+      }
+
+      if (churchId) {
+        conditions.push(eq(soapEntries.churchId, churchId));
+      }
+
+      const entries = await baseQuery
+        .where(and(...conditions))
+        .orderBy(desc(soapEntries.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      return entries;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getSoapEntry(id: number): Promise<SoapEntry | undefined> {
+    try {
+      const [entry] = await db
+        .select()
+        .from(soapEntries)
+        .where(eq(soapEntries.id, id));
+      return entry;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  async updateSoapEntry(id: number, updates: Partial<SoapEntry>): Promise<SoapEntry> {
+    try {
+      const [updatedEntry] = await db
+        .update(soapEntries)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(soapEntries.id, id))
+        .returning();
+
+      return updatedEntry;
+    } catch (error) {
+      throw new Error('Failed to update S.O.A.P. entry');
+    }
+  }
+
+  async deleteSoapEntry(id: number): Promise<void> {
+    try {
+      await db.delete(soapEntries).where(eq(soapEntries.id, id));
+    } catch (error) {
+      throw new Error('Failed to delete S.O.A.P. entry');
+    }
+  }
+
+  async getUserSoapStreak(userId: string): Promise<number> {
+    try {
+      // Get consecutive days of SOAP entries
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const entries = await db
+        .select({
+          createdAt: soapEntries.createdAt
+        })
+        .from(soapEntries)
+        .where(and(
+          eq(soapEntries.userId, userId),
+          gte(soapEntries.createdAt, thirtyDaysAgo)
+        ))
+        .orderBy(desc(soapEntries.createdAt));
+
+      // Calculate streak
+      let streak = 0;
+      const today = new Date();
+      let currentDate = new Date(today);
+
+      for (const entry of entries) {
+        const entryDate = new Date(entry.createdAt);
+        const daysDiff = Math.floor((currentDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff === streak) {
+          streak++;
+          currentDate.setDate(currentDate.getDate() - 1);
+        } else if (daysDiff > streak) {
+          break;
+        }
+      }
+
+      return streak;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  async getPublicSoapEntries(churchId?: number, limit = 20, offset = 0, excludeUserId?: string): Promise<any[]> {
+    try {
+      let conditions = [eq(soapEntries.isPublic, true)];
+
+      if (churchId) {
+        conditions.push(eq(soapEntries.churchId, churchId));
+      }
+
+      if (excludeUserId) {
+        conditions.push(ne(soapEntries.userId, excludeUserId));
+      }
+
+      const entries = await db
+        .select({
+          id: soapEntries.id,
+          userId: soapEntries.userId,
+          scripture: soapEntries.scripture,
+          scriptureReference: soapEntries.scriptureReference,
+          observation: soapEntries.observation,
+          application: soapEntries.application,
+          prayer: soapEntries.prayer,
+          mood: soapEntries.mood,
+          tags: soapEntries.tags,
+          isPublic: soapEntries.isPublic,
+          churchId: soapEntries.churchId,
+          createdAt: soapEntries.createdAt,
+          updatedAt: soapEntries.updatedAt,
+          // User information
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl
+        })
+        .from(soapEntries)
+        .leftJoin(users, eq(soapEntries.userId, users.id))
+        .where(and(...conditions))
+        .orderBy(desc(soapEntries.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      return entries.map(entry => ({
+        ...entry,
+        author: {
+          firstName: entry.firstName,
+          lastName: entry.lastName,
+          email: entry.email,
+          profileImageUrl: entry.profileImageUrl
+        }
+      }));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async featureSoapEntry(id: number, featuredBy: string): Promise<SoapEntry> {
+    try {
+      const [featuredEntry] = await db
+        .update(soapEntries)
+        .set({
+          isFeatured: true,
+          featuredBy,
+          featuredAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(soapEntries.id, id))
+        .returning();
+
+      return featuredEntry;
+    } catch (error) {
+      throw new Error('Failed to feature S.O.A.P. entry');
+    }
+  }
+
+  async unfeatureSoapEntry(id: number): Promise<SoapEntry> {
+    try {
+      const [unfeaturedEntry] = await db
+        .update(soapEntries)
+        .set({
+          isFeatured: false,
+          featuredBy: null,
+          featuredAt: null,
+          updatedAt: new Date()
+        })
+        .where(eq(soapEntries.id, id))
+        .returning();
+
+      return unfeaturedEntry;
+    } catch (error) {
+      throw new Error('Failed to unfeature S.O.A.P. entry');
+    }
+  }
+
+  async getSoapEntriesSharedWithPastor(pastorId: string, churchId: number): Promise<SoapEntry[]> {
+    try {
+      const entries = await db
+        .select()
+        .from(soapEntries)
+        .where(and(
+          eq(soapEntries.churchId, churchId),
+          eq(soapEntries.isSharedWithPastor, true)
+        ))
+        .orderBy(desc(soapEntries.createdAt));
+
+      return entries;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  // S.O.A.P. Bookmark operations
+  async saveSoapEntry(soapId: number, userId: string): Promise<void> {
+    try {
+      await db.insert(soapBookmarks).values({
+        soapId,
+        userId,
+        createdAt: new Date()
+      });
+    } catch (error) {
+      // Ignore duplicate key errors
+    }
+  }
+
+  async getSavedSoapEntries(userId: string): Promise<any[]> {
+    try {
+      const savedEntries = await db
+        .select({
+          id: soapBookmarks.id,
+          soapId: soapBookmarks.soapId,
+          createdAt: soapBookmarks.createdAt,
+          // S.O.A.P. entry details
+          scripture: soapEntries.scripture,
+          scriptureReference: soapEntries.scriptureReference,
+          observation: soapEntries.observation,
+          application: soapEntries.application,
+          prayer: soapEntries.prayer,
+          mood: soapEntries.mood,
+          tags: soapEntries.tags,
+          soapCreatedAt: soapEntries.createdAt,
+          // Author details
+          authorId: soapEntries.userId,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl
+        })
+        .from(soapBookmarks)
+        .leftJoin(soapEntries, eq(soapBookmarks.soapId, soapEntries.id))
+        .leftJoin(users, eq(soapEntries.userId, users.id))
+        .where(eq(soapBookmarks.userId, userId))
+        .orderBy(desc(soapBookmarks.createdAt));
+
+      return savedEntries;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async removeSavedSoapEntry(soapId: number, userId: string): Promise<void> {
+    try {
+      await db.delete(soapBookmarks)
+        .where(and(
+          eq(soapBookmarks.soapId, soapId),
+          eq(soapBookmarks.userId, userId)
+        ));
+    } catch (error) {
+      throw new Error('Failed to remove saved S.O.A.P. entry');
+    }
+  }
+
+  async isSoapEntrySaved(soapId: number, userId: string): Promise<boolean> {
+    try {
+      const [bookmark] = await db
+        .select()
+        .from(soapBookmarks)
+        .where(and(
+          eq(soapBookmarks.soapId, soapId),
+          eq(soapBookmarks.userId, userId)
+        ));
+
+      return !!bookmark;
+    } catch (error) {
+      return false;
     }
   }
 }
