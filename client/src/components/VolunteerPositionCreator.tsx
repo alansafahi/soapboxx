@@ -1032,6 +1032,21 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                             <SelectItem value="Guest Services">Guest Services</SelectItem>
                             <SelectItem value="Security & Safety">Security & Safety</SelectItem>
                             <SelectItem value="Transportation">Transportation</SelectItem>
+                            <SelectItem value="Finance & Stewardship">Finance & Stewardship</SelectItem>
+                            <SelectItem value="Human Resources">Human Resources</SelectItem>
+                            <SelectItem value="Communications & Marketing">Communications & Marketing</SelectItem>
+                            <SelectItem value="Prayer & Spiritual Support">Prayer & Spiritual Support</SelectItem>
+                            <SelectItem value="Missions & Global Outreach">Missions & Global Outreach</SelectItem>
+                            <SelectItem value="Special Events">Special Events</SelectItem>
+                            <SelectItem value="Counseling & Crisis Care">Counseling & Crisis Care</SelectItem>
+                            <SelectItem value="Legal & Compliance">Legal & Compliance</SelectItem>
+                            <SelectItem value="Property & Maintenance">Property & Maintenance</SelectItem>
+                            <SelectItem value="Information Technology">Information Technology</SelectItem>
+                            <SelectItem value="Medical & Health Services">Medical & Health Services</SelectItem>
+                            <SelectItem value="Food & Nutrition Services">Food & Nutrition Services</SelectItem>
+                            <SelectItem value="Volunteer Coordination">Volunteer Coordination</SelectItem>
+                            <SelectItem value="Fundraising & Development">Fundraising & Development</SelectItem>
+                            <SelectItem value="Research & Planning">Research & Planning</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
