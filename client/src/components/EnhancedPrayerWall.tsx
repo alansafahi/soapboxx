@@ -249,13 +249,13 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
     }
 
     // Check profile verification requirements
-    if (!userChurchStatus.profileComplete) {
+    if (!userChurchStatus?.profileComplete) {
       setShowProfileVerificationDialog(true);
       return;
     }
 
     // If user has no church, show smart church connection prompt
-    if (!userChurchStatus.hasChurch) {
+    if (!userChurchStatus?.hasChurch) {
       setShowChurchPromptDialog(true);
       return;
     }
@@ -877,10 +877,10 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                 const showingWhosPraying = showWhosPraying.get(prayer.id) || false;
                 const authorName = prayer.isAnonymous 
                   ? 'Anonymous' 
-                  : (prayer.authorFirstName && prayer.authorLastName) 
-                    ? `${prayer.authorFirstName} ${prayer.authorLastName}`
-                    : prayer.authorEmail 
-                      ? prayer.authorEmail.split('@')[0]
+                  : ((prayer as any).authorFirstName && (prayer as any).authorLastName) 
+                    ? `${(prayer as any).authorFirstName} ${(prayer as any).authorLastName}`
+                    : (prayer as any).authorEmail 
+                      ? (prayer as any).authorEmail.split('@')[0]
                       : 'Community Member';
                 const churchName = prayer.churchId ? 'Local Church' : 'Community Prayer';
 
@@ -906,7 +906,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
                             <Avatar className="w-10 h-10">
-                              <AvatarImage src={prayer.isAnonymous ? undefined : prayer.authorProfileImageUrl} />
+                              <AvatarImage src={prayer.isAnonymous ? undefined : (prayer as any).authorProfileImageUrl} />
                               <AvatarFallback className="bg-blue-500 text-white">
                                 {prayer.isAnonymous ? '?' : getInitials(authorName)}
                               </AvatarFallback>
@@ -1204,7 +1204,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
               </div>
               <Dialog open={isCreateCircleDialogOpen} onOpenChange={setIsCreateCircleDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="w-full mt-4">
+                  <Button className="w-full mt-4" onClick={handleCreateCircleClick}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create New Prayer Circle
                   </Button>
@@ -1218,7 +1218,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                   </DialogHeader>
 
                   {/* Church Status Information */}
-                  {userChurchStatus && !userChurchStatus.hasChurch && (
+                  {userChurchStatus && !(userChurchStatus as any)?.hasChurch && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
                       <div className="flex items-start gap-3">
                         <div className="text-blue-600 dark:text-blue-400 mt-0.5">
@@ -1231,7 +1231,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                             Independent Prayer Circle
                           </h4>
                           <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
-                            You can create up to 2 independent prayer circles ({userChurchStatus.independentCirclesCount}/2 created).
+                            You can create up to 2 independent prayer circles ({(userChurchStatus as any)?.independentCirclesCount || 0}/2 created).
                           </p>
                           <p className="text-xs text-blue-700 dark:text-blue-300">
                             💡 Join a local church to create unlimited prayer circles and connect with a larger faith community.
@@ -1241,14 +1241,14 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                     </div>
                   )}
 
-                  {userChurchStatus?.hasChurch && (
+                  {(userChurchStatus as any)?.hasChurch && (
                     <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-4">
                       <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                         <span className="text-sm font-medium">
-                          Church Member • {userChurchStatus.churchName}
+                          Church Member • {(userChurchStatus as any)?.churchName || 'Local Church'}
                         </span>
                       </div>
                     </div>
@@ -1410,7 +1410,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
               To create prayer circles, please complete your profile verification:
             </div>
             <div className="space-y-2">
-              {!userChurchStatus?.profileComplete && (
+              {!(userChurchStatus as any)?.profileComplete && (
                 <div className="flex items-center gap-2 text-sm">
                   <AlertCircle className="w-4 h-4 text-red-500" />
                   <span>Missing: Email verification, full name, or phone number</span>
@@ -1474,10 +1474,10 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 dark:text-gray-100">Independent Circle</h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        • Create up to {userChurchStatus?.circleLimit || 2} prayer circles
+                        • Create up to {(userChurchStatus as any)?.circleLimit || 2} prayer circles
                         • Self-managed community
                         • Basic prayer features
-                        • {userChurchStatus?.independentCirclesCount || 0} of {userChurchStatus?.circleLimit || 2} used
+                        • {(userChurchStatus as any)?.independentCirclesCount || 0} of {(userChurchStatus as any)?.circleLimit || 2} used
                       </p>
                     </div>
                   </div>
@@ -1499,7 +1499,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                     setShowChurchPromptDialog(false);
                     setIsCreateCircleDialogOpen(true);
                   }}
-                  disabled={!userChurchStatus?.canCreateMore}
+                  disabled={!(userChurchStatus as any)?.canCreateMore}
                   className="bg-purple-600 hover:bg-purple-700"
                 >
                   Continue Independent
