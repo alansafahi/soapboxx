@@ -414,6 +414,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
   const [selectedSkills, setSelectedSkills] = useState<string[]>(editOpportunity?.requiredSkills || []);
   const [preferredSkills, setPreferredSkills] = useState<string[]>(editOpportunity?.preferredSkills || []);
   const [selectedSpiritualGifts, setSelectedSpiritualGifts] = useState<string[]>(editOpportunity?.spiritualGiftsNeeded || []);
+  const [naSkills, setNaSkills] = useState<string[]>([]);
   const [selectedPerformanceMetrics, setSelectedPerformanceMetrics] = useState<string[]>(editOpportunity?.performanceMetrics || []);
   const [selectedRecurringDays, setSelectedRecurringDays] = useState<string[]>(editOpportunity?.recurringDays || []);
   const [selectedTeamRoles, setSelectedTeamRoles] = useState<string[]>(editOpportunity?.teamRoles || []);
