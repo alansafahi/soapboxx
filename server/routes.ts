@@ -12793,9 +12793,19 @@ Please provide suggestions for the missing or incomplete sections.`
 
     } catch (error) {
       console.error('Failed to create volunteer opportunity:', error);
+      
+      // Enhanced error handling for database constraint violations
+      let errorMessage = 'Failed to create volunteer position';
+      if (error.code === '22001') {
+        errorMessage = `One of the fields exceeds the maximum allowed length. Please shorten your text and try again. (Error: ${error.length} characters in a field with a ${error.constraint || '50'} character limit)`;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       res.status(500).json({ 
-        message: 'Failed to create volunteer position',
-        error: error.message 
+        message: errorMessage,
+        error: error.message,
+        code: error.code || 'UNKNOWN'
       });
     }
   });
@@ -12930,9 +12940,19 @@ Please provide suggestions for the missing or incomplete sections.`
 
     } catch (error) {
       console.error('Failed to update volunteer opportunity:', error);
+      
+      // Enhanced error handling for database constraint violations
+      let errorMessage = 'Failed to update volunteer position';
+      if (error.code === '22001') {
+        errorMessage = `One of the fields exceeds the maximum allowed length. Please shorten your text and try again. (Error: ${error.length} characters in a field with a ${error.constraint || '50'} character limit)`;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       res.status(500).json({ 
-        message: 'Failed to update volunteer position',
-        error: error.message 
+        message: errorMessage,
+        error: error.message,
+        code: error.code || 'UNKNOWN'
       });
     }
   });

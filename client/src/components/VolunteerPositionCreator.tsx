@@ -30,13 +30,27 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import FieldLengthValidator from './FieldLengthValidator';
 
-// Comprehensive Phase 2 form validation schema with all detailed fields
+// Field length limits (matching database schema with 2-3x buffer)
+const FIELD_LIMITS = {
+  title: 500,
+  location: 500,
+  timeCommitment: 500,
+  timeCommitmentLevel: 500,
+  ministry: 300,
+  category: 300,
+  backgroundCheckLevel: 150,
+  coordinatorName: 300,
+  coordinatorEmail: 300
+};
+
+// Comprehensive Phase 2 form validation schema with length limits
 const createPositionSchema = z.object({
   // Basic Information
-  title: z.string().min(1, 'Position title is required'),
-  ministry: z.string().min(1, 'Ministry selection is required'),
-  department: z.string().min(1, 'Department is required'),
+  title: z.string().min(1, 'Position title is required').max(FIELD_LIMITS.title, `Title cannot exceed ${FIELD_LIMITS.title} characters`),
+  ministry: z.string().min(1, 'Ministry selection is required').max(FIELD_LIMITS.ministry, `Ministry cannot exceed ${FIELD_LIMITS.ministry} characters`),
+  department: z.string().min(1, 'Department is required').max(FIELD_LIMITS.category, `Department cannot exceed ${FIELD_LIMITS.category} characters`),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   responsibilities: z.union([z.string(), z.array(z.string())]).transform((val) => 
@@ -44,10 +58,10 @@ const createPositionSchema = z.object({
   ),
   
   // Scheduling & Time Commitment
-  timeCommitment: z.string().min(1, 'Time commitment is required'),
-  timeCommitmentLevel: z.enum(['1-2 hours', '3-5 hours', '6-10 hours', '10+ hours']),
+  timeCommitment: z.string().min(1, 'Time commitment is required').max(FIELD_LIMITS.timeCommitment, `Time commitment cannot exceed ${FIELD_LIMITS.timeCommitment} characters`),
+  timeCommitmentLevel: z.string().min(1, 'Time commitment level is required').max(FIELD_LIMITS.timeCommitmentLevel, `Time commitment level cannot exceed ${FIELD_LIMITS.timeCommitmentLevel} characters`),
   maxHoursPerWeek: z.number().min(1).max(40),
-  location: z.string().min(1, 'Location is required'),
+  location: z.string().min(1, 'Location is required').max(FIELD_LIMITS.location, `Location cannot exceed ${FIELD_LIMITS.location} characters`),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
   
@@ -945,6 +959,11 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                             }}
                           />
                         </FormControl>
+                        <FieldLengthValidator 
+                          value={field.value || ''} 
+                          maxLength={FIELD_LIMITS.title} 
+                          fieldName="Position Title"
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -1907,6 +1926,12 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                             <SelectItem value="Varies by task">Varies by task</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FieldLengthValidator 
+                          value={field.value || ''} 
+                          maxLength={FIELD_LIMITS.timeCommitmentLevel} 
+                          fieldName="Time Per Session"
+                          showWarning={false}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -1930,6 +1955,11 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                             }}
                           />
                         </FormControl>
+                        <FieldLengthValidator 
+                          value={field.value || ''} 
+                          maxLength={FIELD_LIMITS.location} 
+                          fieldName="Location"
+                        />
                         <FormMessage />
                       </FormItem>
                     )}

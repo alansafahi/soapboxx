@@ -2580,11 +2580,11 @@ export const volunteerRoleAssignments = pgTable("volunteer_role_assignments", {
 export const volunteerOpportunities = pgTable("volunteer_opportunities", {
   id: serial("id").primaryKey(),
   churchId: integer("church_id").references(() => churches.id),
-  title: varchar("title", { length: 200 }).notNull(),
+  title: varchar("title", { length: 500 }).notNull(),
   description: text("description"),
   roleId: integer("role_id").references(() => volunteerRoles.id),
   coordinatorId: varchar("coordinator_id").references(() => users.id),
-  location: varchar("location", { length: 200 }),
+  location: varchar("location", { length: 500 }),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   volunteersNeeded: integer("volunteers_needed").default(1),
@@ -2592,11 +2592,11 @@ export const volunteerOpportunities = pgTable("volunteer_opportunities", {
   requiredSkills: text("required_skills").array(),
   preferredSkills: text("preferred_skills").array(),
   spiritualGifts: text("spiritual_gifts").array(),
-  timeCommitment: varchar("time_commitment", { length: 200 }),
-  timeCommitmentLevel: varchar("time_commitment_level", { length: 50 }),
+  timeCommitment: varchar("time_commitment", { length: 500 }),
+  timeCommitmentLevel: varchar("time_commitment_level", { length: 500 }),
   maxHoursPerWeek: integer("max_hours_per_week"),
-  ministry: varchar("ministry", { length: 100 }),
-  category: varchar("category", { length: 100 }),
+  ministry: varchar("ministry", { length: 300 }),
+  category: varchar("category", { length: 300 }),
   responsibilities: text("responsibilities").array(),
   isRecurring: boolean("is_recurring").default(false),
   recurringPattern: jsonb("recurring_pattern"), // {frequency: "weekly", interval: 1, daysOfWeek: [1,3,5]}
@@ -2608,7 +2608,7 @@ export const volunteerOpportunities = pgTable("volunteer_opportunities", {
   trainingRequired: boolean("training_required").default(false),
   orientationRequired: boolean("orientation_required").default(false),
   mentorshipProvided: boolean("mentorship_provided").default(false),
-  backgroundCheckLevel: varchar("background_check_level", { length: 50 }),
+  backgroundCheckLevel: varchar("background_check_level", { length: 150 }),
   status: varchar("status", { length: 20 }).default("open"), // open, closed, cancelled, completed
   priority: varchar("priority", { length: 20 }).default("medium"), // low, medium, high, urgent
   backgroundCheckRequired: boolean("background_check_required").default(false),
