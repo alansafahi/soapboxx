@@ -3087,19 +3087,26 @@ export class DatabaseStorage implements IStorage {
     try {
       let conditions = [eq(soapEntries.isPublic, true)];
 
-      if (churchId) {
+      // Only filter by church if churchId is provided AND we want church-specific results
+      if (churchId && excludeUserId) {
+        // For church-specific feed with user exclusion, get entries from same church excluding user
         conditions.push(eq(soapEntries.churchId, churchId));
-      }
-
-      if (excludeUserId) {
+        conditions.push(ne(soapEntries.userId, excludeUserId));
+      } else if (churchId) {
+        // For church-specific feed without exclusion
+        conditions.push(eq(soapEntries.churchId, churchId));
+      } else if (excludeUserId) {
+        // For global feed excluding specific user
         conditions.push(ne(soapEntries.userId, excludeUserId));
       }
+      // else: no filters, get all public entries
 
-      console.log('getPublicSoapEntries conditions:', {
-        churchId,
-        excludeUserId,
-        conditions: conditions.length
-      });
+      // Remove debug logging for production
+      // console.log('getPublicSoapEntries conditions:', {
+      //   churchId,
+      //   excludeUserId,
+      //   conditions: conditions.length
+      // });
 
       // Build where clause properly
       let whereClause;
@@ -3147,15 +3154,16 @@ export class DatabaseStorage implements IStorage {
         profileImageUrl: row.users?.profileImageUrl
       }));
 
-      console.log(`Found ${entries.length} public SOAP entries`);
-      if (entries.length > 0) {
-        console.log('Sample entry:', {
-          id: entries[0].id,
-          authorEmail: entries[0].email,
-          churchId: entries[0].churchId,
-          scriptureRef: entries[0].scriptureReference
-        });
-      }
+      // Remove debug logging for production
+      // console.log(`Found ${entries.length} public SOAP entries`);
+      // if (entries.length > 0) {
+      //   console.log('Sample entry:', {
+      //     id: entries[0].id,
+      //     authorEmail: entries[0].email,
+      //     churchId: entries[0].churchId,
+      //     scriptureRef: entries[0].scriptureReference
+      //   });
+      // }
 
       return entries.map(entry => ({
         ...entry,
@@ -3384,6 +3392,104 @@ export class DatabaseStorage implements IStorage {
       return history;
     } catch (error) {
       return [];
+    }
+  }
+
+  // Sermon operations
+  async createSermonDraft(sermonData: any): Promise<any> {
+    try {
+      const [newDraft] = await db
+        .insert(sermonDrafts)
+        .values({
+          title: sermonData.title,
+          content: sermonData.content,
+          userId: sermonData.userId,
+          isPublished: sermonData.isPublished || false,
+          publishedAt: sermonData.publishedAt,
+          createdAt: sermonData.createdAt || new Date(),
+          updatedAt: sermonData.updatedAt || new Date()
+        })
+        .returning();
+      return newDraft;
+    } catch (error) {
+      throw new Error('Failed to create sermon draft');
+    }
+  }
+
+  async updateSermonDraft(draftId: number, userId: string, updates: any): Promise<any> {
+    try {
+      const [updated] = await db
+        .update(sermonDrafts)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(and(
+          eq(sermonDrafts.id, draftId),
+          eq(sermonDrafts.userId, userId)
+        ))
+        .returning();
+      return updated;
+    } catch (error) {
+      throw new Error('Failed to update sermon draft');
+    }
+  }
+
+  async getUserCompletedSermons(userId: string): Promise<any[]> {
+    try {
+      return await db
+        .select()
+        .from(sermonDrafts)
+        .where(and(
+          eq(sermonDrafts.userId, userId),
+          eq(sermonDrafts.isPublished, true)
+        ))
+        .orderBy(desc(sermonDrafts.publishedAt));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getUserSermonDrafts(userId: string): Promise<any[]> {
+    try {
+      return await db
+        .select()
+        .from(sermonDrafts)
+        .where(and(
+          eq(sermonDrafts.userId, userId),
+          eq(sermonDrafts.isPublished, false)
+        ))
+        .orderBy(desc(sermonDrafts.updatedAt));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getSermonDraft(draftId: number, userId: string): Promise<any> {
+    try {
+      const [draft] = await db
+        .select()
+        .from(sermonDrafts)
+        .where(and(
+          eq(sermonDrafts.id, draftId),
+          eq(sermonDrafts.userId, userId)
+        ));
+      return draft;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async deleteSermonDraft(draftId: number, userId: string): Promise<void> {
+    try {
+      await db
+        .delete(sermonDrafts)
+        .where(and(
+          eq(sermonDrafts.id, draftId),
+          eq(sermonDrafts.userId, userId)
+        ));
+    } catch (error) {
+      throw new Error('Failed to delete sermon draft');
     }
   }
 
