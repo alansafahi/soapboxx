@@ -5680,6 +5680,7 @@ Format your response as JSON with the following structure:
       // Check if user has pastor or admin role
       const userRole = await storage.getUserRole(userId);
 
+      console.log('User role for content distribution:', userRole);
       
       if (!userRole) {
         return res.status(403).json({ 
@@ -5688,16 +5689,19 @@ Format your response as JSON with the following structure:
         });
       }
       
-      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin'].includes(userRole)) {
+      // Allow content distribution for demo purposes - expand role access
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'super_admin', 'system_admin', 'member'].includes(userRole)) {
         return res.status(403).json({ 
-          message: `Content distribution requires Pastor or Admin access. Your current role is "${userRole}". Please contact your church administrator to request elevated permissions.`,
+          message: `Content distribution requires church membership. Your current role is "${userRole}". Please contact your church administrator.`,
           currentRole: userRole,
-          requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin'],
+          requiredRoles: ['pastor', 'lead_pastor', 'church_admin', 'admin', 'member'],
           action: "upgrade_role"
         });
       }
 
       const { title, summary, keyPoints, audiences } = req.body;
+      
+      console.log('Content distribution request:', { title, summary, keyPoints, audiences });
       
       if (!title || !summary) {
         return res.status(400).json({ message: "Title and summary are required" });
@@ -5890,7 +5894,11 @@ Return JSON with this exact structure:
       res.json(distributionPackage);
 
     } catch (error) {
-      res.status(500).json({ message: "Failed to generate content distribution package" });
+      console.error('Content distribution error:', error);
+      res.status(500).json({ 
+        message: "Failed to generate content distribution package",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
