@@ -9303,17 +9303,21 @@ Return JSON with this exact structure:
     }
   });
 
-  // Get ALL public S.O.A.P. entries platform-wide 
+  // Get ALL public S.O.A.P. entries platform-wide including current user
   app.get('/api/soap/all', isAuthenticated, async (req: any, res) => {
     try {
       const { limit = 20, offset = 0 } = req.query;
+
+      console.log('All Entries API called - including current user entries');
 
       const entries = await storage.getPublicSoapEntries(
         undefined, // No church filter - platform-wide
         parseInt(limit as string),
         parseInt(offset as string),
-        undefined // Include all users including current user
+        undefined // Include ALL users including current user
       );
+
+      console.log(`All Entries returned: ${entries.length} entries`);
 
       res.json(entries);
     } catch (error) {

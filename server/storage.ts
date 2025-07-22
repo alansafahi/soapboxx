@@ -3085,33 +3085,51 @@ export class DatabaseStorage implements IStorage {
         conditions: conditions.length
       });
 
-      const entries = await db
-        .select({
-          id: soapEntries.id,
-          userId: soapEntries.userId,
-          scripture: soapEntries.scripture,
-          scriptureReference: soapEntries.scriptureReference,
-          observation: soapEntries.observation,
-          application: soapEntries.application,
-          prayer: soapEntries.prayer,
-          mood: soapEntries.mood,
-          tags: soapEntries.tags,
-          isPublic: soapEntries.isPublic,
-          churchId: soapEntries.churchId,
-          createdAt: soapEntries.createdAt,
-          updatedAt: soapEntries.updatedAt,
-          // User information
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          profileImageUrl: users.profileImageUrl
-        })
+      // Build where clause properly
+      let whereClause;
+      if (conditions.length === 1) {
+        whereClause = conditions[0];
+      } else if (conditions.length > 1) {
+        whereClause = and(...conditions);
+      } else {
+        whereClause = undefined;
+      }
+
+      // Use a simplified query approach to avoid Drizzle ORM issues
+      const query = db
+        .select()
         .from(soapEntries)
         .leftJoin(users, eq(soapEntries.userId, users.id))
-        .where(conditions.length > 0 ? and(...conditions) : undefined)
         .orderBy(desc(soapEntries.createdAt))
         .limit(limit)
         .offset(offset);
+
+      if (whereClause) {
+        query.where(whereClause);
+      }
+
+      const rawEntries = await query;
+      
+      // Transform the results manually
+      const entries = rawEntries.map(row => ({
+        id: row.soap_entries.id,
+        userId: row.soap_entries.userId,
+        scripture: row.soap_entries.scripture,
+        scriptureReference: row.soap_entries.scriptureReference,
+        observation: row.soap_entries.observation,
+        application: row.soap_entries.application,
+        prayer: row.soap_entries.prayer,
+        mood: row.soap_entries.mood,
+        tags: row.soap_entries.tags,
+        isPublic: row.soap_entries.isPublic,
+        churchId: row.soap_entries.churchId,
+        createdAt: row.soap_entries.createdAt,
+        updatedAt: row.soap_entries.updatedAt,
+        firstName: row.users?.firstName,
+        lastName: row.users?.lastName,
+        email: row.users?.email,
+        profileImageUrl: row.users?.profileImageUrl
+      }));
 
       console.log(`Found ${entries.length} public SOAP entries`);
       if (entries.length > 0) {
