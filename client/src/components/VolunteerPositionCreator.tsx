@@ -1558,13 +1558,13 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     </div>
 
                     {/* Compact Spreadsheet Table */}
-                    <div className="overflow-x-auto max-h-96 overflow-y-auto">
-                      <table className="w-full text-xs">
+                    <div className="overflow-x-auto max-h-80 overflow-y-auto">
+                      <table className="w-full text-xs table-fixed">
                         <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
                           <tr>
-                            <th className="text-left p-2 border-r dark:border-gray-700 font-medium w-48">Skill/Requirement</th>
-                            <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-16">Required</th>
-                            <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-16">Preferred</th>
+                            <th className="text-left p-2 border-r dark:border-gray-700 font-medium w-36">Skill/Requirement</th>
+                            <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-20">Required</th>
+                            <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-20">Preferred</th>
                             <th className="text-center p-2 font-medium w-16">N/A</th>
                           </tr>
                         </thead>
@@ -1577,7 +1577,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                           </tr>
                           {['Organization', 'Data Entry', 'Record Keeping', 'Event Planning', 'Project Management', 'Financial Management'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-2 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
@@ -1628,7 +1628,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                           </tr>
                           {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-2 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
@@ -1679,7 +1679,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                           </tr>
                           {['Teaching', 'Bible Study Leadership', 'Counseling', 'Pastoral Care', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading', 'Prayer Ministry', 'Evangelism'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-2 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
@@ -1730,7 +1730,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                           </tr>
                           {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-2 border-r dark:border-gray-700">{skill}</td>
+                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
