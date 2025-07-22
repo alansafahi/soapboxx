@@ -336,10 +336,10 @@ export default function ContentDistributionHub() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Content Distribution Hub
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 dark:text-gray-300">
           Transform your sermon into engaging content across multiple platforms automatically
         </p>
       </div>
@@ -371,7 +371,7 @@ export default function ContentDistributionHub() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                   Sermon Title
                 </label>
                 <input
@@ -384,7 +384,7 @@ export default function ContentDistributionHub() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                   Sermon Summary
                 </label>
                 <textarea
@@ -397,7 +397,7 @@ export default function ContentDistributionHub() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                   Key Points
                 </label>
                 <div className="space-y-2">
@@ -426,7 +426,7 @@ export default function ContentDistributionHub() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                   Target Audiences
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -475,7 +475,7 @@ export default function ContentDistributionHub() {
                 <CardContent>
                   <div className="grid gap-4">
                     {distributionPackage.socialMedia.map((content, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
                             {platformIcons[content.platform as keyof typeof platformIcons]}
@@ -507,8 +507,8 @@ export default function ContentDistributionHub() {
                             </Button>
                           </div>
                         </div>
-                        <div className="bg-gray-50 p-3 rounded-md mb-3">
-                          <p className="text-sm whitespace-pre-wrap">{content.content}</p>
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md mb-3">
+                          <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{content.content}</p>
                         </div>
                         {content.hashtags && (
                           <div className="flex flex-wrap gap-1 mb-2">
@@ -520,7 +520,7 @@ export default function ContentDistributionHub() {
                           </div>
                         )}
                         {content.estimatedReach && (
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             Estimated reach: {content.estimatedReach.toLocaleString()} people
                           </p>
                         )}
@@ -541,7 +541,7 @@ export default function ContentDistributionHub() {
                 <CardContent>
                   <div className="grid gap-4">
                     {distributionPackage.emailContent.map((content, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
                             <Mail className="w-4 h-4" />
@@ -556,8 +556,8 @@ export default function ContentDistributionHub() {
                             Copy
                           </Button>
                         </div>
-                        <div className="bg-gray-50 p-3 rounded-md">
-                          <div className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: content.content }} />
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-md">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: content.content }} />
                         </div>
                       </div>
                     ))}
@@ -576,7 +576,7 @@ export default function ContentDistributionHub() {
                 <CardContent>
                   <div className="grid gap-4">
                     {distributionPackage.studyMaterials.map((content, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
                             <BookOpen className="w-4 h-4" />
@@ -617,7 +617,7 @@ export default function ContentDistributionHub() {
                 <CardContent>
                   <div className="grid gap-4">
                     {distributionPackage.bulletinInserts.map((content, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
                             <FileText className="w-4 h-4" />
@@ -648,8 +648,8 @@ export default function ContentDistributionHub() {
               </Card>
             </>
           ) : (
-            <div className="text-center py-12 text-gray-500">
-              <Share2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <Share2 className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <p>Generate content to review distribution package</p>
             </div>
           )}
