@@ -2403,10 +2403,15 @@ export class DatabaseStorage implements IStorage {
         WHERE user_id = ${userId} AND role IS NOT NULL
       `);
       
+      // DEBUG: Log church roles found
+      console.log('DEBUG getUserRole - userId:', userId, 'churchRoles:', churchRoles.rows.map((r: any) => r.role));
+      
       // If user has any church admin role, return the highest privilege level
       const adminRoles = churchRoles.rows
         .map((r: any) => r.role)
         .filter(role => ['church_admin', 'pastor', 'lead_pastor'].includes(role));
+      
+      console.log('DEBUG getUserRole - adminRoles found:', adminRoles);
       
       if (adminRoles.includes('lead_pastor')) return 'lead_pastor';
       if (adminRoles.includes('pastor')) return 'pastor';
@@ -2414,7 +2419,7 @@ export class DatabaseStorage implements IStorage {
       
       return globalRole;
     } catch (error) {
-      // Silent error logging for production
+      console.error('getUserRole error:', error);
       return 'member';
     }
   }
