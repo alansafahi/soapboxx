@@ -308,6 +308,11 @@ export default function SidebarFixed() {
                         return true;
                       }
                       
+                      // Special case: Always show D.I.V.I.N.E. as it's a core feature
+                      if (item.href === '/divine') {
+                        return true;
+                      }
+                      
                       // Apply role-based filtering first  
                       if (item.roles) {
                         if (!user) return false;
@@ -365,12 +370,17 @@ export default function SidebarFixed() {
 
             {visibleGroups.flatMap(group => group.items).map((item) => {
               
-              // Apply same filtering logic as expanded view
-              if (item.roles) {
-                if (!user) return null;
-                const hasGlobalRole = item.roles.includes(user.role || '');
-                const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
-                if (!hasGlobalRole && !hasChurchRole) return null;
+              // Special case: Always show D.I.V.I.N.E. as it's a core feature
+              if (item.href === '/divine') {
+                // D.I.V.I.N.E. is always shown
+              } else {
+                // Apply same filtering logic as expanded view
+                if (item.roles) {
+                  if (!user) return null;
+                  const hasGlobalRole = item.roles.includes(user.role || '');
+                  const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
+                  if (!hasGlobalRole && !hasChurchRole) return null;
+                }
               }
               
               // Apply church feature filtering for other items
