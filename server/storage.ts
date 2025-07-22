@@ -2388,8 +2388,31 @@ export class DatabaseStorage implements IStorage {
 
   async getUserRole(userId: string): Promise<string> {
     try {
-      const result = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
-      return result[0]?.role || 'member';
+      // First check global role
+      const userResult = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
+      const globalRole = userResult[0]?.role || 'member';
+      
+      // If global role is admin-level, return it
+      if (['soapbox_owner', 'platform_admin', 'system_admin'].includes(globalRole)) {
+        return globalRole;
+      }
+      
+      // Check for church-specific admin roles
+      const churchRoles = await db
+        .select({ role: userChurches.role })
+        .from(userChurches)
+        .where(eq(userChurches.userId, userId));
+      
+      // If user has any church admin role, return the highest privilege level
+      const adminRoles = churchRoles
+        .map(r => r.role)
+        .filter(role => ['church_admin', 'pastor', 'lead_pastor'].includes(role));
+      
+      if (adminRoles.includes('lead_pastor')) return 'lead_pastor';
+      if (adminRoles.includes('pastor')) return 'pastor';
+      if (adminRoles.includes('church_admin')) return 'church_admin';
+      
+      return globalRole;
     } catch (error) {
       // Silent error logging for production
       return 'member';
@@ -3407,6 +3430,49 @@ export class DatabaseStorage implements IStorage {
       return newRecord;
     } catch (error) {
       throw new Error('Failed to create communication record');
+    }
+  }
+
+  // Discussion comments implementation - missing method causing 500 errors
+  async getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
+    try {
+      const comments = await db
+        .select({
+          id: discussionComments.id,
+          discussionId: discussionComments.discussionId,
+          authorId: discussionComments.authorId,
+          content: discussionComments.content,
+          parentId: discussionComments.parentId,
+          likeCount: discussionComments.likeCount,
+          createdAt: discussionComments.createdAt,
+          updatedAt: discussionComments.updatedAt,
+          author: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl
+          }
+        })
+        .from(discussionComments)
+        .leftJoin(users, eq(discussionComments.authorId, users.id))
+        .where(eq(discussionComments.discussionId, discussionId))
+        .orderBy(asc(discussionComments.createdAt));
+
+      return comments.map(comment => ({
+        id: comment.id,
+        discussionId: comment.discussionId,
+        authorId: comment.authorId,
+        content: comment.content,
+        parentId: comment.parentId,
+        likeCount: comment.likeCount || 0,
+        createdAt: comment.createdAt,
+        updatedAt: comment.updatedAt,
+        author: comment.author
+      }));
+    } catch (error) {
+      // Silent error logging for production
+      return [];
     }
   }
 }
