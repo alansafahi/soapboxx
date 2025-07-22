@@ -878,7 +878,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
         {children}
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Target className="w-5 h-5 text-purple-600" />
@@ -963,7 +963,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
             {/* Basic Information Tab */}
             {currentTab === 'basic' && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="title"
@@ -1024,7 +1024,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="department"
@@ -1147,7 +1147,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
             {/* Team Tab */}
             {currentTab === 'team' && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="volunteersNeeded"
@@ -1255,7 +1255,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
               <div className="space-y-6">
                 <div>
                   <FormLabel>Performance Metrics</FormLabel>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                     {performanceMetricsOptions.map(metric => (
                       <div
                         key={metric}
@@ -1272,7 +1272,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="orientationRequired"
@@ -1346,7 +1346,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
             {/* Admin Tab */}
             {currentTab === 'admin' && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="coordinatorName"
@@ -1405,7 +1405,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="budgetRequired"
@@ -1470,7 +1470,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                 <div className="border-t pt-4">
                   <h4 className="font-medium mb-3">Advanced Settings</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="autoApprove"
@@ -1795,7 +1795,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="backgroundCheckRequired"
@@ -1845,7 +1845,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
 
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="trainingRequired"
@@ -1894,7 +1894,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
             {/* Schedule Tab */}
             {currentTab === 'schedule' && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="timeCommitment"
@@ -1948,7 +1948,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="location"
@@ -2016,7 +2016,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   />
 
                   {form.watch('isRecurring') && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="recurringPattern"
@@ -2042,7 +2042,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                       <div>
                         <FormLabel>Recurring Days</FormLabel>
-                        <div className="grid grid-cols-4 gap-2 mt-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
                           {weekDays.map(day => (
                             <div
                               key={day}
@@ -2062,7 +2062,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="startDate"
