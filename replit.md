@@ -147,6 +147,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 22, 2025: ALL ENTRIES TAB FIXED AND DOM NESTING WARNING RESOLVED - Successfully fixed database query issue preventing "All Entries" tab from showing all public SOAP entries including current user's entries, and resolved HTML validation warning by changing FormattedText component from div to span wrapper
+  - QUERY ISSUE RESOLVED: Fixed Drizzle ORM field selection error in getPublicSoapEntries method that was causing database errors
+  - ALL ENTRIES WORKING: "All Entries" tab now displays all 48+ public SOAP entries platform-wide including current user's entries  
+  - DOM NESTING FIXED: Changed FormattedText component wrapper from div to span to eliminate HTML validation warning when used inside paragraph tags
+  - DATABASE PERFORMANCE: Simplified query approach to avoid Drizzle ORM issues while maintaining full functionality
 - July 22, 2025: BRANDING UPDATE TO SOAPBOX REWARDS COMPLETED - Successfully updated all references from "Referral Rewards Program" to "SoapBox Rewards" for consistent branding
   - TAB LABEL UPDATED: Changed contacts page tab from "Referral Program" to "SoapBox Rewards"
   - SECTION HEADER UPDATED: Changed "Referral Rewards Program" to "SoapBox Rewards" in main card title

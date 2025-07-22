@@ -87,7 +87,7 @@ const FormattedText = ({ content }: { content: string }) => {
   const parts = parseMarkdown(formattedContent);
   
   return (
-    <div>
+    <span>
       {parts.map((part, index) => {
         if (typeof part === 'object' && part.type === 'image') {
           return (
@@ -122,7 +122,7 @@ const FormattedText = ({ content }: { content: string }) => {
           </span>
         );
       })}
-    </div>
+    </span>
   );
 };
 
