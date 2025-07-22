@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
+import ShareDialog from "./ShareDialog";
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -103,6 +104,8 @@ export default function EventsList({ highlightId }: EventsListProps = {}) {
   const [showComments, setShowComments] = useState<Record<number, boolean>>({});
   const [eventComments, setEventComments] = useState<Record<number, any[]>>({});
   const [newComment, setNewComment] = useState("");
+  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery({
@@ -310,26 +313,8 @@ export default function EventsList({ highlightId }: EventsListProps = {}) {
   };
 
   const shareEvent = async (event: Event) => {
-    // Create proper event URL
-    const eventUrl = `${window.location.origin}/events?event=${event.id}`;
-    const shareText = `${event.title} 🙏 #SoapBoxApp`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: event.title,
-          text: event.description || "Join us for this event!",
-          url: eventUrl,
-        });
-      } catch (error) {
-        // Fallback to clipboard
-        await navigator.clipboard.writeText(shareText);
-        toast({ title: "Event details copied to clipboard" });
-      }
-    } else {
-      await navigator.clipboard.writeText(shareText);
-      toast({ title: "Event details copied to clipboard" });
-    }
+    setCurrentEvent(event);
+    setShareDialogOpen(true);
   };
 
   const copyEventLink = async (event: Event) => {
@@ -1106,6 +1091,19 @@ export default function EventsList({ highlightId }: EventsListProps = {}) {
           )}
         </CardContent>
       </Card>
+
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        title="Share Event"
+        content={
+          currentEvent 
+            ? `${currentEvent.title} 🙏 #SoapBoxApp` 
+            : ""
+        }
+        url={currentEvent ? `${window.location.origin}/events?event=${currentEvent.id}` : ""}
+      />
     </div>
   );
 }

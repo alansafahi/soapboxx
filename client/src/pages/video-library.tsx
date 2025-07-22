@@ -9,6 +9,7 @@ import { Video, Upload, Play, Clock, User, Calendar, Filter, Search, Grid, List,
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
+import ShareDialog from "../components/ShareDialog";
 import { useAuth } from "../hooks/useAuth";
 import {
   Dialog,
@@ -69,6 +70,8 @@ export default function VideoLibrary() {
 
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [youtubeUrls, setYoutubeUrls] = useState('');
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<VideoContent | null>(null);
 
   // Fetch videos from API
   const { data: videos = [], isLoading } = useQuery({
@@ -181,22 +184,8 @@ export default function VideoLibrary() {
   };
 
   const handleNativeShare = async (video: VideoContent) => {
-    const videoUrl = video.videoUrl || video.url || `${window.location.origin}/video-library#${video.id}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: video.title,
-          text: video.description || '',
-          url: videoUrl,
-        });
-      } catch (err) {
-        // User cancelled or error occurred, fallback to copy
-        handleCopyLink(video);
-      }
-    } else {
-      // Fallback to copy link
-      handleCopyLink(video);
-    }
+    setCurrentVideo(video);
+    setShareDialogOpen(true);
   };
 
   const handleUpload = () => {
@@ -920,6 +909,15 @@ export default function VideoLibrary() {
           </div>
         )}
       </div>
+
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        title="Share Video"
+        content={currentVideo ? `${currentVideo.title} 🎥 #SoapBoxApp` : ""}
+        url={currentVideo ? currentVideo.videoUrl || currentVideo.url || `${window.location.origin}/video-library#${currentVideo.id}` : window.location.href}
+      />
     </div>
   );
 }

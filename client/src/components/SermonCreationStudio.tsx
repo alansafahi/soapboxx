@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger 
 } from "./ui/dropdown-menu";
 import { useToast } from "../hooks/use-toast";
+import ShareDialog from "./ShareDialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { SermonIllustration } from "../../../shared/schema";
@@ -99,6 +100,7 @@ export default function SermonCreationStudio() {
   const [enhancementRecommendations, setEnhancementRecommendations] = useState<string[]>([]);
   const [currentDraftId, setCurrentDraftId] = useState<number | null>(null);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { toast } = useToast();
 
   // Fetch saved sermon drafts
@@ -494,28 +496,7 @@ export default function SermonCreationStudio() {
       return;
     }
 
-    const outline = enhancedOutline || currentOutline;
-    if (!outline) return;
-    
-    const shareText = `Check out this sermon: "${outline.title}"\n\nTheme: ${outline.theme || 'No theme specified'}\n\nMain Points:\n${outline.mainPoints?.map((point: any, index: number) => `${index + 1}. ${point.point || point}`).join('\n') || 'No main points available'}\n\nCreated with SoapBox Super App`;
-    
-    if (navigator.share && typeof navigator.canShare === 'function') {
-      try {
-        await navigator.share({
-          title: outline.title,
-          text: shareText,
-          url: window.location.href
-        });
-        toast({
-          title: "Shared successfully",
-          description: "Sermon content has been shared."
-        });
-      } catch (error) {
-        handleCopyToClipboard(shareText);
-      }
-    } else {
-      handleCopyToClipboard(shareText);
-    }
+    setShareDialogOpen(true);
   };
 
   const handleCopyToClipboard = async (text: string) => {
@@ -1617,6 +1598,19 @@ export default function SermonCreationStudio() {
           </CardContent>
         </Card>
       )}
+
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        title="Share Sermon"
+        content={
+          currentOutline || enhancedOutline 
+            ? `Check out this sermon: "${(enhancedOutline || currentOutline)?.title}" 🙏 #SoapBoxApp` 
+            : ""
+        }
+        url={window.location.href}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
 import { useToast } from "../hooks/use-toast";
+import ShareDialog from "./ShareDialog";
 import { 
   Palette, 
   Download, 
@@ -75,6 +76,7 @@ export default function VerseArtGenerator({ currentVerse }: VerseArtGeneratorPro
   const [colorScheme, setColorScheme] = useState('warm');
   const [generatedArt, setGeneratedArt] = useState<VerseArtData | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   // Function to detect if input is a scripture reference
   const isScriptureReference = (text: string): boolean => {
@@ -231,23 +233,7 @@ export default function VerseArtGenerator({ currentVerse }: VerseArtGeneratorPro
 
   const handleShare = () => {
     if (!generatedArt) return;
-
-    const shareText = `${generatedArt.verseReference} 🙏 #SoapBoxApp`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: 'Bible Verse Art',
-        text: shareText,
-        url: generatedArt.imageUrl
-      });
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(`${shareText} ${generatedArt.imageUrl}`);
-      toast({
-        title: "Link Copied",
-        description: "Verse art link copied to clipboard for sharing.",
-      });
-    }
+    setShareDialogOpen(true);
   };
 
   return (
@@ -498,6 +484,15 @@ export default function VerseArtGenerator({ currentVerse }: VerseArtGeneratorPro
           </div>
         </CardContent>
       </Card>
+
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        title="Share Verse Art"
+        content={generatedArt ? `${generatedArt.verseReference} 🙏 #SoapBoxApp` : ""}
+        url={generatedArt?.imageUrl || window.location.href}
+      />
     </div>
   );
 }

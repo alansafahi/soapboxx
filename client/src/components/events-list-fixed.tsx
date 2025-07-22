@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
+import ShareDialog from "./ShareDialog";
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -97,6 +98,8 @@ export default function EventsList() {
   const [showComments, setShowComments] = useState<Record<number, boolean>>({});
   const [eventComments, setEventComments] = useState<Record<number, any[]>>({});
   const [newComment, setNewComment] = useState("");
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery({
@@ -255,22 +258,8 @@ export default function EventsList() {
   };
 
   const shareEvent = async (event: Event) => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: event.title,
-          text: event.description || "Join us for this event!",
-          url: window.location.href,
-        });
-      } catch (error) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(`${event.title} - ${window.location.href}`);
-        toast({ title: "Event link copied to clipboard" });
-      }
-    } else {
-      navigator.clipboard.writeText(`${event.title} - ${window.location.href}`);
-      toast({ title: "Event link copied to clipboard" });
-    }
+    setCurrentEvent(event);
+    setShareDialogOpen(true);
   };
 
   const addComment = (eventId: number) => {
@@ -888,6 +877,15 @@ export default function EventsList() {
           )}
         </CardContent>
       </Card>
+
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        title="Share Event"
+        content={currentEvent ? `${currentEvent.title} - Join us for this event! 🙏 #SoapBoxApp` : ""}
+        url={currentEvent ? `${window.location.origin}/events?event=${currentEvent.id}` : window.location.href}
+      />
     </div>
   );
 }

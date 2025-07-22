@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
+import ShareDialog from "./ShareDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -136,6 +137,7 @@ export function DailyBibleFeature() {
   const [showNotificationScheduler, setShowNotificationScheduler] = useState(false);
   const [currentJourneyType, setCurrentJourneyType] = useState("reading");
   const [showJourneySelector, setShowJourneySelector] = useState(false);
+  const [showEnhancedShareDialog, setShowEnhancedShareDialog] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState("alloy");
   const [selectedMusicBed, setSelectedMusicBed] = useState("none");
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
@@ -596,29 +598,13 @@ export function DailyBibleFeature() {
   const handleShareInsight = () => {
     if (!ethosResponse || !dailyVerse) return;
     
+    // Use clipboard as simple fallback for ETHOS insights
     const shareText = `🧠 ETHOS Spiritual Insight\n\n${ethosResponse}\n\nBased on: ${dailyVerse.verseReference}\n\nShared from SoapBox Super App`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: 'ETHOS Spiritual Insight',
-        text: shareText,
-        url: window.location.href
-      }).catch(() => {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Copied to Clipboard",
-          description: "Insight copied to clipboard for sharing.",
-        });
-      });
-    } else {
-      // Fallback to clipboard
-      navigator.clipboard.writeText(shareText);
-      toast({
-        title: "Copied to Clipboard",
-        description: "Insight copied to clipboard for sharing.",
-      });
-    }
+    navigator.clipboard.writeText(shareText);
+    toast({
+      title: "Insight Copied",
+      description: "ETHOS insight copied to clipboard for sharing.",
+    });
   };
 
   const handleCustomQuestion = () => {
@@ -1873,6 +1859,19 @@ export function DailyBibleFeature() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={showEnhancedShareDialog}
+        onClose={() => setShowEnhancedShareDialog(false)}
+        title="Share Verse"
+        content={
+          dailyVerse 
+            ? `${dailyVerse.verseReference} 🙏 #SoapBoxApp` 
+            : ""
+        }
+        url={window.location.origin + '/bible'}
+      />
     </div>
   );
 }

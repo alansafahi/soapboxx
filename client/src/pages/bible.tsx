@@ -8,11 +8,13 @@ import { Badge } from "../components/ui/badge";
 import { BookOpen, Calendar, Heart, Share2 } from "lucide-react";
 import MobileNav from "../components/mobile-nav";
 import { useToast } from "../hooks/use-toast";
+import ShareDialog from "../components/ShareDialog";
 
 export default function BiblePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   // Fetch daily verse from API
   const { data: dailyVerse, isLoading: verseLoading, error: verseError } = useQuery({
@@ -123,21 +125,7 @@ export default function BiblePage() {
                 variant="outline" 
                 size="sm" 
                 className="flex items-center justify-center gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: 'Daily Verse',
-                      text: `"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}`,
-                      url: window.location.href
-                    });
-                  } else {
-                    navigator.clipboard.writeText(`"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}"`);
-                    toast({
-                      title: "Copied to clipboard",
-                      description: "The verse has been copied to your clipboard."
-                    });
-                  }
-                }}
+                onClick={() => setShareDialogOpen(true)}
               >
                 <Share2 className="w-4 h-4" />
                 Share
@@ -202,6 +190,15 @@ export default function BiblePage() {
       </div>
 
       <MobileNav />
+      
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        title="Share Daily Verse"
+        content={`"${currentVerse?.verseText || ""}" - ${currentVerse?.verseReference || ""}`}
+        url={window.location.href}
+      />
     </div>
   );
 }
