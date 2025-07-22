@@ -161,7 +161,7 @@ export default function SidebarFixed() {
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
-        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // Positioned after core spiritual tools
+        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // Divine Volunteer System - RESTORED
         { label: "Saved Reflections", href: "/saved-reflections", icon: Bookmark },
         { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Heart },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },

@@ -117,6 +117,7 @@ export default function Sidebar() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
+
   const navigationGroups: NavigationGroup[] = [
     {
       label: "COMMUNITY",
