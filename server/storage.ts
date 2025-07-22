@@ -3252,9 +3252,9 @@ export class DatabaseStorage implements IStorage {
     try {
       const savedEntries = await db
         .select({
-          id: soapBookmarks.id,
+          bookmarkId: soapBookmarks.id,
           soapId: soapBookmarks.soapId,
-          createdAt: soapBookmarks.createdAt,
+          bookmarkCreatedAt: soapBookmarks.createdAt,
           // S.O.A.P. entry details
           scripture: soapEntries.scripture,
           scriptureReference: soapEntries.scriptureReference,
@@ -3277,8 +3277,37 @@ export class DatabaseStorage implements IStorage {
         .where(eq(soapBookmarks.userId, userId))
         .orderBy(desc(soapBookmarks.createdAt));
 
-      return savedEntries;
+      // Transform the data to match the SoapPostCard expected format
+      return savedEntries.map(entry => ({
+        id: entry.soapId, // Use the SOAP entry ID as the main ID
+        content: `${entry.scripture}\n\nObservation: ${entry.observation}\n\nApplication: ${entry.application}\n\nPrayer: ${entry.prayer}`,
+        authorId: entry.authorId,
+        createdAt: entry.soapCreatedAt?.toISOString() || new Date().toISOString(),
+        type: 'soap_reflection',
+        isSaved: true, // This is from saved reflections, so it's always saved
+        soapData: {
+          scripture: entry.scripture || '',
+          scriptureReference: entry.scriptureReference || '',
+          observation: entry.observation || '',
+          application: entry.application || '',
+          prayer: entry.prayer || ''
+        },
+        author: {
+          id: entry.authorId || '',
+          firstName: entry.firstName || 'Unknown',
+          lastName: entry.lastName || '',
+          profileImageUrl: entry.profileImageUrl || null,
+          email: entry.email || ''
+        },
+        likeCount: 0,
+        commentCount: 0,
+        _count: {
+          comments: 0,
+          likes: 0
+        }
+      }));
     } catch (error) {
+      console.error('Error fetching saved SOAP entries:', error);
       return [];
     }
   }
