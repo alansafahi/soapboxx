@@ -2397,15 +2397,15 @@ export class DatabaseStorage implements IStorage {
         return globalRole;
       }
       
-      // Check for church-specific admin roles
-      const churchRoles = await db
-        .select({ role: userChurches.role })
-        .from(userChurches)
-        .where(eq(userChurches.userId, userId));
+      // Check for church-specific admin roles using raw SQL to handle column mapping
+      const churchRoles = await db.execute(sql`
+        SELECT role FROM user_churches 
+        WHERE user_id = ${userId} AND role IS NOT NULL
+      `);
       
       // If user has any church admin role, return the highest privilege level
-      const adminRoles = churchRoles
-        .map(r => r.role)
+      const adminRoles = churchRoles.rows
+        .map((r: any) => r.role)
         .filter(role => ['church_admin', 'pastor', 'lead_pastor'].includes(role));
       
       if (adminRoles.includes('lead_pastor')) return 'lead_pastor';
