@@ -79,6 +79,7 @@ import {
   prayerBadges,
   userBadgeProgress,
   memberCommunications,
+  communicationTemplates,
   churchFeatureSettings,
   defaultFeatureSettings,
   type User,
@@ -3284,6 +3285,128 @@ export class DatabaseStorage implements IStorage {
       return !!bookmark;
     } catch (error) {
       return false;
+    }
+  }
+
+  // Communication Templates operations
+  async getCommunicationTemplates(userId: string, churchId?: number): Promise<any[]> {
+    try {
+      const user = await this.getUser(userId);
+      const userChurchId = churchId || user?.churchId;
+
+      if (!userChurchId) {
+        return [];
+      }
+
+      const templates = await db
+        .select()
+        .from(communicationTemplates)
+        .where(and(
+          eq(communicationTemplates.churchId, userChurchId),
+          eq(communicationTemplates.isActive, true)
+        ))
+        .orderBy(desc(communicationTemplates.usageCount), desc(communicationTemplates.createdAt));
+
+      return templates;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async createCommunicationTemplate(template: any): Promise<any> {
+    try {
+      const [newTemplate] = await db
+        .insert(communicationTemplates)
+        .values({
+          ...template,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      return newTemplate;
+    } catch (error) {
+      throw new Error('Failed to create communication template');
+    }
+  }
+
+  async updateCommunicationTemplate(templateId: number, updates: any): Promise<any> {
+    try {
+      const [updatedTemplate] = await db
+        .update(communicationTemplates)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(communicationTemplates.id, templateId))
+        .returning();
+
+      return updatedTemplate;
+    } catch (error) {
+      throw new Error('Failed to update communication template');
+    }
+  }
+
+  async deleteCommunicationTemplate(templateId: number): Promise<void> {
+    try {
+      await db
+        .delete(communicationTemplates)
+        .where(eq(communicationTemplates.id, templateId));
+    } catch (error) {
+      throw new Error('Failed to delete communication template');
+    }
+  }
+
+  // Communication history operations (using memberCommunications as history table)
+  async getCommunicationHistory(churchId: number): Promise<any[]> {
+    try {
+      const history = await db
+        .select()
+        .from(memberCommunications)
+        .where(eq(memberCommunications.churchId, churchId))
+        .orderBy(desc(memberCommunications.sentAt));
+
+      return history;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async createCommunicationRecord(record: {
+    churchId: number;
+    sentBy: string;
+    subject: string;
+    content: string;
+    recipientCount: number;
+    communicationType: string;
+    channels: string[];
+    priority: string;
+    requiresResponse: boolean;
+    scheduledFor?: Date;
+    sentAt?: Date;
+    deliveryStatus: string;
+  }): Promise<any> {
+    try {
+      const [newRecord] = await db
+        .insert(memberCommunications)
+        .values({
+          churchId: record.churchId,
+          subject: record.subject,
+          content: record.content,
+          memberId: record.sentBy,
+          communicationType: record.communicationType,
+          direction: 'outbound',
+          sentAt: record.sentAt || new Date(),
+          deliveryStatus: record.deliveryStatus,
+          responseReceived: false,
+          followUpRequired: record.requiresResponse,
+          createdAt: new Date()
+        })
+        .returning();
+
+      return newRecord;
+    } catch (error) {
+      throw new Error('Failed to create communication record');
     }
   }
 }

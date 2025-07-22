@@ -10118,7 +10118,14 @@ Please provide suggestions for the missing or incomplete sections.`
       // Get user's custom templates
       const user = await storage.getUser(userId);
       const churchId = user?.churchId;
-      const customTemplates = await storage.getCommunicationTemplates(userId, churchId);
+      let customTemplates = [];
+      
+      try {
+        customTemplates = await storage.getCommunicationTemplates(userId, churchId);
+      } catch (templateError) {
+        console.error('Template fetch error:', templateError);
+        // Continue with empty custom templates
+      }
 
       // Static templates
       const staticTemplates = {
@@ -10206,7 +10213,8 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(allTemplates);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch templates" });
+      console.error('Templates endpoint error:', error);
+      res.status(500).json({ message: "Failed to fetch templates", error: (error as Error).message });
     }
   });
 
