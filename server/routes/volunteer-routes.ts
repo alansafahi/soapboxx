@@ -60,7 +60,7 @@ router.post('/spiritual-gifts-assessment', async (req, res) => {
       volunteer 
     });
   } catch (error) {
-    console.error('Spiritual gifts assessment error:', error);
+    // Log error to server logs
     res.status(500).json({ error: 'Assessment failed' });
   }
 });
@@ -75,7 +75,7 @@ router.get('/has-profile', async (req, res) => {
     const volunteer = await volunteerStorage.getVolunteerByUserId((req.user as any).email);
     res.json({ hasProfile: !!volunteer });
   } catch (error) {
-    console.error('Profile check error:', error);
+    // Log error to server logs
     res.status(500).json({ error: 'Profile check failed' });
   }
 });
@@ -90,7 +90,7 @@ router.get('/profile', async (req, res) => {
     const volunteer = await volunteerStorage.getVolunteerByUserId((req.user as any).email);
     res.json(volunteer);
   } catch (error) {
-    console.error('Profile fetch error:', error);
+    // Log error to server logs
     res.status(500).json({ error: 'Profile fetch failed' });
   }
 });
@@ -116,7 +116,7 @@ router.get('/stats', async (req, res) => {
     const stats = await volunteerStorage.getVolunteerStats(volunteer.id);
     res.json(stats);
   } catch (error) {
-    console.error('Stats fetch error:', error);
+    // Log error to server logs
     res.status(500).json({ error: 'Stats fetch failed' });
   }
 });
@@ -150,7 +150,7 @@ router.get('/divine-appointments', async (req, res) => {
 
     res.json(existingMatches);
   } catch (error) {
-    console.error('Divine appointments error:', error);
+    // Log error to server logs
     res.status(500).json({ error: 'Failed to get divine appointments' });
   }
 });
@@ -172,7 +172,7 @@ router.post('/matches/:matchId/accept', async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Match acceptance error:', error);
+    // Match acceptance error
     res.status(500).json({ error: 'Failed to accept match' });
   }
 });
@@ -200,7 +200,7 @@ router.post('/matches/:matchId/review', async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Application review error:', error);
+    // Application review error
     res.status(500).json({ error: 'Failed to review application' });
   }
 });
@@ -216,7 +216,7 @@ router.get('/applications', async (req, res) => {
     const applications = await volunteerStorage.getPendingApplications((req.user as any).email);
     res.json(applications);
   } catch (error) {
-    console.error('Get applications error:', error);
+    // Get applications error
     res.status(500).json({ error: 'Failed to get applications' });
   }
 });
@@ -290,7 +290,7 @@ router.post('/opportunities', async (req, res) => {
     });
 
   } catch (error: any) {
-    console.error('Create opportunity error:', error);
+    // Create opportunity error
     
     if (error.name === 'ZodError') {
       return res.status(400).json({ 
@@ -310,7 +310,7 @@ router.get('/opportunities', async (req, res) => {
     const opportunities = await volunteerStorage.getVolunteerOpportunities(churchId);
     res.json(opportunities);
   } catch (error) {
-    console.error('Opportunities fetch error:', error);
+    // Opportunities fetch error
     res.status(500).json({ error: 'Failed to fetch opportunities' });
   }
 });
@@ -350,15 +350,15 @@ router.post('/opportunities', async (req, res) => {
       endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
     };
 
-    console.log('✅ ENHANCED ENDPOINT - Creating opportunity with comprehensive data');
+    // Enhanced endpoint for creating comprehensive volunteer opportunities
     
     // Debug specific array fields that might be causing issues
     if (typeof req.body.responsibilities === 'string') {
-      console.log('Converting responsibilities from string to array');
+      // Converting responsibilities from string to array
     }
     
     const validatedData = insertVolunteerOpportunitySchema.parse(mappedData);
-    console.log('✅ Validation passed, creating opportunity in database');
+    // Validation passed, creating opportunity in database
 
     const opportunity = await volunteerStorage.createVolunteerOpportunity(validatedData);
     res.json(opportunity);
@@ -366,7 +366,7 @@ router.post('/opportunities', async (req, res) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Invalid data', details: error.errors });
     }
-    console.error('Opportunity creation error:', error);
+    // Opportunity creation error
     res.status(500).json({ error: 'Failed to create opportunity' });
   }
 });
@@ -378,7 +378,7 @@ router.get('/spiritual-gifts', async (req, res) => {
     const gifts = await volunteerStorage.getSpiritualGifts();
     res.json(gifts);
   } catch (error) {
-    console.error('Spiritual gifts fetch error:', error);
+    // Spiritual gifts fetch error
     res.status(500).json({ error: 'Failed to fetch spiritual gifts' });
   }
 });
@@ -404,7 +404,7 @@ router.post('/background-check', async (req, res) => {
       message: 'Background check requested successfully'
     });
   } catch (error) {
-    console.error('Background check request error:', error);
+    // Background check request error
     res.status(500).json({ error: 'Failed to request background check' });
   }
 });
@@ -424,7 +424,7 @@ router.get('/background-check-status', async (req, res) => {
     const status = await volunteerStorage.getBackgroundCheckStatus(volunteer.id);
     res.json(status);
   } catch (error) {
-    console.error('Background check status error:', error);
+    // Background check status error
     res.status(500).json({ error: 'Failed to get background check status' });
   }
 });
@@ -462,7 +462,7 @@ router.get('/ministry/:ministry/team-optimization', async (req, res) => {
       optimization
     });
   } catch (error) {
-    console.error('Team optimization error:', error);
+    // Team optimization error
     res.status(500).json({ error: 'Failed to optimize team' });
   }
 });
@@ -489,7 +489,7 @@ router.post('/signup', async (req, res) => {
     });
 
     // Send confirmation notification to volunteer - implemented via email service
-    console.log(`📧 Volunteer signup confirmation sent to ${volunteer.email}`);
+    // Volunteer signup confirmation sent
 
     res.json({ 
       success: true, 
@@ -497,7 +497,7 @@ router.post('/signup', async (req, res) => {
       message: "Thank you for signing up! Your application is pending approval and you'll receive a confirmation notification shortly."
     });
   } catch (error) {
-    console.error('Volunteer signup error:', error);
+    // Volunteer signup error
     
     // Provide user-friendly error messages based on error type
     if (error instanceof Error) {
@@ -533,7 +533,7 @@ router.get('/my-registrations', async (req, res) => {
     const registrations = await volunteerStorage.getVolunteerRegistrations(volunteer.id);
     res.json(registrations);
   } catch (error) {
-    console.error('Registrations fetch error:', error);
+    // Registrations fetch error
     res.status(500).json({ error: 'Failed to fetch registrations' });
   }
 });
@@ -553,7 +553,7 @@ router.get('/onboarding-path', async (req, res) => {
     const onboardingPath = await recommendOnboardingPath(volunteer);
     res.json(onboardingPath);
   } catch (error) {
-    console.error('Onboarding path error:', error);
+    // Onboarding path error
     res.status(500).json({ error: 'Failed to get onboarding path' });
   }
 });

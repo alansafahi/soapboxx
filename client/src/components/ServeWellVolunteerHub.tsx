@@ -189,7 +189,7 @@ const SpiritualGiftsAssessment = ({ onComplete }: { onComplete: (profile: any) =
       onComplete(profile);
     },
     onError: (error) => {
-      console.error('Assessment failed:', error);
+      // Assessment failed
       // Still complete the assessment even if API fails - show success announcement
       // Calculate the profile locally if API fails
       const responses = form.getValues().responses;
@@ -794,7 +794,7 @@ const VolunteerOpportunitiesPanel = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/volunteers/my-registrations'] });
     },
     onError: (error) => {
-      console.error('Signup failed:', error);
+      // Signup failed
       alert('❌ Signup failed. Please try again or contact support.');
       setShowSignupDialog(false);
       setSignupNotes('');
@@ -812,13 +812,6 @@ const VolunteerOpportunitiesPanel = () => {
   };
 
   const handleEditPosition = (opportunity: VolunteerOpportunity) => {
-    console.log('handleEditPosition called with:', {
-      id: opportunity.id,
-      title: opportunity.title,
-      ministry: opportunity.ministry,
-      department: opportunity.department,
-      fullData: opportunity
-    });
     setSelectedOpportunity(opportunity);
     setShowEditDialog(true);
   };
@@ -830,7 +823,7 @@ const VolunteerOpportunitiesPanel = () => {
         queryClient.invalidateQueries({ queryKey: ['/api/volunteers/opportunities'] });
         alert('✅ Position marked as complete!');
       } catch (error) {
-        console.error('Failed to complete position:', error);
+        // Failed to complete position
         alert('❌ Failed to complete position. Please try again.');
       }
     }
@@ -843,7 +836,7 @@ const VolunteerOpportunitiesPanel = () => {
         queryClient.invalidateQueries({ queryKey: ['/api/volunteers/opportunities'] });
         alert('🗑️ Position deleted successfully!');
       } catch (error) {
-        console.error('Failed to delete position:', error);
+        // Failed to delete position
         alert('❌ Failed to delete position. Please try again.');
       }
     }

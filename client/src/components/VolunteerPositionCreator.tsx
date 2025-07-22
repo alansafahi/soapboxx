@@ -687,21 +687,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
   // Initialize state arrays and form values when editOpportunity changes
   useEffect(() => {
-    console.log('useEffect triggered:', { 
-      hasEditOpportunity: !!editOpportunity, 
-      isOpen, 
-      opportunityTitle: editOpportunity?.title,
-      opportunityMinistry: editOpportunity?.ministry,
-      opportunityDepartment: editOpportunity?.department
-    });
     if (editOpportunity && isOpen) {
-      console.log('Resetting form with edit data:', {
-        id: editOpportunity.id,
-        title: editOpportunity.title,
-        ministry: editOpportunity.ministry,
-        department: editOpportunity.department,
-        allData: editOpportunity
-      });
       // Use individual setValue calls instead of reset to force UI updates
       const formData = {
         // Basic Information
@@ -780,17 +766,9 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
       // Reset to basic tab when editing
       setCurrentTab('basic');
       
-      // Debug form values after reset
+      // Force form validation
       setTimeout(() => {
-        const currentFormValues = form.getValues();
-        console.log('Form values after reset:', {
-          title: currentFormValues.title,
-          ministry: currentFormValues.ministry,
-          department: currentFormValues.department,
-          description: currentFormValues.description,
-          volunteersNeeded: currentFormValues.volunteersNeeded,
-          allFormValues: currentFormValues
-        });
+        form.trigger();
       }, 100);
     } else if (isOpen && !editOpportunity) {
       // Reset form for new position creation
@@ -853,17 +831,9 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
   }, [editOpportunity, isOpen, form]);
 
   const onSubmit = async (data: CreatePositionForm) => {
-    console.log('🎯 FORM SUBMISSION STARTED!');
-    console.log('📋 Form data received:', data);
-    console.log('📊 Form state valid:', form.formState.isValid);
-    console.log('🚨 Form errors:', form.formState.errors);
-    
     try {
-      console.log('✅ Validation passed, calling mutation...');
       await createPositionMutation.mutateAsync(data);
-      console.log('🎉 Position created successfully!');
     } catch (error: any) {
-      console.error('❌ Mutation failed:', error);
       toast({
         title: "Failed to Create Position",
         description: error.message || "An error occurred while creating the position.",
@@ -896,11 +866,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
             e.preventDefault();
             // Only allow submission on the final 'admin' tab
             if (currentTab === 'admin') {
-              console.log('Form submit event triggered - Admin tab');
-              console.log('Current form values before submission:', form.getValues());
-              console.log('Form errors before submission:', form.formState.errors);
               form.handleSubmit(onSubmit, (errors) => {
-                console.log('Form submission failed with errors:', errors);
                 toast({
                   title: "Form Validation Failed",
                   description: `Please fix: ${Object.keys(errors).join(', ')}`,
@@ -908,7 +874,6 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                 });
               })(e);
             } else {
-              console.log('Form submission blocked - not on admin tab');
               goToNextTab();
             }
           }} className="space-y-6">
