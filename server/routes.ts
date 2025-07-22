@@ -5892,10 +5892,8 @@ Return JSON with this exact structure:
       res.json(distributionPackage);
 
     } catch (error) {
-      console.error('Content distribution error:', error);
       res.status(500).json({ 
-        message: "Failed to generate content distribution package",
-        error: error instanceof Error ? error.message : 'Unknown error'
+        message: "Failed to generate content distribution package"
       });
     }
   });

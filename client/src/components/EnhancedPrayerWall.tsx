@@ -387,7 +387,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       });
     },
     onError: (error: any) => {
-      console.error('Prayer creation error:', error);
+      // Prayer creation error - silent error handling
       let errorMessage = "Failed to post prayer request. Please try again.";
       
       // Check for authentication errors

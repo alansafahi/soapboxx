@@ -373,14 +373,14 @@ export default function Sidebar() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Button clicked for group:', group.label);
+                    // Button clicked for group - debug logging removed
                     if (group.label === 'SPIRITUAL TOOLS') {
-                      console.log('SPIRITUAL TOOLS button specifically clicked!');
+                      // SPIRITUAL TOOLS button clicked - debug logging removed
                     }
                     toggleGroup(group.label);
                   }}
-                  onMouseDown={() => console.log('Mouse down on:', group.label)}
-                  onMouseUp={() => console.log('Mouse up on:', group.label)}
+                  onMouseDown={() => {}}
+                  onMouseUp={() => {}}
                   className="flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400 cursor-pointer z-10 relative"
                   style={{ pointerEvents: 'all' }}
                 >

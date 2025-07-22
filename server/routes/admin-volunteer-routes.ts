@@ -26,7 +26,7 @@ router.get('/pending-approvals', async (req, res) => {
     
     res.json(pendingRegistrations);
   } catch (error) {
-    console.error('Failed to get pending approvals:', error);
+    // Failed to get pending approvals - silent error handling
     res.status(500).json({ error: 'Failed to get pending approvals' });
   }
 });
@@ -59,7 +59,7 @@ router.post('/approve-registration', async (req, res) => {
       message: `Registration ${status} successfully`
     });
   } catch (error) {
-    console.error('Failed to approve registration:', error);
+    // Failed to approve registration - silent error handling
     res.status(500).json({ error: 'Failed to process approval' });
   }
 });

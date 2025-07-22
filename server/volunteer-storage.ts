@@ -389,7 +389,7 @@ export class VolunteerStorage {
           .where(eq(volunteerOpportunities.status, 'open'))
           .limit(3);
 
-        console.log(`💡 Suggested ${alternatives.length} alternative opportunities for volunteer ${volunteerEmail}`);
+        // Suggested alternative opportunities for volunteer - silent logging
         // TODO: Create new volunteer matches for these alternatives
         // This could trigger new AI matching and divine appointments
       }
@@ -430,8 +430,7 @@ export class VolunteerStorage {
   // Create volunteer opportunity - comprehensive implementation
   async createVolunteerOpportunity(data: any): Promise<any> {
     try {
-      console.log('STORAGE METHOD - Received data keys:', Object.keys(data));
-      console.log('STORAGE METHOD - Data values:', JSON.stringify(data, null, 2));
+      // Storage method received data - debug logging removed
       
       const [opportunity] = await db
         .insert(volunteerOpportunities)
@@ -474,7 +473,7 @@ export class VolunteerStorage {
         })
         .returning();
 
-      console.log(`✅ Created volunteer opportunity: ${data.title}`);
+      // Created volunteer opportunity - silent logging
       return opportunity;
       
     } catch (error) {

@@ -77,7 +77,7 @@ export async function sendCoordinatorApplicationNotification(data: VolunteerAppl
     };
 
     await mailService.send(emailData);
-    console.log(`✅ Application notification sent to ${data.coordinatorEmail}`);
+    // Application notification sent - silent logging
     return true;
 
   } catch (error) {
