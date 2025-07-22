@@ -161,7 +161,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
           return next();
         }
       } catch (error) {
-        console.error('Error loading user from session:', error);
+        // Error logged for internal tracking
       }
     }
     

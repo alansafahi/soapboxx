@@ -41,7 +41,7 @@ router.post('/api/media/analyze', isAuthenticated, async (req, res) => {
     });
 
   } catch (error) {
-    // console.error('Media analysis error:', error);
+    // 
     res.status(500).json({ error: 'Analysis failed' });
   }
 });
@@ -99,7 +99,7 @@ router.post('/api/media/bulk-analyze', isAuthenticated, async (req, res) => {
     });
 
   } catch (error) {
-    // console.error('Bulk media analysis error:', error);
+    // 
     res.status(500).json({ error: 'Bulk analysis failed' });
   }
 });
@@ -193,7 +193,7 @@ async function analyzeMedia(req: Request, res: Response) {
     });
 
   } catch (error) {
-    // console.error('Media analysis error:', error);
+    // 
     res.status(500).json({ error: 'Analysis failed' });
   }
 }
@@ -254,7 +254,7 @@ async function bulkAnalyzeMedia(req: Request, res: Response) {
     });
 
   } catch (error) {
-    // console.error('Bulk media analysis error:', error);
+    // 
     res.status(500).json({ error: 'Bulk analysis failed' });
   }
 }

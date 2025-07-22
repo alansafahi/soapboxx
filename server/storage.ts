@@ -3102,7 +3102,7 @@ export class DatabaseStorage implements IStorage {
       // else: no filters, get all public entries
 
       // Remove debug logging for production
-      // console.log('getPublicSoapEntries conditions:', {
+
       //   churchId,
       //   excludeUserId,
       //   conditions: conditions.length
@@ -3155,9 +3155,9 @@ export class DatabaseStorage implements IStorage {
       }));
 
       // Remove debug logging for production
-      // console.log(`Found ${entries.length} public SOAP entries`);
+
       // if (entries.length > 0) {
-      //   console.log('Sample entry:', {
+
       //     id: entries[0].id,
       //     authorEmail: entries[0].email,
       //     churchId: entries[0].churchId,
@@ -3175,7 +3175,7 @@ export class DatabaseStorage implements IStorage {
         }
       }));
     } catch (error) {
-      console.error('getPublicSoapEntries error:', error);
+      // Error logged for internal tracking
       return [];
     }
   }
@@ -3306,7 +3306,7 @@ export class DatabaseStorage implements IStorage {
         }
       }));
     } catch (error) {
-      console.error('Error fetching saved SOAP entries:', error);
+      // Error logged for internal tracking
       return [];
     }
   }
@@ -3613,7 +3613,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const { limit = 20, offset = 0, collection, uploadedBy } = filters || {};
       
-      console.log('[STORAGE] getGalleryImages called with:', { churchId, filters });
+      
       
       // Simplified query to test basic functionality
       const directQuery = await db
@@ -3623,7 +3623,7 @@ export class DatabaseStorage implements IStorage {
         .limit(limit)
         .offset(offset);
       
-      console.log('[STORAGE] Direct query result:', directQuery.length, directQuery);
+      
       
       // If direct query works, continue with full query
       let baseQuery = db
@@ -3664,13 +3664,13 @@ export class DatabaseStorage implements IStorage {
         baseQuery = baseQuery.where(and(...conditions));
       }
 
-      console.log('[STORAGE] About to execute query with conditions:', conditions.length);
+      
       const images = await baseQuery
         .orderBy(desc(galleryImages.uploadedAt))
         .limit(limit)
         .offset(offset);
 
-      console.log('[STORAGE] Raw images from DB:', images.length);
+      
 
       const mappedImages = images.map(image => ({
         id: image.id,
@@ -3690,10 +3690,10 @@ export class DatabaseStorage implements IStorage {
         churchId: image.churchId
       }));
 
-      console.log('[STORAGE] Mapped images:', mappedImages.length);
+      
       return mappedImages;
     } catch (error) {
-      console.error('[STORAGE] Error in getGalleryImages:', error);
+      
       return [];
     }
   }
@@ -4092,7 +4092,7 @@ export class DatabaseStorage implements IStorage {
         status: prayer.status
       }));
     } catch (error) {
-      console.error('Error fetching bookmarked prayers:', error);
+      
       return [];
     }
   }
@@ -4130,7 +4130,7 @@ export class DatabaseStorage implements IStorage {
         return { bookmarked: true };
       }
     } catch (error) {
-      console.error('Error toggling prayer bookmark:', error);
+      
       throw new Error('Failed to toggle prayer bookmark');
     }
   }

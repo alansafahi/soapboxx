@@ -156,7 +156,7 @@ Respond with JSON:
     return moderationResult;
 
   } catch (error) {
-    // // console.error('AI moderation analysis failed:', error);
+    // // 
     // Return safe fallback
     return {
       flagged: false,
@@ -204,16 +204,16 @@ export async function createAutoModerationReport(
 
     // Take immediate action for high priority violations - CRITICAL CHILD PROTECTION
     if (moderationResult.actionRequired === 'hide' || moderationResult.actionRequired === 'remove') {
-      // // console.log(`🚨 URGENT: Auto-hiding ${contentType} #${contentId} - Priority: ${moderationResult.priority} - Reason: ${moderationResult.reason}`);
+      // // 
       await storage.hideContent(
         contentType, 
         contentId, 
         `Auto-moderation: ${moderationResult.reason} (${moderationResult.violations.join(', ')})`,
         systemUserId
       );
-      // // console.log(`✅ Content automatically hidden for child protection`);
+      // // 
     }
   } catch (error) {
-    // // console.error('Failed to create auto-moderation report:', error);
+    // // 
   }
 }

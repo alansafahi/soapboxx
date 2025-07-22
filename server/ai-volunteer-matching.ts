@@ -89,7 +89,7 @@ export async function assessSpiritualGifts(responses: Record<string, number>): P
     };
 
   } catch (error) {
-    console.error("Spiritual gifts assessment failed:", error);
+    
     throw new Error("Failed to assess spiritual gifts");
   }
 }
@@ -182,7 +182,7 @@ export async function findDivineAppointments(
     }));
 
   } catch (error) {
-    console.error("Divine appointment matching failed:", error);
+    
     throw new Error("Failed to find volunteer matches");
   }
 }
@@ -244,7 +244,7 @@ export async function optimizeTeamComposition(volunteers: any[], ministry: strin
     return JSON.parse(response.choices[0].message.content);
 
   } catch (error) {
-    console.error("Team optimization failed:", error);
+    
     throw new Error("Failed to optimize team composition");
   }
 }
@@ -316,7 +316,7 @@ export async function recommendOnboardingPath(volunteer: any): Promise<any> {
     return JSON.parse(response.choices[0].message.content);
 
   } catch (error) {
-    console.error("Onboarding path recommendation failed:", error);
+    
     throw new Error("Failed to recommend onboarding path");
   }
 }

@@ -81,7 +81,7 @@ export async function sendCoordinatorApplicationNotification(data: VolunteerAppl
     return true;
 
   } catch (error) {
-    console.error('Failed to send coordinator notification:', error);
+    
     return false;
   }
 }
@@ -89,8 +89,8 @@ export async function sendCoordinatorApplicationNotification(data: VolunteerAppl
 export async function sendVolunteerStatusNotification(data: VolunteerStatusNotification): Promise<boolean> {
   try {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log(`📧 [DEMO] Status notification to ${data.volunteerName} (${data.volunteerEmail})`);
-      console.log(`Application ${data.status} for ${data.opportunityTitle}`);
+      
+      
       return true;
     }
 
@@ -164,11 +164,11 @@ export async function sendVolunteerStatusNotification(data: VolunteerStatusNotif
     };
 
     await mailService.send(emailData);
-    console.log(`✅ Status notification (${data.status}) sent to ${data.volunteerEmail}`);
+    
     return true;
 
   } catch (error) {
-    console.error('Failed to send volunteer status notification:', error);
+    
     return false;
   }
 }

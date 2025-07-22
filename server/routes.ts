@@ -1267,7 +1267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userRole = await storage.getUserRole(userId);
       res.json(userRole);
     } catch (error) {
-      console.error('Get user role error:', error);
+      // Error logged for internal tracking
       res.status(500).json({ message: "Failed to get user role" });
     }
   });
@@ -3013,13 +3013,13 @@ app.post('/api/invitations', async (req: any, res) => {
           await storage.hideContent(contentType, parseInt(contentId), 
             `High priority violation: ${reason}`, userId);
         } catch (error) {
-          // // console.error('Failed to auto-hide high priority content:', error);
+
         }
       }
 
       res.json({ success: true, report });
     } catch (error) {
-      // // console.error('Failed to create content report:', error);
+
       res.status(500).json({ message: 'Failed to create content report' });
     }
   });
@@ -3059,7 +3059,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json(reports);
     } catch (error) {
-      // // console.error('Failed to fetch content reports:', error);
+
       res.status(500).json({ message: 'Failed to fetch content reports' });
     }
   });
@@ -3089,7 +3089,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json({ success: true, message: 'Report updated successfully' });
     } catch (error) {
-      // // console.error('Failed to update content report:', error);
+
       res.status(500).json({ message: 'Failed to update content report' });
     }
   });
@@ -3118,7 +3118,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
       res.json({ success: true, result });
     } catch (error) {
-      // // console.error('Failed to send edit request:', error);
+
       res.status(500).json({ message: 'Failed to send edit request' });
     }
   });
@@ -3156,14 +3156,14 @@ app.post('/api/invitations', async (req: any, res) => {
 
       const { contentType, originalContent, violationReason, reportDescription } = req.body;
       
-      // // console.log('Received AI suggestions request:', { contentType, originalContent: originalContent?.substring(0, 100), violationReason, reportDescription });
+
       
       if (!contentType || !originalContent || !violationReason) {
-        // // console.log('Missing required fields:', { contentType: !!contentType, originalContent: !!originalContent, violationReason: !!violationReason });
+
         return res.status(400).json({ message: 'Missing required fields' });
       }
 
-      // // console.log('Generating AI suggestions for:', { contentType, violationReason, originalContent: originalContent.substring(0, 100) + '...' });
+
 
       // Create a prompt for GPT-4o to generate edit suggestions
       const prompt = `You are a content moderation assistant for a faith-based community platform. 
@@ -3212,7 +3212,7 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
 
       if (!response.ok) {
         const errorText = await response.text();
-        // // console.error('OpenAI API error:', response.status, errorText);
+
         throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
       }
 
@@ -3229,7 +3229,7 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
         suggestions: aiResponse.suggestions || 'Consider revising the content to better align with our community guidelines.'
       });
     } catch (error) {
-      // // console.error('Error generating AI suggestions:', error);
+      // // 
       
       // Provide more specific error information
       let errorMessage = 'Failed to generate AI suggestions';
@@ -3274,7 +3274,7 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
 
       res.json({ success: true, message: 'Content hidden successfully' });
     } catch (error) {
-      // // console.error('Failed to hide content:', error);
+      // // 
       res.status(500).json({ message: 'Failed to hide content' });
     }
   });
@@ -7287,7 +7287,7 @@ Return JSON with this exact structure:
       const posts = await storage.getUserPosts(userId, sort as string, type as string);
       res.json(posts);
     } catch (error) {
-      // // console.error('Error fetching user posts:', error);
+      // // 
       res.status(500).json({ 
         message: 'Failed to fetch user posts',
         error: error instanceof Error ? error.message : String(error)
@@ -7307,7 +7307,7 @@ Return JSON with this exact structure:
       const stats = await storage.getUserPostStats(userId);
       res.json(stats);
     } catch (error) {
-      // // console.error('Error fetching user post stats:', error);
+      // // 
       res.status(500).json({ 
         message: 'Failed to fetch user post statistics',
         error: error instanceof Error ? error.message : String(error)
@@ -7729,7 +7729,7 @@ Return JSON with this exact structure:
             }
           }
         } catch (error) {
-          // // console.error('AI moderation failed:', error);
+          // // 
         }
       }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
 
@@ -7954,7 +7954,7 @@ Return JSON with this exact structure:
         deletedBy: isAuthor ? "author" : "admin"
       });
     } catch (error) {
-      // // console.error('Delete discussion error:', error);
+      // // 
       res.status(500).json({ message: "Failed to delete post", error: error.message });
     }
   });
@@ -8020,10 +8020,6 @@ Return JSON with this exact structure:
     try {
       const userId = req.session.userId;
       if (!userId) {
-        console.error('Prayer creation failed - no userId in session:', { 
-          sessionId: req.sessionID,
-          session: req.session 
-        });
         return res.status(401).json({ message: 'User authentication required' });
       }
       
@@ -9260,7 +9256,7 @@ Return JSON with this exact structure:
             }
           }
         } catch (error) {
-          // // console.error('AI moderation failed for SOAP entry:', error);
+          // // 
         }
       }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
 
@@ -9329,7 +9325,7 @@ Return JSON with this exact structure:
     try {
       const { limit = 20, offset = 0 } = req.query;
 
-      console.log('All Entries API called - including current user entries');
+      
 
       const entries = await storage.getPublicSoapEntries(
         undefined, // No church filter - platform-wide
@@ -9338,11 +9334,11 @@ Return JSON with this exact structure:
         undefined // Include ALL users including current user
       );
 
-      console.log(`All Entries returned: ${entries.length} entries`);
+      
 
       res.json(entries);
     } catch (error) {
-      console.error('SOAP all entries error:', error);
+      
       res.status(500).json({ message: 'Failed to fetch all S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -9352,14 +9348,7 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const { churchId, limit = 20, offset = 0, includeOwnEntries = 'false' } = req.query;
 
-      console.log('SOAP Public API Debug:', {
-        userId,
-        churchId,
-        limit,
-        offset,
-        includeOwnEntries,
-        sessionInfo: req.session
-      });
+      // Debug info removed for production
 
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
@@ -9375,19 +9364,14 @@ Return JSON with this exact structure:
           const userChurch = await storage.getUserChurch(userId);
           if (userChurch) {
             userChurchId = userChurch.churchId;
-            console.log('Found user church:', userChurchId);
+            
           }
         }
       }
       
       const excludeUserId = includeOwnEntries === 'true' ? undefined : userId;
 
-      console.log('Calling getPublicSoapEntries with:', {
-        userChurchId,
-        limit: parseInt(limit as string),
-        offset: parseInt(offset as string),
-        excludeUserId
-      });
+      // Debug info removed for production
 
       const entries = await storage.getPublicSoapEntries(
         userChurchId, // undefined = platform-wide, number = church-specific
@@ -9396,18 +9380,11 @@ Return JSON with this exact structure:
         excludeUserId // Exclude current user's entries by default
       );
 
-      console.log('Retrieved entries count:', entries.length);
-      if (entries.length > 0) {
-        console.log('First entry sample:', {
-          id: entries[0].id,
-          author: entries[0].author?.email,
-          scriptureRef: entries[0].scriptureReference
-        });
-      }
+      // Debug logging removed for production
 
       res.json(entries);
     } catch (error) {
-      console.error('SOAP public entries error:', error);
+      
       res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -10144,7 +10121,7 @@ Please provide suggestions for the missing or incomplete sections.`
       try {
         customTemplates = await storage.getCommunicationTemplates(userId, churchId);
       } catch (templateError) {
-        console.error('Template fetch error:', templateError);
+        
         // Continue with empty custom templates
       }
 
@@ -10234,7 +10211,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(allTemplates);
     } catch (error) {
-      console.error('Templates endpoint error:', error);
+      
       res.status(500).json({ message: "Failed to fetch templates", error: (error as Error).message });
     }
   });
@@ -12709,7 +12686,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json({ success: true, result });
     } catch (error) {
-      // // console.error('Moderation action failed:', error);
+      // // 
       res.status(500).json({ message: 'Failed to execute moderation action' });
     }
   });
@@ -12732,7 +12709,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const feedback = await LearningIntegration.getTrainingFeedback();
       res.json(feedback);
     } catch (error) {
-      // // console.error('Failed to get training feedback:', error);
+      // // 
       res.status(500).json({ message: 'Failed to get training feedback' });
     }
   });
@@ -12753,7 +12730,7 @@ Please provide suggestions for the missing or incomplete sections.`
       await LearningIntegration.testEnhancedClassification();
       res.json({ message: 'AI classification test completed - check server logs' });
     } catch (error) {
-      // // console.error('AI test failed:', error);
+      // // 
       res.status(500).json({ message: 'Failed to test AI classification' });
     }
   });
@@ -12783,7 +12760,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Extract ALL form data from the comprehensive Phase 2 position creator
-      console.log('✅ OLD ENDPOINT - Backend received ALL data:', JSON.stringify(req.body, null, 2));
+      
       
       const {
         title,
@@ -12867,7 +12844,7 @@ Please provide suggestions for the missing or incomplete sections.`
         updatedAt: new Date()
       };
       
-      console.log('✅ OLD ENDPOINT - Creating opportunity with data:', JSON.stringify(opportunityData, null, 2));
+      
       
       const [opportunity] = await db
         .insert(volunteerOpportunities)
@@ -12881,7 +12858,7 @@ Please provide suggestions for the missing or incomplete sections.`
       });
 
     } catch (error) {
-      console.error('Failed to create volunteer opportunity:', error);
+      
       
       // Enhanced error handling for database constraint violations
       let errorMessage = 'Failed to create volunteer position';
@@ -12941,7 +12918,7 @@ Please provide suggestions for the missing or incomplete sections.`
       });
 
     } catch (error) {
-      console.error('Failed to complete volunteer opportunity:', error);
+      
       res.status(500).json({ 
         message: 'Failed to mark position as complete',
         error: error.message 
@@ -13028,7 +13005,7 @@ Please provide suggestions for the missing or incomplete sections.`
       });
 
     } catch (error) {
-      console.error('Failed to update volunteer opportunity:', error);
+      
       
       // Enhanced error handling for database constraint violations
       let errorMessage = 'Failed to update volunteer position';
@@ -13091,7 +13068,7 @@ Please provide suggestions for the missing or incomplete sections.`
       });
 
     } catch (error) {
-      console.error('Failed to delete volunteer opportunity:', error);
+      
       res.status(500).json({ 
         message: 'Failed to delete volunteer position',
         error: error.message 

@@ -190,7 +190,7 @@ export function ModerationDashboard() {
         description: "Review and customize the AI-generated feedback and suggestions as needed.",
       });
     } catch (error) {
-      // // console.error('AI suggestions error:', error);
+      // // 
       toast({
         title: "Error",
         description: error.message || "Failed to generate AI suggestions. Please create manual suggestions.",

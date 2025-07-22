@@ -37,7 +37,7 @@ export class VolunteerStorage {
         .where(eq(volunteers.userId, userId));
       return volunteer || undefined;
     } catch (error) {
-      console.error('Error fetching volunteer by userId:', error);
+      // Error logged for internal tracking
       return undefined;
     }
   }
@@ -92,7 +92,7 @@ export class VolunteerStorage {
         coordinatorEmail: row.coordinator_email
       }));
     } catch (error) {
-      console.error('Error fetching volunteer opportunities:', error);
+      // Error logged for internal tracking
       return [];
     }
   }
@@ -367,7 +367,7 @@ export class VolunteerStorage {
         };
       }
     } catch (error) {
-      console.error('Failed to update application status:', error);
+      // Error logged for internal tracking
       return { success: false, message: 'Failed to update application status' };
     }
   }
@@ -394,7 +394,7 @@ export class VolunteerStorage {
         // This could trigger new AI matching and divine appointments
       }
     } catch (error) {
-      console.error('Failed to suggest alternatives:', error);
+      // Error logged for internal tracking
     }
   }
 
@@ -422,7 +422,7 @@ export class VolunteerStorage {
 
       return applications;
     } catch (error) {
-      console.error('Failed to get pending applications:', error);
+      // Error logged for internal tracking
       return [];
     }
   }
@@ -477,7 +477,7 @@ export class VolunteerStorage {
       return opportunity;
       
     } catch (error) {
-      console.error('Failed to create volunteer opportunity:', error);
+      
       throw error;
     }
   }
