@@ -147,6 +147,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 22, 2025: SOCIAL FEED INTEGRATION COMPLETELY FIXED - Successfully resolved critical issue where new posts (prayer requests, discussions, SOAP entries) appeared in "My Posts" but not "Latest Posts" section
+  - ROOT CAUSE IDENTIFIED: getDiscussions method only included discussions and SOAP entries but excluded prayer requests from Latest Posts feed
+  - PRAYER REQUESTS INTEGRATION: Enhanced getDiscussions method to include public prayer requests alongside discussions and SOAP entries
+  - UNIFIED FEED DISPLAY: All post types (discussions, SOAP reflections, prayer requests) now appear in both "My Posts" and "Latest Posts" sections
+  - DATA TRANSFORMATION: Added proper prayer request transformation with author info, type classification, and content formatting
+  - CACHE INVALIDATION WORKING: New posts immediately visible in both user's personal feed and community Latest Posts feed
 - July 22, 2025: PRAYER WALL CRITICAL BUG FIXED - Successfully implemented missing createPrayerRequest method in DatabaseStorage class resolving "storage.createPrayerRequest is not a function" error that prevented prayer request creation from working properly
 - July 22, 2025: VOLUNTEER POSITION FIELD LENGTH VALIDATION SYSTEM COMPLETELY IMPLEMENTED - Successfully created comprehensive client-side validation system preventing database constraint errors before form submission
   - DATABASE FIELD LIMITS INCREASED: Enhanced schema field limits by 2-3x (title: 600 chars, location: 500 chars, timeCommitmentLevel: 500 chars, backgroundCheckLevel: 150 chars) to prevent constraint violations

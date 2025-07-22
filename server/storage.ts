@@ -2299,6 +2299,23 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(soapEntries.createdAt))
         .limit(limit || 25);
 
+      // Get public prayer requests
+      const prayerRequestsData = await db
+        .select()
+        .from(prayerRequests)
+        .leftJoin(users, eq(prayerRequests.authorId, users.id))
+        .where(
+          and(
+            eq(prayerRequests.isPublic, true),
+            or(
+              isNull(prayerRequests.expiresAt),
+              gt(prayerRequests.expiresAt, new Date())
+            )
+          )
+        )
+        .orderBy(desc(prayerRequests.createdAt))
+        .limit(limit || 25);
+
       // Transform and combine results
       const transformedDiscussions = regularDiscussions.map(row => ({
         ...row.discussions,
@@ -2327,8 +2344,25 @@ export class DatabaseStorage implements IStorage {
         }
       }));
 
+      const transformedPrayerRequests = prayerRequestsData.map(row => ({
+        ...row.prayer_requests,
+        id: row.prayer_requests?.id,
+        authorId: row.prayer_requests?.authorId,
+        title: 'Prayer Request',
+        content: row.prayer_requests?.content,
+        category: row.prayer_requests?.category || 'general',
+        likeCount: 0,
+        commentCount: 0,
+        prayerCount: row.prayer_requests?.prayerCount || 0,
+        author: row.users,
+        type: 'prayer_request',
+        soapData: null,
+        isAnonymous: row.prayer_requests?.isAnonymous || false,
+        mood: row.prayer_requests?.mood
+      }));
+
       // Combine and sort all posts
-      const allPosts = [...transformedDiscussions, ...transformedSoap]
+      const allPosts = [...transformedDiscussions, ...transformedSoap, ...transformedPrayerRequests]
         .filter(post => post.id) // Remove any invalid entries
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
