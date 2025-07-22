@@ -105,8 +105,13 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Get user role data - use direct user session role instead of API call
-  const userRole = user?.role;
+  // Get user's church-specific role data
+  const { data: userRole } = useQuery<string>({
+    queryKey: ["/api/users/role"],
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 1
+  });
   
 
 
@@ -183,10 +188,14 @@ export default function Sidebar() {
       if (!user) return true;
       
       const hasAccess = item.roles.some(role => 
-        // Check if user has the role directly
+        // Check if user has the role directly (global role)
         user?.role === role || 
+        // Check church-specific role
         userRole === role ||
-        user?.role === 'soapbox_owner' // Always show for soapbox_owner
+        // Always show for soapbox_owner
+        user?.role === 'soapbox_owner' ||
+        // Also check if user has church_admin role for admin portal access
+        (userRole === 'church_admin' && ['admin', 'church-admin', 'church_admin'].includes(role))
       );
       
       return hasAccess;

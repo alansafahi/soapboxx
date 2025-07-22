@@ -1255,6 +1255,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's church-specific role for navigation
+  app.get('/api/users/role', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const userRole = await storage.getUserRole(userId);
+      res.json(userRole);
+    } catch (error) {
+      console.error('Get user role error:', error);
+      res.status(500).json({ message: "Failed to get user role" });
+    }
+  });
+
   // Get pinned posts for church
   app.get('/api/discussions/pinned', isAuthenticated, async (req: any, res) => {
     try {
