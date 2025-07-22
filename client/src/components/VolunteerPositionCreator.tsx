@@ -579,6 +579,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
   };
 
   const handleRequiredSkillToggle = (skill: string) => {
+    // Clear other selections for this skill first (row-level mutual exclusivity)
+    setPreferredSkills(prev => prev.filter(s => s !== skill));
+    setNaSkills(prev => prev.filter(s => s !== skill));
+    
     setSelectedSkills(prev => {
       const updated = prev.includes(skill) 
         ? prev.filter(s => s !== skill)
@@ -589,6 +593,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
   };
 
   const handlePreferredSkillToggle = (skill: string) => {
+    // Clear other selections for this skill first (row-level mutual exclusivity)
+    setSelectedSkills(prev => prev.filter(s => s !== skill));
+    setNaSkills(prev => prev.filter(s => s !== skill));
+    
     setPreferredSkills(prev => {
       const updated = prev.includes(skill) 
         ? prev.filter(s => s !== skill)
@@ -599,6 +607,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
   };
 
   const handleNASkillToggle = (skill: string) => {
+    // Clear other selections for this skill first (row-level mutual exclusivity)
+    setSelectedSkills(prev => prev.filter(s => s !== skill));
+    setPreferredSkills(prev => prev.filter(s => s !== skill));
+    
     setNaSkills(prev => {
       const updated = prev.includes(skill) 
         ? prev.filter(s => s !== skill)
@@ -666,6 +678,7 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
     setSelectedSkills([]);
     setPreferredSkills([]);
     setSelectedSpiritualGifts([]);
+    setNaSkills([]);
     setSelectedPerformanceMetrics([]);
     setSelectedRecurringDays([]);
     setSelectedTeamRoles([]);
@@ -1598,26 +1611,9 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 {(skill === 'Organization' || skill === 'Event Planning' || skill === 'Project Management' || skill === 'Financial Management' || skill === 'Record Keeping') && (
-                                  <div
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      const giftMap = {
-                                        'Organization': 'Administration',
-                                        'Event Planning': 'Administration', 
-                                        'Project Management': 'Administration',
-                                        'Financial Management': 'Giving',
-                                        'Record Keeping': 'Administration'
-                                      };
-                                      handleSpiritualGiftToggle(giftMap[skill as keyof typeof giftMap]);
-                                    }}
-                                    className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
-                                      selectedSpiritualGifts.includes(
-                                        skill === 'Financial Management' ? 'Giving' : 'Administration'
-                                      )
-                                        ? 'bg-purple-500 border-purple-500'
-                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
-                                    }`}
-                                  />
+                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                    {skill === 'Financial Management' ? 'Giving' : 'Administration'}
+                                  </div>
                                 )}
                               </td>
                               <td className="p-2 text-center">
@@ -1673,17 +1669,9 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work'].includes(skill) && (
-                                  <div
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleSpiritualGiftToggle('Serving');
-                                    }}
-                                    className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
-                                      selectedSpiritualGifts.includes('Serving')
-                                        ? 'bg-purple-500 border-purple-500'
-                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
-                                    }`}
-                                  />
+                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                    Serving
+                                  </div>
                                 )}
                               </td>
                               <td className="p-2 text-center">
@@ -1739,36 +1727,14 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 {['Teaching', 'Bible Study Leadership', 'Counseling', 'Evangelism', 'Pastoral Care', 'Prayer Ministry', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading'].includes(skill) && (
-                                  <div
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      const giftMap = {
-                                        'Teaching': 'Teaching',
-                                        'Bible Study Leadership': 'Teaching',
-                                        'Counseling': 'Shepherding',
-                                        'Evangelism': 'Evangelism',
-                                        'Pastoral Care': 'Shepherding',
-                                        'Prayer Ministry': 'Intercession',
-                                        'Youth Ministry': 'Shepherding',
-                                        'Children\'s Ministry': 'Teaching',
-                                        'Music Ministry': 'Worship',
-                                        'Worship Leading': 'Worship'
-                                      };
-                                      handleSpiritualGiftToggle(giftMap[skill as keyof typeof giftMap] || skill.split(' ')[0]);
-                                    }}
-                                    className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
-                                      selectedSpiritualGifts.includes(
-                                        skill === 'Bible Study Leadership' || skill === 'Children\'s Ministry' ? 'Teaching' : 
-                                        skill === 'Counseling' || skill === 'Pastoral Care' || skill === 'Youth Ministry' ? 'Shepherding' : 
-                                        skill === 'Prayer Ministry' ? 'Intercession' :
-                                        skill === 'Music Ministry' || skill === 'Worship Leading' ? 'Worship' :
-                                        skill === 'Evangelism' ? 'Evangelism' :
-                                        skill === 'Teaching' ? 'Teaching' : 'Serving'
-                                      )
-                                        ? 'bg-purple-500 border-purple-500'
-                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
-                                    }`}
-                                  />
+                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                    {skill === 'Bible Study Leadership' || skill === 'Children\'s Ministry' ? 'Teaching' : 
+                                     skill === 'Counseling' || skill === 'Pastoral Care' || skill === 'Youth Ministry' ? 'Shepherding' : 
+                                     skill === 'Prayer Ministry' ? 'Intercession' :
+                                     skill === 'Music Ministry' || skill === 'Worship Leading' ? 'Worship' :
+                                     skill === 'Evangelism' ? 'Evangelism' :
+                                     skill === 'Teaching' ? 'Teaching' : 'Serving'}
+                                  </div>
                                 )}
                               </td>
                               <td className="p-2 text-center">
@@ -1824,30 +1790,10 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                               </td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care'].includes(skill) && (
-                                  <div
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      const giftMap = {
-                                        'Hospitality': 'Hospitality',
-                                        'Guest Relations': 'Hospitality',
-                                        'Greeting': 'Hospitality',
-                                        'Child Care': 'Mercy',
-                                        'Elder Care': 'Mercy',
-                                        'Food Service': 'Serving',
-                                        'Cooking': 'Serving',
-                                        'Ushering': 'Serving'
-                                      };
-                                      handleSpiritualGiftToggle(giftMap[skill as keyof typeof giftMap] || 'Serving');
-                                    }}
-                                    className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
-                                      selectedSpiritualGifts.includes(
-                                        skill === 'Hospitality' || skill === 'Guest Relations' || skill === 'Greeting' ? 'Hospitality' : 
-                                        skill === 'Child Care' || skill === 'Elder Care' ? 'Mercy' : 'Serving'
-                                      )
-                                        ? 'bg-purple-500 border-purple-500'
-                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
-                                    }`}
-                                  />
+                                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                    {skill === 'Hospitality' || skill === 'Guest Relations' || skill === 'Greeting' ? 'Hospitality' : 
+                                     skill === 'Child Care' || skill === 'Elder Care' ? 'Mercy' : 'Serving'}
+                                  </div>
                                 )}
                               </td>
                               <td className="p-2 text-center">
