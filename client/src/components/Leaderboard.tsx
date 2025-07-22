@@ -40,7 +40,8 @@ const Leaderboard: React.FC = () => {
           throw new Error('Failed to fetch leaderboard data.');
         }
         const leaderboardData: LeaderboardEntry[] = await leaderboardResponse.json();
-        setLeaderboard(leaderboardData);
+        // Show only top 5 leaders
+        setLeaderboard(leaderboardData.slice(0, 5));
 
         // Fetch user streaks data for streak icons
         try {
@@ -69,13 +70,13 @@ const Leaderboard: React.FC = () => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="w-5 h-5 text-yellow-500" />;
+        return <Crown className="w-4 h-4 text-white" />;
       case 2:
-        return <Medal className="w-5 h-5 text-gray-400" />;
+        return <Medal className="w-4 h-4 text-white" />;
       case 3:
-        return <Award className="w-5 h-5 text-amber-600" />;
+        return <Award className="w-4 h-4 text-white" />;
       default:
-        return <Trophy className="w-5 h-5 text-blue-500" />;
+        return <Trophy className="w-4 h-4 text-blue-500" />;
     }
   };
 
@@ -139,13 +140,13 @@ const Leaderboard: React.FC = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Trophy className="w-12 h-12 text-yellow-500 mr-3" />
-            <h1 className="text-4xl font-bold text-gray-900 dark:bg-gradient-to-r dark:from-yellow-400 dark:to-orange-500 dark:bg-clip-text dark:text-transparent">
+            <h1 className="text-2xl font-bold text-gray-900 dark:bg-gradient-to-r dark:from-yellow-400 dark:to-orange-500 dark:bg-clip-text dark:text-transparent">
               Community Engagement Board
             </h1>
           </div>
-          <p className="text-lg text-gray-700 dark:text-blue-200 max-w-2xl mx-auto">
-            Celebrating our most active community members! Points are earned through discussions (5pts), 
-            SOAP entries (3pts), prayer requests (2pts), and events created (4pts).
+          <p className="text-sm text-gray-700 dark:text-blue-200 max-w-2xl mx-auto">
+            Celebrating our most active community members! Points are earned through 
+            discussions (20pts), SOAP entries (15pts), prayer requests (25pts), and events attended (25pts).
           </p>
         </div>
 
@@ -194,7 +195,7 @@ const Leaderboard: React.FC = () => {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${getRankColor(entry.rank)} font-semibold text-base mr-3`}>
+                            <div className={`flex items-center justify-center w-8 h-8 rounded-full ${getRankColor(entry.rank)} font-semibold text-sm mr-3`}>
                               {entry.rank <= 3 ? getRankIcon(entry.rank) : entry.rank}
                             </div>
                           </div>
@@ -202,12 +203,12 @@ const Leaderboard: React.FC = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div 
-                              className="flex-shrink-0 w-12 h-12 mr-4 cursor-pointer hover:scale-105 transition-transform"
+                              className="flex-shrink-0 w-10 h-10 mr-3 cursor-pointer hover:scale-105 transition-transform"
                               onClick={() => handleProfileClick(entry.id)}
                             >
                               <img
                                 className="w-full h-full rounded-full border-2 border-white/20 object-cover"
-                                src={entry.avatarUrl || entry.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.firstName + ' ' + entry.lastName)}&background=6366f1&color=fff&size=48`}
+                                src={entry.avatarUrl || entry.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.firstName + ' ' + entry.lastName)}&background=6366f1&color=fff&size=40`}
                                 alt={`${entry.firstName} ${entry.lastName}`}
                               />
                             </div>
@@ -216,7 +217,7 @@ const Leaderboard: React.FC = () => {
                               onClick={() => handleProfileClick(entry.id)}
                             >
                               <div className="flex items-center gap-2">
-                                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                                <p className="text-sm font-semibold text-gray-900 dark:text-white">
                                   {entry.firstName} {entry.lastName}
                                 </p>
                                 {hasStreak(entry.id, entry.rank) && (
@@ -237,10 +238,10 @@ const Leaderboard: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end">
-                            <span className="text-xl font-semibold text-yellow-400 mr-2 group-hover:text-yellow-300 transition-colors">
+                            <span className="text-lg font-semibold text-yellow-400 mr-2 group-hover:text-yellow-300 transition-colors">
                               {entry.score}
                             </span>
-                            <span className="text-sm text-gray-600 dark:text-blue-200">points</span>
+                            <span className="text-xs text-gray-600 dark:text-blue-200">points</span>
                           </div>
                         </td>
                       </tr>
@@ -252,8 +253,8 @@ const Leaderboard: React.FC = () => {
 
             <div className="mt-6 text-center">
               <div className="bg-white/90 dark:bg-white/10 backdrop-blur-md rounded-lg p-4 border border-gray-200 dark:border-white/20">
-                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-yellow-400">How to Earn Points</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-yellow-400">How to Earn Points</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                   <div className="text-center">
                     <div className="text-lg mb-1">💬</div>
                     <div className="font-medium text-gray-900 dark:text-white">Discussions</div>
