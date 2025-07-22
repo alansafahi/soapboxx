@@ -4019,6 +4019,93 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  async getUserBookmarkedPrayers(userId: string, churchId?: number): Promise<any[]> {
+    try {
+      const query = db
+        .select({
+          id: prayerRequests.id,
+          content: prayerRequests.content,
+          isAnonymous: prayerRequests.isAnonymous,
+          isUrgent: prayerRequests.isUrgent,
+          createdAt: prayerRequests.createdAt,
+          authorId: prayerRequests.authorId,
+          authorFirstName: users.firstName,
+          authorLastName: users.lastName,
+          authorEmail: users.email,
+          authorProfileImageUrl: users.profileImageUrl,
+          category: prayerRequests.category,
+          tags: prayerRequests.tags,
+          prayerCount: prayerRequests.prayerCount,
+          status: prayerRequests.status
+        })
+        .from(prayerBookmarks)
+        .innerJoin(prayerRequests, eq(prayerBookmarks.prayerId, prayerRequests.id))
+        .leftJoin(users, eq(prayerRequests.authorId, users.id))
+        .where(eq(prayerBookmarks.userId, userId))
+        .orderBy(desc(prayerBookmarks.createdAt));
+
+      const bookmarkedPrayers = await query;
+
+      return bookmarkedPrayers.map(prayer => ({
+        id: prayer.id,
+        content: prayer.content,
+        isAnonymous: prayer.isAnonymous,
+        isUrgent: prayer.isUrgent,
+        createdAt: prayer.createdAt,
+        authorId: prayer.authorId,
+        authorFirstName: prayer.authorFirstName,
+        authorLastName: prayer.authorLastName,
+        authorEmail: prayer.authorEmail,
+        authorProfileImageUrl: prayer.authorProfileImageUrl,
+        category: prayer.category,
+        tags: prayer.tags,
+        prayerCount: prayer.prayerCount || 0,
+        status: prayer.status
+      }));
+    } catch (error) {
+      console.error('Error fetching bookmarked prayers:', error);
+      return [];
+    }
+  }
+
+  async togglePrayerBookmark(prayerId: number, userId: string): Promise<{ bookmarked: boolean }> {
+    try {
+      // Check if bookmark already exists
+      const existing = await db
+        .select()
+        .from(prayerBookmarks)
+        .where(and(
+          eq(prayerBookmarks.prayerId, prayerId),
+          eq(prayerBookmarks.userId, userId)
+        ))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Remove bookmark
+        await db
+          .delete(prayerBookmarks)
+          .where(and(
+            eq(prayerBookmarks.prayerId, prayerId),
+            eq(prayerBookmarks.userId, userId)
+          ));
+        return { bookmarked: false };
+      } else {
+        // Add bookmark
+        await db
+          .insert(prayerBookmarks)
+          .values({
+            prayerId,
+            userId,
+            createdAt: new Date()
+          });
+        return { bookmarked: true };
+      }
+    } catch (error) {
+      console.error('Error toggling prayer bookmark:', error);
+      throw new Error('Failed to toggle prayer bookmark');
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
