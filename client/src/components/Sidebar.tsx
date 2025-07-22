@@ -375,8 +375,19 @@ export default function Sidebar() {
             return (
               <div key={group.label}>
                 <button
-                  onClick={() => toggleGroup(group.label)}
-                  className="flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Button clicked for group:', group.label);
+                    if (group.label === 'SPIRITUAL TOOLS') {
+                      console.log('SPIRITUAL TOOLS button specifically clicked!');
+                    }
+                    toggleGroup(group.label);
+                  }}
+                  onMouseDown={() => console.log('Mouse down on:', group.label)}
+                  onMouseUp={() => console.log('Mouse up on:', group.label)}
+                  className="flex items-center justify-between w-full text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 hover:text-purple-600 dark:hover:text-purple-400 cursor-pointer z-10 relative"
+                  style={{ pointerEvents: 'all' }}
                 >
                   <span>{group.label}</span>
                   <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
