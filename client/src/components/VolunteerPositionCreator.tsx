@@ -1526,106 +1526,92 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                   </h3>
                   <div className="space-y-2 mb-4">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Select required and preferred skills for this volunteer position. Use the color-coded system below.
-                    </div>
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-4 h-4 bg-purple-500 rounded mt-0.5"></div>
-                        <div>
-                          <span className="font-medium text-purple-700 dark:text-purple-300">Spiritual Gifts Integration:</span>
-                          <span className="text-gray-700 dark:text-gray-300 ml-1">
-                            These connect to volunteers' spiritual assessment results from the D.I.V.I.N.E. system, enabling AI-powered matching based on both practical skills and spiritual giftedness for optimal ministry placement.
-                          </span>
-                        </div>
-                      </div>
+                      Select required and preferred skills for this volunteer position using the color-coded system.
                     </div>
                   </div>
                   
-                  {/* Skills Requirements Matrix - Mobile Responsive */}
-                  <div className="border rounded-lg bg-white dark:bg-gray-900 overflow-hidden max-w-2xl mx-auto">
+                  {/* Skills Requirements Matrix - Enhanced Mobile Responsive */}
+                  <div className="border rounded-lg bg-white dark:bg-gray-900 overflow-hidden w-full">
                     {/* Legend */}
-                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 border-b text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-red-500 rounded"></div>
-                        <span className="hidden sm:inline">Required</span>
-                        <span className="sm:hidden">Req</span>
+                    <div className="flex items-center justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-800 border-b text-xs sm:text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-red-500 rounded"></div>
+                          <span className="font-medium">Required</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                          <span className="font-medium">Preferred</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded"></div>
-                        <span className="hidden sm:inline">Preferred</span>
-                        <span className="sm:hidden">Pref</span>
-                      </div>
-                      <span className="text-gray-600 dark:text-gray-400 hidden sm:inline">Click boxes to select</span>
+                      <span className="text-gray-600 dark:text-gray-400 text-xs">Tap to select</span>
                     </div>
 
-                    {/* Compact Mobile-Responsive Table */}
-                    <div className="overflow-x-auto max-h-72 overflow-y-auto">
-                      <style>{`
-                        .skills-table td:not(:first-child) { padding: 0.25rem !important; }
-                        .skills-table div[class*="w-4 h-4"] { width: 0.75rem !important; height: 0.75rem !important; }
-                        @media (max-width: 640px) {
-                          .skills-table { font-size: 0.6rem; }
-                          .skills-table td { padding: 0.125rem !important; }
-                        }
-                      `}</style>
-                      <table className="w-full text-xs border-collapse skills-table">
+                    {/* Enhanced Mobile-Responsive Table */}
+                    <div className="overflow-x-auto max-h-80 overflow-y-auto">
+                      <table className="w-full text-sm border-collapse">
                         <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
                           <tr>
-                            <th className="text-left px-2 py-1 border-r dark:border-gray-700 font-medium w-32">Skill</th>
-                            <th className="text-center px-1 py-1 border-r dark:border-gray-700 font-medium w-10">
-                              <span className="hidden sm:inline">Req</span>
-                              <span className="sm:hidden">R</span>
+                            <th className="text-left px-3 py-2 border-r dark:border-gray-700 font-medium">
+                              <span className="block sm:hidden">Skills</span>
+                              <span className="hidden sm:block">Skill Name</span>
                             </th>
-                            <th className="text-center px-1 py-1 border-r dark:border-gray-700 font-medium w-10">
-                              <span className="hidden sm:inline">Pref</span>
-                              <span className="sm:hidden">P</span>
+                            <th className="text-center px-2 py-2 border-r dark:border-gray-700 font-medium w-16 sm:w-20">
+                              <span className="text-red-600">Req</span>
                             </th>
-                            <th className="text-center px-1 py-1 font-medium w-10">N/A</th>
+                            <th className="text-center px-2 py-2 border-r dark:border-gray-700 font-medium w-16 sm:w-20">
+                              <span className="text-blue-600">Pref</span>
+                            </th>
+                            <th className="text-center px-2 py-2 font-medium w-16 sm:w-20">
+                              <span className="text-gray-500">N/A</span>
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           {/* Administrative Skills */}
                           <tr className="border-t dark:border-gray-700">
-                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                            <td colSpan={4} className="px-3 py-2 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-sm">
                               📋 <span className="hidden sm:inline">Administrative & Organization</span><span className="sm:hidden">Admin</span>
                             </td>
                           </tr>
                           {['Organization', 'Data Entry', 'Record Keeping', 'Event Planning', 'Project Management', 'Financial Management'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="px-2 py-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-3 py-2 border-r dark:border-gray-700 text-sm" title={skill}>
+                                <span className="block truncate max-w-[150px] sm:max-w-none">{skill}</span>
+                              </td>
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRequiredSkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handlePreferredSkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     preferredSkills.includes(skill)
                                       ? 'bg-blue-500 border-blue-500'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 text-center">
+                              <td className="px-2 py-2 text-center">
                                 <div 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleNASkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     naSkills.includes(skill)
                                       ? 'bg-gray-400 border-gray-400'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
@@ -1637,27 +1623,29 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Technical Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                            <td colSpan={4} className="px-3 py-2 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-sm">
                               🔧 <span className="hidden sm:inline">Technical & Maintenance</span><span className="sm:hidden">Tech</span>
                             </td>
                           </tr>
                           {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-3 py-2 border-r dark:border-gray-700 text-sm" title={skill}>
+                                <span className="block truncate max-w-[150px] sm:max-w-none">{skill}</span>
+                              </td>
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRequiredSkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
