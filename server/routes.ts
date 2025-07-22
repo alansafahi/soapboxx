@@ -1259,12 +1259,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/role', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
+      console.log('DEBUG /api/users/role - userId:', userId, 'session exists:', !!req.session, 'sessionUserId:', req.session?.userId);
       
       if (!userId) {
         return res.status(401).json({ message: 'Authentication required' });
       }
 
       const userRole = await storage.getUserRole(userId);
+      console.log('DEBUG /api/users/role - returning role:', userRole);
       res.json(userRole);
     } catch (error) {
       console.error('Get user role error:', error);

@@ -106,7 +106,7 @@ export default function Sidebar() {
   }, []);
 
   // Get user's church-specific role data
-  const { data: userRole } = useQuery<string>({
+  const { data: userRole, isLoading: roleLoading, error: roleError } = useQuery<string>({
     queryKey: ["/api/users/role"],
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -187,6 +187,11 @@ export default function Sidebar() {
       // If user data is still loading, show all items to prevent flickering
       if (!user) return true;
       
+      // DEBUG: Log role checking for alan@safahi.com
+      if (user?.email === 'alan@safahi.com') {
+        console.log('DEBUG Sidebar - User:', user?.email, 'Global role:', user?.role, 'Church role:', userRole, 'Item roles:', item.roles, 'Item label:', item.label);
+      }
+      
       const hasAccess = item.roles.some(role => 
         // Check if user has the role directly (global role)
         user?.role === role || 
@@ -197,6 +202,11 @@ export default function Sidebar() {
         // Also check if user has church_admin role for admin portal access
         (userRole === 'church_admin' && ['admin', 'church-admin', 'church_admin'].includes(role))
       );
+      
+      // DEBUG: Log access decision
+      if (user?.email === 'alan@safahi.com') {
+        console.log('DEBUG Sidebar - Item:', item.label, 'Access granted:', hasAccess);
+      }
       
       return hasAccess;
     });
