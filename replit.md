@@ -147,6 +147,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - **SoapBox Portal Removal**: Remove SoapBox Portal tab from side navigation menu - user plans to create a separate SoapBox Admin Portal app
 
 ## Recent Changes
+- July 22, 2025: BRANDING UPDATE TO SOAPBOX REWARDS COMPLETED - Successfully updated all references from "Referral Rewards Program" to "SoapBox Rewards" for consistent branding
+  - TAB LABEL UPDATED: Changed contacts page tab from "Referral Program" to "SoapBox Rewards"
+  - SECTION HEADER UPDATED: Changed "Referral Rewards Program" to "SoapBox Rewards" in main card title
+  - METRICS LABELS ENHANCED: Updated "Referral Points" to "SoapBox Points" and "Successful Referrals" to "Friends Invited"
+  - COMMENT HEADERS UPDATED: Changed code comments to reflect new "SoapBox Rewards Tab" naming
+  - REWARD DESCRIPTIONS IMPROVED: Updated "Referral Bonus" to "Friend Referral Bonus" for clarity
 - July 22, 2025: SOCIAL FEED INTEGRATION COMPLETELY FIXED - Successfully resolved critical issue where new posts (prayer requests, discussions, SOAP entries) appeared in "My Posts" but not "Latest Posts" section
   - ROOT CAUSE IDENTIFIED: getDiscussions method only included discussions and SOAP entries but excluded prayer requests from Latest Posts feed
   - PRAYER REQUESTS INTEGRATION: Enhanced getDiscussions method to include public prayer requests alongside discussions and SOAP entries

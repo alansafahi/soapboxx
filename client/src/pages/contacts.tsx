@@ -496,7 +496,7 @@ function ContactsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Successful Referrals</p>
+                  <p className="text-sm font-medium text-gray-600">Friends Invited</p>
                   <p className="text-3xl font-bold text-gray-900">{referralStats?.successful || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
@@ -527,7 +527,7 @@ function ContactsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Referral Points</p>
+                  <p className="text-sm font-medium text-gray-600">SoapBox Points</p>
                   <p className="text-3xl font-bold text-gray-900">{referralStats?.points || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
@@ -551,7 +551,7 @@ function ContactsPage() {
             </TabsTrigger>
             <TabsTrigger value="referrals" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Crown className="h-4 w-4" />
-              Referral Program
+              SoapBox Rewards
             </TabsTrigger>
           </TabsList>
 
@@ -708,13 +708,13 @@ function ContactsPage() {
             )}
           </TabsContent>
 
-        {/* Referral Program Tab */}
+        {/* SoapBox Rewards Tab */}
         <TabsContent value="referrals" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-yellow-600" />
-                Referral Rewards Program
+                SoapBox Rewards
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -732,7 +732,7 @@ function ContactsPage() {
                   <h4 className="font-semibold">Community Rewards</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Referral Bonus</span>
+                      <span>Friend Referral Bonus</span>
                       <Badge variant="outline">100 points</Badge>
                     </div>
                     <div className="flex justify-between text-sm">
