@@ -1542,42 +1542,58 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
                     </div>
                   </div>
                   
-                  {/* Skills Requirements Matrix - Compact Spreadsheet */}
-                  <div className="border rounded-lg bg-white dark:bg-gray-900 overflow-hidden">
+                  {/* Skills Requirements Matrix - Mobile Responsive */}
+                  <div className="border rounded-lg bg-white dark:bg-gray-900 overflow-hidden max-w-2xl mx-auto">
                     {/* Legend */}
-                    <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 border-b text-xs">
+                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 border-b text-xs">
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-red-500 rounded"></div>
-                        <span>Required</span>
+                        <div className="w-2 h-2 bg-red-500 rounded"></div>
+                        <span className="hidden sm:inline">Required</span>
+                        <span className="sm:hidden">Req</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                        <span>Preferred</span>
+                        <div className="w-2 h-2 bg-blue-500 rounded"></div>
+                        <span className="hidden sm:inline">Preferred</span>
+                        <span className="sm:hidden">Pref</span>
                       </div>
-                      <span className="text-gray-600 dark:text-gray-400">Click boxes to select</span>
+                      <span className="text-gray-600 dark:text-gray-400 hidden sm:inline">Click boxes to select</span>
                     </div>
 
-                    {/* Compact Spreadsheet Table */}
-                    <div className="overflow-x-auto max-h-80 overflow-y-auto">
-                      <table className="w-full text-xs table-fixed">
+                    {/* Compact Mobile-Responsive Table */}
+                    <div className="overflow-x-auto max-h-72 overflow-y-auto">
+                      <style>{`
+                        .skills-table td:not(:first-child) { padding: 0.25rem !important; }
+                        .skills-table div[class*="w-4 h-4"] { width: 0.75rem !important; height: 0.75rem !important; }
+                        @media (max-width: 640px) {
+                          .skills-table { font-size: 0.6rem; }
+                          .skills-table td { padding: 0.125rem !important; }
+                        }
+                      `}</style>
+                      <table className="w-full text-xs border-collapse skills-table">
                         <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0">
                           <tr>
-                            <th className="text-left p-2 border-r dark:border-gray-700 font-medium w-36">Skill/Requirement</th>
-                            <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-20">Required</th>
-                            <th className="text-center p-2 border-r dark:border-gray-700 font-medium w-20">Preferred</th>
-                            <th className="text-center p-2 font-medium w-16">N/A</th>
+                            <th className="text-left px-2 py-1 border-r dark:border-gray-700 font-medium w-32">Skill</th>
+                            <th className="text-center px-1 py-1 border-r dark:border-gray-700 font-medium w-10">
+                              <span className="hidden sm:inline">Req</span>
+                              <span className="sm:hidden">R</span>
+                            </th>
+                            <th className="text-center px-1 py-1 border-r dark:border-gray-700 font-medium w-10">
+                              <span className="hidden sm:inline">Pref</span>
+                              <span className="sm:hidden">P</span>
+                            </th>
+                            <th className="text-center px-1 py-1 font-medium w-10">N/A</th>
                           </tr>
                         </thead>
                         <tbody>
                           {/* Administrative Skills */}
                           <tr className="border-t dark:border-gray-700">
-                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
-                              📋 Administrative & Organization
+                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                              📋 <span className="hidden sm:inline">Administrative & Organization</span><span className="sm:hidden">Admin</span>
                             </td>
                           </tr>
                           {['Organization', 'Data Entry', 'Record Keeping', 'Event Planning', 'Project Management', 'Financial Management'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
+                              <td className="px-2 py-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
                               <td className="p-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
@@ -1622,8 +1638,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Technical Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
-                              🔧 Technical & Maintenance
+                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                              🔧 <span className="hidden sm:inline">Technical & Maintenance</span><span className="sm:hidden">Tech</span>
                             </td>
                           </tr>
                           {['Audio/Video Tech', 'Sound Engineering', 'Computer Skills', 'Website Management', 'Maintenance & Repair', 'Electrical Work'].map(skill => (
@@ -1673,8 +1689,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Ministry Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
-                              ⛪ Ministry & Teaching
+                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                              ⛪ <span className="hidden sm:inline">Ministry & Teaching</span><span className="sm:hidden">Ministry</span>
                             </td>
                           </tr>
                           {['Teaching', 'Bible Study Leadership', 'Counseling', 'Pastoral Care', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading', 'Prayer Ministry', 'Evangelism'].map(skill => (
@@ -1724,8 +1740,8 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Hospitality Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={4} className="p-2 bg-gray-100 dark:bg-gray-700 font-bold text-gray-900 dark:text-gray-100 text-sm">
-                              🤝 Hospitality & Service
+                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                              🤝 <span className="hidden sm:inline">Hospitality & Service</span><span className="sm:hidden">Service</span>
                             </td>
                           </tr>
                           {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care'].map(skill => (
