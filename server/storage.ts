@@ -3261,7 +3261,7 @@ export class DatabaseStorage implements IStorage {
           se.observation,
           se.application,
           se.prayer,
-          se.mood,
+          se.mood_tag,
           se.tags,
           se.created_at as soap_created_at,
           se.user_id as author_id,
