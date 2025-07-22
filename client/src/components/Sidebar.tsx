@@ -63,7 +63,7 @@ interface NavigationGroup {
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ACCOUNT']));
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -84,8 +84,8 @@ export default function Sidebar() {
         setIsCollapsed(false);
       }
       
-      // For admin users, keep admin sections expanded
-      if (user?.role === 'soapbox_owner') {
+      // Auto-expand admin sections only on initial load, not on every resize
+      if (user?.role === 'soapbox_owner' && !expandedGroups.has('ADMIN PORTAL')) {
         setExpandedGroups(prev => {
           const newSet = new Set(prev);
           newSet.add('ADMIN PORTAL');
@@ -94,8 +94,8 @@ export default function Sidebar() {
         });
       }
       
-      // For church admins, expand Admin Portal
-      if (userRole === 'church_admin') {
+      // Auto-expand Admin Portal for church admins only on initial load
+      if (userRole === 'church_admin' && !expandedGroups.has('ADMIN PORTAL')) {
         setExpandedGroups(prev => {
           const newSet = new Set(prev);
           newSet.add('ADMIN PORTAL');
@@ -364,10 +364,8 @@ export default function Sidebar() {
         ) : (
           // Expanded Navigation - Full Groups
           visibleGroups.map((group) => {
-            // Ensure admin groups are always expanded for admin users
-            const isExpanded = expandedGroups.has(group.label) || 
-              (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
-              (userRole === 'church_admin' && group.label === 'ADMIN PORTAL');
+            // Check if group is expanded
+            const isExpanded = expandedGroups.has(group.label);
             
             return (
               <div key={group.label}>
