@@ -110,17 +110,24 @@ export const getQueryFn: <T>(options: {
     // This prevents SSL errors from hardcoded external URLs
     const fullUrl = url.startsWith('/') ? url : `/${url}`;
 
-    
-    const res = await fetch(fullUrl, {
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(fullUrl, {
+        credentials: "include",
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      await throwIfResNotOk(res);
+      return await res.json();
+    } catch (error) {
+      // Enhanced error handling for production stability
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(`Network error: Unable to connect to ${fullUrl}`);
+      }
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
