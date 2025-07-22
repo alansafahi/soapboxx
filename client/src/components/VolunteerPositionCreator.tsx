@@ -1676,46 +1676,48 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Ministry Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                            <td colSpan={4} className="px-3 py-2 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-sm">
                               ⛪ <span className="hidden sm:inline">Ministry & Teaching</span><span className="sm:hidden">Ministry</span>
                             </td>
                           </tr>
                           {['Teaching', 'Bible Study Leadership', 'Counseling', 'Pastoral Care', 'Youth Ministry', 'Children\'s Ministry', 'Music Ministry', 'Worship Leading', 'Prayer Ministry', 'Evangelism'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-3 py-2 border-r dark:border-gray-700 text-sm" title={skill}>
+                                <span className="block truncate max-w-[150px] sm:max-w-none">{skill}</span>
+                              </td>
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRequiredSkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handlePreferredSkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     preferredSkills.includes(skill)
                                       ? 'bg-blue-500 border-blue-500'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 text-center">
+                              <td className="px-2 py-2 text-center">
                                 <div 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleNASkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     naSkills.includes(skill)
                                       ? 'bg-gray-400 border-gray-400'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
@@ -1727,46 +1729,48 @@ export default function VolunteerPositionCreator({ children, editOpportunity }: 
 
                           {/* Hospitality Skills */}
                           <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td colSpan={4} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-xs">
+                            <td colSpan={4} className="px-3 py-2 bg-gray-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100 text-sm">
                               🤝 <span className="hidden sm:inline">Hospitality & Service</span><span className="sm:hidden">Service</span>
                             </td>
                           </tr>
                           {['Food Service', 'Cooking', 'Hospitality', 'Guest Relations', 'Greeting', 'Ushering', 'Child Care', 'Elder Care'].map(skill => (
                             <tr key={skill} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="p-1 border-r dark:border-gray-700 text-xs truncate" title={skill}>{skill}</td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-3 py-2 border-r dark:border-gray-700 text-sm" title={skill}>
+                                <span className="block truncate max-w-[150px] sm:max-w-none">{skill}</span>
+                              </td>
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRequiredSkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     selectedSkills.includes(skill)
                                       ? 'bg-red-500 border-red-500'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 border-r dark:border-gray-700 text-center">
+                              <td className="px-2 py-2 border-r dark:border-gray-700 text-center">
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handlePreferredSkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     preferredSkills.includes(skill)
                                       ? 'bg-blue-500 border-blue-500'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                                   }`}
                                 />
                               </td>
-                              <td className="p-2 text-center">
+                              <td className="px-2 py-2 text-center">
                                 <div 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleNASkillToggle(skill);
                                   }}
-                                  className={`w-4 h-4 mx-auto rounded cursor-pointer border transition-colors ${
+                                  className={`w-5 h-5 mx-auto rounded cursor-pointer border-2 transition-colors ${
                                     naSkills.includes(skill)
                                       ? 'bg-gray-400 border-gray-400'
                                       : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
