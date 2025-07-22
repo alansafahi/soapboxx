@@ -174,7 +174,7 @@ export function SoapEntryCard({
   });
   
   // Determine if this is the current user's entry to show proper name
-  const isCurrentUserEntry = currentUser && entry.userId === currentUser.id;
+  const isCurrentUserEntry = currentUser && entry.userId === (currentUser as any)?.id;
   
   // Use author data if available (for community entries), otherwise fallback to current user logic
   const getDisplayName = () => {
@@ -182,7 +182,7 @@ export function SoapEntryCard({
       return `${entry.author.firstName || ''} ${entry.author.lastName || ''}`.trim() || 'Anonymous';
     }
     return isCurrentUserEntry 
-      ? `${currentUser.firstName || currentUser.username || 'You'}`
+      ? `${(currentUser as any)?.firstName || (currentUser as any)?.username || 'You'}`
       : 'Anonymous';
   };
   
@@ -263,13 +263,13 @@ export function SoapEntryCard({
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={entry.author?.profileImageUrl || (isCurrentUserEntry ? currentUser?.profileImageUrl : '') || ''} />
+              <AvatarImage src={entry.author?.profileImageUrl || (isCurrentUserEntry ? (currentUser as any)?.profileImageUrl : '') || ''} />
               <AvatarFallback>
                 {entry.author?.firstName && entry.author?.lastName
                   ? `${entry.author.firstName.charAt(0)}${entry.author.lastName.charAt(0)}`.toUpperCase()
-                  : isCurrentUserEntry && currentUser?.firstName && currentUser?.lastName
-                  ? `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase()
-                  : (entry.author?.firstName?.charAt(0) || currentUser?.firstName?.charAt(0) || 'A').toUpperCase()}
+                  : isCurrentUserEntry && (currentUser as any)?.firstName && (currentUser as any)?.lastName
+                  ? `${(currentUser as any).firstName.charAt(0)}${(currentUser as any).lastName.charAt(0)}`.toUpperCase()
+                  : (entry.author?.firstName?.charAt(0) || (currentUser as any)?.firstName?.charAt(0) || 'A').toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">

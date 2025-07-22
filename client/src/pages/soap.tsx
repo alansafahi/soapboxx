@@ -21,7 +21,7 @@ import { SoapEntryCard } from "../components/SoapEntryCard";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import type { SoapEntry } from "../../../shared/schema";
-import { useUser } from "../hooks/useUser";
+import { useAuth } from "../hooks/useAuth";
 
 export default function SoapPage() {
   const [showForm, setShowForm] = useState(false);
@@ -30,7 +30,7 @@ export default function SoapPage() {
   const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { data: user } = useUser();
+  const { user } = useAuth();
 
   // Fetch user's S.O.A.P. entries
   const { data: userEntries = [], isLoading: userLoading } = useQuery({
@@ -181,7 +181,7 @@ export default function SoapPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Shared Entries</p>
                 <p className="text-2xl font-bold">
-                  {userEntries.filter(entry => entry.isPublic).length}
+                  {userEntries.filter((entry: SoapEntry) => entry.isPublic).length}
                 </p>
               </div>
             </div>
@@ -247,13 +247,12 @@ export default function SoapPage() {
             </div>
           ) : (
             <div className="grid gap-6">
-              {allEntries.map((entry: any) => (
+              {allEntries.map((entry: SoapEntry) => (
                 <SoapEntryCard 
                   key={entry.id} 
                   entry={entry} 
-                  onDelete={deleteMutation.mutate}
-                  isDeleting={deleteMutation.isPending}
-                  onEdit={handleEdit}
+                  onDelete={() => handleDelete(entry.id)}
+                  onEdit={() => handleEdit(entry)}
                   showActions={entry.userId === user?.id}
                 />
               ))}
@@ -288,7 +287,7 @@ export default function SoapPage() {
             </Card>
           ) : (
             <div className="grid gap-6">
-              {userEntries.map((entry) => (
+              {userEntries.map((entry: SoapEntry) => (
                 <SoapEntryCard
                   key={entry.id}
                   entry={entry}
@@ -324,7 +323,7 @@ export default function SoapPage() {
             </Card>
           ) : (
             <div className="grid gap-6">
-              {publicEntries.map((entry) => (
+              {publicEntries.map((entry: SoapEntry) => (
                 <SoapEntryCard
                   key={entry.id}
                   entry={entry}
