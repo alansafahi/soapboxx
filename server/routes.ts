@@ -9306,29 +9306,56 @@ Return JSON with this exact structure:
   app.get('/api/soap/public', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const { churchId, limit = 20, offset = 0 } = req.query;
+      const { churchId, limit = 20, offset = 0, includeOwnEntries = 'false' } = req.query;
 
-      // Get user's church if not specified
-      let userChurchId = churchId ? parseInt(churchId as string) : undefined;
-      if (!userChurchId) {
-        const user = await storage.getUser(userId);
-        if (user) {
-          const userChurches = await storage.getUserChurches(userId);
-          if (userChurches.length > 0) {
-            userChurchId = userChurches[0].id; // Use primary church
-          }
-        }
+      console.log('SOAP Public API Debug:', {
+        userId,
+        churchId,
+        limit,
+        offset,
+        includeOwnEntries,
+        sessionInfo: req.session
+      });
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
       }
 
-      const entries = await storage.getPublicSoapEntries(
+      // For Community tab, we want to show entries from other users in the community
+      // Church scope vs platform scope: Let's make it platform-wide for now
+      let userChurchId = churchId ? parseInt(churchId as string) : undefined;
+      
+      // Don't restrict by church for Community view - show all public entries platform-wide
+      // unless specifically filtering by church
+      const excludeUserId = includeOwnEntries === 'true' ? undefined : userId;
+
+      console.log('Calling getPublicSoapEntries with:', {
         userChurchId,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
+        excludeUserId
+      });
+
+      const entries = await storage.getPublicSoapEntries(
+        userChurchId, // undefined = platform-wide, number = church-specific
         parseInt(limit as string),
         parseInt(offset as string),
-        userId // Exclude current user's entries
+        excludeUserId // Exclude current user's entries by default
       );
+
+      console.log('Retrieved entries count:', entries.length);
+      if (entries.length > 0) {
+        console.log('First entry sample:', {
+          id: entries[0].id,
+          author: entries[0].author?.email,
+          scriptureRef: entries[0].scriptureReference
+        });
+      }
+
       res.json(entries);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries' });
+      console.error('SOAP public entries error:', error);
+      res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
