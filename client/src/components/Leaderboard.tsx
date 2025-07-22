@@ -69,11 +69,11 @@ const Leaderboard: React.FC = () => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="w-6 h-6 text-yellow-500" />;
+        return <Crown className="w-5 h-5 text-yellow-500" />;
       case 2:
-        return <Medal className="w-6 h-6 text-gray-400" />;
+        return <Medal className="w-5 h-5 text-gray-400" />;
       case 3:
-        return <Award className="w-6 h-6 text-amber-600" />;
+        return <Award className="w-5 h-5 text-amber-600" />;
       default:
         return <Trophy className="w-5 h-5 text-blue-500" />;
     }
@@ -194,7 +194,7 @@ const Leaderboard: React.FC = () => {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            <div className={`flex items-center justify-center w-12 h-12 rounded-full ${getRankColor(entry.rank)} font-bold text-lg mr-3`}>
+                            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${getRankColor(entry.rank)} font-semibold text-base mr-3`}>
                               {entry.rank <= 3 ? getRankIcon(entry.rank) : entry.rank}
                             </div>
                           </div>
@@ -216,11 +216,13 @@ const Leaderboard: React.FC = () => {
                               onClick={() => handleProfileClick(entry.id)}
                             >
                               <div className="flex items-center gap-2">
-                                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                                <p className="text-base font-semibold text-gray-900 dark:text-white">
                                   {entry.firstName} {entry.lastName}
                                 </p>
                                 {hasStreak(entry.id, entry.rank) && (
-                                  <Flame className="w-4 h-4 text-orange-500" title="On a streak!" />
+                                  <div title="On a streak!">
+                                    <Flame className="w-4 h-4 text-orange-500" />
+                                  </div>
                                 )}
                               </div>
                               {entry.rank <= 3 && (
@@ -235,7 +237,7 @@ const Leaderboard: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end">
-                            <span className="text-2xl font-bold text-yellow-400 mr-2 group-hover:text-yellow-300 transition-colors">
+                            <span className="text-xl font-semibold text-yellow-400 mr-2 group-hover:text-yellow-300 transition-colors">
                               {entry.score}
                             </span>
                             <span className="text-sm text-gray-600 dark:text-blue-200">points</span>
@@ -248,29 +250,29 @@ const Leaderboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-8 text-center">
-              <div className="bg-white/90 dark:bg-white/10 backdrop-blur-md rounded-xl p-6 border border-gray-200 dark:border-white/20">
-                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-yellow-400">How to Earn Points</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="mt-6 text-center">
+              <div className="bg-white/90 dark:bg-white/10 backdrop-blur-md rounded-lg p-4 border border-gray-200 dark:border-white/20">
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-yellow-400">How to Earn Points</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                   <div className="text-center">
-                    <div className="text-2xl mb-2">💬</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">Discussions</div>
-                    <div className="text-gray-600 dark:text-blue-200">5 points</div>
+                    <div className="text-lg mb-1">💬</div>
+                    <div className="font-medium text-gray-900 dark:text-white">Discussions</div>
+                    <div className="text-gray-600 dark:text-blue-200">20 points</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl mb-2">📖</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">SOAP Entries</div>
-                    <div className="text-gray-600 dark:text-blue-200">3 points</div>
+                    <div className="text-lg mb-1">🙏</div>
+                    <div className="font-medium text-gray-900 dark:text-white">Prayer Requests</div>
+                    <div className="text-gray-600 dark:text-blue-200">25 points</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl mb-2">🙏</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">Prayer Requests</div>
-                    <div className="text-gray-600 dark:text-blue-200">2 points</div>
+                    <div className="text-lg mb-1">📖</div>
+                    <div className="font-medium text-gray-900 dark:text-white">SOAP Entries</div>
+                    <div className="text-gray-600 dark:text-blue-200">15 points</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl mb-2">📅</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">Events Created</div>
-                    <div className="text-gray-600 dark:text-blue-200">4 points</div>
+                    <div className="text-lg mb-1">🎯</div>
+                    <div className="font-medium text-gray-900 dark:text-white">Events Attended</div>
+                    <div className="text-gray-600 dark:text-blue-200">25 points</div>
                   </div>
                 </div>
               </div>
