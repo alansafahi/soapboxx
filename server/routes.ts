@@ -2722,7 +2722,7 @@ app.post('/api/invitations', async (req: any, res) => {
       // Check if the email is already a registered user
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        // Add existing member as a contact
+        // Add existing member as a contact for the inviter
         try {
           await storage.addContact({
             userId: userId,
@@ -2732,8 +2732,19 @@ app.post('/api/invitations', async (req: any, res) => {
             status: 'connected'
           });
 
-          // Send a connection notification to the existing member
+          // Also add the inviter as a contact for the existing user (mutual connection)
           const inviter = await storage.getUser(userId);
+          if (inviter && inviter.email) {
+            await storage.addContact({
+              userId: existingUser.id,
+              email: inviter.email,
+              name: `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email,
+              contactType: 'member',
+              status: 'connected'
+            });
+          }
+
+          // Send a connection notification to the existing member
           const inviterName = inviter ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim() || inviter.email : 'Someone';
           
           // Send notification email to existing member
@@ -2766,7 +2777,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
         return res.status(200).json({ 
           success: true, 
-          message: `Great! ${email} is already part of SoapBox. They've been notified that you want to connect and added to your contacts.`,
+          message: `Perfect! ${email} is already on SoapBox. You're now connected and they've been notified about your new connection.`,
           type: 'already_member',
           alreadyMember: true
         });

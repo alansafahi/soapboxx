@@ -83,7 +83,7 @@ function ContactsPage() {
       // Handle different response types
       if (data.alreadyMember) {
         toast({
-          title: "Already Connected!",
+          title: "Contact Added Successfully!",
           description: data.message,
           variant: "default",
         });
