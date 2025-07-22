@@ -6064,6 +6064,93 @@ Return JSON with this exact structure:
     }
   });
 
+  // Image Gallery API endpoint - fetch all images from database
+  app.get('/api/images/gallery', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const images = [];
+
+      // Get images from discussions
+      const discussions = await storage.getDiscussionsWithImages();
+      for (const discussion of discussions) {
+        if (discussion.attachedMedia) {
+          const author = await storage.getUser(discussion.authorId);
+          images.push({
+            id: discussion.id.toString(),
+            source: 'discussions',
+            title: discussion.title || 'Discussion Post',
+            content: discussion.content || '',
+            imageData: discussion.attachedMedia,
+            author: author ? `${author.firstName || ''} ${author.lastName || ''}`.trim() || author.email : 'Unknown',
+            createdAt: discussion.createdAt || new Date().toISOString(),
+            metadata: {
+              category: discussion.category,
+              isPublic: discussion.isPublic,
+              likeCount: discussion.likeCount || 0,
+              commentCount: discussion.commentCount || 0
+            }
+          });
+        }
+      }
+
+      // Get images from prayer requests
+      const prayers = await storage.getPrayerRequestsWithImages();
+      for (const prayer of prayers) {
+        if (prayer.attachmentUrl) {
+          const author = await storage.getUser(prayer.userId);
+          images.push({
+            id: prayer.id.toString(),
+            source: 'prayer_requests',
+            title: prayer.title || 'Prayer Request',
+            content: prayer.content || '',
+            imageData: prayer.attachmentUrl,
+            author: author ? `${author.firstName || ''} ${author.lastName || ''}`.trim() || author.email : 'Unknown',
+            createdAt: prayer.createdAt || new Date().toISOString(),
+            metadata: {
+              isAnonymous: prayer.isAnonymous,
+              isPublic: prayer.isPublic,
+              category: prayer.category,
+              status: prayer.status
+            }
+          });
+        }
+      }
+
+      // Get images from SOAP entries
+      const soapEntries = await storage.getSoapEntriesWithImages();
+      for (const entry of soapEntries) {
+        if (entry.attachedMedia) {
+          const author = await storage.getUser(entry.userId);
+          images.push({
+            id: entry.id.toString(),
+            source: 'soap_entries',
+            title: entry.scripture || 'S.O.A.P. Entry',
+            content: entry.observation || entry.application || entry.prayer || '',
+            imageData: entry.attachedMedia,
+            author: author ? `${author.firstName || ''} ${author.lastName || ''}`.trim() || author.email : 'Unknown',
+            createdAt: entry.createdAt || new Date().toISOString(),
+            metadata: {
+              scripture: entry.scripture,
+              isPublic: entry.isPublic,
+              expiresAt: entry.expiresAt
+            }
+          });
+        }
+      }
+
+      // Sort by creation date (newest first)
+      images.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      res.json(images);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch image gallery' });
+    }
+  });
+
   // Video Content Routes (Phase 1: Pastor/Admin Uploads)
   app.post('/api/videos', isAuthenticated, async (req, res) => {
     try {

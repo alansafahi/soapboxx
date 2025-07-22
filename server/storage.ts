@@ -1992,6 +1992,51 @@ export class DatabaseStorage implements IStorage {
     await db.delete(events).where(eq(events.id, id));
   }
 
+  // Get discussions with images for gallery
+  async getDiscussionsWithImages(): Promise<any[]> {
+    const result = await db
+      .select()
+      .from(discussions)
+      .where(and(
+        isNotNull(discussions.attachedMedia),
+        ne(discussions.attachedMedia, '""'),
+        ne(discussions.attachedMedia, 'null')
+      ))
+      .orderBy(desc(discussions.createdAt));
+    
+    return result;
+  }
+
+  // Get prayer requests with images for gallery
+  async getPrayerRequestsWithImages(): Promise<any[]> {
+    const result = await db
+      .select()
+      .from(prayerRequests)
+      .where(and(
+        isNotNull(prayerRequests.attachmentUrl),
+        ne(prayerRequests.attachmentUrl, ''),
+        ne(prayerRequests.attachmentUrl, 'null')
+      ))
+      .orderBy(desc(prayerRequests.createdAt));
+    
+    return result;
+  }
+
+  // Get SOAP entries with images for gallery
+  async getSoapEntriesWithImages(): Promise<any[]> {
+    const result = await db
+      .select()
+      .from(soapEntries)
+      .where(and(
+        isNotNull(soapEntries.attachedMedia),
+        ne(soapEntries.attachedMedia, '""'),
+        ne(soapEntries.attachedMedia, 'null')
+      ))
+      .orderBy(desc(soapEntries.createdAt));
+    
+    return result;
+  }
+
   async deleteSoapEntry(id: number): Promise<void> {
     // Delete related data first
     await db.delete(reactions).where(eq(reactions.targetId, id));
