@@ -21,6 +21,7 @@ import {
   Flag
 } from "lucide-react";
 import { FlagContentDialog } from "./content-moderation/FlagContentDialog";
+import ShareDialog from "./ShareDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -165,6 +166,7 @@ export function SoapEntryCard({
   onUnfeature 
 }: SoapEntryCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const { toast } = useToast();
   
   // Fetch current user to check if this is their entry
@@ -212,36 +214,8 @@ export function SoapEntryCard({
     }
   };
 
-  const handleShare = async () => {
-    const productionUrl = `https://www.soapboxsuperapp.com/soap-journal`;
-    const shareText = `Check out this S.O.A.P. entry: "${entry.scriptureReference || 'Scripture Reflection'}"\n\nScripture: ${entry.scripture.substring(0, 100)}${entry.scripture.length > 100 ? '...' : ''}\n\nShared from SoapBox Super App`;
-    
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `S.O.A.P. Entry - ${entry.scriptureReference || 'Scripture Reflection'}`,
-          text: shareText,
-          url: productionUrl
-        });
-        toast({
-          title: "Shared successfully",
-          description: "S.O.A.P. entry has been shared."
-        });
-      } else {
-        // Fallback to clipboard
-        await navigator.clipboard.writeText(`${shareText}\n\n${productionUrl}`);
-        toast({
-          title: "Copied to clipboard",
-          description: "S.O.A.P. entry content copied and ready to share."
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Share failed",
-        description: "Unable to share S.O.A.P. entry.",
-        variant: "destructive"
-      });
-    }
+  const handleShare = () => {
+    setShareDialogOpen(true);
   };
 
   const getMoodColor = (mood: string | null) => {
@@ -484,6 +458,15 @@ export function SoapEntryCard({
           <span>{formatDate(entry.createdAt)}</span>
         </div>
       </CardContent>
+      
+      {/* Enhanced Share Dialog */}
+      <ShareDialog
+        isOpen={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        title={`Share S.O.A.P. Entry - ${entry.scriptureReference || 'Scripture Reflection'}`}
+        content={`Check out this S.O.A.P. entry: "${entry.scriptureReference || 'Scripture Reflection'}"\n\nScripture: ${entry.scripture.substring(0, 100)}${entry.scripture.length > 100 ? '...' : ''}\n\nShared from SoapBox Super App`}
+        url={`https://www.soapboxsuperapp.com/soap-journal`}
+      />
     </Card>
   );
 }
